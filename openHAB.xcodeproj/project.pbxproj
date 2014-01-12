@@ -1,0 +1,490 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
+		DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622C18830A3600D3244D /* CoreGraphics.framework */; };
+		DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
+		DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623318830A3600D3244D /* InfoPlist.strings */; };
+		DFB2623718830A3600D3244D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623618830A3600D3244D /* main.m */; };
+		DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */; };
+		DFB2623E18830A3600D3244D /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623C18830A3600D3244D /* Main_iPhone.storyboard */; };
+		DFB2624118830A3600D3244D /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623F18830A3600D3244D /* Main_iPad.storyboard */; };
+		DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABViewController.m */; };
+		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
+		DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2624C18830A3600D3244D /* XCTest.framework */; };
+		DFB2624E18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
+		DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
+		DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
+		DFB2625918830A3600D3244D /* openHABTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2625818830A3600D3244D /* openHABTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DFB2625018830A3600D3244D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DFB2622618830A3600D3244D;
+			remoteInfo = openHAB;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		DFB2622718830A3600D3244D /* openHAB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHAB.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFB2622A18830A3600D3244D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DFB2622C18830A3600D3244D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		DFB2622E18830A3600D3244D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		DFB2623218830A3600D3244D /* openHAB-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHAB-Info.plist"; sourceTree = "<group>"; };
+		DFB2623418830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DFB2623618830A3600D3244D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DFB2623818830A3600D3244D /* openHAB-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "openHAB-Prefix.pch"; sourceTree = "<group>"; };
+		DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABAppDelegate.h; sourceTree = "<group>"; };
+		DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABAppDelegate.m; sourceTree = "<group>"; };
+		DFB2623D18830A3600D3244D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
+		DFB2624018830A3600D3244D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
+		DFB2624218830A3600D3244D /* OpenHABViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABViewController.h; sourceTree = "<group>"; };
+		DFB2624318830A3600D3244D /* OpenHABViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABViewController.m; sourceTree = "<group>"; };
+		DFB2624518830A3600D3244D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		DFB2624B18830A3600D3244D /* openHABTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		DFB2625418830A3600D3244D /* openHABTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHABTests-Info.plist"; sourceTree = "<group>"; };
+		DFB2625618830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DFB2625818830A3600D3244D /* openHABTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = openHABTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DFB2622418830A3600D3244D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
+				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
+				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DFB2624818830A3600D3244D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */,
+				DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */,
+				DFB2624E18830A3600D3244D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DFB2621E18830A3600D3244D = {
+			isa = PBXGroup;
+			children = (
+				DFB2623018830A3600D3244D /* openHAB */,
+				DFB2625218830A3600D3244D /* openHABTests */,
+				DFB2622918830A3600D3244D /* Frameworks */,
+				DFB2622818830A3600D3244D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DFB2622818830A3600D3244D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DFB2622718830A3600D3244D /* openHAB.app */,
+				DFB2624B18830A3600D3244D /* openHABTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DFB2622918830A3600D3244D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DFB2622A18830A3600D3244D /* Foundation.framework */,
+				DFB2622C18830A3600D3244D /* CoreGraphics.framework */,
+				DFB2622E18830A3600D3244D /* UIKit.framework */,
+				DFB2624C18830A3600D3244D /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DFB2623018830A3600D3244D /* openHAB */ = {
+			isa = PBXGroup;
+			children = (
+				DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */,
+				DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */,
+				DFB2623C18830A3600D3244D /* Main_iPhone.storyboard */,
+				DFB2623F18830A3600D3244D /* Main_iPad.storyboard */,
+				DFB2624218830A3600D3244D /* OpenHABViewController.h */,
+				DFB2624318830A3600D3244D /* OpenHABViewController.m */,
+				DFB2624518830A3600D3244D /* Images.xcassets */,
+				DFB2623118830A3600D3244D /* Supporting Files */,
+			);
+			path = openHAB;
+			sourceTree = "<group>";
+		};
+		DFB2623118830A3600D3244D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DFB2623218830A3600D3244D /* openHAB-Info.plist */,
+				DFB2623318830A3600D3244D /* InfoPlist.strings */,
+				DFB2623618830A3600D3244D /* main.m */,
+				DFB2623818830A3600D3244D /* openHAB-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DFB2625218830A3600D3244D /* openHABTests */ = {
+			isa = PBXGroup;
+			children = (
+				DFB2625818830A3600D3244D /* openHABTests.m */,
+				DFB2625318830A3600D3244D /* Supporting Files */,
+			);
+			path = openHABTests;
+			sourceTree = "<group>";
+		};
+		DFB2625318830A3600D3244D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DFB2625418830A3600D3244D /* openHABTests-Info.plist */,
+				DFB2625518830A3600D3244D /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DFB2622618830A3600D3244D /* openHAB */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */;
+			buildPhases = (
+				DFB2622318830A3600D3244D /* Sources */,
+				DFB2622418830A3600D3244D /* Frameworks */,
+				DFB2622518830A3600D3244D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = openHAB;
+			productName = openHAB;
+			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DFB2624A18830A3600D3244D /* openHABTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DFB2625F18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHABTests" */;
+			buildPhases = (
+				DFB2624718830A3600D3244D /* Sources */,
+				DFB2624818830A3600D3244D /* Frameworks */,
+				DFB2624918830A3600D3244D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DFB2625118830A3600D3244D /* PBXTargetDependency */,
+			);
+			name = openHABTests;
+			productName = openHABTests;
+			productReference = DFB2624B18830A3600D3244D /* openHABTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DFB2621F18830A3600D3244D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = OpenHAB;
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = "Victor Belov";
+				TargetAttributes = {
+					DFB2624A18830A3600D3244D = {
+						TestTargetID = DFB2622618830A3600D3244D;
+					};
+				};
+			};
+			buildConfigurationList = DFB2622218830A3600D3244D /* Build configuration list for PBXProject "openHAB" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DFB2621E18830A3600D3244D;
+			productRefGroup = DFB2622818830A3600D3244D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DFB2622618830A3600D3244D /* openHAB */,
+				DFB2624A18830A3600D3244D /* openHABTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DFB2622518830A3600D3244D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFB2624118830A3600D3244D /* Main_iPad.storyboard in Resources */,
+				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
+				DFB2623E18830A3600D3244D /* Main_iPhone.storyboard in Resources */,
+				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DFB2624918830A3600D3244D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DFB2622318830A3600D3244D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
+				DFB2623718830A3600D3244D /* main.m in Sources */,
+				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DFB2624718830A3600D3244D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFB2625918830A3600D3244D /* openHABTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DFB2625118830A3600D3244D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DFB2622618830A3600D3244D /* openHAB */;
+			targetProxy = DFB2625018830A3600D3244D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		DFB2623318830A3600D3244D /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DFB2623418830A3600D3244D /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		DFB2623C18830A3600D3244D /* Main_iPhone.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DFB2623D18830A3600D3244D /* Base */,
+			);
+			name = Main_iPhone.storyboard;
+			sourceTree = "<group>";
+		};
+		DFB2623F18830A3600D3244D /* Main_iPad.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DFB2624018830A3600D3244D /* Base */,
+			);
+			name = Main_iPad.storyboard;
+			sourceTree = "<group>";
+		};
+		DFB2625518830A3600D3244D /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DFB2625618830A3600D3244D /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DFB2625A18830A3600D3244D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DFB2625B18830A3600D3244D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DFB2625D18830A3600D3244D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
+				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		DFB2625E18830A3600D3244D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
+				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		DFB2626018830A3600D3244D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "openHABTests/openHABTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		DFB2626118830A3600D3244D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
+				INFOPLIST_FILE = "openHABTests/openHABTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DFB2622218830A3600D3244D /* Build configuration list for PBXProject "openHAB" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFB2625A18830A3600D3244D /* Debug */,
+				DFB2625B18830A3600D3244D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFB2625D18830A3600D3244D /* Debug */,
+				DFB2625E18830A3600D3244D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		DFB2625F18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHABTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFB2626018830A3600D3244D /* Debug */,
+				DFB2626118830A3600D3244D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DFB2621F18830A3600D3244D /* Project object */;
+}
