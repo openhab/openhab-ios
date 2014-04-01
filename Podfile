@@ -1,0 +1,7 @@
+platform :ios, '7.0'
+pod 'AFNetworking', '~> 2.0'
+pod 'SDWebImage', '~> 3.5.2'
+pod 'GDataXML-HTML', '~> 1.1.0'
+pod 'TSMessages', '~> 0.9.4'
+pod 'CrittercismSDK', '~> 4.3.2'
+pod 'GoogleAnalytics-iOS-SDK', '~> 3.0.6'
