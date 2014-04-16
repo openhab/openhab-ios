@@ -31,12 +31,10 @@ UIColor *normalTextColor;
 
 -(void)buttonActionReleased
 {
-    NSLog(@"button released");
 }
 
 -(void)buttonActionTouched
 {
-    NSLog(@"button touched");
     self.backgroundColor = normalTextColor;
 //    [self setTitleColor:normalBackgroundColor forState:UIControlStateNormal];
     normalTextColor = self.titleLabel.textColor;

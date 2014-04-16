@@ -181,6 +181,8 @@
         cellIdentifier = @"SliderWidgetCell";
     } else if ([widget.type isEqualToString:@"Selection"]) {
         cellIdentifier = @"SelectionWidgetCell";
+    } else if ([widget.type isEqualToString:@"Colorpicker"]) {
+        cellIdentifier = @"ColorPickerWidgetCell";
     }
 
     GenericUITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
@@ -189,6 +191,9 @@
     if (widget.icon != nil) {
         NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, widget.icon];
         [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
+    }
+    if ([cellIdentifier isEqualToString:@"ColorPickerWidgetCell"]) {
+        ((ColorPickerUITableViewCell*)cell).delegate = self;
     }
     // Check if this is not the last row in the widgets list
     if (indexPath.row < [currentPage.widgets count] - 1) {
@@ -294,6 +299,14 @@
     [self sendCommand:selectedWidget.item commandToSend:selectedMapping.command];
 }
 
+- (void) didPressColorButton:(ColorPickerUITableViewCell *)cell
+{
+    NSLog(@"Pressed color button");
+    NSLog(@"ColorCell row is %d", [self.widgetTableView indexPathForCell:cell].row);
+    ColorPickerViewController *colorPickerViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"ColorPickerViewController"];;
+    colorPickerViewController.widget = [self.currentPage.widgets objectAtIndex:[self.widgetTableView indexPathForCell:cell].row];
+    [self.navigationController pushViewController:colorPickerViewController animated:YES];
+}
 
 // load our page and show it into UITableView
 

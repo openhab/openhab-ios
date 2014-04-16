@@ -222,6 +222,40 @@
                                             <accessibilityTraits key="traits" none="YES" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ColorPickerWidgetCell" rowHeight="44" id="n6i-xP-mqM" customClass="ColorPickerUITableViewCell">
+                                        <rect key="frame" x="0.0" y="429" width="320" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="n6i-xP-mqM" id="9lZ-hN-dkV">
+                                            <rect key="frame" x="0.0" y="0.0" width="287" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <button opaque="NO" tag="703" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OR4-bR-Ekg" customClass="UICircleButton">
+                                                    <rect key="frame" x="270" y="7" width="30" height="30"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <state key="normal">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
+                                                <button opaque="NO" tag="702" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JzN-PF-zeJ" customClass="UICircleButton">
+                                                    <rect key="frame" x="232" y="7" width="30" height="30"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <state key="normal">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
+                                                <button opaque="NO" tag="701" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vxc-Zw-Oyh" customClass="UICircleButton">
+                                                    <rect key="frame" x="194" y="7" width="30" height="30"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <state key="normal">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" none="YES" notEnabled="YES"/>
+                                        </accessibility>
+                                    </tableViewCell>
                                 </prototypes>
                                 <connections>
                                     <outlet property="dataSource" destination="vXZ-lx-hvc" id="FMC-Oi-tEP"/>
@@ -533,6 +567,26 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4aO-a1-xpW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1500" y="692"/>
+        </scene>
+        <!--Color Picker View Controller-->
+        <scene sceneID="1cJ-Yb-6jQ">
+            <objects>
+                <viewController storyboardIdentifier="ColorPickerViewController" automaticallyAdjustsScrollViewInsets="NO" id="XTW-gz-4RR" customClass="ColorPickerViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Nl6-qJ-2g2"/>
+                        <viewControllerLayoutGuide type="bottom" id="fDm-8Z-sSa"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="KR6-1e-R5X">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <navigationItem key="navigationItem" id="AYD-aP-DDS"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="o8x-QB-mZ6" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="597" y="1352"/>
         </scene>
         <!--OpenHAB Selection Table View Controller-->
         <scene sceneID="0ai-k8-BoH">

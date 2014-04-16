@@ -15,8 +15,9 @@
 		DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.m */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */; };
-		DF05FF261896BE5900FF2F9B /* SelectionPickerUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF251896BE5900FF2F9B /* SelectionPickerUITableViewCell.m */; };
 		DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */; };
+		DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */; };
+		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */; };
 		DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = DF2B6ADC18EF4D660063819F /* NSData+HexString.m */; };
 		DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.m */; };
@@ -79,10 +80,12 @@
 		DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RollershutterUITableViewCell.m; sourceTree = "<group>"; };
 		DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectionUITableViewCell.h; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectionUITableViewCell.m; sourceTree = "<group>"; };
-		DF05FF241896BE5900FF2F9B /* SelectionPickerUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectionPickerUITableViewCell.h; sourceTree = "<group>"; };
-		DF05FF251896BE5900FF2F9B /* SelectionPickerUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectionPickerUITableViewCell.m; sourceTree = "<group>"; };
 		DF06F1F418FE7A160011E7B9 /* OpenHABSelectionTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSelectionTableViewController.h; sourceTree = "<group>"; };
 		DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSelectionTableViewController.m; sourceTree = "<group>"; };
+		DF06F1F718FEA8420011E7B9 /* ColorPickerUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPickerUITableViewCell.h; sourceTree = "<group>"; };
+		DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerUITableViewCell.m; sourceTree = "<group>"; };
+		DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPickerViewController.h; sourceTree = "<group>"; };
+		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerViewController.m; sourceTree = "<group>"; };
 		DF2B6ADB18EF4D660063819F /* NSData+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+HexString.h"; sourceTree = "<group>"; };
 		DF2B6ADC18EF4D660063819F /* NSData+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+HexString.m"; sourceTree = "<group>"; };
 		DF4B83FE18857FD900F34902 /* OpenHABSelectSitemapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSelectSitemapViewController.h; sourceTree = "<group>"; };
@@ -236,8 +239,10 @@
 				DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.m */,
 				DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */,
 				DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */,
-				DF05FF241896BE5900FF2F9B /* SelectionPickerUITableViewCell.h */,
-				DF05FF251896BE5900FF2F9B /* SelectionPickerUITableViewCell.m */,
+				DF06F1F718FEA8420011E7B9 /* ColorPickerUITableViewCell.h */,
+				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */,
+				DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */,
+				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -530,7 +535,7 @@
 				DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.m in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
-				DF05FF261896BE5900FF2F9B /* SelectionPickerUITableViewCell.m in Sources */,
+				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,
 				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */,
 				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.m in Sources */,
@@ -542,6 +547,7 @@
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
 				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
 				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
+				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

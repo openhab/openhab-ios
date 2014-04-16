@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-@class OpenHABWidget;
+#import "OpenHABWidget.h"
 
 @interface GenericUITableViewCell : UITableViewCell
 {

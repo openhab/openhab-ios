@@ -7,7 +7,6 @@
 //
 
 #import "GenericUITableViewCell.h"
-#import "OpenHABWidget.h"
 #import "OpenHABLinkedPage.h"
 
 @implementation GenericUITableViewCell
