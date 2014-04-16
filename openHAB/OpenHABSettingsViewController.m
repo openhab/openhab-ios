@@ -7,12 +7,15 @@
 //
 
 #import "OpenHABSettingsViewController.h"
+#import "OpenHABViewController.h"
+#import "OpenHABDataObject.h"
 
 @interface OpenHABSettingsViewController ()
 
 @end
 
 @implementation OpenHABSettingsViewController
+@synthesize localUrlTextField, remoteUrlTextField, usernameTextField, passwordTextField, ignoreSSLSwitch, demomodeSwitch, settingsLocalUrl, settingsRemoteUrl, settingsUsername, settingsPassword, settingsIgnoreSSL, settingsDemomode;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -26,12 +29,38 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    NSLog(@"OpenHABSettingsViewController viewDidLoad");
+    [self.navigationItem setHidesBackButton:TRUE];
+    UIBarButtonItem *leftBarButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonPressed:)];
+    UIBarButtonItem *rightBarButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(saveButtonPressed:)];
+    [self.navigationItem setLeftBarButtonItem:leftBarButton];
+    [self.navigationItem setRightBarButtonItem:rightBarButton];
+    [self loadSettings];
+    [self updateSettingsUi];
+    [localUrlTextField setDelegate:self];
+    [remoteUrlTextField setDelegate:self];
+    [usernameTextField setDelegate:self];
+    [passwordTextField setDelegate:self];
+}
 
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+// This is to automatically hide keyboard on done/enter pressing
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return NO;
+}
+
+- (void)cancelButtonPressed:(id)sender {
+    [self.navigationController popViewControllerAnimated:YES];
+    NSLog(@"Cancel button pressed");
+}
+
+- (void)saveButtonPressed:(id)sender {
+    // TODO: Make a check if any of the preferences has changed
+    NSLog(@"Save button pressed");
+    [self updateSettings];
+    [self saveSettings];
+    [[self appData] rootViewController].pageUrl = nil;
+    [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
 - (void)didReceiveMemoryWarning
@@ -40,81 +69,56 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
-#warning Potentially incomplete method implementation.
-    // Return the number of sections.
-    return 0;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
-    return 0;
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
-    
-    // Configure the cell...
-    
-    return cell;
-}
-
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
-}
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a story board-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
 }
 
- */
+- (void)updateSettingsUi
+{
+    localUrlTextField.text = settingsLocalUrl;
+    remoteUrlTextField.text = settingsRemoteUrl;
+    usernameTextField.text = settingsUsername;
+    passwordTextField.text = settingsPassword;
+    [ignoreSSLSwitch setOn:settingsIgnoreSSL];
+    [demomodeSwitch setOn:settingsDemomode];
+}
+
+- (void)loadSettings
+{
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    settingsLocalUrl = [prefs stringForKey:@"localUrl"];
+    settingsRemoteUrl = [prefs stringForKey:@"remoteUrl"];
+    settingsUsername = [prefs stringForKey:@"username"];
+    settingsPassword = [prefs stringForKey:@"password"];
+    settingsIgnoreSSL = [prefs boolForKey:@"ignoreSSL"];
+    settingsDemomode = [prefs boolForKey:@"demomode"];
+}
+
+- (void)updateSettings
+{
+    settingsLocalUrl = localUrlTextField.text;
+    settingsRemoteUrl = remoteUrlTextField.text;
+    settingsUsername = usernameTextField.text;
+    settingsPassword = passwordTextField.text;
+    settingsIgnoreSSL = ignoreSSLSwitch.isOn;
+    settingsDemomode = demomodeSwitch.isOn;
+}
+
+- (void)saveSettings
+{
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    [prefs setValue:settingsLocalUrl forKey:@"localUrl"];
+    [prefs setValue:settingsRemoteUrl forKey:@"remoteUrl"];
+    [prefs setValue:settingsUsername forKey:@"username"];
+    [prefs setValue:settingsPassword forKey:@"password"];
+    [prefs setBool:settingsIgnoreSSL forKey:@"ignoreSSL"];
+    [prefs setBool:settingsDemomode forKey:@"demomode"];
+}
+
+- (OpenHABDataObject*)appData
+{
+    id<OpenHABAppDataDelegate> theDelegate = (id<OpenHABAppDataDelegate>) [UIApplication sharedApplication].delegate;
+    return [theDelegate appData];
+}
 
 @end

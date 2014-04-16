@@ -22,4 +22,14 @@
     return self;
 }
 
+- (float) stateAsFloat
+{
+    return [state floatValue];
+}
+
+- (int) stateAsInt
+{
+    return [state integerValue];
+}
+
 @end

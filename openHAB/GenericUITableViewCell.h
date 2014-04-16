@@ -7,7 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
+@class OpenHABWidget;
 
 @interface GenericUITableViewCell : UITableViewCell
+{
+    OpenHABWidget * widget;
+}
+
+- (void)loadWidget:(OpenHABWidget *)widgetToLoad;
+- (void)displayWidget;
+
+@property (nonatomic, retain) OpenHABWidget *widget;
 
 @end

@@ -7,7 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GenericUITableViewCell.h"
 
-@interface FrameUITableViewCell : UITableViewCell
+@interface FrameUITableViewCell : GenericUITableViewCell
+
+
+@property (nonatomic, retain) UILabel *textLabel;
 
 @end

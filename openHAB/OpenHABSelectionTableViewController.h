@@ -7,7 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "OpenHABItem.h"
+
+@class OpenHABSelectionTableViewController;
+
+@protocol OpenHABSelectionTableViewControllerDelegate <NSObject>
+- (void)didSelectWidgetMapping:(int)selectedMapping;
+@end
 
 @interface OpenHABSelectionTableViewController : UITableViewController
+
+@property (nonatomic, retain) NSMutableArray *mappings;
+@property (nonatomic, retain) id <OpenHABSelectionTableViewControllerDelegate> delegate;
+@property (nonatomic, retain) OpenHABItem *selectionItem;
 
 @end

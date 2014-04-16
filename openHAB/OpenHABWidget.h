@@ -12,6 +12,10 @@
 @class OpenHABItem;
 @class OpenHABLinkedPage;
 
+@protocol OpenHABWidgetDelegate <NSObject>
+- (void)sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command;
+@end
+
 @interface OpenHABWidget : NSObject
 {
     NSString *widgetId;
@@ -32,8 +36,10 @@
     OpenHABItem *item;
     OpenHABLinkedPage *linkedPage;
     NSString *text;
+    NSMutableArray *mappings;
 }
 
+@property (nonatomic, weak) id<OpenHABWidgetDelegate> delegate;
 @property (nonatomic, retain) NSString *widgetId;
 @property (nonatomic, retain) NSString *label;
 @property (nonatomic, retain) NSString *icon;
@@ -52,7 +58,12 @@
 @property (nonatomic, retain) OpenHABItem *item;
 @property (nonatomic, retain) OpenHABLinkedPage *linkedPage;
 @property (nonatomic, retain) NSString *text;
+@property (nonatomic, retain) NSMutableArray *mappings;
 
 - (OpenHABWidget *) initWithXML:(GDataXMLElement *)xmlElement;
+- (NSString *) labelText;
+- (NSString *) labelValue;
+- (void) sendCommand:(NSString *)command;
+- (int) mappingIndexByCommand:(NSString *)command;
 
 @end

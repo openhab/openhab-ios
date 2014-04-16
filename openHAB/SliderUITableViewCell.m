@@ -7,25 +7,27 @@
 //
 
 #import "SliderUITableViewCell.h"
+#import "OpenHABWidget.h"
+#import "OpenHABItem.h"
 
 @implementation SliderUITableViewCell
+@synthesize widgetSlider;
 
-- (id)initWithFrame:(CGRect)frame
+- (void)displayWidget
 {
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code
-    }
-    return self;
+    self.widgetSlider = (UISlider *)[self viewWithTag:400];
+    self.textLabel.text = [self.widget labelText];
+    float widgetValue = [widget.item stateAsFloat];
+    [self.widgetSlider setValue:widgetValue/100];
+    [self.widgetSlider addTarget:self
+                  action:@selector(sliderDidEndSliding:)
+        forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside)];
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
+- (void)sliderDidEndSliding:(NSNotification *)notification {
+    NSLog(@"Slider new value = %f", self.widgetSlider.value);
+    int intValue = self.widgetSlider.value * 100;
+    [self.widget sendCommand:[NSString stringWithFormat:@"%d", intValue]];
 }
-*/
 
 @end

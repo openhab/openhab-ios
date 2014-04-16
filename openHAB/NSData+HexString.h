@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSData (NSData_HexString)
+@interface NSData (HexString)
+
+- (NSString *)hexString;
 
 @end

@@ -10,4 +10,8 @@
 
 @interface Reachability (URL)
 
++ (instancetype)reachabilityWithUrlString:(NSString *)urlString;
++ (instancetype)reachabilityWithUrl:(NSURL *)url;
+- (BOOL)currentlyReachable;
+
 @end

@@ -7,16 +7,25 @@
 //
 
 #import "FrameUITableViewCell.h"
+#import "OpenHABWidget.h"
 
 @implementation FrameUITableViewCell
+@synthesize textLabel;
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+- (id)initWithCoder:(NSCoder *)coder
 {
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    self = [super initWithCoder:coder];
     if (self) {
-        // Initialization code
+        self.textLabel = (UILabel *)[self viewWithTag:100];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        self.separatorInset = UIEdgeInsetsZero;
     }
     return self;
+}
+
+- (void)displayWidget
+{
+    self.textLabel.text = [self.widget.label uppercaseString];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated

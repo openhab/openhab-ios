@@ -7,23 +7,41 @@
 //
 
 #import "GenericUITableViewCell.h"
+#import "OpenHABWidget.h"
+#import "OpenHABLinkedPage.h"
 
 @implementation GenericUITableViewCell
-
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
-{
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
-    if (self) {
-        // Initialization code
-    }
-    return self;
-}
+@synthesize widget;
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
 {
     [super setSelected:selected animated:animated];
 
     // Configure the view for the selected state
+}
+
+- (void)loadWidget:(OpenHABWidget *)widgetToLoad
+{
+    self.widget = widgetToLoad;
+    if (widget.linkedPage != nil) {
+        self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        self.selectionStyle = UITableViewCellSelectionStyleBlue;
+//        self.userInteractionEnabled = YES;
+    } else {
+        self.accessoryType = UITableViewCellAccessoryNone;
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+//        self.userInteractionEnabled = NO;
+    }
+        
+}
+
+- (void)displayWidget
+{
+    self.textLabel.text = [self.widget labelText];
+    if ([self.widget labelValue] != nil)
+        self.detailTextLabel.text = [self.widget labelValue];
+    else
+        self.detailTextLabel.text = nil;
 }
 
 @end

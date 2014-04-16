@@ -7,25 +7,27 @@
 //
 
 #import "SelectionUITableViewCell.h"
+#import "OpenHABWidget.h"
+#import "OpenHABItem.h"
+#import "OpenHABWidgetMapping.h"
 
 @implementation SelectionUITableViewCell
 
-- (id)initWithFrame:(CGRect)frame
+- (void)loadWidget:(OpenHABWidget *)widgetToLoad
 {
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code
-    }
-    return self;
+    self.widget = widgetToLoad;
+    self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    self.selectionStyle = UITableViewCellSelectionStyleBlue;
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
+- (void)displayWidget
 {
-    // Drawing code
+    self.textLabel.text = [self.widget labelText];
+    int selectedMapping = [self.widget mappingIndexByCommand:self.widget.item.state];
+    if (selectedMapping != -1) {
+        OpenHABWidgetMapping *widgetMapping = [widget.mappings objectAtIndex:selectedMapping];
+        self.detailTextLabel.text = widgetMapping.label;
+    }
 }
-*/
 
 @end

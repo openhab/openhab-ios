@@ -7,7 +7,33 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "OpenHABTracker.h"
+#import "OpenHABSitemapPage.h"
+#import "OpenHABSelectionTableViewController.h"
 
-@interface OpenHABViewController : UIViewController
+@class OpenHABSitemapPage;
+@interface OpenHABViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate>
+{
+    OpenHABTracker *tracker;
+    UIPickerView *selectionPicker;
+}
+
+
+@property (nonatomic,retain) IBOutlet UITableView *widgetTableView;
+@property (nonatomic, strong) NSString *pageUrl;
+@property (nonatomic, strong) NSString *openHABRootUrl;
+@property (nonatomic, strong) NSString *openHABUsername;
+@property (nonatomic, strong) NSString *openHABPassword;
+@property (nonatomic, strong) NSString *defaultSitemap;
+@property (nonatomic) BOOL ignoreSSLCertificate;
+@property (nonatomic, retain) NSMutableArray *sitemaps;
+@property (nonatomic, retain) OpenHABSitemapPage *currentPage;
+@property (nonatomic, retain) UIPickerView *selectionPicker;
+@property (nonatomic) NetworkStatus pageNetworkStatus;
+@property (nonatomic) BOOL pageNetworkStatusAvailable;
+@property NSInteger toggle;
+
+- (void)openHABTracked:(NSString *)openHABUrl;
+- (void)sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command;
 
 @end

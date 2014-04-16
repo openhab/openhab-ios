@@ -10,4 +10,8 @@
 
 @interface RollershutterUITableViewCell : GenericUITableViewCell
 
+@property (nonatomic, retain) UIButton * downButton;
+@property (nonatomic, retain) UIButton * stopButton;
+@property (nonatomic, retain) UIButton * upButton;
+
 @end

@@ -7,25 +7,64 @@
 //
 
 #import "SetpointUITableViewCell.h"
+#import "OpenHABWidget.h"
+#import "OpenHABItem.h"
 
 @implementation SetpointUITableViewCell
-
-- (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code
+}
+@synthesize widgetSegmentedControl;
+
+- (void)displayWidget
+{
+    self.textLabel.text = [self.widget labelText];
+    self.widgetSegmentedControl = (UISegmentedControl *)[self viewWithTag:300];
+    NSString *widgetValue;
+    if ([self.widget.item.state isEqual:@"Uninitialized"]) {
+        widgetValue = @"N/A";
+    } else {
+        widgetValue = [NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat]];
     }
-    return self;
+    [self.widgetSegmentedControl setTitle:widgetValue forSegmentAtIndex:1];
+    [self.widgetSegmentedControl addTarget:self
+                         action:@selector(pickOne:)
+               forControlEvents:UIControlEventValueChanged];
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
+-(void) pickOne:(id)sender
 {
-    // Drawing code
+    UISegmentedControl *segmentedControl = (UISegmentedControl *)sender;
+    NSLog(@"Setpoint pressed %d", [segmentedControl selectedSegmentIndex]);
+    // Deselect segment in the middle
+    if ([segmentedControl selectedSegmentIndex] == 1) {
+        [self.widgetSegmentedControl setSelectedSegmentIndex:-1];
+    // - pressed
+    } else if ([segmentedControl selectedSegmentIndex] == 0) {
+        if ([self.widget.item.state isEqual:@"Uninitialized"]) {
+            [self.widget sendCommand:self.widget.minValue];
+        } else {
+            if (self.widget.minValue != nil) {
+                if ([self.widget.item stateAsFloat] - [self.widget.step floatValue] >= [self.widget.minValue floatValue]) {
+                    [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
+                }
+            } else {
+                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
+            }
+        }
+    // + pressed
+    } else if ([segmentedControl selectedSegmentIndex] == 2) {
+        if ([self.widget.item.state isEqual:@"Uninitialized"]) {
+            [self.widget sendCommand:self.widget.minValue];
+        } else {
+            if (self.widget.maxValue != nil) {
+                if ([self.widget.item stateAsFloat] + [self.widget.step floatValue] <= [self.widget.maxValue floatValue]) {
+                    [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
+                }
+            } else {
+                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
+            }
+        }
+    }
 }
-*/
 
 @end

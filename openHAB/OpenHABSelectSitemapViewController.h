@@ -10,4 +10,11 @@
 
 @interface OpenHABSelectSitemapViewController : UITableViewController
 
+
+@property (nonatomic, retain) NSMutableArray *sitemaps;
+@property (nonatomic, retain) NSString *openHABRootUrl;
+@property (nonatomic, retain) NSString *openHABUsername;
+@property (nonatomic, retain) NSString *openHABPassword;
+@property (nonatomic) BOOL ignoreSSLCertificate;
+
 @end

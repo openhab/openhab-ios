@@ -9,5 +9,6 @@
 #import "OpenHABDataObject.h"
 
 @implementation OpenHABDataObject
+@synthesize openHABRootUrl, sitemaps, openHABUsername, openHABPassword, rootViewController;
 
 @end

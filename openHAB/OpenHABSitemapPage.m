@@ -11,7 +11,7 @@
 #import "OpenHABWidget.h"
 
 @implementation OpenHABSitemapPage
-@synthesize widgets, pageId, title, link;
+@synthesize widgets, pageId, title, link, delegate;
 
 - (OpenHABSitemapPage *) initWithXML:(GDataXMLElement *)xmlElement
 {
@@ -27,6 +27,7 @@
             }
         } else {
             OpenHABWidget *newWidget = [[OpenHABWidget alloc] initWithXML:child];
+            [newWidget setDelegate:self];
             if (newWidget != nil)
                 [widgets addObject:newWidget];
             // If widget have child widgets, cycle through them too
@@ -34,14 +35,23 @@
                 for (GDataXMLElement *childChild in [child elementsForName:@"widget"]) {
                     if ([[child name] isEqual:@"widget"]) {
                         OpenHABWidget *newChildWidget =[[OpenHABWidget alloc] initWithXML:childChild];
-                        if (newChildWidget != nil)
+                        if (newChildWidget != nil) {
+                            [newChildWidget setDelegate:self];
                             [widgets addObject:newChildWidget];
+                        }
                     }
                 }
             }
         }
     }
     return self;
+}
+
+- (void) sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command
+{
+    NSLog(@"SitemapPage sending command %@ to %@", command, item.name);
+    if (self.delegate != nil)
+        [self.delegate sendCommand:item commandToSend:command];
 }
 
 @end

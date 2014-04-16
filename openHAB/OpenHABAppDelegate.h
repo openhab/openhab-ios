@@ -7,9 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "OpenHABAppDataDelegate.h"
+#import "OpenHABDataObject.h"
 
-@interface OpenHABAppDelegate : UIResponder <UIApplicationDelegate>
-
+@interface OpenHABAppDelegate : UIResponder <UIApplicationDelegate, OpenHABAppDataDelegate>
+{
+    OpenHABDataObject* appData;
+}
 @property (strong, nonatomic) UIWindow *window;
+@property (nonatomic, retain) OpenHABDataObject* appData;
 
 @end

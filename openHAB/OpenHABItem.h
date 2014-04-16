@@ -24,5 +24,7 @@
 @property (nonatomic, retain) NSString *link;
 
 - (OpenHABItem *) initWithXML:(GDataXMLElement *)xmlElement;
+- (float) stateAsFloat;
+- (int) stateAsInt;
 
 @end

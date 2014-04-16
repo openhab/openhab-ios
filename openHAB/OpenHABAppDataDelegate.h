@@ -7,7 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+@class OpenHABDataObject;
 
 @protocol OpenHABAppDataDelegate <NSObject>
+
+- (OpenHABDataObject*) appData;
 
 @end

@@ -9,5 +9,10 @@
 #import "GenericUITableViewCell.h"
 
 @interface SegmentedUITableViewCell : GenericUITableViewCell
+{
+    UISegmentedControl *widgetSegmentedControl;
+}
+
+@property (nonatomic, retain) UISegmentedControl *widgetSegmentedControl;
 
 @end

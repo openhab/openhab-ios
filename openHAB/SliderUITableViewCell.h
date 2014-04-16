@@ -9,5 +9,10 @@
 #import "GenericUITableViewCell.h"
 
 @interface SliderUITableViewCell : GenericUITableViewCell
+{
+    UISlider *widgetSlider;
+}
+
+@property (nonatomic, retain) UISlider *widgetSlider;
 
 @end

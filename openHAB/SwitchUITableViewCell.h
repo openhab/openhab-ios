@@ -9,5 +9,10 @@
 #import "GenericUITableViewCell.h"
 
 @interface SwitchUITableViewCell : GenericUITableViewCell
+{
+    UISwitch *widgetSwitch;
+}
+@property (nonatomic, retain) UISwitch *widgetSwitch;
+@property (nonatomic, retain) UILabel *textLabel;
 
 @end
