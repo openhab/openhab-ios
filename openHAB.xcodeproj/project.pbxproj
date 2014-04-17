@@ -18,6 +18,7 @@
 		DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */; };
 		DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */; };
+		DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */; };
 		DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = DF2B6ADC18EF4D660063819F /* NSData+HexString.m */; };
 		DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.m */; };
@@ -86,6 +87,8 @@
 		DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerUITableViewCell.m; sourceTree = "<group>"; };
 		DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPickerViewController.h; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerViewController.m; sourceTree = "<group>"; };
+		DF06F1FD18FEFEDF0011E7B9 /* ChartUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChartUITableViewCell.h; sourceTree = "<group>"; };
+		DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChartUITableViewCell.m; sourceTree = "<group>"; };
 		DF2B6ADB18EF4D660063819F /* NSData+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+HexString.h"; sourceTree = "<group>"; };
 		DF2B6ADC18EF4D660063819F /* NSData+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+HexString.m"; sourceTree = "<group>"; };
 		DF4B83FE18857FD900F34902 /* OpenHABSelectSitemapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSelectSitemapViewController.h; sourceTree = "<group>"; };
@@ -243,6 +246,8 @@
 				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */,
 				DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */,
 				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */,
+				DF06F1FD18FEFEDF0011E7B9 /* ChartUITableViewCell.h */,
+				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -527,6 +532,7 @@
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.m in Sources */,
 				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
 				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */,
+				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */,
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */,
 				DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */,
 				DFB2623718830A3600D3244D /* main.m in Sources */,

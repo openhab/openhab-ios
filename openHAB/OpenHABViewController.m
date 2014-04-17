@@ -25,6 +25,7 @@
 #import "OpenHABItem.h"
 #import "TSMessage.h"
 #import "Reachability+URL.h"
+#import "ChartUITableViewCell.h"
 
 @interface OpenHABViewController ()
 
@@ -157,6 +158,8 @@
             return 35;
         else
             return 0;
+    } else if ([widget.type isEqualToString:@"Chart"]) {
+        return 170;
     }
     return 44;
 }
@@ -183,11 +186,11 @@
         cellIdentifier = @"SelectionWidgetCell";
     } else if ([widget.type isEqualToString:@"Colorpicker"]) {
         cellIdentifier = @"ColorPickerWidgetCell";
+    } else if ([widget.type isEqualToString:@"Chart"]) {
+        cellIdentifier = @"ChartWidgetCell";
     }
 
     GenericUITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
-    [cell loadWidget:widget];
-    [cell displayWidget];
     if (widget.icon != nil) {
         NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, widget.icon];
         [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
@@ -195,6 +198,12 @@
     if ([cellIdentifier isEqualToString:@"ColorPickerWidgetCell"]) {
         ((ColorPickerUITableViewCell*)cell).delegate = self;
     }
+    if ([cellIdentifier isEqualToString:@"ChartWidgetCell"]) {
+        NSLog(@"Setting cell base url to %@", self.openHABRootUrl);
+        ((ChartUITableViewCell*)cell).baseUrl = self.openHABRootUrl;
+    }
+    [cell loadWidget:widget];
+    [cell displayWidget];
     // Check if this is not the last row in the widgets list
     if (indexPath.row < [currentPage.widgets count] - 1) {
         OpenHABWidget *nextWidget = [currentPage.widgets objectAtIndex:indexPath.row + 1];
@@ -248,7 +257,6 @@
 - (void)openHABTrackingProgress:(NSString *)message
 {
     NSLog(@"OpenHABViewController %@", message);
-//    [TSMessage showNotificationWithTitle:@"Connecting" subtitle:message type:TSMessageNotificationTypeMessage];
     [TSMessage showNotificationInViewController:self.navigationController title:@"Connecting" subtitle:message type:TSMessageNotificationTypeMessage duration:3.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
 }
 
@@ -257,7 +265,6 @@
     NSLog(@"OpenHABViewController discovery error");
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] type:TSMessageNotificationTypeError duration:60.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
-//    [TSMessage showNotificationWithTitle:@"Test" subtitle:@"Test subtitle" type:TSMessageNotificationTypeError];
 }
 
 - (void)openHABTracked:(NSString *)openHABUrl
@@ -349,7 +356,7 @@
 //                NSLog(@"%@ - %@", widget.label, widget.type);
 //            }
             [self.widgetTableView reloadData];
-            self.navigationItem.title = self.currentPage.title;
+            self.navigationItem.title = [self.currentPage.title componentsSeparatedByString:@"["][0];
             [self loadPage:YES];
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
@@ -441,7 +448,7 @@
     [[self appData] setOpenHABPassword:self.openHABPassword];
 }
 
-// Set SDImage (used for widget icons) authentication
+// Set SDImage (used for widget icons and images) authentication
 
 - (void)setSDImageAuth
 {

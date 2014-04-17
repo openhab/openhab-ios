@@ -16,7 +16,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="S7g-eE-wf7">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="S7g-eE-wf7">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -256,6 +256,29 @@
                                             <accessibilityTraits key="traits" none="YES" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ChartWidgetCell" rowHeight="44" id="o5c-ql-8Ao" customClass="ChartUITableViewCell">
+                                        <rect key="frame" x="0.0" y="473" width="320" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="o5c-ql-8Ao" id="P0d-ou-gEj">
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" tag="801" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MyD-7j-GMG">
+                                                    <rect key="frame" x="13" y="0.0" width="294" height="43"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                </imageView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailing" secondItem="MyD-7j-GMG" secondAttribute="trailing" constant="20" id="ATT-l4-wgR"/>
+                                                <constraint firstItem="MyD-7j-GMG" firstAttribute="leading" secondItem="P0d-ou-gEj" secondAttribute="leading" constant="20" id="DVY-yo-2CB"/>
+                                                <constraint firstItem="MyD-7j-GMG" firstAttribute="top" secondItem="P0d-ou-gEj" secondAttribute="top" constant="8" id="VeM-6I-CO8"/>
+                                                <constraint firstAttribute="bottom" secondItem="MyD-7j-GMG" secondAttribute="bottom" constant="8" id="jk2-bJ-AJr"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" none="YES" notEnabled="YES"/>
+                                        </accessibility>
+                                    </tableViewCell>
                                 </prototypes>
                                 <connections>
                                     <outlet property="dataSource" destination="vXZ-lx-hvc" id="FMC-Oi-tEP"/>
@@ -264,6 +287,12 @@
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="S7g-eE-wf7" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" id="9UY-UR-3dN"/>
+                            <constraint firstItem="O3I-rs-9RL" firstAttribute="top" secondItem="S7g-eE-wf7" secondAttribute="bottom" id="eFN-zn-mDT"/>
+                            <constraint firstItem="S7g-eE-wf7" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="mYQ-UM-mPh"/>
+                            <constraint firstAttribute="trailing" secondItem="S7g-eE-wf7" secondAttribute="trailing" id="yz9-6F-Iw8"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="N7h-KT-EtL">
                         <barButtonItem key="rightBarButtonItem" title="Settings" id="757-B0-yFP">
@@ -629,16 +658,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8QX-Dp-MYj">
-                                <rect key="frame" x="20" y="0.0" width="280" height="548"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8QX-Dp-MYj">
+                                <rect key="frame" x="20" y="0.0" width="280" height="568"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                <mutableString key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda. Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda. Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</mutableString>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="8QX-Dp-MYj" firstAttribute="top" secondItem="NPT-SP-acq" secondAttribute="top" id="fIS-bu-0bZ"/>
+                            <constraint firstAttribute="trailing" secondItem="8QX-Dp-MYj" secondAttribute="trailing" constant="20" id="uNM-c6-GWX"/>
+                            <constraint firstItem="vRb-Nk-z4d" firstAttribute="top" secondItem="8QX-Dp-MYj" secondAttribute="bottom" id="vdV-RO-YoJ"/>
+                            <constraint firstItem="8QX-Dp-MYj" firstAttribute="leading" secondItem="NPT-SP-acq" secondAttribute="leading" constant="20" id="wz7-de-jLJ"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Legal" id="Oss-Zi-gie"/>
                 </viewController>
