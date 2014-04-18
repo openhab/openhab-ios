@@ -263,16 +263,39 @@
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" tag="801" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MyD-7j-GMG">
-                                                    <rect key="frame" x="13" y="0.0" width="294" height="43"/>
+                                                <imageView userInteractionEnabled="NO" tag="801" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="MyD-7j-GMG">
+                                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 </imageView>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstAttribute="trailing" secondItem="MyD-7j-GMG" secondAttribute="trailing" constant="20" id="ATT-l4-wgR"/>
-                                                <constraint firstItem="MyD-7j-GMG" firstAttribute="leading" secondItem="P0d-ou-gEj" secondAttribute="leading" constant="20" id="DVY-yo-2CB"/>
-                                                <constraint firstItem="MyD-7j-GMG" firstAttribute="top" secondItem="P0d-ou-gEj" secondAttribute="top" constant="8" id="VeM-6I-CO8"/>
-                                                <constraint firstAttribute="bottom" secondItem="MyD-7j-GMG" secondAttribute="bottom" constant="8" id="jk2-bJ-AJr"/>
+                                                <constraint firstItem="MyD-7j-GMG" firstAttribute="top" secondItem="P0d-ou-gEj" secondAttribute="top" id="5R0-Lc-nH4"/>
+                                                <constraint firstAttribute="bottom" secondItem="MyD-7j-GMG" secondAttribute="bottom" id="auN-JV-uZL"/>
+                                                <constraint firstAttribute="trailing" secondItem="MyD-7j-GMG" secondAttribute="trailing" id="gPx-dx-6Jn"/>
+                                                <constraint firstItem="MyD-7j-GMG" firstAttribute="leading" secondItem="P0d-ou-gEj" secondAttribute="leading" id="kvZ-vM-W95"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" none="YES" notEnabled="YES"/>
+                                        </accessibility>
+                                    </tableViewCell>
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ImageWidgetCell" rowHeight="44" id="qAL-2k-0Oq" customClass="ImageUITableViewCell">
+                                        <rect key="frame" x="0.0" y="517" width="320" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="qAL-2k-0Oq" id="TQB-dV-Dmo">
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" tag="901" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="qzD-sQ-IZc">
+                                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                </imageView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailing" secondItem="qzD-sQ-IZc" secondAttribute="trailing" id="95U-D4-jKd"/>
+                                                <constraint firstItem="qzD-sQ-IZc" firstAttribute="top" secondItem="TQB-dV-Dmo" secondAttribute="top" id="NDy-ro-9BN"/>
+                                                <constraint firstAttribute="bottom" secondItem="qzD-sQ-IZc" secondAttribute="bottom" id="XTG-LQ-KrV"/>
+                                                <constraint firstItem="qzD-sQ-IZc" firstAttribute="leading" secondItem="TQB-dV-Dmo" secondAttribute="leading" id="ot3-ch-SLw"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">

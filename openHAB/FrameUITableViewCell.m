@@ -26,6 +26,7 @@
 - (void)displayWidget
 {
     self.textLabel.text = [self.widget.label uppercaseString];
+    [self.contentView sizeToFit];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
