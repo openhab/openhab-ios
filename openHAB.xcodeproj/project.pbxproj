@@ -20,6 +20,7 @@
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */; };
 		DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */; };
 		DF06F2021900F8780011E7B9 /* ImageUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */; };
+		DF06F20519010E9A0011E7B9 /* VideoUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */; };
 		DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = DF2B6ADC18EF4D660063819F /* NSData+HexString.m */; };
 		DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.m */; };
@@ -92,6 +93,8 @@
 		DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChartUITableViewCell.m; sourceTree = "<group>"; };
 		DF06F2001900F8780011E7B9 /* ImageUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageUITableViewCell.h; sourceTree = "<group>"; };
 		DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageUITableViewCell.m; sourceTree = "<group>"; };
+		DF06F20319010E9A0011E7B9 /* VideoUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoUITableViewCell.h; sourceTree = "<group>"; };
+		DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoUITableViewCell.m; sourceTree = "<group>"; };
 		DF2B6ADB18EF4D660063819F /* NSData+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+HexString.h"; sourceTree = "<group>"; };
 		DF2B6ADC18EF4D660063819F /* NSData+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+HexString.m"; sourceTree = "<group>"; };
 		DF4B83FE18857FD900F34902 /* OpenHABSelectSitemapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSelectSitemapViewController.h; sourceTree = "<group>"; };
@@ -253,6 +256,8 @@
 				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */,
 				DF06F2001900F8780011E7B9 /* ImageUITableViewCell.h */,
 				DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */,
+				DF06F20319010E9A0011E7B9 /* VideoUITableViewCell.h */,
+				DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -535,6 +540,7 @@
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.m in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.m in Sources */,
+				DF06F20519010E9A0011E7B9 /* VideoUITableViewCell.m in Sources */,
 				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
 				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */,
 				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */,

@@ -160,7 +160,7 @@
             return 0;
     } else if ([widget.type isEqualToString:@"Chart"]) {
         return 170;
-    } else if ([widget.type isEqualToString:@"Image"]) {
+    } else if ([widget.type isEqualToString:@"Image"]||[widget.type isEqualToString:@"Video"]) {
         return self.widgetTableView.frame.size.width/1.33333333;
     }
     return 44;
@@ -192,10 +192,12 @@
         cellIdentifier = @"ChartWidgetCell";
     } else if ([widget.type isEqualToString:@"Image"]) {
         cellIdentifier = @"ImageWidgetCell";
+    } else if ([widget.type isEqualToString:@"Video"]) {
+        cellIdentifier = @"VideoWidgetCell";
     }
 
     GenericUITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
-    if (widget.icon != nil && !([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"])) {
+    if (widget.icon != nil && !([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"] || [cellIdentifier isEqualToString:@"VideoWidgetCell"])) {
         NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, widget.icon];
         [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
     }
