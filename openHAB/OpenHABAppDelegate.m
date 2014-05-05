@@ -85,16 +85,20 @@
 - (void)loadSettingsDefaults
 {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    if (![prefs boolForKey:@"initialized"]) {
-        NSLog(@"Loading default settings");
+    if (![prefs objectForKey:@"localUrl"])
         [prefs setValue:@"" forKey:@"localUrl"];
+    if (![prefs objectForKey:@"remoteUrl"])
         [prefs setValue:@"" forKey:@"remoteUrl"];
+    if (![prefs objectForKey:@"username"])
         [prefs setValue:@"" forKey:@"username"];
+    if (![prefs objectForKey:@"password"])
         [prefs setValue:@"" forKey:@"password"];
+    if (![prefs objectForKey:@"ignoreSSL"])
         [prefs setBool:NO forKey:@"ignoreSSL"];
+    if (![prefs objectForKey:@"demomode"])
         [prefs setBool:YES forKey:@"demomode"];
-        [prefs setBool:YES forKey:@"initialized"];
-    }
+    if (![prefs objectForKey:@"idleOff"])
+        [prefs setBool:NO forKey:@"idleOff"];
 }
 
 @end

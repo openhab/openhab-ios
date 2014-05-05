@@ -343,7 +343,6 @@
 		DFDEE3FE1883228C008B26AC /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				DFDEE401188322BC008B26AC /* NSObject+Data.m */,
 				DFDEE403188322FA008B26AC /* OpenHABItem.h */,
 				DFDEE404188322FA008B26AC /* OpenHABItem.m */,
 				DFDEE405188322FA008B26AC /* OpenHABLinkedPage.h */,
@@ -365,6 +364,7 @@
 		DFDEE3FF18832293008B26AC /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				DFDEE401188322BC008B26AC /* NSObject+Data.m */,
 				DF2B6ADB18EF4D660063819F /* NSData+HexString.h */,
 				DF2B6ADC18EF4D660063819F /* NSData+HexString.m */,
 				DFDEE400188322BC008B26AC /* NSObject+Data.h */,
@@ -704,8 +704,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -714,7 +714,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "82E22A89-EA14-4A5E-9CD2-017C18B8624C";
+				PROVISIONING_PROFILE = "80AC802D-E494-423A-9CF6-A1151782F325";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -735,7 +735,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "82E22A89-EA14-4A5E-9CD2-017C18B8624C";
+				PROVISIONING_PROFILE = "73D4C5AB-9855-4885-8B36-C7608DD2EFD2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

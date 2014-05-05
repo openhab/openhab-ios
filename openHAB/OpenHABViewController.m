@@ -34,9 +34,10 @@
 @implementation OpenHABViewController {
     long selectedWidgetRow;
     AFHTTPRequestOperation *currentPageOperation;
+    AFHTTPRequestOperation *commandOperation;
 }
 
-@synthesize pageUrl, widgetTableView, openHABRootUrl, openHABUsername, openHABPassword, ignoreSSLCertificate, sitemaps, currentPage, selectionPicker, pageNetworkStatus, pageNetworkStatusAvailable;
+@synthesize pageUrl, widgetTableView, openHABRootUrl, openHABUsername, openHABPassword, ignoreSSLCertificate, sitemaps, currentPage, pageNetworkStatus, pageNetworkStatusAvailable, idleOff, deviceId, deviceToken, deviceName;
 
 
 // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
@@ -58,22 +59,62 @@
                                                object: nil];
 }
 
-- (void)handleApsRegistration:(NSNotification *)note {
+- (void)handleApsRegistration:(NSNotification *)note
+{
     NSLog(@"handleApsRegistration");
     NSDictionary *theData = [note userInfo];
     if (theData != nil) {
-//        NSNumber *n = [theData objectForKey:@"isReachable"];
+        self.deviceId = [theData objectForKey:@"deviceId"];
+        self.deviceToken = [theData objectForKey:@"deviceToken"];
+        self.deviceName = [theData objectForKey:@"deviceName"];
+        [self doRegisterAps];
     }
 }
 
-- (void) viewDidAppear:(BOOL)animated {
+- (void) doRegisterAps
+{
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    if ([[prefs valueForKey:@"remoteUrl"] isEqualToString:@"https://my.openhab.org"]) {
+        if (deviceId != nil && deviceToken != nil && deviceName != nil) {
+            NSLog(@"Registering with my.openHAB");
+            NSString *registrationUrlString = [NSString stringWithFormat:@"https://my.openhab.org/addAppleRegistration?regId=%@&deviceId=%@&deviceModel=%@", deviceToken, deviceId, deviceName];
+            NSURL *registrationUrl = [[NSURL alloc] initWithString:[registrationUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+            NSLog(@"Registration URL = %@", [registrationUrl absoluteString]);
+            NSMutableURLRequest *registrationRequest = [NSMutableURLRequest requestWithURL:registrationUrl];
+            [registrationRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
+            AFHTTPRequestOperation *registrationOperation = [[AFHTTPRequestOperation alloc] initWithRequest:registrationRequest];
+            [registrationOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+                NSLog(@"my.openHAB registration sent");
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error){
+                NSLog(@"my.openHAB registration failed");
+                NSLog(@"Error:------>%@", [error localizedDescription]);
+                NSLog(@"error code %ld",(long)[operation.response statusCode]);
+            }];
+            [registrationOperation start];
+        }
+    }
+}
+
+- (void) viewDidAppear:(BOOL)animated
+{
     NSLog(@"OpenHABViewController viewDidAppear");
     [super viewDidAppear:animated];
+    // Load settings into local properties
     [self loadSettings];
+    // Set authentication parameters to SDImage
     [self setSDImageAuth];
+    // Set default controller for TSMessage to self
     [TSMessage setDefaultViewController:self.navigationController];
+    // Disable idle timeout if configured in settings
+    if (self.idleOff) {
+        [UIApplication sharedApplication].idleTimerDisabled = YES;
+    }
+    [self doRegisterAps];
+    // if pageUrl = nil it means we are the first opened OpenHABViewController
     if (pageUrl == nil) {
+        // Set self as root view controller
         [[self appData] setRootViewController:self];
+        // Add self as observer for APS registration
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleApsRegistration:)
                                                      name:@"apsRegistered"
@@ -114,11 +155,16 @@
         [currentPageOperation cancel];
         currentPageOperation = nil;
     }
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
 }
 
 - (void) didBecomeActive: (NSNotification *)notification
 {
     NSLog(@"OpenHABViewController didBecomeActive");
+    // re disable idle off timer
+    if (self.idleOff) {
+        [UIApplication sharedApplication].idleTimerDisabled = YES;
+    }
     if (self.isViewLoaded && self.view.window && self.pageUrl != nil) {
         if (![self pageNetworkStatusChanged]) {
             NSLog(@"OpenHABViewController isViewLoaded, restarting network activity");
@@ -292,13 +338,18 @@
     [commandRequest setHTTPBody:[command dataUsingEncoding:NSUTF8StringEncoding]];
     [commandRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
     [commandRequest setValue:@"text/plain" forHTTPHeaderField:@"Content-type"];
-    AFHTTPRequestOperation *commandOperation = [[AFHTTPRequestOperation alloc] initWithRequest:commandRequest];
+    if (commandOperation != nil) {
+        [commandOperation cancel];
+        commandOperation = nil;
+    }
+    commandOperation = [[AFHTTPRequestOperation alloc] initWithRequest:commandRequest];
     [commandOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Command sent!");
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         NSLog(@"Error:------>%@", [error localizedDescription]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
     }];
+    NSLog(@"Timeout %f", commandRequest.timeoutInterval);
     NSLog(@"OpenHABViewController posting %@ command to %@", command, item.link);
     [commandOperation start];
 }
@@ -450,6 +501,7 @@
     self.openHABPassword = [prefs valueForKey:@"password"];
     self.ignoreSSLCertificate = [prefs boolForKey:@"ignoreSSL"];
     self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
+    self.idleOff = [prefs boolForKey:@"idleOff"];
     [[self appData] setOpenHABUsername:self.openHABUsername];
     [[self appData] setOpenHABPassword:self.openHABPassword];
 }
@@ -479,6 +531,7 @@
 
 - (BOOL)pageNetworkStatusChanged
 {
+    NSLog(@"OpenHABViewController pageNetworkStatusChange");
     if (self.pageUrl != nil) {
         Reachability *pageReachability = [Reachability reachabilityWithUrlString:self.pageUrl];
         if (!pageNetworkStatusAvailable) {

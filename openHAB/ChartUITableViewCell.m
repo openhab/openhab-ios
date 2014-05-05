@@ -22,7 +22,7 @@
     if ([self.widget.item.type isEqualToString:@"GroupItem"]) {
         chartUrl = [NSString stringWithFormat:@"%@/chart?groups=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
     } else {
-        chartUrl = [NSString stringWithFormat:@"%@/chart?item=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
+        chartUrl = [NSString stringWithFormat:@"%@/chart?items=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
     }
     NSLog(@"Chart url %@", chartUrl);
     [chartImage setImageWithURL:[NSURL URLWithString:chartUrl]];

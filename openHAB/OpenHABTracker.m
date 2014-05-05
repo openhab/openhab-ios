@@ -62,7 +62,7 @@
     } else {
         if (self.delegate && [self.delegate respondsToSelector:@selector(openHABTrackingError:)]) {
             NSMutableDictionary *errorDetail = [NSMutableDictionary dictionary];
-            [errorDetail setValue:@"Network is not available" forKey:NSLocalizedDescriptionKey];
+            [errorDetail setValue:@"Network is not available." forKey:NSLocalizedDescriptionKey];
             NSError *trackingError = [NSError errorWithDomain:@"openHAB" code:100 userInfo:errorDetail];
             [self.delegate openHABTrackingError:trackingError];
             self.reach = [Reachability reachabilityForInternetConnection];
@@ -87,22 +87,34 @@
 
 - (void)trackedRemoteUrl
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(openHABTrackingProgress:)]) {
-        [self.delegate openHABTrackingProgress:@"Connecting to remote URL"];
-    }
     NSString *openHABUrl = [self normalizeUrl:openHABRemoteUrl];
-    [self trackedUrl:openHABUrl];
+    if ([openHABUrl length] > 0) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(openHABTrackingProgress:)]) {
+            [self.delegate openHABTrackingProgress:@"Connecting to remote URL"];
+        }
+        [self trackedUrl:openHABUrl];
+    } else {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(openHABTrackingError:)]) {
+            NSMutableDictionary *errorDetail = [NSMutableDictionary dictionary];
+            [errorDetail setValue:@"Remote URL is not configured." forKey:NSLocalizedDescriptionKey];
+            NSError *trackingError = [NSError errorWithDomain:@"openHAB" code:101 userInfo:errorDetail];
+            [self.delegate openHABTrackingError:trackingError];
+        }
+    }
 }
 
 - (void)trackedDiscoveryUrl:(NSString *)discoveryUrl
 {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(openHABTrackingProgress:)]) {
+        [self.delegate openHABTrackingProgress:@"Connecting to discovered URL"];
+    }
     [self trackedUrl:discoveryUrl];
 }
 
 - (void)trackedDemoMode
 {
     if (self.delegate && [self.delegate respondsToSelector:@selector(openHABTrackingProgress:)]) {
-        [self.delegate openHABTrackingProgress:@"Running in demo mode"];
+        [self.delegate openHABTrackingProgress:@"Running in demo mode. Check settings to disable demo mode."];
     }
     [self trackedUrl:@"http://demo.openhab.org:8080"];
 }
@@ -111,14 +123,6 @@
 {
     if (self.delegate)
         [self.delegate openHABTracked:trackedUrl];
-//    self.reach = [Reachability reachabilityForInternetConnection];
-//    oldReachabilityStatus = [reach currentReachabilityStatus];
-//    [[NSNotificationCenter defaultCenter] addObserver: self
-//                                             selector: @selector(reachabilityChanged:)
-//                                                 name: kReachabilityChangedNotification
-//                                               object: nil];
-//    [self.reach startNotifier];
-    
 }
 
 - (void) reachabilityChanged: (NSNotification *)notification {

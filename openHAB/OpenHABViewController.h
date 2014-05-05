@@ -17,7 +17,6 @@
 @interface OpenHABViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate>
 {
     OpenHABTracker *tracker;
-    UIPickerView *selectionPicker;
 }
 
 
@@ -28,12 +27,16 @@
 @property (nonatomic, strong) NSString *openHABPassword;
 @property (nonatomic, strong) NSString *defaultSitemap;
 @property (nonatomic) BOOL ignoreSSLCertificate;
+@property (nonatomic) BOOL idleOff;
 @property (nonatomic, retain) NSMutableArray *sitemaps;
 @property (nonatomic, retain) OpenHABSitemapPage *currentPage;
 @property (nonatomic, retain) UIPickerView *selectionPicker;
 @property (nonatomic) NetworkStatus pageNetworkStatus;
 @property (nonatomic) BOOL pageNetworkStatusAvailable;
 @property NSInteger toggle;
+@property (nonatomic, strong) NSString *deviceToken;
+@property (nonatomic, strong) NSString *deviceId;
+@property (nonatomic, strong) NSString *deviceName;
 
 - (void)openHABTracked:(NSString *)openHABUrl;
 - (void)sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command;

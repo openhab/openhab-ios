@@ -15,7 +15,7 @@
 @end
 
 @implementation OpenHABSettingsViewController
-@synthesize localUrlTextField, remoteUrlTextField, usernameTextField, passwordTextField, ignoreSSLSwitch, demomodeSwitch, settingsLocalUrl, settingsRemoteUrl, settingsUsername, settingsPassword, settingsIgnoreSSL, settingsDemomode;
+@synthesize localUrlTextField, remoteUrlTextField, usernameTextField, passwordTextField, ignoreSSLSwitch, demomodeSwitch, idleOffSwitch, settingsLocalUrl, settingsRemoteUrl, settingsUsername, settingsPassword, settingsIgnoreSSL, settingsDemomode, settingsIdleOff;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -71,6 +71,12 @@
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    NSLog(@"OpenHABSettingsViewController prepareForSegue");
+    if ([segue.identifier isEqualToString:@"showSelectSitemap"]) {
+        NSLog(@"OpenHABSettingsViewController showSelectSitemap");
+        [self updateSettings];
+        [self saveSettings];
+    }
 }
 
 - (void)updateSettingsUi
@@ -81,6 +87,7 @@
     passwordTextField.text = settingsPassword;
     [ignoreSSLSwitch setOn:settingsIgnoreSSL];
     [demomodeSwitch setOn:settingsDemomode];
+    [idleOffSwitch setOn:settingsIdleOff];
 }
 
 - (void)loadSettings
@@ -92,6 +99,7 @@
     settingsPassword = [prefs stringForKey:@"password"];
     settingsIgnoreSSL = [prefs boolForKey:@"ignoreSSL"];
     settingsDemomode = [prefs boolForKey:@"demomode"];
+    settingsIdleOff = [prefs boolForKey:@"ildeOff"];
 }
 
 - (void)updateSettings
@@ -102,6 +110,7 @@
     settingsPassword = passwordTextField.text;
     settingsIgnoreSSL = ignoreSSLSwitch.isOn;
     settingsDemomode = demomodeSwitch.isOn;
+    settingsIdleOff = idleOffSwitch.isOn;
 }
 
 - (void)saveSettings
@@ -113,6 +122,7 @@
     [prefs setValue:settingsPassword forKey:@"password"];
     [prefs setBool:settingsIgnoreSSL forKey:@"ignoreSSL"];
     [prefs setBool:settingsDemomode forKey:@"demomode"];
+    [prefs setBool:settingsIdleOff forKey:@"idleOff"];
 }
 
 - (OpenHABDataObject*)appData
