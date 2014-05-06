@@ -13,6 +13,7 @@
 #import <netdb.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
 #import "Reachability+URL.h"
+#import <FastSocket.h>
 
 @implementation OpenHABTracker
 @synthesize openHABDemoMode, openHABLocalUrl, openHABRemoteUrl, delegate, netService, reach;
@@ -45,11 +46,16 @@
                 NSLog(@"OpenHABTracker network is Wifi");
                 // Check if local URL is configured, if yes
                 if ([openHABLocalUrl length] > 0) {
-                    Reachability *urlReach = [Reachability reachabilityWithUrlString:openHABLocalUrl];
+/*                    Reachability *urlReach = [Reachability reachabilityWithUrlString:openHABLocalUrl];
                     // If local URL is reachable, go with it
                     if ([urlReach currentlyReachable]) {
                         [self trackedLocalUrl];
                     // If not, go with remote URL
+                    } else {
+                        [self trackedRemoteUrl];
+                    }*/
+                    if ([self isURLReachable:[NSURL URLWithString:openHABLocalUrl]]) {
+                        [self trackedLocalUrl];
                     } else {
                         [self trackedRemoteUrl];
                     }
@@ -203,7 +209,7 @@
 {
     Reachability *networkReach = [Reachability reachabilityForInternetConnection];
     NetworkStatus networkReachabilityStatus = [networkReach currentReachabilityStatus];
-    NSLog(@"Network status = %d", networkReachabilityStatus);
+    NSLog(@"Network status = %ld", networkReachabilityStatus);
     if (networkReachabilityStatus == ReachableViaWiFi || networkReachabilityStatus == ReachableViaWWAN) {
         return YES;
     }
@@ -238,6 +244,17 @@
     ipPort = [NSString stringWithFormat: @"%hu",
               ntohs(socketAddress->sin_port)];  ///problem here
     return ipPort;
+}
+
+- (BOOL)isURLReachable:(NSURL*) url
+{
+    FastSocket *client = [[FastSocket alloc] initWithHost:[url host] andPort:[[url port] stringValue]];
+    NSLog(@"Checking if %@:%@ is reachable", [url host], [[url port] stringValue]);
+    if ([client connect:1]) {
+        [client close];
+        return YES;
+    }
+    return NO;
 }
 
 - (NSString *)stringFromStatus:(NetworkStatus) status {
