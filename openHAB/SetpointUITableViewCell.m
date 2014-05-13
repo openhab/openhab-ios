@@ -13,12 +13,22 @@
 @implementation SetpointUITableViewCell
 {
 }
-@synthesize widgetSegmentedControl;
+@synthesize widgetSegmentedControl, textLabel;
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    if (self) {
+        self.widgetSegmentedControl = (UISegmentedControl *)[self viewWithTag:300];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        self.separatorInset = UIEdgeInsetsZero;
+    }
+    return self;
+}
 
 - (void)displayWidget
 {
     self.textLabel.text = [self.widget labelText];
-    self.widgetSegmentedControl = (UISegmentedControl *)[self viewWithTag:300];
     NSString *widgetValue;
     if ([self.widget.item.state isEqual:@"Uninitialized"]) {
         widgetValue = @"N/A";

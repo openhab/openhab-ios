@@ -18,5 +18,8 @@
 - (void)displayWidget;
 
 @property (nonatomic, retain) OpenHABWidget *widget;
+@property (nonatomic, retain) UILabel *textLabel;
+@property (nonatomic, retain) UILabel *detailTextLabel;
+@property (nonatomic, retain) NSArray *disclosureConstraints;
 
 @end

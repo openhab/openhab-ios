@@ -13,9 +13,19 @@
 @implementation SliderUITableViewCell
 @synthesize widgetSlider;
 
+- (id)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    if (self) {
+        self.widgetSlider = (UISlider *)[self viewWithTag:400];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        self.separatorInset = UIEdgeInsetsZero;
+    }
+    return self;
+}
+
 - (void)displayWidget
 {
-    self.widgetSlider = (UISlider *)[self viewWithTag:400];
     self.textLabel.text = [self.widget labelText];
     float widgetValue = [widget.item stateAsFloat];
     [self.widgetSlider setValue:widgetValue/100];

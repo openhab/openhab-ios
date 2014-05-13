@@ -11,14 +11,13 @@
 #import "OpenHABItem.h"
 
 @implementation SwitchUITableViewCell
-@synthesize widgetSwitch, textLabel;
+@synthesize widgetSwitch;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
     if (self) {
         self.widgetSwitch = (UISwitch *)[self viewWithTag:200];
-        self.textLabel = (UILabel *)[self viewWithTag:201];
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         self.separatorInset = UIEdgeInsetsZero;
     }

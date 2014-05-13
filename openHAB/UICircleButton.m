@@ -15,7 +15,7 @@ UIColor *normalTextColor;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    NSLog(@"UICircleButton initWithCoder");
+//    NSLog(@"UICircleButton initWithCoder");
     self = [super initWithCoder:coder];
     if (self) {
         self.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Light" size:20];

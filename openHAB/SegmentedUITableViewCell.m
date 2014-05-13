@@ -14,10 +14,20 @@
 @implementation SegmentedUITableViewCell
 @synthesize widgetSegmentedControl;
 
+- (id)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    if (self) {
+        self.widgetSegmentedControl = (UISegmentedControl *)[self viewWithTag:500];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        self.separatorInset = UIEdgeInsetsZero;
+    }
+    return self;
+}
+
 - (void)displayWidget
 {
     self.textLabel.text = [self.widget labelText];
-    self.widgetSegmentedControl = (UISegmentedControl *)[self viewWithTag:500];
     widgetSegmentedControl.apportionsSegmentWidthsByContent = YES;
     [self.widgetSegmentedControl removeAllSegments];
     [self.widgetSegmentedControl setApportionsSegmentWidthsByContent:YES];

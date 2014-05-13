@@ -14,5 +14,7 @@
 }
 
 @property (nonatomic, retain) UISegmentedControl *widgetSegmentedControl;
+@property (nonatomic, retain) UILabel *textLabel;
+
 
 @end

@@ -13,6 +13,5 @@
     UISwitch *widgetSwitch;
 }
 @property (nonatomic, retain) UISwitch *widgetSwitch;
-@property (nonatomic, retain) UILabel *textLabel;
 
 @end
