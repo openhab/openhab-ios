@@ -8,8 +8,15 @@
 
 #import "GenericUITableViewCell.h"
 
+@class ImageUITableViewCell;
+
+@protocol ImageUITableViewCellDelegate <NSObject>
+- (void)didLoadImage;
+@end
+
 @interface ImageUITableViewCell : GenericUITableViewCell
 
 @property (nonatomic, retain) UIImageView *widgetImage;
+@property (nonatomic, retain) id <ImageUITableViewCellDelegate> delegate;
 
 @end

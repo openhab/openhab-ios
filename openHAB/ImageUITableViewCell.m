@@ -11,7 +11,7 @@
 #import <SDWebImage/SDWebImageDownloader.h>
 
 @implementation ImageUITableViewCell
-@synthesize widgetImage;
+@synthesize widgetImage, delegate;
 
 - (void)loadWidget:(OpenHABWidget *)widgetToLoad
 {
@@ -23,7 +23,13 @@
     widgetImage = (UIImageView*)[self viewWithTag:901];
     [widgetImage setImageWithURL:[NSURL URLWithString:self.widget.url] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
         NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
-        [widgetImage setFrame:self.contentView.frame];
+        if (widget.image == nil) {
+            widget.image = self.widgetImage.image;
+            [widgetImage setFrame:self.contentView.frame];
+            if (self.delegate != nil) {
+                [self.delegate didLoadImage];
+            }
+        }
     }];
 }
 

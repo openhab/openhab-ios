@@ -59,6 +59,7 @@
 @property (nonatomic, retain) OpenHABLinkedPage *linkedPage;
 @property (nonatomic, retain) NSString *text;
 @property (nonatomic, retain) NSMutableArray *mappings;
+@property (nonatomic, retain) UIImage *image;
 
 - (OpenHABWidget *) initWithXML:(GDataXMLElement *)xmlElement;
 - (NSString *) labelText;

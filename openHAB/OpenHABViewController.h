@@ -12,9 +12,10 @@
 #import "OpenHABSelectionTableViewController.h"
 #import "ColorPickerUITableViewCell.h"
 #import "ColorPickerViewController.h"
+#import "ImageUITableViewCell.h"
 
 @class OpenHABSitemapPage;
-@interface OpenHABViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate>
+@interface OpenHABViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate>
 {
     OpenHABTracker *tracker;
 }

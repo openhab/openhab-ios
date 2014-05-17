@@ -7,10 +7,10 @@
 //
 
 #import "GenericUITableViewCell.h"
+#import "ImageUITableViewCell.h"
 
-@interface ChartUITableViewCell : GenericUITableViewCell
+@interface ChartUITableViewCell : ImageUITableViewCell
 
-@property (nonatomic, retain) UIImageView *chartImage;
 @property (nonatomic, retain) NSString *baseUrl;
 
 @end

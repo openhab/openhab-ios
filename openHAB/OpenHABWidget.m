@@ -13,7 +13,7 @@
 #import "OpenHABWidgetMapping.h"
 
 @implementation OpenHABWidget
-@synthesize widgetId, label, icon, type, url, period, minValue, maxValue, step, refresh, height, isLeaf, iconColor, labelColor, valueColor, item, linkedPage, text, mappings, delegate;
+@synthesize widgetId, label, icon, type, url, period, minValue, maxValue, step, refresh, height, isLeaf, iconColor, labelColor, valueColor, item, linkedPage, text, mappings, delegate, image;
 
 - (OpenHABWidget *) initWithXML:(GDataXMLElement *)xmlElement
 {

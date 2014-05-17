@@ -12,11 +12,10 @@
 #import "OpenHABItem.h"
 
 @implementation ChartUITableViewCell
-@synthesize chartImage;
 
 - (void)displayWidget
 {
-    chartImage = (UIImageView*)[self viewWithTag:801];
+    self.widgetImage = (UIImageView*)[self viewWithTag:801];
     NSString *chartUrl;
     int random = arc4random() % 1000;
     if ([self.widget.item.type isEqualToString:@"GroupItem"]) {
@@ -25,7 +24,16 @@
         chartUrl = [NSString stringWithFormat:@"%@/chart?items=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
     }
     NSLog(@"Chart url %@", chartUrl);
-    [chartImage setImageWithURL:[NSURL URLWithString:chartUrl]];
+    [self.widgetImage setImageWithURL:[NSURL URLWithString:chartUrl] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+        NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
+        if (widget.image == nil) {
+            widget.image = self.widgetImage.image;
+            [self.widgetImage setFrame:self.contentView.frame];
+            if (self.delegate != nil) {
+                [self.delegate didLoadImage];
+            }
+        }
+    }];
 }
 
 

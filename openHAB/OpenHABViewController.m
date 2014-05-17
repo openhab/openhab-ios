@@ -204,10 +204,15 @@
             return 35;
         else
             return 0;
-    } else if ([widget.type isEqualToString:@"Chart"]) {
-        return 170;
-    } else if ([widget.type isEqualToString:@"Image"]||[widget.type isEqualToString:@"Video"]) {
+    } else if ([widget.type isEqualToString:@"Video"]) {
         return self.widgetTableView.frame.size.width/1.33333333;
+    } else if ([widget.type isEqualToString:@"Image"] || [widget.type isEqualToString:@"Chart"]) {
+        if (widget.image != nil) {
+            return widget.image.size.height/(widget.image.size.width/self.widgetTableView.frame.size.width);
+        } else {
+//            return self.widgetTableView.frame.size.width/1.33333333;
+            return 44;
+        }
     }
     return 44;
 }
@@ -254,6 +259,9 @@
         NSLog(@"Setting cell base url to %@", self.openHABRootUrl);
         ((ChartUITableViewCell*)cell).baseUrl = self.openHABRootUrl;
     }
+    if ([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"]) {
+        [(ImageUITableViewCell *)cell setDelegate:self];
+    }
     [cell loadWidget:widget];
     [cell displayWidget];
     // Check if this is not the last row in the widgets list
@@ -289,6 +297,11 @@
         [self.navigationController pushViewController:selectionViewController animated:YES];
     }
     [self.widgetTableView deselectRowAtIndexPath:[self.widgetTableView indexPathForSelectedRow] animated:NO];
+}
+
+- (void)didLoadImage
+{
+    [self.widgetTableView reloadData];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
