@@ -19,17 +19,17 @@
 - (void)displayWidget
 {
     NSLog(@"Video url = %@", widget.url);
-    videoPlayer = [[MPMoviePlayerController alloc] initWithContentURL:[NSURL URLWithString:widget.url]];
-    videoPlayer.view.frame = self.contentView.bounds;
-    [self.contentView addSubview:videoPlayer.view];
-    [videoPlayer prepareToPlay];
-    [videoPlayer play];
+//    videoPlayer = [[MPMoviePlayerController alloc] initWithContentURL:[NSURL URLWithString:widget.url]];
+//    videoPlayer.view.frame = self.contentView.bounds;
+//    [self.contentView addSubview:videoPlayer.view];
+//    [videoPlayer prepareToPlay];
+//    [videoPlayer play];
 }
 
 -(void)setFrame:(CGRect)frame
 {
     [super setFrame:frame];
-    [videoPlayer.view setFrame:frame];
+//    [videoPlayer.view setFrame:frame];
 }
 
 @end

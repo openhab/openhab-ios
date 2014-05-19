@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13C1021" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" useAutolayout="YES" initialViewController="g8u-NA-0RX">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" useAutolayout="YES" initialViewController="g8u-NA-0RX">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
     </dependencies>
@@ -404,6 +404,30 @@
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="XCb-Bs-Z86" id="f8d-ky-V3j">
                                             <rect key="frame" x="0.0" y="0.0" width="768" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" none="YES" notEnabled="YES"/>
+                                        </accessibility>
+                                    </tableViewCell>
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="WebWidgetCell" rowHeight="44" id="dyN-VF-02L" customClass="WebUITableViewCell">
+                                        <rect key="frame" x="0.0" y="605" width="768" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="dyN-VF-02L" id="2q1-Ui-JSq">
+                                            <rect key="frame" x="0.0" y="0.0" width="768" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <webView tag="1001" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BpI-fg-5y4">
+                                                    <rect key="frame" x="0.0" y="0.0" width="768" height="43"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                                </webView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="BpI-fg-5y4" firstAttribute="leading" secondItem="2q1-Ui-JSq" secondAttribute="leading" id="5LQ-kr-41C"/>
+                                                <constraint firstAttribute="bottom" secondItem="BpI-fg-5y4" secondAttribute="bottom" id="6rb-Uh-k67"/>
+                                                <constraint firstItem="BpI-fg-5y4" firstAttribute="top" secondItem="2q1-Ui-JSq" secondAttribute="top" id="se0-uo-llj"/>
+                                                <constraint firstAttribute="trailing" secondItem="BpI-fg-5y4" secondAttribute="trailing" id="uHD-C8-pfO"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
                                             <accessibilityTraits key="traits" none="YES" notEnabled="YES"/>

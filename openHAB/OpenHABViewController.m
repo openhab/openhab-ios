@@ -210,8 +210,16 @@
         if (widget.image != nil) {
             return widget.image.size.height/(widget.image.size.width/self.widgetTableView.frame.size.width);
         } else {
-//            return self.widgetTableView.frame.size.width/1.33333333;
             return 44;
+        }
+    } else if ([widget.type isEqualToString:@"Webview"]) {
+        if (widget.height != nil) {
+            // calculate webview height and return it
+            NSLog(@"Webview height would be %f", [widget.height floatValue]*44);
+            return [widget.height floatValue]*44;
+        } else {
+            // return default height for webview as 8 rows
+            return 44*8;
         }
     }
     return 44;
@@ -245,10 +253,13 @@
         cellIdentifier = @"ImageWidgetCell";
     } else if ([widget.type isEqualToString:@"Video"]) {
         cellIdentifier = @"VideoWidgetCell";
+    } else if ([widget.type isEqualToString:@"Webview"]) {
+        cellIdentifier = @"WebWidgetCell";
     }
 
     GenericUITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
-    if (widget.icon != nil && !([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"] || [cellIdentifier isEqualToString:@"VideoWidgetCell"] || [cellIdentifier isEqualToString:@"FrameWidgetCell"])) {
+    // No icon is needed for image, video, frame and web widgets
+    if (widget.icon != nil && !([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"] || [cellIdentifier isEqualToString:@"VideoWidgetCell"] || [cellIdentifier isEqualToString:@"FrameWidgetCell"] || [cellIdentifier isEqualToString:@"WebWidgetCell"])) {
         NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, widget.icon];
         [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
     }
@@ -267,7 +278,7 @@
     // Check if this is not the last row in the widgets list
     if (indexPath.row < [currentPage.widgets count] - 1) {
         OpenHABWidget *nextWidget = [currentPage.widgets objectAtIndex:indexPath.row + 1];
-        if ([nextWidget.type isEqual:@"Frame"]) {
+        if ([nextWidget.type isEqual:@"Frame"] || [nextWidget.type isEqual:@"Image"] || [nextWidget.type isEqual:@"Video"] || [nextWidget.type isEqual:@"Webview"] || [nextWidget.type isEqual:@"Chart"]) {
             cell.separatorInset = UIEdgeInsetsZero;
         } else if (![widget.type isEqualToString:@"Frame"]) {
             cell.separatorInset = UIEdgeInsetsMake(0, 60, 0, 0);

@@ -209,7 +209,7 @@
 {
     Reachability *networkReach = [Reachability reachabilityForInternetConnection];
     NetworkStatus networkReachabilityStatus = [networkReach currentReachabilityStatus];
-    NSLog(@"Network status = %ld", networkReachabilityStatus);
+    NSLog(@"Network status = %d", networkReachabilityStatus);
     if (networkReachabilityStatus == ReachableViaWiFi || networkReachabilityStatus == ReachableViaWWAN) {
         return YES;
     }
