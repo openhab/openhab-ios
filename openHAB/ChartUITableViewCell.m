@@ -24,8 +24,8 @@
         chartUrl = [NSString stringWithFormat:@"%@/chart?items=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
     }
     NSLog(@"Chart url %@", chartUrl);
-    [self.widgetImage setImageWithURL:[NSURL URLWithString:chartUrl] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
-        NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
+    [self.widgetImage setImageWithURL:[NSURL URLWithString:chartUrl] placeholderImage:nil options:SDWebImageCacheMemoryOnly completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+//        NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
         if (widget.image == nil) {
             widget.image = self.widgetImage.image;
             [self.widgetImage setFrame:self.contentView.frame];

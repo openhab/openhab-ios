@@ -16,13 +16,15 @@
 - (void)loadWidget:(OpenHABWidget *)widgetToLoad
 {
     self.widget = widgetToLoad;
+    // Remove image from SDImage cache
+    [[SDImageCache sharedImageCache] removeImageForKey:self.widget.url fromDisk:YES];
 }
 
 - (void)displayWidget
 {
     widgetImage = (UIImageView*)[self viewWithTag:901];
-    [widgetImage setImageWithURL:[NSURL URLWithString:self.widget.url] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
-        NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
+    [widgetImage setImageWithURL:[NSURL URLWithString:self.widget.url] placeholderImage:nil options:SDWebImageCacheMemoryOnly completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+//        NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
         if (widget.image == nil) {
             widget.image = self.widgetImage.image;
             [widgetImage setFrame:self.contentView.frame];
