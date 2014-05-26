@@ -60,6 +60,8 @@
 		DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */; };
 		DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4191883EB18008B26AC /* Reachability.m */; };
 		DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41C1883EB99008B26AC /* Reachability+URL.m */; };
+		DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.m */; };
+		DFDF45311932042B00A6E581 /* legal.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFDF45301932042B00A6E581 /* legal.rtf */; };
 		DFFD8FD118EDBD4F003B502A /* UICircleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = DFFD8FD018EDBD4F003B502A /* UICircleButton.m */; };
 /* End PBXBuildFile section */
 
@@ -163,6 +165,9 @@
 		DFDEE4191883EB18008B26AC /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		DFDEE41B1883EB99008B26AC /* Reachability+URL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Reachability+URL.h"; sourceTree = "<group>"; };
 		DFDEE41C1883EB99008B26AC /* Reachability+URL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Reachability+URL.m"; sourceTree = "<group>"; };
+		DFDF452D1932032B00A6E581 /* OpenHABLegalViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABLegalViewController.h; sourceTree = "<group>"; };
+		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABLegalViewController.m; sourceTree = "<group>"; };
+		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFFD8FCF18EDBD4F003B502A /* UICircleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICircleButton.h; sourceTree = "<group>"; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UICircleButton.m; sourceTree = "<group>"; };
 		E419E0383FCC45E7A3970B93 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
@@ -218,6 +223,8 @@
 				DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */,
 				DF06F1F418FE7A160011E7B9 /* OpenHABSelectionTableViewController.h */,
 				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */,
+				DFDF452D1932032B00A6E581 /* OpenHABLegalViewController.h */,
+				DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.m */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -323,6 +330,7 @@
 				DFB2623318830A3600D3244D /* InfoPlist.strings */,
 				DFB2623618830A3600D3244D /* main.m */,
 				DFB2623818830A3600D3244D /* openHAB-Prefix.pch */,
+				DFDF45301932042B00A6E581 /* legal.rtf */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -485,6 +493,7 @@
 				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
 				DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */,
 				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
+				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				DF4B840F1885B34300F34902 /* app-icon@2x.png in Resources */,
 				DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */,
@@ -571,6 +580,7 @@
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
 				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
 				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
+				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
 			);
@@ -710,7 +720,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -720,7 +730,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "0C149203-5AD7-4BC5-8D34-6892402A44CD";
+				PROVISIONING_PROFILE = "07D1361C-2D0B-4625-B088-8CE58301D611";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -731,7 +741,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -741,7 +751,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "8B2CEAC5-DD95-40D3-8C48-092727BF8F47";
+				PROVISIONING_PROFILE = "979ADFAD-6D21-4ED8-8AE8-C6840EF182D2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

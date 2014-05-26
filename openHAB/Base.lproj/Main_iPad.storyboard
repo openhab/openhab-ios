@@ -822,10 +822,10 @@
             </objects>
             <point key="canvasLocation" x="3486" y="2202"/>
         </scene>
-        <!--View Controller - Legal-->
+        <!--OpenHAB Legal View Controller - Legal-->
         <scene sceneID="9Sy-po-KdG">
             <objects>
-                <viewController id="pHv-Bo-sPH" sceneMemberID="viewController">
+                <viewController id="pHv-Bo-sPH" customClass="OpenHABLegalViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Gnq-O4-0Xy"/>
                         <viewControllerLayoutGuide type="bottom" id="E0F-UJ-giw"/>
@@ -838,7 +838,6 @@
                                 <rect key="frame" x="20" y="0.0" width="728" height="1024"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda. Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda. Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
@@ -852,6 +851,9 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Legal" id="km0-XG-QCM"/>
+                    <connections>
+                        <outlet property="legalTextView" destination="vGn-3T-IPU" id="KA7-WZ-OTE"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Q7P-z3-m4N" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
