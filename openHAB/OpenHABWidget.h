@@ -33,6 +33,7 @@
     NSString *iconColor;
     NSString *labelColor;
     NSString *valueColor;
+    NSString *service;
     OpenHABItem *item;
     OpenHABLinkedPage *linkedPage;
     NSString *text;
@@ -55,6 +56,7 @@
 @property (nonatomic, retain) NSString *iconColor;
 @property (nonatomic, retain) NSString *labelColor;
 @property (nonatomic, retain) NSString *valueColor;
+@property (nonatomic, retain) NSString *service;
 @property (nonatomic, retain) OpenHABItem *item;
 @property (nonatomic, retain) OpenHABLinkedPage *linkedPage;
 @property (nonatomic, retain) NSString *text;

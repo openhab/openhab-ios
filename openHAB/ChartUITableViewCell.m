@@ -23,6 +23,9 @@
     } else {
         chartUrl = [NSString stringWithFormat:@"%@/chart?items=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
     }
+    if (self.widget.service != nil && [self.widget.service length] > 0) {
+        chartUrl = [NSString stringWithFormat:@"%@&service=%@", chartUrl, self.widget.service];
+    }
     NSLog(@"Chart url %@", chartUrl);
     if (widget.image == nil) {
         [self.widgetImage setImageWithURL:[NSURL URLWithString:chartUrl] placeholderImage:nil options:SDWebImageCacheMemoryOnly completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
