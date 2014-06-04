@@ -50,6 +50,13 @@
 		DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
 		DFB2625918830A3600D3244D /* openHABTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2625818830A3600D3244D /* openHABTests.m */; };
 		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
+		DFDA3CED193F198700888039 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CEC193F198700888039 /* Default-568h@2x.png */; };
+		DFDA3CF4193F199900888039 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CEE193F199900888039 /* Default@2x.png */; };
+		DFDA3CF5193F199900888039 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CEF193F199900888039 /* Default.png */; };
+		DFDA3CF6193F199900888039 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CF0193F199900888039 /* Default-Portrait~ipad.png */; };
+		DFDA3CF7193F199900888039 /* Default-Portrait@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CF1193F199900888039 /* Default-Portrait@2x~ipad.png */; };
+		DFDA3CF8193F199900888039 /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CF2193F199900888039 /* Default-Landscape~ipad.png */; };
+		DFDA3CF9193F199900888039 /* Default-Landscape@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CF3193F199900888039 /* Default-Landscape@2x~ipad.png */; };
 		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.m */; };
 		DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE401188322BC008B26AC /* NSObject+Data.m */; };
 		DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.m */; };
@@ -146,6 +153,13 @@
 		DFB2625618830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DFB2625818830A3600D3244D /* openHABTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = openHABTests.m; sourceTree = "<group>"; };
 		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
+		DFDA3CEC193F198700888039 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		DFDA3CEE193F199900888039 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		DFDA3CEF193F199900888039 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		DFDA3CF0193F199900888039 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
+		DFDA3CF1193F199900888039 /* Default-Portrait@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait@2x~ipad.png"; sourceTree = "<group>"; };
+		DFDA3CF2193F199900888039 /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad.png"; sourceTree = "<group>"; };
+		DFDA3CF3193F199900888039 /* Default-Landscape@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape@2x~ipad.png"; sourceTree = "<group>"; };
 		DFDEE3FB18831099008B26AC /* OpenHABSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSettingsViewController.h; sourceTree = "<group>"; };
 		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSettingsViewController.m; sourceTree = "<group>"; };
 		DFDEE400188322BC008B26AC /* NSObject+Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Data.h"; sourceTree = "<group>"; };
@@ -316,6 +330,7 @@
 		DFB2623018830A3600D3244D /* openHAB */ = {
 			isa = PBXGroup;
 			children = (
+				DFDA3CEB193F197200888039 /* LaunchImage */,
 				DF4B84051885AD4600F34902 /* Images */,
 				DF4B83FD18857FA100F34902 /* UI */,
 				DFDEE3FF18832293008B26AC /* Util */,
@@ -359,6 +374,20 @@
 				DFB2625518830A3600D3244D /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DFDA3CEB193F197200888039 /* LaunchImage */ = {
+			isa = PBXGroup;
+			children = (
+				DFDA3CEE193F199900888039 /* Default@2x.png */,
+				DFDA3CEF193F199900888039 /* Default.png */,
+				DFDA3CF0193F199900888039 /* Default-Portrait~ipad.png */,
+				DFDA3CF1193F199900888039 /* Default-Portrait@2x~ipad.png */,
+				DFDA3CF2193F199900888039 /* Default-Landscape~ipad.png */,
+				DFDA3CF3193F199900888039 /* Default-Landscape@2x~ipad.png */,
+				DFDA3CEC193F198700888039 /* Default-568h@2x.png */,
+			);
+			name = LaunchImage;
 			sourceTree = "<group>";
 		};
 		DFDEE3FE1883228C008B26AC /* Models */ = {
@@ -496,14 +525,21 @@
 				DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */,
 				DFB2624118830A3600D3244D /* Main_iPad.storyboard in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
+				DFDA3CF5193F199900888039 /* Default.png in Resources */,
 				DFB2623E18830A3600D3244D /* Main_iPhone.storyboard in Resources */,
+				DFDA3CF6193F199900888039 /* Default-Portrait~ipad.png in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
+				DFDA3CED193F198700888039 /* Default-568h@2x.png in Resources */,
 				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
+				DFDA3CF8193F199900888039 /* Default-Landscape~ipad.png in Resources */,
 				DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */,
 				DFDA3CEA193CADB200888039 /* ping.wav in Resources */,
 				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
+				DFDA3CF7193F199900888039 /* Default-Portrait@2x~ipad.png in Resources */,
 				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
+				DFDA3CF9193F199900888039 /* Default-Landscape@2x~ipad.png in Resources */,
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
+				DFDA3CF4193F199900888039 /* Default@2x.png in Resources */,
 				DF4B840F1885B34300F34902 /* app-icon@2x.png in Resources */,
 				DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */,
 			);
@@ -729,7 +765,6 @@
 			baseConfigurationReference = E419E0383FCC45E7A3970B93 /* Pods.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -750,7 +785,6 @@
 			baseConfigurationReference = E419E0383FCC45E7A3970B93 /* Pods.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
