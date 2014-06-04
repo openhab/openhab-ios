@@ -9,6 +9,9 @@
 #import "OpenHABSettingsViewController.h"
 #import "OpenHABViewController.h"
 #import "OpenHABDataObject.h"
+#import <GAI.h>
+#import "GAIFields.h"
+#import "GAIDictionaryBuilder.h"
 
 @interface OpenHABSettingsViewController ()
 
@@ -42,6 +45,16 @@
     [usernameTextField setDelegate:self];
     [passwordTextField setDelegate:self];
 }
+
+- (void) viewWillAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    id tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker set:kGAIScreenName
+           value:@"OpenHABSettingsViewController"];
+    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
+}
+
 
 // This is to automatically hide keyboard on done/enter pressing
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {

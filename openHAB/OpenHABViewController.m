@@ -26,6 +26,9 @@
 #import "TSMessage.h"
 #import "Reachability+URL.h"
 #import "ChartUITableViewCell.h"
+#import <GAI.h>
+#import "GAIFields.h"
+#import "GAIDictionaryBuilder.h"
 
 @interface OpenHABViewController ()
 
@@ -139,7 +142,17 @@
     }
 }
 
-- (void) viewWillDisappear:(BOOL)animated {
+- (void) viewWillAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    id tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker set:kGAIScreenName
+           value:@"OpenHABViewController"];
+    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
+}
+
+- (void) viewWillDisappear:(BOOL)animated
+{
     NSLog(@"OpenHABViewController viewWillDisappear");
     if (currentPageOperation != nil) {
         [currentPageOperation cancel];

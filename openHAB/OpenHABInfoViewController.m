@@ -7,6 +7,9 @@
 //
 
 #import "OpenHABInfoViewController.h"
+#import <GAI.h>
+#import "GAIFields.h"
+#import "GAIDictionaryBuilder.h"
 
 @interface OpenHABInfoViewController ()
 
@@ -25,6 +28,15 @@
     openHABVersionLabel.text = @"-";
     openHABUUIDLabel.text = @"-";
     openHABSecretLabel.text = @"-";
+}
+
+- (void) viewWillAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    id tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker set:kGAIScreenName
+           value:@"OpenHABInfoViewController"];
+    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)didReceiveMemoryWarning

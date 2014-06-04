@@ -7,6 +7,9 @@
 //
 
 #import "OpenHABLegalViewController.h"
+#import <GAI.h>
+#import "GAIFields.h"
+#import "GAIDictionaryBuilder.h"
 
 @interface OpenHABLegalViewController ()
 
@@ -22,6 +25,15 @@
     NSURL *legalPath = [[NSBundle mainBundle] URLForResource: @"legal" withExtension:@"rtf"];
     NSAttributedString *legalAttributedString = [[NSAttributedString alloc]   initWithFileURL:legalPath options:@{NSDocumentTypeDocumentAttribute:NSRTFTextDocumentType} documentAttributes:nil error:nil];
     legalTextView.attributedText = legalAttributedString;
+}
+
+- (void) viewWillAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    id tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker set:kGAIScreenName
+           value:@"OpenHABLegalViewController"];
+    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)didReceiveMemoryWarning

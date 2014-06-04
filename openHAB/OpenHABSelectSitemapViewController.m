@@ -16,6 +16,9 @@
 #import "AFNetworking.h"
 #import "NSMutableURLRequest+Auth.h"
 #import "GDataXMLNode.h"
+#import <GAI.h>
+#import "GAIFields.h"
+#import "GAIDictionaryBuilder.h"
 
 @interface OpenHABSelectSitemapViewController ()
 
@@ -52,6 +55,15 @@
     self.openHABUsername = [prefs valueForKey:@"username"];
     self.openHABPassword = [prefs valueForKey:@"password"];
     self.ignoreSSLCertificate = [prefs boolForKey:@"ignoreSSL"];
+}
+
+- (void) viewWillAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    id tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker set:kGAIScreenName
+           value:@"OpenHABSelectSitemapViewController"];
+    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)viewDidAppear:(BOOL)animated
