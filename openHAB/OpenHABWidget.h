@@ -31,8 +31,8 @@
     NSString *height;
     NSString *isLeaf;
     NSString *iconColor;
-    NSString *labelColor;
-    NSString *valueColor;
+    NSString *labelcolor;
+    NSString *valuecolor;
     NSString *service;
     OpenHABItem *item;
     OpenHABLinkedPage *linkedPage;
@@ -54,8 +54,8 @@
 @property (nonatomic, retain) NSString *height;
 @property (nonatomic, retain) NSString *isLeaf;
 @property (nonatomic, retain) NSString *iconColor;
-@property (nonatomic, retain) NSString *labelColor;
-@property (nonatomic, retain) NSString *valueColor;
+@property (nonatomic, retain) NSString *labelcolor;
+@property (nonatomic, retain) NSString *valuecolor;
 @property (nonatomic, retain) NSString *service;
 @property (nonatomic, retain) OpenHABItem *item;
 @property (nonatomic, retain) OpenHABLinkedPage *linkedPage;

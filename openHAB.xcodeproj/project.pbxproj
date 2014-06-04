@@ -49,6 +49,7 @@
 		DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
 		DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
 		DFB2625918830A3600D3244D /* openHABTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2625818830A3600D3244D /* openHABTests.m */; };
+		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
 		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.m */; };
 		DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE401188322BC008B26AC /* NSObject+Data.m */; };
 		DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.m */; };
@@ -144,6 +145,7 @@
 		DFB2625418830A3600D3244D /* openHABTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHABTests-Info.plist"; sourceTree = "<group>"; };
 		DFB2625618830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DFB2625818830A3600D3244D /* openHABTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = openHABTests.m; sourceTree = "<group>"; };
+		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
 		DFDEE3FB18831099008B26AC /* OpenHABSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSettingsViewController.h; sourceTree = "<group>"; };
 		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSettingsViewController.m; sourceTree = "<group>"; };
 		DFDEE400188322BC008B26AC /* NSObject+Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Data.h"; sourceTree = "<group>"; };
@@ -331,6 +333,7 @@
 		DFB2623118830A3600D3244D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				DFDA3CE9193CADB200888039 /* ping.wav */,
 				DFB2623218830A3600D3244D /* openHAB-Info.plist */,
 				DFB2623318830A3600D3244D /* InfoPlist.strings */,
 				DFB2623618830A3600D3244D /* main.m */,
@@ -497,6 +500,7 @@
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
 				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
 				DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */,
+				DFDA3CEA193CADB200888039 /* ping.wav in Resources */,
 				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
 				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,

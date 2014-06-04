@@ -72,6 +72,24 @@
             [self addConstraints:disclosureConstraints];
         }
     }
+    if (self.widget.valuecolor != nil) {
+        [self.detailTextLabel setTextColor:[self colorFromHexString:self.widget.valuecolor]];
+    } else {
+        self.detailTextLabel.textColor = [UIColor lightGrayColor];
+    }
+    if (self.widget.labelcolor != nil) {
+        [self.textLabel setTextColor:[self colorFromHexString:self.widget.labelcolor]];
+    } else {
+        self.textLabel.textColor = [UIColor blackColor];
+    }
+}
+
+- (UIColor *)colorFromHexString:(NSString *)hexString {
+    unsigned rgbValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:hexString];
+    [scanner setScanLocation:1]; // bypass '#' character
+    [scanner scanHexInt:&rgbValue];
+    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
 }
 
 @end

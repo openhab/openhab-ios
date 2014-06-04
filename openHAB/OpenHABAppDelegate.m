@@ -11,8 +11,13 @@
 #import "GAI.h"
 #import "AFNetworking.h"
 #import "NSData+HexString.h"
+#import "TSMessage.h"
+@import AVFoundation;
+
 @implementation OpenHABAppDelegate
 @synthesize appData;
+
+AVAudioPlayer *player;
 
 - (id)init
 {
@@ -35,6 +40,12 @@
      (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
     NSLog(@"uniq id %@", [UIDevice currentDevice].identifierForVendor.UUIDString);
     NSLog(@"device name %@", [UIDevice currentDevice].name);
+//    AudioSessionInitialize(NULL, NULL, nil , nil);
+//    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error: nil];
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient withOptions:AVAudioSessionCategoryOptionDuckOthers error:nil];
+    UInt32 doSetProperty = 1;
+//    AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof(doSetProperty), &doSetProperty);
+//    [[AVAudioSession sharedInstance] setActive: YES error: nil];
     NSLog(@"didFinishLaunchingWithOptions ended");
     return YES;
 }
@@ -53,6 +64,27 @@
 - (void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error
 {
 	NSLog(@"Failed to get token, error: %@", error);
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    NSLog(@"didReceiveRemoteNotification");
+    if (application.applicationState == UIApplicationStateActive) {
+        NSLog(@"App is active and got a remote notification");
+        NSLog(@"%@", [userInfo valueForKey:@"aps"]);
+        NSString *message = [[[userInfo valueForKey:@"aps"] valueForKey:@"alert"] valueForKey:@"body"];
+        NSURL* soundPath = [[NSBundle mainBundle] URLForResource: @"ping" withExtension:@"wav"];
+        NSLog(@"Sound path %@", soundPath);
+        player = [[AVAudioPlayer alloc] initWithContentsOfURL:soundPath error:nil];
+        if (player != nil) {
+            player.numberOfLoops = 0;
+            [player play];
+        } else {
+            NSLog(@"AVPlayer error");
+        }
+        [TSMessage showNotificationInViewController:((UINavigationController*)self.window.rootViewController).visibleViewController title:@"Notification" subtitle:message type:TSMessageNotificationTypeMessage duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
+        
+    }
 }
 							
 - (void)applicationWillResignActive:(UIApplication *)application

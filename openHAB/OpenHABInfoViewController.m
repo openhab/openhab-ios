@@ -33,4 +33,25 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)loadOpenHABInfo
+{
+/*    NSURL *pageToLoadUrl = [[NSURL alloc] initWithString:self.pageUrl];
+    NSMutableURLRequest *pageRequest = [NSMutableURLRequest requestWithURL:pageToLoadUrl];
+    [pageRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
+    currentPageOperation = [[AFHTTPRequestOperation alloc] initWithRequest:pageRequest];
+    if (self.ignoreSSLCertificate) {
+        NSLog(@"Warning - ignoring invalid certificates");
+        currentPageOperation.securityPolicy.allowInvalidCertificates = YES;
+    }
+    [currentPageOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSData *response = (NSData*)responseObject;
+        NSError *error;
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error){
+        NSLog(@"Error:------>%@", [error description]);
+        NSLog(@"error code %ld",(long)[operation.response statusCode]);
+    }];
+    [currentPageOperation start];
+*/
+}
+
 @end
