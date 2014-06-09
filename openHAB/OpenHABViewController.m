@@ -427,6 +427,9 @@
     } else {
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     }
+    if (self.atmosphereTrackingId != nil) {
+        [pageRequest setValue:self.atmosphereTrackingId forHTTPHeaderField:@"X-Atmosphere-tracking-id"];
+    }
     if (currentPageOperation != nil) {
         [currentPageOperation cancel];
         currentPageOperation = nil;
@@ -438,6 +441,12 @@
     }
     [currentPageOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        NSDictionary *headers = operation.response.allHeaderFields;
+//        NSLog(@"%@", headers);
+        if ([headers objectForKey:@"X-Atmosphere-tracking-id"] != nil) {
+            NSLog(@"Found X-Atmosphere-tracking-id: %@", [headers objectForKey:@"X-Atmosphere-tracking-id"]);
+            self.atmosphereTrackingId = [headers objectForKey:@"X-Atmosphere-tracking-id"];
+        }
         NSData *response = (NSData*)responseObject;
         NSError *error;
         GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];

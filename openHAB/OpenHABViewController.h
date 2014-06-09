@@ -38,6 +38,7 @@
 @property (nonatomic, strong) NSString *deviceToken;
 @property (nonatomic, strong) NSString *deviceId;
 @property (nonatomic, strong) NSString *deviceName;
+@property (nonatomic, retain) NSString *atmosphereTrackingId;
 
 - (void)openHABTracked:(NSString *)openHABUrl;
 - (void)sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command;

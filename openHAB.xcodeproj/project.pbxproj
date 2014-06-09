@@ -71,6 +71,13 @@
 		DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.m */; };
 		DFDF45311932042B00A6E581 /* legal.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFDF45301932042B00A6E581 /* legal.rtf */; };
 		DFDF45341934699B00A6E581 /* OpenHABInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDF45331934699B00A6E581 /* OpenHABInfoViewController.m */; };
+		DFEBBAD51940CBEA00F3F0B8 /* icon-29x29.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBACE1940CBEA00F3F0B8 /* icon-29x29.png */; };
+		DFEBBAD61940CBEA00F3F0B8 /* icon-40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBACF1940CBEA00F3F0B8 /* icon-40x40.png */; };
+		DFEBBAD71940CBEA00F3F0B8 /* icon-58x58.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBAD01940CBEA00F3F0B8 /* icon-58x58.png */; };
+		DFEBBAD81940CBEA00F3F0B8 /* icon-76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBAD11940CBEA00F3F0B8 /* icon-76x76.png */; };
+		DFEBBAD91940CBEA00F3F0B8 /* icon-80x80.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBAD21940CBEA00F3F0B8 /* icon-80x80.png */; };
+		DFEBBADA1940CBEA00F3F0B8 /* icon-120x120.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBAD31940CBEA00F3F0B8 /* icon-120x120.png */; };
+		DFEBBADB1940CBEA00F3F0B8 /* icon-152x152.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBAD41940CBEA00F3F0B8 /* icon-152x152.png */; };
 		DFFD8FD118EDBD4F003B502A /* UICircleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = DFFD8FD018EDBD4F003B502A /* UICircleButton.m */; };
 /* End PBXBuildFile section */
 
@@ -187,6 +194,13 @@
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFDF45321934699B00A6E581 /* OpenHABInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABInfoViewController.h; sourceTree = "<group>"; };
 		DFDF45331934699B00A6E581 /* OpenHABInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABInfoViewController.m; sourceTree = "<group>"; };
+		DFEBBACE1940CBEA00F3F0B8 /* icon-29x29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-29x29.png"; sourceTree = "<group>"; };
+		DFEBBACF1940CBEA00F3F0B8 /* icon-40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-40x40.png"; sourceTree = "<group>"; };
+		DFEBBAD01940CBEA00F3F0B8 /* icon-58x58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-58x58.png"; sourceTree = "<group>"; };
+		DFEBBAD11940CBEA00F3F0B8 /* icon-76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-76x76.png"; sourceTree = "<group>"; };
+		DFEBBAD21940CBEA00F3F0B8 /* icon-80x80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-80x80.png"; sourceTree = "<group>"; };
+		DFEBBAD31940CBEA00F3F0B8 /* icon-120x120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-120x120.png"; sourceTree = "<group>"; };
+		DFEBBAD41940CBEA00F3F0B8 /* icon-152x152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-152x152.png"; sourceTree = "<group>"; };
 		DFFD8FCF18EDBD4F003B502A /* UICircleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICircleButton.h; sourceTree = "<group>"; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UICircleButton.m; sourceTree = "<group>"; };
 		E419E0383FCC45E7A3970B93 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
@@ -330,6 +344,7 @@
 		DFB2623018830A3600D3244D /* openHAB */ = {
 			isa = PBXGroup;
 			children = (
+				DFEBBAC31940CA0F00F3F0B8 /* Icons */,
 				DFDA3CEB193F197200888039 /* LaunchImage */,
 				DF4B84051885AD4600F34902 /* Images */,
 				DF4B83FD18857FA100F34902 /* UI */,
@@ -431,6 +446,20 @@
 			name = Util;
 			sourceTree = "<group>";
 		};
+		DFEBBAC31940CA0F00F3F0B8 /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				DFEBBACE1940CBEA00F3F0B8 /* icon-29x29.png */,
+				DFEBBACF1940CBEA00F3F0B8 /* icon-40x40.png */,
+				DFEBBAD01940CBEA00F3F0B8 /* icon-58x58.png */,
+				DFEBBAD11940CBEA00F3F0B8 /* icon-76x76.png */,
+				DFEBBAD21940CBEA00F3F0B8 /* icon-80x80.png */,
+				DFEBBAD31940CBEA00F3F0B8 /* icon-120x120.png */,
+				DFEBBAD41940CBEA00F3F0B8 /* icon-152x152.png */,
+			);
+			name = Icons;
+			sourceTree = "<group>";
+		};
 		DFFD8FCE18EDBD30003B502A /* Util */ = {
 			isa = PBXGroup;
 			children = (
@@ -529,6 +558,7 @@
 				DFB2623E18830A3600D3244D /* Main_iPhone.storyboard in Resources */,
 				DFDA3CF6193F199900888039 /* Default-Portrait~ipad.png in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
+				DFEBBAD61940CBEA00F3F0B8 /* icon-40x40.png in Resources */,
 				DFDA3CED193F198700888039 /* Default-568h@2x.png in Resources */,
 				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
 				DFDA3CF8193F199900888039 /* Default-Landscape~ipad.png in Resources */,
@@ -538,10 +568,16 @@
 				DFDA3CF7193F199900888039 /* Default-Portrait@2x~ipad.png in Resources */,
 				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
 				DFDA3CF9193F199900888039 /* Default-Landscape@2x~ipad.png in Resources */,
+				DFEBBADA1940CBEA00F3F0B8 /* icon-120x120.png in Resources */,
+				DFEBBAD81940CBEA00F3F0B8 /* icon-76x76.png in Resources */,
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				DFDA3CF4193F199900888039 /* Default@2x.png in Resources */,
 				DF4B840F1885B34300F34902 /* app-icon@2x.png in Resources */,
 				DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */,
+				DFEBBAD91940CBEA00F3F0B8 /* icon-80x80.png in Resources */,
+				DFEBBAD71940CBEA00F3F0B8 /* icon-58x58.png in Resources */,
+				DFEBBADB1940CBEA00F3F0B8 /* icon-152x152.png in Resources */,
+				DFEBBAD51940CBEA00F3F0B8 /* icon-29x29.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -764,9 +800,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E419E0383FCC45E7A3970B93 /* Pods.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -775,7 +810,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "07D1361C-2D0B-4625-B088-8CE58301D611";
+				PROVISIONING_PROFILE = "F5A4C993-92E6-4A41-93C4-B922E1F99F45";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -784,7 +819,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E419E0383FCC45E7A3970B93 /* Pods.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -795,7 +829,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "979ADFAD-6D21-4ED8-8AE8-C6840EF182D2";
+				PROVISIONING_PROFILE = "F5A4C993-92E6-4A41-93C4-B922E1F99F45";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
