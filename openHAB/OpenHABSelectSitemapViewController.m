@@ -64,11 +64,6 @@
     [tracker set:kGAIScreenName
            value:@"OpenHABSelectSitemapViewController"];
     [tracker send:[[GAIDictionaryBuilder createAppView] build]];
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
     NSString *sitemapsUrlString = [NSString stringWithFormat:@"%@/rest/sitemaps", self.openHABRootUrl];
     NSURL *sitemapsUrl = [[NSURL alloc] initWithString:sitemapsUrlString];
     NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];
@@ -102,6 +97,11 @@
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
     }];
     [operation start];
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
 
 }
 

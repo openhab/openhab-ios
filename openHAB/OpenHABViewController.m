@@ -102,6 +102,16 @@
 {
     NSLog(@"OpenHABViewController viewDidAppear");
     [super viewDidAppear:animated];
+}
+
+- (void) viewWillAppear:(BOOL)animated
+{
+    NSLog(@"OpenHABViewController viewWillAppear");
+    [super viewDidAppear:animated];
+    id gaiTracker = [[GAI sharedInstance] defaultTracker];
+    [gaiTracker set:kGAIScreenName
+           value:@"OpenHABViewController"];
+    [gaiTracker send:[[GAIDictionaryBuilder createAppView] build]];
     // Load settings into local properties
     [self loadSettings];
     // Set authentication parameters to SDImage
@@ -140,15 +150,6 @@
             [self restart];
         }
     }
-}
-
-- (void) viewWillAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    id tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker set:kGAIScreenName
-           value:@"OpenHABViewController"];
-    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void) viewWillDisappear:(BOOL)animated
@@ -424,11 +425,16 @@
     if (longPolling) {
         NSLog(@"long polling, so setting atmosphere transport");
         [pageRequest setValue:@"long-polling" forHTTPHeaderField:@"X-Atmosphere-Transport"];
+        [pageRequest setTimeoutInterval:300.0];
     } else {
+        self.atmosphereTrackingId = nil;
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        [pageRequest setTimeoutInterval:10.0];
     }
     if (self.atmosphereTrackingId != nil) {
         [pageRequest setValue:self.atmosphereTrackingId forHTTPHeaderField:@"X-Atmosphere-tracking-id"];
+    } else {
+        [pageRequest setValue:@"0" forHTTPHeaderField:@"X-Atmosphere-tracking-id"];
     }
     if (currentPageOperation != nil) {
         [currentPageOperation cancel];
@@ -440,6 +446,7 @@
         currentPageOperation.securityPolicy.allowInvalidCertificates = YES;
     }
     [currentPageOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"Page loaded with success");
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSDictionary *headers = operation.response.allHeaderFields;
 //        NSLog(@"%@", headers);
@@ -461,13 +468,15 @@
             [self.widgetTableView reloadData];
             self.navigationItem.title = [self.currentPage.title componentsSeparatedByString:@"["][0];
             [self loadPage:YES];
+        } else {
+            NSLog(@"Unable to find page root element");
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
         if (error.code == -1001 && longPolling) {
-            [self loadPage:YES];
+            [self loadPage:NO];
         } else if (error.code == -999) {
             // Request was cancelled
             NSLog(@"Request was cancelled");

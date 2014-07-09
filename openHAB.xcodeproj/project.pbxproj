@@ -801,7 +801,7 @@
 			baseConfigurationReference = E419E0383FCC45E7A3970B93 /* Pods.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -810,7 +810,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "F5A4C993-92E6-4A41-93C4-B922E1F99F45";
+				PROVISIONING_PROFILE = "A4E08784-BDD2-434A-B00F-357413BF1935";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
