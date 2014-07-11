@@ -422,6 +422,7 @@
     NSMutableURLRequest *pageRequest = [NSMutableURLRequest requestWithURL:pageToLoadUrl];
     [pageRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
     [pageRequest setValue:@"application/xml" forHTTPHeaderField:@"Accept"];
+    [pageRequest setValue:@"1.0" forHTTPHeaderField:@"X-Atmosphere-Framework"];
     if (longPolling) {
         NSLog(@"long polling, so setting atmosphere transport");
         [pageRequest setValue:@"long-polling" forHTTPHeaderField:@"X-Atmosphere-Transport"];
@@ -475,7 +476,9 @@
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
+        self.atmosphereTrackingId = nil;
         if (error.code == -1001 && longPolling) {
+            NSLog(@"Timeout, restarting requests");
             [self loadPage:NO];
         } else if (error.code == -999) {
             // Request was cancelled
@@ -486,7 +489,9 @@
             NSLog(@"Request failed: %@", [error localizedDescription]);
         }
     }];
+    NSLog(@"OpenHABViewController sending new request");
     [currentPageOperation start];
+    NSLog(@"OpenHABViewController request sent");
 }
 
 // Select sitemap
