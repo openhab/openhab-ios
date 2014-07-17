@@ -19,6 +19,7 @@
 #import <GAI.h>
 #import "GAIFields.h"
 #import "GAIDictionaryBuilder.h"
+#import "AFRememberingSecurityPolicy.h"
 
 @interface OpenHABSelectSitemapViewController ()
 
@@ -69,6 +70,8 @@
     NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];
     [sitemapsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
     AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:sitemapsRequest];
+    AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    operation.securityPolicy = policy;
     if (self.ignoreSSLCertificate) {
         NSLog(@"Warning - ignoring invalid certificates");
         operation.securityPolicy.allowInvalidCertificates = YES;

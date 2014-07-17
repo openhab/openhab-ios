@@ -13,6 +13,7 @@
 #import "NSData+HexString.h"
 #import "TSMessage.h"
 @import AVFoundation;
+#import "AFRememberingSecurityPolicy.h"
 
 @implementation OpenHABAppDelegate
 @synthesize appData;
@@ -36,6 +37,7 @@ AVAudioPlayer *player;
     NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"CacheDataAgressively"];
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
     [self loadSettingsDefaults];
+    [AFRememberingSecurityPolicy initializeCertificatesStore];
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
      (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
     NSLog(@"uniq id %@", [UIDevice currentDevice].identifierForVendor.UUIDString);
@@ -82,8 +84,7 @@ AVAudioPlayer *player;
         } else {
             NSLog(@"AVPlayer error");
         }
-        [TSMessage showNotificationInViewController:((UINavigationController*)self.window.rootViewController).visibleViewController title:@"Notification" subtitle:message type:TSMessageNotificationTypeMessage duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
-        
+        [TSMessage showNotificationInViewController:((UINavigationController*)self.window.rootViewController).visibleViewController title:@"Notification" subtitle:message image:nil type:TSMessageNotificationTypeMessage duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
     }
 }
 							

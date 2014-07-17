@@ -29,6 +29,7 @@
 		DF4B840F1885B34300F34902 /* app-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4B840E1885B34300F34902 /* app-icon@2x.png */; };
 		DF4B84131886DAC400F34902 /* FrameUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.m */; };
 		DF4B84161886EACA00F34902 /* GenericUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */; };
+		DF75996D1976CD0C0098F90D /* UIAlertView+Block.m in Sources */ = {isa = PBXBuildFile; fileRef = DF75996C1976CD0C0098F90D /* UIAlertView+Block.m */; };
 		DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.m */; };
 		DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.m */; };
 		DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */; };
@@ -71,6 +72,8 @@
 		DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.m */; };
 		DFDF45311932042B00A6E581 /* legal.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFDF45301932042B00A6E581 /* legal.rtf */; };
 		DFDF45341934699B00A6E581 /* OpenHABInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDF45331934699B00A6E581 /* OpenHABInfoViewController.m */; };
+		DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */; };
+		DFE10414197415F900D94943 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE10413197415F900D94943 /* Security.framework */; };
 		DFEBBAD51940CBEA00F3F0B8 /* icon-29x29.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBACE1940CBEA00F3F0B8 /* icon-29x29.png */; };
 		DFEBBAD61940CBEA00F3F0B8 /* icon-40x40.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBACF1940CBEA00F3F0B8 /* icon-40x40.png */; };
 		DFEBBAD71940CBEA00F3F0B8 /* icon-58x58.png in Resources */ = {isa = PBXBuildFile; fileRef = DFEBBAD01940CBEA00F3F0B8 /* icon-58x58.png */; };
@@ -129,6 +132,8 @@
 		DF4B84121886DAC400F34902 /* FrameUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameUITableViewCell.m; sourceTree = "<group>"; };
 		DF4B84141886EACA00F34902 /* GenericUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericUITableViewCell.h; sourceTree = "<group>"; };
 		DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericUITableViewCell.m; sourceTree = "<group>"; };
+		DF75996B1976CD0C0098F90D /* UIAlertView+Block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIAlertView+Block.h"; sourceTree = "<group>"; };
+		DF75996C1976CD0C0098F90D /* UIAlertView+Block.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIAlertView+Block.m"; sourceTree = "<group>"; };
 		DFA13CB218872EBD006355C3 /* SwitchUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwitchUITableViewCell.h; sourceTree = "<group>"; };
 		DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwitchUITableViewCell.m; sourceTree = "<group>"; };
 		DFA16EB618883CF300EDB0BB /* SetpointUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetpointUITableViewCell.h; sourceTree = "<group>"; };
@@ -194,6 +199,9 @@
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFDF45321934699B00A6E581 /* OpenHABInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABInfoViewController.h; sourceTree = "<group>"; };
 		DFDF45331934699B00A6E581 /* OpenHABInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABInfoViewController.m; sourceTree = "<group>"; };
+		DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRememberingSecurityPolicy.h; sourceTree = "<group>"; };
+		DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRememberingSecurityPolicy.m; sourceTree = "<group>"; };
+		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DFEBBACE1940CBEA00F3F0B8 /* icon-29x29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-29x29.png"; sourceTree = "<group>"; };
 		DFEBBACF1940CBEA00F3F0B8 /* icon-40x40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-40x40.png"; sourceTree = "<group>"; };
 		DFEBBAD01940CBEA00F3F0B8 /* icon-58x58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-58x58.png"; sourceTree = "<group>"; };
@@ -211,6 +219,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
@@ -332,6 +341,7 @@
 		DFB2622918830A3600D3244D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DFE10413197415F900D94943 /* Security.framework */,
 				DFB2622A18830A3600D3244D /* Foundation.framework */,
 				DFB2622C18830A3600D3244D /* CoreGraphics.framework */,
 				DFB2622E18830A3600D3244D /* UIKit.framework */,
@@ -442,6 +452,8 @@
 				DFDEE41B1883EB99008B26AC /* Reachability+URL.h */,
 				DFDEE41C1883EB99008B26AC /* Reachability+URL.m */,
 				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.h */,
+				DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */,
+				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -465,6 +477,8 @@
 			children = (
 				DFFD8FCF18EDBD4F003B502A /* UICircleButton.h */,
 				DFFD8FD018EDBD4F003B502A /* UICircleButton.m */,
+				DF75996B1976CD0C0098F90D /* UIAlertView+Block.h */,
+				DF75996C1976CD0C0098F90D /* UIAlertView+Block.m */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -661,10 +675,12 @@
 				DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
 				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
+				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
 				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
 				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
+				DF75996D1976CD0C0098F90D /* UIAlertView+Block.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

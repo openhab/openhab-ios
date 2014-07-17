@@ -29,6 +29,7 @@
 #import <GAI.h>
 #import "GAIFields.h"
 #import "GAIDictionaryBuilder.h"
+#import "UIAlertView+Block.h"
 
 @interface OpenHABViewController ()
 
@@ -329,6 +330,36 @@
     [self.widgetTableView reloadData];
 }
 
+- (void)evaluateServerTrust:(AFRememberingSecurityPolicy *)policy summary:(NSString *)certificateSummary forDomain:(NSString *)domain
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"SSL Certificate Warning" message:[NSString stringWithFormat:@"SSL Certificate presented by %@ for %@ is invalid. Do you want to proceed?", certificateSummary, domain] delegate:nil cancelButtonTitle:NSLocalizedString(@"Abort", @"") otherButtonTitles:@"Once", @"Always", nil];
+        [alertView showWithCompletion:^(UIAlertView *alertView, NSInteger buttonIndex) {
+            if (buttonIndex == 0)
+                [policy deny];
+            else if (buttonIndex == 1)
+                [policy permitOnce];
+            else if (buttonIndex == 2)
+                [policy permitAlways];
+        }];
+    });
+}
+
+- (void) evaluateCertificateMismatch:(AFRememberingSecurityPolicy *)policy summary:(NSString *)certificateSummary forDomain:(NSString *)domain
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"SSL Certificate Warning" message:[NSString stringWithFormat:@"SSL Certificate presented by %@ for %@ is doesn't match the record. Do you want to proceed?", certificateSummary, domain] delegate:nil cancelButtonTitle:NSLocalizedString(@"Abort", @"") otherButtonTitles:@"Once", @"Always", nil];
+        [alertView showWithCompletion:^(UIAlertView *alertView, NSInteger buttonIndex) {
+            if (buttonIndex == 0)
+                [policy deny];
+            else if (buttonIndex == 1)
+                [policy permitOnce];
+            else if (buttonIndex == 2)
+                [policy permitAlways];
+        }];
+    });
+}
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     NSLog(@"OpenHABViewController prepareForSegue %@", segue.identifier);
@@ -383,6 +414,13 @@
         commandOperation = nil;
     }
     commandOperation = [[AFHTTPRequestOperation alloc] initWithRequest:commandRequest];
+    AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    [policy setDelegate:self];
+    commandOperation.securityPolicy = policy;
+    if (self.ignoreSSLCertificate) {
+        NSLog(@"Warning - ignoring invalid certificates");
+        commandOperation.securityPolicy.allowInvalidCertificates = YES;
+    }
     [commandOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Command sent!");
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
@@ -444,6 +482,9 @@
         currentPageOperation = nil;
     }
     currentPageOperation = [[AFHTTPRequestOperation alloc] initWithRequest:pageRequest];
+    AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    [policy setDelegate:self];
+    currentPageOperation.securityPolicy = policy;
     if (self.ignoreSSLCertificate) {
         NSLog(@"Warning - ignoring invalid certificates");
         currentPageOperation.securityPolicy.allowInvalidCertificates = YES;
@@ -487,8 +528,11 @@
             NSLog(@"Request was cancelled");
         } else {
             // Error
-//            [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
-            [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:5.0  callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+            if (error.code == -1012) {
+                [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:@"SSL Certificate Error" image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+            } else {
+                [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+            }
             NSLog(@"Request failed: %@", [error localizedDescription]);
         }
     }];
@@ -506,6 +550,9 @@
     NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];
     [sitemapsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
     AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:sitemapsRequest];
+    AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    [policy setDelegate:self];
+    operation.securityPolicy = policy;
     if (self.ignoreSSLCertificate) {
         NSLog(@"Warning - ignoring invalid certificates");
         operation.securityPolicy.allowInvalidCertificates = YES;
@@ -552,7 +599,11 @@
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
         // Error
 //        [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
-        [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+        if (error.code == -1012) {
+            [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:@"SSL Certificate Error" image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+        } else {
+            [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+        }
     }];
     [operation start];
 }
