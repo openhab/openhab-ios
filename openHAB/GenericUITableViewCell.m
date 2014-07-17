@@ -84,6 +84,12 @@
     }
 }
 
+// This is to fix possible different sizes of user icons - we fix size and position of UITableViewCell icons
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    self.imageView.frame = CGRectMake(13,5,32,32);
+}
+
 - (UIColor *)colorFromHexString:(NSString *)hexString {
     unsigned rgbValue = 0;
     NSScanner *scanner = [NSScanner scannerWithString:hexString];
