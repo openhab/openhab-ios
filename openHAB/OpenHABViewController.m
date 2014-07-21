@@ -454,8 +454,10 @@
 
 - (void)loadPage:(Boolean)longPolling
 {
+    if (self.pageUrl == nil) {
+        return;
+    }
     NSLog(@"pageUrl = %@", self.pageUrl);
-    NSLog(@"operations queue size = %d", [AFHTTPRequestOperationManager manager].operationQueue.operationCount);
     Reachability *pageReachability = [Reachability reachabilityWithUrlString:self.pageUrl];
     pageNetworkStatus = [pageReachability currentReachabilityStatus];
     NSURL *pageToLoadUrl = [[NSURL alloc] initWithString:self.pageUrl];
