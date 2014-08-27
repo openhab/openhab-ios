@@ -443,8 +443,6 @@
 
 - (void) didPressColorButton:(ColorPickerUITableViewCell *)cell
 {
-    NSLog(@"Pressed color button");
-    NSLog(@"ColorCell row is %d", [self.widgetTableView indexPathForCell:cell].row);
     ColorPickerViewController *colorPickerViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"ColorPickerViewController"];;
     colorPickerViewController.widget = [self.currentPage.widgets objectAtIndex:[self.widgetTableView indexPathForCell:cell].row];
     [self.navigationController pushViewController:colorPickerViewController animated:YES];
