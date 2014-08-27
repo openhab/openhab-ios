@@ -21,6 +21,8 @@ To start developing you need an [Apple Developer](https://developer.apple.com/de
 
 You are ready to contribute!
 
+Before producing any amount of code please have a look at [contribution guidelines](https://github.com/openhab/openhab.ios/blob/master/CONTRIBUTING.md)
+
 ## Trademark Disclaimer
 
 Product names, logos, brands and other trademarks referred to within the openHAB website are the
