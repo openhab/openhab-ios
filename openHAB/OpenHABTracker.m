@@ -46,14 +46,6 @@
                 NSLog(@"OpenHABTracker network is Wifi");
                 // Check if local URL is configured, if yes
                 if ([openHABLocalUrl length] > 0) {
-/*                    Reachability *urlReach = [Reachability reachabilityWithUrlString:openHABLocalUrl];
-                    // If local URL is reachable, go with it
-                    if ([urlReach currentlyReachable]) {
-                        [self trackedLocalUrl];
-                    // If not, go with remote URL
-                    } else {
-                        [self trackedRemoteUrl];
-                    }*/
                     if ([self isURLReachable:[NSURL URLWithString:openHABLocalUrl]]) {
                         [self trackedLocalUrl];
                     } else {

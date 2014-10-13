@@ -456,8 +456,10 @@
         return;
     }
     NSLog(@"pageUrl = %@", self.pageUrl);
-    Reachability *pageReachability = [Reachability reachabilityWithUrlString:self.pageUrl];
-    pageNetworkStatus = [pageReachability currentReachabilityStatus];
+    // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
+    // to save current reachability status.
+    if (!longPolling)
+        [self pageNetworkStatusChanged];
     NSURL *pageToLoadUrl = [[NSURL alloc] initWithString:self.pageUrl];
     NSMutableURLRequest *pageRequest = [NSMutableURLRequest requestWithURL:pageToLoadUrl];
     [pageRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
