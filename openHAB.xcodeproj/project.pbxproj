@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		2ABDF59D4B634F06BF0F0E2E /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CEB562F22E44DC92058388 /* libPods.a */; };
+		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
+		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
+		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
 		DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */; };
 		DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */; };
 		DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */; };
@@ -41,8 +44,6 @@
 		DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623318830A3600D3244D /* InfoPlist.strings */; };
 		DFB2623718830A3600D3244D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623618830A3600D3244D /* main.m */; };
 		DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */; };
-		DFB2623E18830A3600D3244D /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623C18830A3600D3244D /* Main_iPhone.storyboard */; };
-		DFB2624118830A3600D3244D /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623F18830A3600D3244D /* Main_iPad.storyboard */; };
 		DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABViewController.m */; };
 		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
 		DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2624C18830A3600D3244D /* XCTest.framework */; };
@@ -98,6 +99,10 @@
 		25279B3D1FF5798BF16509A1 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		3445EB45514207D2E03FC870 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		73CEB562F22E44DC92058388 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
+		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
+		CCDE2E686DCD3817C7AE5376 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_207_remove_2@2x.png"; sourceTree = "<group>"; };
 		DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_212_down_arrow@2x.png"; sourceTree = "<group>"; };
 		DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_213_up_arrow@2x.png"; sourceTree = "<group>"; };
@@ -156,8 +161,6 @@
 		DFB2623818830A3600D3244D /* openHAB-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "openHAB-Prefix.pch"; sourceTree = "<group>"; };
 		DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABAppDelegate.h; sourceTree = "<group>"; };
 		DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABAppDelegate.m; sourceTree = "<group>"; };
-		DFB2623D18830A3600D3244D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
-		DFB2624018830A3600D3244D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
 		DFB2624218830A3600D3244D /* OpenHABViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABViewController.h; sourceTree = "<group>"; };
 		DFB2624318830A3600D3244D /* OpenHABViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABViewController.m; sourceTree = "<group>"; };
 		DFB2624518830A3600D3244D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -241,11 +244,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1581768B020CF6F3A65AB853 /* Pods */ = {
+		2CF204B778445157FBD44AB2 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				25279B3D1FF5798BF16509A1 /* Pods.debug.xcconfig */,
-				3445EB45514207D2E03FC870 /* Pods.release.xcconfig */,
+				CCDE2E686DCD3817C7AE5376 /* Pods.debug.xcconfig */,
+				4F048B4D29497A0B6D732C65 /* Pods.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -288,6 +291,7 @@
 			children = (
 				DF05FF13189658FD00FF2F9B /* icons */,
 				DF4B840E1885B34300F34902 /* app-icon@2x.png */,
+				A3F4C3A61A49A6AC0019A09F /* launchImage.png */,
 				DF4B84061885AE0E00F34902 /* blankicon.png */,
 			);
 			name = Images;
@@ -335,7 +339,7 @@
 				DFB2625218830A3600D3244D /* openHABTests */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				DFB2622818830A3600D3244D /* Products */,
-				1581768B020CF6F3A65AB853 /* Pods */,
+				2CF204B778445157FBD44AB2 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -372,8 +376,8 @@
 				DFDEE3FE1883228C008B26AC /* Models */,
 				DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */,
 				DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */,
-				DFB2623C18830A3600D3244D /* Main_iPhone.storyboard */,
-				DFB2623F18830A3600D3244D /* Main_iPad.storyboard */,
+				A3F4C3A11A49A5090019A09F /* Main.storyboard */,
+				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
 				DFB2624518830A3600D3244D /* Images.xcassets */,
 				DFB2623118830A3600D3244D /* Supporting Files */,
 			);
@@ -576,12 +580,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */,
-				DFB2624118830A3600D3244D /* Main_iPad.storyboard in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
+				A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */,
 				DFDA3CF5193F199900888039 /* Default.png in Resources */,
-				DFB2623E18830A3600D3244D /* Main_iPhone.storyboard in Resources */,
+				A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */,
 				DFDA3CF6193F199900888039 /* Default-Portrait~ipad.png in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
+				A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */,
 				DFEBBAD61940CBEA00F3F0B8 /* icon-40x40.png in Resources */,
 				DFDA3CED193F198700888039 /* Default-568h@2x.png in Resources */,
 				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
@@ -713,28 +718,21 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		A3F4C3A11A49A5090019A09F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A3F4C3A21A49A5090019A09F /* Base */,
+			);
+			name = Main.storyboard;
+			path = ..;
+			sourceTree = "<group>";
+		};
 		DFB2623318830A3600D3244D /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				DFB2623418830A3600D3244D /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		DFB2623C18830A3600D3244D /* Main_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				DFB2623D18830A3600D3244D /* Base */,
-			);
-			name = Main_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		DFB2623F18830A3600D3244D /* Main_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				DFB2624018830A3600D3244D /* Base */,
-			);
-			name = Main_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 		DFB2625518830A3600D3244D /* InfoPlist.strings */ = {
@@ -824,7 +822,7 @@
 		};
 		DFB2625D18830A3600D3244D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 25279B3D1FF5798BF16509A1 /* Pods.debug.xcconfig */;
+			baseConfigurationReference = CCDE2E686DCD3817C7AE5376 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -844,7 +842,7 @@
 		};
 		DFB2625E18830A3600D3244D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3445EB45514207D2E03FC870 /* Pods.release.xcconfig */;
+			baseConfigurationReference = 4F048B4D29497A0B6D732C65 /* Pods.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";

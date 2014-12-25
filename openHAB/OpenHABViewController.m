@@ -276,7 +276,7 @@
     // No icon is needed for image, video, frame and web widgets
     if (widget.icon != nil && !([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"] || [cellIdentifier isEqualToString:@"VideoWidgetCell"] || [cellIdentifier isEqualToString:@"FrameWidgetCell"] || [cellIdentifier isEqualToString:@"WebWidgetCell"])) {
         NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, widget.icon];
-        [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
+        [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
     }
     if ([cellIdentifier isEqualToString:@"ColorPickerWidgetCell"]) {
         ((ColorPickerUITableViewCell*)cell).delegate = self;
@@ -378,7 +378,6 @@
 - (void)openHABTrackingProgress:(NSString *)message
 {
     NSLog(@"OpenHABViewController %@", message);
-//    [TSMessage showNotificationInViewController:self.navigationController title:@"Connecting" subtitle:message type:TSMessageNotificationTypeMessage duration:3.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
     [TSMessage showNotificationInViewController:self.navigationController title:@"Connecting" subtitle:message image:nil type:TSMessageNotificationTypeMessage duration:3.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
 }
 
@@ -386,7 +385,6 @@
 {
     NSLog(@"OpenHABViewController discovery error");
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-//    [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] type:TSMessageNotificationTypeError duration:60.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
     [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:60.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
 }
 
@@ -424,6 +422,7 @@
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
         [self selectSitemap];
     }];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     [versionPageOperation start];
 }
 
@@ -594,6 +593,7 @@
     NSURL *sitemapsUrl = [[NSURL alloc] initWithString:sitemapsUrlString];
     NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];
     [sitemapsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
+    [sitemapsRequest setTimeoutInterval:10.0];
     AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:sitemapsRequest];
     AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     [policy setDelegate:self];
@@ -610,6 +610,7 @@
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSData *response = (NSData*)responseObject;
         NSError *error;
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         [sitemaps removeAllObjects];
         // If we are talking to openHAB 1.X, talk XML
         if ([self appData].openHABVersion == 1) {
@@ -660,8 +661,8 @@
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         // Error
-//        [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
         if (error.code == -1012) {
             [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:@"SSL Certificate Error" image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
         } else {
@@ -669,6 +670,7 @@
         }
     }];
     NSLog(@"Firing request");
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     [operation start];
 }
 
