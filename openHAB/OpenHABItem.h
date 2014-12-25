@@ -24,6 +24,7 @@
 @property (nonatomic, retain) NSString *link;
 
 - (OpenHABItem *) initWithXML:(GDataXMLElement *)xmlElement;
+- (OpenHABItem *) initWithDictionary:(NSDictionary *)dictionary;
 - (float) stateAsFloat;
 - (int) stateAsInt;
 - (UIColor*) stateAsUIColor;

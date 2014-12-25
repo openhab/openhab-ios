@@ -76,25 +76,46 @@
         NSLog(@"Warning - ignoring invalid certificates");
         operation.securityPolicy.allowInvalidCertificates = YES;
     }
+    if ([self appData].openHABVersion == 2) {
+        NSLog(@"Setting setializer to JSON");
+        operation.responseSerializer = [AFJSONResponseSerializer serializer];
+    }
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSData *response = (NSData*)responseObject;
-        NSLog(@"%@", [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
         NSError *error;
-        GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
-        if (doc == nil) return;
-        NSLog(@"%@", [doc.rootElement name]);
-        if ([[doc.rootElement name] isEqual:@"sitemaps"]) {
-            [sitemaps removeAllObjects];
-            for (GDataXMLElement *element in [doc.rootElement elementsForName:@"sitemap"]) {
-                OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithXML:element];
-                [sitemaps addObject:sitemap];
+        [sitemaps removeAllObjects];
+        NSLog(@"Sitemap response");
+        // If we are talking to openHAB 1.X, talk XML
+        if ([self appData].openHABVersion == 1) {
+            NSLog(@"openHAB 1");
+            NSLog(@"%@", [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
+            GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
+            if (doc == nil) return;
+            NSLog(@"%@", [doc.rootElement name]);
+            if ([[doc.rootElement name] isEqual:@"sitemaps"]) {
+                for (GDataXMLElement *element in [doc.rootElement elementsForName:@"sitemap"]) {
+                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithXML:element];
+                    [sitemaps addObject:sitemap];
+                }
+            } else {
+                return;
             }
-            for (OpenHABSitemap *sitemap in sitemaps) {
-                NSLog(@"%@ - %@", sitemap.label, sitemap.homepageLink);
+        // Newer versions speak JSON!
+        } else {
+            NSLog(@"openHAB 2");
+            if ([responseObject isKindOfClass:[NSArray class]]) {
+                NSLog(@"Response is array");
+                for (id sitemapJson in responseObject) {
+                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithDictionaty:sitemapJson];
+                    [sitemaps addObject:sitemap];
+                }
+            } else {
+                // Something went wrong, we should have received an array
+                return;
             }
-            [[self appData] setSitemaps:sitemaps];
-            [self.tableView reloadData];
         }
+        [[self appData] setSitemaps:sitemaps];
+        [self.tableView reloadData];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);

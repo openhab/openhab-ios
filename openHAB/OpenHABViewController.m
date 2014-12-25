@@ -396,7 +396,35 @@
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     self.openHABRootUrl = openHABUrl;
     [[self appData] setOpenHABRootUrl:openHABRootUrl];
-    [self selectSitemap];
+    // Checking openHAB version
+    NSURL *pageToLoadUrl = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"%@/rest/bindings", self.openHABRootUrl]];
+    NSMutableURLRequest *pageRequest = [NSMutableURLRequest requestWithURL:pageToLoadUrl];
+    [pageRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
+    [pageRequest setTimeoutInterval:10.0];
+    AFHTTPRequestOperation *versionPageOperation = [[AFHTTPRequestOperation alloc] initWithRequest:pageRequest];
+    AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    [policy setDelegate:self];
+    currentPageOperation.securityPolicy = policy;
+    if (self.ignoreSSLCertificate) {
+        NSLog(@"Warning - ignoring invalid certificates");
+        currentPageOperation.securityPolicy.allowInvalidCertificates = YES;
+    }
+    [versionPageOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"This is an openHAB 2.X");
+        [[self appData] setOpenHABVersion:2];
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        NSData *response = (NSData*)responseObject;
+        NSError *error;
+        [self selectSitemap];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error){
+        NSLog(@"This is an openHAB 1.X");
+        [[self appData] setOpenHABVersion:1];
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        NSLog(@"Error:------>%@", [error description]);
+        NSLog(@"error code %ld",(long)[operation.response statusCode]);
+        [self selectSitemap];
+    }];
+    [versionPageOperation start];
 }
 
 // send command to an item
@@ -463,7 +491,10 @@
     NSURL *pageToLoadUrl = [[NSURL alloc] initWithString:self.pageUrl];
     NSMutableURLRequest *pageRequest = [NSMutableURLRequest requestWithURL:pageToLoadUrl];
     [pageRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
-    [pageRequest setValue:@"application/xml" forHTTPHeaderField:@"Accept"];
+    // We accept XML only if openHAB is 1.X
+    if ([self appData].openHABVersion == 1) {
+        [pageRequest setValue:@"application/xml" forHTTPHeaderField:@"Accept"];
+    }
     [pageRequest setValue:@"1.0" forHTTPHeaderField:@"X-Atmosphere-Framework"];
     if (longPolling) {
         NSLog(@"long polling, so setting atmosphere transport");
@@ -484,6 +515,11 @@
         currentPageOperation = nil;
     }
     currentPageOperation = [[AFHTTPRequestOperation alloc] initWithRequest:pageRequest];
+    // If we are talking to openHAB 2+, we expect response to be JSON
+    if ([self appData].openHABVersion == 2) {
+        NSLog(@"Setting setializer to JSON");
+        currentPageOperation.responseSerializer = [AFJSONResponseSerializer serializer];
+    }
     AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     [policy setDelegate:self];
     currentPageOperation.securityPolicy = policy;
@@ -502,21 +538,28 @@
         }
         NSData *response = (NSData*)responseObject;
         NSError *error;
-        GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
-        if (doc == nil) return;
-        NSLog(@"%@", [doc.rootElement name]);
-        if ([[doc.rootElement name] isEqual:@"page"]) {
-            currentPage = [[OpenHABSitemapPage alloc] initWithXML:doc.rootElement];
-            [currentPage setDelegate:self];
-//            for (OpenHABWidget *widget in [self.currentPage widgets]) {
-//                NSLog(@"%@ - %@", widget.label, widget.type);
-//            }
-            [self.widgetTableView reloadData];
-            self.navigationItem.title = [self.currentPage.title componentsSeparatedByString:@"["][0];
-            [self loadPage:YES];
+        // If we are talking to openHAB 1.X, talk XML
+        if ([self appData].openHABVersion == 1) {
+            GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
+            if (doc == nil) return;
+            NSLog(@"%@", [doc.rootElement name]);
+            if ([[doc.rootElement name] isEqual:@"page"]) {
+                currentPage = [[OpenHABSitemapPage alloc] initWithXML:doc.rootElement];
+            } else {
+                NSLog(@"Unable to find page root element");
+                return;
+            }
+        // Newer versions talk JSON!
         } else {
-            NSLog(@"Unable to find page root element");
+            currentPage = [[OpenHABSitemapPage alloc] initWithDictionary:responseObject];
         }
+        [currentPage setDelegate:self];
+        [self.widgetTableView reloadData];
+        self.navigationItem.title = [self.currentPage.title componentsSeparatedByString:@"["][0];
+        if (longPolling == YES)
+            [self loadPage:NO];
+        else
+            [self loadPage:YES];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSLog(@"Error:------>%@", [error description]);
@@ -559,43 +602,61 @@
         NSLog(@"Warning - ignoring invalid certificates");
         operation.securityPolicy.allowInvalidCertificates = YES;
     }
+    // If we are talking to openHAB 2+, we expect response to be JSON
+    if ([self appData].openHABVersion == 2) {
+        NSLog(@"Setting setializer to JSON");
+        operation.responseSerializer = [AFJSONResponseSerializer serializer];
+    }
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSData *response = (NSData*)responseObject;
-        NSLog(@"%@", [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
         NSError *error;
-        GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
-        if (doc == nil) return;
-        NSLog(@"%@", [doc.rootElement name]);
-        if ([[doc.rootElement name] isEqual:@"sitemaps"]) {
-            [sitemaps removeAllObjects];
-            for (GDataXMLElement *element in [doc.rootElement elementsForName:@"sitemap"]) {
-                OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithXML:element];
-                [sitemaps addObject:sitemap];
+        [sitemaps removeAllObjects];
+        // If we are talking to openHAB 1.X, talk XML
+        if ([self appData].openHABVersion == 1) {
+            NSLog(@"%@", [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
+            GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
+            if (doc == nil) return;
+            NSLog(@"%@", [doc.rootElement name]);
+            if ([[doc.rootElement name] isEqual:@"sitemaps"]) {
+                for (GDataXMLElement *element in [doc.rootElement elementsForName:@"sitemap"]) {
+                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithXML:element];
+                    [sitemaps addObject:sitemap];
+                }
             }
-            [[self appData] setSitemaps:sitemaps];
-            if ([sitemaps count] > 0) {
-                if ([sitemaps count] > 1) {
-                    if (self.defaultSitemap != nil) {
-                        OpenHABSitemap *sitemapToOpen = [self sitemapByName:self.defaultSitemap];
-                        if (sitemapToOpen != nil) {
-                            self.pageUrl = sitemapToOpen.homepageLink;
-                            [self loadPage:NO];
-                        } else {
-                            [self performSegueWithIdentifier:@"showSelectSitemap" sender:self];
-                        }
+        // Newer versions speak JSON!
+        } else {
+            if ([responseObject isKindOfClass:[NSArray class]]) {
+                NSLog(@"Response is array");
+                for (id sitemapJson in responseObject) {
+                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithDictionaty:sitemapJson];
+                    [sitemaps addObject:sitemap];
+                }
+            } else {
+                // Something went wrong, we should have received an array
+            }
+        }
+        [[self appData] setSitemaps:sitemaps];
+        if ([sitemaps count] > 0) {
+            if ([sitemaps count] > 1) {
+                if (self.defaultSitemap != nil) {
+                    OpenHABSitemap *sitemapToOpen = [self sitemapByName:self.defaultSitemap];
+                    if (sitemapToOpen != nil) {
+                        self.pageUrl = sitemapToOpen.homepageLink;
+                        [self loadPage:NO];
                     } else {
                         [self performSegueWithIdentifier:@"showSelectSitemap" sender:self];
                     }
                 } else {
-                    self.pageUrl = [[sitemaps objectAtIndex:0] homepageLink];
-                    [self loadPage:NO];
+                    [self performSegueWithIdentifier:@"showSelectSitemap" sender:self];
                 }
             } else {
-                // Error - we got 0 sitemaps in the list :-(
-//                [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:@"openHAB returned empty sitemap list" type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismisedByUser:YES];
-                [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:@"openHAB returned empty sitemap list" image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+                self.pageUrl = [[sitemaps objectAtIndex:0] homepageLink];
+                [self loadPage:NO];
             }
+        } else {
+            [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:@"openHAB returned empty sitemap list" image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
         }
+
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
@@ -607,6 +668,7 @@
             [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
         }
     }];
+    NSLog(@"Firing request");
     [operation start];
 }
 

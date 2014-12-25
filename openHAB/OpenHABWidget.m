@@ -37,6 +37,30 @@
     return self;
 }
 
+- (OpenHABWidget *) initWithDictionary:(NSDictionary *)dictionary
+{
+    self = [super init];
+    self.mappings = [[NSMutableArray alloc] init];
+    for (NSString *key in [dictionary allKeys]) {
+        if ([key isEqualToString:@"item"]) {
+            item = [[OpenHABItem alloc] initWithDictionary:[dictionary objectForKey:key]];
+        } else if ([key isEqualToString:@"mappings"]) {
+            NSArray *widgetMappings = [dictionary objectForKey:@"mappings"];
+            for (NSDictionary *mappingDictionary in widgetMappings) {
+                OpenHABWidgetMapping *mapping = [[OpenHABWidgetMapping alloc] initWithDictionary:mappingDictionary];
+                [self.mappings addObject:mapping];
+            }
+        } else if ([key isEqualToString:@"linkedPage"]) {
+            linkedPage = [[OpenHABLinkedPage alloc] initWithDictionary:[dictionary objectForKey:key]];
+        } else {
+            if ([[self allPropertyNames] containsObject:key]) {
+                [self setValue:[dictionary objectForKey:key] forKey:key];
+            }
+        }
+    }
+    return self;
+}
+
 - (NSString *) labelText
 {
     NSArray *array = [self.label componentsSeparatedByString:@"["];

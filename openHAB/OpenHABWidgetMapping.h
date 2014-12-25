@@ -21,5 +21,6 @@
 @property (nonatomic, retain) NSString *label;
 
 - (OpenHABWidgetMapping *) initWithXML:(GDataXMLElement *)xmlElement;
+- (OpenHABWidgetMapping *) initWithDictionary:(NSDictionary *)dictionary;
 
 @end

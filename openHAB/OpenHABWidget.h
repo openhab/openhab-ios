@@ -64,6 +64,7 @@
 @property (nonatomic, retain) UIImage *image;
 
 - (OpenHABWidget *) initWithXML:(GDataXMLElement *)xmlElement;
+- (OpenHABWidget *) initWithDictionary:(NSDictionary *)dictionary;
 - (NSString *) labelText;
 - (NSString *) labelValue;
 - (void) sendCommand:(NSString *)command;

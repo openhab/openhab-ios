@@ -24,5 +24,6 @@
 @property (nonatomic, retain) NSString *link;
 
 - (OpenHABLinkedPage *) initWithXML:(GDataXMLElement *)xmlElement;
+- (OpenHABLinkedPage *) initWithDictionary:(NSDictionary *)dictionary;
 
 @end

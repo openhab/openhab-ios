@@ -22,4 +22,14 @@
     return self;
 }
 
+- (OpenHABWidgetMapping *) initWithDictionary:(NSDictionary *)dictionary
+{
+    self = [super init];
+    for (NSString *key in [dictionary allKeys]) {
+        if ([[self allPropertyNames] containsObject:key])
+            [self setValue:[dictionary objectForKey:key] forKey:key];
+    }
+    return self;
+}
+
 @end

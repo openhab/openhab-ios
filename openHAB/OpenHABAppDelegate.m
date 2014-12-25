@@ -52,6 +52,18 @@ AVAudioPlayer *player;
     return YES;
 }
 
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
+    // Probably need to do this in a way compatible to Android app's URL
+    NSLog(@"Calling Application Bundle ID: %@", sourceApplication);
+    NSLog(@"URL scheme:%@", [url scheme]);
+    NSLog(@"URL query: %@", [url query]);
+    
+    return YES;
+}
+
 - (void)application:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken
 {
 	NSLog(@"My token is: %@", [deviceToken hexString]);

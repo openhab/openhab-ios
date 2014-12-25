@@ -24,5 +24,6 @@
 @property (nonatomic, copy) NSString* openHABUsername;
 @property (nonatomic, copy) NSString* openHABPassword;
 @property (nonatomic, retain) OpenHABViewController* rootViewController;
+@property (nonatomic) int openHABVersion;
 
 @end

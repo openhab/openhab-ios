@@ -32,4 +32,27 @@
     return self;
 }
 
+- (OpenHABSitemap *) initWithDictionaty:(NSDictionary *)dictionary
+{
+    self = [super init];
+    NSArray *keyArray =  [dictionary allKeys];
+    for (NSString *key in keyArray) {
+        if ([key isEqualToString:@"homepage"]) {
+            NSDictionary *homepageDictionary = [dictionary objectForKey:key];
+            NSArray *homepageKeyArray = [homepageDictionary allKeys];
+            for (NSString *homepageKey in homepageKeyArray) {
+                if ([homepageKey isEqualToString:@"link"]) {
+                    homepageLink = [homepageDictionary objectForKey:homepageKey];
+                }
+                if ([homepageKey isEqualToString:@"leaf"]) {
+                    leaf = [homepageDictionary objectForKey:homepageKey];
+                }
+            }
+        } else if ([[self allPropertyNames] containsObject:key]) {
+            [self setValue:[dictionary objectForKey:key] forKey:key];
+        }
+    }
+    return self;
+}
+
 @end

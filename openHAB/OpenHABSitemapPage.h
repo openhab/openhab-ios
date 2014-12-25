@@ -29,7 +29,9 @@
 @property (nonatomic, retain) NSString *pageId;
 @property (nonatomic, retain) NSString *title;
 @property (nonatomic, retain) NSString *link;
+@property (nonatomic, retain) NSString *leaf;
 
 - (OpenHABSitemapPage *) initWithXML:(GDataXMLElement *)xmlElement;
+- (OpenHABSitemapPage *) initWithDictionary:(NSDictionary *)dictionary;
 
 @end

@@ -11,7 +11,7 @@
 #import "OpenHABWidget.h"
 
 @implementation OpenHABSitemapPage
-@synthesize widgets, pageId, title, link, delegate;
+@synthesize widgets, pageId, title, link, leaf, delegate;
 
 - (OpenHABSitemapPage *) initWithXML:(GDataXMLElement *)xmlElement
 {
@@ -27,9 +27,10 @@
             }
         } else {
             OpenHABWidget *newWidget = [[OpenHABWidget alloc] initWithXML:child];
-            [newWidget setDelegate:self];
-            if (newWidget != nil)
+            if (newWidget != nil) {
+                [newWidget setDelegate:self];
                 [widgets addObject:newWidget];
+            }
             // If widget have child widgets, cycle through them too
             if ([child elementsForName:@"widget"] > 0) {
                 for (GDataXMLElement *childChild in [child elementsForName:@"widget"]) {
@@ -46,6 +47,36 @@
     }
     return self;
 }
+
+- (OpenHABSitemapPage *) initWithDictionary:(NSDictionary *)dictionary
+{
+    self = [super init];
+    widgets = [[NSMutableArray alloc] init];
+    pageId = [dictionary valueForKey:@"id"];
+    title = [dictionary valueForKey:@"title"];
+    link = [dictionary valueForKey:@"link"];
+    leaf = [dictionary valueForKey:@"leaf"];
+    NSArray *widgetsArray = [dictionary objectForKey:@"widgets"];
+    for (NSDictionary *widgetDictionary in widgetsArray) {
+        OpenHABWidget *newWidget = [[OpenHABWidget alloc] initWithDictionary:widgetDictionary];
+        if (newWidget != nil) {
+            [newWidget setDelegate:self];
+            [widgets addObject:newWidget];
+        }
+        if ([widgetDictionary objectForKey:@"widgets"] != nil) {
+            NSArray *childWidgetsArray = [widgetDictionary objectForKey:@"widgets"];
+            for (NSDictionary *childWidgetDictionary in childWidgetsArray) {
+                OpenHABWidget *newChildWidget = [[OpenHABWidget alloc] initWithDictionary:childWidgetDictionary];
+                if (newChildWidget != nil) {
+                    [newChildWidget setDelegate:self];
+                    [widgets addObject:newChildWidget];
+                }
+            }
+        }
+    }
+    return self;
+}
+
 
 - (void) sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command
 {

@@ -22,6 +22,19 @@
     return self;
 }
 
+- (OpenHABItem *) initWithDictionary:(NSDictionary *)dictionary
+{
+    self = [super init];
+    for (NSString *key in [dictionary allKeys]) {
+        if ([[self allPropertyNames] containsObject:key]) {
+            NSLog(@"%@ = %@", key, [dictionary objectForKey:key]);
+            [self setValue:[dictionary objectForKey:key] forKey:key];
+        }
+    }
+    return self;
+}
+
+
 - (float) stateAsFloat
 {
     return [state floatValue];

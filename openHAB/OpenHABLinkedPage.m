@@ -26,4 +26,19 @@
     return self;
 }
 
+- (OpenHABLinkedPage *) initWithDictionary:(NSDictionary *)dictionary
+{
+    self = [super init];
+    for (NSString *key in [dictionary allKeys]) {
+        if (![key isEqualToString:@"id"]) {
+            if ([[self allPropertyNames] containsObject:key]) {
+                [self setValue:[dictionary objectForKey:key] forKey:key];
+            }
+        } else {
+            pageId = [dictionary objectForKey:key];
+        }
+    }
+    return self;
+}
+
 @end
