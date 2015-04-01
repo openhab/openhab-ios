@@ -38,8 +38,16 @@ AVAudioPlayer *player;
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
     [self loadSettingsDefaults];
     [AFRememberingSecurityPolicy initializeCertificatesStore];
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
-     (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
+    // Notification registration now depends on iOS version (befor iOS8 and after it)
+    if ([[UIApplication sharedApplication] respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
+        // iOS 8 Notifications
+        [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:nil]];
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
+    } else {
+        // iOS < 8 Notifications
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
+         (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
+    }
     NSLog(@"uniq id %@", [UIDevice currentDevice].identifierForVendor.UUIDString);
     NSLog(@"device name %@", [UIDevice currentDevice].name);
 //    AudioSessionInitialize(NULL, NULL, nil , nil);

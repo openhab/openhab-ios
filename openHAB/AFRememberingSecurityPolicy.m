@@ -37,7 +37,8 @@ static NSMutableDictionary * trustedCertificates;
 
 + (void) storeCertificateData:(CFDataRef)certificate forDomain:(NSString*)domain
 {
-    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
+//    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
+    NSData *certificateData = (__bridge_transfer NSData*) certificate;
     [trustedCertificates setObject:certificateData forKey:domain];
     [self saveTrustedCertificates];
 }
@@ -47,7 +48,8 @@ static NSMutableDictionary * trustedCertificates;
     NSData *certificateData = [trustedCertificates objectForKey:domain];
     if (certificateData == nil)
         return nil;
-    CFDataRef certificate = (__bridge CFDataRef)([NSKeyedUnarchiver unarchiveObjectWithData:certificateData]);
+    CFDataRef certificate = CFDataCreate(NULL, [certificateData bytes], [certificateData length]);
+//    CFDataRef certificate = SecCertificateCopyData((__bridge CFDataRef)([NSKeyedUnarchiver unarchiveObjectWithData:certificateData]));
     return certificate;
 }
 
@@ -73,18 +75,17 @@ static NSMutableDictionary * trustedCertificates;
 // Evaluates trust received during SSL negotiation and checks it against known ones,
 // against policy setting to ignore certificate errors and so on.
 {
-    SecCertificateRef certificate = SecTrustGetLeafCertificate(serverTrust);
-    CFStringRef certificateSummary = SecCertificateCopySubjectSummary(certificate);
-    CFDataRef certificateData = SecCertificateCopyData(certificate);
     SecTrustResultType evaluateResult;
     SecTrustEvaluate(serverTrust, &evaluateResult);
-    SecKeyRef certificatePublicKey = NULL;
     if (evaluateResult == kSecTrustResultUnspecified || evaluateResult == kSecTrustResultProceed || self.allowInvalidCertificates) {
         // This means system thinks this is a legal/usable certificate, just permit the connection
         return YES;
     }
+    SecCertificateRef certificate = SecTrustGetLeafCertificate(serverTrust);
+    CFStringRef certificateSummary = SecCertificateCopySubjectSummary(certificate);
+    CFDataRef certificateData = SecCertificateCopyData(certificate);
     // If we have a certificate for this domain
-    if ([AFRememberingSecurityPolicy certificateDataForDomain:domain] != nil) {
+    if ([AFRememberingSecurityPolicy certificateDataForDomain:domain] != nil && certificateData != nil) {
         // Obtain certificate we have and compare it with the certificate presented by the server
         CFDataRef previousCertificateData = [AFRememberingSecurityPolicy certificateDataForDomain:domain];
         BOOL success = CFEqual(previousCertificateData, certificateData);
