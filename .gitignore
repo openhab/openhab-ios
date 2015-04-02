@@ -1,0 +1,7 @@
+.DS_Store
+openHAB.xcodeproj/project.xcworkspace/xcshareddata
+openHAB.xcodeproj/project.xcworkspace/xcuserdata
+openHAB.xcodeproj/xcuserdata
+openHAB.xcworkspace
+Podfile.lock
+Pods
