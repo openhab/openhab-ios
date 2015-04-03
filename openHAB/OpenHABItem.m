@@ -42,7 +42,7 @@
 
 - (int) stateAsInt
 {
-    return [state integerValue];
+    return (int)[state integerValue];
 }
 
 - (UIColor*) stateAsUIColor

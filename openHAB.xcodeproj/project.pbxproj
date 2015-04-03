@@ -96,9 +96,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		25279B3D1FF5798BF16509A1 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
-		3445EB45514207D2E03FC870 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		73CEB562F22E44DC92058388 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BCFC8D0359734746ECE3AB2 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
@@ -248,7 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				CCDE2E686DCD3817C7AE5376 /* Pods.debug.xcconfig */,
-				4F048B4D29497A0B6D732C65 /* Pods.release.xcconfig */,
+				9BCFC8D0359734746ECE3AB2 /* Pods.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -835,14 +834,14 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "55C16473-E5A9-48D6-A56D-81F62301E6E5";
+				PROVISIONING_PROFILE = "c9374b3d-9e2e-44f5-970a-f10e9f45b876";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
 		DFB2625E18830A3600D3244D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4F048B4D29497A0B6D732C65 /* Pods.release.xcconfig */;
+			baseConfigurationReference = 9BCFC8D0359734746ECE3AB2 /* Pods.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -855,7 +854,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "5F1B9222-2B67-4188-9B51-B641EE305EB7";
+				PROVISIONING_PROFILE = "F5A4C993-92E6-4A41-93C4-B922E1F99F45";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
