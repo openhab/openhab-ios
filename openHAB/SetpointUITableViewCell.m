@@ -51,7 +51,7 @@
     // - pressed
     } else if ([segmentedControl selectedSegmentIndex] == 0) {
         if ([self.widget.item.state isEqual:@"Uninitialized"]) {
-            [self.widget sendCommand:self.widget.minValue];
+            [self.widget sendCommand:(NSString*)self.widget.minValue];
         } else {
             if (self.widget.minValue != nil) {
                 if ([self.widget.item stateAsFloat] - [self.widget.step floatValue] >= [self.widget.minValue floatValue]) {

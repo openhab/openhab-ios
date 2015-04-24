@@ -29,8 +29,9 @@
             } else if ([[child name] isEqual:@"linkedPage"]) {
                 linkedPage = [[OpenHABLinkedPage alloc] initWithXML:child];
             } else {
+                NSString *propertyValue = [child stringValue];
                 if ([[self allPropertyNames] containsObject:[child name]])
-                    [self setValue:[child stringValue] forKey:[child name]];
+                    [self setValue:propertyValue forKey:[child name]];
             }
         }
     }
@@ -53,8 +54,14 @@
         } else if ([key isEqualToString:@"linkedPage"]) {
             linkedPage = [[OpenHABLinkedPage alloc] initWithDictionary:[dictionary objectForKey:key]];
         } else {
-            if ([[self allPropertyNames] containsObject:key]) {
-                [self setValue:[dictionary objectForKey:key] forKey:key];
+            if ([[dictionary objectForKey:key] isKindOfClass:[NSString class]]) {
+                if ([[self allPropertyNames] containsObject:key]) {
+                    [self setValue:[dictionary objectForKey:key] forKey:key];
+                }
+            } else {
+                if ([[self allPropertyNames] containsObject:key]) {
+                    [self setValue:[[dictionary objectForKey:key] stringValue] forKey:key];
+                }
             }
         }
     }
