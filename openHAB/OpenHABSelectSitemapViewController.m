@@ -157,6 +157,9 @@
         NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, sitemap.icon];
         NSLog(@"icon url = %@", iconUrlString);
         [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
+    } else {
+        NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/openhab.png", self.openHABRootUrl];
+        [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
     }
     return cell;
 }
