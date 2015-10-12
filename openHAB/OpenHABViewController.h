@@ -40,6 +40,7 @@
 @property (nonatomic, strong) NSString *deviceId;
 @property (nonatomic, strong) NSString *deviceName;
 @property (nonatomic, retain) NSString *atmosphereTrackingId;
+@property (nonatomic, retain) UIRefreshControl *refreshControl;
 
 - (void)openHABTracked:(NSString *)openHABUrl;
 - (void)sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command;

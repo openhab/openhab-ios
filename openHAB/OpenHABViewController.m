@@ -41,7 +41,7 @@
     AFHTTPRequestOperation *commandOperation;
 }
 
-@synthesize pageUrl, widgetTableView, openHABRootUrl, openHABUsername, openHABPassword, ignoreSSLCertificate, sitemaps, currentPage, pageNetworkStatus, pageNetworkStatusAvailable, idleOff, deviceId, deviceToken, deviceName;
+@synthesize pageUrl, widgetTableView, openHABRootUrl, openHABUsername, openHABPassword, ignoreSSLCertificate, sitemaps, currentPage, pageNetworkStatus, pageNetworkStatusAvailable, idleOff, deviceId, deviceToken, deviceName, refreshControl;
 
 
 // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
@@ -61,6 +61,18 @@
                                              selector: @selector(didBecomeActive:)
                                                  name: UIApplicationDidBecomeActiveNotification
                                                object: nil];
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    self.refreshControl.backgroundColor = [UIColor groupTableViewBackgroundColor];
+//    self.refreshControl.tintColor = [UIColor whiteColor];
+    [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
+    [self.widgetTableView addSubview:self.refreshControl];
+    [self.widgetTableView sendSubviewToBack:refreshControl];
+}
+
+- (void)handleRefresh:(UIRefreshControl *)refreshControl {
+    [self loadPage:NO];
+//    [self.widgetTableView reloadData];
+//    [self.widgetTableView layoutIfNeeded];
 }
 
 - (void)handleApsRegistration:(NSNotification *)note
@@ -302,6 +314,19 @@
     return cell;
 }
 
+-(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Prevent the cell from inheriting the Table View's margin settings
+    if ([cell respondsToSelector:@selector(setPreservesSuperviewLayoutMargins:)]) {
+        [cell setPreservesSuperviewLayoutMargins:NO];
+    }
+    
+    // Explictly set your cell's layout margins
+    if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+        [cell setLayoutMargins:UIEdgeInsetsZero];
+    }
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     OpenHABWidget *widget = [currentPage.widgets objectAtIndex:indexPath.row];
@@ -528,7 +553,6 @@
     }
     [currentPageOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Page loaded with success");
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSDictionary *headers = operation.response.allHeaderFields;
 //        NSLog(@"%@", headers);
         if ([headers objectForKey:@"X-Atmosphere-tracking-id"] != nil) {
@@ -554,6 +578,8 @@
         }
         [currentPage setDelegate:self];
         [self.widgetTableView reloadData];
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        [self.refreshControl endRefreshing];
         self.navigationItem.title = [self.currentPage.title componentsSeparatedByString:@"["][0];
         if (longPolling == YES)
             [self loadPage:NO];
