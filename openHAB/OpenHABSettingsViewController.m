@@ -44,6 +44,7 @@
     [remoteUrlTextField setDelegate:self];
     [usernameTextField setDelegate:self];
     [passwordTextField setDelegate:self];
+    [demomodeSwitch addTarget:self action:@selector(demomodeSwitchChange:) forControlEvents:UIControlEventValueChanged];
 }
 
 - (void) viewWillAppear:(BOOL)animated
@@ -76,6 +77,44 @@
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
+- (void)demomodeSwitchChange:(id)sender
+{
+    if (self.demomodeSwitch.isOn) {
+        NSLog(@"Demo is ON");
+        [self disableConnectionSettings];
+    } else {
+        NSLog(@"Demo is OFF");
+        [self enableConnectionSettings];
+    }
+}
+
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+    NSInteger ret;
+    switch (section) {
+        case 0:
+            if (demomodeSwitch.isOn) {
+                ret = 1;
+            } else {
+                ret = 5;
+            }
+            break;
+        case 1:
+            ret = 5;
+    }
+    return ret;
+}
+
+- (void)enableConnectionSettings
+{
+    [settingsTableView reloadData];
+}
+
+- (void)disableConnectionSettings
+{
+    [settingsTableView reloadData];
+}
+
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -101,6 +140,11 @@
     [ignoreSSLSwitch setOn:settingsIgnoreSSL];
     [demomodeSwitch setOn:settingsDemomode];
     [idleOffSwitch setOn:settingsIdleOff];
+    if (settingsDemomode == YES) {
+        [self disableConnectionSettings];
+    } else {
+        [self enableConnectionSettings];
+    }
 }
 
 - (void)loadSettings

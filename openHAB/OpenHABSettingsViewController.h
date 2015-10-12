@@ -18,6 +18,7 @@
     IBOutlet UISwitch *ignoreSSLSwitch;
     IBOutlet UISwitch *demomodeSwitch;
     IBOutlet UISwitch *idleOffSwitch;
+    IBOutlet UITableView *settingsTableView;
     
     NSString *settingsLocalUrl;
     NSString *settingsRemoteUrl;

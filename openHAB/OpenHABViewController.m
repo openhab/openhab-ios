@@ -300,6 +300,11 @@
     if ([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"]) {
         [(ImageUITableViewCell *)cell setDelegate:self];
     }
+    if ([cellIdentifier isEqualToString:@"FrameWidgetCell"]) {
+        cell.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    } else {
+        cell.backgroundColor = [UIColor whiteColor];
+    }
     [cell loadWidget:widget];
     [cell displayWidget];
     // Check if this is not the last row in the widgets list
