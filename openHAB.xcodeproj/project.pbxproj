@@ -508,6 +508,7 @@
 				DFB2622418830A3600D3244D /* Frameworks */,
 				DFB2622518830A3600D3244D /* Resources */,
 				731D5AA1AB0C4564ABDB9401 /* Copy Pods Resources */,
+				A2AEF59FA2ED629F4FEA7169 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -633,6 +634,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A2AEF59FA2ED629F4FEA7169 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		CD12626098D2495A8D125E38 /* Check Pods Manifest.lock */ = {
@@ -824,7 +840,7 @@
 			baseConfigurationReference = CCDE2E686DCD3817C7AE5376 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -834,7 +850,7 @@
 					"$(PROJECT_DIR)/CrittercismSDK",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "c9374b3d-9e2e-44f5-970a-f10e9f45b876";
+				PROVISIONING_PROFILE = "F5A4C993-92E6-4A41-93C4-B922E1F99F45";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -844,7 +860,7 @@
 			baseConfigurationReference = 9BCFC8D0359734746ECE3AB2 /* Pods.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
