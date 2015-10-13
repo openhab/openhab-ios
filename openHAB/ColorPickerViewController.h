@@ -8,9 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "OpenHABWidget.h"
+#import "NKOColorPickerView.h"
 
 @interface ColorPickerViewController : UIViewController
 
 @property (nonatomic, retain) OpenHABWidget *widget;
+@property (nonatomic, retain) NKOColorPickerView *colorPickerView;
 
 @end

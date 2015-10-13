@@ -7,7 +7,6 @@
 //
 
 #import "ColorPickerViewController.h"
-#import "NKOColorPickerView.h"
 #import "OpenHABItem.h"
 
 @interface ColorPickerViewController ()
@@ -15,7 +14,7 @@
 @end
 
 @implementation ColorPickerViewController
-@synthesize widget;
+@synthesize widget, colorPickerView;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
@@ -44,13 +43,21 @@
         [self.widget sendCommand:command];
     };
     CGRect viewFrame = self.view.frame;
-    CGRect pickerFrame = CGRectMake(viewFrame.origin.x, viewFrame.origin.y + viewFrame.size.height/20, viewFrame.size.width, viewFrame.size.height - viewFrame.size.height/5);
-    NKOColorPickerView *colorPickerView = [[NKOColorPickerView alloc] initWithFrame:pickerFrame color:[UIColor blueColor] andDidChangeColorBlock:colorDidChangeBlock];
+    CGRect pickerFrame = CGRectMake(viewFrame.origin.x, viewFrame.origin.y + viewFrame.size.height/10, viewFrame.size.width, viewFrame.size.height - viewFrame.size.height/5);
+    colorPickerView = [[NKOColorPickerView alloc] initWithFrame:pickerFrame color:[UIColor blueColor] andDidChangeColorBlock:colorDidChangeBlock];
     [self.view addSubview:colorPickerView];
     if (self.widget != nil) {
         [colorPickerView setColor:[self.widget.item stateAsUIColor]];
     }
     [super viewDidLoad];
+}
+
+- (void) didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    NSLog(@"Rotation!");
+    CGRect viewFrame = self.view.frame;
+    CGRect pickerFrame = CGRectMake(viewFrame.origin.x, viewFrame.origin.y, viewFrame.size.width, viewFrame.size.height - viewFrame.size.height/5);
+    colorPickerView.frame = pickerFrame;
 }
 
 - (void)didReceiveMemoryWarning
