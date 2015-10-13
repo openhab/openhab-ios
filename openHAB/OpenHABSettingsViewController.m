@@ -12,6 +12,7 @@
 #import <GAI.h>
 #import "GAIFields.h"
 #import "GAIDictionaryBuilder.h"
+#import <SDWebImage/UIImageView+WebCache.h>
 
 @interface OpenHABSettingsViewController ()
 
@@ -54,6 +55,8 @@
     [tracker set:kGAIScreenName
            value:@"OpenHABSettingsViewController"];
     [tracker send:[[GAIDictionaryBuilder createAppView] build]];
+    [settingsTableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow
+                                  animated:YES];
 }
 
 
@@ -99,9 +102,22 @@
             }
             break;
         case 1:
-            ret = 5;
+            ret = 6;
     }
     return ret;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [settingsTableView deselectRowAtIndexPath:indexPath
+                                     animated:YES];
+    NSLog(@"Row selected %ld %ld", (long)[indexPath section], (long)[indexPath row]);
+    if ([indexPath section] == 1 && [indexPath row] == 2) {
+        NSLog(@"Clearing image cache");
+        SDImageCache *imageCache = [SDImageCache sharedImageCache];
+        [imageCache clearMemory];
+        [imageCache clearDisk];
+    }
 }
 
 - (void)enableConnectionSettings
