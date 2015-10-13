@@ -65,6 +65,12 @@
     }
     OpenHABWidgetMapping *mapping = [mappings objectAtIndex:indexPath.row];
     cell.textLabel.text = mapping.label;
+    if ([[selectionItem state] intValue] == [indexPath row]) {
+        NSLog(@"This item is selected");
+        cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    } else {
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
     return cell;
 }
 
