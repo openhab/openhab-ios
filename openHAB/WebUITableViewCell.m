@@ -31,9 +31,11 @@
 - (void)displayWidget
 {
     NSLog(@"webview loading url %@", self.widget.url);
-        NSURL *nsurl=[NSURL URLWithString:self.widget.url];
-        NSURLRequest *nsrequest=[NSURLRequest requestWithURL:nsurl];
-        [widgetWebView loadRequest:nsrequest];
+    widgetWebView.scrollView.scrollEnabled = NO;
+    widgetWebView.scrollView.bounces = NO;
+    NSURL *nsurl=[NSURL URLWithString:self.widget.url];
+    NSURLRequest *nsrequest=[NSURLRequest requestWithURL:nsurl];
+    [widgetWebView loadRequest:nsrequest];
     NSLog(@"webview size %f %f", widgetWebView.frame.size.width, widgetWebView.frame.size.height);
     NSLog(@"scrollview size %f %f", widgetWebView.scrollView.frame.size.width, widgetWebView.scrollView.frame.size.height);
 }
