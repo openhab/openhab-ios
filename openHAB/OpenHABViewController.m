@@ -90,7 +90,7 @@
 - (void) doRegisterAps
 {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    if ([[prefs valueForKey:@"remoteUrl"] isEqualToString:@"https://my.openhab.org"]) {
+    if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"]) {
         if (deviceId != nil && deviceToken != nil && deviceName != nil) {
             NSLog(@"Registering with my.openHAB");
             NSString *registrationUrlString = [NSString stringWithFormat:@"https://my.openhab.org/addAppleRegistration?regId=%@&deviceId=%@&deviceModel=%@", deviceToken, deviceId, deviceName];
