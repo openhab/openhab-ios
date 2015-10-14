@@ -31,13 +31,18 @@
 - (void)displayWidget
 {
     NSLog(@"webview loading url %@", self.widget.url);
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *openHABUsername = [prefs valueForKey:@"username"];
+    NSString *openHABPassword = [prefs valueForKey:@"password"];
+    NSString *authStr = [NSString stringWithFormat:@"%@:%@", openHABUsername, openHABPassword];
+    NSData *authData = [authStr dataUsingEncoding:NSASCIIStringEncoding];
+    NSString *authValue = [NSString stringWithFormat:@"Basic %@", [authData base64EncodedStringWithOptions:kNilOptions]];
+    NSMutableURLRequest *mutableRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:self.widget.url]];
+    [mutableRequest setValue:authValue forHTTPHeaderField:@"Authorization"];
+    NSURLRequest *nsrequest=[mutableRequest copy];
     widgetWebView.scrollView.scrollEnabled = NO;
     widgetWebView.scrollView.bounces = NO;
-    NSURL *nsurl=[NSURL URLWithString:self.widget.url];
-    NSURLRequest *nsrequest=[NSURLRequest requestWithURL:nsurl];
     [widgetWebView loadRequest:nsrequest];
-    NSLog(@"webview size %f %f", widgetWebView.frame.size.width, widgetWebView.frame.size.height);
-    NSLog(@"scrollview size %f %f", widgetWebView.scrollView.frame.size.width, widgetWebView.scrollView.frame.size.height);
 }
 
 -(void)webViewDidStartLoad:(UIWebView *)webView
