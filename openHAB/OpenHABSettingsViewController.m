@@ -54,7 +54,7 @@
     id tracker = [[GAI sharedInstance] defaultTracker];
     [tracker set:kGAIScreenName
            value:@"OpenHABSettingsViewController"];
-    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
+    [tracker send:[[GAIDictionaryBuilder createScreenView] build]];
     [settingsTableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow
                                   animated:YES];
 }

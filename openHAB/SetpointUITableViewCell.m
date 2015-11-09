@@ -44,7 +44,7 @@
 -(void) pickOne:(id)sender
 {
     UISegmentedControl *segmentedControl = (UISegmentedControl *)sender;
-    NSLog(@"Setpoint pressed %d", [segmentedControl selectedSegmentIndex]);
+    NSLog(@"Setpoint pressed %ld", (long)[segmentedControl selectedSegmentIndex]);
     // Deselect segment in the middle
     if ([segmentedControl selectedSegmentIndex] == 1) {
         [self.widgetSegmentedControl setSelectedSegmentIndex:-1];
