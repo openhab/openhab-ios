@@ -28,14 +28,16 @@
     }
     NSLog(@"Chart url %@", chartUrl);
     if (widget.image == nil) {
-        [self.widgetImage setImageWithURL:[NSURL URLWithString:chartUrl] placeholderImage:nil options:SDWebImageCacheMemoryOnly completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
-//        NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
-            widget.image = self.widgetImage.image;
-            [self.widgetImage setFrame:self.contentView.frame];
-            if (self.delegate != nil) {
-                [self.delegate didLoadImage];
-            }
-        }];
+        [self.widgetImage sd_setImageWithURL:[NSURL URLWithString:chartUrl]
+                            placeholderImage:nil
+                                     options:SDWebImageCacheMemoryOnly
+                                   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *url) {
+                                       widget.image = self.widgetImage.image;
+                                       [self.widgetImage setFrame:self.contentView.frame];
+                                       if (self.delegate != nil) {
+                                           [self.delegate didLoadImage];
+                                       }
+                                   } ];
     } else {
         [self.widgetImage setImage:widget.image];
     }

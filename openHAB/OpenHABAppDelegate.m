@@ -53,7 +53,7 @@ AVAudioPlayer *player;
 //    AudioSessionInitialize(NULL, NULL, nil , nil);
 //    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error: nil];
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient withOptions:AVAudioSessionCategoryOptionDuckOthers error:nil];
-    UInt32 doSetProperty = 1;
+    //UInt32 doSetProperty = 1;
 //    AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof(doSetProperty), &doSetProperty);
 //    [[AVAudioSession sharedInstance] setActive: YES error: nil];
     NSLog(@"didFinishLaunchingWithOptions ended");

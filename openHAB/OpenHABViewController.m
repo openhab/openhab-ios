@@ -124,7 +124,7 @@
     id gaiTracker = [[GAI sharedInstance] defaultTracker];
     [gaiTracker set:kGAIScreenName
            value:@"OpenHABViewController"];
-    [gaiTracker send:[[GAIDictionaryBuilder createAppView] build]];
+    [gaiTracker send:[[GAIDictionaryBuilder createScreenView] build]];
     // Load settings into local properties
     [self loadSettings];
     // Set authentication parameters to SDImage
@@ -441,8 +441,6 @@
         NSLog(@"This is an openHAB 2.X");
         [[self appData] setOpenHABVersion:2];
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-        NSData *response = (NSData*)responseObject;
-        NSError *error;
         [self selectSitemap];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         NSLog(@"This is an openHAB 1.X");
@@ -509,6 +507,8 @@
 
 - (void)loadPage:(Boolean)longPolling
 {
+    __weak typeof(self) weakSelf = self;
+    __weak typeof(currentPage) weakCurrentPage = currentPage;
     if (self.pageUrl == nil) {
         return;
     }
@@ -559,10 +559,9 @@
     [currentPageOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"Page loaded with success");
         NSDictionary *headers = operation.response.allHeaderFields;
-//        NSLog(@"%@", headers);
         if ([headers objectForKey:@"X-Atmosphere-tracking-id"] != nil) {
             NSLog(@"Found X-Atmosphere-tracking-id: %@", [headers objectForKey:@"X-Atmosphere-tracking-id"]);
-            self.atmosphereTrackingId = [headers objectForKey:@"X-Atmosphere-tracking-id"];
+            weakSelf.atmosphereTrackingId = [headers objectForKey:@"X-Atmosphere-tracking-id"];
         }
         NSData *response = (NSData*)responseObject;
         NSError *error;
@@ -581,32 +580,32 @@
         } else {
             currentPage = [[OpenHABSitemapPage alloc] initWithDictionary:responseObject];
         }
-        [currentPage setDelegate:self];
-        [self.widgetTableView reloadData];
+        [weakCurrentPage setDelegate:weakSelf];
+        [weakSelf.widgetTableView reloadData];
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-        [self.refreshControl endRefreshing];
-        self.navigationItem.title = [self.currentPage.title componentsSeparatedByString:@"["][0];
+        [weakSelf.refreshControl endRefreshing];
+        weakSelf.navigationItem.title = [weakSelf.currentPage.title componentsSeparatedByString:@"["][0];
         if (longPolling == YES)
-            [self loadPage:NO];
+            [weakSelf loadPage:NO];
         else
-            [self loadPage:YES];
+            [weakSelf loadPage:YES];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
-        self.atmosphereTrackingId = nil;
+        weakSelf.atmosphereTrackingId = nil;
         if (error.code == -1001 && longPolling) {
             NSLog(@"Timeout, restarting requests");
-            [self loadPage:NO];
+            [weakSelf loadPage:NO];
         } else if (error.code == -999) {
             // Request was cancelled
             NSLog(@"Request was cancelled");
         } else {
             // Error
             if (error.code == -1012) {
-                [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:@"SSL Certificate Error" image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+                [TSMessage showNotificationInViewController:weakSelf.navigationController title:@"Error" subtitle:@"SSL Certificate Error" image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
             } else {
-                [TSMessage showNotificationInViewController:self.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+                [TSMessage showNotificationInViewController:weakSelf.navigationController title:@"Error" subtitle:[error localizedDescription] image:nil type:TSMessageNotificationTypeError duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
             }
             NSLog(@"Request failed: %@", [error localizedDescription]);
         }
