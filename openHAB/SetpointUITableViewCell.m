@@ -53,12 +53,12 @@
         if ([self.widget.item.state isEqual:@"Uninitialized"]) {
             [self.widget sendCommand:(NSString*)self.widget.minValue];
         } else {
-            if (self.widget.minValue != nil) {
-                if ([self.widget.item stateAsFloat] - [self.widget.step floatValue] >= [self.widget.minValue floatValue]) {
-                    [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
-                }
-            } else {
-                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
+            if (self.widget.minValue == nil || ([self.widget.item stateAsFloat] - [self.widget.step floatValue] >= [self.widget.minValue floatValue])) {
+                float setp = [self.widget.item stateAsFloat] - [self.widget.step floatValue];
+                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", setp]];
+                //update our local value and UI until we get an update from the server
+                [self.widget.item setState: [NSString stringWithFormat:@"%.01f", setp]];
+                [self displayWidget];
             }
         }
     // + pressed
@@ -66,12 +66,13 @@
         if ([self.widget.item.state isEqual:@"Uninitialized"]) {
             [self.widget sendCommand:self.widget.minValue];
         } else {
-            if (self.widget.maxValue != nil) {
-                if ([self.widget.item stateAsFloat] + [self.widget.step floatValue] <= [self.widget.maxValue floatValue]) {
-                    [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
-                }
-            } else {
-                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
+            if (self.widget.maxValue == nil ||
+                ([self.widget.item stateAsFloat] + [self.widget.step floatValue] <= [self.widget.maxValue floatValue])) {
+                float setp = [self.widget.item stateAsFloat] + [self.widget.step floatValue];
+                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", setp]];
+                //update our local value and UI until we get an update from the server
+                [self.widget.item setState: [NSString stringWithFormat:@"%.01f", setp]];
+                [self displayWidget];
             }
         }
     }
