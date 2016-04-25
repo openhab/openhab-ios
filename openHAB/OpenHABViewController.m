@@ -287,7 +287,15 @@
     GenericUITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     // No icon is needed for image, video, frame and web widgets
     if (widget.icon != nil && !([cellIdentifier isEqualToString:@"ChartWidgetCell"] || [cellIdentifier isEqualToString:@"ImageWidgetCell"] || [cellIdentifier isEqualToString:@"VideoWidgetCell"] || [cellIdentifier isEqualToString:@"FrameWidgetCell"] || [cellIdentifier isEqualToString:@"WebWidgetCell"])) {
-        NSString *iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, widget.icon];
+        
+        NSString *iconUrlString = nil;
+        
+        if ([self appData].openHABVersion == 2) {
+            iconUrlString = [NSString stringWithFormat:@"%@/icon/%@?state=%@", self.openHABRootUrl, widget.icon, [widget.item.state stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        } else {
+            iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, widget.icon];
+        }
+        
         [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
     }
     if ([cellIdentifier isEqualToString:@"ColorPickerWidgetCell"]) {
