@@ -30,6 +30,9 @@
 #import "GAIFields.h"
 #import "GAIDictionaryBuilder.h"
 #import "UIAlertView+Block.h"
+#import "UIViewController+MMDrawerController.h"
+#import "MMDrawerBarButtonItem.h"
+#import "OpenHABDrawerTableViewController.h"
 
 @interface OpenHABViewController ()
 
@@ -67,6 +70,8 @@
     [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
     [self.widgetTableView addSubview:self.refreshControl];
     [self.widgetTableView sendSubviewToBack:refreshControl];
+    MMDrawerBarButtonItem * rightDrawerButton = [[MMDrawerBarButtonItem alloc] initWithTarget:self action:@selector(rightDrawerButtonPress:)];
+    [self.navigationItem setRightBarButtonItem:rightDrawerButton animated:YES];
 }
 
 - (void)handleRefresh:(UIRefreshControl *)refreshControl {
@@ -85,6 +90,12 @@
         self.deviceName = [theData objectForKey:@"deviceName"];
         [self doRegisterAps];
     }
+}
+
+-(void)rightDrawerButtonPress:(id)sender{
+    OpenHABDrawerTableViewController *drawer = (OpenHABDrawerTableViewController*)[self.mm_drawerController rightDrawerViewController];
+    drawer.sitemaps = [self sitemaps];
+    [self.mm_drawerController toggleDrawerSide:MMDrawerSideRight animated:YES completion:nil];
 }
 
 - (void) doRegisterAps

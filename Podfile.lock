@@ -27,6 +27,20 @@ PODS:
     - GoogleAnalytics-iOS-SDK/Core (= 3.12)
   - GoogleAnalytics-iOS-SDK/Core (3.12)
   - HexColors (2.2.1)
+  - MMDrawerController (0.5.7):
+    - MMDrawerController/Core (= 0.5.7)
+    - MMDrawerController/MMDrawerBarButtonItem (= 0.5.7)
+    - MMDrawerController/MMDrawerVisualStates (= 0.5.7)
+    - MMDrawerController/Subclass (= 0.5.7)
+  - MMDrawerController+Storyboard (0.0.2):
+    - MMDrawerController
+  - MMDrawerController/Core (0.5.7)
+  - MMDrawerController/MMDrawerBarButtonItem (0.5.7):
+    - MMDrawerController/Core
+  - MMDrawerController/MMDrawerVisualStates (0.5.7):
+    - MMDrawerController/Core
+  - MMDrawerController/Subclass (0.5.7):
+    - MMDrawerController/Core
   - NKOColorPickerView (0.5)
   - SDWebImage (3.7.3):
     - SDWebImage/Core (= 3.7.3)
@@ -40,6 +54,8 @@ DEPENDENCIES:
   - FastSocket (~> 1.3)
   - GDataXML-HTML (~> 1.3.0)
   - GoogleAnalytics-iOS-SDK (~> 3.12)
+  - MMDrawerController (~> 0.5.7)
+  - MMDrawerController+Storyboard
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 3.7.3)
   - TSMessages (~> 0.9.12)
@@ -51,6 +67,8 @@ SPEC CHECKSUMS:
   GDataXML-HTML: 7adc03668cab35c288f1dbb8929a179f0fece898
   GoogleAnalytics-iOS-SDK: 13241762fa4aea845eb75bef6c0da3427a26e7b3
   HexColors: abfd172e329dab59888614ccba6f216cec59289d
+  MMDrawerController: 7a4cf8e25596bf2434e03ce50d22a8608ddee6a1
+  MMDrawerController+Storyboard: c98f86c0f32cdef1d466d19a7da3ad2fc6c6ac00
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
   SDWebImage: 1d2b1a1efda1ade1b00b6f8498865f8ddedc8a84
   TSMessages: c8cc7b80f2a833af533872cd02010cac061532cc
