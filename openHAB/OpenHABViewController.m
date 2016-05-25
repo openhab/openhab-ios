@@ -94,14 +94,14 @@
 
 -(void)rightDrawerButtonPress:(id)sender{
     OpenHABDrawerTableViewController *drawer = (OpenHABDrawerTableViewController*)[self.mm_drawerController rightDrawerViewController];
-    drawer.sitemaps = [self sitemaps];
     [self.mm_drawerController toggleDrawerSide:MMDrawerSideRight animated:YES completion:nil];
 }
 
 - (void) doRegisterAps
 {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"]) {
+    if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"] ||
+        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://home.openhab.org"]) {
         if (deviceId != nil && deviceToken != nil && deviceName != nil) {
             NSLog(@"Registering with my.openHAB");
             NSString *registrationUrlString = [NSString stringWithFormat:@"https://my.openhab.org/addAppleRegistration?regId=%@&deviceId=%@&deviceModel=%@", deviceToken, deviceId, deviceName];

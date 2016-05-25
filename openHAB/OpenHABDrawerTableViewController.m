@@ -13,6 +13,12 @@
 #import "OpenHABDrawerItem.h"
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <SDWebImage/SDWebImageDownloader.h>
+#import "OpenHABAppDataDelegate.h"
+#import "OpenHABDataObject.h"
+#import "OpenHABViewController.h"
+#import "AFNetworking.h"
+#import "NSMutableURLRequest+Auth.h"
+#import "GDataXMLNode.h"
 
 @interface OpenHABDrawerTableViewController ()
 
@@ -28,13 +34,79 @@
     NSLog(@"OpenHABDrawerTableViewController did load");
 }
 
+- (void) viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    NSString *sitemapsUrlString = [NSString stringWithFormat:@"%@/rest/sitemaps", self.openHABRootUrl];
+    NSURL *sitemapsUrl = [[NSURL alloc] initWithString:sitemapsUrlString];
+    NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];
+    [sitemapsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
+    AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:sitemapsRequest];
+    AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    operation.securityPolicy = policy;
+    if (self.ignoreSSLCertificate) {
+        NSLog(@"Warning - ignoring invalid certificates");
+        operation.securityPolicy.allowInvalidCertificates = YES;
+    }
+    if ([self appData].openHABVersion == 2) {
+        NSLog(@"Setting setializer to JSON");
+        operation.responseSerializer = [AFJSONResponseSerializer serializer];
+    }
+    [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSData *response = (NSData*)responseObject;
+        NSError *error;
+        [sitemaps removeAllObjects];
+        NSLog(@"Sitemap response");
+        // If we are talking to openHAB 1.X, talk XML
+        if ([self appData].openHABVersion == 1) {
+            NSLog(@"openHAB 1");
+            NSLog(@"%@", [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
+            GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
+            if (doc == nil) return;
+            NSLog(@"%@", [doc.rootElement name]);
+            if ([[doc.rootElement name] isEqual:@"sitemaps"]) {
+                for (GDataXMLElement *element in [doc.rootElement elementsForName:@"sitemap"]) {
+                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithXML:element];
+                    [sitemaps addObject:sitemap];
+                }
+            } else {
+                return;
+            }
+            // Newer versions speak JSON!
+        } else {
+            NSLog(@"openHAB 2");
+            if ([responseObject isKindOfClass:[NSArray class]]) {
+                NSLog(@"Response is array");
+                for (id sitemapJson in responseObject) {
+                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithDictionaty:sitemapJson];
+                    [sitemaps addObject:sitemap];
+                }
+            } else {
+                // Something went wrong, we should have received an array
+                return;
+            }
+        }
+        [[self appData] setSitemaps:sitemaps];
+        [self.tableView reloadData];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error){
+        NSLog(@"Error:------>%@", [error description]);
+        NSLog(@"error code %ld",(long)[operation.response statusCode]);
+    }];
+    [operation start];    
+}
+
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self.drawerItems removeAllObjects];
     // check if we are using my.openHAB, add notifications menu item then
-    if ([self.openHABRootUrl hasPrefix:@"https://my.openhab.org"] ||
-        [self.openHABRootUrl hasPrefix:@"https://home.openhab.org"]) {
-        
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"] ||
+        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://home.openhab.org"]) {
+        OpenHABDrawerItem *notificationsItem = [[OpenHABDrawerItem alloc] init];
+        notificationsItem.label = @"Notifications";
+        notificationsItem.tag = @"notifications";
+        notificationsItem.icon = @"glyphicons-334-bell.png";
+        [self.drawerItems addObject:notificationsItem];
     }
     // Settings always go last
     OpenHABDrawerItem *settingsItem = [[OpenHABDrawerItem alloc] init];
@@ -42,6 +114,7 @@
     settingsItem.tag = @"settings";
     settingsItem.icon = @"glyphicons-137-cogwheel.png";
     [self.drawerItems addObject:settingsItem];
+    self.sitemaps = [[self appData] sitemaps];
     [self.tableView reloadData];
     NSLog(@"RightDrawerViewController viewDidAppear");
     NSLog(@"Sitemaps count: %lu", (unsigned long)[self.sitemaps count]);
@@ -79,7 +152,12 @@
         if ([indexPath row] <= [self.sitemaps count] && [sitemaps count] > 0) {
             cell.textLabel.text = ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).label;
             NSString *iconUrlString = nil;
-            iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", self.openHABRootUrl, ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).icon];
+            if ([self appData].openHABVersion == 2) {
+                iconUrlString = [NSString stringWithFormat:@"%@/icon/%@.png", [self appData].openHABRootUrl, ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).icon];
+            } else {
+                iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", [self appData].openHABRootUrl, ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).icon];
+            }
+            NSLog(iconUrlString);
             [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"icon-29x29.png"] options:0];
         } else {
             // Then menu items
@@ -117,12 +195,24 @@
     if ([indexPath row] != 0) {
         // First sitemaps
         if ([indexPath row] <= [self.sitemaps count] && [sitemaps count] > 0) {
-            // ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).label;
+            OpenHABSitemap *sitemap = [self.sitemaps objectAtIndex:indexPath.row - 1];
+            NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+            [prefs setValue:sitemap.name forKey:@"defaultSitemap"];
+            [[self appData] rootViewController].pageUrl = nil;
+            UINavigationController *nav =(UINavigationController *)self.mm_drawerController.centerViewController;
+            UIViewController *dummyViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"DummyViewController"];
+            [nav pushViewController:dummyViewController animated:NO];
+            [nav popToRootViewControllerAnimated:YES];
         } else {
             // Then menu items
             if ([((OpenHABDrawerItem *)[self.drawerItems objectAtIndex:[indexPath row] - [self.sitemaps count] - 1]).tag isEqualToString:@"settings"]) {
                 UINavigationController *nav =(UINavigationController *)self.mm_drawerController.centerViewController;
                 OpenHABSettingsViewController *newViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"OpenHABSettingsViewController"];
+                [nav pushViewController:newViewController animated:YES];
+            }
+            if ([((OpenHABDrawerItem *)[self.drawerItems objectAtIndex:[indexPath row] - [self.sitemaps count] - 1]).tag isEqualToString:@"notifications"]) {
+                UINavigationController *nav =(UINavigationController *)self.mm_drawerController.centerViewController;
+                OpenHABSettingsViewController *newViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"OpenHABNotificationsViewController"];
                 [nav pushViewController:newViewController animated:YES];
             }
         }
@@ -139,5 +229,13 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+// App wide data access
+
+- (OpenHABDataObject*)appData
+{
+    id<OpenHABAppDataDelegate> theDelegate = (id<OpenHABAppDataDelegate>) [UIApplication sharedApplication].delegate;
+    return [theDelegate appData];
+}
 
 @end
