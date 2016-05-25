@@ -165,6 +165,7 @@
             NSString *iconUrlString = nil;
             [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:((OpenHABDrawerItem *)[self.drawerItems objectAtIndex:[indexPath row] - [self.sitemaps count] - 1]).icon] options:0];
         }
+        cell.separatorInset = UIEdgeInsetsMake(0, 60, 0, 0);
     }
 /*    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
         [cell setSeparatorInset:UIEdgeInsetsZero];
