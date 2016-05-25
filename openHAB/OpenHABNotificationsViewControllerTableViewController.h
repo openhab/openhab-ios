@@ -10,4 +10,6 @@
 
 @interface OpenHABNotificationsViewControllerTableViewController : UITableViewController
 
+@property (nonatomic, retain) NSMutableArray *notifications;
+
 @end

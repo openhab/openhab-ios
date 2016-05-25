@@ -13,7 +13,7 @@
 #import <netdb.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
 #import "Reachability+URL.h"
-#import <FastSocket.h>
+#import <FastSocket/FastSocket.h>
 
 @implementation OpenHABTracker
 @synthesize openHABDemoMode, openHABLocalUrl, openHABRemoteUrl, delegate, netService, reach;

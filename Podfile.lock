@@ -20,13 +20,11 @@ PODS:
   - AFNetworking/UIKit (2.6.3):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
-  - CrittercismSDK (5.4.11)
+  - CrittercismSDK (5.5.5)
   - FastSocket (1.3)
   - GDataXML-HTML (1.3.0)
-  - GoogleAnalytics-iOS-SDK (3.12):
-    - GoogleAnalytics-iOS-SDK/Core (= 3.12)
-  - GoogleAnalytics-iOS-SDK/Core (3.12)
-  - HexColors (2.2.1)
+  - GoogleAnalytics (3.14.0)
+  - HexColors (2.3.0)
   - MMDrawerController (0.5.7):
     - MMDrawerController/Core (= 0.5.7)
     - MMDrawerController/MMDrawerBarButtonItem (= 0.5.7)
@@ -42,35 +40,46 @@ PODS:
   - MMDrawerController/Subclass (0.5.7):
     - MMDrawerController/Core
   - NKOColorPickerView (0.5)
-  - SDWebImage (3.7.3):
-    - SDWebImage/Core (= 3.7.3)
-  - SDWebImage/Core (3.7.3)
-  - TSMessages (0.9.12):
-    - HexColors (~> 2.2.0)
+  - SDWebImage (3.7.6):
+    - SDWebImage/Core (= 3.7.6)
+  - SDWebImage/Core (3.7.6)
+  - TSMessages (0.9.13):
+    - HexColors (~> 2.3.0)
 
 DEPENDENCIES:
   - AFNetworking (~> 2.6.0)
-  - CrittercismSDK (~> 5.4.0)
+  - CrittercismSDK (~> 5.5.5)
   - FastSocket (~> 1.3)
   - GDataXML-HTML (~> 1.3.0)
-  - GoogleAnalytics-iOS-SDK (~> 3.12)
+  - GoogleAnalytics
   - MMDrawerController (~> 0.5.7)
   - MMDrawerController+Storyboard
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 3.7.3)
-  - TSMessages (~> 0.9.12)
+  - TSMessages (from `https://github.com/KrauseFx/TSMessages.git`)
+
+EXTERNAL SOURCES:
+  TSMessages:
+    :git: https://github.com/KrauseFx/TSMessages.git
+
+CHECKOUT OPTIONS:
+  TSMessages:
+    :commit: e63f23304f781dcadbac31e6d338f3105fb3cd78
+    :git: https://github.com/KrauseFx/TSMessages.git
 
 SPEC CHECKSUMS:
   AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
-  CrittercismSDK: bea34b91a42eebc03eac6effa81b4d761b12ed3f
+  CrittercismSDK: 70f261913b23c5018f7e695d8abe287ee7061ad2
   FastSocket: 0fa2716071517078d67ead1378d34af443bd54c4
   GDataXML-HTML: 7adc03668cab35c288f1dbb8929a179f0fece898
-  GoogleAnalytics-iOS-SDK: 13241762fa4aea845eb75bef6c0da3427a26e7b3
-  HexColors: abfd172e329dab59888614ccba6f216cec59289d
+  GoogleAnalytics: 9be1afdb8deeac4bb5f13ca7f7d3b9db2a1f43dc
+  HexColors: 6ad3947c3447a055a3aa8efa859def096351fe5f
   MMDrawerController: 7a4cf8e25596bf2434e03ce50d22a8608ddee6a1
   MMDrawerController+Storyboard: c98f86c0f32cdef1d466d19a7da3ad2fc6c6ac00
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
-  SDWebImage: 1d2b1a1efda1ade1b00b6f8498865f8ddedc8a84
-  TSMessages: c8cc7b80f2a833af533872cd02010cac061532cc
+  SDWebImage: c325cf02c30337336b95beff20a13df489ec0ec9
+  TSMessages: 6e403b790139636c15ab4f51946537095e03e79c
 
-COCOAPODS: 0.39.0
+PODFILE CHECKSUM: fd14a6c69e637f8454d3ce63709589c64a10c307
+
+COCOAPODS: 1.0.0

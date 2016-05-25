@@ -7,7 +7,7 @@
 //
 
 #import "OpenHABAppDelegate.h"
-#import "Crittercism.h"
+#import <Crittercism/Crittercism.h>
 #import "GAI.h"
 #import "AFNetworking.h"
 #import "NSData+HexString.h"
