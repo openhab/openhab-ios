@@ -7,6 +7,19 @@
 //
 
 #import "OpenHABNotificationsViewControllerTableViewController.h"
+#import "OpenHABAppDataDelegate.h"
+#import "OpenHABDataObject.h"
+#import "NSMutableURLRequest+Auth.h"
+#import "AFNetworking.h"
+#import "AFRememberingSecurityPolicy.h"
+#import "OpenHABNotification.h"
+#import "NSDate+Helper.h"
+#import <SDWebImage/UIImageView+WebCache.h>
+#import <SDWebImage/SDWebImageDownloader.h>
+#import "UIViewController+MMDrawerController.h"
+#import "MMDrawerBarButtonItem.h"
+#import "OpenHABDrawerTableViewController.h"
+
 
 @interface OpenHABNotificationsViewControllerTableViewController ()
 
@@ -14,14 +27,21 @@
 
 @implementation OpenHABNotificationsViewControllerTableViewController
 
+@synthesize openHABUsername, openHABRootUrl, openHABPassword, ignoreSSLCertificate, notifications;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    self.notifications = [NSMutableArray array];
+    self.tableView.tableFooterView = [[UIView alloc] init];
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    self.refreshControl.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    //    self.refreshControl.tintColor = [UIColor whiteColor];
+    [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
+    [self.tableView addSubview:self.refreshControl];
+    [self.tableView sendSubviewToBack:self.refreshControl];
+    MMDrawerBarButtonItem * rightDrawerButton = [[MMDrawerBarButtonItem alloc] initWithTarget:self action:@selector(rightDrawerButtonPress:)];
+    [self.navigationItem setRightBarButtonItem:rightDrawerButton animated:YES];
+
 }
 
 - (void)didReceiveMemoryWarning {
@@ -32,128 +52,117 @@
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-/*    NSString *sitemapsUrlString = [NSString stringWithFormat:@"%@/rest/sitemaps", self.openHABRootUrl];
-    NSURL *sitemapsUrl = [[NSURL alloc] initWithString:sitemapsUrlString];
-    NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];
-    [sitemapsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
-    AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:sitemapsRequest];
+    [self loadSettings];
+    [self loadNotifications];
+}
+
+- (void)loadNotifications {
+    NSString *notificationsUrlString = [NSString stringWithFormat:@"https://my.openhab.org/api/v1/notifications?limit=20"];
+    NSURL *notificationsUrl = [[NSURL alloc] initWithString:notificationsUrlString];
+    NSMutableURLRequest *notificationsRequest = [NSMutableURLRequest requestWithURL:notificationsUrl];
+    [notificationsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
+    AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:notificationsRequest];
     AFRememberingSecurityPolicy *policy = [AFRememberingSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
     operation.securityPolicy = policy;
     if (self.ignoreSSLCertificate) {
         NSLog(@"Warning - ignoring invalid certificates");
         operation.securityPolicy.allowInvalidCertificates = YES;
     }
-    if ([self appData].openHABVersion == 2) {
-        NSLog(@"Setting setializer to JSON");
-        operation.responseSerializer = [AFJSONResponseSerializer serializer];
-    }
+    operation.responseSerializer = [AFJSONResponseSerializer serializer];
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSData *response = (NSData*)responseObject;
         NSError *error;
-        [sitemaps removeAllObjects];
-        NSLog(@"Sitemap response");
+        [self.notifications removeAllObjects];
+        NSLog(@"Notifications response");
         // If we are talking to openHAB 1.X, talk XML
-        if ([self appData].openHABVersion == 1) {
-            NSLog(@"openHAB 1");
-            NSLog(@"%@", [[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding]);
-            GDataXMLDocument *doc = [[GDataXMLDocument alloc] initWithData:response error:&error];
-            if (doc == nil) return;
-            NSLog(@"%@", [doc.rootElement name]);
-            if ([[doc.rootElement name] isEqual:@"sitemaps"]) {
-                for (GDataXMLElement *element in [doc.rootElement elementsForName:@"sitemap"]) {
-                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithXML:element];
-                    [sitemaps addObject:sitemap];
-                }
-            } else {
-                return;
+        if ([responseObject isKindOfClass:[NSArray class]]) {
+            NSLog(@"Response is array");
+            for (id notificationJson in responseObject) {
+                OpenHABNotification *notification = [[OpenHABNotification alloc] initWithDictionary:notificationJson];
+                [notifications addObject:notification];
             }
-            // Newer versions speak JSON!
         } else {
-            NSLog(@"openHAB 2");
-            if ([responseObject isKindOfClass:[NSArray class]]) {
-                NSLog(@"Response is array");
-                for (id sitemapJson in responseObject) {
-                    OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithDictionaty:sitemapJson];
-                    [sitemaps addObject:sitemap];
-                }
-            } else {
-                // Something went wrong, we should have received an array
-                return;
-            }
+            NSLog(@"Response is not array");
+            return;
         }
-        [[self appData] setSitemaps:sitemaps];
+        [self.refreshControl endRefreshing];
         [self.tableView reloadData];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
+        [self.refreshControl endRefreshing];
     }];
-    [operation start];*/
+    [operation start];
 }
 
-#pragma mark - Table view data source
+- (void)handleRefresh:(UIRefreshControl *)refreshControl {
+    NSLog(@"Refresh pulled");
+    [self loadNotifications];
+}
+
+-(void)rightDrawerButtonPress:(id)sender{
+    OpenHABDrawerTableViewController *drawer = (OpenHABDrawerTableViewController*)[self.mm_drawerController rightDrawerViewController];
+    [self.mm_drawerController toggleDrawerSide:MMDrawerSideRight animated:YES completion:nil];
+}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Incomplete implementation, return the number of sections
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete implementation, return the number of rows
-    return 0;
+    return [notifications count];
 }
 
-/*
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:<#@"reuseIdentifier"#> forIndexPath:indexPath];
+    static NSString *CellIdentifier = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+    }
+    OpenHABNotification *notification = [notifications objectAtIndex:[indexPath row]];
+    cell.textLabel.text = notification.message;
+    cell.detailTextLabel.text = [NSDate stringForDisplayFromDate:notification.created];
     
-    // Configure the cell...
-    
+    NSString *iconUrlString = nil;
+    if ([self appData].openHABVersion == 2) {
+        iconUrlString = [NSString stringWithFormat:@"%@/icon/%@.png", [self appData].openHABRootUrl, notification.icon];
+    } else {
+        iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", [self appData].openHABRootUrl, notification.icon];
+    }
+    NSLog(@"%@", iconUrlString);
+    [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"icon-29x29.png"] options:0];
+    if ([cell respondsToSelector:@selector(setPreservesSuperviewLayoutMargins:)]) {
+        [cell setPreservesSuperviewLayoutMargins:NO];
+    }
+    // Explictly set your cell's layout margins
+    if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+        [cell setLayoutMargins:UIEdgeInsetsZero];
+    }
     return cell;
 }
-*/
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    // open a alert with an OK and cancel button
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
-*/
 
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+- (void)loadSettings
+{
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    self.openHABUsername = [prefs valueForKey:@"username"];
+    self.openHABPassword = [prefs valueForKey:@"password"];
+    self.ignoreSSLCertificate = [prefs boolForKey:@"ignoreSSL"];
+//    self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
+//    self.idleOff = [prefs boolForKey:@"idleOff"];
+    [[self appData] setOpenHABUsername:self.openHABUsername];
+    [[self appData] setOpenHABPassword:self.openHABPassword];
 }
-*/
 
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+- (OpenHABDataObject*)appData
+{
+    id<OpenHABAppDataDelegate> theDelegate = (id<OpenHABAppDataDelegate>) [UIApplication sharedApplication].delegate;
+    return [theDelegate appData];
 }
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

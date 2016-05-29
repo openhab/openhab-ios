@@ -11,5 +11,9 @@
 @interface OpenHABNotificationsViewControllerTableViewController : UITableViewController
 
 @property (nonatomic, retain) NSMutableArray *notifications;
+@property (nonatomic, retain) NSString *openHABRootUrl;
+@property (nonatomic, retain) NSString *openHABUsername;
+@property (nonatomic, retain) NSString *openHABPassword;
+@property (nonatomic) BOOL ignoreSSLCertificate;
 
 @end

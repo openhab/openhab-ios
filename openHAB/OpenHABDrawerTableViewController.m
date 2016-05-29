@@ -19,6 +19,7 @@
 #import "AFNetworking.h"
 #import "NSMutableURLRequest+Auth.h"
 #import "GDataXMLNode.h"
+#import "OpenHABNotificationsViewControllerTableViewController.h"
 
 @interface OpenHABDrawerTableViewController ()
 
@@ -213,8 +214,12 @@
             }
             if ([((OpenHABDrawerItem *)[self.drawerItems objectAtIndex:[indexPath row] - [self.sitemaps count] - 1]).tag isEqualToString:@"notifications"]) {
                 UINavigationController *nav =(UINavigationController *)self.mm_drawerController.centerViewController;
-                OpenHABSettingsViewController *newViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"OpenHABNotificationsViewController"];
-                [nav pushViewController:newViewController animated:YES];
+                if ([[nav visibleViewController] isKindOfClass:[OpenHABNotificationsViewControllerTableViewController class]]) {
+                    NSLog(@"Notifications are already open");
+                } else {
+                    OpenHABNotificationsViewControllerTableViewController *newViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"OpenHABNotificationsViewController"];
+                    [nav pushViewController:newViewController animated:YES];
+                }
             }
         }
     }

@@ -62,6 +62,7 @@
 		DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
 		DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
 		DFB2625918830A3600D3244D /* openHABTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2625818830A3600D3244D /* openHABTests.m */; };
+		DFD411071CF874C000F78066 /* NSDate+Helper.m in Sources */ = {isa = PBXBuildFile; fileRef = DFD411061CF874C000F78066 /* NSDate+Helper.m */; };
 		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
 		DFDA3CED193F198700888039 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CEC193F198700888039 /* Default-568h@2x.png */; };
 		DFDA3CF4193F199900888039 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CEE193F199900888039 /* Default@2x.png */; };
@@ -197,6 +198,8 @@
 		DFB2625418830A3600D3244D /* openHABTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHABTests-Info.plist"; sourceTree = "<group>"; };
 		DFB2625618830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DFB2625818830A3600D3244D /* openHABTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = openHABTests.m; sourceTree = "<group>"; };
+		DFD411051CF874C000F78066 /* NSDate+Helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Helper.h"; sourceTree = "<group>"; };
+		DFD411061CF874C000F78066 /* NSDate+Helper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Helper.m"; sourceTree = "<group>"; };
 		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
 		DFDA3CEC193F198700888039 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		DFDA3CEE193F199900888039 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
@@ -530,6 +533,8 @@
 				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.h */,
 				DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */,
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
+				DFD411051CF874C000F78066 /* NSDate+Helper.h */,
+				DFD411061CF874C000F78066 /* NSDate+Helper.m */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -754,6 +759,7 @@
 				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */,
 				DFDF45341934699B00A6E581 /* OpenHABInfoViewController.m in Sources */,
 				DF3072A41929FE7A000D6CC3 /* WebUITableViewCell.m in Sources */,
+				DFD411071CF874C000F78066 /* NSDate+Helper.m in Sources */,
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */,
 				DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */,
 				DFB2623718830A3600D3244D /* main.m in Sources */,
@@ -913,15 +919,15 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0B8ADF5EDF627447F5C32ADF /* Pods-openHAB.debug.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Thomas Eichstädt-Engelen (9TG93F79RE)";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "F5A4C993-92E6-4A41-93C4-B922E1F99F45";
+				PROVISIONING_PROFILE = "592ba556-9eb8-49f5-8757-7d24f9703378";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -930,15 +936,15 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 92D164D7D26248F747AE06CA /* Pods-openHAB.release.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: openHAB UG (haftungsbeschränkt) (4K478J645F)";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "F5A4C993-92E6-4A41-93C4-B922E1F99F45";
+				PROVISIONING_PROFILE = "db22e98b-a8ff-438f-9d83-710f29817520";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
