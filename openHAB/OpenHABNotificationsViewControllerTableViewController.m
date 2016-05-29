@@ -122,7 +122,10 @@
     }
     OpenHABNotification *notification = [notifications objectAtIndex:[indexPath row]];
     cell.textLabel.text = notification.message;
-    cell.detailTextLabel.text = [NSDate stringForDisplayFromDate:notification.created];
+    // First convert date of notification from UTC from my.OH to local time for device
+    NSTimeInterval timeZoneSeconds = [[NSTimeZone localTimeZone] secondsFromGMT];
+    NSDate *createdInLocalTimezone = [notification.created dateByAddingTimeInterval:timeZoneSeconds];
+    cell.detailTextLabel.text = [NSDate stringForDisplayFromDate:createdInLocalTimezone];
     
     NSString *iconUrlString = nil;
     if ([self appData].openHABVersion == 2) {
