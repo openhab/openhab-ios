@@ -143,12 +143,13 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-    }
+    UITableViewCell *cell;
     if ([indexPath row] != 0) {
+        static NSString *CellIdentifier = @"DrawerCell";
+        cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        if (cell == nil) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        }
         // First sitemaps
         if ([indexPath row] <= [self.sitemaps count] && [sitemaps count] > 0) {
             cell.textLabel.text = ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).label;
@@ -167,6 +168,12 @@
             [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:((OpenHABDrawerItem *)[self.drawerItems objectAtIndex:[indexPath row] - [self.sitemaps count] - 1]).icon] options:0];
         }
         cell.separatorInset = UIEdgeInsetsMake(0, 60, 0, 0);
+    } else {
+        static NSString *CellIdentifier = @"DrawerHeaderCell";
+         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        if (cell == nil) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        }
     }
 /*    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
         [cell setSeparatorInset:UIEdgeInsetsZero];
