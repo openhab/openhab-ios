@@ -9,7 +9,7 @@
 #import "NotificationTableViewCell.h"
 
 @implementation NotificationTableViewCell
-@synthesize textLabel;
+@synthesize textLabel, detailTextLabel;
 
 - (id)initWithCoder:(NSCoder *)coder
 {
@@ -18,6 +18,7 @@
     if (self) {
         self.separatorInset = UIEdgeInsetsZero;
         self.textLabel = (UILabel *)[self viewWithTag:101];
+        self.detailTextLabel =(UILabel *)[self viewWithTag:102];
     }
     return self;
 }

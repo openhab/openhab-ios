@@ -11,5 +11,6 @@
 @interface NotificationTableViewCell : UITableViewCell
 
 @property (nonatomic, retain) UILabel *textLabel;
+@property (nonatomic, retain) UILabel *detailTextLabel;
 
 @end
