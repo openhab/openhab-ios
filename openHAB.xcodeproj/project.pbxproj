@@ -11,6 +11,7 @@
 		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
+		DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.m */; };
 		DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */; };
 		DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */; };
 		DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */; };
@@ -28,9 +29,6 @@
 		DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = DF2B6ADC18EF4D660063819F /* NSData+HexString.m */; };
 		DF3072A41929FE7A000D6CC3 /* WebUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF3072A31929FE7A000D6CC3 /* WebUITableViewCell.m */; };
 		DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.m */; };
-		DF4A02361CF31668006C3456 /* DrawerHeaderUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4A02351CF31668006C3456 /* DrawerHeaderUITableViewCell.m */; };
-		DF4A023C1CF316D6006C3456 /* DrawerSitemapUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4A023B1CF316D6006C3456 /* DrawerSitemapUITableViewCell.m */; };
-		DF4A023F1CF31719006C3456 /* DrawerMenuUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4A023E1CF31719006C3456 /* DrawerMenuUITableViewCell.m */; };
 		DF4A02421CF34096006C3456 /* OpenHABDrawerItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4A02411CF34096006C3456 /* OpenHABDrawerItem.m */; };
 		DF4A02441CF46986006C3456 /* glyphicons-137-cogwheel.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */; };
 		DF4A02461CF4721B006C3456 /* glyphicons-334-bell.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02451CF4721B006C3456 /* glyphicons-334-bell.png */; };
@@ -114,6 +112,8 @@
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
+		DF05EF101D00696200DD646D /* DrawerUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawerUITableViewCell.h; sourceTree = "<group>"; };
+		DF05EF111D00696200DD646D /* DrawerUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawerUITableViewCell.m; sourceTree = "<group>"; };
 		DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_207_remove_2@2x.png"; sourceTree = "<group>"; };
 		DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_212_down_arrow@2x.png"; sourceTree = "<group>"; };
 		DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_213_up_arrow@2x.png"; sourceTree = "<group>"; };
@@ -143,12 +143,6 @@
 		DF3072A31929FE7A000D6CC3 /* WebUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebUITableViewCell.m; sourceTree = "<group>"; };
 		DF4A022A1CF315BA006C3456 /* OpenHABDrawerTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABDrawerTableViewController.h; sourceTree = "<group>"; };
 		DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABDrawerTableViewController.m; sourceTree = "<group>"; };
-		DF4A02341CF31668006C3456 /* DrawerHeaderUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawerHeaderUITableViewCell.h; sourceTree = "<group>"; };
-		DF4A02351CF31668006C3456 /* DrawerHeaderUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawerHeaderUITableViewCell.m; sourceTree = "<group>"; };
-		DF4A023A1CF316D6006C3456 /* DrawerSitemapUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawerSitemapUITableViewCell.h; sourceTree = "<group>"; };
-		DF4A023B1CF316D6006C3456 /* DrawerSitemapUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawerSitemapUITableViewCell.m; sourceTree = "<group>"; };
-		DF4A023D1CF31719006C3456 /* DrawerMenuUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawerMenuUITableViewCell.h; sourceTree = "<group>"; };
-		DF4A023E1CF31719006C3456 /* DrawerMenuUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawerMenuUITableViewCell.m; sourceTree = "<group>"; };
 		DF4A02401CF34096006C3456 /* OpenHABDrawerItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABDrawerItem.h; sourceTree = "<group>"; };
 		DF4A02411CF34096006C3456 /* OpenHABDrawerItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABDrawerItem.m; sourceTree = "<group>"; };
 		DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-137-cogwheel.png"; sourceTree = "<group>"; };
@@ -315,12 +309,8 @@
 		DF4A022D1CF315D3006C3456 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				DF4A02341CF31668006C3456 /* DrawerHeaderUITableViewCell.h */,
-				DF4A02351CF31668006C3456 /* DrawerHeaderUITableViewCell.m */,
-				DF4A023A1CF316D6006C3456 /* DrawerSitemapUITableViewCell.h */,
-				DF4A023B1CF316D6006C3456 /* DrawerSitemapUITableViewCell.m */,
-				DF4A023D1CF31719006C3456 /* DrawerMenuUITableViewCell.h */,
-				DF4A023E1CF31719006C3456 /* DrawerMenuUITableViewCell.m */,
+				DF05EF101D00696200DD646D /* DrawerUITableViewCell.h */,
+				DF05EF111D00696200DD646D /* DrawerUITableViewCell.m */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -746,7 +736,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
-				DF4A023F1CF31719006C3456 /* DrawerMenuUITableViewCell.m in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.m in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.m in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.m in Sources */,
@@ -771,9 +760,7 @@
 				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,
-				DF4A02361CF31668006C3456 /* DrawerHeaderUITableViewCell.m in Sources */,
 				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */,
-				DF4A023C1CF316D6006C3456 /* DrawerSitemapUITableViewCell.m in Sources */,
 				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.m in Sources */,
 				DF06F2021900F8780011E7B9 /* ImageUITableViewCell.m in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.m in Sources */,
@@ -785,6 +772,7 @@
 				DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
 				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
+				DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */,
 				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
 				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
 				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */,

@@ -20,6 +20,7 @@
 #import "NSMutableURLRequest+Auth.h"
 #import "GDataXMLNode.h"
 #import "OpenHABNotificationsViewControllerTableViewController.h"
+#import "DrawerUITableViewCell.h"
 
 @interface OpenHABDrawerTableViewController ()
 
@@ -32,13 +33,16 @@
     [super viewDidLoad];
     self.tableView.tableFooterView = [[UIView alloc] init] ;
     self.drawerItems = [NSMutableArray array];
+    self.sitemaps = [NSMutableArray array];
     NSLog(@"OpenHABDrawerTableViewController did load");
 }
 
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    NSLog(@"OpenHABDrawerTableViewController viewWillAppear");
     NSString *sitemapsUrlString = [NSString stringWithFormat:@"%@/rest/sitemaps", self.openHABRootUrl];
+    NSLog(@"Sitemap URL = %@", sitemapsUrlString);
     NSURL *sitemapsUrl = [[NSURL alloc] initWithString:sitemapsUrlString];
     NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];
     [sitemapsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];
@@ -68,7 +72,7 @@
             if ([[doc.rootElement name] isEqual:@"sitemaps"]) {
                 for (GDataXMLElement *element in [doc.rootElement elementsForName:@"sitemap"]) {
                     OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithXML:element];
-                    [sitemaps addObject:sitemap];
+                    [self.sitemaps addObject:sitemap];
                 }
             } else {
                 return;
@@ -80,14 +84,15 @@
                 NSLog(@"Response is array");
                 for (id sitemapJson in responseObject) {
                     OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithDictionaty:sitemapJson];
-                    [sitemaps addObject:sitemap];
+                    NSLog(@"Sitemap %@", sitemap.label);
+                    [self.sitemaps addObject:sitemap];
                 }
             } else {
                 // Something went wrong, we should have received an array
                 return;
             }
         }
-        [[self appData] setSitemaps:sitemaps];
+        [[self appData] setSitemaps:self.sitemaps];
         [self.tableView reloadData];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
         NSLog(@"Error:------>%@", [error description]);
@@ -115,7 +120,7 @@
     settingsItem.tag = @"settings";
     settingsItem.icon = @"glyphicons-137-cogwheel.png";
     [self.drawerItems addObject:settingsItem];
-    self.sitemaps = [[self appData] sitemaps];
+//    self.sitemaps = [[self appData] sitemaps];
     [self.tableView reloadData];
     NSLog(@"RightDrawerViewController viewDidAppear");
     NSLog(@"Sitemaps count: %lu", (unsigned long)[self.sitemaps count]);
@@ -143,13 +148,13 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell;
+    DrawerUITableViewCell *cell;
     if ([indexPath row] != 0) {
         static NSString *CellIdentifier = @"DrawerCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        if (cell == nil) {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-        }
+//        if (cell == nil) {
+//            cell = [[DrawerUITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+//        }
         // First sitemaps
         if ([indexPath row] <= [self.sitemaps count] && [sitemaps count] > 0) {
             cell.textLabel.text = ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).label;
@@ -159,8 +164,8 @@
             } else {
                 iconUrlString = [NSString stringWithFormat:@"%@/images/%@.png", [self appData].openHABRootUrl, ((OpenHABSitemap *)[sitemaps objectAtIndex:[indexPath row] - 1]).icon];
             }
-            NSLog(iconUrlString);
-            [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"icon-29x29.png"] options:0];
+            NSLog(@"%@", iconUrlString);
+            [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"icon-76x76.png"] options:0];
         } else {
             // Then menu items
             cell.textLabel.text = ((OpenHABDrawerItem *)[self.drawerItems objectAtIndex:[indexPath row] - [self.sitemaps count] - 1]).label;
@@ -172,12 +177,9 @@
         static NSString *CellIdentifier = @"DrawerHeaderCell";
          cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (cell == nil) {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+            cell = [[DrawerUITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         }
     }
-/*    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
-        [cell setSeparatorInset:UIEdgeInsetsZero];
-    }*/
     if ([cell respondsToSelector:@selector(setPreservesSuperviewLayoutMargins:)]) {
         [cell setPreservesSuperviewLayoutMargins:NO];
     }

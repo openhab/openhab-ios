@@ -94,6 +94,7 @@
 
 -(void)rightDrawerButtonPress:(id)sender{
     OpenHABDrawerTableViewController *drawer = (OpenHABDrawerTableViewController*)[self.mm_drawerController rightDrawerViewController];
+    drawer.openHABRootUrl = self.openHABRootUrl;
     [self.mm_drawerController toggleDrawerSide:MMDrawerSideRight animated:YES completion:nil];
 }
 
