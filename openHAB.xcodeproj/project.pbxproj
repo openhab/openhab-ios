@@ -47,6 +47,7 @@
 		DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */; };
 		DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */; };
 		DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.m */; };
+		DFA358FE1D00CF37003633DF /* NotificationTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */; };
 		DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
 		DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622C18830A3600D3244D /* CoreGraphics.framework */; };
 		DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
@@ -174,6 +175,8 @@
 		DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABWidgetMapping.m; sourceTree = "<group>"; };
 		DFA16EBF18898A8400EDB0BB /* SegmentedUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SegmentedUITableViewCell.h; sourceTree = "<group>"; };
 		DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SegmentedUITableViewCell.m; sourceTree = "<group>"; };
+		DFA358FC1D00CF37003633DF /* NotificationTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationTableViewCell.h; sourceTree = "<group>"; };
+		DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificationTableViewCell.m; sourceTree = "<group>"; };
 		DFB2622718830A3600D3244D /* openHAB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHAB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFB2622A18830A3600D3244D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DFB2622C18830A3600D3244D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -381,6 +384,8 @@
 				DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */,
 				DF3072A21929FE7A000D6CC3 /* WebUITableViewCell.h */,
 				DF3072A31929FE7A000D6CC3 /* WebUITableViewCell.m */,
+				DFA358FC1D00CF37003633DF /* NotificationTableViewCell.h */,
+				DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -757,6 +762,7 @@
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.m in Sources */,
 				DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.m in Sources */,
+				DFA358FE1D00CF37003633DF /* NotificationTableViewCell.m in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,

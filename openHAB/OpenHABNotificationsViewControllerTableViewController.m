@@ -19,6 +19,7 @@
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
 #import "OpenHABDrawerTableViewController.h"
+#import "NotificationTableViewCell.h"
 
 
 @interface OpenHABNotificationsViewControllerTableViewController ()
@@ -57,6 +58,7 @@
 }
 
 - (void)loadNotifications {
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     NSString *notificationsUrlString = [NSString stringWithFormat:@"https://my.openhab.org/api/v1/notifications?limit=20"];
     NSURL *notificationsUrl = [[NSURL alloc] initWithString:notificationsUrlString];
     NSMutableURLRequest *notificationsRequest = [NSMutableURLRequest requestWithURL:notificationsUrl];
@@ -87,7 +89,9 @@
         }
         [self.refreshControl endRefreshing];
         [self.tableView reloadData];
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
         [self.refreshControl endRefreshing];
@@ -115,11 +119,8 @@
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
-    }
+    static NSString *CellIdentifier = @"NotificationCell";
+    NotificationTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     OpenHABNotification *notification = [notifications objectAtIndex:[indexPath row]];
     cell.textLabel.text = notification.message;
     // First convert date of notification from UTC from my.OH to local time for device
@@ -142,6 +143,7 @@
     if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
         [cell setLayoutMargins:UIEdgeInsetsZero];
     }
+    cell.separatorInset = UIEdgeInsetsMake(0, 60, 0, 0);
     return cell;
 }
 

@@ -60,6 +60,7 @@
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSData *response = (NSData*)responseObject;
         NSError *error;
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         [sitemaps removeAllObjects];
         NSLog(@"Sitemap response");
         // If we are talking to openHAB 1.X, talk XML
@@ -95,10 +96,12 @@
         [[self appData] setSitemaps:self.sitemaps];
         [self.tableView reloadData];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSLog(@"Error:------>%@", [error description]);
         NSLog(@"error code %ld",(long)[operation.response statusCode]);
     }];
-    [operation start];    
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    [operation start];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
