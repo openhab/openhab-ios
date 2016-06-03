@@ -63,4 +63,26 @@
     }
 }
 
+#pragma mark Serialization
+
+-(id)initWithCoder:(NSCoder*)coder
+{
+    if (self = [self init])
+    {
+        type = [coder decodeObjectForKey:@"type"];
+        name = [coder decodeObjectForKey:@"name"];
+        state = [coder decodeObjectForKey:@"state"];
+        link = [coder decodeObjectForKey:@"link"];
+    }
+    return self;
+}
+
+-(void)encodeWithCoder:(NSCoder*)coder
+{
+    [coder encodeObject:type forKey:@"type"];
+    [coder encodeObject:name forKey:@"name"];
+    [coder encodeObject:state forKey:@"state"];
+    [coder encodeObject:link forKey:@"link"];
+}
+
 @end

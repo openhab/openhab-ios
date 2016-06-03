@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "OpenHABBeaconLocationManager.h"
 
 @class OpenHABViewController;
 
@@ -17,6 +18,7 @@
     NSString* openHABUsername;
     NSString* openHABPassword;
     OpenHABViewController* rootViewController;
+    OpenHABBeaconLocationManager* beaconLocations;
 }
 
 @property (nonatomic, copy) NSString* openHABRootUrl;
@@ -24,6 +26,7 @@
 @property (nonatomic, copy) NSString* openHABUsername;
 @property (nonatomic, copy) NSString* openHABPassword;
 @property (nonatomic, retain) OpenHABViewController* rootViewController;
+@property (nonatomic, retain) OpenHABBeaconLocationManager* beaconLocations;
 @property (nonatomic) int openHABVersion;
 
 @end

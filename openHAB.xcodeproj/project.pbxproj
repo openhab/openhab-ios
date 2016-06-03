@@ -11,6 +11,10 @@
 		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
+		C678E4511D01C8DF009B9CE4 /* OpenHABBeaconNotificationTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C678E4501D01C8DF009B9CE4 /* OpenHABBeaconNotificationTableViewController.m */; };
+		C678E4541D01C958009B9CE4 /* OpenHABBeaconNotificationDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C678E4531D01C958009B9CE4 /* OpenHABBeaconNotificationDetailViewController.m */; };
+		C678E4571D01CA2B009B9CE4 /* OpenHABBeaconLocationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C678E4561D01CA2B009B9CE4 /* OpenHABBeaconLocationManager.m */; };
+		C678E45A1D01CBF4009B9CE4 /* OpenHABBeaconNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = C678E4591D01CBF4009B9CE4 /* OpenHABBeaconNotification.m */; };
 		DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */; };
 		DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */; };
 		DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */; };
@@ -114,6 +118,14 @@
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
+		C678E44F1D01C8DF009B9CE4 /* OpenHABBeaconNotificationTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABBeaconNotificationTableViewController.h; sourceTree = "<group>"; };
+		C678E4501D01C8DF009B9CE4 /* OpenHABBeaconNotificationTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABBeaconNotificationTableViewController.m; sourceTree = "<group>"; };
+		C678E4521D01C958009B9CE4 /* OpenHABBeaconNotificationDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABBeaconNotificationDetailViewController.h; sourceTree = "<group>"; };
+		C678E4531D01C958009B9CE4 /* OpenHABBeaconNotificationDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABBeaconNotificationDetailViewController.m; sourceTree = "<group>"; };
+		C678E4551D01CA2B009B9CE4 /* OpenHABBeaconLocationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABBeaconLocationManager.h; sourceTree = "<group>"; };
+		C678E4561D01CA2B009B9CE4 /* OpenHABBeaconLocationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABBeaconLocationManager.m; sourceTree = "<group>"; };
+		C678E4581D01CBF4009B9CE4 /* OpenHABBeaconNotification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABBeaconNotification.h; sourceTree = "<group>"; };
+		C678E4591D01CBF4009B9CE4 /* OpenHABBeaconNotification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABBeaconNotification.m; sourceTree = "<group>"; };
 		DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_207_remove_2@2x.png"; sourceTree = "<group>"; };
 		DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_212_down_arrow@2x.png"; sourceTree = "<group>"; };
 		DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_213_up_arrow@2x.png"; sourceTree = "<group>"; };
@@ -345,6 +357,10 @@
 				DFDF45331934699B00A6E581 /* OpenHABInfoViewController.m */,
 				DF4A024B1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.h */,
 				DF4A024C1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m */,
+				C678E44F1D01C8DF009B9CE4 /* OpenHABBeaconNotificationTableViewController.h */,
+				C678E4501D01C8DF009B9CE4 /* OpenHABBeaconNotificationTableViewController.m */,
+				C678E4521D01C958009B9CE4 /* OpenHABBeaconNotificationDetailViewController.h */,
+				C678E4531D01C958009B9CE4 /* OpenHABBeaconNotificationDetailViewController.m */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -511,6 +527,8 @@
 				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */,
 				DF1B302B1CF5C667009C921C /* OpenHABNotification.h */,
 				DF1B302C1CF5C667009C921C /* OpenHABNotification.m */,
+				C678E4581D01CBF4009B9CE4 /* OpenHABBeaconNotification.h */,
+				C678E4591D01CBF4009B9CE4 /* OpenHABBeaconNotification.m */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -535,6 +553,8 @@
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
 				DFD411051CF874C000F78066 /* NSDate+Helper.h */,
 				DFD411061CF874C000F78066 /* NSDate+Helper.m */,
+				C678E4551D01CA2B009B9CE4 /* OpenHABBeaconLocationManager.h */,
+				C678E4561D01CA2B009B9CE4 /* OpenHABBeaconLocationManager.m */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -571,12 +591,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */;
 			buildPhases = (
+				DE3FB31FBD17AA464BDAF34B /* Check Pods Manifest.lock */,
 				9543C2DDD9BFDB7DD06CF7DE /* 📦 Check Pods Manifest.lock */,
 				DFB2622318830A3600D3244D /* Sources */,
 				DFB2622418830A3600D3244D /* Frameworks */,
 				DFB2622518830A3600D3244D /* Resources */,
 				CE459E4F9AA10964E3EDBD8A /* 📦 Embed Pods Frameworks */,
 				3DE01113C96D3D4C44867A5A /* 📦 Copy Pods Resources */,
+				26D23E1E70E2CE33682468C5 /* Embed Pods Frameworks */,
+				694F0FA800795A79381B3233 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -693,6 +716,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		26D23E1E70E2CE33682468C5 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-openHAB/Pods-openHAB-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		3DE01113C96D3D4C44867A5A /* 📦 Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -701,6 +739,21 @@
 			inputPaths = (
 			);
 			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-openHAB/Pods-openHAB-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		694F0FA800795A79381B3233 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -738,6 +791,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-openHAB/Pods-openHAB-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		DE3FB31FBD17AA464BDAF34B /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -753,7 +821,9 @@
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.m in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.m in Sources */,
+				C678E4511D01C8DF009B9CE4 /* OpenHABBeaconNotificationTableViewController.m in Sources */,
 				DF06F20519010E9A0011E7B9 /* VideoUITableViewCell.m in Sources */,
+				C678E45A1D01CBF4009B9CE4 /* OpenHABBeaconNotification.m in Sources */,
 				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
 				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */,
 				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */,
@@ -768,6 +838,8 @@
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.m in Sources */,
 				DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.m in Sources */,
+				C678E4571D01CA2B009B9CE4 /* OpenHABBeaconLocationManager.m in Sources */,
+				C678E4541D01C958009B9CE4 /* OpenHABBeaconNotificationDetailViewController.m in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,

@@ -14,6 +14,7 @@
 #import "TSMessage.h"
 @import AVFoundation;
 #import "AFRememberingSecurityPolicy.h"
+#import "OpenHABBeaconLocationManager.h"
 
 @implementation OpenHABAppDelegate
 @synthesize appData;
@@ -23,6 +24,7 @@ AVAudioPlayer *player;
 - (id)init
 {
     self.appData = [[OpenHABDataObject alloc] init];
+    self.appData.beaconLocations = [[OpenHABBeaconLocationManager alloc] init];
     return [super init];
 }
 

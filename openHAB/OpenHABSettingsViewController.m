@@ -102,7 +102,7 @@
             }
             break;
         case 1:
-            ret = 6;
+            ret = 7;
     }
     return ret;
 }
