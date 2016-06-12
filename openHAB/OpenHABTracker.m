@@ -114,7 +114,7 @@
     if (self.delegate && [self.delegate respondsToSelector:@selector(openHABTrackingProgress:)]) {
         [self.delegate openHABTrackingProgress:@"Running in demo mode. Check settings to disable demo mode."];
     }
-    [self trackedUrl:@"http://demo.openhab.org:8080"];
+    [self trackedUrl:@"http://demo.openhab.org:9080"];
 }
 
 - (void)trackedUrl:(NSString *)trackedUrl
