@@ -34,6 +34,7 @@
     self.tableView.tableFooterView = [[UIView alloc] init] ;
     self.drawerItems = [NSMutableArray array];
     self.sitemaps = [NSMutableArray array];
+    [self loadSettings];
     NSLog(@"OpenHABDrawerTableViewController did load");
 }
 
@@ -247,6 +248,14 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+- (void)loadSettings
+{
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    self.openHABUsername = [prefs valueForKey:@"username"];
+    self.openHABPassword = [prefs valueForKey:@"password"];
+    self.ignoreSSLCertificate = [prefs boolForKey:@"ignoreSSL"];
+}
 
 // App wide data access
 
