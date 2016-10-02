@@ -273,7 +273,9 @@
     } else if ([widget.type isEqualToString:@"Switch"]) {
         if ([widget.mappings count] > 0) {
             cellIdentifier = @"SegmentedWidgetCell";
-        } else if ([widget.item.type isEqualToString:@"RollershutterItem"]) {
+            //RollershutterItem changed to Rollershutter in later builds of OH2
+        } else if ([widget.item.type isEqualToString:@"RollershutterItem"]
+                   || [widget.item.type isEqualToString:@"Rollershutter"]) {
             cellIdentifier = @"RollershutterWidgetCell";
         } else {
             cellIdentifier = @"SwitchWidgetCell";
