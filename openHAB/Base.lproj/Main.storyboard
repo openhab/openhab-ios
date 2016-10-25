@@ -4,6 +4,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -211,7 +212,7 @@
                                                     <frame key="frameInset" minX="176" minY="5" width="126" height="31"/>
                                                 </slider>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9hr-4E-GF3">
-                                                    <frame key="frameInset" minX="62" minY="11" width="108" height="21"/>
+                                                    <frame key="frameInset" minX="62" minY="11" width="187" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -223,6 +224,7 @@
                                                 <constraint firstItem="9hr-4E-GF3" firstAttribute="leading" secondItem="n9y-r4-Qcp" secondAttribute="leading" constant="62" id="Gsh-Ti-OC9"/>
                                                 <constraint firstItem="Aa2-hH-P4c" firstAttribute="leading" secondItem="9hr-4E-GF3" secondAttribute="trailing" constant="8" id="aBo-Bi-p8I"/>
                                                 <constraint firstAttribute="trailing" secondItem="Aa2-hH-P4c" secondAttribute="trailing" constant="20" id="iT9-vY-faY"/>
+                                                <constraint firstItem="9hr-4E-GF3" firstAttribute="width" secondItem="Aa2-hH-P4c" secondAttribute="width" priority="999" id="pYe-aD-i0S"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
@@ -281,9 +283,10 @@
                                                 </label>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="leading" secondItem="dGQ-sz-j4J" secondAttribute="trailing" constant="32" id="21I-9b-hQv"/>
+                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="leading" secondItem="dGQ-sz-j4J" secondAttribute="trailing" constant="8" id="21I-9b-hQv"/>
                                                 <constraint firstItem="dGQ-sz-j4J" firstAttribute="centerY" secondItem="bbE-Hw-4gl" secondAttribute="centerY" id="GRd-gd-6L4"/>
                                                 <constraint firstItem="dGQ-sz-j4J" firstAttribute="leading" secondItem="bbE-Hw-4gl" secondAttribute="leading" constant="62" id="UTE-PO-DoV"/>
+                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="width" secondItem="dGQ-sz-j4J" secondAttribute="width" multiplier="1.5" id="UgV-C4-7x3"/>
                                                 <constraint firstAttribute="trailing" secondItem="QBf-tO-eE0" secondAttribute="trailing" constant="20" id="ZvK-a2-hS8"/>
                                                 <constraint firstAttribute="centerY" secondItem="QBf-tO-eE0" secondAttribute="centerY" id="yzX-TK-6OX"/>
                                             </constraints>
@@ -846,7 +849,7 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SelectSitemapCell" id="QgP-w1-LJm">
-                                <rect key="frame" x="0.0" y="22" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="86" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="QgP-w1-LJm" id="rr6-DC-9oo">
                                     <frame key="frameInset" width="375" height="43"/>
