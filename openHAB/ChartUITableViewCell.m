@@ -18,7 +18,8 @@
     self.widgetImage = (UIImageView*)[self viewWithTag:801];
     NSString *chartUrl;
     int random = arc4random() % 1000;
-    if ([self.widget.item.type isEqualToString:@"GroupItem"]) {
+    if ([self.widget.item.type isEqualToString:@"GroupItem"] ||
+        [self.widget.item.type isEqualToString:@"Group"]) {
         chartUrl = [NSString stringWithFormat:@"%@/chart?groups=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
     } else {
         chartUrl = [NSString stringWithFormat:@"%@/chart?items=%@&period=%@&random=%d", self.baseUrl, self.widget.item.name, self.widget.period, random];
