@@ -14,6 +14,7 @@
 #import "TSMessage.h"
 @import AVFoundation;
 #import "AFRememberingSecurityPolicy.h"
+#import "UIViewController+MMDrawerController.h"
 
 @implementation OpenHABAppDelegate
 @synthesize appData;
@@ -104,7 +105,8 @@ AVAudioPlayer *player;
         } else {
             NSLog(@"AVPlayer error");
         }
-        [TSMessage showNotificationInViewController:((UINavigationController*)self.window.rootViewController).visibleViewController title:@"Notification" subtitle:message image:nil type:TSMessageNotificationTypeMessage duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
+        
+         [TSMessage showNotificationInViewController:((UINavigationController*)((MMDrawerController*)self.window.rootViewController).centerViewController).visibleViewController title:@"Notification" subtitle:message image:nil type:TSMessageNotificationTypeMessage duration:5.0 callback:nil buttonTitle:nil buttonCallback:nil atPosition:TSMessageNotificationPositionBottom canBeDismissedByUser:YES];
     }
 }
 							
