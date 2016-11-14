@@ -102,10 +102,11 @@
 {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"] ||
-        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://home.openhab.org"]) {
+        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://myopenhab.org"]) {
         if (deviceId != nil && deviceToken != nil && deviceName != nil) {
-            NSLog(@"Registering with my.openHAB");
-            NSString *registrationUrlString = [NSString stringWithFormat:@"https://my.openhab.org/addAppleRegistration?regId=%@&deviceId=%@&deviceModel=%@", deviceToken, deviceId, deviceName];
+            NSLog(@"Registering notifications with %@", [prefs valueForKey:@"remoteUrl"]);
+            NSString *registrationUrlString = [NSString stringWithFormat:@"%@/addAppleRegistration?regId=%@&deviceId=%@&deviceModel=%@", [prefs valueForKey:@"remoteUrl"],deviceToken,
+                                               deviceId, deviceName];
             NSURL *registrationUrl = [[NSURL alloc] initWithString:[registrationUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
             NSLog(@"Registration URL = %@", [registrationUrl absoluteString]);
             NSMutableURLRequest *registrationRequest = [NSMutableURLRequest requestWithURL:registrationUrl];

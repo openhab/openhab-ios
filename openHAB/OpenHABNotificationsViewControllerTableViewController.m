@@ -58,8 +58,9 @@
 }
 
 - (void)loadNotifications {
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    NSString *notificationsUrlString = [NSString stringWithFormat:@"https://my.openhab.org/api/v1/notifications?limit=20"];
+    NSString *notificationsUrlString = [NSString stringWithFormat:@"%@/api/v1/notifications?limit=20", [prefs valueForKey:@"remoteUrl"]];
     NSURL *notificationsUrl = [[NSURL alloc] initWithString:notificationsUrlString];
     NSMutableURLRequest *notificationsRequest = [NSMutableURLRequest requestWithURL:notificationsUrl];
     [notificationsRequest setAuthCredentials:self.openHABUsername :self.openHABPassword];

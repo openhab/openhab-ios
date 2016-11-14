@@ -111,7 +111,7 @@
     // check if we are using my.openHAB, add notifications menu item then
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"] ||
-        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://home.openhab.org"]) {
+        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://myopenhab.org"]) {
         OpenHABDrawerItem *notificationsItem = [[OpenHABDrawerItem alloc] init];
         notificationsItem.label = @"Notifications";
         notificationsItem.tag = @"notifications";
