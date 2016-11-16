@@ -110,8 +110,7 @@
     [self.drawerItems removeAllObjects];
     // check if we are using my.openHAB, add notifications menu item then
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"] ||
-        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://myopenhab.org"]) {
+    if ([[prefs valueForKey:@"remoteUrl"] rangeOfString:@"openhab.org"].location != NSNotFound) {
         OpenHABDrawerItem *notificationsItem = [[OpenHABDrawerItem alloc] init];
         notificationsItem.label = @"Notifications";
         notificationsItem.tag = @"notifications";

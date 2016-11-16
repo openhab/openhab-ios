@@ -101,8 +101,7 @@
 - (void) doRegisterAps
 {
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    if ([[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://my.openhab.org"] ||
-        [[prefs valueForKey:@"remoteUrl"] hasPrefix:@"https://myopenhab.org"]) {
+    if ([[prefs valueForKey:@"remoteUrl"] rangeOfString:@"openhab.org"].location != NSNotFound) {
         if (deviceId != nil && deviceToken != nil && deviceName != nil) {
             NSLog(@"Registering notifications with %@", [prefs valueForKey:@"remoteUrl"]);
             NSString *registrationUrlString = [NSString stringWithFormat:@"%@/addAppleRegistration?regId=%@&deviceId=%@&deviceModel=%@", [prefs valueForKey:@"remoteUrl"],deviceToken,
