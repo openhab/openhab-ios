@@ -457,7 +457,10 @@
     currentPageOperation.securityPolicy = policy;
     if (self.ignoreSSLCertificate) {
         NSLog(@"Warning - ignoring invalid certificates");
+        currentPageOperation.securityPolicy.validatesDomainName = NO;
         currentPageOperation.securityPolicy.allowInvalidCertificates = YES;
+        versionPageOperation.securityPolicy.allowInvalidCertificates = YES;
+        versionPageOperation.securityPolicy.validatesDomainName = NO;
     }
     [versionPageOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"This is an openHAB 2.X");
