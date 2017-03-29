@@ -1,7 +1,7 @@
 ## Introduction
 
 openHAB iOS application is a native client for openHAB. It uses REST API of openHAB to render
-sitemaps of your openHAB. It also supports my.openhab.org including push notifications.
+sitemaps of your openHAB. It also supports [myopenhab.org](https://myopenhab.org) including push notifications.
 Release version of the app is always available for installation through the
 [App Store](https://itunes.apple.com/us/app/openhab/id492054521?ls=1&mt=8).
 

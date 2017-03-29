@@ -244,7 +244,7 @@
         else
             return 0;
     } else if ([widget.type isEqualToString:@"Video"]) {
-        return self.widgetTableView.frame.size.width/1.33333333;
+        return self.widgetTableView.frame.size.width * 0.75;
     } else if ([widget.type isEqualToString:@"Image"] || [widget.type isEqualToString:@"Chart"]) {
         if (widget.image != nil) {
             return widget.image.size.height/(widget.image.size.width/self.widgetTableView.frame.size.width);
@@ -255,10 +255,10 @@
         if (widget.height != nil) {
             // calculate webview height and return it
             NSLog(@"Webview height would be %f", [widget.height floatValue]*44);
-            return [widget.height floatValue]*44;
+            return [widget.height floatValue] * 44;
         } else {
             // return default height for webview as 8 rows
-            return 44*8;
+            return 44 * 8;
         }
     }
     return 44;

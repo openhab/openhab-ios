@@ -251,11 +251,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
-				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
 				240E752E32702103C7E74188 /* Pods_openHAB.framework in Frameworks */,
+				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
+				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,9 +263,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */,
-				DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */,
 				DFB2624E18830A3600D3244D /* Foundation.framework in Frameworks */,
+				DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */,
+				DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,15 +284,15 @@
 		DF05FF13189658FD00FF2F9B /* icons */ = {
 			isa = PBXGroup;
 			children = (
-				DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */,
-				DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */,
-				DF4A02451CF4721B006C3456 /* glyphicons-334-bell.png */,
 				DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */,
-				DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */,
-				DF05FF1A189659AF00FF2F9B /* glyphicons_432_plus@2x.png */,
-				DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */,
-				DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */,
+				DF4A02451CF4721B006C3456 /* glyphicons-334-bell.png */,
+				DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */,
+				DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */,
 				DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */,
+				DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */,
+				DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */,
+				DF05FF1A189659AF00FF2F9B /* glyphicons_432_plus@2x.png */,
+				DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */,
 			);
 			name = icons;
 			sourceTree = "<group>";
@@ -300,11 +300,11 @@
 		DF4A02291CF3157B006C3456 /* Drawer */ = {
 			isa = PBXGroup;
 			children = (
-				DF4A022D1CF315D3006C3456 /* Widgets */,
-				DF4A022A1CF315BA006C3456 /* OpenHABDrawerTableViewController.h */,
-				DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.m */,
 				DF4A02401CF34096006C3456 /* OpenHABDrawerItem.h */,
 				DF4A02411CF34096006C3456 /* OpenHABDrawerItem.m */,
+				DF4A022A1CF315BA006C3456 /* OpenHABDrawerTableViewController.h */,
+				DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.m */,
+				DF4A022D1CF315D3006C3456 /* Widgets */,
 			);
 			name = Drawer;
 			sourceTree = "<group>";
@@ -322,22 +322,22 @@
 			isa = PBXGroup;
 			children = (
 				DF4A02291CF3157B006C3456 /* Drawer */,
-				DFFD8FCE18EDBD30003B502A /* Util */,
-				DF4B84101886DA9900F34902 /* Widgets */,
+				DFDF45321934699B00A6E581 /* OpenHABInfoViewController.h */,
+				DFDF45331934699B00A6E581 /* OpenHABInfoViewController.m */,
+				DFDF452D1932032B00A6E581 /* OpenHABLegalViewController.h */,
+				DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.m */,
+				DF4A024B1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.h */,
+				DF4A024C1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m */,
+				DF06F1F418FE7A160011E7B9 /* OpenHABSelectionTableViewController.h */,
+				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */,
+				DF4B83FE18857FD900F34902 /* OpenHABSelectSitemapViewController.h */,
+				DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */,
 				DFDEE3FB18831099008B26AC /* OpenHABSettingsViewController.h */,
 				DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.m */,
 				DFB2624218830A3600D3244D /* OpenHABViewController.h */,
 				DFB2624318830A3600D3244D /* OpenHABViewController.m */,
-				DF4B83FE18857FD900F34902 /* OpenHABSelectSitemapViewController.h */,
-				DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */,
-				DF06F1F418FE7A160011E7B9 /* OpenHABSelectionTableViewController.h */,
-				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */,
-				DFDF452D1932032B00A6E581 /* OpenHABLegalViewController.h */,
-				DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.m */,
-				DFDF45321934699B00A6E581 /* OpenHABInfoViewController.h */,
-				DFDF45331934699B00A6E581 /* OpenHABInfoViewController.m */,
-				DF4A024B1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.h */,
-				DF4A024C1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m */,
+				DFFD8FCE18EDBD30003B502A /* Util */,
+				DF4B84101886DA9900F34902 /* Widgets */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -345,10 +345,10 @@
 		DF4B84051885AD4600F34902 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				DF05FF13189658FD00FF2F9B /* icons */,
 				DF4B840E1885B34300F34902 /* app-icon@2x.png */,
-				A3F4C3A61A49A6AC0019A09F /* launchImage.png */,
 				DF4B84061885AE0E00F34902 /* blankicon.png */,
+				DF05FF13189658FD00FF2F9B /* icons */,
+				A3F4C3A61A49A6AC0019A09F /* launchImage.png */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -356,36 +356,36 @@
 		DF4B84101886DA9900F34902 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				DF4B84111886DAC400F34902 /* FrameUITableViewCell.h */,
-				DF4B84121886DAC400F34902 /* FrameUITableViewCell.m */,
-				DF4B84141886EACA00F34902 /* GenericUITableViewCell.h */,
-				DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */,
-				DFA13CB218872EBD006355C3 /* SwitchUITableViewCell.h */,
-				DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.m */,
-				DFA16EB618883CF300EDB0BB /* SetpointUITableViewCell.h */,
-				DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.m */,
-				DFA16EB918883DE500EDB0BB /* SliderUITableViewCell.h */,
-				DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */,
-				DFA16EBF18898A8400EDB0BB /* SegmentedUITableViewCell.h */,
-				DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.m */,
-				DF05FF1E18965B5400FF2F9B /* RollershutterUITableViewCell.h */,
-				DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.m */,
-				DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */,
-				DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */,
+				DF06F1FD18FEFEDF0011E7B9 /* ChartUITableViewCell.h */,
+				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */,
 				DF06F1F718FEA8420011E7B9 /* ColorPickerUITableViewCell.h */,
 				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */,
 				DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */,
 				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */,
-				DF06F1FD18FEFEDF0011E7B9 /* ChartUITableViewCell.h */,
-				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */,
+				DF4B84111886DAC400F34902 /* FrameUITableViewCell.h */,
+				DF4B84121886DAC400F34902 /* FrameUITableViewCell.m */,
+				DF4B84141886EACA00F34902 /* GenericUITableViewCell.h */,
+				DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */,
 				DF06F2001900F8780011E7B9 /* ImageUITableViewCell.h */,
 				DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */,
+				DFA358FC1D00CF37003633DF /* NotificationTableViewCell.h */,
+				DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */,
+				DF05FF1E18965B5400FF2F9B /* RollershutterUITableViewCell.h */,
+				DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.m */,
+				DFA16EBF18898A8400EDB0BB /* SegmentedUITableViewCell.h */,
+				DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.m */,
+				DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */,
+				DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */,
+				DFA16EB618883CF300EDB0BB /* SetpointUITableViewCell.h */,
+				DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.m */,
+				DFA16EB918883DE500EDB0BB /* SliderUITableViewCell.h */,
+				DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */,
+				DFA13CB218872EBD006355C3 /* SwitchUITableViewCell.h */,
+				DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.m */,
 				DF06F20319010E9A0011E7B9 /* VideoUITableViewCell.h */,
 				DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */,
 				DF3072A21929FE7A000D6CC3 /* WebUITableViewCell.h */,
 				DF3072A31929FE7A000D6CC3 /* WebUITableViewCell.m */,
-				DFA358FC1D00CF37003633DF /* NotificationTableViewCell.h */,
-				DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -393,11 +393,11 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
+				DFB2622918830A3600D3244D /* Frameworks */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DFB2625218830A3600D3244D /* openHABTests */,
-				DFB2622918830A3600D3244D /* Frameworks */,
-				DFB2622818830A3600D3244D /* Products */,
 				55933D2EF2A0967A5346C7B0 /* Pods */,
+				DFB2622818830A3600D3244D /* Products */,
 			);
 			sourceTree = "<group>";
 		};
@@ -413,12 +413,12 @@
 		DFB2622918830A3600D3244D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				DFE10413197415F900D94943 /* Security.framework */,
-				DFB2622A18830A3600D3244D /* Foundation.framework */,
 				DFB2622C18830A3600D3244D /* CoreGraphics.framework */,
+				DFB2622A18830A3600D3244D /* Foundation.framework */,
+				A0936D4493CB67B1F64C3BED /* Pods_openHAB.framework */,
+				DFE10413197415F900D94943 /* Security.framework */,
 				DFB2622E18830A3600D3244D /* UIKit.framework */,
 				DFB2624C18830A3600D3244D /* XCTest.framework */,
-				A0936D4493CB67B1F64C3BED /* Pods_openHAB.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -427,17 +427,17 @@
 			isa = PBXGroup;
 			children = (
 				DFEBBAC31940CA0F00F3F0B8 /* Icons */,
-				DFDA3CEB193F197200888039 /* LaunchImage */,
 				DF4B84051885AD4600F34902 /* Images */,
-				DF4B83FD18857FA100F34902 /* UI */,
-				DFDEE3FF18832293008B26AC /* Util */,
+				DFB2624518830A3600D3244D /* Images.xcassets */,
+				DFDA3CEB193F197200888039 /* LaunchImage */,
+				A3F4C3A11A49A5090019A09F /* Main.storyboard */,
+				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
 				DFDEE3FE1883228C008B26AC /* Models */,
 				DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */,
 				DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */,
-				A3F4C3A11A49A5090019A09F /* Main.storyboard */,
-				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
-				DFB2624518830A3600D3244D /* Images.xcassets */,
 				DFB2623118830A3600D3244D /* Supporting Files */,
+				DF4B83FD18857FA100F34902 /* UI */,
+				DFDEE3FF18832293008B26AC /* Util */,
 			);
 			path = openHAB;
 			sourceTree = "<group>";
@@ -445,12 +445,12 @@
 		DFB2623118830A3600D3244D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				DFDA3CE9193CADB200888039 /* ping.wav */,
-				DFB2623218830A3600D3244D /* openHAB-Info.plist */,
 				DFB2623318830A3600D3244D /* InfoPlist.strings */,
-				DFB2623618830A3600D3244D /* main.m */,
-				DFB2623818830A3600D3244D /* openHAB-Prefix.pch */,
 				DFDF45301932042B00A6E581 /* legal.rtf */,
+				DFB2623618830A3600D3244D /* main.m */,
+				DFB2623218830A3600D3244D /* openHAB-Info.plist */,
+				DFB2623818830A3600D3244D /* openHAB-Prefix.pch */,
+				DFDA3CE9193CADB200888039 /* ping.wav */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -467,8 +467,8 @@
 		DFB2625318830A3600D3244D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				DFB2625418830A3600D3244D /* openHABTests-Info.plist */,
 				DFB2625518830A3600D3244D /* InfoPlist.strings */,
+				DFB2625418830A3600D3244D /* openHABTests-Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -476,13 +476,13 @@
 		DFDA3CEB193F197200888039 /* LaunchImage */ = {
 			isa = PBXGroup;
 			children = (
-				DFDA3CEE193F199900888039 /* Default@2x.png */,
 				DFDA3CEF193F199900888039 /* Default.png */,
-				DFDA3CF0193F199900888039 /* Default-Portrait~ipad.png */,
-				DFDA3CF1193F199900888039 /* Default-Portrait@2x~ipad.png */,
-				DFDA3CF2193F199900888039 /* Default-Landscape~ipad.png */,
-				DFDA3CF3193F199900888039 /* Default-Landscape@2x~ipad.png */,
 				DFDA3CEC193F198700888039 /* Default-568h@2x.png */,
+				DFDA3CF3193F199900888039 /* Default-Landscape@2x~ipad.png */,
+				DFDA3CF2193F199900888039 /* Default-Landscape~ipad.png */,
+				DFDA3CF1193F199900888039 /* Default-Portrait@2x~ipad.png */,
+				DFDA3CF0193F199900888039 /* Default-Portrait~ipad.png */,
+				DFDA3CEE193F199900888039 /* Default@2x.png */,
 			);
 			name = LaunchImage;
 			sourceTree = "<group>";
@@ -490,22 +490,22 @@
 		DFDEE3FE1883228C008B26AC /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				DF4B84021885A53700F34902 /* OpenHABDataObject.h */,
+				DF4B84031885A53700F34902 /* OpenHABDataObject.m */,
 				DFDEE403188322FA008B26AC /* OpenHABItem.h */,
 				DFDEE404188322FA008B26AC /* OpenHABItem.m */,
 				DFDEE405188322FA008B26AC /* OpenHABLinkedPage.h */,
 				DFDEE406188322FA008B26AC /* OpenHABLinkedPage.m */,
+				DF1B302B1CF5C667009C921C /* OpenHABNotification.h */,
+				DF1B302C1CF5C667009C921C /* OpenHABNotification.m */,
 				DFDEE407188322FA008B26AC /* OpenHABSitemap.h */,
 				DFDEE408188322FA008B26AC /* OpenHABSitemap.m */,
 				DFDEE409188322FA008B26AC /* OpenHABSitemapPage.h */,
 				DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.m */,
 				DFDEE40B188322FA008B26AC /* OpenHABWidget.h */,
 				DFDEE40C188322FA008B26AC /* OpenHABWidget.m */,
-				DF4B84021885A53700F34902 /* OpenHABDataObject.h */,
-				DF4B84031885A53700F34902 /* OpenHABDataObject.m */,
 				DFA16EBC1889867B00EDB0BB /* OpenHABWidgetMapping.h */,
 				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */,
-				DF1B302B1CF5C667009C921C /* OpenHABNotification.h */,
-				DF1B302C1CF5C667009C921C /* OpenHABNotification.m */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -513,23 +513,23 @@
 		DFDEE3FF18832293008B26AC /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				DFDEE401188322BC008B26AC /* NSObject+Data.m */,
-				DF2B6ADB18EF4D660063819F /* NSData+HexString.h */,
-				DF2B6ADC18EF4D660063819F /* NSData+HexString.m */,
-				DFDEE400188322BC008B26AC /* NSObject+Data.h */,
-				DFDEE4181883EB18008B26AC /* Reachability.h */,
-				DFDEE4191883EB18008B26AC /* Reachability.m */,
-				DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */,
-				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */,
-				DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */,
-				DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */,
-				DFDEE41B1883EB99008B26AC /* Reachability+URL.h */,
-				DFDEE41C1883EB99008B26AC /* Reachability+URL.m */,
-				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.h */,
 				DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */,
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
+				DF2B6ADB18EF4D660063819F /* NSData+HexString.h */,
+				DF2B6ADC18EF4D660063819F /* NSData+HexString.m */,
 				DFD411051CF874C000F78066 /* NSDate+Helper.h */,
 				DFD411061CF874C000F78066 /* NSDate+Helper.m */,
+				DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */,
+				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */,
+				DFDEE400188322BC008B26AC /* NSObject+Data.h */,
+				DFDEE401188322BC008B26AC /* NSObject+Data.m */,
+				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.h */,
+				DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */,
+				DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */,
+				DFDEE4181883EB18008B26AC /* Reachability.h */,
+				DFDEE4191883EB18008B26AC /* Reachability.m */,
+				DFDEE41B1883EB99008B26AC /* Reachability+URL.h */,
+				DFDEE41C1883EB99008B26AC /* Reachability+URL.m */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -537,13 +537,13 @@
 		DFEBBAC31940CA0F00F3F0B8 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
+				DFEBBAD31940CBEA00F3F0B8 /* icon-120x120.png */,
+				DFEBBAD41940CBEA00F3F0B8 /* icon-152x152.png */,
 				DFEBBACE1940CBEA00F3F0B8 /* icon-29x29.png */,
 				DFEBBACF1940CBEA00F3F0B8 /* icon-40x40.png */,
 				DFEBBAD01940CBEA00F3F0B8 /* icon-58x58.png */,
 				DFEBBAD11940CBEA00F3F0B8 /* icon-76x76.png */,
 				DFEBBAD21940CBEA00F3F0B8 /* icon-80x80.png */,
-				DFEBBAD31940CBEA00F3F0B8 /* icon-120x120.png */,
-				DFEBBAD41940CBEA00F3F0B8 /* icon-152x152.png */,
 			);
 			name = Icons;
 			sourceTree = "<group>";
@@ -551,10 +551,10 @@
 		DFFD8FCE18EDBD30003B502A /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				DFFD8FCF18EDBD4F003B502A /* UICircleButton.h */,
-				DFFD8FD018EDBD4F003B502A /* UICircleButton.m */,
 				DF75996B1976CD0C0098F90D /* UIAlertView+Block.h */,
 				DF75996C1976CD0C0098F90D /* UIAlertView+Block.m */,
+				DFFD8FCF18EDBD4F003B502A /* UICircleButton.h */,
+				DFFD8FD018EDBD4F003B502A /* UICircleButton.m */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -566,12 +566,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */;
 			buildPhases = (
-				9543C2DDD9BFDB7DD06CF7DE /* 📦 Check Pods Manifest.lock */,
+				9543C2DDD9BFDB7DD06CF7DE /* [CP] Check Pods Manifest.lock */,
 				DFB2622318830A3600D3244D /* Sources */,
 				DFB2622418830A3600D3244D /* Frameworks */,
 				DFB2622518830A3600D3244D /* Resources */,
-				CE459E4F9AA10964E3EDBD8A /* 📦 Embed Pods Frameworks */,
-				3DE01113C96D3D4C44867A5A /* 📦 Copy Pods Resources */,
+				CE459E4F9AA10964E3EDBD8A /* [CP] Embed Pods Frameworks */,
+				3DE01113C96D3D4C44867A5A /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -642,38 +642,38 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */,
-				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
-				A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */,
-				DFDA3CF5193F199900888039 /* Default.png in Resources */,
-				A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */,
-				DF4A02461CF4721B006C3456 /* glyphicons-334-bell.png in Resources */,
-				DFDA3CF6193F199900888039 /* Default-Portrait~ipad.png in Resources */,
-				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
-				A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */,
-				DFEBBAD61940CBEA00F3F0B8 /* icon-40x40.png in Resources */,
-				DFDA3CED193F198700888039 /* Default-568h@2x.png in Resources */,
-				DF4A024A1CF47794006C3456 /* glyphicons-731-puzzle.png in Resources */,
-				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
-				DFDA3CF8193F199900888039 /* Default-Landscape~ipad.png in Resources */,
-				DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */,
-				DFDA3CEA193CADB200888039 /* ping.wav in Resources */,
-				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
-				DFDA3CF7193F199900888039 /* Default-Portrait@2x~ipad.png in Resources */,
-				DF4A02481CF47757006C3456 /* glyphicons-597-activity.png in Resources */,
-				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
-				DFDA3CF9193F199900888039 /* Default-Landscape@2x~ipad.png in Resources */,
-				DFEBBADA1940CBEA00F3F0B8 /* icon-120x120.png in Resources */,
-				DFEBBAD81940CBEA00F3F0B8 /* icon-76x76.png in Resources */,
-				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
-				DFDA3CF4193F199900888039 /* Default@2x.png in Resources */,
 				DF4B840F1885B34300F34902 /* app-icon@2x.png in Resources */,
+				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
+				DFDA3CED193F198700888039 /* Default-568h@2x.png in Resources */,
+				DFDA3CF9193F199900888039 /* Default-Landscape@2x~ipad.png in Resources */,
+				DFDA3CF8193F199900888039 /* Default-Landscape~ipad.png in Resources */,
+				DFDA3CF7193F199900888039 /* Default-Portrait@2x~ipad.png in Resources */,
+				DFDA3CF6193F199900888039 /* Default-Portrait~ipad.png in Resources */,
+				DFDA3CF5193F199900888039 /* Default.png in Resources */,
+				DFDA3CF4193F199900888039 /* Default@2x.png in Resources */,
 				DF4A02441CF46986006C3456 /* glyphicons-137-cogwheel.png in Resources */,
+				DF4A02461CF4721B006C3456 /* glyphicons-334-bell.png in Resources */,
+				DF4A02481CF47757006C3456 /* glyphicons-597-activity.png in Resources */,
+				DF4A024A1CF47794006C3456 /* glyphicons-731-puzzle.png in Resources */,
 				DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */,
-				DFEBBAD91940CBEA00F3F0B8 /* icon-80x80.png in Resources */,
-				DFEBBAD71940CBEA00F3F0B8 /* icon-58x58.png in Resources */,
+				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
+				DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */,
+				DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */,
+				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
+				DFEBBADA1940CBEA00F3F0B8 /* icon-120x120.png in Resources */,
 				DFEBBADB1940CBEA00F3F0B8 /* icon-152x152.png in Resources */,
 				DFEBBAD51940CBEA00F3F0B8 /* icon-29x29.png in Resources */,
+				DFEBBAD61940CBEA00F3F0B8 /* icon-40x40.png in Resources */,
+				DFEBBAD71940CBEA00F3F0B8 /* icon-58x58.png in Resources */,
+				DFEBBAD81940CBEA00F3F0B8 /* icon-76x76.png in Resources */,
+				DFEBBAD91940CBEA00F3F0B8 /* icon-80x80.png in Resources */,
+				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
+				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
+				A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */,
+				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
+				A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */,
+				A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */,
+				DFDA3CEA193CADB200888039 /* ping.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -688,14 +688,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3DE01113C96D3D4C44867A5A /* 📦 Copy Pods Resources */ = {
+		3DE01113C96D3D4C44867A5A /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "📦 Copy Pods Resources";
+			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -703,29 +703,29 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-openHAB/Pods-openHAB-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		9543C2DDD9BFDB7DD06CF7DE /* 📦 Check Pods Manifest.lock */ = {
+		9543C2DDD9BFDB7DD06CF7DE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "📦 Check Pods Manifest.lock";
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		CE459E4F9AA10964E3EDBD8A /* 📦 Embed Pods Frameworks */ = {
+		CE459E4F9AA10964E3EDBD8A /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "📦 Embed Pods Frameworks";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -740,51 +740,51 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
+				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
+				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */,
+				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
+				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
+				DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.m in Sources */,
-				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.m in Sources */,
+				DF4B84161886EACA00F34902 /* GenericUITableViewCell.m in Sources */,
+				DF06F2021900F8780011E7B9 /* ImageUITableViewCell.m in Sources */,
+				DFB2623718830A3600D3244D /* main.m in Sources */,
+				DFA358FE1D00CF37003633DF /* NotificationTableViewCell.m in Sources */,
+				DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */,
+				DFD411071CF874C000F78066 /* NSDate+Helper.m in Sources */,
+				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
+				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
+				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
+				DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */,
+				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.m in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.m in Sources */,
-				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.m in Sources */,
+				DFDF45341934699B00A6E581 /* OpenHABInfoViewController.m in Sources */,
+				DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */,
+				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */,
+				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */,
+				DF1B302D1CF5C667009C921C /* OpenHABNotification.m in Sources */,
+				DF4A024D1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m in Sources */,
+				DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.m in Sources */,
+				DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */,
+				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.m in Sources */,
+				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,
+				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */,
+				DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */,
+				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
+				DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */,
+				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */,
+				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
+				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
+				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.m in Sources */,
+				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.m in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */,
+				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.m in Sources */,
+				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
+				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.m in Sources */,
+				DF75996D1976CD0C0098F90D /* UIAlertView+Block.m in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.m in Sources */,
 				DF06F20519010E9A0011E7B9 /* VideoUITableViewCell.m in Sources */,
-				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
-				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */,
-				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */,
-				DFDF45341934699B00A6E581 /* OpenHABInfoViewController.m in Sources */,
 				DF3072A41929FE7A000D6CC3 /* WebUITableViewCell.m in Sources */,
-				DFD411071CF874C000F78066 /* NSDate+Helper.m in Sources */,
-				DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */,
-				DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */,
-				DFB2623718830A3600D3244D /* main.m in Sources */,
-				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.m in Sources */,
-				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */,
-				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.m in Sources */,
-				DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */,
-				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.m in Sources */,
-				DFA358FE1D00CF37003633DF /* NotificationTableViewCell.m in Sources */,
-				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
-				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
-				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,
-				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */,
-				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.m in Sources */,
-				DF06F2021900F8780011E7B9 /* ImageUITableViewCell.m in Sources */,
-				DF4B84161886EACA00F34902 /* GenericUITableViewCell.m in Sources */,
-				DF4A024D1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m in Sources */,
-				DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */,
-				DF1B302D1CF5C667009C921C /* OpenHABNotification.m in Sources */,
-				DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.m in Sources */,
-				DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */,
-				DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */,
-				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
-				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
-				DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */,
-				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
-				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
-				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.m in Sources */,
-				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
-				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
-				DF75996D1976CD0C0098F90D /* UIAlertView+Block.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
