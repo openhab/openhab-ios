@@ -13,7 +13,6 @@
 #import <netdb.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
 #import "Reachability+URL.h"
-#import <FastSocket/FastSocket.h>
 
 @implementation OpenHABTracker
 @synthesize openHABDemoMode, openHABLocalUrl, openHABRemoteUrl, delegate, netService, reach;
@@ -238,15 +237,15 @@
     return ipPort;
 }
 
-- (BOOL)isURLReachable:(NSURL*) url
-{
-    FastSocket *client = [[FastSocket alloc] initWithHost:[url host] andPort:[[url port] stringValue]];
-    NSLog(@"Checking if %@:%@ is reachable", [url host], [[url port] stringValue]);
-    if ([client connect:1]) {
-        [client close];
-        return YES;
-    }
-    return NO;
+- (BOOL)isURLReachable:(NSURL*) url {
+    NSURLResponse *response;
+    NSError *error=nil;
+    NSData *data = nil;
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    
+    data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    
+    return (data && response);
 }
 
 - (NSString *)stringFromStatus:(NetworkStatus) status {
