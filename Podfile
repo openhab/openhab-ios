@@ -9,7 +9,6 @@ target 'openHAB' do
 	pod 'CrittercismSDK', '~> 5.5.5'
 	pod 'GoogleAnalytics'
 	pod 'NKOColorPickerView', '~> 0.5'
-	pod 'FastSocket', '~> 1.3'
 	pod 'MMDrawerController', '~> 0.5.7'
 	pod 'MMDrawerController+Storyboard'
 end
