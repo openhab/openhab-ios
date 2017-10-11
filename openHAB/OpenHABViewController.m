@@ -377,9 +377,11 @@
     [self.widgetTableView deselectRowAtIndexPath:[self.widgetTableView indexPathForSelectedRow] animated:NO];
 }
 
-- (void)didLoadImage
+- (void)didLoadImageOfCell:(ImageUITableViewCell *)cell
 {
-    [self.widgetTableView reloadData];
+    NSIndexPath *indexPath = [self.widgetTableView indexPathForCell:cell];
+    if (indexPath) // otherwise the cell is no longer visible 
+        [self.widgetTableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)evaluateServerTrust:(AFRememberingSecurityPolicy *)policy summary:(NSString *)certificateSummary forDomain:(NSString *)domain
