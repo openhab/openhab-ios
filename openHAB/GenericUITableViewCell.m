@@ -90,9 +90,42 @@
     self.imageView.frame = CGRectMake(13,5,32,32);
 }
 
-- (UIColor *)colorFromHexString:(NSString *)hexString {
+- (NSString *)namedColorToHexString:(NSString *)namedColor
+{
+    NSDictionary *namedColors = @{
+                                  @"maroon"     : @"#800000",
+                                  @"red"        : @"#ff0000",
+                                  @"orange"     : @"#ffa500",
+                                  @"olive"      : @"#808000",
+                                  @"yellow"     : @"#ffff00",
+                                  @"purple"     : @"#800080",
+                                  @"fuchsia"    : @"#ff00ff",
+                                  @"white"      : @"#ffffff",
+                                  @"lime"       : @"#00ff00",
+                                  @"green"      : @"#008000",
+                                  @"navy"       : @"#000080",
+                                  @"blue"       : @"#0000ff",
+                                  @"teal"       : @"#008080",
+                                  @"aqua"       : @"#00ffff",
+                                  @"black"      : @"#000000",
+                                  @"silver"     : @"#c0c0c0",
+                                  @"gray"       : @"#808080"
+                                  };
+    return namedColors[[namedColor lowercaseString]];
+}
+
+- (UIColor *)colorFromHexString:(NSString *)hexString
+{
+    NSString *colorString = hexString;
+    if (![hexString hasPrefix:@"#"]) {
+        NSString *namedColor = [self namedColorToHexString:hexString];
+        if (namedColor) {
+            colorString = namedColor;
+        }
+    }
+    
     unsigned rgbValue = 0;
-    NSScanner *scanner = [NSScanner scannerWithString:hexString];
+    NSScanner *scanner = [NSScanner scannerWithString:colorString];
     [scanner setScanLocation:1]; // bypass '#' character
     [scanner scanHexInt:&rgbValue];
     return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
