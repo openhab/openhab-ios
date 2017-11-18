@@ -10,9 +10,15 @@
 #import "OpenHABWidget.h"
 #import "OpenHABItem.h"
 
+@interface SetpointUITableViewCell()
+
+@property (nonatomic, readonly) BOOL isIntStep;
+@property (nonatomic, readonly) NSString *stateFormat;
+
+@end
+
 @implementation SetpointUITableViewCell
-{
-}
+
 @synthesize widgetSegmentedControl, textLabel;
 
 - (id)initWithCoder:(NSCoder *)coder
@@ -33,7 +39,7 @@
     if ([self.widget.item.state isEqual:@"Uninitialized"]) {
         widgetValue = @"N/A";
     } else {
-        widgetValue = [NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat]];
+        widgetValue = [NSString stringWithFormat:self.stateFormat, !self.isIntStep ? [self.widget.item stateAsFloat] : [self.widget.item stateAsInt]];
     }
     [self.widgetSegmentedControl setTitle:widgetValue forSegmentAtIndex:1];
     [self.widgetSegmentedControl addTarget:self
@@ -41,40 +47,84 @@
                forControlEvents:UIControlEventValueChanged];
 }
 
+- (void)decreaseValue {
+    if ([self.widget.item.state isEqual:@"Uninitialized"]) {
+        [self.widget sendCommand:(NSString*)self.widget.minValue];
+    } else {
+        if (self.widget.minValue != nil) {
+            if (!self.isIntStep) {
+                float newValue = [self.widget.item stateAsFloat] - [self.widget.step floatValue];
+                if (newValue >= [self.widget.minValue floatValue]) {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                }
+            } else {
+                int newValue = [self.widget.item stateAsInt] - [self.widget.step intValue];
+                if (newValue >= [self.widget.minValue intValue]) {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                }
+            }
+        } else {
+            if (!self.isIntStep) {
+                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
+            }
+            else {
+                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsInt] - [self.widget.step intValue]]];
+            }
+        }
+    }
+}
+
+- (void)increaseValue {
+    if ([self.widget.item.state isEqual:@"Uninitialized"]) {
+        [self.widget sendCommand:(NSString*)self.widget.minValue];
+    } else {
+        if (self.widget.maxValue != nil) {
+            if (!self.isIntStep) {
+                float newValue = [self.widget.item stateAsFloat] + [self.widget.step floatValue];
+                if (newValue <= [self.widget.maxValue floatValue]) {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                }
+            } else {
+                int newValue = [self.widget.item stateAsInt] + [self.widget.step intValue];
+                if (newValue <= [self.widget.maxValue intValue]) {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                }
+            }
+        } else {
+            if (!self.isIntStep) {
+                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
+            }
+            else {
+                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsInt] + [self.widget.step intValue]]];
+            }
+        }
+    }
+}
+
 -(void) pickOne:(id)sender
 {
     UISegmentedControl *segmentedControl = (UISegmentedControl *)sender;
-    NSLog(@"Setpoint pressed %d", [segmentedControl selectedSegmentIndex]);
+    NSLog(@"Setpoint pressed %ld", [segmentedControl selectedSegmentIndex]);
     // Deselect segment in the middle
     if ([segmentedControl selectedSegmentIndex] == 1) {
         [self.widgetSegmentedControl setSelectedSegmentIndex:-1];
     // - pressed
     } else if ([segmentedControl selectedSegmentIndex] == 0) {
-        if ([self.widget.item.state isEqual:@"Uninitialized"]) {
-            [self.widget sendCommand:(NSString*)self.widget.minValue];
-        } else {
-            if (self.widget.minValue != nil) {
-                if ([self.widget.item stateAsFloat] - [self.widget.step floatValue] >= [self.widget.minValue floatValue]) {
-                    [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
-                }
-            } else {
-                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
-            }
-        }
+        [self decreaseValue];
     // + pressed
     } else if ([segmentedControl selectedSegmentIndex] == 2) {
-        if ([self.widget.item.state isEqual:@"Uninitialized"]) {
-            [self.widget sendCommand:self.widget.minValue];
-        } else {
-            if (self.widget.maxValue != nil) {
-                if ([self.widget.item stateAsFloat] + [self.widget.step floatValue] <= [self.widget.maxValue floatValue]) {
-                    [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
-                }
-            } else {
-                [self.widget sendCommand:[NSString stringWithFormat:@"%.01f", [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
-            }
-        }
+        [self increaseValue];
     }
+}
+
+- (NSString *)stateFormat
+{
+    return self.isIntStep ? @"%d" : @"%.01f";
+}
+
+- (BOOL)isIntStep
+{
+    return [self.widget.step floatValue] == [self.widget.step intValue];
 }
 
 @end
