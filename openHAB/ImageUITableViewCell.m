@@ -47,7 +47,7 @@ NSTimer *refreshTimer;
         widget.image = image;
         [widgetImage setFrame:self.contentView.frame];
         if (self.delegate != nil) {
-            [self.delegate didLoadImage];
+            [self.delegate didLoadImageOfCell:self];
         }
     }];
 }
@@ -57,6 +57,9 @@ NSTimer *refreshTimer;
     int random = arc4random() % 1000;
     [widgetImage sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@&random=%d", self.widget.url, random]] placeholderImage:self.widgetImage.image options:SDWebImageCacheMemoryOnly completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
         widget.image = image;
+        if (self.delegate != nil) {
+            [self.delegate didLoadImageOfCell:self];
+        }
     }];
 }
 

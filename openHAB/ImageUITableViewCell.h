@@ -11,7 +11,7 @@
 @class ImageUITableViewCell;
 
 @protocol ImageUITableViewCellDelegate <NSObject>
-- (void)didLoadImage;
+- (void)didLoadImageOfCell:(ImageUITableViewCell*)cell;
 @end
 
 @interface ImageUITableViewCell : GenericUITableViewCell

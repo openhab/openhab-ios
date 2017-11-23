@@ -34,7 +34,7 @@
         widget.image = image;
         [self.widgetImage setFrame:self.contentView.frame];
         if (self.delegate != nil) {
-          [self.delegate didLoadImage];
+          [self.delegate didLoadImageOfCell:self];
         }
       }];
     } else {
