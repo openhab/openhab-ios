@@ -10,6 +10,7 @@
 		240E752E32702103C7E74188 /* Pods_openHAB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0936D4493CB67B1F64C3BED /* Pods_openHAB.framework */; };
 		653C09D71EAE4C0000BA4C4A /* icon-29x29.png in Resources */ = {isa = PBXBuildFile; fileRef = 653C09D51EAE4C0000BA4C4A /* icon-29x29.png */; };
 		653C09D81EAE4C0000BA4C4A /* icon-76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = 653C09D61EAE4C0000BA4C4A /* icon-76x76.png */; };
+		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
@@ -98,6 +99,7 @@
 		653C09D41EAD691A00BA4C4A /* openHAB.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHAB.entitlements; sourceTree = "<group>"; };
 		653C09D51EAE4C0000BA4C4A /* icon-29x29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-29x29.png"; sourceTree = "<group>"; };
 		653C09D61EAE4C0000BA4C4A /* icon-76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-76x76.png"; sourceTree = "<group>"; };
+		656916D81FCB82BC00667B2A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		92D164D7D26248F747AE06CA /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Pods/Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		A0936D4493CB67B1F64C3BED /* Pods_openHAB.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHAB.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -402,6 +404,7 @@
 		DFB2623018830A3600D3244D /* openHAB */ = {
 			isa = PBXGroup;
 			children = (
+				656916D81FCB82BC00667B2A /* GoogleService-Info.plist */,
 				653C09D41EAD691A00BA4C4A /* openHAB.entitlements */,
 				DF4B84051885AD4600F34902 /* Images */,
 				DFB2624518830A3600D3244D /* Images.xcassets */,
@@ -612,6 +615,7 @@
 				A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */,
 				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
 				A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */,
+				656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */,
 				A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */,
 				DFDA3CEA193CADB200888039 /* ping.wav in Resources */,
 			);

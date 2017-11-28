@@ -7,12 +7,11 @@
 //
 
 #import "OpenHABAppDelegate.h"
-#import <Crittercism/Crittercism.h>
-#import "GAI.h"
 #import "AFNetworking.h"
 #import "NSData+HexString.h"
 #import "TSMessage.h"
 @import AVFoundation;
+@import Firebase;
 #import "AFRememberingSecurityPolicy.h"
 #import "UIViewController+MMDrawerController.h"
 
@@ -30,9 +29,8 @@ AVAudioPlayer *player;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     NSLog(@"didFinishLaunchingWithOptions started");
-    // Override point for customization after application launch.
-    [Crittercism enableWithAppID: @"5134a8a08e54584a75000015"];
-    [[GAI sharedInstance] trackerWithTrackingId:@"UA-49587640-1"];
+    
+    [FIRApp configure];
 //    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
 //    manager.operationQueue.maxConcurrentOperationCount = 50;
     NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"CacheDataAgressively"];

@@ -7,9 +7,6 @@
 //
 
 #import "OpenHABLegalViewController.h"
-#import <GAI.h>
-#import "GAIFields.h"
-#import "GAIDictionaryBuilder.h"
 
 @interface OpenHABLegalViewController ()
 
@@ -30,10 +27,6 @@
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    id tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker set:kGAIScreenName
-           value:@"OpenHABLegalViewController"];
-    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
 }
 
 - (void)didReceiveMemoryWarning

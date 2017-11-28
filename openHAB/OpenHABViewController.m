@@ -26,9 +26,6 @@
 #import "TSMessage.h"
 #import "Reachability+URL.h"
 #import "ChartUITableViewCell.h"
-#import <GAI.h>
-#import "GAIFields.h"
-#import "GAIDictionaryBuilder.h"
 #import "UIAlertView+Block.h"
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
@@ -133,10 +130,6 @@
 {
     NSLog(@"OpenHABViewController viewWillAppear");
     [super viewDidAppear:animated];
-    id gaiTracker = [[GAI sharedInstance] defaultTracker];
-    [gaiTracker set:kGAIScreenName
-           value:@"OpenHABViewController"];
-    [gaiTracker send:[[GAIDictionaryBuilder createAppView] build]];
     // Load settings into local properties
     [self loadSettings];
     // Set authentication parameters to SDImage
