@@ -241,7 +241,9 @@
     NSURLResponse *response;
     NSError *error=nil;
     NSData *data = nil;
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url
+                                            cachePolicy:NSURLRequestReloadIgnoringCacheData
+                                        timeoutInterval:2.0];
     
     data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
     
