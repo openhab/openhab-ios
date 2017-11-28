@@ -16,9 +16,6 @@
 #import "AFNetworking.h"
 #import "NSMutableURLRequest+Auth.h"
 #import "GDataXMLNode.h"
-#import <GAI.h>
-#import "GAIFields.h"
-#import "GAIDictionaryBuilder.h"
 #import "AFRememberingSecurityPolicy.h"
 
 @interface OpenHABSelectSitemapViewController ()
@@ -61,10 +58,6 @@
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    id tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker set:kGAIScreenName
-           value:@"OpenHABSelectSitemapViewController"];
-    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
     NSString *sitemapsUrlString = [NSString stringWithFormat:@"%@/rest/sitemaps", self.openHABRootUrl];
     NSURL *sitemapsUrl = [[NSURL alloc] initWithString:sitemapsUrlString];
     NSMutableURLRequest *sitemapsRequest = [NSMutableURLRequest requestWithURL:sitemapsUrl];

@@ -9,9 +9,6 @@
 #import "OpenHABSettingsViewController.h"
 #import "OpenHABViewController.h"
 #import "OpenHABDataObject.h"
-#import <GAI.h>
-#import "GAIFields.h"
-#import "GAIDictionaryBuilder.h"
 #import <SDWebImage/UIImageView+WebCache.h>
 
 @interface OpenHABSettingsViewController ()
@@ -51,10 +48,6 @@
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    id tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker set:kGAIScreenName
-           value:@"OpenHABSettingsViewController"];
-    [tracker send:[[GAIDictionaryBuilder createAppView] build]];
     [settingsTableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow
                                   animated:YES];
 }
