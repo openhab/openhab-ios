@@ -10,4 +10,6 @@ target 'openHAB' do
 	pod 'MMDrawerController', '~> 0.5.7'
 	pod 'MMDrawerController+Storyboard'
         pod 'Firebase/Core'
+	pod 'Fabric', '~> 1.7.2'
+	pod 'Crashlytics', '~> 3.9.3'
 end
