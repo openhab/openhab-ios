@@ -30,7 +30,9 @@ AVAudioPlayer *player;
 {
     NSLog(@"didFinishLaunchingWithOptions started");
     
+    //init Firebase crash reporting
     [FIRApp configure];
+    
 //    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
 //    manager.operationQueue.maxConcurrentOperationCount = 50;
     NSDictionary *appDefaults = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"CacheDataAgressively"];

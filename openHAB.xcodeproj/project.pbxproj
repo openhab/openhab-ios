@@ -522,6 +522,7 @@
 				DFB2622518830A3600D3244D /* Resources */,
 				CE459E4F9AA10964E3EDBD8A /* [CP] Embed Pods Frameworks */,
 				3DE01113C96D3D4C44867A5A /* [CP] Copy Pods Resources */,
+				6562C91D1FCF2B56008C61CE /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -646,6 +647,19 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-openHAB/Pods-openHAB-resources.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		6562C91D1FCF2B56008C61CE /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Fabric/run\"";
 		};
 		9543C2DDD9BFDB7DD06CF7DE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
