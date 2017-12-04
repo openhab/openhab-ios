@@ -26,7 +26,7 @@
 - (OpenHABItem *) initWithXML:(GDataXMLElement *)xmlElement;
 - (OpenHABItem *) initWithDictionary:(NSDictionary *)dictionary;
 - (float) stateAsFloat;
-- (int) stateAsInt;
+- (NSInteger) stateAsInt;
 - (UIColor*) stateAsUIColor;
 
 @end

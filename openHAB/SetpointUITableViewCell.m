@@ -39,7 +39,11 @@
     if ([self.widget.item.state isEqual:@"Uninitialized"]) {
         widgetValue = @"N/A";
     } else {
-        widgetValue = [NSString stringWithFormat:self.stateFormat, !self.isIntStep ? [self.widget.item stateAsFloat] : [self.widget.item stateAsInt]];
+        if (!self.isIntStep){
+            widgetValue = [NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsFloat]];
+        } else {
+            widgetValue = [NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsInt]];
+        }
     }
     [self.widgetSegmentedControl setTitle:widgetValue forSegmentAtIndex:1];
     [self.widgetSegmentedControl addTarget:self
@@ -56,11 +60,15 @@
                 float newValue = [self.widget.item stateAsFloat] - [self.widget.step floatValue];
                 if (newValue >= [self.widget.minValue floatValue]) {
                     [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                } else {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.minValue floatValue]]];
                 }
             } else {
-                int newValue = [self.widget.item stateAsInt] - [self.widget.step intValue];
-                if (newValue >= [self.widget.minValue intValue]) {
+                NSInteger newValue = [self.widget.item stateAsInt] - [self.widget.step integerValue];
+                if (newValue >= [self.widget.minValue integerValue]) {
                     [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                } else {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.minValue integerValue]]];
                 }
             }
         } else {
@@ -68,7 +76,7 @@
                 [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsFloat] - [self.widget.step floatValue]]];
             }
             else {
-                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsInt] - [self.widget.step intValue]]];
+                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsInt] - [self.widget.step integerValue]]];
             }
         }
     }
@@ -83,11 +91,15 @@
                 float newValue = [self.widget.item stateAsFloat] + [self.widget.step floatValue];
                 if (newValue <= [self.widget.maxValue floatValue]) {
                     [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                } else {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.maxValue floatValue]]];
                 }
             } else {
-                int newValue = [self.widget.item stateAsInt] + [self.widget.step intValue];
-                if (newValue <= [self.widget.maxValue intValue]) {
+                NSInteger newValue = [self.widget.item stateAsInt] + [self.widget.step integerValue];
+                if (newValue <= [self.widget.maxValue integerValue]) {
                     [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, newValue]];
+                } else {
+                    [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.maxValue integerValue]]];
                 }
             }
         } else {
@@ -95,7 +107,7 @@
                 [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsFloat] + [self.widget.step floatValue]]];
             }
             else {
-                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsInt] + [self.widget.step intValue]]];
+                [self.widget sendCommand:[NSString stringWithFormat:self.stateFormat, [self.widget.item stateAsInt] + [self.widget.step integerValue]]];
             }
         }
     }
@@ -119,12 +131,12 @@
 
 - (NSString *)stateFormat
 {
-    return self.isIntStep ? @"%d" : @"%.01f";
+    return self.isIntStep ? @"%ld" : @"%.01f";
 }
 
 - (BOOL)isIntStep
 {
-    return [self.widget.step floatValue] == [self.widget.step intValue];
+    return [self.widget.step floatValue] == [self.widget.step integerValue];
 }
 
 @end

@@ -40,9 +40,9 @@
     return [state floatValue];
 }
 
-- (int) stateAsInt
+- (NSInteger) stateAsInt
 {
-    return (int)[state integerValue];
+    return [state integerValue];
 }
 
 - (UIColor*) stateAsUIColor
