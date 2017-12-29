@@ -43,7 +43,7 @@
 -(void) pickOne:(id)sender
 {
     UISegmentedControl *segmentedControl = (UISegmentedControl *)sender;
-    NSLog(@"Segment pressed %d", [segmentedControl selectedSegmentIndex]);
+    NSLog(@"Segment pressed %ld", (long)[segmentedControl selectedSegmentIndex]);
     if (self.widget.mappings != nil) {
         OpenHABWidgetMapping *mapping = [self.widget.mappings objectAtIndex:[segmentedControl selectedSegmentIndex]];
         [self.widget sendCommand:mapping.command];

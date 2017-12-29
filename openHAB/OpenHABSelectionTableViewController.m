@@ -29,7 +29,7 @@
 {
     [super viewDidLoad];
     
-    NSLog(@"I have %d mappings", [mappings count]);
+    NSLog(@"I have %lu mappings", (unsigned long)[mappings count]);
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
@@ -78,7 +78,7 @@
 {
     NSLog(@"Selected mapping %ld", (long)indexPath.row);
     if (self.delegate != nil) {
-        [self.delegate didSelectWidgetMapping:indexPath.row];
+        [self.delegate didSelectWidgetMapping:(int)indexPath.row];
     }
     [self.navigationController popViewControllerAnimated:YES];
 }
