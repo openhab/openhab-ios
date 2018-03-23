@@ -10,7 +10,7 @@
 #import "GDataXMLNode.h"
 
 @implementation OpenHABItem
-@synthesize type, name, state, link;
+@synthesize type, groupType, name, state, link;
 
 - (OpenHABItem *) initWithXML:(GDataXMLElement *)xmlElement
 {
