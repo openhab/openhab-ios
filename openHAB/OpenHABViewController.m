@@ -268,7 +268,8 @@
             cellIdentifier = @"SegmentedWidgetCell";
             //RollershutterItem changed to Rollershutter in later builds of OH2
         } else if ([widget.item.type isEqualToString:@"RollershutterItem"]
-                   || [widget.item.type isEqualToString:@"Rollershutter"]) {
+                   || [widget.item.type isEqualToString:@"Rollershutter"]
+                   || ([widget.item.type isEqualToString:@"Group"] && [widget.item.groupType isEqualToString:@"Rollershutter"])) {
             cellIdentifier = @"RollershutterWidgetCell";
         } else {
             cellIdentifier = @"SwitchWidgetCell";

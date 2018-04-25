@@ -13,12 +13,14 @@
 @interface OpenHABItem : NSObject
 {
     NSString *type;
+    NSString *groupType;
     NSString *name;
     NSString *state;
     NSString *link;
 }
 
 @property (nonatomic, retain) NSString *type;
+@property (nonatomic, retain) NSString *groupType;
 @property (nonatomic, retain) NSString *name;
 @property (nonatomic, retain) NSString *state;
 @property (nonatomic, retain) NSString *link;
