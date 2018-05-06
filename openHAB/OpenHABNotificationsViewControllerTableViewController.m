@@ -74,11 +74,10 @@
     operation.responseSerializer = [AFJSONResponseSerializer serializer];
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSData *response = (NSData*)responseObject;
-        NSError *error;
         [self.notifications removeAllObjects];
         NSLog(@"Notifications response");
         // If we are talking to openHAB 1.X, talk XML
-        if ([responseObject isKindOfClass:[NSArray class]]) {
+        if ([response isKindOfClass:[NSArray class]]) {
             NSLog(@"Response is array");
             for (id notificationJson in responseObject) {
                 OpenHABNotification *notification = [[OpenHABNotification alloc] initWithDictionary:notificationJson];
@@ -106,7 +105,7 @@
 }
 
 -(void)rightDrawerButtonPress:(id)sender{
-    OpenHABDrawerTableViewController *drawer = (OpenHABDrawerTableViewController*)[self.mm_drawerController rightDrawerViewController];
+    [self.mm_drawerController rightDrawerViewController];
     [self.mm_drawerController toggleDrawerSide:MMDrawerSideRight animated:YES completion:nil];
 }
 

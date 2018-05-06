@@ -40,21 +40,16 @@ AVAudioPlayer *player;
     [self loadSettingsDefaults];
     [AFRememberingSecurityPolicy initializeCertificatesStore];
     // Notification registration now depends on iOS version (befor iOS8 and after it)
-    if ([[UIApplication sharedApplication] respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
-        // iOS 8 Notifications
-        [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:nil]];
-        [[UIApplication sharedApplication] registerForRemoteNotifications];
-    } else {
-        // iOS < 8 Notifications
-        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
-         (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
-    }
+    // iOS 8 Notifications
+    [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:nil]];
+    [[UIApplication sharedApplication] registerForRemoteNotifications];
+    
     NSLog(@"uniq id %@", [UIDevice currentDevice].identifierForVendor.UUIDString);
     NSLog(@"device name %@", [UIDevice currentDevice].name);
 //    AudioSessionInitialize(NULL, NULL, nil , nil);
 //    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error: nil];
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient withOptions:AVAudioSessionCategoryOptionDuckOthers error:nil];
-    UInt32 doSetProperty = 1;
+//    UInt32 doSetProperty = 1;
 //    AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof(doSetProperty), &doSetProperty);
 //    [[AVAudioSession sharedInstance] setActive: YES error: nil];
     NSLog(@"didFinishLaunchingWithOptions ended");

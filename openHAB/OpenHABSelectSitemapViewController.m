@@ -152,10 +152,10 @@
     if (sitemap.icon != nil) {
         NSString *iconUrlString = [NSString stringWithFormat:imageBase, self.openHABRootUrl, sitemap.icon];
         NSLog(@"icon url = %@", iconUrlString);
-        [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
+        [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
     } else {
         NSString *iconUrlString = [NSString stringWithFormat:imageBase, self.openHABRootUrl,@""];
-        [cell.imageView setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
+        [cell.imageView sd_setImageWithURL:[NSURL URLWithString:iconUrlString] placeholderImage:[UIImage imageNamed:@"blankicon.png"] options:0];
     }
     return cell;
 }
