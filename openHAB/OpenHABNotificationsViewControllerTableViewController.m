@@ -105,7 +105,6 @@
 }
 
 -(void)rightDrawerButtonPress:(id)sender{
-    [self.mm_drawerController rightDrawerViewController];
     [self.mm_drawerController toggleDrawerSide:MMDrawerSideRight animated:YES completion:nil];
 }
 
