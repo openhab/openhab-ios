@@ -31,10 +31,19 @@
         self.detailTextLabel.text = [self.widget labelValue];
     else
         self.detailTextLabel.text = nil;
-    if ([self.widget.item.state isEqualToString:@"ON"]) {
+
+    NSString *state = self.widget.item.state;
+    if ([state isEqualToString:@"ON"]) {
         [self.widgetSwitch setOn:YES];
     } else {
-        [self.widgetSwitch setOn:NO];
+        NSArray<NSString*> *parts = [state componentsSeparatedByString:@","];
+        if ((parts.count == 3 && parts[2].floatValue > 0) ||
+            (parts.count == 1 && parts[0].floatValue > 0)) {
+            // HSB w/brightness > 0 or numeric > 0
+            [self.widgetSwitch setOn:YES];
+        } else {
+            [self.widgetSwitch setOn:NO];
+        }
     }
 //    NSLog(@"%f %f %f %f", self.textLabel.frame.origin.x, self.textLabel.frame.origin.y, self.textLabel.frame.size.width, self.textLabel.frame.size.height);
     [self.widgetSwitch addTarget:self action:@selector(switchChange:) forControlEvents:UIControlEventValueChanged];
