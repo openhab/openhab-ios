@@ -321,7 +321,7 @@
     } else {
         cell.backgroundColor = [UIColor whiteColor];
     }
-    [cell loadWidget:widget];
+    cell.widget = widget;
     [cell displayWidget];
     // Check if this is not the last row in the widgets list
     if (indexPath.row < [currentPage.widgets count] - 1) {
