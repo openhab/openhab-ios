@@ -27,11 +27,16 @@
 - (void)displayWidget
 {
     self.textLabel.text = [self.widget labelText];
+    NSString *state = [self.widget state];
+    //if state is nil or empty using the item state ( OH 1.x compatability )
+    if(![state length]){
+        state = self.widget.item.state;
+    }
     if ([self.widget labelValue] != nil)
         self.detailTextLabel.text = [self.widget labelValue];
     else
         self.detailTextLabel.text = nil;
-    if ([self.widget.item.state isEqualToString:@"ON"]) {
+    if ([state isEqualToString:@"ON"]) {
         [self.widgetSwitch setOn:YES];
     } else {
         [self.widgetSwitch setOn:NO];
