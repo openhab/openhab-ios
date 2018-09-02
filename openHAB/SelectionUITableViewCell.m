@@ -23,8 +23,8 @@
 - (void)displayWidget
 {
     self.textLabel.text = [self.widget labelText];
-    int selectedMapping = [self.widget mappingIndexByCommand:self.widget.item.state];
-    if (selectedMapping != -1) {
+    NSUInteger selectedMapping = [self.widget mappingIndexByCommand:self.widget.item.state];
+    if (selectedMapping != NSNotFound) {
         OpenHABWidgetMapping *widgetMapping = [widget.mappings objectAtIndex:selectedMapping];
         self.detailTextLabel.text = widgetMapping.label;
     }

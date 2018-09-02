@@ -91,16 +91,14 @@
     return nil;
 }
 
-- (int) mappingIndexByCommand:(NSString *)command
+- (NSUInteger) mappingIndexByCommand:(NSString *)command
 {
-    if (self.mappings != nil) {
-        for (int i=0; i<[self.mappings count]; i++) {
-            OpenHABWidgetMapping *mapping = [self.mappings objectAtIndex:i];
-            if (mapping.command == command)
-                return i;
+    for (OpenHABWidgetMapping *mapping in self.mappings) {
+        if ([mapping.command isEqualToString:command]) {
+            return [self.mappings indexOfObject:mapping];
         }
     }
-    return -1;
+    return NSNotFound;
 }
 
 - (void) sendCommand:(NSString *)command

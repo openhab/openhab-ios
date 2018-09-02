@@ -70,6 +70,6 @@
 - (NSString *) labelText;
 - (NSString *) labelValue;
 - (void) sendCommand:(NSString *)command;
-- (int) mappingIndexByCommand:(NSString *)command;
+- (NSUInteger) mappingIndexByCommand:(NSString *)command;
 
 @end

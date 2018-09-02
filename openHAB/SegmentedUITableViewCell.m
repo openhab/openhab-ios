@@ -34,7 +34,7 @@
     for (OpenHABWidgetMapping *mapping in self.widget.mappings) {
         [self.widgetSegmentedControl insertSegmentWithTitle:mapping.label atIndex:[self.widget.mappings indexOfObject:mapping] animated:NO];
     }
-    [self.widgetSegmentedControl setSelectedSegmentIndex:[self.widget mappingIndexByCommand:self.widget.item.state]];
+    [self.widgetSegmentedControl setSelectedSegmentIndex:(NSInteger)[self.widget mappingIndexByCommand:self.widget.item.state]];
     [self.widgetSegmentedControl addTarget:self
                                     action:@selector(pickOne:)
                           forControlEvents:UIControlEventValueChanged];
