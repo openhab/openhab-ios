@@ -11,11 +11,6 @@
 @implementation VideoUITableViewCell
 @synthesize videoPlayer;
 
-- (void)loadWidget:(OpenHABWidget *)widgetToLoad
-{
-    self.widget = widgetToLoad;
-}
-
 - (void)displayWidget
 {
     NSLog(@"Video url = %@", widget.url);

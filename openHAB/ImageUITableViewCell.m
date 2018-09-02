@@ -15,9 +15,9 @@
 
 NSTimer *refreshTimer;
 
-- (void)loadWidget:(OpenHABWidget *)widgetToLoad
+- (void)setWidget:(OpenHABWidget *)widget
 {
-    self.widget = widgetToLoad;
+    super.widget = widget;
     // Remove image from SDImage cache
 }
 

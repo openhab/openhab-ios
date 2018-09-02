@@ -13,9 +13,9 @@
 
 @implementation SelectionUITableViewCell
 
-- (void)loadWidget:(OpenHABWidget *)widgetToLoad
+- (void)setWidget:(OpenHABWidget *)widget
 {
-    self.widget = widgetToLoad;
+    super.widget = widget;
     self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     self.selectionStyle = UITableViewCellSelectionStyleBlue;
 }

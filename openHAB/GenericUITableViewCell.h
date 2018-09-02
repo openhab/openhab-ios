@@ -14,7 +14,6 @@
     OpenHABWidget * widget;
 }
 
-- (void)loadWidget:(OpenHABWidget *)widgetToLoad;
 - (void)displayWidget;
 
 @property (nonatomic, retain) OpenHABWidget *widget;

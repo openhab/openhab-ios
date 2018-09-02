@@ -55,10 +55,15 @@
     // Configure the view for the selected state
 }
 
-- (void)loadWidget:(OpenHABWidget *)widgetToLoad
+/*
+ * This setter must be called via `super.widget`
+ * when it gets overriden inside a subclass.
+ */
+- (void)setWidget:(OpenHABWidget *)widget
 {
-    self.widget = widgetToLoad;
-    if (widget.linkedPage != nil) {
+    self->widget = widget;
+    
+    if (self.widget.linkedPage != nil) {
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         self.selectionStyle = UITableViewCellSelectionStyleBlue;
 //        self.userInteractionEnabled = YES;
@@ -67,16 +72,28 @@
         self.selectionStyle = UITableViewCellSelectionStyleNone;
 //        self.userInteractionEnabled = NO;
     }
-        
+    
+    if (self.widget.labelcolor != nil) {
+        [self.textLabel setTextColor:[self colorFromHexString:self.widget.labelcolor]];
+    } else {
+        self.textLabel.textColor = [UIColor blackColor];
+    }
+    if (self.widget.valuecolor != nil) {
+        [self.detailTextLabel setTextColor:[self colorFromHexString:self.widget.valuecolor]];
+    } else {
+        self.detailTextLabel.textColor = [UIColor lightGrayColor];
+    }
 }
 
 - (void)displayWidget
 {
     self.textLabel.text = [self.widget labelText];
-    if ([self.widget labelValue] != nil)
+    if ([self.widget labelValue] != nil) {
         self.detailTextLabel.text = [self.widget labelValue];
-    else
+    }
+    else {
         self.detailTextLabel.text = nil;
+    }
     [self.detailTextLabel sizeToFit];
     // Clean any detailTextLabel constraints we set before, or they will start to interfere with new ones because of UITableViewCell caching
     if (self.disclosureConstraints != nil) {
@@ -95,16 +112,6 @@
             self.disclosureConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"[detailTextLabel]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(detailTextLabel)];
             [self addConstraints:disclosureConstraints];
         }
-    }
-    if (self.widget.valuecolor != nil) {
-        [self.detailTextLabel setTextColor:[self colorFromHexString:self.widget.valuecolor]];
-    } else {
-        self.detailTextLabel.textColor = [UIColor lightGrayColor];
-    }
-    if (self.widget.labelcolor != nil) {
-        [self.textLabel setTextColor:[self colorFromHexString:self.widget.labelcolor]];
-    } else {
-        self.textLabel.textColor = [UIColor blackColor];
     }
 }
 

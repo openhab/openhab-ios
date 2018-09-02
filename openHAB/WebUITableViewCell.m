@@ -23,11 +23,6 @@
     return self;
 }
 
-- (void)loadWidget:(OpenHABWidget *)widgetToLoad
-{
-    self.widget = widgetToLoad;
-}
-
 - (void)displayWidget
 {
     NSLog(@"webview loading url %@", self.widget.url);
