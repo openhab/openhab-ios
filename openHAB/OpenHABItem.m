@@ -63,4 +63,18 @@
     }
 }
 
+- (CLLocation *)stateAsLocation {
+    if ([self.type isEqualToString:@"Location"]) {
+        // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitued>,<altitude>')
+        NSArray<NSString *> *locationComponents = [self.state componentsSeparatedByString:@","];
+        if ( locationComponents.count >= 2) {
+            CLLocationDegrees latitude = (CLLocationDegrees)[locationComponents[0] doubleValue];
+            CLLocationDegrees longitude = (CLLocationDegrees)[locationComponents[1] doubleValue];
+            
+            return [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
+        }
+    }
+    return nil;
+}
+
 @end

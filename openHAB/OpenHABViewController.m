@@ -30,6 +30,9 @@
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
 #import "OpenHABDrawerTableViewController.h"
+#import "MapViewTableViewCell.h"
+
+static NSString * const OpenHABViewControllerMapViewCellReuseIdentifier = @"OpenHABViewControllerMapViewCellReuseIdentifier";
 
 @interface OpenHABViewController ()
 
@@ -61,12 +64,17 @@
                                              selector: @selector(didBecomeActive:)
                                                  name: UIApplicationDidBecomeActiveNotification
                                                object: nil];
+    
+    [self.widgetTableView registerClass:[MapViewTableViewCell class]
+                 forCellReuseIdentifier:OpenHABViewControllerMapViewCellReuseIdentifier];
+    
     self.refreshControl = [[UIRefreshControl alloc] init];
     self.refreshControl.backgroundColor = [UIColor groupTableViewBackgroundColor];
 //    self.refreshControl.tintColor = [UIColor whiteColor];
     [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
     [self.widgetTableView addSubview:self.refreshControl];
     [self.widgetTableView sendSubviewToBack:refreshControl];
+    
     MMDrawerBarButtonItem * rightDrawerButton = [[MMDrawerBarButtonItem alloc] initWithTarget:self action:@selector(rightDrawerButtonPress:)];
     [self.navigationItem setRightBarButtonItem:rightDrawerButton animated:YES];
 }
@@ -244,13 +252,13 @@
         } else {
             return 44;
         }
-    } else if ([widget.type isEqualToString:@"Webview"]) {
+    } else if ([widget.type isEqualToString:@"Webview"] || [widget.type isEqualToString:@"Mapview"]) {
         if (widget.height != nil) {
-            // calculate webview height and return it
-            NSLog(@"Webview height would be %f", [widget.height floatValue]*44);
+            // calculate webview/mapview height and return it
+            NSLog(@"Webview/Mapview height would be %f", [widget.height floatValue]*44);
             return [widget.height floatValue] * 44;
         } else {
-            // return default height for webview as 8 rows
+            // return default height for webview/mapview as 8 rows
             return 44 * 8;
         }
     }
@@ -290,6 +298,8 @@
         cellIdentifier = @"VideoWidgetCell";
     } else if ([widget.type isEqualToString:@"Webview"]) {
         cellIdentifier = @"WebWidgetCell";
+    } else if ([widget.type isEqualToString:@"Mapview"]) {
+        cellIdentifier = OpenHABViewControllerMapViewCellReuseIdentifier;
     }
 
     GenericUITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];

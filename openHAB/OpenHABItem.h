@@ -8,6 +8,7 @@
 
 #import "NSObject+Data.h"
 #import <Foundation/Foundation.h>
+@import CoreLocation;
 @class GDataXMLElement;
 
 @interface OpenHABItem : NSObject
@@ -30,5 +31,6 @@
 - (float) stateAsFloat;
 - (NSInteger) stateAsInt;
 - (UIColor*) stateAsUIColor;
+- (CLLocation *)stateAsLocation;
 
 @end
