@@ -94,6 +94,16 @@
                 return;
             }
         }
+        
+        // Sort the sitemaps alphabetically.
+        NSArray *sorted = [[self sitemaps] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+            NSString *a = [(OpenHABSitemap *)obj1 name];
+            NSString *b = [(OpenHABSitemap *)obj2 name];
+            return [a compare:b];
+        }];
+        
+        self.sitemaps = sorted.mutableCopy;
+        
         [[self appData] setSitemaps:self.sitemaps];
         [self.tableView reloadData];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error){
