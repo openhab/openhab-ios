@@ -86,8 +86,10 @@
                 NSLog(@"Response is array");
                 for (id sitemapJson in responseObject) {
                     OpenHABSitemap *sitemap = [[OpenHABSitemap alloc] initWithDictionaty:sitemapJson];
-                    NSLog(@"Sitemap %@", sitemap.label);
-                    [self.sitemaps addObject:sitemap];
+                    if([responseObject count] != 1 && ![sitemap.name isEqualToString:@"_default"]) {
+                        NSLog(@"Sitemap %@", sitemap.label);
+                        [self.sitemaps addObject:sitemap];
+                    }
                 }
             } else {
                 // Something went wrong, we should have received an array
