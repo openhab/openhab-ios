@@ -111,4 +111,12 @@
         NSLog(@"Delegate = nil");
 }
 
+- (CLLocationCoordinate2D)coordinate {
+    return [self.item stateAsLocation].coordinate;
+}
+
+- (NSString *)title {
+    return [self labelText];
+}
+
 @end

@@ -7,16 +7,17 @@
 //
 
 #import "NSObject+Data.h"
-#import <Foundation/Foundation.h>
+#import "OpenHABItem.h"
+@import Foundation;
+@import MapKit;
 @class GDataXMLElement;
-@class OpenHABItem;
 @class OpenHABLinkedPage;
 
 @protocol OpenHABWidgetDelegate <NSObject>
 - (void)sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command;
 @end
 
-@interface OpenHABWidget : NSObject
+@interface OpenHABWidget : NSObject <MKAnnotation>
 {
     NSString *widgetId;
     NSString *label;
