@@ -42,7 +42,7 @@
 		DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.m */; };
 		DF4B84071885AE0E00F34902 /* blankicon.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4B84061885AE0E00F34902 /* blankicon.png */; };
-		DF4B84131886DAC400F34902 /* FrameUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.m */; };
+		DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */; };
 		DF4B84161886EACA00F34902 /* GenericUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */; };
 		DF75996D1976CD0C0098F90D /* UIAlertView+Block.m in Sources */ = {isa = PBXBuildFile; fileRef = DF75996C1976CD0C0098F90D /* UIAlertView+Block.m */; };
 		DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */; };
@@ -153,8 +153,7 @@
 		DF4B84021885A53700F34902 /* OpenHABDataObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABDataObject.h; sourceTree = "<group>"; };
 		DF4B84031885A53700F34902 /* OpenHABDataObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABDataObject.m; sourceTree = "<group>"; };
 		DF4B84061885AE0E00F34902 /* blankicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blankicon.png; sourceTree = "<group>"; };
-		DF4B84111886DAC400F34902 /* FrameUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameUITableViewCell.h; sourceTree = "<group>"; };
-		DF4B84121886DAC400F34902 /* FrameUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameUITableViewCell.m; sourceTree = "<group>"; };
+		DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameUITableViewCell.swift; sourceTree = "<group>"; };
 		DF4B84141886EACA00F34902 /* GenericUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericUITableViewCell.h; sourceTree = "<group>"; };
 		DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericUITableViewCell.m; sourceTree = "<group>"; };
 		DF75996B1976CD0C0098F90D /* UIAlertView+Block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIAlertView+Block.h"; sourceTree = "<group>"; };
@@ -336,8 +335,7 @@
 				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */,
 				DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */,
 				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */,
-				DF4B84111886DAC400F34902 /* FrameUITableViewCell.h */,
-				DF4B84121886DAC400F34902 /* FrameUITableViewCell.m */,
+				DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */,
 				DF4B84141886EACA00F34902 /* GenericUITableViewCell.h */,
 				DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */,
 				DF06F2001900F8780011E7B9 /* ImageUITableViewCell.h */,
@@ -706,7 +704,7 @@
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */,
-				DF4B84131886DAC400F34902 /* FrameUITableViewCell.m in Sources */,
+				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.m in Sources */,
 				DF06F2021900F8780011E7B9 /* ImageUITableViewCell.m in Sources */,
 				DFB2623718830A3600D3244D /* main.m in Sources */,

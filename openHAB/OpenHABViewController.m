@@ -20,7 +20,6 @@
 #import "OpenHABSitemapPage.h"
 #import "OpenHABWidget.h"
 #import "OpenHABWidgetMapping.h"
-#import "FrameUITableViewCell.h"
 #import "OpenHABLinkedPage.h"
 #import "OpenHABItem.h"
 #import "TSMessage.h"
