@@ -11,6 +11,10 @@
 #endif
 
 #ifdef __OBJC__
+    // Added by Swiftify: import the Swift Bridging Header from the .pch file
+    // to make it accessible from all Objective-C source files
+    //#import "openHAB-Swift.h"
+
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
 #endif
