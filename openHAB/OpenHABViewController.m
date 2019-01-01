@@ -29,7 +29,7 @@
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
 #import "OpenHABDrawerTableViewController.h"
-#import "MapViewTableViewCell.h"
+
 
 static NSString * const OpenHABViewControllerMapViewCellReuseIdentifier = @"OpenHABViewControllerMapViewCellReuseIdentifier";
 

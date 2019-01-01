@@ -14,7 +14,7 @@
 		A3F4C3A31A49A5090019A09F = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
-		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.m */; };
+		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.m */; };
 		DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */; };
 		DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */; };
@@ -107,8 +107,7 @@
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
-		B7D5ECDF21499E55001B0EC6 /* MapViewTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MapViewTableViewCell.h; sourceTree = "<group>"; };
-		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MapViewTableViewCell.m; sourceTree = "<group>"; };
+		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
 		DF05EF101D00696200DD646D /* DrawerUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawerUITableViewCell.h; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawerUITableViewCell.m; sourceTree = "<group>"; };
 		DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_207_remove_2@2x.png"; sourceTree = "<group>"; };
@@ -339,8 +338,7 @@
 				DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */,
 				DF06F2001900F8780011E7B9 /* ImageUITableViewCell.h */,
 				DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */,
-				B7D5ECDF21499E55001B0EC6 /* MapViewTableViewCell.h */,
-				B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.m */,
+				B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */,
 				DFA358FC1D00CF37003633DF /* NotificationTableViewCell.h */,
 				DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */,
 				DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */,
@@ -710,7 +708,7 @@
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */,
 				DFD411071CF874C000F78066 /* NSDate+Helper.m in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
-				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.m in Sources */,
+				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
 				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
 				DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */,
