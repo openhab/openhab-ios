@@ -264,7 +264,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SegmentedWidgetCell" rowHeight="44" id="IBt-aJ-0VH" customClass="SegmentedUITableViewCell">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SegmentedWidgetCell" rowHeight="44" id="IBt-aJ-0VH" customClass="SegmentedUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="321" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="IBt-aJ-0VH" id="bbE-Hw-4gl">
@@ -1259,6 +1259,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="9JR-Li-4ww"/>
+        <segue reference="IN7-RI-eVs"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -49,7 +49,7 @@
 		DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.m */; };
 		DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */; };
 		DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */; };
-		DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.m */; };
+		DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */; };
 		DFA358FE1D00CF37003633DF /* NotificationTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */; };
 		DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
 		DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622C18830A3600D3244D /* CoreGraphics.framework */; };
@@ -166,8 +166,7 @@
 		DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SliderUITableViewCell.m; sourceTree = "<group>"; };
 		DFA16EBC1889867B00EDB0BB /* OpenHABWidgetMapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABWidgetMapping.h; sourceTree = "<group>"; };
 		DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABWidgetMapping.m; sourceTree = "<group>"; };
-		DFA16EBF18898A8400EDB0BB /* SegmentedUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SegmentedUITableViewCell.h; sourceTree = "<group>"; };
-		DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SegmentedUITableViewCell.m; sourceTree = "<group>"; };
+		DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedUITableViewCell.swift; sourceTree = "<group>"; };
 		DFA358FC1D00CF37003633DF /* NotificationTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationTableViewCell.h; sourceTree = "<group>"; };
 		DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificationTableViewCell.m; sourceTree = "<group>"; };
 		DFB2622718830A3600D3244D /* openHAB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHAB.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -349,8 +348,7 @@
 				DFA358FC1D00CF37003633DF /* NotificationTableViewCell.h */,
 				DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */,
 				DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */,
-				DFA16EBF18898A8400EDB0BB /* SegmentedUITableViewCell.h */,
-				DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.m */,
+				DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */,
 				DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */,
 				DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */,
 				DFA16EB618883CF300EDB0BB /* SetpointUITableViewCell.h */,
@@ -742,7 +740,7 @@
 				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
 				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
-				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.m in Sources */,
+				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.m in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
