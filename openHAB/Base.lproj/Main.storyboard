@@ -144,7 +144,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ColorPickerWidgetCell" rowHeight="44" id="n6i-xP-mqM" customClass="ColorPickerUITableViewCell">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ColorPickerWidgetCell" rowHeight="44" id="n6i-xP-mqM" customClass="ColorPickerUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="189" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="n6i-xP-mqM" id="9lZ-hN-dkV">
@@ -1084,7 +1084,7 @@
         <!--Color Picker View Controller-->
         <scene sceneID="1cJ-Yb-6jQ">
             <objects>
-                <viewController storyboardIdentifier="ColorPickerViewController" automaticallyAdjustsScrollViewInsets="NO" id="XTW-gz-4RR" customClass="ColorPickerViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ColorPickerViewController" automaticallyAdjustsScrollViewInsets="NO" id="XTW-gz-4RR" customClass="ColorPickerViewController" customModule="openHAB" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Nl6-qJ-2g2"/>
                         <viewControllerLayoutGuide type="bottom" id="fDm-8Z-sSa"/>

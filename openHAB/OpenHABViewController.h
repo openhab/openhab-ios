@@ -10,8 +10,6 @@
 #import "OpenHABTracker.h"
 #import "OpenHABSitemapPage.h"
 #import "OpenHABSelectionTableViewController.h"
-#import "ColorPickerUITableViewCell.h"
-#import "ColorPickerViewController.h"
 #import "ImageUITableViewCell.h"
 #import "AFRememberingSecurityPolicy.h"
 

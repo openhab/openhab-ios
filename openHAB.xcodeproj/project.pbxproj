@@ -24,8 +24,8 @@
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */; };
-		DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */; };
-		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */; };
+		DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.swift */; };
+		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
 		DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */; };
 		DF06F2021900F8780011E7B9 /* ImageUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */; };
 		DF06F20519010E9A0011E7B9 /* VideoUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */; };
@@ -119,10 +119,8 @@
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1F418FE7A160011E7B9 /* OpenHABSelectionTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSelectionTableViewController.h; sourceTree = "<group>"; };
 		DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSelectionTableViewController.m; sourceTree = "<group>"; };
-		DF06F1F718FEA8420011E7B9 /* ColorPickerUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPickerUITableViewCell.h; sourceTree = "<group>"; };
-		DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerUITableViewCell.m; sourceTree = "<group>"; };
-		DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPickerViewController.h; sourceTree = "<group>"; };
-		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerViewController.m; sourceTree = "<group>"; };
+		DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerUITableViewCell.swift; sourceTree = "<group>"; };
+		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
 		DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F2001900F8780011E7B9 /* ImageUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageUITableViewCell.h; sourceTree = "<group>"; };
 		DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageUITableViewCell.m; sourceTree = "<group>"; };
@@ -326,10 +324,8 @@
 			isa = PBXGroup;
 			children = (
 				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */,
-				DF06F1F718FEA8420011E7B9 /* ColorPickerUITableViewCell.h */,
-				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */,
-				DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */,
-				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */,
+				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.swift */,
+				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */,
 				DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */,
 				DF4B84141886EACA00F34902 /* GenericUITableViewCell.h */,
 				DF4B84151886EACA00F34902 /* GenericUITableViewCell.m */,
@@ -693,8 +689,8 @@
 			files = (
 				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
 				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */,
-				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
-				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
+				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
+				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.m in Sources */,
