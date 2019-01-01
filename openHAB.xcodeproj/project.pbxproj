@@ -47,7 +47,7 @@
 		DF75996D1976CD0C0098F90D /* UIAlertView+Block.m in Sources */ = {isa = PBXBuildFile; fileRef = DF75996C1976CD0C0098F90D /* UIAlertView+Block.m */; };
 		DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */; };
 		DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.swift */; };
-		DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */; };
+		DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.swift */; };
 		DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */; };
 		DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */; };
 		DFA358FE1D00CF37003633DF /* NotificationTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */; };
@@ -160,8 +160,7 @@
 		DF75996C1976CD0C0098F90D /* UIAlertView+Block.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIAlertView+Block.m"; sourceTree = "<group>"; };
 		DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchUITableViewCell.swift; sourceTree = "<group>"; };
 		DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetpointUITableViewCell.swift; sourceTree = "<group>"; };
-		DFA16EB918883DE500EDB0BB /* SliderUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SliderUITableViewCell.h; sourceTree = "<group>"; };
-		DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SliderUITableViewCell.m; sourceTree = "<group>"; };
+		DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderUITableViewCell.swift; sourceTree = "<group>"; };
 		DFA16EBC1889867B00EDB0BB /* OpenHABWidgetMapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABWidgetMapping.h; sourceTree = "<group>"; };
 		DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABWidgetMapping.m; sourceTree = "<group>"; };
 		DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedUITableViewCell.swift; sourceTree = "<group>"; };
@@ -349,8 +348,7 @@
 				DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */,
 				DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */,
 				DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.swift */,
-				DFA16EB918883DE500EDB0BB /* SliderUITableViewCell.h */,
-				DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.m */,
+				DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.swift */,
 				DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */,
 				DF06F20319010E9A0011E7B9 /* VideoUITableViewCell.h */,
 				DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */,
@@ -739,7 +737,7 @@
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
-				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.m in Sources */,
+				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DF75996D1976CD0C0098F90D /* UIAlertView+Block.m in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.m in Sources */,
