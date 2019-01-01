@@ -24,7 +24,6 @@
 #import "OpenHABItem.h"
 #import "TSMessage.h"
 #import "Reachability+URL.h"
-#import "ChartUITableViewCell.h"
 #import "UIAlertView+Block.h"
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"

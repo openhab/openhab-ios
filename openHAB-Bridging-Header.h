@@ -18,11 +18,14 @@
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
 #import "GenericUITableViewCell.h"
+#import "ImageUITableViewCell.h"
 #import "OpenHABItem.h"
 #import "OpenHABWidget.h"
 #import "OpenHABWidgetMapping.h"
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
+#import <SDWebImage/SDWebImageDownloader.h>
+#import <SDWebImage/UIImageView+WebCache.h>
 #import <UIKit/UIKit.h>
 
 // End Swiftify generated imports

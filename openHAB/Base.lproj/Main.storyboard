@@ -233,7 +233,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="TopLeft" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SelectionWidgetCell" rowHeight="44" id="OGD-zU-l0C" customClass="SelectionUITableViewCell">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="TopLeft" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SelectionWidgetCell" rowHeight="44" id="OGD-zU-l0C" customClass="SelectionUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="277" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" tableViewCell="OGD-zU-l0C" id="cLy-KN-ufh">

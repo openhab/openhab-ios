@@ -22,11 +22,11 @@
 		DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF1A189659AF00FF2F9B /* glyphicons_432_plus@2x.png */; };
 		DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
-		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */; };
+		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */; };
 		DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */; };
-		DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */; };
+		DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */; };
 		DF06F2021900F8780011E7B9 /* ImageUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */; };
 		DF06F20519010E9A0011E7B9 /* VideoUITableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DF06F20419010E9A0011E7B9 /* VideoUITableViewCell.m */; };
 		DF1B302D1CF5C667009C921C /* OpenHABNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.m */; };
@@ -116,16 +116,14 @@
 		DF05FF1A189659AF00FF2F9B /* glyphicons_432_plus@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_432_plus@2x.png"; sourceTree = "<group>"; };
 		DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_433_minus@2x.png"; sourceTree = "<group>"; };
 		DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RollershutterUITableViewCell.swift; sourceTree = "<group>"; };
-		DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectionUITableViewCell.h; sourceTree = "<group>"; };
-		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectionUITableViewCell.m; sourceTree = "<group>"; };
+		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1F418FE7A160011E7B9 /* OpenHABSelectionTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSelectionTableViewController.h; sourceTree = "<group>"; };
 		DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSelectionTableViewController.m; sourceTree = "<group>"; };
 		DF06F1F718FEA8420011E7B9 /* ColorPickerUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPickerUITableViewCell.h; sourceTree = "<group>"; };
 		DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerUITableViewCell.m; sourceTree = "<group>"; };
 		DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorPickerViewController.h; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColorPickerViewController.m; sourceTree = "<group>"; };
-		DF06F1FD18FEFEDF0011E7B9 /* ChartUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChartUITableViewCell.h; sourceTree = "<group>"; };
-		DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChartUITableViewCell.m; sourceTree = "<group>"; };
+		DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F2001900F8780011E7B9 /* ImageUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageUITableViewCell.h; sourceTree = "<group>"; };
 		DF06F2011900F8780011E7B9 /* ImageUITableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageUITableViewCell.m; sourceTree = "<group>"; };
 		DF06F20319010E9A0011E7B9 /* VideoUITableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoUITableViewCell.h; sourceTree = "<group>"; };
@@ -327,8 +325,7 @@
 		DF4B84101886DA9900F34902 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				DF06F1FD18FEFEDF0011E7B9 /* ChartUITableViewCell.h */,
-				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.m */,
+				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */,
 				DF06F1F718FEA8420011E7B9 /* ColorPickerUITableViewCell.h */,
 				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.m */,
 				DF06F1FA18FEC2020011E7B9 /* ColorPickerViewController.h */,
@@ -343,8 +340,7 @@
 				DFA358FD1D00CF37003633DF /* NotificationTableViewCell.m */,
 				DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */,
 				DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */,
-				DF05FF211896BD2D00FF2F9B /* SelectionUITableViewCell.h */,
-				DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.m */,
+				DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */,
 				DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.swift */,
 				DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.swift */,
 				DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */,
@@ -696,7 +692,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
-				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.m in Sources */,
+				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.m in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.m in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.m in Sources */,
@@ -733,7 +729,7 @@
 				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
-				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.m in Sources */,
+				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
