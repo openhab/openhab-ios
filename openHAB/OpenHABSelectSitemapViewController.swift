@@ -32,14 +32,14 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         if sitemaps != nil {
             print("We have sitemap list here!")
         }
-        if appData()?.openHABRootUrl() != nil {
-            if let open = appData()?.openHABRootUrl() {
+        if appData()?.openHABRootUrl != nil {
+            if let open = appData()?.openHABRootUrl {
                 print("OpenHABSelectSitemapViewController openHABRootUrl = \(open)")
             }
         }
         tableView.tableFooterView = UIView()
         sitemaps = [AnyHashable]()
-        openHABRootUrl = appData()?.openHABRootUrl() ?? ""
+        openHABRootUrl = appData()?.openHABRootUrl ?? ""
         let prefs = UserDefaults.standard
         openHABUsername = prefs.value(forKey: "username") as? String ?? ""
         openHABPassword = prefs.value(forKey: "password") as? String ?? ""
@@ -57,9 +57,9 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
         var operation: AFHTTPRequestOperation? = nil
         if let sitemapsRequest = sitemapsRequest {
-            operation = AFHTTPRequestOperation(request: sitemapsRequest)
+            operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
         }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningModeNone)
+        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
         operation?.securityPolicy = policy
         if ignoreSSLCertificate {
             print("Warning - ignoring invalid certificates")
@@ -87,11 +87,11 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 if doc == nil {
                     return
                 }
-                if let name = doc?.rootElement.name() {
+                if let name = doc?.rootElement().name() {
                     print("\(name)")
                 }
-                if doc?.rootElement.name() == "sitemaps" {
-                    for element: GDataXMLElement? in doc?.rootElement.elements(forName: "sitemap") ?? [] {
+                if doc?.rootElement().name() == "sitemaps" {
+                    for element: GDataXMLElement? in doc?.rootElement().elements(forName: "sitemap") as? [GDataXMLElement] ?? [] {
                         let sitemap = OpenHABSitemap(xml: element)
                         self.sitemaps.append(sitemap)
                     }
@@ -104,9 +104,9 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 if (responseObject is [Any]) {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson)
-                        if responseObject?.count() != 1 && !(sitemap.name == "_default") {
-                            print("Sitemap \(sitemap.label)")
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable : Any])
+                        if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
+                            print("Sitemap \(sitemap?.label)")
                             self.sitemaps.append(sitemap)
                         }
                     }
@@ -115,13 +115,11 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     return
                 }
             }
-            self.appData()?.sitemaps = self.sitemaps
+            self.appData()?.sitemaps = self.sitemaps as! NSMutableArray
             self.tableView.reloadData()
         }, failure: { operation, error in
-            if let description = error?.description() {
-                print("Error:------>\(description)")
-            }
-            print(String(format: "error code %ld", Int(operation?.response.statusCode ?? 0)))
+            print("Error:------>\(error.localizedDescription)")
+            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
         })
         operation?.start()
     }
@@ -163,10 +161,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 iconUrlString = String(format: imageBase, openHABRootUrl, icon)
             }
             print("icon url = \(iconUrlString ?? "")")
-            cell.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: 0)
+            cell.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
         } else {
             let iconUrlString = String(format: imageBase, openHABRootUrl, "")
-            cell.imageView?.sd_setImage(with: URL(string: iconUrlString), placeholderImage: UIImage(named: "blankicon.png"), options: 0)
+            cell.imageView?.sd_setImage(with: URL(string: iconUrlString), placeholderImage: UIImage(named: "blankicon.png"), options: [])
         }
         return cell
     }
@@ -177,7 +175,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         var prefs = UserDefaults.standard
         prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
         selectedSitemap = indexPath.row
-        appData()?.rootViewController?.pageUrl = nil
+        appData().rootViewController().pageUrl = nil
         navigationController?.popToRootViewController(animated: true)
     }
 
@@ -186,7 +184,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     func appData() -> OpenHABDataObject? {
         let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate?.appData()
+        return theDelegate??.appData()
     }
 
     required init?(coder aDecoder: NSCoder) {

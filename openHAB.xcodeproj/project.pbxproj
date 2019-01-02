@@ -15,6 +15,7 @@
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
+		DA32155121DCC46700F0AA84 /* OpenHABSelectSitemapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32155021DCC46700F0AA84 /* OpenHABSelectSitemapViewController.swift */; };
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
@@ -40,7 +41,6 @@
 		DF4A02481CF47757006C3456 /* glyphicons-597-activity.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */; };
 		DF4A024A1CF47794006C3456 /* glyphicons-731-puzzle.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */; };
 		DF4A024D1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4A024C1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m */; };
-		DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.m */; };
 		DF4B84071885AE0E00F34902 /* blankicon.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4B84061885AE0E00F34902 /* blankicon.png */; };
 		DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */; };
@@ -108,6 +108,7 @@
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
 		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
+		DA32155021DCC46700F0AA84 /* OpenHABSelectSitemapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSelectSitemapViewController.swift; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
@@ -139,8 +140,6 @@
 		DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-731-puzzle.png"; sourceTree = "<group>"; };
 		DF4A024B1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABNotificationsViewControllerTableViewController.h; sourceTree = "<group>"; };
 		DF4A024C1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABNotificationsViewControllerTableViewController.m; sourceTree = "<group>"; };
-		DF4B83FE18857FD900F34902 /* OpenHABSelectSitemapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSelectSitemapViewController.h; sourceTree = "<group>"; };
-		DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSelectSitemapViewController.m; sourceTree = "<group>"; };
 		DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABAppDataDelegate.h; sourceTree = "<group>"; };
 		DF4B84021885A53700F34902 /* OpenHABDataObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABDataObject.h; sourceTree = "<group>"; };
 		DF4B84031885A53700F34902 /* OpenHABDataObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABDataObject.m; sourceTree = "<group>"; };
@@ -290,8 +289,7 @@
 				DF4A024B1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.h */,
 				DF4A024C1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m */,
 				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */,
-				DF4B83FE18857FD900F34902 /* OpenHABSelectSitemapViewController.h */,
-				DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.m */,
+				DA32155021DCC46700F0AA84 /* OpenHABSelectSitemapViewController.swift */,
 				DFDEE3FB18831099008B26AC /* OpenHABSettingsViewController.h */,
 				DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.m */,
 				DFB2624218830A3600D3244D /* OpenHABViewController.h */,
@@ -699,7 +697,6 @@
 				DF1B302D1CF5C667009C921C /* OpenHABNotification.m in Sources */,
 				DF4A024D1CF47858006C3456 /* OpenHABNotificationsViewControllerTableViewController.m in Sources */,
 				DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */,
-				DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.m in Sources */,
 				DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */,
 				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.m in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,
@@ -711,6 +708,7 @@
 				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
 				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
+				DA32155121DCC46700F0AA84 /* OpenHABSelectSitemapViewController.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,

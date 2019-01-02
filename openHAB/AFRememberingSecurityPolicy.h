@@ -6,7 +6,9 @@
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
 //
 
-#import "AFSecurityPolicy.h"
+#import <AFNetworking/AFSecurityPolicy.h>
+
+//#import "AFSecurityPolicy.h"
 @class AFRememberingSecurityPolicy;
 @protocol AFRememberingSecurityPolicyDelegate <NSObject>
 

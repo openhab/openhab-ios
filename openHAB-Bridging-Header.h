@@ -2,6 +2,15 @@
 //  Use this file to import your target's public headers that you would like to expose to Swift.
 //
 #import <NKOColorPickerView/NKOColorPickerView.h>
+#import "OpenHABSitemap.h"
+#import "OpenHABAppDataDelegate.h"
+#import "OpenHABDataObject.h"
+#import "NSMutableURLRequest+Auth.h"
+#import <AFNetworking/AFHTTPRequestOperation.h>
+#import "AFRememberingSecurityPolicy.h"
+#import <GDataXML_HTML/GDataXMLNode.h>
+#import "OpenHABViewController.h"
+
 
 // -----------------------------------------------------------------------------
 // Begin Swiftify generated imports

@@ -12,6 +12,7 @@
 //#import "OpenHABSelectionTableViewController.h"
 #import "AFRememberingSecurityPolicy.h"
 
+
 @class OpenHABSitemapPage;
 @interface OpenHABViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate>
 {
