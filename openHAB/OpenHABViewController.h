@@ -10,7 +10,6 @@
 #import "OpenHABTracker.h"
 #import "OpenHABSitemapPage.h"
 #import "OpenHABSelectionTableViewController.h"
-#import "ImageUITableViewCell.h"
 #import "AFRememberingSecurityPolicy.h"
 
 @class OpenHABSitemapPage;

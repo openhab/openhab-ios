@@ -19,7 +19,6 @@
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
 #import "GenericUITableViewCell.h"
-#import "ImageUITableViewCell.h"
 #import "OpenHABItem.h"
 #import "OpenHABWidget.h"
 #import "OpenHABWidgetMapping.h"
