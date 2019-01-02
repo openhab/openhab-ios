@@ -27,6 +27,7 @@
 #import <SDWebImage/SDWebImageDownloader.h>
 #import <SDWebImage/UIImageView+WebCache.h>
 #import <UIKit/UIKit.h>
+#import <objc/runtime.h>
 
 // End Swiftify generated imports
 // -----------------------------------------------------------------------------
