@@ -22,7 +22,6 @@
 #import "OpenHABItem.h"
 #import "OpenHABWidget.h"
 #import "OpenHABWidgetMapping.h"
-#import "UICircleButton.h"
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
 #import <SDWebImage/SDWebImageDownloader.h>
