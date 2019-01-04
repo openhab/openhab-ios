@@ -7,7 +7,6 @@
 //
 
 #import "OpenHABViewController.h"
-#import "OpenHABSelectSitemapViewController.h"
 #import "OpenHABTracker.h"
 #import "AFNetworking.h"
 #import <SDWebImage/UIImageView+WebCache.h>

@@ -12,6 +12,10 @@
 #import "AFRememberingSecurityPolicy.h"
 
 @class OpenHABSitemapPage;
+@class OpenHABSelectionTableViewController;
+@protocol OpenHABSelectionTableViewControllerDelegate;
+@protocol ColorPickerUITableViewCellDelegate;
+@protocol ImageUITableViewCellDelegate;
 @interface OpenHABViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate>
 {
     OpenHABTracker *tracker;

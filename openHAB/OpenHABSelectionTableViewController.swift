@@ -9,11 +9,7 @@
 
 import UIKit
 
-@objc protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
-    func didSelectWidgetMapping(_ selectedMapping: Int)
-}
-
-class OpenHABSelectionTableViewController: UITableViewController {
+@objc class OpenHABSelectionTableViewController: UITableViewController {
     @objc var mappings: [AnyHashable] = []
     @objc weak var delegate: OpenHABSelectionTableViewControllerDelegate?
     @objc var selectionItem: OpenHABItem?
