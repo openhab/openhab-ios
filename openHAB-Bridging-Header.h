@@ -5,6 +5,8 @@
 #import <AFNetworking/AFNetworking.h>
 //#import "GDataXMLDocument.h"
 #import <GDataXML_HTML/GDataXMLNode.h>
+#import "OpenHABLinkedPage.h"
+
 
 
 // -----------------------------------------------------------------------------
@@ -23,7 +25,6 @@
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
 #import "AFRememberingSecurityPolicy.h"
-#import "GenericUITableViewCell.h"
 #import "NSMutableURLRequest+Auth.h"
 #import "OpenHABAppDataDelegate.h"
 #import "OpenHABAppDelegate.h"

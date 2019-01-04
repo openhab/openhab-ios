@@ -14,7 +14,7 @@ class FrameUITableViewCell: GenericUITableViewCell {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
-        textLabel = viewWithTag(100) as? UILabel
+  //      textLabel = viewWithTag(100) as? UILabel
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
     

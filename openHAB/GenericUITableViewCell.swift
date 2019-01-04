@@ -12,7 +12,7 @@ import UIKit
 class GenericUITableViewCell: UITableViewCell {
     private var namedColors: [AnyHashable : Any] = [:]
 
-    func displayWidget() {
+    @objc func displayWidget() {
         textLabel?.text = widget?.labelText()
         if widget?.labelValue() != nil {
             detailTextLabel?.text = widget?.labelValue()
@@ -21,41 +21,35 @@ class GenericUITableViewCell: UITableViewCell {
         }
         detailTextLabel?.sizeToFit()
         // Clean any detailTextLabel constraints we set before, or they will start to interfere with new ones because of UITableViewCell caching
-        if disclosureConstraints.count != 0 {
-            if let disclosureConstraints = disclosureConstraints as? [NSLayoutConstraint] {
-                removeConstraints(disclosureConstraints)
-            }
+        if !disclosureConstraints.isEmpty {
+            removeConstraints(disclosureConstraints)
             disclosureConstraints = []
         }
         if accessoryType == .none {
             // If accessory is disabled, set detailTextLabel (widget value) constraing 20px to the right for padding to the right side of table view
-//            if let detailTextLabelC = detailTextLabel {
-//                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]-20.0-|", options: [], metrics: nil, views: NSDictionaryOfVariableBindings(detailTextLabelC) )
-//                if let disclosureConstraints = disclosureConstraints as? [NSLayoutConstraint] {
-//                    addConstraints(disclosureConstraints)
-//                }
-//            }
+            if detailTextLabel != nil {
+//                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]-20.0-|", options: [], metrics: nil, views: _NSDictionaryOfVariableBindings(detailTextLabel, ))
+//                addConstraints(disclosureConstraints)
+            }
         } else {
             // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-//            if detailTextLabel != nil {
+            if detailTextLabel != nil {
 //                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]|", options: [], metrics: nil, views: NSDictionaryOfVariableBindings(detailTextLabel))
-//                if let disclosureConstraints = disclosureConstraints as? [NSLayoutConstraint] {
-//                    addConstraints(disclosureConstraints)
-//                }
-//            }
+//                addConstraints(disclosureConstraints)
+            }
         }
     }
 
 
-    private var _widget: OpenHABWidget?
-    var widget: OpenHABWidget? {
+    private var _widget: OpenHABWidget!
+    @objc var widget: OpenHABWidget! {
         get {
             return _widget
         }
         set(widget) {
-            self.widget = widget
-
-            if self.widget?.linkedPage != nil {
+            _widget = widget
+    
+            if _widget.linkedPage != nil {
                 accessoryType = .disclosureIndicator
                 selectionStyle = .blue
                 //        self.userInteractionEnabled = YES;
@@ -65,13 +59,14 @@ class GenericUITableViewCell: UITableViewCell {
                 //        self.userInteractionEnabled = NO;
             }
     
-            if let color = color(fromHexString: self.widget?.labelcolor) {
+            if _widget.labelcolor != nil {
+                if let color = color(fromHexString: self.widget?.labelcolor) {
                     textLabel?.textColor = color
-                
+                }
             } else {
                 textLabel?.textColor = UIColor.black
             }
-            if self.widget?.valuecolor != nil {
+            if _widget.valuecolor != nil {
                 if let color = color(fromHexString: self.widget?.valuecolor) {
                     detailTextLabel?.textColor = color
                 }
@@ -82,13 +77,14 @@ class GenericUITableViewCell: UITableViewCell {
     }
 //    var textLabel: UILabel?
 //    var detailTextLabel: UILabel?
-    var disclosureConstraints: [Any] = []
+    var disclosureConstraints: [NSLayoutConstraint] = []
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
-//        textLabel = viewWithTag(101) as? UILabel
-//        detailTextLabel = viewWithTag(100) as? UILabel
+        // MARK - To be changed
+        //textLabel = viewWithTag(101) as? UILabel
+        //detailTextLabel = viewWithTag(100) as? UILabel
         selectionStyle = .none
         separatorInset = .zero
         namedColors = ["maroon": "#800000", "red": "#ff0000", "orange": "#ffa500", "olive": "#808000", "yellow": "#ffff00", "purple": "#800080", "fuchsia": "#ff00ff", "white": "#ffffff", "lime": "#00ff00", "green": "#008000", "navy": "#000080", "blue": "#0000ff", "teal": "#008080", "aqua": "#00ffff", "black": "#000000", "silver": "#c0c0c0", "gray": "#808080"]
@@ -114,6 +110,23 @@ class GenericUITableViewCell: UITableViewCell {
     func namedColor(toHexString namedColor: String?) -> String? {
         return namedColors[namedColor?.lowercased() ?? ""] as? String
     }
+
+//    func color(fromHexString hexString: String?) -> UIColor? {
+//        var colorString = hexString
+//        if !(hexString?.hasPrefix("#") ?? false) {
+//            let namedColor = self.namedColor(toHexString: hexString)
+//            if namedColor != nil {
+//                colorString = namedColor
+//            }
+//        }
+//
+//        var rgbValue: UInt = 0
+//        let scanner = Scanner(string: colorString ?? "")
+//        scanner.scanLocation = 1 // bypass '#' character
+//        scanner.scanHexInt32(&rgbValue)
+//        return UIColor(red: Double(((Int(rgbValue) & 0xff0000) >> 16)) / 255.0, green: Double(((Int(rgbValue) & 0xff00) >> 8)) / 255.0, blue: Double((Int(rgbValue) & 0xff)) / 255.0, alpha: 1.0)
+//    }
+    
     
     func color(fromHexString hexString: String?) -> UIColor? {
         var cString:String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ??  "x800000"
@@ -137,19 +150,4 @@ class GenericUITableViewCell: UITableViewCell {
         )
     }
 
-//    func color(fromHexString hexString: String?) -> UIColor? {
-//        var colorString = hexString
-//        if !(hexString?.hasPrefix("#") ?? false) {
-//            let namedColor = self.namedColor(toHexString: hexString)
-//            if namedColor != nil {
-//                colorString = namedColor
-//            }
-//        }
-//
-//        var rgbValue: UInt = 0
-//        let scanner = Scanner(string: colorString ?? "")
-//        scanner.scanLocation = 1 // bypass '#' character
-//        scanner.scanHexInt32(&rgbValue)
-//        return UIColor(red: Double(((Int(rgbValue) & 0xff0000) >> 16)) / 255.0, green: Double(((Int(rgbValue) & 0xff00) >> 8)) / 255.0, blue: Double((Int(rgbValue) & 0xff)) / 255.0, alpha: 1.0)
-//    }
 }

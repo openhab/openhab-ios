@@ -12,18 +12,13 @@ import MapKit
 class MapViewTableViewCell: GenericUITableViewCell {
     private var mapView: MKMapView!
 
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
         mapView = MKMapView(frame: CGRect.zero)
         mapView.layer.cornerRadius = 4.0
         mapView.layer.masksToBounds = true
         contentView.addSubview(mapView)
-    
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+
     }
     
     override func layoutSubviews() {

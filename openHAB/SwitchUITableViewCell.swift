@@ -8,8 +8,9 @@
 //
 
 class SwitchUITableViewCell: GenericUITableViewCell {
-    var widgetSwitch: UISwitch?
+    //var widgetSwitch: UISwitch?
 
+    @IBOutlet weak var widgetSwitch: UISwitch!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
@@ -20,7 +21,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        textLabel.text = widget.labelText()
+        textLabel?.text = widget.labelText()
         var state = widget.state
         //if state is nil or empty using the item state ( OH 1.x compatability )
         if state?.count == 0 {
