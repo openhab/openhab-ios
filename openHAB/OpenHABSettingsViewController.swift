@@ -13,13 +13,30 @@ import UIKit
 class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelegate, UITextFieldDelegate {
     @IBOutlet var settingsTableView: UITableView!
 
-    var localUrlTextField: UITextField?
-    var remoteUrlTextField: UITextField?
-    var usernameTextField: UITextField?
-    var passwordTextField: UITextField?
-    var ignoreSSLSwitch: UISwitch?
-    var demomodeSwitch: UISwitch?
-    var idleOffSwitch: UISwitch?
+//    @IBAction func demomodeSwitchChange(_ sender: Any) {
+//            if demomodeSwitch?.isOn != nil {
+//                print("Demo is ON")
+//                disableConnectionSettings()
+//            } else {
+//                print("Demo is OFF")
+//                enableConnectionSettings()
+//            }
+//    }
+    
+    @IBOutlet weak var demomodeSwitch: UISwitch!
+    @IBOutlet weak var passwordTextField: UITextField!
+    @IBOutlet weak var usernameTextField: UITextField!
+    @IBOutlet weak var remoteUrlTextField: UITextField!
+    @IBOutlet weak var localUrlTextField: UITextField!
+    @IBOutlet weak var idleOffSwitch: UISwitch!
+    @IBOutlet weak var ignoreSSLSwitch: UISwitch!
+//    var localUrlTextField: UITextField?
+//    var remoteUrlTextField: UITextField?
+//    var usernameTextField: UITextField?
+//    var passwordTextField: UITextField?
+//    var ignoreSSLSwitch: UISwitch?
+//    var demomodeSwitch: UISwitch?
+//    var idleOffSwitch: UISwitch?
     var settingsLocalUrl = ""
     var settingsRemoteUrl = ""
     var settingsUsername = ""

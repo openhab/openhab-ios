@@ -792,14 +792,14 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Settings" id="6QK-CR-nbP"/>
                     <connections>
-                        <outlet property="demomodeSwitch" destination="U49-Vc-87C" id="wLc-cu-jDX"/>
-                        <outlet property="idleOffSwitch" destination="nhl-2h-nOu" id="NJW-Yw-ZU9"/>
-                        <outlet property="ignoreSSLSwitch" destination="SSG-Hc-q0a" id="jby-cp-3AV"/>
-                        <outlet property="localUrlTextField" destination="8Z4-jj-MHt" id="Oxh-iN-PYu"/>
-                        <outlet property="passwordTextField" destination="3La-Yc-Vmi" id="Izw-Wp-rlB"/>
-                        <outlet property="remoteUrlTextField" destination="ppC-da-pKq" id="ibj-du-sP1"/>
+                        <outlet property="demomodeSwitch" destination="U49-Vc-87C" id="Fyh-cn-GhG"/>
+                        <outlet property="idleOffSwitch" destination="nhl-2h-nOu" id="tob-t4-aeK"/>
+                        <outlet property="ignoreSSLSwitch" destination="SSG-Hc-q0a" id="rUy-bB-0R1"/>
+                        <outlet property="localUrlTextField" destination="8Z4-jj-MHt" id="a0x-bk-iK5"/>
+                        <outlet property="passwordTextField" destination="3La-Yc-Vmi" id="pPI-mK-EET"/>
+                        <outlet property="remoteUrlTextField" destination="ppC-da-pKq" id="FyS-4h-tKY"/>
                         <outlet property="settingsTableView" destination="Gpo-Jj-aMP" id="w5C-jq-jO6"/>
-                        <outlet property="usernameTextField" destination="7GO-er-lvr" id="eUM-zP-yHr"/>
+                        <outlet property="usernameTextField" destination="7GO-er-lvr" id="nLw-7S-7YN"/>
                         <segue destination="VQn-En-nLm" kind="unwind" identifier="unwindToRoot" unwindAction="unwindToRootViewController:" id="Ez7-Nt-ZRa"/>
                     </connections>
                 </tableViewController>
@@ -1259,6 +1259,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="IN7-RI-eVs"/>
+        <segue reference="9JR-Li-4ww"/>
     </inferredMetricsTieBreakers>
 </document>
