@@ -908,7 +908,7 @@
         <!--Select Sitemap-->
         <scene sceneID="n2e-ly-9YF">
             <objects>
-                <tableViewController id="1hm-c1-IPh" userLabel="Select Sitemap" customClass="OpenHABSelectSitemapViewController" sceneMemberID="viewController">
+                <tableViewController id="1hm-c1-IPh" userLabel="Select Sitemap" customClass="OpenHABSelectSitemapViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="7vi-ca-TKH">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

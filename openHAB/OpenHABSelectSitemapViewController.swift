@@ -106,18 +106,20 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 guard let jsonArray = responseObject as? [[String: Any]] else {
                     return
                 }
-                for sitemapJson in jsonArray{
-                    guard let title = dic["title"] as? String else { return }
-                    let extractedExpr = OpenHABSitemap(dictionaty: sitemapJson)
-                    let sitemap = extractedExpr
-                    print(title) //Output
-                }
+//                if jsonArray.count != 1 {
+//                    for sitemapJson in jsonArray {
+//                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson)
+//                        if  sitemap?.name != "_default" {
+//                            print("Sitemap \(sitemap?.label ?? "not found")")
+//                            self.sitemaps.append(sitemap)
+//                        }
+//                    }
                 if (responseObject is [Any]) {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson)
-                        if responseObject?.count() != 1 && !(sitemap.name == "_default") {
-                            print("Sitemap \(sitemap.label)")
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as! [AnyHashable : Any])
+                        if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
+                            print("Sitemap \(sitemap?.label)")
                             self.sitemaps.append(sitemap)
                         }
                     }
@@ -126,7 +128,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     return
                 }
             }
-            self.appData()?.sitemaps = self.sitemaps as! NSMutableArray
+            self.appData()?.sitemaps = self.sitemaps as? NSMutableArray
             self.tableView.reloadData()
         }, failure: { operation, error in
                 print("Error:------>\(error.localizedDescription)")
@@ -196,7 +198,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     func appData() -> OpenHABDataObject? {
         let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate?.appData()
+        return theDelegate??.appData()
     }
 
     required init?(coder aDecoder: NSCoder) {
