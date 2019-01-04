@@ -28,14 +28,16 @@ class GenericUITableViewCell: UITableViewCell {
         if accessoryType == .none {
             // If accessory is disabled, set detailTextLabel (widget value) constraing 20px to the right for padding to the right side of table view
             if detailTextLabel != nil {
-//                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]-20.0-|", options: [], metrics: nil, views: _NSDictionaryOfVariableBindings(detailTextLabel, ))
-//                addConstraints(disclosureConstraints)
+                let views = ["detailTextLabel": detailTextLabel]
+                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]-20.0-|", options: [], metrics: nil, views: views as [String : Any])
+                addConstraints(disclosureConstraints)
             }
         } else {
             // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
             if detailTextLabel != nil {
-//                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]|", options: [], metrics: nil, views: NSDictionaryOfVariableBindings(detailTextLabel))
-//                addConstraints(disclosureConstraints)
+                let views = ["detailTextLabel": detailTextLabel]
+                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]|", options: [], metrics: nil, views: views as [String : Any])
+                addConstraints(disclosureConstraints)
             }
         }
     }
