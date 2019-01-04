@@ -356,7 +356,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ChartWidgetCell" rowHeight="44" id="o5c-ql-8Ao" customClass="ChartUITableViewCell">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ChartWidgetCell" rowHeight="44" id="o5c-ql-8Ao" customClass="ChartUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="409" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="o5c-ql-8Ao" id="P0d-ou-gEj">
@@ -378,7 +378,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ImageWidgetCell" rowHeight="44" id="qAL-2k-0Oq" customClass="ImageUITableViewCell">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ImageWidgetCell" rowHeight="44" id="qAL-2k-0Oq" customClass="ImageUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="453" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="qAL-2k-0Oq" id="TQB-dV-Dmo">
@@ -400,7 +400,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="VideoWidgetCell" rowHeight="44" id="s2s-Aw-LZh" customClass="VideoUITableViewCell">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="VideoWidgetCell" rowHeight="44" id="s2s-Aw-LZh" customClass="VideoUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="497" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="s2s-Aw-LZh" id="BRq-hd-ujz">
@@ -411,7 +411,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="WebWidgetCell" rowHeight="44" id="cNS-Yn-KPo" customClass="WebUITableViewCell">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="WebWidgetCell" rowHeight="44" id="cNS-Yn-KPo" customClass="WebUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="541" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cNS-Yn-KPo" id="Tr2-YU-Z8o">
@@ -462,7 +462,7 @@
         <!--Settings-->
         <scene sceneID="bFA-oT-thf">
             <objects>
-                <tableViewController storyboardIdentifier="OpenHABSettingsViewController" id="0lY-On-oJ2" customClass="OpenHABSettingsViewController" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="OpenHABSettingsViewController" id="0lY-On-oJ2" customClass="OpenHABSettingsViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="Gpo-Jj-aMP">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

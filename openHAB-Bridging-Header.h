@@ -3,7 +3,10 @@
 //
 #import <NKOColorPickerView/NKOColorPickerView.h>
 #import <AFNetworking/AFNetworking.h>
+//#import "GDataXMLDocument.h"
 #import <GDataXML_HTML/GDataXMLNode.h>
+
+
 // -----------------------------------------------------------------------------
 // Begin Swiftify generated imports
 
@@ -19,12 +22,11 @@
 // • Add `@class MySwiftClass` to your .h files that depend on the Swift code;
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
-//#import "AFNetworking.h"
 #import "AFRememberingSecurityPolicy.h"
-//#import "GDataXMLNode.h"
 #import "GenericUITableViewCell.h"
 #import "NSMutableURLRequest+Auth.h"
 #import "OpenHABAppDataDelegate.h"
+#import "OpenHABAppDelegate.h"
 #import "OpenHABDataObject.h"
 #import "OpenHABItem.h"
 #import "OpenHABSitemap.h"

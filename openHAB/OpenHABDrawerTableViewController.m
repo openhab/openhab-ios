@@ -8,7 +8,7 @@
 
 #import "OpenHABDrawerTableViewController.h"
 #import "UIViewController+MMDrawerController.h"
-#import "OpenHABSettingsViewController.h"
+//#import "OpenHABSettingsViewController.h"
 #import "OpenHABSitemap.h"
 #import "OpenHABDrawerItem.h"
 #import <SDWebImage/UIImageView+WebCache.h>
