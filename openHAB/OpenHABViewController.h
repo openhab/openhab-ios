@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "OpenHABTracker.h"
 #import "OpenHABSitemapPage.h"
-#import "OpenHABSelectionTableViewController.h"
 #import "AFRememberingSecurityPolicy.h"
 
 @class OpenHABSitemapPage;
