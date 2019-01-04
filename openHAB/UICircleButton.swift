@@ -13,7 +13,7 @@ var normalBackgroundColor: UIColor?
 var normalTextColor: UIColor?
 
 class UICircleButton: UIButton {
-    required init?(coder coder: NSCoder) {
+    required init?(coder: NSCoder) {
         //    NSLog(@"UICircleButton initWithCoder");
         super.init(coder: coder)
         

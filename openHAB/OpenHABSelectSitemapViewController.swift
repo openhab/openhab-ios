@@ -103,9 +103,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 // Newer versions speak JSON!
             } else {
                 print("openHAB 2")
-                guard let jsonArray = responseObject as? [[String: Any]] else {
-                    return
-                }
+// MARK - Needs to ported to Swift 4 - But not yet ready
+//                guard let jsonArray = responseObject as? [[String: Any]] else {
+//                    return
+//                }
 //                if jsonArray.count != 1 {
 //                    for sitemapJson in jsonArray {
 //                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson)
@@ -157,9 +158,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier, for: indexPath)
-        if cell == nil {
-            cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier)
-        }
+        cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier)
         let sitemap = sitemaps[indexPath.row] as? OpenHABSitemap
         if sitemap?.label != nil {
             cell.textLabel?.text = sitemap?.label
@@ -186,7 +185,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(String(format: "Selected sitemap %ld", indexPath.row))
         let sitemap = sitemaps[indexPath.row] as? OpenHABSitemap
-        var prefs = UserDefaults.standard
+        let prefs = UserDefaults.standard
         prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
         selectedSitemap = indexPath.row
         appData()?.rootViewController?.pageUrl = nil

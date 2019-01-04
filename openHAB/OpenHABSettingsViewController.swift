@@ -177,7 +177,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     }
 
     func saveSettings() {
-        var prefs = UserDefaults.standard
+        let prefs = UserDefaults.standard
         prefs.setValue(settingsLocalUrl, forKey: "localUrl")
         prefs.setValue(settingsRemoteUrl, forKey: "remoteUrl")
         prefs.setValue(settingsUsername, forKey: "username")

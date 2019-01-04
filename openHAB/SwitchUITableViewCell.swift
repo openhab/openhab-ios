@@ -41,7 +41,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func switchChange(_ sender: Any?) {
-        if widgetSwitch?.isOn != nil {
+        if (widgetSwitch?.isOn)! {
             print("Switch to ON")
             widget.sendCommand("ON")
         } else {

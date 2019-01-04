@@ -12,7 +12,7 @@ class WebUITableViewCell: GenericUITableViewCell, UIWebViewDelegate {
     var isLoadingUrl = false
     var isLoaded = false
 
-    required init?(coder coder: NSCoder) {
+    required init?(coder: NSCoder) {
         super.init(coder: coder)
         
         selectionStyle = UITableViewCell.SelectionStyle.none
