@@ -814,13 +814,13 @@
         <!--OpenHAB Notifications View Controller Table View Controller-->
         <scene sceneID="rzB-s5-QOg">
             <objects>
-                <tableViewController storyboardIdentifier="OpenHABNotificationsViewController" id="zYO-lW-n6K" customClass="OpenHABNotificationsViewControllerTableViewController" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="OpenHABNotificationsViewController" id="zYO-lW-n6K" customClass="OpenHABNotificationsViewControllerTableViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="2Wi-N4-CS1">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NotificationCell" id="1Ag-Y5-0q8" customClass="NotificationTableViewCell">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NotificationCell" id="1Ag-Y5-0q8" customClass="NotificationTableViewCell" customModule="openHAB">
                                 <rect key="frame" x="0.0" y="28" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="1Ag-Y5-0q8" id="s4Z-v6-X0D">

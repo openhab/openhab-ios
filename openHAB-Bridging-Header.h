@@ -7,9 +7,7 @@
 #import <GDataXML_HTML/GDataXMLNode.h>
 #import "OpenHABLinkedPage.h"
 #import <MMDrawerController/UIViewController+MMDrawerController.h>
-
-
-
+//#import "NSDate+Helper.h"
 
 // -----------------------------------------------------------------------------
 // Begin Swiftify generated imports
@@ -35,7 +33,6 @@
 #import "OpenHABDataObject.h"
 //#import "OpenHABDrawerItem.h"
 #import "OpenHABItem.h"
-#import "OpenHABNotificationsViewControllerTableViewController.h"
 #import "OpenHABSitemap.h"
 #import "OpenHABViewController.h"
 #import "OpenHABWidget.h"

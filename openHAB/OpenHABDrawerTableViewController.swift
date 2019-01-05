@@ -55,7 +55,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
             let response = responseObject as? Data
-            var error: Error?
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             self.sitemaps = []
             print("Sitemap response")
@@ -186,7 +185,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             //        }
             // First sitemaps
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
-                cell?.customTextLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
+                cell?.textLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
                 var iconUrlString: String? = nil
                 if appData()?.openHABVersion == 2 {
                     if let app = appData()?.openHABRootUrl, let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
