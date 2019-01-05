@@ -6,6 +6,8 @@
 //#import "GDataXMLDocument.h"
 #import <GDataXML_HTML/GDataXMLNode.h>
 #import "OpenHABLinkedPage.h"
+#import <MMDrawerController/UIViewController+MMDrawerController.h>
+
 
 
 
@@ -24,16 +26,21 @@
 // • Add `@class MySwiftClass` to your .h files that depend on the Swift code;
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
+//#import "AFNetworking.h"
 #import "AFRememberingSecurityPolicy.h"
+//#import "GDataXMLNode.h"
 #import "NSMutableURLRequest+Auth.h"
 #import "OpenHABAppDataDelegate.h"
 #import "OpenHABAppDelegate.h"
 #import "OpenHABDataObject.h"
+//#import "OpenHABDrawerItem.h"
 #import "OpenHABItem.h"
+#import "OpenHABNotificationsViewControllerTableViewController.h"
 #import "OpenHABSitemap.h"
 #import "OpenHABViewController.h"
 #import "OpenHABWidget.h"
 #import "OpenHABWidgetMapping.h"
+//#import "UIViewController+MMDrawerController.h"
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
 #import <SDWebImage/SDWebImageDownloader.h>

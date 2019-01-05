@@ -13,6 +13,7 @@
 
 @class OpenHABSitemapPage;
 @class OpenHABSelectionTableViewController;
+@class OpenHABDrawerTableViewController;
 @protocol OpenHABSelectionTableViewControllerDelegate;
 @protocol ColorPickerUITableViewCellDelegate;
 @protocol ImageUITableViewCellDelegate;

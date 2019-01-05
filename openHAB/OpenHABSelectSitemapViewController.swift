@@ -29,7 +29,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("OpenHABSelectSitemapViewController viewDidLoad")
-        if sitemaps != nil {
+        if sitemaps.count != 0 {
             print("We have sitemap list here!")
         }
         if appData()?.openHABRootUrl != nil {
@@ -132,9 +132,11 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             self.appData()?.sitemaps = self.sitemaps
             self.tableView.reloadData()
         }, failure: { operation, error in
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
             print("Error:------>\(error.localizedDescription)")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
         })
+        UIApplication.shared.isNetworkActivityIndicatorVisible = true
         operation?.start()
     }
 

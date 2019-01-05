@@ -25,7 +25,6 @@
 #import "Reachability+URL.h"
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
-#import "OpenHABDrawerTableViewController.h"
 
 
 static NSString * const OpenHABViewControllerMapViewCellReuseIdentifier = @"OpenHABViewControllerMapViewCellReuseIdentifier";

@@ -1212,13 +1212,13 @@
         <!--OpenHAB Drawer Table View Controller-->
         <scene sceneID="Ftx-Af-xJe">
             <objects>
-                <tableViewController id="MPp-H6-Zce" customClass="OpenHABDrawerTableViewController" sceneMemberID="viewController">
+                <tableViewController id="MPp-H6-Zce" customClass="OpenHABDrawerTableViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="yaQ-kw-KPl">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DrawerCell" id="A9K-On-IoL" customClass="DrawerUITableViewCell">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DrawerCell" id="A9K-On-IoL" customClass="DrawerUITableViewCell" customModule="openHAB">
                                 <rect key="frame" x="0.0" y="28" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="A9K-On-IoL" id="CKg-F0-eHj">
@@ -1231,6 +1231,10 @@
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Psk-Ip-Gby">
+                                            <rect key="frame" x="16" y="5" width="43" height="39"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        </imageView>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="NcF-3h-pDH" firstAttribute="leading" secondItem="CKg-F0-eHj" secondAttribute="leadingMargin" constant="59" id="33i-o0-AUn"/>
@@ -1244,6 +1248,10 @@
                                         </mask>
                                     </variation>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="customImageView" destination="Psk-Ip-Gby" id="KA9-33-pjA"/>
+                                    <outlet property="customTextLabel" destination="NcF-3h-pDH" id="ZuT-a5-tlC"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -1254,7 +1262,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d5Y-bl-XKC" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="304" y="875"/>
+            <point key="canvasLocation" x="303.75" y="874.64788732394368"/>
         </scene>
     </scenes>
     <resources>

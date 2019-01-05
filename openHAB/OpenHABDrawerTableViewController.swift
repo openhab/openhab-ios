@@ -11,8 +11,8 @@ import SDWebImage
 import UIKit
 
 class OpenHABDrawerTableViewController: UITableViewController {
-    var sitemaps: [AnyHashable] = []
-    var openHABRootUrl = ""
+    var sitemaps: NSMutableArray = []
+    @objc var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
     var ignoreSSLCertificate = false
@@ -23,7 +23,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         super.viewDidLoad()
         tableView.tableFooterView = UIView()
         drawerItems = [AnyHashable]()
-        sitemaps = [AnyHashable]()
+        sitemaps = []
         loadSettings()
         print("OpenHABDrawerTableViewController did load")
     }
@@ -41,9 +41,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
         var operation: AFHTTPRequestOperation? = nil
         if let sitemapsRequest = sitemapsRequest {
-            operation = AFHTTPRequestOperation(request: sitemapsRequest)
+            operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
         }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningModeNone)
+        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
         operation?.securityPolicy = policy
         if ignoreSSLCertificate {
             print("Warning - ignoring invalid certificates")
@@ -57,7 +57,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let response = responseObject as? Data
             var error: Error?
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            self.sitemaps.removeAll()
+            self.sitemaps = []
             print("Sitemap response")
             // If we are talking to openHAB 1.X, talk XML
             if self.appData()?.openHABVersion == 1 {
@@ -72,13 +72,15 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 if doc == nil {
                     return
                 }
-                if let name = doc?.rootElement.name() {
+                if let name = doc?.rootElement().name() {
                     print("\(name)")
                 }
-                if doc?.rootElement.name() == "sitemaps" {
-                    for element: GDataXMLElement? in doc?.rootElement.elements(forName: "sitemap") ?? [] {
-                        let sitemap = OpenHABSitemap(xml: element)
-                        self.sitemaps.append(sitemap)
+                if doc?.rootElement().name() == "sitemaps" {
+                    for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
+                        if let element = element as? GDataXMLElement {
+                            let sitemap = OpenHABSitemap(xml: element)
+                            self.sitemaps.add(sitemap)
+                        }
                     }
                 } else {
                     return
@@ -89,10 +91,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 if (responseObject is [Any]) {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson)
-                        if responseObject?.count() != 1 && !(sitemap.name == "_default") {
-                            print("Sitemap \(sitemap.label)")
-                            self.sitemaps.append(sitemap)
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable : Any])
+                        if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
+                            print("Sitemap \(sitemap?.label)")
+                            self.sitemaps.add(sitemap)
                         }
                     }
                 } else {
@@ -102,24 +104,27 @@ class OpenHABDrawerTableViewController: UITableViewController {
             }
 
             // Sort the sitemaps alphabetically.
-            let sorted = (self.sitemaps as NSArray).sortedArray(comparator: { obj1, obj2 in
-                    let a = (obj1 as? OpenHABSitemap)?.name()
-                    let b = (obj2 as? OpenHABSitemap)?.name()
-                    return (a?.compare(b ?? ""))!
-                })
-
-            if let sorted = sorted as? [AnyHashable] {
-                self.sitemaps = sorted
-            }
+            self.sitemaps.sort(comparator: { obj1, obj2 in
+                let a = (obj1 as? OpenHABSitemap)?.name
+                let b = (obj2 as? OpenHABSitemap)?.name
+                return (a?.compare(b ?? ""))!
+            })
+//            let sorted = (self.sitemaps as NSArray).sortedArray(comparator: { obj1, obj2 in
+//                    let a = (obj1 as? OpenHABSitemap)?.name
+//                    let b = (obj2 as? OpenHABSitemap)?.name
+//                    return (a?.compare(b ?? ""))!
+//                })
+//
+//            if let sorted = sorted as? [AnyHashable] {
+//                self.sitemaps = sorted
+//            }
 
             self.appData()?.sitemaps = self.sitemaps
             self.tableView.reloadData()
         }, failure: { operation, error in
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            if let description = error?.description() {
-                print("Error:------>\(description)")
-            }
-            print(String(format: "error code %ld", Int(operation?.response.statusCode ?? 0)))
+            print("Error:------>\(error.localizedDescription)")
+            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
         })
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         operation?.start()
@@ -175,13 +180,13 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell: DrawerUITableViewCell?
         if indexPath.row != 0 {
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier)
+            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as! DrawerUITableViewCell
             //        if (cell == nil) {
             //            cell = [[DrawerUITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
             //        }
             // First sitemaps
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
-                cell?.textLabel.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
+                cell?.customTextLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
                 var iconUrlString: String? = nil
                 if appData()?.openHABVersion == 2 {
                     if let app = appData()?.openHABRootUrl, let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
@@ -193,19 +198,19 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     }
                 }
                 print("\(iconUrlString ?? "")")
-                cell?.imageView.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: 0)
+                cell?.customImageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
             } else {
                 // Then menu items
-                cell?.textLabel.text = (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.label
+                cell?.customTextLabel?.text = (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.label
                 var iconUrlString: String? = nil
-                cell?.imageView.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.icon ?? ""), options: 0)
+                cell?.customImageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.icon ?? ""), options: [])
             }
-            cell?.separatorInset = UIEdgeInsetsMake(0, 60, 0, 0)
+            cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
         } else {
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier)
-            if cell == nil {
-                cell = DrawerUITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier)
-            }
+            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as! DrawerUITableViewCell
+//            if cell == nil {
+//                cell = DrawerUITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier)
+//            }
         }
         if cell?.responds(to: #selector(setter: DrawerUITableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
@@ -287,6 +292,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
     // App wide data access
     func appData() -> OpenHABDataObject? {
         let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate?.appData()
+        return theDelegate??.appData()
     }
 }
+
+//#import "OpenHABSettingsViewController.h"
