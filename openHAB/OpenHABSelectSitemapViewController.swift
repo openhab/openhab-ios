@@ -71,7 +71,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
             let response = responseObject as? Data
-            var error: Error?
             self.sitemaps = []
             print("Sitemap response")
             // If we are talking to openHAB 1.X, talk XML
@@ -189,7 +188,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         let prefs = UserDefaults.standard
         prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
         selectedSitemap = indexPath.row
-        appData()?.rootViewController?.pageUrl = nil
+        appData()?.rootViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
     }
 

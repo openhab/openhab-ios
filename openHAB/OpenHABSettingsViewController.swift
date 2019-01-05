@@ -76,7 +76,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         print("Save button pressed")
         updateSettings()
         saveSettings()
-        appData()?.rootViewController?.pageUrl = nil
+        appData()?.rootViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
     }
 

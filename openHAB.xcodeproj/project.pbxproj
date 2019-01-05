@@ -58,14 +58,13 @@
 		DFB2623518830A3600D3244D = {isa = PBXBuildFile; fileRef = DFB2623318830A3600D3244D /* InfoPlist.strings */; };
 		DFB2623718830A3600D3244D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623618830A3600D3244D /* main.m */; };
 		DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */; };
-		DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABViewController.m */; };
+		DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABViewController.swift */; };
 		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
 		DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2624C18830A3600D3244D /* XCTest.framework */; };
 		DFB2624E18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
 		DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
 		DFB2625718830A3600D3244D = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
 		DFB2625918830A3600D3244D /* openHABTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2625818830A3600D3244D /* openHABTests.m */; };
-		DFD411071CF874C000F78066 /* NSDate+Helper.m in Sources */ = {isa = PBXBuildFile; fileRef = DFD411061CF874C000F78066 /* NSDate+Helper.m */; };
 		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
 		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */; };
 		DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE401188322BC008B26AC /* NSObject+Data.m */; };
@@ -160,16 +159,13 @@
 		DFB2623818830A3600D3244D /* openHAB-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "openHAB-Prefix.pch"; sourceTree = "<group>"; };
 		DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABAppDelegate.h; sourceTree = "<group>"; };
 		DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABAppDelegate.m; sourceTree = "<group>"; };
-		DFB2624218830A3600D3244D /* OpenHABViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABViewController.h; sourceTree = "<group>"; };
-		DFB2624318830A3600D3244D /* OpenHABViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABViewController.m; sourceTree = "<group>"; };
+		DFB2624318830A3600D3244D /* OpenHABViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABViewController.swift; sourceTree = "<group>"; };
 		DFB2624518830A3600D3244D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		DFB2624B18830A3600D3244D /* openHABTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		DFB2625418830A3600D3244D /* openHABTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHABTests-Info.plist"; sourceTree = "<group>"; };
 		DFB2625618830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DFB2625818830A3600D3244D /* openHABTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = openHABTests.m; sourceTree = "<group>"; };
-		DFD411051CF874C000F78066 /* NSDate+Helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Helper.h"; sourceTree = "<group>"; };
-		DFD411061CF874C000F78066 /* NSDate+Helper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Helper.m"; sourceTree = "<group>"; };
 		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
 		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSettingsViewController.swift; sourceTree = "<group>"; };
 		DFDEE400188322BC008B26AC /* NSObject+Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Data.h"; sourceTree = "<group>"; };
@@ -283,8 +279,7 @@
 				DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */,
 				DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.swift */,
 				DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */,
-				DFB2624218830A3600D3244D /* OpenHABViewController.h */,
-				DFB2624318830A3600D3244D /* OpenHABViewController.m */,
+				DFB2624318830A3600D3244D /* OpenHABViewController.swift */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 			);
@@ -437,8 +432,6 @@
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
 				DF2B6ADB18EF4D660063819F /* NSData+HexString.h */,
 				DF2B6ADC18EF4D660063819F /* NSData+HexString.m */,
-				DFD411051CF874C000F78066 /* NSDate+Helper.h */,
-				DFD411061CF874C000F78066 /* NSDate+Helper.m */,
 				DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */,
 				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */,
 				DFDEE400188322BC008B26AC /* NSObject+Data.h */,
@@ -670,7 +663,6 @@
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				DFB2623718830A3600D3244D /* main.m in Sources */,
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */,
-				DFD411071CF874C000F78066 /* NSDate+Helper.m in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
@@ -693,7 +685,7 @@
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,
 				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */,
 				DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */,
-				DFB2624418830A3600D3244D /* OpenHABViewController.m in Sources */,
+				DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */,
 				DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */,
 				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */,
 				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,

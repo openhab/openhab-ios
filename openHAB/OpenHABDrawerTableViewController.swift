@@ -179,7 +179,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell: DrawerUITableViewCell?
         if indexPath.row != 0 {
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as! DrawerUITableViewCell
+            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
             //        if (cell == nil) {
             //            cell = [[DrawerUITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
             //        }
@@ -201,12 +201,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
             } else {
                 // Then menu items
                 cell?.customTextLabel?.text = (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.label
-                var iconUrlString: String? = nil
+                let iconUrlString: String? = nil
                 cell?.customImageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.icon ?? ""), options: [])
             }
             cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
         } else {
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as! DrawerUITableViewCell
+            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
 //            if cell == nil {
 //                cell = DrawerUITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier)
 //            }
@@ -238,9 +238,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
             // First sitemaps
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
                 let sitemap = sitemaps[indexPath.row - 1] as? OpenHABSitemap
-                var prefs = UserDefaults.standard
+                let prefs = UserDefaults.standard
                 prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
-                appData()?.rootViewController?.pageUrl = nil
+                appData()?.rootViewController?.pageUrl = ""
                 let nav = mm_drawerController.centerViewController as? UINavigationController
                 let dummyViewController: UIViewController? = storyboard?.instantiateViewController(withIdentifier: "DummyViewController")
                 if let dummyViewController = dummyViewController {
