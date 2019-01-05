@@ -12,7 +12,7 @@
         <!--OpenHAB View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
-                <viewController storyboardIdentifier="OpenHABPageViewController" id="vXZ-lx-hvc" customClass="OpenHABViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="OpenHABPageViewController" id="vXZ-lx-hvc" customClass="OpenHABViewController" customModule="openHAB" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="wJM-h9-4Pp"/>
                         <viewControllerLayoutGuide type="bottom" id="O3I-rs-9RL"/>

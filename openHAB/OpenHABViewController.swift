@@ -26,7 +26,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var defaultSitemap = ""
     var ignoreSSLCertificate = false
     var idleOff = false
-    var sitemaps: [AnyHashable] = []
+    var sitemaps: NSMutableArray = []
     var currentPage: OpenHABSitemapPage?
     var selectionPicker: UIPickerView?
     var pageNetworkStatus: NetworkStatus?
@@ -125,7 +125,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         super.viewDidLoad()
         print("OpenHABViewController viewDidLoad")
         pageNetworkStatus = NetworkStatus(rawValue: -1)
-        sitemaps = [AnyHashable]()
+        sitemaps = []
         widgetTableView.tableFooterView = UIView()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -525,10 +525,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         TSMessage.showNotification(in: navigationController, title: "Connecting", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 3.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
     }
 
-    func openHABTrackingError() throws {
+    func openHABTrackingError(_ error: Error) throws {
         print("OpenHABViewController discovery error")
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        TSMessage.showNotification(inViewController: navigationController, title: "Error", subtitle: error?.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 60.0, callback: nil, buttonTitle: nil, buttonCallback: nil, atPosition: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+        TSMessage.showNotification(in: navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 60.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
     }
 
     // send command to an item
@@ -620,7 +620,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
             }
             let response = responseObject as? Data
-            var error: Error?
             // If we are talking to openHAB 1.X, talk XML
             if self.appData()?.openHABVersion == 1 {
                 var doc: GDataXMLDocument? = nil
@@ -634,14 +633,16 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     print("\(name)")
                 }
                 if doc?.rootElement().name() == "page" {
-                    self.currentPage = OpenHABSitemapPage(xml: doc?.rootElement)
+                    if let rootElement = doc?.rootElement() {
+                        self.currentPage = OpenHABSitemapPage(xml: rootElement)
+                    }
                 } else {
                     print("Unable to find page root element")
                     return
                 }
                 // Newer versions talk JSON!
             } else {
-                self.currentPage = responseObject as! OpenHABSitemapPage
+                self.currentPage = responseObject as? OpenHABSitemapPage
             }
             strongSelf.currentPage?.delegate = strongSelf
             strongSelf.widgetTableView.reloadData()
@@ -709,7 +710,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             let response = responseObject as? Data
             var error: Error?
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            self.sitemaps.removeAll()
+            self.sitemaps = []
             // If we are talking to openHAB 1.X, talk XML
             if self.appData()?.openHABVersion == 1 {
                 if let response = response {
@@ -726,9 +727,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     print("\(name)")
                 }
                 if doc?.rootElement().name() == "sitemaps" {
-                    for element: GDataXMLElement? in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                        let sitemap = OpenHABSitemap(xml: element)
-                        self.sitemaps.append(sitemap)
+                    for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
+                        if let element = element as? GDataXMLElement {
+                            let sitemap = OpenHABSitemap(xml: element)
+                            self.sitemaps.add(sitemap!)
+                        }
                     }
                 }
                 // Newer versions speak JSON!
@@ -736,8 +739,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if (responseObject is [Any]) {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson)
-                        self.sitemaps.append(sitemap)
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable : Any])
+                        self.sitemaps.add(sitemap!)
                     }
                 } else {
                     // Something went wrong, we should have received an array
@@ -758,7 +761,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
                     }
                 } else {
-                    self.pageUrl = self.sitemaps[0].homepageLink()
+                    self.pageUrl = (self.sitemaps[0] as! OpenHABSitemap).homepageLink
                     self.loadPage(false)
                 }
             } else {
