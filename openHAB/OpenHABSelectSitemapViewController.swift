@@ -13,7 +13,7 @@ import UIKit
 class OpenHABSelectSitemapViewController: UITableViewController {
     private var selectedSitemap: Int = 0
 
-    var sitemaps: [AnyHashable] = []
+    var sitemaps: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
@@ -38,7 +38,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             }
         }
         tableView.tableFooterView = UIView()
-        sitemaps = [AnyHashable]()
+        //sitemaps = []
         openHABRootUrl = appData()?.openHABRootUrl ?? ""
         let prefs = UserDefaults.standard
         openHABUsername = prefs.value(forKey: "username") as? String ?? ""
@@ -72,7 +72,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
             let response = responseObject as? Data
             var error: Error?
-            self.sitemaps.removeAll()
+            self.sitemaps = []
             print("Sitemap response")
             // If we are talking to openHAB 1.X, talk XML
             if self.appData()?.openHABVersion == 1 {
@@ -94,7 +94,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                         if let element = element as? GDataXMLElement {
                             let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.append(sitemap)
+                            self.sitemaps.add(sitemap!)
                         }
                     }
                 } else {
@@ -118,10 +118,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 if (responseObject is [Any]) {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as! [AnyHashable : Any])
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable : Any])
                         if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
                             print("Sitemap \(sitemap?.label)")
-                            self.sitemaps.append(sitemap)
+                            self.sitemaps.add(sitemap!)
                         }
                     }
                 } else {
@@ -129,11 +129,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     return
                 }
             }
-            self.appData()?.sitemaps = self.sitemaps as? NSMutableArray
+            self.appData()?.sitemaps = self.sitemaps
             self.tableView.reloadData()
         }, failure: { operation, error in
-                print("Error:------>\(error.localizedDescription)")
-            
+            print("Error:------>\(error.localizedDescription)")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
         })
         operation?.start()
