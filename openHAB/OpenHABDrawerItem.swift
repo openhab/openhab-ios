@@ -1,10 +1,11 @@
-//  Converted to Swift 4 by Swiftify v4.2.28993 - https://objectivec2swift.com/
 //
 //  OpenHABDrawerItem.swift
 //  openHAB
 //
 //  Created by Victor Belov on 23/05/16.
 //  Copyright © 2016 Victor Belov. All rights reserved.
+//
+//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
 import Foundation

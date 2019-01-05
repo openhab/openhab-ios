@@ -1,10 +1,11 @@
-//  Converted to Swift 4 by Swiftify v4.2.28993 - https://objectivec2swift.com/
 //
 //  UIAlertView+Block.swift
 //  openHAB
 //
 //  Created by Victor Belov on 16/07/14.
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
+//
+//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
 import ObjectiveC

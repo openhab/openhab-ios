@@ -1,10 +1,11 @@
-//  Converted to Swift 4 by Swiftify v4.2.28993 - https://objectivec2swift.com/
 //
 //  OpenHABSelectSitemapViewController.swift
 //  openHAB
 //
 //  Created by Victor Belov on 14/01/14.
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
+//
+//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
 import SDWebImage

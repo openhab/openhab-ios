@@ -1,10 +1,11 @@
-//  Converted to Swift 4 by Swiftify v4.2.28993 - https://objectivec2swift.com/
 //
 //  MapViewTableViewCell.swift
 //  openHAB
 //
 //  Created by Manfred Scheiner on 12.09.18.
 //  Copyright © 2018 openHAB e.V. All rights reserved.
+//
+//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
 import MapKit
