@@ -120,7 +120,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     for sitemapJson: Any? in responseObject as! [Any?] {
                         let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable: Any])
                         if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
-                            print("Sitemap \(sitemap?.label)")
+                            print("Sitemap \(String(describing: sitemap?.label))")
                             self.sitemaps.add(sitemap!)
                         }
                     }

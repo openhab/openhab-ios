@@ -134,7 +134,7 @@ class GenericUITableViewCell: UITableViewCell {
             cString.remove(at: cString.startIndex)
         }
 
-        if ((cString.count) != 6) {
+        if (cString.count) != 6 {
             return UIColor.gray
         }
 

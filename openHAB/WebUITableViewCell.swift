@@ -15,11 +15,11 @@ class WebUITableViewCell: GenericUITableViewCell, UIWebViewDelegate {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
         widgetWebView = viewWithTag(1001) as? UIWebView
-    
+
     }
 
     override func displayWidget() {

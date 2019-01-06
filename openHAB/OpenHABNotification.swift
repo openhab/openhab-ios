@@ -7,7 +7,6 @@
 //
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 
-
 import Foundation
 
 class OpenHABNotification: NSObject {
@@ -20,7 +19,7 @@ class OpenHABNotification: NSObject {
         super.init()
         let keyArray = dictionary.keys
         for key in keyArray {
-            if (key as String == "created") {
+            if key as String == "created" {
                 let dateFormatter = DateFormatter()
                 // 2015-09-15T13:39:19.938Z
                 dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"

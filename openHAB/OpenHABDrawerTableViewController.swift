@@ -181,24 +181,23 @@ class OpenHABDrawerTableViewController: UITableViewController {
         var cell: DrawerUITableViewCell?
         if indexPath.row != 0 {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
-            //        if (cell == nil) {
-            //            cell = [[DrawerUITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-            //        }
-            // First sitemaps
+
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
                 cell?.textLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
-                var iconUrlString: String? = nil
+
+                var components = URLComponents(string: openHABRootUrl)
+
                 if appData()?.openHABVersion == 2 {
-                    if let app = appData()?.openHABRootUrl, let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        iconUrlString = "\(app)/icon/\(object).png"
+                    if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
+                        components?.path = "icon/\(object).png"
                     }
                 } else {
-                    if let app = appData()?.openHABRootUrl, let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        iconUrlString = "\(app)/images/\(object).png"
+                    if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
+                        components?.path = "images/\(object).png"
                     }
                 }
-                print("\(iconUrlString ?? "")")
-                cell?.customImageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+                print("\(components?.debugDescription ?? "")")
+                cell?.customImageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
             } else {
                 // Then menu items
                 cell?.customTextLabel?.text = (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.label
@@ -208,18 +207,13 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
-//            if cell == nil {
-//                cell = DrawerUITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier)
-//            }
-        }
-        if cell?.responds(to: #selector(setter: DrawerUITableViewCell.preservesSuperviewLayoutMargins)) ?? false {
-            cell?.preservesSuperviewLayoutMargins = false
+            //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
+
         }
 
-        // Explictly set your cell's layout margins
-        if cell?.responds(to: #selector(setter: DrawerUITableViewCell.layoutMargins)) ?? false {
-            cell?.layoutMargins = .zero
-        }
+        cell?.preservesSuperviewLayoutMargins = false
+        cell?.layoutMargins = .zero
+
         return cell!
     }
 
