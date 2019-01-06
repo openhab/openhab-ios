@@ -16,7 +16,7 @@ class OpenHABLegalViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let legalPath: URL? = Bundle.main.url(forResource: "legal", withExtension: "rtf")
-        var legalAttributedString: NSAttributedString? = nil
+        var legalAttributedString: NSAttributedString?
         if let legalPath = legalPath {
             legalAttributedString = try? NSAttributedString(fileURL: legalPath, options: [NSAttributedString.DocumentAttributeKey.documentType: NSAttributedString.DocumentType.rtf.rawValue], documentAttributes: nil)
         }

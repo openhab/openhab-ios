@@ -811,10 +811,10 @@
             </objects>
             <point key="canvasLocation" x="2753" y="34"/>
         </scene>
-        <!--OpenHAB Notifications View Controller Table View Controller-->
+        <!--OpenHAB Notifications View Controller-->
         <scene sceneID="rzB-s5-QOg">
             <objects>
-                <tableViewController storyboardIdentifier="OpenHABNotificationsViewController" id="zYO-lW-n6K" customClass="OpenHABNotificationsViewControllerTableViewController" customModule="openHAB" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="OpenHABNotificationsViewController" id="zYO-lW-n6K" customClass="OpenHABNotificationsViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="2Wi-N4-CS1">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

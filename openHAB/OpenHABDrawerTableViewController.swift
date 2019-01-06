@@ -35,12 +35,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
         let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
         print("Sitemap URL = \(sitemapsUrlString)")
         let sitemapsUrl = URL(string: sitemapsUrlString)
-        var sitemapsRequest: NSMutableURLRequest? = nil
+        var sitemapsRequest: NSMutableURLRequest?
         if let sitemapsUrl = sitemapsUrl {
             sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
         }
         sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        var operation: AFHTTPRequestOperation? = nil
+        var operation: AFHTTPRequestOperation?
         if let sitemapsRequest = sitemapsRequest {
             operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
         }
@@ -65,7 +65,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 if let response = response {
                     print("\(String(data: response, encoding: .utf8) ?? "")")
                 }
-                var doc: GDataXMLDocument? = nil
+                var doc: GDataXMLDocument?
                 if let response = response {
                     doc = try? GDataXMLDocument(data: response)
                 }
@@ -88,10 +88,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 // Newer versions speak JSON!
             } else {
                 print("openHAB 2")
-                if (responseObject is [Any]) {
+                if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable : Any])
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable: Any])
                         if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
                             print("Sitemap \(sitemap?.label)")
                             self.sitemaps.add(sitemap)
@@ -250,19 +250,19 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 nav?.popToRootViewController(animated: true)
             } else {
                 // Then menu items
-                if (((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "settings") {
+                if ((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "settings" {
                     let nav = mm_drawerController.centerViewController as? UINavigationController
                     let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController
                     if let newViewController = newViewController {
                         nav?.pushViewController(newViewController, animated: true)
                     }
                 }
-                if (((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "notifications") {
+                if ((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "notifications" {
                     let nav = mm_drawerController.centerViewController as? UINavigationController
-                    if (nav?.visibleViewController is OpenHABNotificationsViewControllerTableViewController) {
+                    if nav?.visibleViewController is OpenHABNotificationsViewController {
                         print("Notifications are already open")
                     } else {
-                        let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewControllerTableViewController
+                        let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController
                         if let newViewController = newViewController {
                             nav?.pushViewController(newViewController, animated: true)
                         }

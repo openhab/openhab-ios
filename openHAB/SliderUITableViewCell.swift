@@ -13,11 +13,11 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
         widgetSlider = viewWithTag(400) as? UISlider
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-    
+
     }
 
     override func displayWidget() {

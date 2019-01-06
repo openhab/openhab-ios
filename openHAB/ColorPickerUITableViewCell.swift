@@ -21,20 +21,20 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     required init?(coder: NSCoder) {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(coder: coder)
-        
+
         upButton = viewWithTag(701) as? UICircleButton
         colorButton = viewWithTag(702) as? UICircleButton
         downButton = viewWithTag(703) as? UICircleButton
-        
+
         upButton?.setTitle("▲", for: .normal)
         downButton?.setTitle("▼", for: .normal)
-        
+
         upButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.upButtonPressed), for: .touchUpInside)
         colorButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.colorButtonPressed), for: .touchUpInside)
         downButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-    
+
     }
 
     override func displayWidget() {

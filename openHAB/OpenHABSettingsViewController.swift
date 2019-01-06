@@ -13,7 +13,7 @@ import UIKit
 
 class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelegate, UITextFieldDelegate {
     @IBOutlet var settingsTableView: UITableView!
-    
+
     @IBOutlet weak var demomodeSwitch: UISwitch!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var usernameTextField: UITextField!
@@ -32,9 +32,9 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     override init(style: UITableView.Style) {
         super.init(style: style)
-        
+
         // Custom initialization
-    
+
     }
 
     override func viewDidLoad() {
@@ -94,16 +94,16 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         var ret: Int
         switch section {
-            case 0:
-                if (demomodeSwitch?.isOn)! {
-                    ret = 1
-                } else {
-                    ret = 5
-                }
-            case 1:
-                ret = 6
-            default:
-                ret = 6
+        case 0:
+            if (demomodeSwitch?.isOn)! {
+                ret = 1
+            } else {
+                ret = 5
+            }
+        case 1:
+            ret = 6
+        default:
+            ret = 6
         }
         return ret
     }
@@ -134,7 +134,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         print("OpenHABSettingsViewController prepareForSegue")
-        if (segue.identifier == "showSelectSitemap") {
+        if segue.identifier == "showSelectSitemap" {
             print("OpenHABSettingsViewController showSelectSitemap")
             updateSettings()
             saveSettings()

@@ -22,9 +22,9 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override init(style: UITableView.Style) {
         super.init(style: style)
-        
+
         // Custom initialization
-    
+
     }
 
     override func viewDidLoad() {
@@ -51,12 +51,12 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         super.viewDidAppear(animated)
         let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
         let sitemapsUrl = URL(string: sitemapsUrlString)
-        var sitemapsRequest: NSMutableURLRequest? = nil
+        var sitemapsRequest: NSMutableURLRequest?
         if let sitemapsUrl = sitemapsUrl {
             sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
         }
         sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        var operation: AFHTTPRequestOperation? = nil
+        var operation: AFHTTPRequestOperation?
         if let sitemapsRequest = sitemapsRequest {
             operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
         }
@@ -80,7 +80,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 if let response = response {
                     print("\(String(data: response, encoding: .utf8) ?? "")")
                 }
-                var doc: GDataXMLDocument? = nil
+                var doc: GDataXMLDocument?
                 if let response = response {
                     doc = try? GDataXMLDocument(data: response)
                 }
@@ -115,10 +115,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 //                            self.sitemaps.append(sitemap)
 //                        }
 //                    }
-                if (responseObject is [Any]) {
+                if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable : Any])
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable: Any])
                         if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
                             print("Sitemap \(sitemap?.label)")
                             self.sitemaps.add(sitemap!)
@@ -170,7 +170,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         let imageBase = appData()?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@"
 
         if sitemap?.icon != nil {
-            var iconUrlString: String? = nil
+            var iconUrlString: String?
             if let icon = sitemap?.icon {
                 iconUrlString = String(format: imageBase, openHABRootUrl, icon)
             }

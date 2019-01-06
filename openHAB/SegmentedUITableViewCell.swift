@@ -13,11 +13,11 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
         widgetSegmentedControl = viewWithTag(500) as? UISegmentedControl
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-    
+
     }
 
     override func displayWidget() {
@@ -25,8 +25,8 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentedControl?.apportionsSegmentWidthsByContent = true
         widgetSegmentedControl?.removeAllSegments()
         widgetSegmentedControl?.apportionsSegmentWidthsByContent = true
-        
-        for mapping: OpenHABWidgetMapping? in widget?.mappings as? [OpenHABWidgetMapping?] ?? []  {
+
+        for mapping: OpenHABWidgetMapping? in widget?.mappings as? [OpenHABWidgetMapping?] ?? [] {
             if let mapping = mapping {
                 widgetSegmentedControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.index(of: mapping), animated: false)
             }

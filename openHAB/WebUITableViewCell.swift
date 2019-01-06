@@ -30,7 +30,7 @@ class WebUITableViewCell: GenericUITableViewCell, UIWebViewDelegate {
         let authStr = "\(openHABUsername ?? ""):\(openHABPassword ?? "")"
         let authData: Data? = authStr.data(using: .ascii)
         let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-        var mutableRequest: NSMutableURLRequest? = nil
+        var mutableRequest: NSMutableURLRequest?
         if let url = URL(string: widget.url) {
             mutableRequest = NSMutableURLRequest(url: url)
         }

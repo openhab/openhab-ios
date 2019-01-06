@@ -77,10 +77,10 @@ class OpenHABNotificationsViewController: UITableViewController {
             self.notifications = []
             print("Notifications response")
             // If we are talking to openHAB 1.X, talk XML
-            if response is [Any] {
+            if (response is [Any]) {
                 print("Response is array")
                 for notificationJson: Any? in responseObject as! [Any?] {
-                    let notification = OpenHABNotification(dictionary: notificationJson as! [AnyHashable: Any] as! [String : Any])
+                    let notification = OpenHABNotification(dictionary: notificationJson as! [AnyHashable : Any] as! [String : Any])
                     self.notifications.add(notification)
                 }
             } else {

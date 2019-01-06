@@ -14,11 +14,10 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var widgetSwitch: UISwitch!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
         widgetSwitch = viewWithTag(200) as? UISwitch
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-    
     }
 
     override func displayWidget() {
@@ -33,7 +32,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         } else {
             detailTextLabel?.text = nil
         }
-        if (state == "ON") {
+        if state == "ON" {
             widgetSwitch?.isOn = true
         } else {
             widgetSwitch?.isOn = false

@@ -14,14 +14,14 @@ class DrawerUITableViewCell: UITableViewCell {
 
     @IBOutlet weak var customTextLabel: UILabel!
     @IBOutlet weak var customImageView: UIImageView!
-    
+
     required init?(coder: NSCoder) {
         print("DrawerUITableViewCell initWithCoder")
         super.init(coder: coder)
-        
+
         separatorInset = .zero
         //textLabel = viewWithTag(101) as? UILabel
-    
+
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

@@ -17,9 +17,9 @@ import UIKit
 
     override init(style: UITableView.Style) {
         super.init(style: style)
-        
+
         // Custom initialization
-    
+
     }
 
     override func viewDidLoad() {
@@ -55,7 +55,7 @@ import UIKit
         cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier)
         let mapping = mappings[indexPath.row] as? OpenHABWidgetMapping
         cell.textLabel?.text = mapping?.label
-        if (selectionItem?.state == mapping?.command) {
+        if selectionItem?.state == mapping?.command {
             print("This item is selected")
             cell.accessoryType = .checkmark
         } else {

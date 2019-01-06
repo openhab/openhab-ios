@@ -11,7 +11,7 @@
 import UIKit
 
 class GenericUITableViewCell: UITableViewCell {
-    private var namedColors: [AnyHashable : Any] = [:]
+    private var namedColors: [AnyHashable: Any] = [:]
 
     @objc func displayWidget() {
         textLabel?.text = widget?.labelText()
@@ -30,19 +30,18 @@ class GenericUITableViewCell: UITableViewCell {
             // If accessory is disabled, set detailTextLabel (widget value) constraing 20px to the right for padding to the right side of table view
             if detailTextLabel != nil {
                 let views = ["detailTextLabel": detailTextLabel]
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]-20.0-|", options: [], metrics: nil, views: views as [String : Any])
+                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]-20.0-|", options: [], metrics: nil, views: views as [String: Any])
                 addConstraints(disclosureConstraints)
             }
         } else {
             // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
             if detailTextLabel != nil {
                 let views = ["detailTextLabel": detailTextLabel]
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]|", options: [], metrics: nil, views: views as [String : Any])
+                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]|", options: [], metrics: nil, views: views as [String: Any])
                 addConstraints(disclosureConstraints)
             }
         }
     }
-
 
     private var _widget: OpenHABWidget!
     @objc var widget: OpenHABWidget! {
@@ -51,7 +50,7 @@ class GenericUITableViewCell: UITableViewCell {
         }
         set(widget) {
             _widget = widget
-    
+
             if _widget.linkedPage != nil {
                 accessoryType = .disclosureIndicator
                 selectionStyle = .blue
@@ -61,7 +60,7 @@ class GenericUITableViewCell: UITableViewCell {
                 selectionStyle = .none
                 //        self.userInteractionEnabled = NO;
             }
-    
+
             if _widget.labelcolor != nil {
                 if let color = color(fromHexString: self.widget?.labelcolor) {
                     textLabel?.textColor = color
@@ -84,14 +83,12 @@ class GenericUITableViewCell: UITableViewCell {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
         // MARK - To be changed
         //textLabel = viewWithTag(101) as? UILabel
         //detailTextLabel = viewWithTag(100) as? UILabel
         selectionStyle = .none
         separatorInset = .zero
         namedColors = ["maroon": "#800000", "red": "#ff0000", "orange": "#ffa500", "olive": "#808000", "yellow": "#ffff00", "purple": "#800080", "fuchsia": "#ff00ff", "white": "#ffffff", "lime": "#00ff00", "green": "#008000", "navy": "#000080", "blue": "#0000ff", "teal": "#008080", "aqua": "#00ffff", "black": "#000000", "silver": "#c0c0c0", "gray": "#808080"]
-    
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -129,22 +126,21 @@ class GenericUITableViewCell: UITableViewCell {
 //        scanner.scanHexInt32(&rgbValue)
 //        return UIColor(red: Double(((Int(rgbValue) & 0xff0000) >> 16)) / 255.0, green: Double(((Int(rgbValue) & 0xff00) >> 8)) / 255.0, blue: Double((Int(rgbValue) & 0xff)) / 255.0, alpha: 1.0)
 //    }
-    
-    
+
     func color(fromHexString hexString: String?) -> UIColor? {
-        var cString:String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ??  "x800000"
-        
-        if (cString.hasPrefix("#")) {
+        var cString: String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ??  "x800000"
+
+        if cString.hasPrefix("#") {
             cString.remove(at: cString.startIndex)
         }
-        
+
         if ((cString.count) != 6) {
             return UIColor.gray
         }
-        
-        var rgbValue:UInt32 = 0
+
+        var rgbValue: UInt32 = 0
         Scanner(string: cString).scanHexInt32(&rgbValue)
-        
+
         return UIColor(
             red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,

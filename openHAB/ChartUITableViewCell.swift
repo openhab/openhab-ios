@@ -32,7 +32,7 @@ class ChartUITableViewCell: ImageUITableViewCell {
                 self.widget.image = image
                 self.widgetImage?.frame = self.contentView.frame
                 if self.delegate != nil {
-                    self.delegate?.didLoadImageOf(self) 
+                    self.delegate?.didLoadImageOf(self)
                 }
             })
         } else {

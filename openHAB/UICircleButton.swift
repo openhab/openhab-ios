@@ -27,7 +27,7 @@ class UICircleButton: UIButton {
         addTarget(self, action: #selector(UICircleButton.buttonActionReleased), for: .touchUpInside)
         addTarget(self, action: #selector(UICircleButton.buttonActionTouched), for: .touchDown)
         normalBackgroundColor = backgroundColor
-    
+
     }
 
     @objc func buttonActionReleased() {

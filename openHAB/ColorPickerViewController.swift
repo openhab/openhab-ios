@@ -22,17 +22,17 @@ class ColorPickerViewController: UIViewController {
     override func viewDidLoad() {
         print("ColorPickerViewController viewDidLoad")
         let colorDidChangeBlock: NKOColorPickerDidChangeColorBlock = { color in
-            
+
             var (hue, saturation, brightness, alpha): (CGFloat, CGFloat, CGFloat, CGFloat) = (0.0, 0.0, 0.0, 0.0)
             color?.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
-            
-            hue = hue * 360
-            saturation = saturation * 100
-            brightness = brightness * 100
+
+            hue *= 360
+            saturation *= 100
+            brightness *= 100
             print("Color changed to \(hue) \(saturation) \(brightness)")
             let command = "\(hue),\(saturation),\(brightness)"
             self.widget?.sendCommand(command)
-            
+
         }
         let viewFrame: CGRect = view.frame
         let pickerFrame = CGRect(x: viewFrame.origin.x, y: viewFrame.origin.y + viewFrame.size.height / 10, width: viewFrame.size.width, height: viewFrame.size.height - viewFrame.size.height / 5)

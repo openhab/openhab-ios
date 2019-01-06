@@ -46,13 +46,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         appData()?.openHABRootUrl = openHABRootUrl
         // Checking openHAB version
         let pageToLoadUrl = URL(string: "\(openHABRootUrl)/rest/bindings")
-        var pageRequest: NSMutableURLRequest? = nil
+        var pageRequest: NSMutableURLRequest?
         if let pageToLoadUrl = pageToLoadUrl {
             pageRequest = NSMutableURLRequest(url: pageToLoadUrl)
         }
         pageRequest?.setAuthCredentials(openHABUsername, openHABPassword)
         pageRequest?.timeoutInterval = 10.0
-        var versionPageOperation: AFHTTPRequestOperation? = nil
+        var versionPageOperation: AFHTTPRequestOperation?
         if let pageRequest = pageRequest {
             versionPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
         }
@@ -86,7 +86,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         let commandUrl = URL(string: item?.link ?? "")
-        var commandRequest: NSMutableURLRequest? = nil
+        var commandRequest: NSMutableURLRequest?
         if let commandUrl = commandUrl {
             commandRequest = NSMutableURLRequest(url: commandUrl)
         }
@@ -178,18 +178,18 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if let value = prefs.value(forKey: "remoteUrl") {
                     print("Registering notifications with \(value)")
                 }
-                var registrationUrlString: String? = nil
+                var registrationUrlString: String?
                 if let value = prefs.value(forKey: "remoteUrl") {
                     registrationUrlString = "\(value)/addAppleRegistration?regId=\(deviceToken)&deviceId=\(deviceId)&deviceModel=\(deviceName)"
                 }
                 let registrationUrl = URL(string: (registrationUrlString as NSString?)?.addingPercentEscapes(using: String.Encoding.utf8.rawValue) ?? "")
                 print("Registration URL = \(registrationUrl?.absoluteString ?? "")")
-                var registrationRequest: NSMutableURLRequest? = nil
+                var registrationRequest: NSMutableURLRequest?
                 if let registrationUrl = registrationUrl {
                     registrationRequest = NSMutableURLRequest(url: registrationUrl)
                 }
                 registrationRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-                var registrationOperation: AFHTTPRequestOperation? = nil
+                var registrationOperation: AFHTTPRequestOperation?
                 if let registrationRequest = registrationRequest {
                     registrationOperation = AFHTTPRequestOperation(request: registrationRequest as URLRequest)
                 }
@@ -305,13 +305,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
-        if (widget?.type == "Frame") {
+        if widget?.type == "Frame" {
             if widget?.label.count ?? 0 > 0 {
                 return 35
             } else {
                 return 0
             }
-        } else if (widget?.type == "Video") {
+        } else if widget?.type == "Video" {
             return widgetTableView.frame.size.width * 0.75
         } else if (widget?.type == "Image") || (widget?.type == "Chart") {
             if widget?.image != nil {
@@ -320,7 +320,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return 44
             }
         } else if (widget?.type == "Webview") || (widget?.type == "Mapview") {
-            if let height = widget?.height  {
+            if let height = widget?.height {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
                 print("Webview/Mapview height would be \(heightValue)")
@@ -336,9 +336,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
         var cellIdentifier = "GenericWidgetCell"
-        if (widget?.type == "Frame") {
+        if widget?.type == "Frame" {
             cellIdentifier = "FrameWidgetCell"
-        } else if (widget?.type == "Switch") {
+        } else if widget?.type == "Switch" {
             if widget?.mappings.count ?? 0 > 0 {
                 cellIdentifier = "SegmentedWidgetCell"
                 //RollershutterItem changed to Rollershutter in later builds of OH2
@@ -347,23 +347,23 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             } else {
                 cellIdentifier = "SwitchWidgetCell"
             }
-        } else if (widget?.type == "Setpoint") {
+        } else if widget?.type == "Setpoint" {
             cellIdentifier = "SetpointWidgetCell"
-        } else if (widget?.type == "Slider") {
+        } else if widget?.type == "Slider" {
             cellIdentifier = "SliderWidgetCell"
-        } else if (widget?.type == "Selection") {
+        } else if widget?.type == "Selection" {
             cellIdentifier = "SelectionWidgetCell"
-        } else if (widget?.type == "Colorpicker") {
+        } else if widget?.type == "Colorpicker" {
             cellIdentifier = "ColorPickerWidgetCell"
-        } else if (widget?.type == "Chart") {
+        } else if widget?.type == "Chart" {
             cellIdentifier = "ChartWidgetCell"
-        } else if (widget?.type == "Image") {
+        } else if widget?.type == "Image" {
             cellIdentifier = "ImageWidgetCell"
-        } else if (widget?.type == "Video") {
+        } else if widget?.type == "Video" {
             cellIdentifier = "VideoWidgetCell"
-        } else if (widget?.type == "Webview") {
+        } else if widget?.type == "Webview" {
             cellIdentifier = "WebWidgetCell"
-        } else if (widget?.type == "Mapview") {
+        } else if widget?.type == "Mapview" {
             cellIdentifier = OpenHABViewControllerMapViewCellReuseIdentifier
         }
 
@@ -372,7 +372,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if widget?.icon != nil && !((cellIdentifier == "ChartWidgetCell") || (cellIdentifier == "ImageWidgetCell") || (cellIdentifier == "VideoWidgetCell") || (cellIdentifier == "FrameWidgetCell") || (cellIdentifier == "WebWidgetCell")) {
 
             var components = URLComponents(string: openHABRootUrl)
-            
+
             if appData()?.openHABVersion == 2 {
                 if let icon = widget?.icon {
                     components?.path = "icon/\(icon)"
@@ -397,17 +397,17 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
             cell?.imageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
         }
-        if (cellIdentifier == "ColorPickerWidgetCell") {
+        if cellIdentifier == "ColorPickerWidgetCell" {
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         }
-        if (cellIdentifier == "ChartWidgetCell") {
+        if cellIdentifier == "ChartWidgetCell" {
             print("Setting cell base url to \(openHABRootUrl)")
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         }
         if (cellIdentifier == "ChartWidgetCell") || (cellIdentifier == "ImageWidgetCell") {
             (cell as? ImageUITableViewCell)?.delegate = self
         }
-        if (cellIdentifier == "FrameWidgetCell") {
+        if cellIdentifier == "FrameWidgetCell" {
             cell?.backgroundColor = UIColor.groupTableViewBackground
         } else {
             cell?.backgroundColor = UIColor.white
@@ -451,7 +451,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             if let newViewController = newViewController {
                 navigationController?.pushViewController(newViewController, animated: true)
             }
-        } else if (widget?.type == "Selection") {
+        } else if widget?.type == "Selection" {
             print("Selected selection widget")
             selectedWidgetRow = indexPath.row
             let selectionViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController
@@ -469,7 +469,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func didLoadImageOf(_ cell: ImageUITableViewCell?) {
-        var indexPath: IndexPath? = nil
+        var indexPath: IndexPath?
         if let cell = cell {
             indexPath = widgetTableView.indexPath(for: cell)
         }
@@ -563,7 +563,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             pageNetworkStatusChanged()
         }
         let pageToLoadUrl = URL(string: pageUrl)
-        var pageRequest: NSMutableURLRequest? = nil
+        var pageRequest: NSMutableURLRequest?
         if let pageToLoadUrl = pageToLoadUrl {
             pageRequest = NSMutableURLRequest(url: pageToLoadUrl)
         }
@@ -623,7 +623,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             let response = responseObject as? Data
             // If we are talking to openHAB 1.X, talk XML
             if self.appData()?.openHABVersion == 1 {
-                var doc: GDataXMLDocument? = nil
+                var doc: GDataXMLDocument?
                 if let response = response {
                     doc = try? GDataXMLDocument(data: response)
                 }
@@ -685,13 +685,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func selectSitemap() {
         let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
         let sitemapsUrl = URL(string: sitemapsUrlString)
-        var sitemapsRequest: NSMutableURLRequest? = nil
+        var sitemapsRequest: NSMutableURLRequest?
         if let sitemapsUrl = sitemapsUrl {
             sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
         }
         sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
         sitemapsRequest?.timeoutInterval = 10.0
-        var operation: AFHTTPRequestOperation? = nil
+        var operation: AFHTTPRequestOperation?
         if let sitemapsRequest = sitemapsRequest {
             operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
         }
@@ -709,7 +709,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
             let response = responseObject as? Data
-            var error: Error?
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             self.sitemaps = []
             // If we are talking to openHAB 1.X, talk XML
@@ -717,7 +716,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if let response = response {
                     print("\(String(data: response, encoding: .utf8) ?? "")")
                 }
-                var doc: GDataXMLDocument? = nil
+                var doc: GDataXMLDocument?
                 if let response = response {
                     doc = try? GDataXMLDocument(data: response)
                 }
@@ -737,10 +736,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 // Newer versions speak JSON!
             } else {
-                if (responseObject is [Any]) {
+                if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable : Any])
+                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable: Any])
                         self.sitemaps.add(sitemap!)
                     }
                 } else {
@@ -750,7 +749,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.appData()?.sitemaps = self.sitemaps
             if self.sitemaps.count > 0 {
                 if self.sitemaps.count > 1 {
-                    if self.defaultSitemap != nil {
+                    if self.defaultSitemap != "" {
                         let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
                         if sitemapToOpen != nil {
                             self.pageUrl = sitemapToOpen?.homepageLink ?? ""
@@ -809,7 +808,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // Find and return sitemap by it's name if any
     func sitemap(byName sitemapName: String?) -> OpenHABSitemap? {
         for sitemap: OpenHABSitemap in sitemaps as? [OpenHABSitemap] ?? [] {
-            if (sitemap.name == sitemapName) {
+            if sitemap.name == sitemapName {
                 return sitemap
             }
         }

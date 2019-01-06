@@ -9,7 +9,7 @@
 //
 
 extension String {
-    
+
     var floatValue: Float {
         if let asNumber = NumberFormatter().number(from: self) {
             return asNumber.floatValue
@@ -17,7 +17,7 @@ extension String {
             return 0.0 // MARK - Change this horror
         }
     }
-    
+
     var intValue: Int {
         if let asNumber = NumberFormatter().number(from: self) {
             return asNumber.intValue
@@ -29,7 +29,7 @@ extension String {
 
 class SetpointUITableViewCell: GenericUITableViewCell {
     var widgetSegmentedControl: UISegmentedControl?
-    
+
     private var isIntStep: Bool {
         return widget.step.floatValue.truncatingRemainder(dividingBy: 1) == 0
     }
@@ -40,11 +40,11 @@ class SetpointUITableViewCell: GenericUITableViewCell {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+
         widgetSegmentedControl = viewWithTag(300) as? UISegmentedControl
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-    
+
     }
 
     override func displayWidget() {
