@@ -572,25 +572,25 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if appData()?.openHABVersion == 1 {
             pageRequest?.setValue("application/xml", forHTTPHeaderField: "Accept")
         }
-        pageRequest?.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
-        if longPolling {
-            print("long polling, so setting atmosphere transport")
-            pageRequest?.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
-            pageRequest?.timeoutInterval = 300.0
-        } else {
-            atmosphereTrackingId = ""
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            pageRequest?.timeoutInterval = 10.0
-        }
-        if atmosphereTrackingId == "" {
-            pageRequest?.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
-        } else {
-            pageRequest?.setValue("0", forHTTPHeaderField: "X-Atmosphere-tracking-id")
-        }
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
+//        pageRequest?.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
+//        if longPolling {
+//            print("long polling, so setting atmosphere transport")
+//            pageRequest?.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
+//            pageRequest?.timeoutInterval = 300.0
+//        } else {
+//            atmosphereTrackingId = ""
+//            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+//            pageRequest?.timeoutInterval = 10.0
+//        }
+//        if atmosphereTrackingId == "" {
+//            pageRequest?.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
+//        } else {
+//            pageRequest?.setValue("0", forHTTPHeaderField: "X-Atmosphere-tracking-id")
+//        }
+//        if currentPageOperation != nil {
+//            currentPageOperation?.cancel()
+//            currentPageOperation = nil
+//        }
         if let pageRequest = pageRequest {
             currentPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
         }
