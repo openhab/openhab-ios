@@ -215,16 +215,16 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         super.viewDidAppear(animated)
         // Load settings into local properties
         loadSettings()
-        // Set authentication parameters to SDImage
+        // Set authentication parameters to SDImag
         setSDImageAuth()
         // Set default controller for TSMessage to self
-        //TSMessage.defaultViewController() = navigationController
+        TSMessage.setDefaultViewController(navigationController)
         // Disable idle timeout if configured in settings
         if idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
         }
         doRegisterAps()
-        // if pageUrl = nil it means we are the first opened OpenHABViewController
+        // if pageUrl == "" it means we are the first opened OpenHABViewController
         if pageUrl == "" {
             // Set self as root view controller
             appData()?.rootViewController = self
