@@ -32,6 +32,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("OpenHABDrawerTableViewController viewWillAppear")
+
+//        var components = URLComponents(string: openHABRootUrl)
+//        components?.path = "rest/sitemaps"
+//        print ("Sitemap URL = \(components?.debugDescription ?? "")")
+//        let sitemapsUrl = components?.url
+
         let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
         print("Sitemap URL = \(sitemapsUrlString)")
         let sitemapsUrl = URL(string: sitemapsUrlString)
@@ -183,7 +189,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
 
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
-                cell?.textLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
+                cell?.customTextLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
 
                 var components = URLComponents(string: openHABRootUrl)
 
@@ -267,15 +273,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         mm_drawerController.closeDrawer(animated: true, completion: nil)
     }
 
-    /*
-    #pragma mark - Navigation
-    
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
     func loadSettings() {
         let prefs = UserDefaults.standard
         openHABUsername = prefs.value(forKey: "username") as? String ?? ""
@@ -289,5 +286,3 @@ class OpenHABDrawerTableViewController: UITableViewController {
         return theDelegate??.appData()
     }
 }
-
-//#import "OpenHABSettingsViewController.h"
