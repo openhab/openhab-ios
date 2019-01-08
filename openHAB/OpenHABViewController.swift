@@ -374,10 +374,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             var components = URLComponents(string: openHABRootUrl)
 
             if appData()?.openHABVersion == 2 {
-                if let icon = widget?.icon {
+                if let icon = widget?.icon, let item = widget?.item, let state = item.state {
                     components?.path = "icon/\(icon)"
                     components?.queryItems = [
-                        URLQueryItem(name: "state", value: widget?.item.state)
+                        URLQueryItem(name: "state", value: state )
                     ]
                 }
             } else {
@@ -385,9 +385,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     components?.path = "images/\(icon).png"
                 }
             }
+//            var iconUrlString : String
 //            if appData()?.openHABVersion == 2 {
 //                if let icon = widget?.icon {
-//                    iconUrlString = "\(openHABRootUrl)/icon/\(icon)?state=\(widget?.item.state.addingPercentEscapes(using: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) ?? "")"
+//                    iconUrlString = "\(openHABRootUrl)/icon/\(icon)?state=\(widget?.item.state.addingPercentEscapes(using: .urlHostAllowed))"
+//                    //using: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) ?? "")"
 //                }
 //            } else {
 //                if let icon = widget?.icon {
@@ -643,7 +645,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 // Newer versions talk JSON!
             } else {
-                self.currentPage = responseObject as? OpenHABSitemapPage
+                self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [AnyHashable : Any] )
             }
             strongSelf.currentPage?.delegate = strongSelf
             strongSelf.widgetTableView.reloadData()
