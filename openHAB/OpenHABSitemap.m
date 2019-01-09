@@ -32,7 +32,7 @@
     return self;
 }
 
-- (OpenHABSitemap *) initWithDictionaty:(NSDictionary *)dictionary
+- (OpenHABSitemap *) initWithDictionary:(NSDictionary *)dictionary
 {
     self = [super init];
     NSArray *keyArray =  [dictionary allKeys];

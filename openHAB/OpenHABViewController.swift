@@ -742,7 +742,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable: Any])
+                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as? [AnyHashable: Any])
                         self.sitemaps.add(sitemap!)
                     }
                 } else {

@@ -97,7 +97,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionaty: sitemapJson as? [AnyHashable: Any])
+                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as? [AnyHashable: Any])
                         if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
                             print("Sitemap \(sitemap?.label)")
                             self.sitemaps.add(sitemap)
