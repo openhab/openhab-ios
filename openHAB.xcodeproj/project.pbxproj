@@ -21,6 +21,8 @@
 		DAA42BAE21DC987C00244B2A /* ImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAD21DC987C00244B2A /* ImageUITableViewCell.swift */; };
 		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
+		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
+		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
 		DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */; };
 		DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */; };
@@ -114,6 +116,8 @@
 		DAA42BAD21DC987C00244B2A /* ImageUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSelectionTableViewControllerDelegate.swift; sourceTree = "<group>"; };
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
+		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
+		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_207_remove_2@2x.png"; sourceTree = "<group>"; };
 		DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_212_down_arrow@2x.png"; sourceTree = "<group>"; };
@@ -299,6 +303,7 @@
 		DF4B84101886DA9900F34902 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
+				DAEAA89C21E6B06300267EA3 /* ReusableView.swift */,
 				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */,
 				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.swift */,
 				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */,
@@ -315,6 +320,7 @@
 				DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */,
 				DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */,
 				DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */,
+				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -700,6 +706,7 @@
 				DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.swift in Sources */,
 				DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */,
 				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */,
+				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */,
 				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */,
 				DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */,
@@ -710,6 +717,7 @@
 				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
+				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,

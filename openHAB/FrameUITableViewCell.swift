@@ -21,6 +21,14 @@ class FrameUITableViewCell: GenericUITableViewCell {
 
     }
 
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        selectionStyle = UITableViewCell.SelectionStyle.none
+        separatorInset = UIEdgeInsets.zero
+
+    }
+
     override func displayWidget() {
         textLabel?.text = widget.label.uppercased()
         contentView.sizeToFit()

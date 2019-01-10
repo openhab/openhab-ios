@@ -22,6 +22,16 @@ class MapViewTableViewCell: GenericUITableViewCell {
 
     }
 
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        mapView = MKMapView(frame: CGRect.zero)
+        mapView.layer.cornerRadius = 4.0
+        mapView.layer.masksToBounds = true
+        contentView.addSubview(mapView)
+    }
+
+
     override func layoutSubviews() {
         super.layoutSubviews()
 

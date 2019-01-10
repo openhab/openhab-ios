@@ -133,6 +133,14 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
 
+        widgetTableView.register(FrameUITableViewCell.self)
+        widgetTableView.register(SwitchUITableViewCell.self)
+        widgetTableView.register(SegmentedUITableViewCell.self)
+        widgetTableView.register(RollershutterUITableViewCell.self)
+        widgetTableView.register(SliderUITableViewCell.self)
+        widgetTableView.register(GenericUITableViewCell.self)
+        widgetTableView.register(MapViewTableViewCell.self)
+
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
         //    self.refreshControl.tintColor = [UIColor whiteColor];
@@ -335,42 +343,42 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+        let cell: GenericUITableViewCell
+
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
-        var cellIdentifier = "GenericWidgetCell"
-        if widget?.type == "Frame" {
-            cellIdentifier = "FrameWidgetCell"
-        } else if widget?.type == "Switch" {
+
+        switch widget?.type {
+        case "Frame":
+            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
+        case "Switch":
             if widget?.mappings.count ?? 0 > 0 {
-                cellIdentifier = "SegmentedWidgetCell"
+                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 //RollershutterItem changed to Rollershutter in later builds of OH2
             } else if (widget?.item.type == "RollershutterItem") || (widget?.item.type == "Rollershutter") || ((widget?.item.type == "Group") && (widget?.item.groupType == "Rollershutter")) {
-                cellIdentifier = "RollershutterWidgetCell"
+                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
             } else {
-                cellIdentifier = "SwitchWidgetCell"
+                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
-        } else if widget?.type == "Setpoint" {
-            cellIdentifier = "SetpointWidgetCell"
-        } else if widget?.type == "Slider" {
-            cellIdentifier = "SliderWidgetCell"
-        } else if widget?.type == "Selection" {
-            cellIdentifier = "SelectionWidgetCell"
-        } else if widget?.type == "Colorpicker" {
-            cellIdentifier = "ColorPickerWidgetCell"
-        } else if widget?.type == "Chart" {
-            cellIdentifier = "ChartWidgetCell"
-        } else if widget?.type == "Image" {
-            cellIdentifier = "ImageWidgetCell"
-        } else if widget?.type == "Video" {
-            cellIdentifier = "VideoWidgetCell"
-        } else if widget?.type == "Webview" {
-            cellIdentifier = "WebWidgetCell"
-        } else if widget?.type == "Mapview" {
-            cellIdentifier = OpenHABViewControllerMapViewCellReuseIdentifier
+        case "Setpoint": cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
+        case "Slider": cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+        case "Selection": cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
+        case "Colorpicker":
+            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
+            (cell as? ColorPickerUITableViewCell)?.delegate = self
+        case "Chart":
+            cell = tableView.dequeueReusableCell(for: indexPath) as ChartUITableViewCell
+            print("Setting cell base url to \(openHABRootUrl)")
+            (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
+        case "Image": cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
+        case "Video": cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
+        case "Webview": cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
+        case "Mapview": cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
+        default: cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as? GenericUITableViewCell
         // No icon is needed for image, video, frame and web widgets
-        if widget?.icon != nil && !((cellIdentifier == "ChartWidgetCell") || (cellIdentifier == "ImageWidgetCell") || (cellIdentifier == "VideoWidgetCell") || (cellIdentifier == "FrameWidgetCell") || (cellIdentifier == "WebWidgetCell")) {
+        if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
             var components = URLComponents(string: openHABRootUrl)
 
@@ -386,47 +394,27 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     components?.path = "images/\(icon).png"
                 }
             }
-//            var iconUrlString : String
-//            if appData()?.openHABVersion == 2 {
-//                if let icon = widget?.icon {
-//                    iconUrlString = "\(openHABRootUrl)/icon/\(icon)?state=\(widget?.item.state.addingPercentEscapes(using: .urlHostAllowed))"
-//                    //using: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) ?? "")"
-//                }
-//            } else {
-//                if let icon = widget?.icon {
-//                    iconUrlString = "\(openHABRootUrl)/images/\(icon).png"
-//                }
-//            }
 
-            cell?.imageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            cell.imageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
         }
-        if cellIdentifier == "ColorPickerWidgetCell" {
-            (cell as? ColorPickerUITableViewCell)?.delegate = self
-        }
-        if cellIdentifier == "ChartWidgetCell" {
-            print("Setting cell base url to \(openHABRootUrl)")
-            (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
-        }
-        if (cellIdentifier == "ChartWidgetCell") || (cellIdentifier == "ImageWidgetCell") {
-            (cell as? ImageUITableViewCell)?.delegate = self
-        }
-        if cellIdentifier == "FrameWidgetCell" {
-            cell?.backgroundColor = UIColor.groupTableViewBackground
+
+        if cell is FrameUITableViewCell {
+            cell.backgroundColor = UIColor.groupTableViewBackground
         } else {
-            cell?.backgroundColor = UIColor.white
+            cell.backgroundColor = UIColor.white
         }
-        cell?.widget = widget
-        cell?.displayWidget()
+        cell.widget = widget
+        cell.displayWidget()
         // Check if this is not the last row in the widgets list
         if indexPath.row < currentPage?.widgets.count ?? 0 - 1 {
             let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1] as? OpenHABWidget
             if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
-                cell?.separatorInset = UIEdgeInsets.zero
+                cell.separatorInset = UIEdgeInsets.zero
             } else if !(widget?.type == "Frame") {
-                cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+                cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
             }
         }
-        return cell!
+        return cell
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

@@ -91,6 +91,15 @@ class GenericUITableViewCell: UITableViewCell {
         namedColors = ["maroon": "#800000", "red": "#ff0000", "orange": "#ffa500", "olive": "#808000", "yellow": "#ffff00", "purple": "#800080", "fuchsia": "#ff00ff", "white": "#ffffff", "lime": "#00ff00", "green": "#008000", "navy": "#000080", "blue": "#0000ff", "teal": "#008080", "aqua": "#00ffff", "black": "#000000", "silver": "#c0c0c0", "gray": "#808080"]
     }
 
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        selectionStyle = .none
+        separatorInset = .zero
+        namedColors = ["maroon": "#800000", "red": "#ff0000", "orange": "#ffa500", "olive": "#808000", "yellow": "#ffff00", "purple": "#800080", "fuchsia": "#ff00ff", "white": "#ffffff", "lime": "#00ff00", "green": "#008000", "navy": "#000080", "blue": "#0000ff", "teal": "#008080", "aqua": "#00ffff", "black": "#000000", "silver": "#c0c0c0", "gray": "#808080"]
+
+    }
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
@@ -147,6 +156,10 @@ class GenericUITableViewCell: UITableViewCell {
             blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
             alpha: CGFloat(1.0)
         )
+    }
+
+    static var identifier: String {
+        return String(describing: self)
     }
 
 }

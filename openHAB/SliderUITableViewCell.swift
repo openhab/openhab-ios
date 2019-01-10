@@ -20,6 +20,14 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     }
 
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        widgetSlider = viewWithTag(400) as? UISlider
+        selectionStyle = UITableViewCell.SelectionStyle.none
+        separatorInset = UIEdgeInsets.zero
+    }
+
     override func displayWidget() {
         textLabel?.text = widget.labelText()
         let widgetValue = widget.item.stateAsFloat()

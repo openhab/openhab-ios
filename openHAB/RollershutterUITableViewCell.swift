@@ -35,6 +35,26 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
 
     }
 
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        print("RollershutterUITableViewCell initWithCoder")
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        upButton = viewWithTag(601) as? UIButton
+        stopButton = viewWithTag(602) as? UIButton
+        downButton = viewWithTag(603) as? UIButton
+
+        upButton?.setTitle("▲", for: .normal)
+        stopButton?.setTitle("■", for: .normal)
+        downButton?.setTitle("▼", for: .normal)
+
+        upButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.upButtonPressed), for: .touchUpInside)
+        stopButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.stopButtonPressed), for: .touchUpInside)
+        downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
+        selectionStyle = UITableViewCell.SelectionStyle.none
+        separatorInset = UIEdgeInsets.zero
+        
+    }
+
     @objc func upButtonPressed() {
         print("up button pressed")
         widget.sendCommand("UP")

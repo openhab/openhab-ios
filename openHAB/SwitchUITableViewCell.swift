@@ -11,6 +11,7 @@
 class SwitchUITableViewCell: GenericUITableViewCell {
     //var widgetSwitch: UISwitch?
 
+    @IBOutlet weak var customTextLabel: UILabel!
     @IBOutlet weak var widgetSwitch: UISwitch!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -20,8 +21,15 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         separatorInset = UIEdgeInsets.zero
     }
 
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        selectionStyle = UITableViewCell.SelectionStyle.none
+        separatorInset = UIEdgeInsets.zero
+    }
+
     override func displayWidget() {
-        textLabel?.text = widget.labelText()
+        customTextLabel?.text = widget.labelText()
         var state = widget.state
         //if state is nil or empty using the item state ( OH 1.x compatability )
         if state?.count == 0 {

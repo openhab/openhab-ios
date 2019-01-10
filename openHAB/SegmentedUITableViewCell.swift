@@ -20,6 +20,15 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
 
     }
 
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        widgetSegmentedControl = viewWithTag(500) as? UISegmentedControl
+        selectionStyle = UITableViewCell.SelectionStyle.none
+        separatorInset = UIEdgeInsets.zero
+        
+    }
+
     override func displayWidget() {
         textLabel?.text = widget.labelText()
         widgetSegmentedControl?.apportionsSegmentWidthsByContent = true
