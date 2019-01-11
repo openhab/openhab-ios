@@ -18,8 +18,8 @@ extension UITableView {
         return cell
     }
 
-    func register<T: UITableViewCell>(_: T.Type) {
-        register(T.self, forCellReuseIdentifier: T.reuseIdentifier)
+    final func register<T: UITableViewCell>(cellType: T.Type) {
+        self.register(cellType.self, forCellReuseIdentifier: cellType.reuseIdentifier)
     }
 
 }

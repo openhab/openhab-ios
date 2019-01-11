@@ -133,13 +133,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
 
-        widgetTableView.register(FrameUITableViewCell.self)
-        widgetTableView.register(SwitchUITableViewCell.self)
-        widgetTableView.register(SegmentedUITableViewCell.self)
-        widgetTableView.register(RollershutterUITableViewCell.self)
-        widgetTableView.register(SliderUITableViewCell.self)
-        widgetTableView.register(GenericUITableViewCell.self)
-        widgetTableView.register(MapViewTableViewCell.self)
+        //widgetTableView.register(SwitchUITableViewCell.self, forCellReuseIdentifier: "SwitchWidgetCell")
+        widgetTableView.register(cellType: FrameUITableViewCell.self)
+        widgetTableView.register(cellType: SwitchUITableViewCell.self)
+        widgetTableView.register(cellType: SegmentedUITableViewCell.self)
+        widgetTableView.register(cellType: RollershutterUITableViewCell.self)
+        widgetTableView.register(cellType: SliderUITableViewCell.self)
+        widgetTableView.register(cellType: GenericUITableViewCell.self)
+        widgetTableView.register(cellType:
+            MapViewTableViewCell.self)
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -385,9 +387,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             if appData()?.openHABVersion == 2 {
                 if let icon = widget?.icon, let item = widget?.item, let state = item.state {
                     components?.path = "icon/\(icon)"
-                    components?.queryItems = [
-                        URLQueryItem(name: "state", value: state )
-                    ]
+//                    components?.queryItems = [
+//                        URLQueryItem(name: "state", value: state )
+//                    ]
                 }
             } else {
                 if let icon = widget?.icon {
@@ -395,7 +397,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
 
-            cell.imageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            let urlc = components?.url ?? URL(string: "")
+            cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            cell.imageView?.image = UIImage(named: "icon-76x76.png")
+           // cell.imageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "icon-76x76.png", options: [])
+
         }
 
         if cell is FrameUITableViewCell {
