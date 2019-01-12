@@ -14,30 +14,34 @@ class GenericUITableViewCell: UITableViewCell {
     private var namedColors: [AnyHashable: Any] = [:]
 
     @objc func displayWidget() {
-        textLabel?.text = widget?.labelText()
+        customTextLabel?.text = widget?.labelText()
         if widget?.labelValue() != nil {
-            detailTextLabel?.text = widget?.labelValue()
+            customDetailTextLabel?.text = widget?.labelValue()
         } else {
-            detailTextLabel?.text = nil
+            customDetailTextLabel?.text = nil
         }
-        detailTextLabel?.sizeToFit()
+        customDetailTextLabel?.sizeToFit()
         // Clean any detailTextLabel constraints we set before, or they will start to interfere with new ones because of UITableViewCell caching
         if !disclosureConstraints.isEmpty {
             removeConstraints(disclosureConstraints)
             disclosureConstraints = []
         }
         if accessoryType == .none {
-            // If accessory is disabled, set detailTextLabel (widget value) constraing 20px to the right for padding to the right side of table view
-            if detailTextLabel != nil {
-                let views = ["detailTextLabel": detailTextLabel]
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]-20.0-|", options: [], metrics: nil, views: views as [String: Any])
+            // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
+            if customDetailTextLabel != nil {
+                let views = ["customDetailTextLabel": customDetailTextLabel]
+                let formatString = "[customDetailTextLabel]-20.0-|"
+
+                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String: Any])
                 addConstraints(disclosureConstraints)
             }
         } else {
             // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-            if detailTextLabel != nil {
-                let views = ["detailTextLabel": detailTextLabel]
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: "[detailTextLabel]|", options: [], metrics: nil, views: views as [String: Any])
+            if customDetailTextLabel != nil {
+                let views = ["customDetailTextLabel": customDetailTextLabel]
+                let formatString = "[customDetailTextLabel]|"
+
+                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String : Any])
                 addConstraints(disclosureConstraints)
             }
         }
@@ -63,29 +67,29 @@ class GenericUITableViewCell: UITableViewCell {
 
             if _widget.labelcolor != nil {
                 if let color = color(fromHexString: self.widget?.labelcolor) {
-                    textLabel?.textColor = color
+                    customTextLabel?.textColor = color
                 }
             } else {
-                textLabel?.textColor = UIColor.black
+                customTextLabel?.textColor = UIColor.black
             }
             if _widget.valuecolor != nil {
                 if let color = color(fromHexString: self.widget?.valuecolor) {
-                    detailTextLabel?.textColor = color
+                    customDetailTextLabel?.textColor = color
                 }
             } else {
-                detailTextLabel?.textColor = UIColor.lightGray
+                customDetailTextLabel?.textColor = UIColor.lightGray
             }
         }
     }
-//    var textLabel: UILabel?
-//    var detailTextLabel: UILabel?
+
+    @IBOutlet weak var customTextLabel: UILabel!
+    @IBOutlet weak var customDetailTextLabel: UILabel!
+
     var disclosureConstraints: [NSLayoutConstraint] = []
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        // MARK - To be changed
-        //textLabel = viewWithTag(101) as? UILabel
-        //detailTextLabel = viewWithTag(100) as? UILabel
+
         selectionStyle = .none
         separatorInset = .zero
         namedColors = ["maroon": "#800000", "red": "#ff0000", "orange": "#ffa500", "olive": "#808000", "yellow": "#ffff00", "purple": "#800080", "fuchsia": "#ff00ff", "white": "#ffffff", "lime": "#00ff00", "green": "#008000", "navy": "#000080", "blue": "#0000ff", "teal": "#008080", "aqua": "#00ffff", "black": "#000000", "silver": "#c0c0c0", "gray": "#808080"]
@@ -119,22 +123,6 @@ class GenericUITableViewCell: UITableViewCell {
     func namedColor(toHexString namedColor: String?) -> String? {
         return namedColors[namedColor?.lowercased() ?? ""] as? String
     }
-
-//    func color(fromHexString hexString: String?) -> UIColor? {
-//        var colorString = hexString
-//        if !(hexString?.hasPrefix("#") ?? false) {
-//            let namedColor = self.namedColor(toHexString: hexString)
-//            if namedColor != nil {
-//                colorString = namedColor
-//            }
-//        }
-//
-//        var rgbValue: UInt = 0
-//        let scanner = Scanner(string: colorString ?? "")
-//        scanner.scanLocation = 1 // bypass '#' character
-//        scanner.scanHexInt32(&rgbValue)
-//        return UIColor(red: Double(((Int(rgbValue) & 0xff0000) >> 16)) / 255.0, green: Double(((Int(rgbValue) & 0xff00) >> 8)) / 255.0, blue: Double((Int(rgbValue) & 0xff)) / 255.0, alpha: 1.0)
-//    }
 
     func color(fromHexString hexString: String?) -> UIColor? {
         var cString: String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ??  "x800000"

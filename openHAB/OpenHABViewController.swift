@@ -140,8 +140,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         widgetTableView.register(cellType: RollershutterUITableViewCell.self)
         widgetTableView.register(cellType: SliderUITableViewCell.self)
         widgetTableView.register(cellType: GenericUITableViewCell.self)
-        widgetTableView.register(cellType:
-            MapViewTableViewCell.self)
+        widgetTableView.register(cellType: MapViewTableViewCell.self)
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -308,7 +307,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if currentPage != nil {
             // MARK : - 1 only to avoid Range problem.  Change
-            return (currentPage?.widgets.count ?? 1) - 1
+            //return (currentPage?.widgets.count ?? 1) - 1
+            return currentPage?.widgets.count ?? 0
+
         } else {
             return 0
         }
@@ -352,31 +353,53 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         switch widget?.type {
         case "Frame":
-            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
+            //cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "FrameWidgetCell") as? FrameUITableViewCell)!
         case "Switch":
             if widget?.mappings.count ?? 0 > 0 {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 //RollershutterItem changed to Rollershutter in later builds of OH2
             } else if (widget?.item.type == "RollershutterItem") || (widget?.item.type == "Rollershutter") || ((widget?.item.type == "Group") && (widget?.item.groupType == "Rollershutter")) {
-                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+                //cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+                cell = (tableView.dequeueReusableCell(withIdentifier: "RollershutterWidgetCell") as? RollershutterUITableViewCell)!
             } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
+                //cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
+                cell = (tableView.dequeueReusableCell(withIdentifier: "SwitchWidgetCell") as? SwitchUITableViewCell)!
             }
-        case "Setpoint": cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
-        case "Slider": cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
-        case "Selection": cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
+        case "Setpoint":
+            // cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "SetpointWidgetCell") as? SetpointUITableViewCell)!
+        case "Slider":
+            //cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "SliderWidgetCell") as? SliderUITableViewCell)!
+        case "Selection":
+            // cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "SelectionWidgetCell") as? SelectionUITableViewCell)!
         case "Colorpicker":
-            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
+            // cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "ColorPickerWidgetCell") as? ColorPickerUITableViewCell)!
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case "Chart":
-            cell = tableView.dequeueReusableCell(for: indexPath) as ChartUITableViewCell
+            //cell = tableView.dequeueReusableCell(for: indexPath) as ChartUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "ChartWidgetCell") as? ChartUITableViewCell)!
             print("Setting cell base url to \(openHABRootUrl)")
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
-        case "Image": cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
-        case "Video": cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
-        case "Webview": cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
-        case "Mapview": cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
-        default: cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+        case "Image":
+            // cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "ChartUIWidgetCell") as? ImageUITableViewCell)!
+        case "Video":
+            // cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "VideoWidgetCell") as? VideoUITableViewCell)!
+        case "Webview":
+            // cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "WebviewWidgetCell") as? WebUITableViewCell)!
+        case "Mapview":
+            // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "MapviewWidgetCell") as? MapViewTableViewCell)!
+        default:
+            //cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+            cell = (tableView.dequeueReusableCell(withIdentifier: "GenericWidgetCell") as? GenericUITableViewCell)!
+
         }
 
         // No icon is needed for image, video, frame and web widgets
@@ -386,21 +409,19 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
             if appData()?.openHABVersion == 2 {
                 if let icon = widget?.icon, let item = widget?.item, let state = item.state {
-                    components?.path = "icon/\(icon)"
-//                    components?.queryItems = [
-//                        URLQueryItem(name: "state", value: state )
-//                    ]
+                    components?.path = "/icon/\(icon)"
+                    components?.queryItems = [
+                        URLQueryItem(name: "state", value: state )
+                    ]
                 }
             } else {
                 if let icon = widget?.icon {
-                    components?.path = "images/\(icon).png"
+                    components?.path = "/images/\(icon).png"
                 }
             }
 
             let urlc = components?.url ?? URL(string: "")
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
-            cell.imageView?.image = UIImage(named: "icon-76x76.png")
-           // cell.imageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "icon-76x76.png", options: [])
 
         }
 
@@ -412,7 +433,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         cell.widget = widget
         cell.displayWidget()
         // Check if this is not the last row in the widgets list
-        if indexPath.row < currentPage?.widgets.count ?? 0 - 1 {
+        if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
+
             let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1] as? OpenHABWidget
             if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
                 cell.separatorInset = UIEdgeInsets.zero

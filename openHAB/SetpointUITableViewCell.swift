@@ -28,7 +28,7 @@ extension String {
 }
 
 class SetpointUITableViewCell: GenericUITableViewCell {
-    var widgetSegmentedControl: UISegmentedControl?
+    @IBOutlet weak var widgetSegmentControl: UISegmentedControl!
 
     private var isIntStep: Bool {
         return widget.step.floatValue.truncatingRemainder(dividingBy: 1) == 0
@@ -41,14 +41,13 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
-        widgetSegmentedControl = viewWithTag(300) as? UISegmentedControl
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
 
     }
 
     override func displayWidget() {
-        textLabel?.text = widget.labelText()
+        customTextLabel?.text = widget.labelText()
         var widgetValue: String
         if widget.item.state == "Uninitialized" {
             widgetValue = "N/A"
@@ -59,8 +58,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
                 widgetValue = String(format: stateFormat, widget.item.stateAsInt())
             }
         }
-        widgetSegmentedControl?.setTitle(widgetValue, forSegmentAt: 1)
-        widgetSegmentedControl?.addTarget(self, action: #selector(SetpointUITableViewCell.pickOne(_:)), for: .valueChanged)
+        widgetSegmentControl?.setTitle(widgetValue, forSegmentAt: 1)
+        widgetSegmentControl?.addTarget(self, action: #selector(SetpointUITableViewCell.pickOne(_:)), for: .valueChanged)
     }
 
     func decreaseValue() {
@@ -128,7 +127,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         print(String(format: "Setpoint pressed %ld", segmentedControl?.selectedSegmentIndex ?? 0))
         // Deselect segment in the middle
         if segmentedControl?.selectedSegmentIndex == 1 {
-            widgetSegmentedControl?.selectedSegmentIndex = -1
+            widgetSegmentControl?.selectedSegmentIndex = -1
             // - pressed
         } else if segmentedControl?.selectedSegmentIndex == 0 {
             decreaseValue()

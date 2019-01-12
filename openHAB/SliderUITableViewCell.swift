@@ -9,12 +9,12 @@
 //
 
 class SliderUITableViewCell: GenericUITableViewCell {
-    var widgetSlider: UISlider?
 
+    @IBOutlet weak var widgetSlider: UISlider!
+    //@IBOutlet weak var customTextLabel: UILabel!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
-        widgetSlider = viewWithTag(400) as? UISlider
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
 
@@ -23,13 +23,12 @@ class SliderUITableViewCell: GenericUITableViewCell {
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        widgetSlider = viewWithTag(400) as? UISlider
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
     }
 
     override func displayWidget() {
-        textLabel?.text = widget.labelText()
+        customTextLabel?.text = widget.labelText()
         let widgetValue = widget.item.stateAsFloat()
         widgetSlider?.value = widgetValue / 100
         widgetSlider?.addTarget(self, action: #selector(SliderUITableViewCell.sliderDidEndSliding(_:)), for: [.touchUpInside, .touchUpOutside])

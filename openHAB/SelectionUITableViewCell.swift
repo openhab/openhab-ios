@@ -16,7 +16,7 @@ class SelectionUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        textLabel?.text = widget.labelText()
+        customTextLabel?.text = widget.labelText()
         let selectedMapping = widget.mappingIndex(byCommand: widget.item.state)
         if selectedMapping != NSNotFound {
             if let widgetMapping = widget?.mappings[Int(selectedMapping)] as? OpenHABWidgetMapping {

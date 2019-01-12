@@ -20,7 +20,6 @@ class DrawerUITableViewCell: UITableViewCell {
         super.init(coder: coder)
 
         separatorInset = .zero
-        //textLabel = viewWithTag(101) as? UILabel
 
     }
 

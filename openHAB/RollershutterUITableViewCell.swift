@@ -11,17 +11,14 @@
 import QuartzCore
 
 class RollershutterUITableViewCell: GenericUITableViewCell {
-    var downButton: UIButton?
-    var stopButton: UIButton?
-    var upButton: UIButton?
 
+    @IBOutlet weak var downButton: UICircleButton!
+    @IBOutlet weak var stopButton: UICircleButton!
+    @IBOutlet weak var upButton: UICircleButton!
+    //@IBOutlet weak var customTextLabel: UILabel!
     required init?(coder: NSCoder) {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(coder: coder)
-
-        upButton = viewWithTag(601) as? UIButton
-        stopButton = viewWithTag(602) as? UIButton
-        downButton = viewWithTag(603) as? UIButton
 
         upButton?.setTitle("▲", for: .normal)
         stopButton?.setTitle("■", for: .normal)
@@ -39,10 +36,6 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        upButton = viewWithTag(601) as? UIButton
-        stopButton = viewWithTag(602) as? UIButton
-        downButton = viewWithTag(603) as? UIButton
-
         upButton?.setTitle("▲", for: .normal)
         stopButton?.setTitle("■", for: .normal)
         downButton?.setTitle("▼", for: .normal)
@@ -52,12 +45,17 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-        
+
+    }
+
+    override func displayWidget() {
+        customTextLabel?.text = widget.labelText()
     }
 
     @objc func upButtonPressed() {
         print("up button pressed")
         widget.sendCommand("UP")
+        
     }
 
     @objc func stopButtonPressed() {

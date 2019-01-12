@@ -33,14 +33,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         print("OpenHABDrawerTableViewController viewWillAppear")
 
-//        var components = URLComponents(string: openHABRootUrl)
-//        components?.path = "rest/sitemaps"
-//        print ("Sitemap URL = \(components?.debugDescription ?? "")")
-//        let sitemapsUrl = components?.url
+        var components = URLComponents(string: openHABRootUrl)
+        components?.path = "/rest/sitemaps"
+        print ("Sitemap URL = \(components?.url?.absoluteString ?? "")")
+        let sitemapsUrl = components?.url
 
-        let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
-        print("Sitemap URL = \(sitemapsUrlString)")
-        let sitemapsUrl = URL(string: sitemapsUrlString)
         var sitemapsRequest: NSMutableURLRequest?
         if let sitemapsUrl = sitemapsUrl {
             sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
@@ -115,15 +112,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 let b = (obj2 as? OpenHABSitemap)?.name
                 return (a?.compare(b ?? ""))!
             })
-//            let sorted = (self.sitemaps as NSArray).sortedArray(comparator: { obj1, obj2 in
-//                    let a = (obj1 as? OpenHABSitemap)?.name
-//                    let b = (obj2 as? OpenHABSitemap)?.name
-//                    return (a?.compare(b ?? ""))!
-//                })
-//
-//            if let sorted = sorted as? [AnyHashable] {
-//                self.sitemaps = sorted
-//            }
+
 
             self.appData()?.sitemaps = self.sitemaps
             self.tableView.reloadData()
@@ -195,14 +184,14 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
                 if appData()?.openHABVersion == 2 {
                     if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        components?.path = "icon/\(object).png"
+                        components?.path = "/icon/\(object).png"
                     }
                 } else {
                     if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        components?.path = "images/\(object).png"
+                        components?.path = "/images/\(object).png"
                     }
                 }
-                print("\(components?.debugDescription ?? "")")
+                print("\(components?.url?.absoluteString ?? "")")
                 cell?.customImageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
             } else {
                 // Then menu items
