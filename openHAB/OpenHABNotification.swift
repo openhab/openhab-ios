@@ -28,6 +28,7 @@ class OpenHABNotification: NSObject {
                 break
             }
         }
+        
             // MARK - Please addrress later:
 //                if allPropertyNames().contains(where: key ) {
 //                setValue(dictionary[key], forKey: key ?? "")
