@@ -71,7 +71,7 @@
 		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */; };
 		DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE401188322BC008B26AC /* NSObject+Data.m */; };
 		DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.m */; };
-		DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.m */; };
+		DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
 		DFDEE40F188322FA008B26AC /* OpenHABSitemap.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.m */; };
 		DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.m */; };
 		DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40C188322FA008B26AC /* OpenHABWidget.m */; };
@@ -175,8 +175,7 @@
 		DFDEE401188322BC008B26AC /* NSObject+Data.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Data.m"; sourceTree = "<group>"; };
 		DFDEE403188322FA008B26AC /* OpenHABItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABItem.h; sourceTree = "<group>"; };
 		DFDEE404188322FA008B26AC /* OpenHABItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABItem.m; sourceTree = "<group>"; };
-		DFDEE405188322FA008B26AC /* OpenHABLinkedPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABLinkedPage.h; sourceTree = "<group>"; };
-		DFDEE406188322FA008B26AC /* OpenHABLinkedPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABLinkedPage.m; sourceTree = "<group>"; };
+		DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLinkedPage.swift; sourceTree = "<group>"; };
 		DFDEE407188322FA008B26AC /* OpenHABSitemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSitemap.h; sourceTree = "<group>"; };
 		DFDEE408188322FA008B26AC /* OpenHABSitemap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSitemap.m; sourceTree = "<group>"; };
 		DFDEE409188322FA008B26AC /* OpenHABSitemapPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSitemapPage.h; sourceTree = "<group>"; };
@@ -415,8 +414,7 @@
 				DF4B84031885A53700F34902 /* OpenHABDataObject.m */,
 				DFDEE403188322FA008B26AC /* OpenHABItem.h */,
 				DFDEE404188322FA008B26AC /* OpenHABItem.m */,
-				DFDEE405188322FA008B26AC /* OpenHABLinkedPage.h */,
-				DFDEE406188322FA008B26AC /* OpenHABLinkedPage.m */,
+				DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */,
 				DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */,
 				DFDEE407188322FA008B26AC /* OpenHABSitemap.h */,
 				DFDEE408188322FA008B26AC /* OpenHABSitemap.m */,
@@ -697,7 +695,7 @@
 				DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */,
 				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */,
 				DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */,
-				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */,
+				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.swift in Sources */,
 				DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */,
 				DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */,
 				DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */,
