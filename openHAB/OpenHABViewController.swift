@@ -354,7 +354,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell = (tableView.dequeueReusableCell(withIdentifier: "FrameWidgetCell") as? FrameUITableViewCell)!
         case "Switch":
             if widget?.mappings.count ?? 0 > 0 {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
+                //cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
+                cell = (tableView.dequeueReusableCell(withIdentifier: "SegmentedWidgetCell") as? SegmentedUITableViewCell)!
                 //RollershutterItem changed to Rollershutter in later builds of OH2
             } else if (widget?.item.type == "RollershutterItem") || (widget?.item.type == "Rollershutter") || ((widget?.item.type == "Group") && (widget?.item.groupType == "Rollershutter")) {
                 //cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell

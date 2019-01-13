@@ -9,18 +9,27 @@
 //
 
 class SelectionUITableViewCell: GenericUITableViewCell {
-    func setWidget(_ widget: OpenHABWidget?) {
-        super.widget = widget
-        accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
-        selectionStyle = UITableViewCell.SelectionStyle.blue
+
+    //@IBOutlet weak var customTextLabel: UILabel!
+    //@IBOutlet weak var customDetailTextLabel: UILabel!
+
+    @objc override var widget: OpenHABWidget! {
+        get {
+            return super.widget
+        }
+        set(widget) {
+            super.widget = widget
+            accessoryType = .disclosureIndicator
+            selectionStyle = .blue
+        }
     }
 
     override func displayWidget() {
-        customTextLabel?.text = widget.labelText()
+        super.customTextLabel?.text = widget.labelText()
         let selectedMapping = widget.mappingIndex(byCommand: widget.item.state)
         if selectedMapping != NSNotFound {
             if let widgetMapping = widget?.mappings[Int(selectedMapping)] as? OpenHABWidgetMapping {
-                detailTextLabel?.text = widgetMapping.label
+                customDetailTextLabel?.text = widgetMapping.label
             }
         }
 

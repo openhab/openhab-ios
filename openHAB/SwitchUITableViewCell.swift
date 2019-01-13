@@ -35,9 +35,9 @@ class SwitchUITableViewCell: GenericUITableViewCell {
             state = widget.item.state
         }
         if widget.labelValue() != nil {
-            detailTextLabel?.text = widget.labelValue()
+            customDetailTextLabel?.text = widget.labelValue()
         } else {
-            detailTextLabel?.text = nil
+            customDetailTextLabel?.text = nil
         }
         if state == "ON" {
             widgetSwitch?.isOn = true

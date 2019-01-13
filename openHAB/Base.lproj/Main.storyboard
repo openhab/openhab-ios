@@ -166,7 +166,7 @@
                                                         <constraint firstAttribute="width" constant="30" id="e9d-e3-sAe"/>
                                                         <constraint firstAttribute="height" constant="30" id="xxx-h0-TRp"/>
                                                     </constraints>
-                                                    <state key="normal">
+                                                    <state key="normal" title="▲">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                 </button>
@@ -179,6 +179,9 @@
                                                     <state key="normal">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
+                                                    <connections>
+                                                        <action selector="colorButtonPressed:" destination="n6i-xP-mqM" eventType="touchUpInside" id="E2V-fJ-h4T"/>
+                                                    </connections>
                                                 </button>
                                                 <button opaque="NO" tag="701" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vxc-Zw-Oyh" customClass="UICircleButton" customModule="openHAB">
                                                     <rect key="frame" x="288" y="7" width="30" height="30"/>
@@ -186,7 +189,7 @@
                                                         <constraint firstAttribute="height" constant="30" id="6LY-s0-Idb"/>
                                                         <constraint firstAttribute="width" constant="30" id="pMB-mJ-lDb"/>
                                                     </constraints>
-                                                    <state key="normal">
+                                                    <state key="normal" title="▼">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                 </button>
@@ -211,6 +214,11 @@
                                         <accessibility key="accessibilityConfiguration">
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
+                                        <connections>
+                                            <outlet property="colorButton" destination="JzN-PF-zeJ" id="q22-iL-Tqd"/>
+                                            <outlet property="downButton" destination="vxc-Zw-Oyh" id="wmx-Ah-YGw"/>
+                                            <outlet property="upButton" destination="OR4-bR-Ekg" id="F4j-67-AmO"/>
+                                        </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SliderWidgetCell" rowHeight="44" id="S22-0C-9Sl" customClass="SliderUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="233" width="414" height="44"/>
@@ -276,6 +284,10 @@
                                         <accessibility key="accessibilityConfiguration">
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
+                                        <connections>
+                                            <outlet property="customDetailTextLabel" destination="Adh-o9-6Qx" id="uUe-4v-wLl"/>
+                                            <outlet property="customTextLabel" destination="hd9-I4-GIr" id="N3i-yD-fxt"/>
+                                        </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SegmentedWidgetCell" rowHeight="44" id="IBt-aJ-0VH" customClass="SegmentedUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="321" width="414" height="44"/>
@@ -310,6 +322,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                         <connections>
+                                            <outlet property="customTextLabel" destination="dGQ-sz-j4J" id="PBo-Lj-28S"/>
                                             <outlet property="widgetSegmentControl" destination="QBf-tO-eE0" id="SaO-tM-Eh5"/>
                                         </connections>
                                     </tableViewCell>
@@ -336,7 +349,7 @@
                                                         <constraint firstAttribute="height" constant="30" id="M2m-p5-D0f"/>
                                                         <constraint firstAttribute="width" constant="30" id="Was-wR-0wt"/>
                                                     </constraints>
-                                                    <state key="normal">
+                                                    <state key="normal" title="■">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                 </button>
@@ -346,7 +359,7 @@
                                                         <constraint firstAttribute="width" constant="30" id="LaN-EA-e8o"/>
                                                         <constraint firstAttribute="height" constant="30" id="iup-nQ-ZD5"/>
                                                     </constraints>
-                                                    <state key="normal">
+                                                    <state key="normal" title="▼">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                 </button>

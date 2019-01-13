@@ -10,6 +10,7 @@
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
 
+    //@IBOutlet weak var customTextLabel: UILabel!
     @IBOutlet weak var widgetSegmentControl: UISegmentedControl!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -22,14 +23,13 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        widgetSegmentControl = viewWithTag(500) as? UISegmentedControl
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
 
     }
 
     override func displayWidget() {
-        customTextLabel?.text = widget.labelText()
+        self.customTextLabel?.text = widget.labelText()
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
         widgetSegmentControl?.removeAllSegments()
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true

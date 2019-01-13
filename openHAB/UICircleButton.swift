@@ -15,7 +15,6 @@ var normalTextColor: UIColor?
 
 class UICircleButton: UIButton {
     required init?(coder: NSCoder) {
-        //    NSLog(@"UICircleButton initWithCoder");
         super.init(coder: coder)
 
         if let font = UIFont(name: "HelveticaNeue-Light", size: 20) {
