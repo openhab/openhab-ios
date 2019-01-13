@@ -34,7 +34,6 @@
 #import "OpenHABDataObject.h"
 #import "OpenHABItem.h"
 #import "OpenHABLinkedPage.h"
-#import "OpenHABSitemap.h"
 #import "OpenHABSitemapPage.h"
 #import "OpenHABTracker.h"
 #import "OpenHABWidget.h"
