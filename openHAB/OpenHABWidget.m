@@ -7,7 +7,6 @@
 //
 
 #import "OpenHABWidget.h"
-#import "OpenHABItem.h"
 //#import "OpenHABLinkedPage.h"
 #import "GDataXMLNode.h"
 
@@ -21,7 +20,7 @@
     for (GDataXMLElement *child in [xmlElement children]) {
         if (![[child name] isEqual:@"widget"]) {
             if ([[child name] isEqual:@"item"]) {
-                item = [[OpenHABItem alloc] initWithXML:child];
+                //item = [[OpenHABItem alloc] initWithXML:child];
             } else if ([[child name] isEqual:@"mapping"]) {
                // MARK - HORROR - needs to be reverted
                // OpenHABWidgetMapping *mapping = [[OpenHABWidgetMapping alloc] initWithXML:child];

@@ -32,7 +32,6 @@
 #import "OpenHABAppDataDelegate.h"
 #import "OpenHABAppDelegate.h"
 #import "OpenHABDataObject.h"
-#import "OpenHABItem.h"
 #import "OpenHABSitemap.h"
 #import "OpenHABSitemapPage.h"
 #import "OpenHABTracker.h"
