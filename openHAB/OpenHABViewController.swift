@@ -324,7 +324,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             return widgetTableView.frame.size.width * 0.75
         } else if (widget?.type == "Image") || (widget?.type == "Chart") {
             if widget?.image != nil {
-                return widget?.image.size.height ?? 0.0 / (widget?.image.size.width ?? 0.0 / widgetTableView.frame.size.width)
+                return widget?.image?.size.height ?? 0.0 / (widget?.image?.size.width ?? 0.0 / widgetTableView.frame.size.width)
             } else {
                 return 44
             }
@@ -357,7 +357,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 //cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 cell = (tableView.dequeueReusableCell(withIdentifier: "SegmentedWidgetCell") as? SegmentedUITableViewCell)!
                 //RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if (widget?.item.type == "RollershutterItem") || (widget?.item.type == "Rollershutter") || ((widget?.item.type == "Group") && (widget?.item.groupType == "Rollershutter")) {
+            } else if (widget?.item?.type == "RollershutterItem") || (widget?.item?.type == "Rollershutter") || ((widget?.item?.type == "Group") && (widget?.item?.groupType == "Rollershutter")) {
                 //cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
                 cell = (tableView.dequeueReusableCell(withIdentifier: "RollershutterWidgetCell") as? RollershutterUITableViewCell)!
             } else {
@@ -458,12 +458,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
         if widget?.linkedPage != nil {
-            if let link = widget?.linkedPage.link {
+            if let link = widget?.linkedPage?.link {
                 print("Selected \(link)")
             }
             selectedWidgetRow = indexPath.row
             let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABViewController
-            newViewController?.pageUrl = widget?.linkedPage.link ?? ""
+            newViewController?.pageUrl = widget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
             if let newViewController = newViewController {
                 navigationController?.pushViewController(newViewController, animated: true)
@@ -530,7 +530,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if segue.identifier?.isEqual("showPage") ?? false {
             let newViewController = segue.destination as? OpenHABViewController
             let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow] as? OpenHABWidget
-            newViewController?.pageUrl = selectedWidget?.linkedPage.link ?? ""
+            newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
         } else if segue.identifier?.isEqual("showSelectionView") ?? false {
             print("Selection seague")

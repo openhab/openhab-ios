@@ -8,11 +8,11 @@
 
 #import "NSObject+Data.h"
 #import <Foundation/Foundation.h>
-#import "OpenHABWidget.h"
 
 @class OpenHABItem;
 
 @class GDataXMLElement;
+@protocol OpenHABWidgetDelegate;
 
 @protocol OpenHABSitemapPageDelegate <NSObject>
 - (void)sendCommand:(OpenHABItem *)item commandToSend:(NSString *)command;

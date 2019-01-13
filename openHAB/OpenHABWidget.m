@@ -20,13 +20,13 @@
     for (GDataXMLElement *child in [xmlElement children]) {
         if (![[child name] isEqual:@"widget"]) {
             if ([[child name] isEqual:@"item"]) {
-                //item = [[OpenHABItem alloc] initWithXML:child];
+                item = [[OpenHABItem alloc] initWithXML:child];
             } else if ([[child name] isEqual:@"mapping"]) {
                // MARK - HORROR - needs to be reverted
-               // OpenHABWidgetMapping *mapping = [[OpenHABWidgetMapping alloc] initWithXML:child];
-               // [self.mappings addObject:mapping];
+               OpenHABWidgetMapping *mapping = [[OpenHABWidgetMapping alloc] initWithXML:child];
+               [self.mappings addObject:mapping];
             } else if ([[child name] isEqual:@"linkedPage"]) {
-               // linkedPage = [[OpenHABLinkedPage alloc] initWithXML:child];
+               linkedPage = [[OpenHABLinkedPage alloc] initWithXML:child];
             } else {
                 NSString *propertyValue = [child stringValue];
                 if ([[self allPropertyNames] containsObject:[child name]])

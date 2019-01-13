@@ -49,7 +49,7 @@ class MapViewTableViewCell: GenericUITableViewCell {
         if !(oldLocationCoordinate.latitude == newLocationCoordinate?.latitude && oldLocationCoordinate.longitude == newLocationCoordinate?.longitude && (oldLocationTitle == newLocationTitle)) {
             mapView.removeAnnotations(mapView.annotations)
 
-            if widget?.item.stateAsLocation() != nil {
+            if widget?.item?.stateAsLocation() != nil {
                 if let widget = widget {
                     mapView.addAnnotation(widget)
                 }

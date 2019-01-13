@@ -8,7 +8,6 @@
 
 #import "OpenHABSitemapPage.h"
 #import "GDataXMLNode.h"
-#import "OpenHABWidget.h"
 
 @implementation OpenHABSitemapPage
 @synthesize widgets, pageId, title, link, leaf, delegate;

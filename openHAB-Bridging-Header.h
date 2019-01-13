@@ -35,7 +35,6 @@
 #import "OpenHABSitemap.h"
 #import "OpenHABSitemapPage.h"
 #import "OpenHABTracker.h"
-#import "OpenHABWidget.h"
 #import "Reachability+URL.h"
 //#import "TSMessage.h"
 //#import "UIViewController+MMDrawerController.h"
