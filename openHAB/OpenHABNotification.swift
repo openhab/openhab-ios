@@ -14,6 +14,7 @@ class OpenHABNotification: NSObject {
     var created: Date?
     var icon = ""
     var severity = ""
+    let propertyNames: Set = ["message", "icon", "severity"]
 
     init(dictionary: [String: Any]) {
         super.init()
@@ -25,12 +26,10 @@ class OpenHABNotification: NSObject {
                 dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
                 created = dateFormatter.date(from: dictionary[key] as? String ?? "")
             } else {
-                break
+                if propertyNames.contains(key) {
+                    setValue(dictionary[key], forKey: key)
+                }
             }
         }
-        
-            // MARK - Please addrress later:
-//                if allPropertyNames().contains(where: key ) {
-//                setValue(dictionary[key], forKey: key ?? "")
     }
 }
