@@ -309,6 +309,9 @@
                                         <accessibility key="accessibilityConfiguration">
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
+                                        <connections>
+                                            <outlet property="widgetSegmentControl" destination="QBf-tO-eE0" id="SaO-tM-Eh5"/>
+                                        </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="RollershutterWidgetCell" rowHeight="44" id="Sg1-VD-yHT" customClass="RollershutterUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="365" width="414" height="44"/>
@@ -323,7 +326,7 @@
                                                         <constraint firstAttribute="width" constant="30" id="X1M-1P-C4k"/>
                                                         <constraint firstAttribute="height" constant="30" id="hd4-jY-xhn"/>
                                                     </constraints>
-                                                    <state key="normal">
+                                                    <state key="normal" title="▲">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
                                                 </button>

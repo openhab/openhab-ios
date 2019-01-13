@@ -9,12 +9,11 @@
 //
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
-    var widgetSegmentedControl: UISegmentedControl?
 
+    @IBOutlet weak var widgetSegmentControl: UISegmentedControl!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
-        widgetSegmentedControl = viewWithTag(500) as? UISegmentedControl
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
 
@@ -23,25 +22,25 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        widgetSegmentedControl = viewWithTag(500) as? UISegmentedControl
+        widgetSegmentControl = viewWithTag(500) as? UISegmentedControl
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-        
+
     }
 
     override func displayWidget() {
         customTextLabel?.text = widget.labelText()
-        widgetSegmentedControl?.apportionsSegmentWidthsByContent = true
-        widgetSegmentedControl?.removeAllSegments()
-        widgetSegmentedControl?.apportionsSegmentWidthsByContent = true
+        widgetSegmentControl?.apportionsSegmentWidthsByContent = true
+        widgetSegmentControl?.removeAllSegments()
+        widgetSegmentControl?.apportionsSegmentWidthsByContent = true
 
         for mapping: OpenHABWidgetMapping? in widget?.mappings as? [OpenHABWidgetMapping?] ?? [] {
             if let mapping = mapping {
-                widgetSegmentedControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.index(of: mapping), animated: false)
+                widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.index(of: mapping), animated: false)
             }
         }
-        widgetSegmentedControl?.selectedSegmentIndex = Int(widget.mappingIndex(byCommand: widget.item.state))
-        widgetSegmentedControl?.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
+        widgetSegmentControl?.selectedSegmentIndex = Int(widget.mappingIndex(byCommand: widget.item.state))
+        widgetSegmentControl?.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
     }
 
     @objc func pickOne(_ sender: Any?) {

@@ -306,10 +306,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // Here goes everything about our main UITableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if currentPage != nil {
-            // MARK : - 1 only to avoid Range problem.  Change
-            //return (currentPage?.widgets.count ?? 1) - 1
             return currentPage?.widgets.count ?? 0
-
         } else {
             return 0
         }
@@ -395,11 +392,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell = (tableView.dequeueReusableCell(withIdentifier: "WebviewWidgetCell") as? WebUITableViewCell)!
         case "Mapview":
             // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "MapviewWidgetCell") as? MapViewTableViewCell)!
+            cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
         default:
             //cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
             cell = (tableView.dequeueReusableCell(withIdentifier: "GenericWidgetCell") as? GenericUITableViewCell)!
-
         }
 
         // No icon is needed for image, video, frame and web widgets

@@ -22,9 +22,9 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(coder: coder)
 
-        upButton = viewWithTag(701) as? UICircleButton
-        colorButton = viewWithTag(702) as? UICircleButton
-        downButton = viewWithTag(703) as? UICircleButton
+//        upButton = viewWithTag(701) as? UICircleButton
+//        colorButton = viewWithTag(702) as? UICircleButton
+//        downButton = viewWithTag(703) as? UICircleButton
 
         upButton?.setTitle("▲", for: .normal)
         downButton?.setTitle("▼", for: .normal)
@@ -40,9 +40,9 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        upButton = viewWithTag(701) as? UICircleButton
-        colorButton = viewWithTag(702) as? UICircleButton
-        downButton = viewWithTag(703) as? UICircleButton
+//        upButton = viewWithTag(701) as? UICircleButton
+//        colorButton = viewWithTag(702) as? UICircleButton
+//        downButton = viewWithTag(703) as? UICircleButton
 
         upButton?.setTitle("▲", for: .normal)
         downButton?.setTitle("▼", for: .normal)
@@ -52,9 +52,8 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         downButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-        
-    }
 
+    }
 
     override func displayWidget() {
         customTextLabel?.text = widget.labelText()
