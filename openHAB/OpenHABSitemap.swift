@@ -75,5 +75,4 @@ class OpenHABSitemap: NSObject {
             }
         }
     }
-
 }
