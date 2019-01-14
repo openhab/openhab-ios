@@ -12,6 +12,7 @@
 @class OpenHABItem;
 
 @class GDataXMLElement;
+@class OpenHABWidget;
 @protocol OpenHABWidgetDelegate;
 
 @protocol OpenHABSitemapPageDelegate <NSObject>

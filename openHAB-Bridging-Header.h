@@ -33,7 +33,6 @@
 #import "OpenHABAppDelegate.h"
 #import "OpenHABDataObject.h"
 #import "OpenHABSitemap.h"
-#import "OpenHABSitemapPage.h"
 #import "OpenHABTracker.h"
 #import "Reachability+URL.h"
 //#import "TSMessage.h"

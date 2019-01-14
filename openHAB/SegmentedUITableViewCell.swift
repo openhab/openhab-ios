@@ -36,7 +36,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
 
         for mapping: OpenHABWidgetMapping? in widget?.mappings as? [OpenHABWidgetMapping?] ?? [] {
             if let mapping = mapping {
-                widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.index(of: mapping) ?? <#default value#>, animated: false)
+                widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.index(of: mapping)!, animated: false)
             }
         }
         widgetSegmentControl?.selectedSegmentIndex = Int(widget.mappingIndex(byCommand: widget.item?.state))

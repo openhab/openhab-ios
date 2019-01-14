@@ -14,7 +14,7 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
 }
 
-class OpenHABWidget: NSObject, MKAnnotation {
+@objcMembers class OpenHABWidget: NSObject, MKAnnotation {
     weak var delegate: OpenHABWidgetDelegate?
     var widgetId = ""
     var label = ""
@@ -39,7 +39,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var mappings: [AnyHashable] = []
     var image: UIImage?
 
-    let propertyNames: Set = ["widgetId", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
+    let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
@@ -72,18 +72,18 @@ class OpenHABWidget: NSObject, MKAnnotation {
         super.init()
         mappings = [AnyHashable]()
         for key in dictionary.keys {
-            if (key == "item") {
+            if key == "item" {
                 item = OpenHABItem(dictionary: dictionary[key] as! [String:Any])
-            } else if (key == "mappings") {
-                let widgetMappings = dictionary["mappings"] as? [Any]
-                for mappingDictionary in widgetMappings as? [[String : Any]?] ?? [] {
-                    let mapping = OpenHABWidgetMapping(dictionary: mappingDictionary)
+            } else if key == "mappings" {
+                let widgetMappings = dictionary["mappings"] as? [[String:Any]?]
+                for mappingDictionary in widgetMappings ?? [] {
+                    let mapping = OpenHABWidgetMapping(dictionary: mappingDictionary!)
                     mappings.append(mapping)
                 }
-            } else if (key == "linkedPage") {
+            } else if key == "linkedPage" {
                 linkedPage = OpenHABLinkedPage(dictionary: dictionary[key] as! [String:Any])
             } else {
-                if (dictionary[key] is String) {
+                if dictionary[key] is String {
                     if propertyNames.contains(key) {
                         setValue(dictionary[key], forKey: key)
                     }
