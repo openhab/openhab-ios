@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "OpenHABAppDataDelegate.h"
-#import "OpenHABDataObject.h"
+
+@class OpenHABDataObject;
 
 @interface OpenHABAppDelegate : UIResponder <UIApplicationDelegate, OpenHABAppDataDelegate>
 {

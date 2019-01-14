@@ -27,7 +27,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var defaultSitemap = ""
     var ignoreSSLCertificate = false
     var idleOff = false
-    var sitemaps: NSMutableArray = []
+    var sitemaps: [OpenHABSitemap] = []
     var currentPage: OpenHABSitemapPage?
     var selectionPicker: UIPickerView?
     var pageNetworkStatus: NetworkStatus?
@@ -747,7 +747,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                         if let element = element as? GDataXMLElement {
                             let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.add(sitemap!)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 }
@@ -756,8 +756,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as? [AnyHashable: Any])
-                        self.sitemaps.add(sitemap!)
+                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
+                        self.sitemaps.append(sitemap)
                     }
                 } else {
                     // Something went wrong, we should have received an array

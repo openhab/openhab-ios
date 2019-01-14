@@ -12,7 +12,7 @@ import SDWebImage
 import UIKit
 
 class OpenHABDrawerTableViewController: UITableViewController {
-    var sitemaps: NSMutableArray = []
+    var sitemaps: [OpenHABSitemap] = []
     @objc var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
@@ -82,7 +82,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                         if let element = element as? GDataXMLElement {
                             let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.add(sitemap)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
@@ -94,10 +94,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as? [AnyHashable: Any])
-                        if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
-                            print("Sitemap \(sitemap?.label)")
-                            self.sitemaps.add(sitemap)
+                        let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [String: Any])!)
+                        if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
+                            print("Sitemap \(sitemap.label)")
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
@@ -107,10 +107,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
             }
 
             // Sort the sitemaps alphabetically.
-            self.sitemaps.sort(comparator: { obj1, obj2 in
-                let a = (obj1 as? OpenHABSitemap)?.name
-                let b = (obj2 as? OpenHABSitemap)?.name
-                return (a?.compare(b ?? ""))!
+            self.sitemaps.sort(by: { obj1, obj2 in
+
+               return obj1.name > obj2.name
+
             })
 
 

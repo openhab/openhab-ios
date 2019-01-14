@@ -14,7 +14,7 @@ import UIKit
 class OpenHABSelectSitemapViewController: UITableViewController {
     private var selectedSitemap: Int = 0
 
-    var sitemaps: NSMutableArray = []
+    var sitemaps: [OpenHABSitemap] = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
@@ -94,7 +94,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                         if let element = element as? GDataXMLElement {
                             let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.add(sitemap!)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
@@ -118,10 +118,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as? [AnyHashable: Any])
-                        if (responseObject as AnyObject).count != 1 && !(sitemap?.name == "_default") {
-                            print("Sitemap \(String(describing: sitemap?.label))")
-                            self.sitemaps.add(sitemap!)
+                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
+                        if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
+                            print("Sitemap \(String(describing: sitemap.label))")
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
