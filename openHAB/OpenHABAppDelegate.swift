@@ -14,7 +14,8 @@ import UIKit
 var player: AVAudioPlayer?
 
 @UIApplicationMain
-class OpenHABAppDelegate: UIResponder, UIApplicationDelegate, OpenHABAppDataDelegate {
+class OpenHABAppDelegate: UIResponder, UIApplicationDelegate { //}, OpenHABAppDataDelegate {
+
     var window: UIWindow?
     var appData: OpenHABDataObject?
 
@@ -47,7 +48,8 @@ class OpenHABAppDelegate: UIResponder, UIApplicationDelegate, OpenHABAppDataDele
         //    AudioSessionInitialize(NULL, NULL, nil , nil);
         //    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error: nil];
         if #available(iOS 10.0, *) {
-            try! AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: .duckOthers)
+//MARK - Change this
+            //try! AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: .duckOthers)
         } else {
             // Fallback on earlier versions
         }
