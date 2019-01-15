@@ -25,8 +25,7 @@
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
 #import "AFRememberingSecurityPolicy.h"
-#import "NSMutableURLRequest+Auth.h"
-#import "NSObject+Data.h"
+//#import "NSObject+Data.h"
 #import "OpenHABTracker.h"
 #import "Reachability+URL.h"
 #import <Foundation/Foundation.h>

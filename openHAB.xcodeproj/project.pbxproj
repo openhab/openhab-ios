@@ -11,7 +11,7 @@
 		653C09D71EAE4C0000BA4C4A /* icon-29x29.png in Resources */ = {isa = PBXBuildFile; fileRef = 653C09D51EAE4C0000BA4C4A /* icon-29x29.png */; };
 		653C09D81EAE4C0000BA4C4A /* icon-76x76.png in Resources */ = {isa = PBXBuildFile; fileRef = 653C09D61EAE4C0000BA4C4A /* icon-76x76.png */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
-		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
+		A3F4C3A31A49A5090019A09F = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
@@ -58,14 +58,14 @@
 		DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
 		DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622C18830A3600D3244D /* CoreGraphics.framework */; };
 		DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
-		DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623318830A3600D3244D /* InfoPlist.strings */; };
+		DFB2623518830A3600D3244D = {isa = PBXBuildFile; fileRef = DFB2623318830A3600D3244D /* InfoPlist.strings */; };
 		DFB2623B18830A3600D3244D /* OpenHABAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* OpenHABAppDelegate.swift */; };
 		DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABViewController.swift */; };
 		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
 		DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2624C18830A3600D3244D /* XCTest.framework */; };
 		DFB2624E18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
 		DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
-		DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
+		DFB2625718830A3600D3244D = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
 		DFB2625918830A3600D3244D /* openHABTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2625818830A3600D3244D /* openHABTests.m */; };
 		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
 		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */; };
@@ -74,7 +74,7 @@
 		DFDEE40F188322FA008B26AC /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
 		DFDEE410188322FA008B26AC /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DFDEE411188322FA008B26AC /* OpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */; };
-		DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */; };
+		DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */; };
 		DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */; };
 		DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4191883EB18008B26AC /* Reachability.m */; };
 		DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41C1883EB99008B26AC /* Reachability+URL.m */; };
@@ -172,8 +172,7 @@
 		DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemap.swift; sourceTree = "<group>"; };
 		DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemapPage.swift; sourceTree = "<group>"; };
 		DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABWidget.swift; sourceTree = "<group>"; };
-		DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+Auth.h"; sourceTree = "<group>"; };
-		DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+Auth.m"; sourceTree = "<group>"; };
+		DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableURLRequest+Auth.swift"; sourceTree = "<group>"; };
 		DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABTracker.h; sourceTree = "<group>"; };
 		DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABTracker.m; sourceTree = "<group>"; };
 		DFDEE4181883EB18008B26AC /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
@@ -416,8 +415,7 @@
 				DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */,
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
 				DF2B6ADC18EF4D660063819F /* NSData+HexString.swift */,
-				DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */,
-				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */,
+				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */,
 				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */,
 				DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */,
 				DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */,
@@ -445,11 +443,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */;
 			buildPhases = (
-				9543C2DDD9BFDB7DD06CF7DE /* [CP] Check Pods Manifest.lock */,
+				9543C2DDD9BFDB7DD06CF7DE /* ShellScript */,
 				DFB2622318830A3600D3244D /* Sources */,
 				DFB2622418830A3600D3244D /* Frameworks */,
 				DFB2622518830A3600D3244D /* Resources */,
-				CE459E4F9AA10964E3EDBD8A /* [CP] Embed Pods Frameworks */,
+				CE459E4F9AA10964E3EDBD8A /* ShellScript */,
 				6562C91D1FCF2B56008C61CE /* ShellScript */,
 				DAEAA89921E1F4BD00267EA3 /* ShellScript */,
 			);
@@ -513,7 +511,7 @@
 				Base,
 			);
 			mainGroup = DFB2621E18830A3600D3244D;
-			productRefGroup = DFB2622818830A3600D3244D /* Products */;
+			productRefGroup = DFB2622818830A3600D3244D;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -540,11 +538,11 @@
 				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
 				653C09D71EAE4C0000BA4C4A /* icon-29x29.png in Resources */,
-				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
+				DFB2623518830A3600D3244D,
 				653C09D81EAE4C0000BA4C4A /* icon-76x76.png in Resources */,
 				A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */,
 				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
-				A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */,
+				A3F4C3A31A49A5090019A09F,
 				656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */,
 				A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */,
 				DFDA3CEA193CADB200888039 /* ping.wav in Resources */,
@@ -555,7 +553,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */,
+				DFB2625718830A3600D3244D,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -575,7 +573,7 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Fabric/run\"\n";
 		};
-		9543C2DDD9BFDB7DD06CF7DE /* [CP] Check Pods Manifest.lock */ = {
+		9543C2DDD9BFDB7DD06CF7DE /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -593,7 +591,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		CE459E4F9AA10964E3EDBD8A /* [CP] Embed Pods Frameworks */ = {
+		CE459E4F9AA10964E3EDBD8A /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -662,7 +660,7 @@
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.swift in Sources */,
-				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
+				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.swift in Sources */,
@@ -853,7 +851,7 @@
 		};
 		DFB2625D18830A3600D3244D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0B8ADF5EDF627447F5C32ADF /* Pods-openHAB.debug.xcconfig */;
+			baseConfigurationReference = 0B8ADF5EDF627447F5C32ADF;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -880,7 +878,7 @@
 		};
 		DFB2625E18830A3600D3244D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 92D164D7D26248F747AE06CA /* Pods-openHAB.release.xcconfig */;
+			baseConfigurationReference = 92D164D7D26248F747AE06CA;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
