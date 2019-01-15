@@ -27,7 +27,6 @@
 #import "AFRememberingSecurityPolicy.h"
 #import "NSMutableURLRequest+Auth.h"
 #import "NSObject+Data.h"
-#import "OpenHABAppDataDelegate.h"
 #import "OpenHABTracker.h"
 #import "Reachability+URL.h"
 #import <Foundation/Foundation.h>
