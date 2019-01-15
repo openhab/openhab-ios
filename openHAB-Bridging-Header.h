@@ -28,7 +28,6 @@
 #import "NSMutableURLRequest+Auth.h"
 #import "NSObject+Data.h"
 #import "OpenHABAppDataDelegate.h"
-#import "OpenHABAppDelegate.h"
 #import "OpenHABTracker.h"
 #import "Reachability+URL.h"
 #import <Foundation/Foundation.h>

@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-#import "OpenHABAppDelegate.h"
 
 int main(int argc, char * argv[])
 {

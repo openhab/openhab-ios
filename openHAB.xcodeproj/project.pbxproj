@@ -58,8 +58,7 @@
 		DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622C18830A3600D3244D /* CoreGraphics.framework */; };
 		DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
 		DFB2623518830A3600D3244D = {isa = PBXBuildFile; fileRef = DFB2623318830A3600D3244D /* InfoPlist.strings */; };
-		DFB2623718830A3600D3244D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623618830A3600D3244D /* main.m */; };
-		DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */; };
+		DFB2623B18830A3600D3244D /* OpenHABAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* OpenHABAppDelegate.swift */; };
 		DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABViewController.swift */; };
 		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
 		DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2624C18830A3600D3244D /* XCTest.framework */; };
@@ -156,10 +155,8 @@
 		DFB2622E18830A3600D3244D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		DFB2623218830A3600D3244D /* openHAB-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHAB-Info.plist"; sourceTree = "<group>"; };
 		DFB2623418830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		DFB2623618830A3600D3244D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		DFB2623818830A3600D3244D /* openHAB-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "openHAB-Prefix.pch"; sourceTree = "<group>"; };
-		DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABAppDelegate.h; sourceTree = "<group>"; };
-		DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABAppDelegate.m; sourceTree = "<group>"; };
+		DFB2623A18830A3600D3244D /* OpenHABAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABAppDelegate.swift; sourceTree = "<group>"; };
 		DFB2624318830A3600D3244D /* OpenHABViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABViewController.swift; sourceTree = "<group>"; };
 		DFB2624518830A3600D3244D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		DFB2624B18830A3600D3244D /* openHABTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -361,8 +358,7 @@
 				A3F4C3A11A49A5090019A09F /* Main.storyboard */,
 				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
 				DFDEE3FE1883228C008B26AC /* Models */,
-				DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */,
-				DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */,
+				DFB2623A18830A3600D3244D /* OpenHABAppDelegate.swift */,
 				DFB2623118830A3600D3244D /* Supporting Files */,
 				DF4B83FD18857FA100F34902 /* UI */,
 				DFDEE3FF18832293008B26AC /* Util */,
@@ -375,7 +371,6 @@
 			children = (
 				DFB2623318830A3600D3244D /* InfoPlist.strings */,
 				DFDF45301932042B00A6E581 /* legal.rtf */,
-				DFB2623618830A3600D3244D /* main.m */,
 				DFB2623218830A3600D3244D /* openHAB-Info.plist */,
 				DFB2623818830A3600D3244D /* openHAB-Prefix.pch */,
 				DFDA3CE9193CADB200888039 /* ping.wav */,
@@ -669,13 +664,12 @@
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
-				DFB2623718830A3600D3244D /* main.m in Sources */,
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.swift in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
-				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
+				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.swift in Sources */,
 				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
 				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
