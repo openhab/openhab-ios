@@ -65,14 +65,14 @@ class GenericUITableViewCell: UITableViewCell {
                 //        self.userInteractionEnabled = NO;
             }
 
-            if _widget.labelcolor != nil {
+            if _widget.labelcolor != "" {
                 if let color = color(fromHexString: self.widget?.labelcolor) {
                     customTextLabel?.textColor = color
                 }
             } else {
                 customTextLabel?.textColor = UIColor.black
             }
-            if _widget.valuecolor != nil {
+            if _widget.valuecolor != "" {
                 if let color = color(fromHexString: self.widget?.valuecolor) {
                     customDetailTextLabel?.textColor = color
                 }
