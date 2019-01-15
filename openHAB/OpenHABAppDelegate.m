@@ -8,7 +8,6 @@
 
 #import "OpenHABAppDelegate.h"
 #import "AFNetworking.h"
-#import "NSData+HexString.h"
 #import "TSMessage.h"
 @import AVFoundation;
 @import Firebase;
