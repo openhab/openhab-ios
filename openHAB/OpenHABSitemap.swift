@@ -17,6 +17,8 @@
 //  This class parses and holds data for a sitemap list entry
 //  REST: /sitemaps
 //
+//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
+//
 
 import Foundation
 

@@ -107,11 +107,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             }
 
             // Sort the sitemaps alphabetically.
-            self.sitemaps.sort(by: { obj1, obj2 in
-
-               return obj1.name > obj2.name
-
-            })
+            self.sitemaps.sort { $0.name < $1.name }
 
             self.appData()?.sitemaps = self.sitemaps
             self.tableView.reloadData()

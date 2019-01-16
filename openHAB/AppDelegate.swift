@@ -6,6 +6,8 @@
 //  Created by Victor Belov on 12/01/14.
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
 //
+//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
+//
 
 import AVFoundation
 import Firebase
