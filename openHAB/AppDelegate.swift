@@ -14,7 +14,7 @@ import UIKit
 var player: AVAudioPlayer?
 
 @UIApplicationMain
-class OpenHABAppDelegate: UIResponder, UIApplicationDelegate { //}, OpenHABAppDataDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var appData: OpenHABDataObject?
