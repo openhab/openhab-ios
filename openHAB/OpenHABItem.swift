@@ -20,7 +20,7 @@ import Foundation
 
     let propertyNames: Set = ["name", "type", "groupType", "state", "link" ]
 
-    @objc init(xml xmlElement: GDataXMLElement?) {
+    init(xml xmlElement: GDataXMLElement?) {
         super.init()
         for child in (xmlElement?.children())! {
             if let child = child as?  GDataXMLElement {
@@ -33,7 +33,7 @@ import Foundation
         }
     }
 
-    @objc init(dictionary: [String : Any]) {
+    init(dictionary: [String : Any]) {
         super.init()
 
         for key in dictionary.keys {
@@ -52,7 +52,7 @@ import Foundation
     }
 
     func stateAsUIColor() -> UIColor? {
-        if (state == "Uninitialized") {
+        if state == "Uninitialized" {
             return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         } else {
             let values = state.components(separatedBy: ",")
@@ -68,8 +68,8 @@ import Foundation
         }
     }
 
-    @objc func stateAsLocation() -> CLLocation? {
-        if (type == "Location") {
+    func stateAsLocation() -> CLLocation? {
+        if type == "Location" {
             // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitued>,<altitude>')
             let locationComponents = state.components(separatedBy: ",")
             if locationComponents.count >= 2 {

@@ -111,7 +111,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
             print("Command sent!")
         }, failure: { operation, error in
-            print("Error:------>\(error.localizedDescription ?? "")")
+            print("Error:------>\(error.localizedDescription )")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
         })
         print("Timeout \(commandRequest?.timeoutInterval ?? 0.0)")
@@ -778,7 +778,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
                     }
                 } else {
-                    self.pageUrl = (self.sitemaps[0] as! OpenHABSitemap).homepageLink
+                    self.pageUrl = self.sitemaps[0].homepageLink
                     self.loadPage(false)
                 }
             } else {
@@ -824,10 +824,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // Find and return sitemap by it's name if any
     func sitemap(byName sitemapName: String?) -> OpenHABSitemap? {
-        for sitemap: OpenHABSitemap in sitemaps as? [OpenHABSitemap] ?? [] {
-            if sitemap.name == sitemapName {
+        for sitemap in sitemaps where sitemap.name == sitemapName {
                 return sitemap
-            }
         }
         return nil
     }

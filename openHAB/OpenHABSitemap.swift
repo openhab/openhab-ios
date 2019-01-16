@@ -47,7 +47,7 @@ import Foundation
                 }
                 } else if let name = child.name() {
                     if propertyNames.contains(name) {
-                        setValue(child.stringValue ?? "", forKey: child.name() ?? "")
+                        setValue(child.stringValue ?? "", forKey: child.name() )
                 }
             }
         }
@@ -57,20 +57,20 @@ import Foundation
 init(dictionary: [String : Any]) {
     super.init()
     let keyArray = dictionary.keys
-    for key in keyArray  {
-        if (key == "homepage") {
+    for key in keyArray {
+        if key == "homepage" {
             let homepageDictionary = dictionary[key] as? [String : Any]
             let homepageKeyArray = homepageDictionary!.keys
             for homepageKey in homepageKeyArray {
-                if (homepageKey == "link") {
+                if homepageKey == "link" {
                     homepageLink = homepageDictionary?[homepageKey] as? String ?? ""
                 }
-                if (homepageKey == "leaf") {
+                if homepageKey == "leaf" {
                     leaf = homepageDictionary?[homepageKey] as? String ?? ""
                 }
             }
         } else if propertyNames.contains(key) {
-            setValue(dictionary[key], forKey: key ?? "")
+            setValue(dictionary[key], forKey: key)
         }
     }
 }

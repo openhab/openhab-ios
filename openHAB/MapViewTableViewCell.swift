@@ -31,7 +31,6 @@ class MapViewTableViewCell: GenericUITableViewCell {
         contentView.addSubview(mapView)
     }
 
-
     override func layoutSubviews() {
         super.layoutSubviews()
 

@@ -140,7 +140,7 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
 
     @objc func reachabilityChanged(_ notification: Notification?) {
         let changedReach = notification?.object as? Reachability
-        if (changedReach is Reachability) {
+        if changedReach is Reachability {
             let nStatus: NetworkStatus? = changedReach?.currentReachabilityStatus()
             if nStatus != oldReachabilityStatus {
                 if let oldReachabilityStatus = oldReachabilityStatus, let nStatus = nStatus {
@@ -219,8 +219,8 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
 
     func getStringIp(fromAddressData dataIn: Data?) -> String? {
 
-        var socketAddress: sockaddr_in? = nil
-        var ipString: String? = nil
+        var socketAddress: sockaddr_in?
+        var ipString: String?
 
         socketAddress = dataIn?.bytes as? sockaddr_in
         ipString = "\(inet_ntoa(socketAddress?.sin_addr))" ///problem here
@@ -229,8 +229,8 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
 
     func getStringPort(fromAddressData dataIn: Data?) -> String? {
 
-        var socketAddress: sockaddr_in? = nil
-        var ipPort: String? = nil
+        var socketAddress: sockaddr_in?
+        var ipPort: String?
 
         socketAddress = dataIn?.bytes as? sockaddr_in
         ipPort = String(format: "%hu", ntohs(socketAddress?.sin_port)) ///problem here
@@ -239,9 +239,9 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
 
     func isURLReachable(_ url: URL?) -> Bool {
         var response: URLResponse?
-        var error: Error? = nil
-        var data: Data? = nil
-        var request: URLRequest? = nil
+        var error: Error?
+        var data: Data?
+        var request: URLRequest?
         if let url = url {
             request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
         }
@@ -257,14 +257,14 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
 
         var string: String
         switch status {
-            case NotReachable:
-                string = "unreachable"
-            case ReachableViaWiFi:
-                string = "WiFi"
-            case ReachableViaWWAN:
-                string = "WWAN"
-            default:
-                string = "Unknown"
+        case NotReachable:
+            string = "unreachable"
+        case ReachableViaWiFi:
+            string = "WiFi"
+        case ReachableViaWWAN:
+            string = "WWAN"
+        default:
+            string = "Unknown"
         }
         return string
     }

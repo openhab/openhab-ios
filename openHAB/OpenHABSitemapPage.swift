@@ -39,13 +39,10 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
                     pageId = child.stringValue() ?? ""
                 }
             } else {
-                let newWidget = OpenHABWidget(xml: child) as? OpenHABWidget
-                if newWidget != nil {
-                    newWidget?.delegate = self
-                    if let newWidget = newWidget {
-                        widgets.append(newWidget)
-                    }
-                }
+                let newWidget = OpenHABWidget(xml: child)
+                newWidget.delegate = self
+                widgets.append(newWidget)
+
                 // If widget have child widgets, cycle through them too
 //                if Int(child.elements(forName: "widget") ?? 0) > 0 {
 //                    for childChild: GDataXMLElement? in child.elements(forName: "widget") ?? [] {
@@ -75,18 +72,14 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
         let widgetsArray = dictionary["widgets"] as? [[String : Any]?]
         for widgetDictionary in widgetsArray ?? [] {
             let newWidget = OpenHABWidget(dictionary: widgetDictionary!)
-            if newWidget != nil {
-                newWidget.delegate = self
-                widgets.append(newWidget)
-            }
+            newWidget.delegate = self
+            widgets.append(newWidget)
             if widgetDictionary?["widgets"] != nil {
                 let childWidgetsArray = widgetDictionary?["widgets"] as? [[String : Any]?]
                 for childWidgetDictionary in childWidgetsArray ?? [] {
                     let newChildWidget = OpenHABWidget(dictionary: childWidgetDictionary!)
-                    if newChildWidget != nil {
-                        newChildWidget.delegate = self
-                        widgets.append(newChildWidget)
-                    }
+                    newChildWidget.delegate = self
+                    widgets.append(newChildWidget)
                 }
             }
         }

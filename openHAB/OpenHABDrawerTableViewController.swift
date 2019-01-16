@@ -113,7 +113,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             })
 
-
             self.appData()?.sitemaps = self.sitemaps
             self.tableView.reloadData()
         }, failure: { operation, error in
@@ -178,18 +177,16 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
 
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
-                cell?.customTextLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
+                cell?.customTextLabel?.text = sitemaps[indexPath.row - 1].label
 
                 var components = URLComponents(string: openHABRootUrl)
 
                 if appData()?.openHABVersion == 2 {
-                    if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        components?.path = "/icon/\(object).png"
-                    }
+                    let object = sitemaps[indexPath.row - 1].icon
+                    components?.path = "/icon/\(object).png"
                 } else {
-                    if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        components?.path = "/images/\(object).png"
-                    }
+                    let object = sitemaps[indexPath.row - 1].icon
+                    components?.path = "/images/\(object).png"
                 }
                 print("\(components?.url?.absoluteString ?? "")")
                 cell?.customImageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
@@ -227,9 +224,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if indexPath.row != 0 {
             // First sitemaps
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
-                let sitemap = sitemaps[indexPath.row - 1] as? OpenHABSitemap
+                let sitemap = sitemaps[indexPath.row - 1]
                 let prefs = UserDefaults.standard
-                prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
+                prefs.setValue(sitemap.name, forKey: "defaultSitemap")
                 appData()?.rootViewController?.pageUrl = ""
                 let nav = mm_drawerController.centerViewController as? UINavigationController
                 let dummyViewController: UIViewController? = storyboard?.instantiateViewController(withIdentifier: "DummyViewController")

@@ -16,7 +16,6 @@ import Foundation
     @objc var link = ""
     let propertyNames: Set = ["title", "icon", "link"]
 
-
     @objc init(xml xmlElement: GDataXMLElement?) {
         super.init()
         for child in (xmlElement?.children())! {
