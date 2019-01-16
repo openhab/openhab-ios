@@ -384,7 +384,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
             // cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "ChartUIWidgetCell") as? ImageUITableViewCell)!
+            cell = (tableView.dequeueReusableCell(withIdentifier: "ImageWidgetCell") as? ImageUITableViewCell)!
         case "Video":
             // cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
             cell = (tableView.dequeueReusableCell(withIdentifier: "VideoWidgetCell") as? VideoUITableViewCell)!

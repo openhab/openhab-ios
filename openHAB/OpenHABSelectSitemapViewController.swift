@@ -158,22 +158,20 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     static let tableViewCellIdentifier = "SelectSitemapCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier, for: indexPath)
-        cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier)
-        let sitemap = sitemaps[indexPath.row] as? OpenHABSitemap
-        if sitemap?.label != nil {
-            cell.textLabel?.text = sitemap?.label
+        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier, for: indexPath)
+        //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier)
+        let sitemap = sitemaps[indexPath.row]
+        if sitemap.label != "" {
+            cell.textLabel?.text = sitemap.label
         } else {
-            cell.textLabel?.text = sitemap?.name
+            cell.textLabel?.text = sitemap.name
         }
 
         let imageBase = appData()?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@"
 
-        if sitemap?.icon != nil {
+        if sitemap.icon != "" {
             var iconUrlString: String?
-            if let icon = sitemap?.icon {
-                iconUrlString = String(format: imageBase, openHABRootUrl, icon)
-            }
+            iconUrlString = String(format: imageBase, openHABRootUrl, sitemap.icon )
             print("icon url = \(iconUrlString ?? "")")
             cell.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
         } else {
