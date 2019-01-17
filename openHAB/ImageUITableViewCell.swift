@@ -20,9 +20,14 @@ class ImageUITableViewCell: GenericUITableViewCell {
     var widgetImage: UIImageView?
     @objc weak var delegate: ImageUITableViewCellDelegate?
 
-    func setWidget(_ widget: OpenHABWidget?) {
-        super.widget = widget
-        // Remove image from SDImage cache
+    @objc override var widget: OpenHABWidget! {
+        get {
+            return super.widget
+        }
+        set(widget) {
+            super.widget = widget
+            // Remove image from SDImage cache
+        }
     }
 
     override func displayWidget() {

@@ -183,9 +183,9 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(String(format: "Selected sitemap %ld", indexPath.row))
-        let sitemap = sitemaps[indexPath.row] as? OpenHABSitemap
+        let sitemap = sitemaps[indexPath.row]
         let prefs = UserDefaults.standard
-        prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
+        prefs.setValue(sitemap.name, forKey: "defaultSitemap")
         selectedSitemap = indexPath.row
         appData()?.rootViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
