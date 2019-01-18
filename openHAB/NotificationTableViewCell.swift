@@ -12,6 +12,9 @@ import UIKit
 
 class NotificationTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var customTextLabel: UILabel!
+    @IBOutlet weak var customDetailTextLabel: UILabel!
+
     required init?(coder: NSCoder) {
         print("DrawerUITableViewCell initWithCoder")
         super.init(coder: coder)

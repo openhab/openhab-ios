@@ -24,7 +24,7 @@ extension OpenHABNotification.CodingData {
     }
 }
 
-class OpenHABNotification: NSObject {
+@objcMembers class OpenHABNotification: NSObject {
     var message = ""
     var created: Date?
     var icon = ""
@@ -41,9 +41,10 @@ class OpenHABNotification: NSObject {
                 dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
                 created = dateFormatter.date(from: dictionary[key] as? String ?? "")
             } else {
-//                if propertyNames.contains(key) {
-//                    setValue(dictionary[key], forKey: key)
-//                }
+//                setValue("test", forKey: "message")
+                if propertyNames.contains(key) {
+                    setValue(dictionary[key], forKey: key)
+                }
             }
         }
     }

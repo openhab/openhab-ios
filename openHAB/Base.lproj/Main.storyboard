@@ -896,6 +896,10 @@
                                         </mask>
                                     </variation>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="customDetailTextLabel" destination="uwJ-PQ-XzZ" id="gGu-s7-ro3"/>
+                                    <outlet property="customTextLabel" destination="4HA-k8-SRV" id="Tgb-l2-PkE"/>
+                                </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NotificationCell1" textLabel="Y1o-2s-cct" detailTextLabel="jql-jn-mhj" style="IBUITableViewCellStyleSubtitle" id="MhW-Q9-ErE" customClass="NotificationTableViewCell" customModule="openHAB">
                                 <rect key="frame" x="0.0" y="72" width="414" height="44"/>

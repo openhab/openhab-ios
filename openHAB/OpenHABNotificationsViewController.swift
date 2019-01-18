@@ -141,13 +141,13 @@ class OpenHABNotificationsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OpenHABNotificationsViewController.tableViewCellIdentifier) as? NotificationTableViewCell
         let notification = notifications[indexPath.row] as? OpenHABNotification
-        cell?.textLabel?.text = notification?.message
+        cell?.customTextLabel?.text = notification?.message
         // First convert date of notification from UTC from my.OH to local time for device
         let timeZoneSeconds = TimeInterval(NSTimeZone.local.secondsFromGMT())
         let createdInLocalTimezone = notification?.created?.addingTimeInterval(timeZoneSeconds)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
-        cell?.detailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
+        cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
 
         var iconUrlString: String?
         if appData()?.openHABVersion == 2 {
