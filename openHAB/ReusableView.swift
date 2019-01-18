@@ -23,4 +23,6 @@ extension ReusableView {
 
 }
 
-extension UITableViewCell: ReusableView {}
+extension UITableViewCell: ReusableView {
+
+}

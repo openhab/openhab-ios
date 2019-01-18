@@ -123,7 +123,7 @@
                                                 <segmentedControl opaque="NO" tag="300" contentMode="scaleToFill" horizontalCompressionResistancePriority="800" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" momentary="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WVa-JP-ksR">
                                                     <rect key="frame" x="271" y="8" width="123" height="29"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="123" id="ayd-Kj-Zf9"/>
+                                                        <constraint firstAttribute="width" relation="lessThanOrEqual" constant="123" id="ayd-Kj-Zf9"/>
                                                     </constraints>
                                                     <segments>
                                                         <segment title="" image="glyphicons_433_minus.png"/>
@@ -160,16 +160,6 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <button opaque="NO" tag="703" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OR4-bR-Ekg" customClass="UICircleButton" customModule="openHAB">
-                                                    <rect key="frame" x="364" y="7" width="30" height="30"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" constant="30" id="e9d-e3-sAe"/>
-                                                        <constraint firstAttribute="height" constant="30" id="xxx-h0-TRp"/>
-                                                    </constraints>
-                                                    <state key="normal" title="▲">
-                                                        <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    </state>
-                                                </button>
                                                 <button opaque="NO" tag="702" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JzN-PF-zeJ" customClass="UICircleButton" customModule="openHAB">
                                                     <rect key="frame" x="326" y="7" width="30" height="30"/>
                                                     <constraints>
@@ -182,6 +172,16 @@
                                                     <connections>
                                                         <action selector="colorButtonPressed:" destination="n6i-xP-mqM" eventType="touchUpInside" id="E2V-fJ-h4T"/>
                                                     </connections>
+                                                </button>
+                                                <button opaque="NO" tag="703" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OR4-bR-Ekg" customClass="UICircleButton" customModule="openHAB">
+                                                    <rect key="frame" x="364" y="7" width="30" height="30"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="30" id="e9d-e3-sAe"/>
+                                                        <constraint firstAttribute="height" constant="30" id="xxx-h0-TRp"/>
+                                                    </constraints>
+                                                    <state key="normal" title="▲">
+                                                        <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </state>
                                                 </button>
                                                 <button opaque="NO" tag="701" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vxc-Zw-Oyh" customClass="UICircleButton" customModule="openHAB">
                                                     <rect key="frame" x="288" y="7" width="30" height="30"/>
@@ -767,13 +767,20 @@
                                             <rect key="frame" x="0.0" y="0.0" width="376" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Info" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qfh-lz-UXm">
-                                                    <rect key="frame" x="20" y="11" width="107" height="21"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Info" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qfh-lz-UXm">
+                                                    <rect key="frame" x="20" y="11.666666666666666" width="107" height="20.333333333333336"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="107" id="18T-vl-PFk"/>
+                                                    </constraints>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstItem="Qfh-lz-UXm" firstAttribute="centerY" secondItem="Tqr-A3-HHs" secondAttribute="centerY" id="SBh-BJ-rUI"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="Qfh-lz-UXm" secondAttribute="bottom" constant="1" id="fn0-xK-s5a"/>
+                                                <constraint firstItem="Qfh-lz-UXm" firstAttribute="leading" secondItem="Tqr-A3-HHs" secondAttribute="leadingMargin" id="kgg-ol-aNM"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                         <connections>
                                             <segue destination="PIs-QD-9gt" kind="show" identifier="showInfo" id="Q7x-bt-C6I"/>
@@ -805,13 +812,16 @@
                                             <rect key="frame" x="0.0" y="0.0" width="376" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Legal" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v8c-Ps-18a">
-                                                    <rect key="frame" x="20" y="11" width="42" height="21"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Legal" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v8c-Ps-18a">
+                                                    <rect key="frame" x="20" y="11.666666666666666" width="42" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstItem="v8c-Ps-18a" firstAttribute="leading" secondItem="szB-fb-9zj" secondAttribute="leadingMargin" id="7co-rp-T7T"/>
+                                                <constraint firstItem="v8c-Ps-18a" firstAttribute="centerY" secondItem="szB-fb-9zj" secondAttribute="centerY" id="Lex-Uh-AZm"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                         <connections>
                                             <segue destination="v14-EG-ajz" kind="show" identifier="showLegal" id="UI7-Ps-XIw"/>
@@ -887,7 +897,7 @@
                                     </variation>
                                 </tableViewCellContentView>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NotificationCell1" textLabel="Y1o-2s-cct" detailTextLabel="jql-jn-mhj" style="IBUITableViewCellStyleSubtitle" id="MhW-Q9-ErE">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NotificationCell1" textLabel="Y1o-2s-cct" detailTextLabel="jql-jn-mhj" style="IBUITableViewCellStyleSubtitle" id="MhW-Q9-ErE" customClass="NotificationTableViewCell" customModule="openHAB">
                                 <rect key="frame" x="0.0" y="72" width="414" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="MhW-Q9-ErE" id="ksy-lG-Fq9">
@@ -1316,6 +1326,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="9JR-Li-4ww"/>
+        <segue reference="IN7-RI-eVs"/>
     </inferredMetricsTieBreakers>
 </document>

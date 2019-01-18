@@ -47,19 +47,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         print("uniq id \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
         print("device name \(UIDevice.current.name)")
-        //    AudioSessionInitialize(NULL, NULL, nil , nil);
-        //    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error: nil];
-        if #available(iOS 10.0, *) {
-//MARK - Change this
-            //try! AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: .duckOthers)
-        } else {
-            // Fallback on earlier versions
+
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            if #available(iOS 10.0, *) {
+                try audioSession.setCategory(.playback, mode: .default, options: [])
+            }
+        } catch {
+            print("Setting category to AVAudioSessionCategoryPlayback failed.")
         }
 
-        // AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.ambient, withOptions: AVAudioSessionCategoryOptionDuckOthers, error: nil)
-        //    UInt32 doSetProperty = 1;
-        //    AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof(doSetProperty), &doSetProperty);
-        //    [[AVAudioSession sharedInstance] setActive: YES error: nil];
         print("didFinishLaunchingWithOptions ended")
         return true
     }

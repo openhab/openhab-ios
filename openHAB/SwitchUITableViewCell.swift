@@ -9,9 +9,7 @@
 //
 
 class SwitchUITableViewCell: GenericUITableViewCell {
-    //var widgetSwitch: UISwitch?
 
-    //@IBOutlet var customTextLabel: UILabel!
     @IBOutlet var widgetSwitch: UISwitch!
     required init?(coder: NSCoder) {
         super.init(coder: coder)

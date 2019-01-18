@@ -361,7 +361,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 //cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
                 cell = (tableView.dequeueReusableCell(withIdentifier: "RollershutterWidgetCell") as? RollershutterUITableViewCell)!
             } else {
-                //cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
+//                let cell2: SwitchUITableViewCell = tableView.dequeueReusableCell(for: indexPath)
+//                cell = cell2
                 cell = (tableView.dequeueReusableCell(withIdentifier: "SwitchWidgetCell") as? SwitchUITableViewCell)!
             }
         case "Setpoint":

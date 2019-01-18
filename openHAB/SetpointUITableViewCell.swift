@@ -66,7 +66,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         if widget.item?.state == "Uninitialized" {
             widget.sendCommand(widget.minValue) // as? String)
         } else {
-            if widget.minValue != nil {
+            if widget.minValue != "" {
                 if !isIntStep {
                     let newValue = (widget.item?.stateAsFloat())! - widget.step.floatValue
                     if newValue >= widget.minValue.floatValue {
@@ -96,7 +96,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         if widget.item?.state == "Uninitialized" {
             widget.sendCommand(widget.minValue )
         } else {
-            if widget.maxValue != nil {
+            if widget.maxValue != "" {
                 if !isIntStep {
                     let newValue = (widget.item?.stateAsFloat())! + widget.step.floatValue
                     if newValue <= widget.maxValue.floatValue {
