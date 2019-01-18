@@ -42,14 +42,15 @@ class MapViewTableViewCell: GenericUITableViewCell {
             return super.widget
         }
         set(widget) {
-            let oldLocationCoordinate: CLLocationCoordinate2D = self.widget.coordinate
-            let oldLocationTitle = self.widget.title
+
+            let oldLocationCoordinate: CLLocationCoordinate2D? = self.widget?.coordinate
+            let oldLocationTitle = self.widget?.title ?? ""
             let newLocationCoordinate: CLLocationCoordinate2D? = widget?.coordinate
             let newLocationTitle = widget?.title
 
             super.widget = widget
 
-            if !(oldLocationCoordinate.latitude == newLocationCoordinate?.latitude && oldLocationCoordinate.longitude == newLocationCoordinate?.longitude && (oldLocationTitle == newLocationTitle)) {
+            if !(oldLocationCoordinate?.latitude == newLocationCoordinate?.latitude && oldLocationCoordinate?.longitude == newLocationCoordinate?.longitude && (oldLocationTitle == newLocationTitle)) {
                 mapView.removeAnnotations(mapView.annotations)
 
                 if widget?.item?.stateAsLocation() != nil {

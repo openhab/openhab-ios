@@ -25,7 +25,7 @@ import Foundation
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
         for child in (xmlElement?.children())! {
-            if let child = child as?  GDataXMLElement {
+            if let child = child as? GDataXMLElement {
                 if let name = child.name() {
                     if propertyNames.contains(name) {
                         setValue(child.stringValue ?? "", forKey: child.name() ?? "")
