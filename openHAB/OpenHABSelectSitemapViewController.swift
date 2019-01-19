@@ -103,18 +103,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 // Newer versions speak JSON!
             } else {
                 print("openHAB 2")
-// MARK - Needs to ported to Swift 4 - But not yet ready
-//                guard let jsonArray = responseObject as? [[String: Any]] else {
-//                    return
-//                }
-//                if jsonArray.count != 1 {
-//                    for sitemapJson in jsonArray {
-//                        let sitemap = OpenHABSitemap(dictionary: sitemapJson)
-//                        if  sitemap?.name != "_default" {
-//                            print("Sitemap \(sitemap?.label ?? "not found")")
-//                            self.sitemaps.append(sitemap)
-//                        }
-//                    }
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {

@@ -46,28 +46,26 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
         mappings = [AnyHashable]()
-//        for child: GDataXMLElement? in (xmlElement?.children())! {
-//            if !(child?.name() == "widget") {
-//                if child?.name() == "item" {
-//                    item = OpenHABItem(xml: child)
-//                } else if child?.name() == "mapping" {
-//                    // MARK - HORROR - needs to be reverted
-//                    let mapping = OpenHABWidgetMapping(xml: child) as? OpenHABWidgetMapping
-//                    if let mapping = mapping {
-//                        mappings.append(mapping)
-//                    }
-//                } else if child?.name() == "linkedPage" {
-//                    linkedPage = OpenHABLinkedPage(xml: child)
-//                } else {
-//                    let propertyValue = child?.stringValue ?? ""
-//                    if let name = child?.name() {
-//                        if allPropertyNames().contains(name) {
-//                            setValue(propertyValue, forKey: child?.name() ?? "")
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        for child in (xmlElement?.children())! {
+            if let child = child as? GDataXMLElement {
+                if !(child.name() == "widget") {
+                    if child.name() == "item" {
+                        item = OpenHABItem(xml: child)
+                    } else if child.name() == "mapping" {
+                        let mapping = OpenHABWidgetMapping(xml: child)
+                        mappings.append(mapping)
+                    } else if child.name() == "linkedPage" {
+                        linkedPage = OpenHABLinkedPage(xml: child)
+                    } else {
+                        if let name = child.name() {
+                            if propertyNames.contains(name) {
+                                setValue(child.stringValue, forKey: child.name() ?? "")
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     init(dictionary: [String : Any]) {
@@ -91,7 +89,7 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
                     }
                 } else {
                     if propertyNames.contains(key) {
-                        setValue((dictionary[key] as? NSNumber)?.stringValue ?? "", forKey: key ?? "")
+                        setValue((dictionary[key] as? NSNumber)?.stringValue ?? "", forKey: key )
                     }
                 }
             }
