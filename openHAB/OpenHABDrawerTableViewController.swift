@@ -54,7 +54,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             operation?.securityPolicy.allowInvalidCertificates = true
         }
         if appData()?.openHABVersion == 2 {
-            print("Setting setializer to JSON")
+            print("Setting serializer to JSON")
             operation?.responseSerializer = AFJSONResponseSerializer()
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in

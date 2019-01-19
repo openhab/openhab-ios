@@ -38,14 +38,14 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     var item: OpenHABItem?
     var linkedPage: OpenHABLinkedPage?
     var text = ""
-    var mappings: [AnyHashable] = []
+    var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
 
     let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
-        mappings = [AnyHashable]()
+        mappings = [OpenHABWidgetMapping]()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
                 if !(child.name() == "widget") {
@@ -70,7 +70,7 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
 
     init(dictionary: [String : Any]) {
         super.init()
-        mappings = [AnyHashable]()
+        mappings = [OpenHABWidgetMapping]()
         for key in dictionary.keys {
             if key == "item" {
                 item = OpenHABItem(dictionary: dictionary[key] as! [String:Any])
@@ -130,7 +130,7 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     }
 
     func mappingIndex(byCommand command: String?) -> Int {
-        for mapping in mappings as? [OpenHABWidgetMapping] ?? [] {
+        for mapping in mappings ?? [] {
             if mapping.command == command {
                 return (mappings as NSArray).index(of: mapping)
             }

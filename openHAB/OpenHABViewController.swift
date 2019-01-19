@@ -313,7 +313,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
+        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
         if widget?.type == "Frame" {
             if widget?.label.count ?? 0 > 0 {
                 return 35
@@ -346,7 +346,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         let cell: GenericUITableViewCell
 
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
+        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
 
         switch widget?.type {
         case "Frame":
@@ -434,7 +434,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Check if this is not the last row in the widgets list
         if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
 
-            let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1] as? OpenHABWidget
+            let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
             if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
                 cell.separatorInset = UIEdgeInsets.zero
             } else if !(widget?.type == "Frame") {
@@ -457,7 +457,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
+        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
         if widget?.linkedPage != nil {
             if let link = widget?.linkedPage?.link {
                 print("Selected \(link)")
@@ -473,8 +473,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("Selected selection widget")
             selectedWidgetRow = indexPath.row
             let selectionViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController
-            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow] as? OpenHABWidget
-            selectionViewController?.mappings = selectedWidget?.mappings as! [AnyHashable]
+            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+            selectionViewController?.mappings = (selectedWidget?.mappings)!
             selectionViewController?.delegate = self
             selectionViewController?.selectionItem = selectedWidget?.item
             if let selectionViewController = selectionViewController {
@@ -530,7 +530,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         print("OpenHABViewController prepareForSegue \(segue.identifier ?? "")")
         if segue.identifier?.isEqual("showPage") ?? false {
             let newViewController = segue.destination as? OpenHABViewController
-            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow] as? OpenHABWidget
+            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
             newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
         } else if segue.identifier?.isEqual("showSelectionView") ?? false {
@@ -554,15 +554,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // send command on selected selection widget mapping
     func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
-        let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow] as? OpenHABWidget
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex] as? OpenHABWidgetMapping
+        let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
         sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
     }
 
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell = cell {
-            colorPickerViewController?.widget = currentPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0] as? OpenHABWidget
+            colorPickerViewController?.widget = currentPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
         }
         if let colorPickerViewController = colorPickerViewController {
             navigationController?.pushViewController(colorPickerViewController, animated: true)
@@ -614,7 +614,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         // If we are talking to openHAB 2+, we expect response to be JSON
         if appData()?.openHABVersion == 2 {
-            print("Setting setializer to JSON")
+            print("Setting serializer to JSON")
             currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
         }
         let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
@@ -722,7 +722,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         // If we are talking to openHAB 2+, we expect response to be JSON
         if appData()?.openHABVersion == 2 {
-            print("Setting setializer to JSON")
+            print("Setting serializer to JSON")
             operation?.responseSerializer = AFJSONResponseSerializer()
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in

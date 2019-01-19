@@ -52,18 +52,13 @@ class OpenHABNotificationsViewController: UITableViewController {
         let prefs = UserDefaults.standard
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-//        var components = URLComponents(string: openHABRootUrl)
-//        components?.path = "/api/v1/notifications"
-//        components?.queryItems = [
-//            URLQueryItem(name: "limit", value: "20")
-//        ]
-//        components?.url ?? URL(string: "")
+        var components = URLComponents(string: prefs.value(forKey: "remoteUrl") as! String)
+        components?.path = "/api/v1/notifications"
+        components?.queryItems = [
+            URLQueryItem(name: "limit", value: "20")
+        ]
+        let notificationsUrl = components?.url ?? URL(string: "")
 
-        var notificationsUrlString: String?
-        if let value = prefs.value(forKey: "remoteUrl") {
-            notificationsUrlString = "\(value)/api/v1/notifications?limit=20"
-        }
-        let notificationsUrl = URL(string: notificationsUrlString ?? "")
         var notificationsRequest: NSMutableURLRequest?
         if let notificationsUrl = notificationsUrl {
             notificationsRequest = NSMutableURLRequest(url: notificationsUrl)
@@ -79,7 +74,6 @@ class OpenHABNotificationsViewController: UITableViewController {
             print("Warning - ignoring invalid certificates")
             operation?.securityPolicy.allowInvalidCertificates = true
         }
-        //operation?.responseSerializer = AFJSONResponseSerializer()
 
         let decoder = JSONDecoder()
 
@@ -93,20 +87,6 @@ class OpenHABNotificationsViewController: UITableViewController {
                 print("should not throw \(error)")
             }
 
-//            let response = responseObject //as? Data
-//            self.notifications = []
-//            print("Notifications response")
-//            // If we are talking to openHAB 1.X, talk XML
-//            if response is [Any] {
-//                print("Response is array")
-//                for notificationJson: Any? in responseObject as! [Any?] {
-//                    let notification = OpenHABNotification(dictionary: notificationJson as! [String: Any])
-//                    self.notifications.add(notification)
-//                }
-//            } else {
-//                print("Response is not array")
-//                return
-//            }
             self.refreshControl?.endRefreshing()
             self.tableView.reloadData()
             UIApplication.shared.isNetworkActivityIndicatorVisible = false

@@ -28,7 +28,7 @@ class SelectionUITableViewCell: GenericUITableViewCell {
         super.customTextLabel?.text = widget.labelText()
         let selectedMapping = widget.mappingIndex(byCommand: widget.item?.state)
         if selectedMapping != NSNotFound {
-            if let widgetMapping = widget?.mappings[Int(selectedMapping)] as? OpenHABWidgetMapping {
+            if let widgetMapping = widget?.mappings[Int(selectedMapping)] {
                 customDetailTextLabel?.text = widgetMapping.label
             }
         }

@@ -17,7 +17,7 @@ protocol OpenHABSitemapPageDelegate: NSObjectProtocol {
 
 class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     weak var delegate: OpenHABSitemapPageDelegate?
-    var widgets: [AnyHashable] = []
+    var widgets: [OpenHABWidget] = []
     var pageId = ""
     var title = ""
     var link = ""
@@ -27,7 +27,7 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
-        widgets = [AnyHashable]()
+        widgets = [OpenHABWidget]()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
             if !(child.name() == "widget") {
@@ -66,7 +66,7 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
 
     init(dictionary: [String : Any]) {
         super.init()
-        widgets = [AnyHashable]()
+        widgets = [OpenHABWidget]()
         pageId = dictionary["id"] as? String ?? ""
         title = dictionary["title"] as? String ?? ""
         link = dictionary["link"] as? String ?? ""
