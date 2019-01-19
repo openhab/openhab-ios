@@ -126,7 +126,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         let timeZoneSeconds = TimeInterval(NSTimeZone.local.secondsFromGMT())
         let createdInLocalTimezone = notification?.created?.addingTimeInterval(timeZoneSeconds)
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
+        dateFormatter.dateFormat = "HH:mm:ss"
         cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
 
         var iconUrlString: String?

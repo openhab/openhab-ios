@@ -870,13 +870,13 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4HA-k8-SRV">
-                                            <rect key="frame" x="16" y="7.9999999999999982" width="378" height="19.333333333333329"/>
+                                            <rect key="frame" x="70" y="7.9999999999999982" width="324" height="19.333333333333329"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" tag="102" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uwJ-PQ-XzZ">
-                                            <rect key="frame" x="15.999999999999996" y="26.999999999999996" width="40.666666666666657" height="13.333333333333332"/>
+                                            <rect key="frame" x="70" y="26.999999999999996" width="40.666666666666657" height="13.333333333333332"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -887,8 +887,8 @@
                                         <constraint firstItem="4HA-k8-SRV" firstAttribute="centerY" secondItem="s4Z-v6-X0D" secondAttribute="centerY" id="2Sq-LS-vvB"/>
                                         <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="uwJ-PQ-XzZ" secondAttribute="trailing" constant="20" symbolic="YES" id="7GA-ZC-0C5"/>
                                         <constraint firstItem="uwJ-PQ-XzZ" firstAttribute="top" secondItem="s4Z-v6-X0D" secondAttribute="topMargin" constant="16" id="9Hl-Pq-oNU"/>
-                                        <constraint firstItem="4HA-k8-SRV" firstAttribute="leading" secondItem="s4Z-v6-X0D" secondAttribute="leadingMargin" constant="-4" id="9Zf-re-wNI"/>
-                                        <constraint firstItem="uwJ-PQ-XzZ" firstAttribute="leading" secondItem="s4Z-v6-X0D" secondAttribute="leadingMargin" constant="-4" id="E2M-me-Fhc"/>
+                                        <constraint firstItem="4HA-k8-SRV" firstAttribute="leading" secondItem="s4Z-v6-X0D" secondAttribute="leadingMargin" constant="50" id="9Zf-re-wNI"/>
+                                        <constraint firstItem="uwJ-PQ-XzZ" firstAttribute="leading" secondItem="s4Z-v6-X0D" secondAttribute="leadingMargin" constant="50" id="E2M-me-Fhc"/>
                                         <constraint firstItem="4HA-k8-SRV" firstAttribute="top" secondItem="s4Z-v6-X0D" secondAttribute="topMargin" constant="-3" id="JOH-i0-twM"/>
                                     </constraints>
                                     <variation key="default">
