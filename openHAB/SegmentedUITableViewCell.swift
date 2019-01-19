@@ -34,7 +34,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl?.removeAllSegments()
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
 
-        for mapping: OpenHABWidgetMapping? in widget?.mappings as? [OpenHABWidgetMapping?] ?? [] {
+        for mapping in widget?.mappings as? [OpenHABWidgetMapping?] ?? [] {
             if let mapping = mapping {
                 widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.index(of: mapping)!, animated: false)
             }

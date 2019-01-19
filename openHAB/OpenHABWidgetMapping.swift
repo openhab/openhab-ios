@@ -21,7 +21,7 @@ import Foundation
             if let child = child as? GDataXMLElement {
                 if let name = child.name() {
                     if propertyNames.contains(name) {
-                        setValue(child.stringValue ?? "", forKey: child.name() ?? "")
+                        setValue(child.stringValue, forKey: child.name() ?? "")
                     }
                 }
             }
@@ -33,8 +33,6 @@ import Foundation
     @objc init(dictionary: [String : Any]) {
         super.init()
         for key in dictionary.keys {
-//            if allPropertyNames().contains(key ?? "") {
-//                setValue(dictionary[key], forKey: key ?? "")
             if propertyNames.contains(key) {
                     setValue(dictionary[key], forKey: key)
             }

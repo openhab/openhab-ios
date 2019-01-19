@@ -45,7 +45,7 @@ class NSCBAlertWrapper: NSObject {
     func alertViewCancel(_ alertView: UIAlertView) {
         // Just simulate a cancel button click
         if completionBlock != nil {
-            completionBlock?(alertView, alertView.cancelButtonIndex ?? 0)
+            completionBlock?(alertView, alertView.cancelButtonIndex)
         }
     }
 }

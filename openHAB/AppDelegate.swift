@@ -134,7 +134,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func loadSettingsDefaults() {
-        var prefs = UserDefaults.standard
+        let prefs = UserDefaults.standard
         if prefs.object(forKey: "localUrl") == nil {
             prefs.setValue("", forKey: "localUrl")
         }
