@@ -10,13 +10,10 @@
 import Foundation
 import SystemConfiguration
 
-protocol OpenHABTrackerDelegate {
+protocol OpenHABTrackerDelegate: AnyObject {
     func openHABTracked(_ openHABUrl: String?)
     func openHABTrackingProgress(_ message: String?)
-}
-
-protocol OpenHABTrackerErrorDelegate: OpenHABTrackerDelegate {
-    func openHABTrackingError() throws
+    func openHABTrackingError(_ error: Error) throws
 }
 
 protocol OpenHABTrackerExtendedDelegate: OpenHABTrackerDelegate {
@@ -34,7 +31,7 @@ extension NSData {
 class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     var oldReachabilityStatus: Reachability.Connection?
 
-    var delegate: OpenHABTrackerDelegate?
+    weak var delegate: OpenHABTrackerDelegate?
     var openHABDemoMode = false
     var openHABLocalUrl = ""
     var openHABRemoteUrl = ""
@@ -58,6 +55,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                     print("OpenHABTracker network is Wifi")
                     // Check if local URL is configured, if yes
                     if openHABLocalUrl.count > 0 {
+                        //if Reachability(hostname: openHABLocalUrl) {
                         if isURLReachable(URL(string: openHABLocalUrl)) {
                             trackedLocalUrl()
                         } else {
@@ -70,20 +68,14 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                 }
             }
         } else {
-            if let delegate = delegate as? OpenHABTrackerErrorDelegate {
-                var errorDetail: [AnyHashable : Any] = [:]
-                errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
-                let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String : Any])
-                try? delegate.openHABTrackingError()
-                reach = Reachability()
-                oldReachabilityStatus = reach?.connection
-                NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: NSNotification.Name.reachabilityChanged, object: nil)
-                do {
-                try reach?.startNotifier()
-                } catch {
-                    print ("Could not start notifier")
-                }
-            }
+            var errorDetail: [AnyHashable : Any] = [:]
+            errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
+            let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String : Any])
+            try? delegate?.openHABTrackingError(trackingError)
+            reach = Reachability()
+            oldReachabilityStatus = reach?.connection
+            NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: NSNotification.Name.reachabilityChanged, object: reach)
+            try? reach?.startNotifier()
         }
     }
 
@@ -108,9 +100,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     }
 
     func trackedLocalUrl() {
-        if let delegate = delegate as? OpenHABTrackerDelegate {
-            delegate.openHABTrackingProgress("Connecting to local URL")
-        }
+        delegate?.openHABTrackingProgress("Connecting to local URL")
         let openHABUrl = normalizeUrl(openHABLocalUrl)
         trackedUrl(openHABUrl)
     }
@@ -118,38 +108,28 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(openHABRemoteUrl)
         if (openHABUrl?.count ?? 0) > 0 {
-            if let delegate = delegate as? OpenHABTrackerDelegate {
-                delegate.openHABTrackingProgress("Connecting to remote URL")
-            }
+            delegate?.openHABTrackingProgress("Connecting to remote URL")
             trackedUrl(openHABUrl)
         } else {
-            if let delegate = delegate as? OpenHABTrackerErrorDelegate {
-                var errorDetail: [AnyHashable : Any] = [:]
-                errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
-                let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String : Any])
-                try? delegate.openHABTrackingError()
-            }
+            var errorDetail: [AnyHashable : Any] = [:]
+            errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
+            let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String : Any])
+            try? delegate?.openHABTrackingError(trackingError)
         }
     }
 
     func trackedDiscoveryUrl(_ discoveryUrl: String?) {
-        if let delegate = delegate as? OpenHABTrackerDelegate {
-            delegate.openHABTrackingProgress("Connecting to discovered URL")
-        }
+        delegate?.openHABTrackingProgress("Connecting to discovered URL")
         trackedUrl(discoveryUrl)
     }
 
     func trackedDemoMode() {
-        if let delegate = delegate as? OpenHABTrackerDelegate {
-            delegate.openHABTrackingProgress("Running in demo mode. Check settings to disable demo mode.")
-        }
+        delegate?.openHABTrackingProgress("Running in demo mode. Check settings to disable demo mode.")
         trackedUrl("http://demo.openhab.org:8080")
     }
 
     func trackedUrl(_ trackedUrl: String?) {
-        if delegate != nil {
-            delegate?.openHABTracked(trackedUrl)
-        }
+        delegate?.openHABTracked(trackedUrl)
     }
 
     @objc func reachabilityChanged(_ notification: Notification?) {
@@ -171,9 +151,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 
     func startDiscovery() {
         print("OpenHABTracking starting Bonjour discovery")
-        if let delegate = delegate as? OpenHABTrackerDelegate {
-            delegate.openHABTrackingProgress("Discovering openHAB")
-        }
+        delegate?.openHABTrackingProgress("Discovering openHAB")
         netService = NetService(domain: "local.", type: "_openhab-server-ssl._tcp.", name: "openHAB-ssl")
         netService!.delegate = self
         netService!.resolve(withTimeout: 5.0)
@@ -205,7 +183,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     }
 
     func getStringIp(fromAddressData dataIn: Data?) -> String? {
-        var ipString: String? = nil
+        var ipString: String?
         let data = dataIn! as NSData
         let socketAddress: sockaddr_in = data.castToCPointer()
         ipString = String(cString: inet_ntoa(socketAddress.sin_addr), encoding: .ascii)  ///problem here
@@ -229,9 +207,9 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 
     func isURLReachable(_ url: URL?) -> Bool {
         var response: URLResponse?
-        var error: Error? = nil
-        var data: Data? = nil
-        var request: URLRequest? = nil
+        var error: Error?
+        var data: Data?
+        var request: URLRequest?
         if let url = url {
             request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
         }
@@ -248,7 +226,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         case .none: return "unreachable"
         case .wifi: return "WiFi"
         case .cellular: return "WWAN"
-        default: return "Unknown"
         }
     }
 }
