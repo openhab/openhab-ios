@@ -7,10 +7,7 @@
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
 //
 
-//import arpa
 import Foundation
-//import netinet
-//import sys
 import SystemConfiguration
 
 protocol OpenHABTrackerDelegate {
@@ -83,7 +80,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                 NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: NSNotification.Name.reachabilityChanged, object: nil)
                 do {
                 try reach?.startNotifier()
-                }  catch {
+                } catch {
                     print ("Could not start notifier")
                 }
             }
@@ -197,41 +194,14 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         return urlTest.evaluate(with: url)
     }
 
-//    func isNetworkConnected() -> Bool {
-//        var zeroAddress: sockaddr_in
-//        bzero(&zeroAddress, MemoryLayout<zeroAddress>.size)
-//        zeroAddress.sin_len = MemoryLayout<zeroAddress>.size
-//        zeroAddress.sin_family = AF_INET
-//        let defaultRouteReachability = SCNetworkReachabilityCreateWithAddress(nil, &zeroAddress as? sockaddr)
-//        var flags: SCNetworkReachabilityFlags?
-//        let didRetrieveFlags = SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags)
-//        if !didRetrieveFlags {
-//            return false
-//        }
-//        let isReachable = Bool(flags!.rawValue & kSCNetworkFlagsReachable)
-//        let needsConnection = Bool(flags!.rawValue & kSCNetworkFlagsConnectionRequired)
-//        return (isReachable && !needsConnection) ? true : false
-//    }
-
     func isNetworkConnected2() -> Bool {
         let networkReach = Reachability()
         return (networkReach?.connection == .wifi || networkReach?.connection == .cellular ) ? true : false
-//        let networkReachabilityStatus: NetworkStatus = networkReach.currenteachabilityStatus()
-//        print(String(format: "Network status = %ld", Int(Float(networkReachabilityStatus.rawValue))))
-//        if networkReachabilityStatus == ReachableViaWiFi || networkReachabilityStatus == ReachableViaWWAN {
-//            return true
-//        }
-//        return false
     }
 
     func isNetworkWiFi() -> Bool {
         let wifiReach = Reachability()
         return wifiReach?.connection == .wifi ? true : false
-//        let wifiReachabilityStatus: NetworkStatus = wifiReach.currentReachabilityStatus()
-//        if wifiReachabilityStatus == ReachableViaWiFi {
-//            return true
-//        }
-//        return false
     }
 
     func getStringIp(fromAddressData dataIn: Data?) -> String? {
