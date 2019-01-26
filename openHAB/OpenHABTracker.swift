@@ -1,4 +1,4 @@
-//  Converted to Swift 4 by Swiftify v4.2.20229 - https://objectivec2swift.com/
+//  Converted to Swift 4 by Swiftify v4.2.28153 - https://objectivec2swift.com/
 //
 //  OpenHABTracker.swift
 //  openHAB
@@ -7,24 +7,37 @@
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
 //
 
-import arpa
+//import arpa
 import Foundation
-import netinet
-import sys
+//import netinet
+//import sys
 import SystemConfiguration
 
-@objc protocol OpenHABTrackerDelegate: NSObjectProtocol {
+protocol OpenHABTrackerDelegate {
     func openHABTracked(_ openHABUrl: String?)
-
-    @objc optional func openHABTrackingProgress(_ message: String?)
-    @objc optional func openHABTrackingError() throws
-    @objc optional func openHABTrackingNetworkChange(_ networkStatus: NetworkStatus)
+    func openHABTrackingProgress(_ message: String?)
 }
 
-class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegate {
-    var oldReachabilityStatus: NetworkStatus?
+protocol OpenHABTrackerErrorDelegate: OpenHABTrackerDelegate {
+    func openHABTrackingError() throws
+}
 
-    weak var delegate: OpenHABTrackerDelegate?
+protocol OpenHABTrackerExtendedDelegate: OpenHABTrackerDelegate {
+    func openHABTrackingNetworkChange(_ networkStatus: Reachability.Connection)
+}
+
+extension NSData {
+    func castToCPointer<T>() -> T {
+        let mem = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout<T.Type>.size)
+        self.getBytes(mem, length: MemoryLayout<T.Type>.size)
+        return mem.move()
+    }
+}
+
+class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
+    var oldReachabilityStatus: Reachability.Connection?
+
+    var delegate: OpenHABTrackerDelegate?
     var openHABDemoMode = false
     var openHABLocalUrl = ""
     var openHABRemoteUrl = ""
@@ -33,7 +46,7 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
 
     func start() {
         // Check if any network is available
-        if isNetworkConnected() {
+        if isNetworkConnected2() {
             // Check if demo mode is switched on in preferences
             if openHABDemoMode {
                 print("OpenHABTracker demo mode preference is on")
@@ -60,23 +73,27 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
                 }
             }
         } else {
-            if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingError)) ?? false {
+            if let delegate = delegate as? OpenHABTrackerErrorDelegate {
                 var errorDetail: [AnyHashable : Any] = [:]
                 errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
                 let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String : Any])
-                try? delegate?.openHABTrackingError()
+                try? delegate.openHABTrackingError()
                 reach = Reachability()
-                oldReachabilityStatus = reach?.currentReachabilityStatus()
-                NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: kReachabilityChangedNotification, object: nil)
-                reach?.startNotifier()
+                oldReachabilityStatus = reach?.connection
+                NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: NSNotification.Name.reachabilityChanged, object: nil)
+                do {
+                try reach?.startNotifier()
+                }  catch {
+                    print ("Could not start notifier")
+                }
             }
         }
     }
 
     // NSNetService delegate methods for publication
     func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
-        print("OpenHABTracker discovered \(getStringIp(fromAddressData: resolvedNetService.addresses[0]) ?? ""):\(getStringPort(fromAddressData: resolvedNetService.addresses[0]) ?? "")")
-        let openhabUrl = "https://\(getStringIp(fromAddressData: resolvedNetService.addresses[0]) ?? ""):\(getStringPort(fromAddressData: resolvedNetService.addresses[0]) ?? "")"
+        print("OpenHABTracker discovered \(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(getStringPort(fromAddressData: resolvedNetService.addresses![0]) ?? "")")
+        let openhabUrl = "https://\(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(getStringPort(fromAddressData: resolvedNetService.addresses![0]) ?? "")"
         trackedDiscoveryUrl(openhabUrl)
     }
 
@@ -94,8 +111,8 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
     }
 
     func trackedLocalUrl() {
-        if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingProgress(_:))) ?? false {
-            delegate?.openHABTrackingProgress("Connecting to local URL")
+        if let delegate = delegate as? OpenHABTrackerDelegate {
+            delegate.openHABTrackingProgress("Connecting to local URL")
         }
         let openHABUrl = normalizeUrl(openHABLocalUrl)
         trackedUrl(openHABUrl)
@@ -104,30 +121,30 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(openHABRemoteUrl)
         if (openHABUrl?.count ?? 0) > 0 {
-            if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingProgress(_:))) ?? false {
-                delegate?.openHABTrackingProgress("Connecting to remote URL")
+            if let delegate = delegate as? OpenHABTrackerDelegate {
+                delegate.openHABTrackingProgress("Connecting to remote URL")
             }
             trackedUrl(openHABUrl)
         } else {
-            if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingError)) ?? false {
+            if let delegate = delegate as? OpenHABTrackerErrorDelegate {
                 var errorDetail: [AnyHashable : Any] = [:]
                 errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
                 let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String : Any])
-                try? delegate?.openHABTrackingError()
+                try? delegate.openHABTrackingError()
             }
         }
     }
 
     func trackedDiscoveryUrl(_ discoveryUrl: String?) {
-        if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingProgress(_:))) ?? false {
-            delegate?.openHABTrackingProgress("Connecting to discovered URL")
+        if let delegate = delegate as? OpenHABTrackerDelegate {
+            delegate.openHABTrackingProgress("Connecting to discovered URL")
         }
         trackedUrl(discoveryUrl)
     }
 
     func trackedDemoMode() {
-        if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingProgress(_:))) ?? false {
-            delegate?.openHABTrackingProgress("Running in demo mode. Check settings to disable demo mode.")
+        if let delegate = delegate as? OpenHABTrackerDelegate {
+            delegate.openHABTrackingProgress("Running in demo mode. Check settings to disable demo mode.")
         }
         trackedUrl("http://demo.openhab.org:8080")
     }
@@ -139,18 +156,17 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
     }
 
     @objc func reachabilityChanged(_ notification: Notification?) {
-        let changedReach = notification?.object as? Reachability
-        if changedReach is Reachability {
-            let nStatus: NetworkStatus? = changedReach?.currentReachabilityStatus()
+        if let changedReach = notification?.object as? Reachability {
+            let nStatus = changedReach.connection
             if nStatus != oldReachabilityStatus {
-                if let oldReachabilityStatus = oldReachabilityStatus, let nStatus = nStatus {
-                    print("Network status changed from \(string(from: oldReachabilityStatus) ?? "") to \(string(from: nStatus) ?? "")")
+                if let oldReachabilityStatus = oldReachabilityStatus { //}, let nStatus = nStatus {
+                print("Network status changed from \(string(from: oldReachabilityStatus) ?? "") to \(string(from: nStatus) ?? "")")
                 }
                 oldReachabilityStatus = nStatus
-                if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingNetworkChange(_:))) ?? false {
-                    if let nStatus = nStatus {
-                        delegate?.openHABTrackingNetworkChange(nStatus)
-                    }
+                if let delegate = delegate as? OpenHABTrackerExtendedDelegate {
+//                    if let nStatus = nStatus {
+                        delegate.openHABTrackingNetworkChange(nStatus)
+//                    }
                 }
             }
         }
@@ -158,12 +174,12 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
 
     func startDiscovery() {
         print("OpenHABTracking starting Bonjour discovery")
-        if delegate != nil && delegate?.responds(to: #selector(OpenHABTrackerDelegate.openHABTrackingProgress(_:))) ?? false {
-            delegate?.openHABTrackingProgress("Discovering openHAB")
+        if let delegate = delegate as? OpenHABTrackerDelegate {
+            delegate.openHABTrackingProgress("Discovering openHAB")
         }
         netService = NetService(domain: "local.", type: "_openhab-server-ssl._tcp.", name: "openHAB-ssl")
-        netService.delegate = self
-        netService.resolve(withTimeout: 5.0)
+        netService!.delegate = self
+        netService!.resolve(withTimeout: 5.0)
     }
 
     // NSNetService delegate methods for Bonjour resolving
@@ -181,67 +197,71 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
         return urlTest.evaluate(with: url)
     }
 
-    func isNetworkConnected() -> Bool {
-
-        var zeroAddress: sockaddr_in
-        bzero(&zeroAddress, MemoryLayout<zeroAddress>.size)
-        zeroAddress.sin_len = MemoryLayout<zeroAddress>.size
-        zeroAddress.sin_family = AF_INET
-        let defaultRouteReachability = SCNetworkReachabilityCreateWithAddress(nil, &zeroAddress as? sockaddr)
-        var flags: SCNetworkReachabilityFlags?
-        let didRetrieveFlags = SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags)
-        if !didRetrieveFlags {
-            return false
-        }
-        let isReachable = Bool(flags.rawValue & kSCNetworkFlagsReachable)
-        let needsConnection = Bool(flags.rawValue & kSCNetworkFlagsConnectionRequired)
-        return (isReachable && !needsConnection) ? true : false
-    }
+//    func isNetworkConnected() -> Bool {
+//        var zeroAddress: sockaddr_in
+//        bzero(&zeroAddress, MemoryLayout<zeroAddress>.size)
+//        zeroAddress.sin_len = MemoryLayout<zeroAddress>.size
+//        zeroAddress.sin_family = AF_INET
+//        let defaultRouteReachability = SCNetworkReachabilityCreateWithAddress(nil, &zeroAddress as? sockaddr)
+//        var flags: SCNetworkReachabilityFlags?
+//        let didRetrieveFlags = SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags)
+//        if !didRetrieveFlags {
+//            return false
+//        }
+//        let isReachable = Bool(flags!.rawValue & kSCNetworkFlagsReachable)
+//        let needsConnection = Bool(flags!.rawValue & kSCNetworkFlagsConnectionRequired)
+//        return (isReachable && !needsConnection) ? true : false
+//    }
 
     func isNetworkConnected2() -> Bool {
         let networkReach = Reachability()
-        let networkReachabilityStatus: NetworkStatus = networkReach.currentReachabilityStatus()
-        print(String(format: "Network status = %ld", Int(networkReachabilityStatus)))
-        if networkReachabilityStatus == ReachableViaWiFi || networkReachabilityStatus == ReachableViaWWAN {
-            return true
-        }
-        return false
+        return (networkReach?.connection == .wifi || networkReach?.connection == .cellular ) ? true : false
+//        let networkReachabilityStatus: NetworkStatus = networkReach.currenteachabilityStatus()
+//        print(String(format: "Network status = %ld", Int(Float(networkReachabilityStatus.rawValue))))
+//        if networkReachabilityStatus == ReachableViaWiFi || networkReachabilityStatus == ReachableViaWWAN {
+//            return true
+//        }
+//        return false
     }
 
     func isNetworkWiFi() -> Bool {
         let wifiReach = Reachability()
-        let wifiReachabilityStatus: NetworkStatus = wifiReach.currentReachabilityStatus()
-        if wifiReachabilityStatus == ReachableViaWiFi {
-            return true
-        }
-        return false
+        return wifiReach?.connection == .wifi ? true : false
+//        let wifiReachabilityStatus: NetworkStatus = wifiReach.currentReachabilityStatus()
+//        if wifiReachabilityStatus == ReachableViaWiFi {
+//            return true
+//        }
+//        return false
     }
 
     func getStringIp(fromAddressData dataIn: Data?) -> String? {
-
-        var socketAddress: sockaddr_in?
-        var ipString: String?
-
-        socketAddress = dataIn?.bytes as? sockaddr_in
-        ipString = "\(inet_ntoa(socketAddress?.sin_addr))" ///problem here
+        var ipString: String? = nil
+        let data = dataIn! as NSData
+        let socketAddress: sockaddr_in = data.castToCPointer()
+        ipString = String(cString: inet_ntoa(socketAddress.sin_addr), encoding: .ascii)  ///problem here
         return ipString
     }
 
     func getStringPort(fromAddressData dataIn: Data?) -> String? {
+        //MARK - taken out of service
 
-        var socketAddress: sockaddr_in?
-        var ipPort: String?
-
-        socketAddress = dataIn?.bytes as? sockaddr_in
-        ipPort = String(format: "%hu", ntohs(socketAddress?.sin_port)) ///problem here
-        return ipPort
+        return "8832"
+//        //var socketAddress: sockaddr_in? = nil
+//        var ipPort: String? = nil
+//
+//        //socketAddress = dataIn?.bytes as? sockaddr_in
+//        let data = dataIn! as NSData
+//        let socketAddress: sockaddr_in = data.castToCPointer()
+//
+//        ipPort = String(format: "%hu", ntohs(socketAddress?.sin_port)) ///problem here
+//        return ipPort
     }
 
     func isURLReachable(_ url: URL?) -> Bool {
         var response: URLResponse?
-        var error: Error?
-        var data: Data?
-        var request: URLRequest?
+        var error: Error? = nil
+        var data: Data? = nil
+        var request: URLRequest? = nil
         if let url = url {
             request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
         }
@@ -253,19 +273,12 @@ class OpenHABTracker: NSObject, NSNetServiceDelegate, NSNetServiceBrowserDelegat
         return data != nil && response != nil
     }
 
-    func string(from status: NetworkStatus) -> String? {
-
-        var string: String
+    func string(from status: Reachability.Connection) -> String? {
         switch status {
-        case NotReachable:
-            string = "unreachable"
-        case ReachableViaWiFi:
-            string = "WiFi"
-        case ReachableViaWWAN:
-            string = "WWAN"
-        default:
-            string = "Unknown"
+        case .none: return "unreachable"
+        case .wifi: return "WiFi"
+        case .cellular: return "WWAN"
+        default: return "Unknown"
         }
-        return string
     }
 }

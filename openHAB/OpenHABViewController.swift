@@ -30,7 +30,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var sitemaps: [OpenHABSitemap] = []
     var currentPage: OpenHABSitemapPage?
     var selectionPicker: UIPickerView?
-    var pageNetworkStatus: NetworkStatus?
+    var pageNetworkStatus: Reachability.Connection?
     var pageNetworkStatusAvailable = false
     var toggle: Int = 0
     var deviceToken = ""
@@ -125,7 +125,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         print("OpenHABViewController viewDidLoad")
-        pageNetworkStatus = NetworkStatus(rawValue: -1)
+        pageNetworkStatus = nil //NetworkStatus(rawValue: -1)
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -834,16 +834,16 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func pageNetworkStatusChanged() -> Bool {
         print("OpenHABViewController pageNetworkStatusChange")
         if pageUrl != "" {
-            let pageReachability = Reachability(urlString: pageUrl)
+            let pageReachability = Reachability( hostname: pageUrl)
             if !pageNetworkStatusAvailable {
-                pageNetworkStatus = pageReachability?.currentReachabilityStatus()
+                pageNetworkStatus = pageReachability?.connection
                 pageNetworkStatusAvailable = true
                 return false
             } else {
-                if pageNetworkStatus == pageReachability?.currentReachabilityStatus() {
+                if pageNetworkStatus == pageReachability?.connection {
                     return false
                 } else {
-                    pageNetworkStatus = pageReachability?.currentReachabilityStatus()
+                    pageNetworkStatus = pageReachability?.connection
                     return true
                 }
             }

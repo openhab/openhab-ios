@@ -26,7 +26,6 @@
 
 #import "AFRememberingSecurityPolicy.h"
 //#import "NSObject+Data.h"
-#import "OpenHABTracker.h"
 #import "Reachability+URL.h"
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
