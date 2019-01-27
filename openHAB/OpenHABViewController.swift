@@ -76,7 +76,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("This is an openHAB 1.X")
             self.appData()?.openHABVersion = 1
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------>\(error.localizedDescription)")
+            print("Error:------On Tracking>\(error.localizedDescription)")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
 
             self.selectSitemap()
@@ -676,7 +676,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
         }, failure: { operation, error in
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------>\(error.localizedDescription )")
+            print("Error:------> on LoadPage \(error.localizedDescription )")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
             strongSelf.atmosphereTrackingId = ""
             if (error as NSError?)?.code == -1001 && longPolling {
@@ -788,7 +788,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
 
         }, failure: { operation, error in
-            print("Error:------>\(error.localizedDescription)")
+            print("Error:------SelectSitemap>\(error.localizedDescription)")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             // Error

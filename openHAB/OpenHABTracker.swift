@@ -81,8 +81,8 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 
     // NSNetService delegate methods for publication
     func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
-        print("OpenHABTracker discovered \(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(getStringPort(fromAddressData: resolvedNetService.addresses![0]) ?? "")")
-        let openhabUrl = "https://\(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(getStringPort(fromAddressData: resolvedNetService.addresses![0]) ?? "")"
+        let openhabUrl = "https://\(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(resolvedNetService.port)"
+        print("OpenHABTracker discovered:\(openhabUrl)")
         trackedDiscoveryUrl(openhabUrl)
     }
 
@@ -190,10 +190,10 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         return ipString
     }
 
-    func getStringPort(fromAddressData dataIn: Data?) -> String? {
-        //MARK - taken out of service
-
-        return "8832"
+//    func getStringPort(fromAddressData dataIn: Data?) -> String? {
+//        //MARK - taken out of service
+//
+//        return "8832"
 //        //var socketAddress: sockaddr_in? = nil
 //        var ipPort: String? = nil
 //
@@ -203,7 +203,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 //
 //        ipPort = String(format: "%hu", ntohs(socketAddress?.sin_port)) ///problem here
 //        return ipPort
-    }
+//    }
 
     func isURLReachable(_ url: URL?) -> Bool {
         var response: URLResponse?
