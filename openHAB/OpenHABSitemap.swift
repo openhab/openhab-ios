@@ -1,12 +1,3 @@
-//  Converted to Swift 4 by Swiftify v4.2.20229 - https://objectivec2swift.com/
-//
-//  OpenHABSitemap.swift
-//  HelloRestKit
-//
-//  Created by Victor Belov on 10/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
-//
-
 //
 //  OpenHABSitemap.swift
 //  HelloRestKit
@@ -39,41 +30,41 @@ import Foundation
                 if child.name() == "homepage" {
                     for childChild in (child.children())! {
                         if let childChild = childChild as? GDataXMLElement {
-                        if childChild.name() == "link" {
-                            homepageLink = childChild.stringValue() ?? ""
-                        }
-                        if childChild.name() == "leaf" {
-                            leaf = childChild.stringValue() ?? ""
+                            if childChild.name() == "link" {
+                                homepageLink = childChild.stringValue() ?? ""
+                            }
+                            if childChild.name() == "leaf" {
+                                leaf = childChild.stringValue() ?? ""
+                            }
                         }
                     }
-                }
                 } else if let name = child.name() {
                     if propertyNames.contains(name) {
                         setValue(child.stringValue, forKey: child.name() )
+                    }
                 }
             }
         }
     }
-}
 
-init(dictionary: [String : Any]) {
-    super.init()
-    let keyArray = dictionary.keys
-    for key in keyArray {
-        if key == "homepage" {
-            let homepageDictionary = dictionary[key] as? [String : Any]
-            let homepageKeyArray = homepageDictionary!.keys
-            for homepageKey in homepageKeyArray {
-                if homepageKey == "link" {
-                    homepageLink = homepageDictionary?[homepageKey] as? String ?? ""
+    init(dictionary: [String : Any]) {
+        super.init()
+        let keyArray = dictionary.keys
+        for key in keyArray {
+            if key == "homepage" {
+                let homepageDictionary = dictionary[key] as? [String : Any]
+                let homepageKeyArray = homepageDictionary!.keys
+                for homepageKey in homepageKeyArray {
+                    if homepageKey == "link" {
+                        homepageLink = homepageDictionary?[homepageKey] as? String ?? ""
+                    }
+                    if homepageKey == "leaf" {
+                        leaf = homepageDictionary?[homepageKey] as? String ?? ""
+                    }
                 }
-                if homepageKey == "leaf" {
-                    leaf = homepageDictionary?[homepageKey] as? String ?? ""
-                }
+            } else if propertyNames.contains(key) {
+                setValue(dictionary[key], forKey: key)
             }
-        } else if propertyNames.contains(key) {
-            setValue(dictionary[key], forKey: key)
         }
     }
-}
 }

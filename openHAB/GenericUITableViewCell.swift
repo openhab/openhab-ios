@@ -18,7 +18,7 @@ class GenericUITableViewCell: UITableViewCell {
         if widget?.labelValue() != nil {
             customDetailTextLabel?.text = widget?.labelValue()
         } else {
-            customDetailTextLabel?.text = nil
+            customDetailTextLabel?.text = ""
         }
         customDetailTextLabel?.sizeToFit()
         // Clean any detailTextLabel constraints we set before, or they will start to interfere with new ones because of UITableViewCell caching

@@ -96,23 +96,19 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
         }
     }
 
+    // Text prior to "["
     func labelText() -> String? {
         let array = label.components(separatedBy: "[")
-        var valueString = array[0]
-        while valueString.hasSuffix(" ") {
-            valueString = (valueString as? NSString)?.substring(to: valueString.count - 1) ?? ""
-        }
-        return valueString
+        return array[0].trimmingCharacters(in: .whitespaces)
     }
 
+    // Text after "["
     func labelValue() -> String? {
         let array = label.components(separatedBy: "[")
         if array.count > 1 {
-            var valueString = array[1]
-            while valueString.hasSuffix("]") || valueString.hasSuffix(" ") {
-                valueString = (valueString as? NSString)?.substring(to: valueString.count - 1) ?? ""
-            }
-            return valueString
+            var characterSet = CharacterSet.whitespaces
+            characterSet.insert(charactersIn: "]")
+            return array[1].trimmingCharacters(in: characterSet)
         }
         return nil
     }
@@ -130,7 +126,7 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     }
 
     func mappingIndex(byCommand command: String?) -> Int {
-        for mapping in mappings ?? [] {
+        for mapping in mappings {
             if mapping.command == command {
                 return (mappings as NSArray).index(of: mapping)
             }
@@ -139,7 +135,7 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     }
 
     var coordinate: CLLocationCoordinate2D {
-        return (item?.stateAsLocation()?.coordinate)!
+        return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
     var title: String? {
