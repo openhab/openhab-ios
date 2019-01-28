@@ -46,7 +46,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         openHABRootUrl = openHABUrl ?? ""
         appData()?.openHABRootUrl = openHABRootUrl
 
-
         // Checking openHAB version
         var components = URLComponents(string: openHABRootUrl)
         components?.path = "/rest/bindings"
