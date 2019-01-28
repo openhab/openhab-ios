@@ -1,4 +1,4 @@
-//  Converted to Swift 4 by Swiftify v4.2.20229 - https://objectivec2swift.com/
+//  Converted to Swift 4 by Swiftify v4.2.28153 - https://objectivec2swift.com/
 //
 //  AFRememberingSecurityPolicy.swift
 //  openHAB
@@ -25,6 +25,7 @@ protocol AFRememberingSecurityPolicyDelegate: NSObjectProtocol {
 
 var trustedCertificates: [AnyHashable : Any] = [:]
 
+
 func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
     // Returns the leaf certificate from a SecTrust object (that is always the
     // certificate at index 0).
@@ -32,8 +33,8 @@ func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
 
     assert(trust != nil)
 
-    if SecTrustGetCertificateCount(trust!) > 0 {
-        result = SecTrustGetCertificateAtIndex(trust!, 0)
+    if SecTrustGetCertificateCount(trust) > 0 {
+        result = SecTrustGetCertificateAtIndex(trust, 0)
         assert(result != nil)
     } else {
         result = nil
@@ -86,11 +87,11 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         super.init()
         allowInvalidCertificates = ignoreCertificates
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
         //    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
         let certificateData = certificate as? Data
@@ -114,18 +115,18 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         }
     }
 
-    override func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {
+    func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {
         // Evaluates trust received during SSL negotiation and checks it against known ones,
         // against policy setting to ignore certificate errors and so on.
         var evaluateResult: SecTrustResultType?
-        SecTrustEvaluate(serverTrust!, &evaluateResult!)
+        SecTrustEvaluate(serverTrust, &evaluateResult)
         if evaluateResult == .unspecified || evaluateResult == .proceed || allowInvalidCertificates {
             // This means system thinks this is a legal/usable certificate, just permit the connection
             return true
         }
-        let certificate = SecTrustGetLeafCertificate(trust: serverTrust)
-        let certificateSummary = SecCertificateCopySubjectSummary(certificate!)
-        let certificateData = SecCertificateCopyData(certificate!)
+        let certificate = SecTrustGetLeafCertificate(serverTrust)
+        let certificateSummary = SecCertificateCopySubjectSummary(certificate)
+        let certificateData = SecCertificateCopyData(certificate)
         // If we have a certificate for this domain
         if AFRememberingSecurityPolicy.certificateData(forDomain: domain) != nil && certificateData != nil {
             // Obtain certificate we have and compare it with the certificate presented by the server
@@ -145,15 +146,19 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                         Thread.sleep(forTimeInterval: 0.1)
                     }
                     switch self.evaluateResult {
-                    case 0: // User decided to abort connection
-                        return false
-                    case 1: // User decided to accept invalid certificate once
-                        return true
-                    case 2: // User decided to accept invalid certificate and remember decision
-                        // Add certificate to storage
-                        AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
-                        return true
-                    default: // Something went wrong, abort connection
+                        case 0:
+                            // User decided to abort connection
+                            return false
+                        case 1:
+                            // User decided to accept invalid certificate once
+                            return true
+                        case 2:
+                            // User decided to accept invalid certificate and remember decision
+                            // Add certificate to storage
+                            AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                            return true
+                        default:
+                            // Something went wrong, abort connection
                             return false
                     }
                 }
@@ -170,20 +175,20 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                 Thread.sleep(forTimeInterval: 0.1)
             }
             switch self.evaluateResult {
-            case 0:
-                // User decided to abort connection
-                return false
-            case 1:
-                // User decided to accept invalid certificate once
-                return true
-            case 2:
-                // User decided to accept invalid certificate and remember decision
-                // Add certificate to storage
-                AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
-                return true
-            default:
-                // Something went wrong, abort connection
-                return false
+                case 0:
+                    // User decided to abort connection
+                    return false
+                case 1:
+                    // User decided to accept invalid certificate once
+                    return true
+                case 2:
+                    // User decided to accept invalid certificate and remember decision
+                    // Add certificate to storage
+                    AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                    return true
+                default:
+                    // Something went wrong, abort connection
+                    return false
             }
         }
         // We have no way of handling it so no access!

@@ -11,7 +11,6 @@
 #import "TSMessage.h"
 @import AVFoundation;
 @import Firebase;
-#import "AFRememberingSecurityPolicy.h"
 #import "UIViewController+MMDrawerController.h"
 
 @implementation OpenHABAppDelegate

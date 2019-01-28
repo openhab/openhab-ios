@@ -24,7 +24,6 @@
 // • Add `@class MySwiftClass` to your .h files that depend on the Swift code;
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
-#import "AFRememberingSecurityPolicy.h"
 //#import "NSObject+Data.h"
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>

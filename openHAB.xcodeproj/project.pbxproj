@@ -82,7 +82,7 @@
 		DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */; };
 		DFDF45311932042B00A6E581 /* legal.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFDF45301932042B00A6E581 /* legal.rtf */; };
 		DFDF45341934699B00A6E581 /* OpenHABInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */; };
-		DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */; };
+		DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */; };
 		DFE10414197415F900D94943 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE10413197415F900D94943 /* Security.framework */; };
 		DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */; };
 /* End PBXBuildFile section */
@@ -189,8 +189,7 @@
 		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLegalViewController.swift; sourceTree = "<group>"; };
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABInfoViewController.swift; sourceTree = "<group>"; };
-		DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRememberingSecurityPolicy.h; sourceTree = "<group>"; };
-		DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRememberingSecurityPolicy.m; sourceTree = "<group>"; };
+		DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AFRememberingSecurityPolicy.swift; sourceTree = "<group>"; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UICircleButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -438,8 +437,7 @@
 			isa = PBXGroup;
 			children = (
 				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
-				DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */,
-				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
+				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */,
 				DF2B6ADC18EF4D660063819F /* NSData+HexString.swift */,
 				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */,
 				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */,
@@ -715,7 +713,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
+				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.swift in Sources */,
 				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
