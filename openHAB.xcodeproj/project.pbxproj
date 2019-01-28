@@ -23,7 +23,6 @@
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
 		DAA42BAE21DC987C00244B2A /* ImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAD21DC987C00244B2A /* ImageUITableViewCell.swift */; };
-		DAD3714421EB91BF00255BBB /* NSObjectExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */; };
 		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
@@ -68,16 +67,6 @@
 		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
 		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
 		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */; };
-		DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE401188322BC008B26AC /* NSObject+Data.m */; };
-		DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.m */; };
-		DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.m */; };
-		DFDEE40F188322FA008B26AC /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
-		DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.m */; };
-		DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40C188322FA008B26AC /* OpenHABWidget.m */; };
-		DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */; };
-		DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */; };
-		DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4191883EB18008B26AC /* Reachability.m */; };
-		DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41C1883EB99008B26AC /* Reachability+URL.m */; };
 		DFDEE40D188322FA008B26AC /* OpenHABItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.swift */; };
 		DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
 		DFDEE40F188322FA008B26AC /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
@@ -176,30 +165,20 @@
 		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSettingsViewController.swift; sourceTree = "<group>"; };
 		DFDEE400188322BC008B26AC /* NSObject+Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Data.h"; sourceTree = "<group>"; };
 		DFDEE401188322BC008B26AC /* NSObject+Data.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Data.m"; sourceTree = "<group>"; };
-		DFDEE403188322FA008B26AC /* OpenHABItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABItem.h; sourceTree = "<group>"; };
-		DFDEE404188322FA008B26AC /* OpenHABItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABItem.m; sourceTree = "<group>"; };
-		DFDEE405188322FA008B26AC /* OpenHABLinkedPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABLinkedPage.h; sourceTree = "<group>"; };
-		DFDEE406188322FA008B26AC /* OpenHABLinkedPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABLinkedPage.m; sourceTree = "<group>"; };
-		DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemap.swift; sourceTree = "<group>"; };
-		DFDEE409188322FA008B26AC /* OpenHABSitemapPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSitemapPage.h; sourceTree = "<group>"; };
-		DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABSitemapPage.m; sourceTree = "<group>"; };
-		DFDEE40B188322FA008B26AC /* OpenHABWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABWidget.h; sourceTree = "<group>"; };
-		DFDEE40C188322FA008B26AC /* OpenHABWidget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABWidget.m; sourceTree = "<group>"; };
-		DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+Auth.h"; sourceTree = "<group>"; };
-		DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableURLRequest+Auth.m"; sourceTree = "<group>"; };
-		DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABTracker.h; sourceTree = "<group>"; };
-		DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABTracker.m; sourceTree = "<group>"; };
-		DFDEE4181883EB18008B26AC /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
-		DFDEE4191883EB18008B26AC /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
-		DFDEE41B1883EB99008B26AC /* Reachability+URL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Reachability+URL.h"; sourceTree = "<group>"; };
-		DFDEE41C1883EB99008B26AC /* Reachability+URL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Reachability+URL.m"; sourceTree = "<group>"; };
 		DFDEE404188322FA008B26AC /* OpenHABItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABItem.swift; sourceTree = "<group>"; };
 		DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLinkedPage.swift; sourceTree = "<group>"; };
 		DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemap.swift; sourceTree = "<group>"; };
+		DFDEE409188322FA008B26AC /* OpenHABSitemapPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABSitemapPage.h; sourceTree = "<group>"; };
 		DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemapPage.swift; sourceTree = "<group>"; };
+		DFDEE40B188322FA008B26AC /* OpenHABWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABWidget.h; sourceTree = "<group>"; };
 		DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABWidget.swift; sourceTree = "<group>"; };
+		DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+Auth.h"; sourceTree = "<group>"; };
 		DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableURLRequest+Auth.swift"; sourceTree = "<group>"; };
+		DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABTracker.h; sourceTree = "<group>"; };
 		DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABTracker.swift; sourceTree = "<group>"; };
+		DFDEE4181883EB18008B26AC /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		DFDEE4191883EB18008B26AC /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		DFDEE41B1883EB99008B26AC /* Reachability+URL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Reachability+URL.h"; sourceTree = "<group>"; };
 		DFDEE41C1883EB99008B26AC /* Reachability+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Reachability+URL.swift"; sourceTree = "<group>"; };
 		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLegalViewController.swift; sourceTree = "<group>"; };
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
@@ -412,11 +391,7 @@
 				DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */,
 				DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */,
 				DFDEE409188322FA008B26AC /* OpenHABSitemapPage.h */,
-				DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.m */,
 				DFDEE40B188322FA008B26AC /* OpenHABWidget.h */,
-				DFDEE40C188322FA008B26AC /* OpenHABWidget.m */,
-				DFA16EBC1889867B00EDB0BB /* OpenHABWidgetMapping.h */,
-				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */,
 				DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */,
 				DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */,
 				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */,
@@ -428,21 +403,13 @@
 			isa = PBXGroup;
 			children = (
 				DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */,
-				DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */,
-				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */,
-				DF2B6ADB18EF4D660063819F /* NSData+HexString.h */,
-				DF2B6ADC18EF4D660063819F /* NSData+HexString.m */,
 				DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */,
-				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.m */,
 				DFDEE400188322BC008B26AC /* NSObject+Data.h */,
 				DFDEE401188322BC008B26AC /* NSObject+Data.m */,
-				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.h */,
 				DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */,
-				DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */,
 				DFDEE4181883EB18008B26AC /* Reachability.h */,
 				DFDEE4191883EB18008B26AC /* Reachability.m */,
 				DFDEE41B1883EB99008B26AC /* Reachability+URL.h */,
-				DFDEE41C1883EB99008B26AC /* Reachability+URL.m */,
 				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */,
 				DF2B6ADC18EF4D660063819F /* NSData+HexString.swift */,
@@ -697,7 +664,6 @@
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
-				DAD3714421EB91BF00255BBB /* NSObjectExtension.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.swift in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.swift in Sources */,
@@ -721,8 +687,8 @@
 				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.swift in Sources */,
-				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */,
-				DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */,
+				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.swift in Sources */,
+				DFDEE4171883C6A5008B26AC /* OpenHABTracker.swift in Sources */,
 				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.swift in Sources */,
 				DFDEE4171883C6A5008B26AC /* OpenHABTracker.swift in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */,
