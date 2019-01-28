@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DFB2624A18830A3600D3244D"
-               BuildableName = "openHABTests.xctest"
-               BlueprintName = "openHABTests"
+               BlueprintIdentifier = "DA2DC22E21F2736C00830730"
+               BuildableName = "openHABTestsSwift.xctest"
+               BlueprintName = "openHABTestsSwift"
                ReferencedContainer = "container:openHAB.xcodeproj">
             </BuildableReference>
          </TestableReference>

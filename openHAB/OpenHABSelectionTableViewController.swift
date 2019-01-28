@@ -51,7 +51,7 @@ import UIKit
     static let tableViewCellIdentifier = "SelectionCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier, for: indexPath)
+        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier, for: indexPath)
         //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier)
         let mapping = mappings[indexPath.row] as? OpenHABWidgetMapping
         cell.textLabel?.text = mapping?.label

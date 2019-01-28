@@ -31,29 +31,34 @@ class MapViewTableViewCell: GenericUITableViewCell {
         contentView.addSubview(mapView)
     }
 
-
     override func layoutSubviews() {
         super.layoutSubviews()
 
         mapView.frame = contentView.bounds.insetBy(dx: 13.0, dy: 8.0)
     }
 
-    func setWidget(_ widget: OpenHABWidget?) {
-        let oldLocationCoordinate: CLLocationCoordinate2D = self.widget.coordinate
-        let oldLocationTitle = self.widget.title
-        let newLocationCoordinate: CLLocationCoordinate2D? = widget?.coordinate
-        let newLocationTitle = widget?.title
+    @objc override var widget: OpenHABWidget! {
+        get {
+            return super.widget
+        }
+        set(widget) {
 
-        super.widget = widget
+            let oldLocationCoordinate: CLLocationCoordinate2D? = self.widget?.coordinate
+            let oldLocationTitle = self.widget?.title ?? ""
+            let newLocationCoordinate: CLLocationCoordinate2D? = widget?.coordinate
+            let newLocationTitle = widget?.title
 
-        if !(oldLocationCoordinate.latitude == newLocationCoordinate?.latitude && oldLocationCoordinate.longitude == newLocationCoordinate?.longitude && (oldLocationTitle == newLocationTitle)) {
-            mapView.removeAnnotations(mapView.annotations)
+            super.widget = widget
 
-            if widget?.item.stateAsLocation() != nil {
-                if let widget = widget {
-                    mapView.addAnnotation(widget)
+            if !(oldLocationCoordinate?.latitude == newLocationCoordinate?.latitude && oldLocationCoordinate?.longitude == newLocationCoordinate?.longitude && (oldLocationTitle == newLocationTitle)) {
+                mapView.removeAnnotations(mapView.annotations)
+
+                if widget?.item?.stateAsLocation() != nil {
+                    if let widget = widget {
+                        mapView.addAnnotation(widget)
+                    }
+                    mapView.setRegion(MKCoordinateRegion(center: (widget?.coordinate)!, latitudinalMeters: 1000.0, longitudinalMeters: 1000.0), animated: false)
                 }
-                mapView.setRegion(MKCoordinateRegion(center: (widget?.coordinate)!, latitudinalMeters: 1000.0, longitudinalMeters: 1000.0), animated: false)
             }
         }
     }

@@ -29,8 +29,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     override func displayWidget() {
         customTextLabel?.text = widget.labelText()
-        let widgetValue = widget.item.stateAsFloat()
-        widgetSlider?.value = widgetValue / 100
+        let widgetValue = widget.item?.stateAsFloat()
+        widgetSlider?.value = widgetValue! / 100
         widgetSlider?.addTarget(self, action: #selector(SliderUITableViewCell.sliderDidEndSliding(_:)), for: [.touchUpInside, .touchUpOutside])
     }
 

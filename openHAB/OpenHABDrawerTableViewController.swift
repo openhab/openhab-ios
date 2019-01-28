@@ -12,7 +12,7 @@ import SDWebImage
 import UIKit
 
 class OpenHABDrawerTableViewController: UITableViewController {
-    var sitemaps: NSMutableArray = []
+    var sitemaps: [OpenHABSitemap] = []
     @objc var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
@@ -54,7 +54,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             operation?.securityPolicy.allowInvalidCertificates = true
         }
         if appData()?.openHABVersion == 2 {
-            print("Setting setializer to JSON")
+            print("Setting serializer to JSON")
             operation?.responseSerializer = AFJSONResponseSerializer()
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
@@ -82,7 +82,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                         if let element = element as? GDataXMLElement {
                             let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.add(sitemap)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
@@ -94,10 +94,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [AnyHashable: Any])! as! [String : Any])
+                        let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [String: Any])!)
                         if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
                             print("Sitemap \(sitemap.label)")
-                            self.sitemaps.add(sitemap)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
@@ -107,12 +107,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             }
 
             // Sort the sitemaps alphabetically.
-            self.sitemaps.sort(comparator: { obj1, obj2 in
-                let a = (obj1 as? OpenHABSitemap)?.name
-                let b = (obj2 as? OpenHABSitemap)?.name
-                return (a?.compare(b ?? ""))!
-            })
-
+            self.sitemaps.sort { $0.name < $1.name }
 
             self.appData()?.sitemaps = self.sitemaps
             self.tableView.reloadData()
@@ -178,18 +173,16 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
 
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
-                cell?.customTextLabel?.text = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.label
+                cell?.customTextLabel?.text = sitemaps[indexPath.row - 1].label
 
                 var components = URLComponents(string: openHABRootUrl)
 
                 if appData()?.openHABVersion == 2 {
-                    if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        components?.path = "/icon/\(object).png"
-                    }
+                    let object = sitemaps[indexPath.row - 1].icon
+                    components?.path = "/icon/\(object).png"
                 } else {
-                    if let object = (sitemaps[indexPath.row - 1] as? OpenHABSitemap)?.icon {
-                        components?.path = "/images/\(object).png"
-                    }
+                    let object = sitemaps[indexPath.row - 1].icon
+                    components?.path = "/images/\(object).png"
                 }
                 print("\(components?.url?.absoluteString ?? "")")
                 cell?.customImageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
@@ -227,9 +220,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if indexPath.row != 0 {
             // First sitemaps
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
-                let sitemap = sitemaps[indexPath.row - 1] as? OpenHABSitemap
+                let sitemap = sitemaps[indexPath.row - 1]
                 let prefs = UserDefaults.standard
-                prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
+                prefs.setValue(sitemap.name, forKey: "defaultSitemap")
                 appData()?.rootViewController?.pageUrl = ""
                 let nav = mm_drawerController.centerViewController as? UINavigationController
                 let dummyViewController: UIViewController? = storyboard?.instantiateViewController(withIdentifier: "DummyViewController")
@@ -271,7 +264,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     // App wide data access
     func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate??.appData()
+        let theDelegate = UIApplication.shared.delegate as? AppDelegate?
+        return theDelegate??.appData
     }
 }

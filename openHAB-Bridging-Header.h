@@ -3,10 +3,8 @@
 //
 #import <NKOColorPickerView/NKOColorPickerView.h>
 #import <AFNetworking/AFNetworking.h>
-//#import "GDataXMLDocument.h"
 #import <GDataXML_HTML/GDataXMLNode.h>
 #import <MMDrawerController/UIViewController+MMDrawerController.h>
-//#import "NSDate+Helper.h"
 #import <TSMessages/TSMessage.h>
 
 // -----------------------------------------------------------------------------
@@ -24,29 +22,13 @@
 // • Add `@class MySwiftClass` to your .h files that depend on the Swift code;
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
-//#import "AFNetworking.h"
-#import "AFRememberingSecurityPolicy.h"
-//#import "GDataXMLNode.h"
-//#import "MMDrawerBarButtonItem.h"
-#import "NSMutableURLRequest+Auth.h"
-#import "OpenHABAppDataDelegate.h"
-#import "OpenHABAppDelegate.h"
-#import "OpenHABDataObject.h"
-#import "OpenHABItem.h"
-#import "OpenHABLinkedPage.h"
-#import "OpenHABSitemapPage.h"
-#import "OpenHABTracker.h"
-#import "OpenHABWidget.h"
-#import "OpenHABWidgetMapping.h"
-#import "Reachability+URL.h"
-//#import "TSMessage.h"
-//#import "UIViewController+MMDrawerController.h"
-#import <Foundation/Foundation.h>
-#import <QuartzCore/QuartzCore.h>
-#import <SDWebImage/SDWebImageDownloader.h>
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <UIKit/UIKit.h>
-#import <objc/runtime.h>
+//#import "NSObject+Data.h"
+//#import <Foundation/Foundation.h>
+//#import <QuartzCore/QuartzCore.h>
+//#import <SDWebImage/SDWebImageDownloader.h>
+//#import <SDWebImage/UIImageView+WebCache.h>
+//#import <UIKit/UIKit.h>
+//#import <objc/runtime.h>
 
 // End Swiftify generated imports
 // -----------------------------------------------------------------------------

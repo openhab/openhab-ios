@@ -46,7 +46,7 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         customTextLabel?.text = widget.labelText()
 
-        colorButton?.backgroundColor = widget.item.stateAsUIColor()
+        colorButton?.backgroundColor = widget.item?.stateAsUIColor()
     }
 
     @objc func upButtonPressed() {

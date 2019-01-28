@@ -14,7 +14,7 @@ import UIKit
 class OpenHABSelectSitemapViewController: UITableViewController {
     private var selectedSitemap: Int = 0
 
-    var sitemaps: NSMutableArray = []
+    var sitemaps: [OpenHABSitemap] = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
@@ -49,8 +49,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
-        let sitemapsUrl = URL(string: sitemapsUrlString)
+        var components = URLComponents(string: openHABRootUrl)
+        components?.path = "/rest/sitemaps"
+        let sitemapsUrl = components?.url ?? URL(string: "")
+
         var sitemapsRequest: NSMutableURLRequest?
         if let sitemapsUrl = sitemapsUrl {
             sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
@@ -67,7 +69,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             operation?.securityPolicy.allowInvalidCertificates = true
         }
         if appData()?.openHABVersion == 2 {
-            print("Setting setializer to JSON")
+            print("Setting serializer to JSON")
             operation?.responseSerializer = AFJSONResponseSerializer()
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
@@ -94,7 +96,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                         if let element = element as? GDataXMLElement {
                             let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.add(sitemap)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
@@ -103,25 +105,13 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 // Newer versions speak JSON!
             } else {
                 print("openHAB 2")
-// MARK - Needs to ported to Swift 4 - But not yet ready
-//                guard let jsonArray = responseObject as? [[String: Any]] else {
-//                    return
-//                }
-//                if jsonArray.count != 1 {
-//                    for sitemapJson in jsonArray {
-//                        let sitemap = OpenHABSitemap(dictionary: sitemapJson)
-//                        if  sitemap?.name != "_default" {
-//                            print("Sitemap \(sitemap?.label ?? "not found")")
-//                            self.sitemaps.append(sitemap)
-//                        }
-//                    }
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [AnyHashable: Any])! as! [String : Any])
+                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
                         if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
                             print("Sitemap \(String(describing: sitemap.label))")
-                            self.sitemaps.add(sitemap)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 } else {
@@ -158,22 +148,20 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     static let tableViewCellIdentifier = "SelectSitemapCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier, for: indexPath)
-        cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier)
-        let sitemap = sitemaps[indexPath.row] as? OpenHABSitemap
-        if sitemap?.label != nil {
-            cell.textLabel?.text = sitemap?.label
+        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier, for: indexPath)
+        //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectSitemapViewController.tableViewCellIdentifier)
+        let sitemap = sitemaps[indexPath.row]
+        if sitemap.label != "" {
+            cell.textLabel?.text = sitemap.label
         } else {
-            cell.textLabel?.text = sitemap?.name
+            cell.textLabel?.text = sitemap.name
         }
 
         let imageBase = appData()?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@"
 
-        if sitemap?.icon != nil {
+        if sitemap.icon != "" {
             var iconUrlString: String?
-            if let icon = sitemap?.icon {
-                iconUrlString = String(format: imageBase, openHABRootUrl, icon)
-            }
+            iconUrlString = String(format: imageBase, openHABRootUrl, sitemap.icon )
             print("icon url = \(iconUrlString ?? "")")
             cell.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
         } else {
@@ -185,9 +173,9 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(String(format: "Selected sitemap %ld", indexPath.row))
-        let sitemap = sitemaps[indexPath.row] as? OpenHABSitemap
+        let sitemap = sitemaps[indexPath.row]
         let prefs = UserDefaults.standard
-        prefs.setValue(sitemap?.name, forKey: "defaultSitemap")
+        prefs.setValue(sitemap.name, forKey: "defaultSitemap")
         selectedSitemap = indexPath.row
         appData()?.rootViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
@@ -197,8 +185,8 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     }
 
     func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate??.appData()
+        let theDelegate = UIApplication.shared.delegate as? AppDelegate
+        return theDelegate?.appData
     }
 
     required init?(coder aDecoder: NSCoder) {

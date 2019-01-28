@@ -15,6 +15,10 @@
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
+		CA7D4C708413DB6D1BEC9D2F /* OpenHABAppDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */; };
+		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
+		DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */; };
+		DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
@@ -37,7 +41,7 @@
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
 		DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */; };
 		DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
-		DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */ = {isa = PBXBuildFile; fileRef = DF2B6ADC18EF4D660063819F /* NSData+HexString.m */; };
+		DF2B6ADD18EF4D660063819F /* NSData+HexString.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2B6ADC18EF4D660063819F /* NSData+HexString.swift */; };
 		DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift */; };
 		DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */; };
 		DF4A02441CF46986006C3456 /* glyphicons-137-cogwheel.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */; };
@@ -45,7 +49,7 @@
 		DF4A02481CF47757006C3456 /* glyphicons-597-activity.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */; };
 		DF4A024A1CF47794006C3456 /* glyphicons-731-puzzle.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */; };
 		DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.swift */; };
-		DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.m */; };
+		DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.swift */; };
 		DF4B84071885AE0E00F34902 /* blankicon.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4B84061885AE0E00F34902 /* blankicon.png */; };
 		DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */; };
 		DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84151886EACA00F34902 /* GenericUITableViewCell.swift */; };
@@ -53,21 +57,15 @@
 		DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */; };
 		DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.swift */; };
 		DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.swift */; };
-		DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */; };
+		DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */; };
 		DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */; };
 		DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
 		DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622C18830A3600D3244D /* CoreGraphics.framework */; };
 		DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
 		DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2623318830A3600D3244D /* InfoPlist.strings */; };
-		DFB2623718830A3600D3244D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623618830A3600D3244D /* main.m */; };
-		DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */; };
+		DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2623A18830A3600D3244D /* AppDelegate.swift */; };
 		DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABViewController.swift */; };
 		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
-		DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2624C18830A3600D3244D /* XCTest.framework */; };
-		DFB2624E18830A3600D3244D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622A18830A3600D3244D /* Foundation.framework */; };
-		DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFB2622E18830A3600D3244D /* UIKit.framework */; };
-		DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFB2625518830A3600D3244D /* InfoPlist.strings */; };
-		DFB2625918830A3600D3244D /* openHABTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DFB2625818830A3600D3244D /* openHABTests.m */; };
 		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
 		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */; };
 		DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE401188322BC008B26AC /* NSObject+Data.m */; };
@@ -80,16 +78,23 @@
 		DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.m */; };
 		DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4191883EB18008B26AC /* Reachability.m */; };
 		DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41C1883EB99008B26AC /* Reachability+URL.m */; };
+		DFDEE40D188322FA008B26AC /* OpenHABItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.swift */; };
+		DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
+		DFDEE40F188322FA008B26AC /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
+		DFDEE410188322FA008B26AC /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
+		DFDEE411188322FA008B26AC /* OpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */; };
+		DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */; };
+		DFDEE4171883C6A5008B26AC /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
 		DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */; };
 		DFDF45311932042B00A6E581 /* legal.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFDF45301932042B00A6E581 /* legal.rtf */; };
 		DFDF45341934699B00A6E581 /* OpenHABInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */; };
-		DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */; };
+		DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */; };
 		DFE10414197415F900D94943 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE10413197415F900D94943 /* Security.framework */; };
 		DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		DFB2625018830A3600D3244D /* PBXContainerItemProxy */ = {
+		DA2DC23421F2736C00830730 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
 			proxyType = 1;
@@ -111,6 +116,10 @@
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
 		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
+		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
+		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABTestsSwift.swift; sourceTree = "<group>"; };
+		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
@@ -133,8 +142,7 @@
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
 		DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartUITableViewCell.swift; sourceTree = "<group>"; };
 		DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABNotification.swift; sourceTree = "<group>"; };
-		DF2B6ADB18EF4D660063819F /* NSData+HexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+HexString.h"; sourceTree = "<group>"; };
-		DF2B6ADC18EF4D660063819F /* NSData+HexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+HexString.m"; sourceTree = "<group>"; };
+		DF2B6ADC18EF4D660063819F /* NSData+HexString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSData+HexString.swift"; sourceTree = "<group>"; };
 		DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDrawerTableViewController.swift; sourceTree = "<group>"; };
 		DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDrawerItem.swift; sourceTree = "<group>"; };
 		DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-137-cogwheel.png"; sourceTree = "<group>"; };
@@ -142,9 +150,8 @@
 		DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-597-activity.png"; sourceTree = "<group>"; };
 		DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-731-puzzle.png"; sourceTree = "<group>"; };
 		DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSelectSitemapViewController.swift; sourceTree = "<group>"; };
-		DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABAppDataDelegate.h; sourceTree = "<group>"; };
-		DF4B84021885A53700F34902 /* OpenHABDataObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABDataObject.h; sourceTree = "<group>"; };
-		DF4B84031885A53700F34902 /* OpenHABDataObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABDataObject.m; sourceTree = "<group>"; };
+		DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABAppDataDelegate.swift; sourceTree = "<group>"; };
+		DF4B84031885A53700F34902 /* OpenHABDataObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDataObject.swift; sourceTree = "<group>"; };
 		DF4B84061885AE0E00F34902 /* blankicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blankicon.png; sourceTree = "<group>"; };
 		DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameUITableViewCell.swift; sourceTree = "<group>"; };
 		DF4B84151886EACA00F34902 /* GenericUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericUITableViewCell.swift; sourceTree = "<group>"; };
@@ -152,8 +159,7 @@
 		DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchUITableViewCell.swift; sourceTree = "<group>"; };
 		DFA16EB718883CF300EDB0BB /* SetpointUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetpointUITableViewCell.swift; sourceTree = "<group>"; };
 		DFA16EBA18883DE500EDB0BB /* SliderUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderUITableViewCell.swift; sourceTree = "<group>"; };
-		DFA16EBC1889867B00EDB0BB /* OpenHABWidgetMapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABWidgetMapping.h; sourceTree = "<group>"; };
-		DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpenHABWidgetMapping.m; sourceTree = "<group>"; };
+		DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABWidgetMapping.swift; sourceTree = "<group>"; };
 		DFA16EC018898A8400EDB0BB /* SegmentedUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedUITableViewCell.swift; sourceTree = "<group>"; };
 		DFB2622718830A3600D3244D /* openHAB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHAB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFB2622A18830A3600D3244D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -161,17 +167,11 @@
 		DFB2622E18830A3600D3244D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		DFB2623218830A3600D3244D /* openHAB-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHAB-Info.plist"; sourceTree = "<group>"; };
 		DFB2623418830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		DFB2623618830A3600D3244D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		DFB2623818830A3600D3244D /* openHAB-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "openHAB-Prefix.pch"; sourceTree = "<group>"; };
-		DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenHABAppDelegate.h; sourceTree = "<group>"; };
-		DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OpenHABAppDelegate.m; sourceTree = "<group>"; };
+		DFB2623A18830A3600D3244D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DFB2624318830A3600D3244D /* OpenHABViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABViewController.swift; sourceTree = "<group>"; };
 		DFB2624518830A3600D3244D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		DFB2624B18830A3600D3244D /* openHABTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		DFB2625418830A3600D3244D /* openHABTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "openHABTests-Info.plist"; sourceTree = "<group>"; };
-		DFB2625618830A3600D3244D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		DFB2625818830A3600D3244D /* openHABTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = openHABTests.m; sourceTree = "<group>"; };
 		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
 		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSettingsViewController.swift; sourceTree = "<group>"; };
 		DFDEE400188322BC008B26AC /* NSObject+Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Data.h"; sourceTree = "<group>"; };
@@ -193,16 +193,30 @@
 		DFDEE4191883EB18008B26AC /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		DFDEE41B1883EB99008B26AC /* Reachability+URL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Reachability+URL.h"; sourceTree = "<group>"; };
 		DFDEE41C1883EB99008B26AC /* Reachability+URL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Reachability+URL.m"; sourceTree = "<group>"; };
+		DFDEE404188322FA008B26AC /* OpenHABItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABItem.swift; sourceTree = "<group>"; };
+		DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLinkedPage.swift; sourceTree = "<group>"; };
+		DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemap.swift; sourceTree = "<group>"; };
+		DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemapPage.swift; sourceTree = "<group>"; };
+		DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABWidget.swift; sourceTree = "<group>"; };
+		DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableURLRequest+Auth.swift"; sourceTree = "<group>"; };
+		DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABTracker.swift; sourceTree = "<group>"; };
+		DFDEE41C1883EB99008B26AC /* Reachability+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Reachability+URL.swift"; sourceTree = "<group>"; };
 		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLegalViewController.swift; sourceTree = "<group>"; };
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABInfoViewController.swift; sourceTree = "<group>"; };
-		DFE104101973FC7500D94943 /* AFRememberingSecurityPolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRememberingSecurityPolicy.h; sourceTree = "<group>"; };
-		DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRememberingSecurityPolicy.m; sourceTree = "<group>"; };
+		DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AFRememberingSecurityPolicy.swift; sourceTree = "<group>"; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UICircleButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		DA2DC22C21F2736C00830730 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DFB2622418830A3600D3244D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -212,16 +226,6 @@
 				240E752E32702103C7E74188 /* Pods_openHAB.framework in Frameworks */,
 				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DFB2624818830A3600D3244D /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DFB2624E18830A3600D3244D /* Foundation.framework in Frameworks */,
-				DFB2624F18830A3600D3244D /* UIKit.framework in Frameworks */,
-				DFB2624D18830A3600D3244D /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,6 +239,15 @@
 				92D164D7D26248F747AE06CA /* Pods-openHAB.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		DA2DC23021F2736C00830730 /* openHABTestsSwift */ = {
+			isa = PBXGroup;
+			children = (
+				DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */,
+				DA2DC23321F2736C00830730 /* Info.plist */,
+			);
+			path = openHABTestsSwift;
 			sourceTree = "<group>";
 		};
 		DF05FF13189658FD00FF2F9B /* icons */ = {
@@ -329,9 +342,9 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
+				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				DFB2623018830A3600D3244D /* openHAB */,
-				DFB2625218830A3600D3244D /* openHABTests */,
 				55933D2EF2A0967A5346C7B0 /* Pods */,
 				DFB2622818830A3600D3244D /* Products */,
 				9D18471F9683BC95AB168CBE /* openHAB-Bridging-Header.h */,
@@ -342,7 +355,7 @@
 			isa = PBXGroup;
 			children = (
 				DFB2622718830A3600D3244D /* openHAB.app */,
-				DFB2624B18830A3600D3244D /* openHABTests.xctest */,
+				DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -370,8 +383,7 @@
 				A3F4C3A11A49A5090019A09F /* Main.storyboard */,
 				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
 				DFDEE3FE1883228C008B26AC /* Models */,
-				DFB2623918830A3600D3244D /* OpenHABAppDelegate.h */,
-				DFB2623A18830A3600D3244D /* OpenHABAppDelegate.m */,
+				DFB2623A18830A3600D3244D /* AppDelegate.swift */,
 				DFB2623118830A3600D3244D /* Supporting Files */,
 				DF4B83FD18857FA100F34902 /* UI */,
 				DFDEE3FF18832293008B26AC /* Util */,
@@ -384,7 +396,6 @@
 			children = (
 				DFB2623318830A3600D3244D /* InfoPlist.strings */,
 				DFDF45301932042B00A6E581 /* legal.rtf */,
-				DFB2623618830A3600D3244D /* main.m */,
 				DFB2623218830A3600D3244D /* openHAB-Info.plist */,
 				DFB2623818830A3600D3244D /* openHAB-Prefix.pch */,
 				DFDA3CE9193CADB200888039 /* ping.wav */,
@@ -392,33 +403,12 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		DFB2625218830A3600D3244D /* openHABTests */ = {
-			isa = PBXGroup;
-			children = (
-				DFB2625818830A3600D3244D /* openHABTests.m */,
-				DFB2625318830A3600D3244D /* Supporting Files */,
-			);
-			path = openHABTests;
-			sourceTree = "<group>";
-		};
-		DFB2625318830A3600D3244D /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				DFB2625518830A3600D3244D /* InfoPlist.strings */,
-				DFB2625418830A3600D3244D /* openHABTests-Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		DFDEE3FE1883228C008B26AC /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				DF4B84021885A53700F34902 /* OpenHABDataObject.h */,
-				DF4B84031885A53700F34902 /* OpenHABDataObject.m */,
-				DFDEE403188322FA008B26AC /* OpenHABItem.h */,
-				DFDEE404188322FA008B26AC /* OpenHABItem.m */,
-				DFDEE405188322FA008B26AC /* OpenHABLinkedPage.h */,
-				DFDEE406188322FA008B26AC /* OpenHABLinkedPage.m */,
+				DF4B84031885A53700F34902 /* OpenHABDataObject.swift */,
+				DFDEE404188322FA008B26AC /* OpenHABItem.swift */,
+				DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */,
 				DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */,
 				DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */,
 				DFDEE409188322FA008B26AC /* OpenHABSitemapPage.h */,
@@ -427,6 +417,9 @@
 				DFDEE40C188322FA008B26AC /* OpenHABWidget.m */,
 				DFA16EBC1889867B00EDB0BB /* OpenHABWidgetMapping.h */,
 				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.m */,
+				DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */,
+				DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */,
+				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -450,6 +443,13 @@
 				DFDEE4191883EB18008B26AC /* Reachability.m */,
 				DFDEE41B1883EB99008B26AC /* Reachability+URL.h */,
 				DFDEE41C1883EB99008B26AC /* Reachability+URL.m */,
+				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
+				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */,
+				DF2B6ADC18EF4D660063819F /* NSData+HexString.swift */,
+				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */,
+				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */,
+				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
+				DFDEE41C1883EB99008B26AC /* Reachability+URL.swift */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -466,6 +466,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		DA2DC22E21F2736C00830730 /* openHABTestsSwift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA2DC23821F2736D00830730 /* Build configuration list for PBXNativeTarget "openHABTestsSwift" */;
+			buildPhases = (
+				DA2DC22B21F2736C00830730 /* Sources */,
+				DA2DC22C21F2736C00830730 /* Frameworks */,
+				DA2DC22D21F2736C00830730 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DA2DC23521F2736C00830730 /* PBXTargetDependency */,
+			);
+			name = openHABTestsSwift;
+			productName = openHABTestsSwift;
+			productReference = DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		DFB2622618830A3600D3244D /* openHAB */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */;
@@ -487,24 +505,6 @@
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DFB2624A18830A3600D3244D /* openHABTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = DFB2625F18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHABTests" */;
-			buildPhases = (
-				DFB2624718830A3600D3244D /* Sources */,
-				DFB2624818830A3600D3244D /* Frameworks */,
-				DFB2624918830A3600D3244D /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				DFB2625118830A3600D3244D /* PBXTargetDependency */,
-			);
-			name = openHABTests;
-			productName = openHABTests;
-			productReference = DFB2624B18830A3600D3244D /* openHABTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -512,9 +512,16 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = OpenHAB;
+				LastSwiftUpdateCheck = 1010;
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "openHAB e.V.";
 				TargetAttributes = {
+					DA2DC22E21F2736C00830730 = {
+						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = D6A95UZXVC;
+						ProvisioningStyle = Automatic;
+						TestTargetID = DFB2622618830A3600D3244D;
+					};
 					DFB2622618830A3600D3244D = {
 						DevelopmentTeam = D6A95UZXVC;
 						ProvisioningStyle = Automatic;
@@ -523,9 +530,6 @@
 								enabled = 1;
 							};
 						};
-					};
-					DFB2624A18830A3600D3244D = {
-						TestTargetID = DFB2622618830A3600D3244D;
 					};
 				};
 			};
@@ -543,12 +547,19 @@
 			projectRoot = "";
 			targets = (
 				DFB2622618830A3600D3244D /* openHAB */,
-				DFB2624A18830A3600D3244D /* openHABTests */,
+				DA2DC22E21F2736C00830730 /* openHABTestsSwift */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		DA2DC22D21F2736C00830730 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DFB2622518830A3600D3244D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -573,14 +584,6 @@
 				656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */,
 				A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */,
 				DFDA3CEA193CADB200888039 /* ping.wav in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DFB2624918830A3600D3244D /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DFB2625718830A3600D3244D /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -674,11 +677,20 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		DA2DC22B21F2736C00830730 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
+				DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DFB2622318830A3600D3244D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.m in Sources */,
+				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.swift in Sources */,
 				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
@@ -687,21 +699,20 @@
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DAD3714421EB91BF00255BBB /* NSObjectExtension.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
-				DFB2623718830A3600D3244D /* main.m in Sources */,
-				DF2B6ADD18EF4D660063819F /* NSData+HexString.m in Sources */,
-				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.m in Sources */,
+				DF2B6ADD18EF4D660063819F /* NSData+HexString.swift in Sources */,
+				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
-				DFDEE402188322BD008B26AC /* NSObject+Data.m in Sources */,
-				DFB2623B18830A3600D3244D /* OpenHABAppDelegate.m in Sources */,
-				DF4B84041885A53700F34902 /* OpenHABDataObject.m in Sources */,
+				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
+				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
+				DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */,
 				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
 				DFDF45341934699B00A6E581 /* OpenHABInfoViewController.swift in Sources */,
-				DFDEE40D188322FA008B26AC /* OpenHABItem.m in Sources */,
+				DFDEE40D188322FA008B26AC /* OpenHABItem.swift in Sources */,
 				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */,
 				DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */,
-				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.m in Sources */,
+				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.swift in Sources */,
 				DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */,
 				DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */,
 				DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */,
@@ -712,11 +723,11 @@
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.swift in Sources */,
 				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.m in Sources */,
 				DFDEE4171883C6A5008B26AC /* OpenHABTracker.m in Sources */,
+				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.swift in Sources */,
+				DFDEE4171883C6A5008B26AC /* OpenHABTracker.swift in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */,
-				DFDEE411188322FA008B26AC /* OpenHABWidget.m in Sources */,
-				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.m in Sources */,
-				DFDEE41D1883EB99008B26AC /* Reachability+URL.m in Sources */,
-				DFDEE41A1883EB18008B26AC /* Reachability.m in Sources */,
+				DFDEE411188322FA008B26AC /* OpenHABWidget.swift in Sources */,
+				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.swift in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
@@ -727,24 +738,17 @@
 				DF75996D1976CD0C0098F90D /* UIAlertView+Block.swift in Sources */,
 				DAA42BAE21DC987C00244B2A /* ImageUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DFB2624718830A3600D3244D /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DFB2625918830A3600D3244D /* openHABTests.m in Sources */,
+				CA7D4C708413DB6D1BEC9D2F /* OpenHABAppDataDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		DFB2625118830A3600D3244D /* PBXTargetDependency */ = {
+		DA2DC23521F2736C00830730 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = DFB2622618830A3600D3244D /* openHAB */;
-			targetProxy = DFB2625018830A3600D3244D /* PBXContainerItemProxy */;
+			targetProxy = DA2DC23421F2736C00830730 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -766,17 +770,73 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
-		DFB2625518830A3600D3244D /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				DFB2625618830A3600D3244D /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		DA2DC23621F2736D00830730 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = D6A95UZXVC;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
+			};
+			name = Debug;
+		};
+		DA2DC23721F2736D00830730 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = D6A95UZXVC;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
+			};
+			name = Release;
+		};
 		DFB2625A18830A3600D3244D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -930,58 +990,18 @@
 			};
 			name = Release;
 		};
-		DFB2626018830A3600D3244D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
-				CLANG_ENABLE_MODULES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = "openHABTests/openHABTests-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../Frameworks @executable_path/../../Frameworks @loader_path/Frameworks @loader_path/../Frameworks @loader_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.openhab.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
-			};
-			name = Debug;
-		};
-		DFB2626118830A3600D3244D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
-				CLANG_ENABLE_MODULES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
-				INFOPLIST_FILE = "openHABTests/openHABTests-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../Frameworks @executable_path/../../Frameworks @loader_path/Frameworks @loader_path/../Frameworks @loader_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.openhab.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		DA2DC23821F2736D00830730 /* Build configuration list for PBXNativeTarget "openHABTestsSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA2DC23621F2736D00830730 /* Debug */,
+				DA2DC23721F2736D00830730 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DFB2622218830A3600D3244D /* Build configuration list for PBXProject "openHAB" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -996,15 +1016,6 @@
 			buildConfigurations = (
 				DFB2625D18830A3600D3244D /* Debug */,
 				DFB2625E18830A3600D3244D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		DFB2625F18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHABTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				DFB2626018830A3600D3244D /* Debug */,
-				DFB2626118830A3600D3244D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -9,11 +9,27 @@
 
 import Foundation
 
-class OpenHABNotification: NSObject {
+extension OpenHABNotification {
+    struct CodingData: Decodable {
+            let _id : String
+            let message : String
+            let __v: Int
+            let created: String
+    }
+}
+
+extension OpenHABNotification.CodingData {
+    var openHABNotification: OpenHABNotification {
+        return OpenHABNotification(dictionary: ["message": self.message, "created": self.created ])
+    }
+}
+
+@objcMembers class OpenHABNotification: NSObject {
     var message = ""
     var created: Date?
     var icon = ""
     var severity = ""
+    let propertyNames: Set = ["message", "icon", "severity"]
 
     init(dictionary: [String: Any]) {
         super.init()
@@ -25,11 +41,14 @@ class OpenHABNotification: NSObject {
                 dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
                 created = dateFormatter.date(from: dictionary[key] as? String ?? "")
             } else {
-                break
+//                setValue("test", forKey: "message")
+                if propertyNames.contains(key) {
+                    setValue(dictionary[key], forKey: key)
+                }
             }
         }
-            // MARK - Please addrress later:
-//                if allPropertyNames().contains(where: key ) {
-//                setValue(dictionary[key], forKey: key ?? "")
+    }
+    init (message: String) {
+        self.message = message
     }
 }

@@ -189,8 +189,8 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     }
 
     func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate??.appData()
+        let theDelegate = UIApplication.shared.delegate as? AppDelegate
+        return theDelegate?.appData
     }
 
     required init?(coder aDecoder: NSCoder) {

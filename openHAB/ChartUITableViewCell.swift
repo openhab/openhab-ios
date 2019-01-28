@@ -17,10 +17,10 @@ class ChartUITableViewCell: ImageUITableViewCell {
         widgetImage = viewWithTag(801) as? UIImageView
         var chartUrl: String
         let random = Int(arc4random()) % 1000
-        if (widget.item.type == "GroupItem") || (widget.item.type == "Group") {
-            chartUrl = "\(baseUrl)/chart?groups=\(widget.item.name)&period=\(widget.period)&random=\(random)"
+        if (widget.item?.type == "GroupItem") || (widget.item?.type == "Group") {
+            chartUrl = "\(baseUrl)/chart?groups=\(widget.item?.name)&period=\(widget.period)&random=\(random)"
         } else {
-            chartUrl = "\(baseUrl)/chart?items=\(widget.item.name)&period=\(widget.period)&random=\(random)"
+            chartUrl = "\(baseUrl)/chart?items=\(widget.item?.name)&period=\(widget.period)&random=\(random)"
         }
         if widget.service != nil && widget.service.count > 0 {
             chartUrl = "\(chartUrl)&service=\(widget.service)"

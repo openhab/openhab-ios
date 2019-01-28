@@ -41,7 +41,7 @@ class ColorPickerViewController: UIViewController {
             view.addSubview(colorPickerView)
         }
         if widget != nil {
-            colorPickerView?.color = widget?.item.stateAsUIColor()
+            colorPickerView?.color = widget?.item?.stateAsUIColor()
         }
         super.viewDidLoad()
     }

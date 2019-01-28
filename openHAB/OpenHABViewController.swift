@@ -13,6 +13,7 @@ import UIKit
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
+
     var tracker: OpenHABTracker?
 
     private var selectedWidgetRow: Int = 0
@@ -27,10 +28,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var defaultSitemap = ""
     var ignoreSSLCertificate = false
     var idleOff = false
-    var sitemaps: NSMutableArray = []
+    var sitemaps: [OpenHABSitemap] = []
     var currentPage: OpenHABSitemapPage?
     var selectionPicker: UIPickerView?
-    var pageNetworkStatus: NetworkStatus?
+    var pageNetworkStatus: Reachability.Connection?
     var pageNetworkStatusAvailable = false
     var toggle: Int = 0
     var deviceToken = ""
@@ -44,8 +45,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
         openHABRootUrl = openHABUrl ?? ""
         appData()?.openHABRootUrl = openHABRootUrl
+
         // Checking openHAB version
-        let pageToLoadUrl = URL(string: "\(openHABRootUrl)/rest/bindings")
+        var components = URLComponents(string: openHABRootUrl)
+        components?.path = "/rest/bindings"
+        let pageToLoadUrl = components?.url ?? URL(string: "")
         var pageRequest: NSMutableURLRequest?
         if let pageToLoadUrl = pageToLoadUrl {
             pageRequest = NSMutableURLRequest(url: pageToLoadUrl)
@@ -75,7 +79,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("This is an openHAB 1.X")
             self.appData()?.openHABVersion = 1
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------>\(error.localizedDescription)")
+            print("Error:------On Tracking>\(error.localizedDescription)")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
 
             self.selectSitemap()
@@ -111,7 +115,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
             print("Command sent!")
         }, failure: { operation, error in
-            print("Error:------>\(error.localizedDescription ?? "")")
+            print("Error:------>\(error.localizedDescription )")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
         })
         print("Timeout \(commandRequest?.timeoutInterval ?? 0.0)")
@@ -125,7 +129,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         print("OpenHABViewController viewDidLoad")
-        pageNetworkStatus = NetworkStatus(rawValue: -1)
+        pageNetworkStatus = nil //NetworkStatus(rawValue: -1)
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -313,7 +317,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
+        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
         if widget?.type == "Frame" {
             if widget?.label.count ?? 0 > 0 {
                 return 35
@@ -324,7 +328,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             return widgetTableView.frame.size.width * 0.75
         } else if (widget?.type == "Image") || (widget?.type == "Chart") {
             if widget?.image != nil {
-                return widget?.image.size.height ?? 0.0 / (widget?.image.size.width ?? 0.0 / widgetTableView.frame.size.width)
+                return widget?.image?.size.height ?? 0.0 / (widget?.image?.size.width ?? 0.0 / widgetTableView.frame.size.width)
             } else {
                 return 44
             }
@@ -346,7 +350,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         let cell: GenericUITableViewCell
 
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
+        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
 
         switch widget?.type {
         case "Frame":
@@ -357,11 +361,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 //cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 cell = (tableView.dequeueReusableCell(withIdentifier: "SegmentedWidgetCell") as? SegmentedUITableViewCell)!
                 //RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if (widget?.item.type == "RollershutterItem") || (widget?.item.type == "Rollershutter") || ((widget?.item.type == "Group") && (widget?.item.groupType == "Rollershutter")) {
+            } else if (widget?.item?.type == "RollershutterItem") || (widget?.item?.type == "Rollershutter") || ((widget?.item?.type == "Group") && (widget?.item?.groupType == "Rollershutter")) {
                 //cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
                 cell = (tableView.dequeueReusableCell(withIdentifier: "RollershutterWidgetCell") as? RollershutterUITableViewCell)!
             } else {
-                //cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
+//                let cell2: SwitchUITableViewCell = tableView.dequeueReusableCell(for: indexPath)
+//                cell = cell2
                 cell = (tableView.dequeueReusableCell(withIdentifier: "SwitchWidgetCell") as? SwitchUITableViewCell)!
             }
         case "Setpoint":
@@ -384,7 +389,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
             // cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "ChartUIWidgetCell") as? ImageUITableViewCell)!
+            cell = (tableView.dequeueReusableCell(withIdentifier: "ImageWidgetCell") as? ImageUITableViewCell)!
         case "Video":
             // cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
             cell = (tableView.dequeueReusableCell(withIdentifier: "VideoWidgetCell") as? VideoUITableViewCell)!
@@ -405,7 +410,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             var components = URLComponents(string: openHABRootUrl)
 
             if appData()?.openHABVersion == 2 {
-                if let icon = widget?.icon, let item = widget?.item, let state = item.state {
+                if let icon = widget?.icon, let item = widget?.item {
+                    let state = item.state
                     components?.path = "/icon/\(icon)"
                     components?.queryItems = [
                         URLQueryItem(name: "state", value: state )
@@ -432,7 +438,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Check if this is not the last row in the widgets list
         if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
 
-            let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1] as? OpenHABWidget
+            let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
             if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
                 cell.separatorInset = UIEdgeInsets.zero
             } else if !(widget?.type == "Frame") {
@@ -455,14 +461,14 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row] as? OpenHABWidget
+        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
         if widget?.linkedPage != nil {
-            if let link = widget?.linkedPage.link {
+            if let link = widget?.linkedPage?.link {
                 print("Selected \(link)")
             }
             selectedWidgetRow = indexPath.row
             let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABViewController
-            newViewController?.pageUrl = widget?.linkedPage.link ?? ""
+            newViewController?.pageUrl = widget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
             if let newViewController = newViewController {
                 navigationController?.pushViewController(newViewController, animated: true)
@@ -471,8 +477,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("Selected selection widget")
             selectedWidgetRow = indexPath.row
             let selectionViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController
-            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow] as? OpenHABWidget
-            selectionViewController?.mappings = selectedWidget?.mappings as! [AnyHashable]
+            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+            selectionViewController?.mappings = (selectedWidget?.mappings)!
             selectionViewController?.delegate = self
             selectionViewController?.selectionItem = selectedWidget?.item
             if let selectionViewController = selectionViewController {
@@ -528,8 +534,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         print("OpenHABViewController prepareForSegue \(segue.identifier ?? "")")
         if segue.identifier?.isEqual("showPage") ?? false {
             let newViewController = segue.destination as? OpenHABViewController
-            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow] as? OpenHABWidget
-            newViewController?.pageUrl = selectedWidget?.linkedPage.link ?? ""
+            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+            newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
         } else if segue.identifier?.isEqual("showSelectionView") ?? false {
             print("Selection seague")
@@ -552,15 +558,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // send command on selected selection widget mapping
     func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
-        let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow] as? OpenHABWidget
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex] as? OpenHABWidgetMapping
+        let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
         sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
     }
 
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell = cell {
-            colorPickerViewController?.widget = currentPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0] as? OpenHABWidget
+            colorPickerViewController?.widget = currentPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
         }
         if let colorPickerViewController = colorPickerViewController {
             navigationController?.pushViewController(colorPickerViewController, animated: true)
@@ -612,7 +618,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         // If we are talking to openHAB 2+, we expect response to be JSON
         if appData()?.openHABVersion == 2 {
-            print("Setting setializer to JSON")
+            print("Setting serializer to JSON")
             currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
         }
         let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
@@ -659,7 +665,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 // Newer versions talk JSON!
             } else {
-                self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [AnyHashable : Any] )
+                self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String : Any] )
             }
             strongSelf.currentPage?.delegate = strongSelf
             strongSelf.widgetTableView.reloadData()
@@ -673,7 +679,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
         }, failure: { operation, error in
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------>\(error.localizedDescription )")
+            print("Error:------> on LoadPage \(error.localizedDescription )")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
             strongSelf.atmosphereTrackingId = ""
             if (error as NSError?)?.code == -1001 && longPolling {
@@ -720,7 +726,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         // If we are talking to openHAB 2+, we expect response to be JSON
         if appData()?.openHABVersion == 2 {
-            print("Setting setializer to JSON")
+            print("Setting serializer to JSON")
             operation?.responseSerializer = AFJSONResponseSerializer()
         }
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
@@ -746,7 +752,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                         if let element = element as? GDataXMLElement {
                             let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.add(sitemap)
+                            self.sitemaps.append(sitemap)
                         }
                     }
                 }
@@ -755,8 +761,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if responseObject is [Any] {
                     print("Response is array")
                     for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [AnyHashable: Any])! as! [String : Any])
-                        self.sitemaps.add(sitemap)
+                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
+                        self.sitemaps.append(sitemap)
                     }
                 } else {
                     // Something went wrong, we should have received an array
@@ -777,7 +783,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
                     }
                 } else {
-                    self.pageUrl = (self.sitemaps[0] as! OpenHABSitemap).homepageLink
+                    self.pageUrl = self.sitemaps[0].homepageLink
                     self.loadPage(false)
                 }
             } else {
@@ -785,7 +791,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
 
         }, failure: { operation, error in
-            print("Error:------>\(error.localizedDescription)")
+            print("Error:------SelectSitemap>\(error.localizedDescription)")
             print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             // Error
@@ -823,10 +829,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // Find and return sitemap by it's name if any
     func sitemap(byName sitemapName: String?) -> OpenHABSitemap? {
-        for sitemap: OpenHABSitemap in sitemaps as? [OpenHABSitemap] ?? [] {
-            if sitemap.name == sitemapName {
+        for sitemap in sitemaps where sitemap.name == sitemapName {
                 return sitemap
-            }
         }
         return nil
     }
@@ -834,16 +838,16 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func pageNetworkStatusChanged() -> Bool {
         print("OpenHABViewController pageNetworkStatusChange")
         if pageUrl != "" {
-            let pageReachability = Reachability(urlString: pageUrl)
+            let pageReachability = Reachability( hostname: pageUrl)
             if !pageNetworkStatusAvailable {
-                pageNetworkStatus = pageReachability?.currentReachabilityStatus()
+                pageNetworkStatus = pageReachability?.connection
                 pageNetworkStatusAvailable = true
                 return false
             } else {
-                if pageNetworkStatus == pageReachability?.currentReachabilityStatus() {
+                if pageNetworkStatus == pageReachability?.connection {
                     return false
                 } else {
-                    pageNetworkStatus = pageReachability?.currentReachabilityStatus()
+                    pageNetworkStatus = pageReachability?.connection
                     return true
                 }
             }
@@ -853,8 +857,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // App wide data access
     func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate??.appData()
+        let theDelegate = UIApplication.shared.delegate as? AppDelegate
+        return theDelegate?.appData
     }
 
     override func didReceiveMemoryWarning() {

@@ -51,11 +51,14 @@ class OpenHABNotificationsViewController: UITableViewController {
     func loadNotifications() {
         let prefs = UserDefaults.standard
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        var notificationsUrlString: String?
-        if let value = prefs.value(forKey: "remoteUrl") {
-            notificationsUrlString = "\(value)/api/v1/notifications?limit=20"
-        }
-        let notificationsUrl = URL(string: notificationsUrlString ?? "")
+
+        var components = URLComponents(string: prefs.value(forKey: "remoteUrl") as! String)
+        components?.path = "/api/v1/notifications"
+        components?.queryItems = [
+            URLQueryItem(name: "limit", value: "20")
+        ]
+        let notificationsUrl = components?.url ?? URL(string: "")
+
         var notificationsRequest: NSMutableURLRequest?
         if let notificationsUrl = notificationsUrl {
             notificationsRequest = NSMutableURLRequest(url: notificationsUrl)
@@ -71,22 +74,19 @@ class OpenHABNotificationsViewController: UITableViewController {
             print("Warning - ignoring invalid certificates")
             operation?.securityPolicy.allowInvalidCertificates = true
         }
-        operation?.responseSerializer = AFJSONResponseSerializer()
+
+        let decoder = JSONDecoder()
+
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            let response = responseObject as? Data
-            self.notifications = []
-            print("Notifications response")
-            // If we are talking to openHAB 1.X, talk XML
-            if response is [Any] {
-                print("Response is array")
-                for notificationJson: Any? in responseObject as! [Any?] {
-                    let notification = OpenHABNotification(dictionary: notificationJson as! [AnyHashable: Any] as! [String: Any])
-                    self.notifications.add(notification)
+            do {
+                let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: responseObject as! Data)
+                for codingDatum in codingDatas {
+                    self.notifications.add(codingDatum.openHABNotification)
                 }
-            } else {
-                print("Response is not array")
-                return
+            } catch {
+                print("should not throw \(error)")
             }
+
             self.refreshControl?.endRefreshing()
             self.tableView.reloadData()
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -121,13 +121,13 @@ class OpenHABNotificationsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OpenHABNotificationsViewController.tableViewCellIdentifier) as? NotificationTableViewCell
         let notification = notifications[indexPath.row] as? OpenHABNotification
-        cell?.textLabel?.text = notification?.message
+        cell?.customTextLabel?.text = notification?.message
         // First convert date of notification from UTC from my.OH to local time for device
         let timeZoneSeconds = TimeInterval(NSTimeZone.local.secondsFromGMT())
         let createdInLocalTimezone = notification?.created?.addingTimeInterval(timeZoneSeconds)
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
-        cell?.detailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
+        dateFormatter.dateFormat = "HH:mm:ss"
+        cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
 
         var iconUrlString: String?
         if appData()?.openHABVersion == 2 {
@@ -169,7 +169,7 @@ class OpenHABNotificationsViewController: UITableViewController {
     }
 
     func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
-        return theDelegate??.appData()
+        let theDelegate = UIApplication.shared.delegate as? AppDelegate
+        return theDelegate?.appData
     }
 }

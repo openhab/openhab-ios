@@ -9,9 +9,7 @@
 //
 
 class SwitchUITableViewCell: GenericUITableViewCell {
-    //var widgetSwitch: UISwitch?
 
-    //@IBOutlet var customTextLabel: UILabel!
     @IBOutlet var widgetSwitch: UISwitch!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -31,13 +29,13 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         self.customTextLabel?.text = widget.labelText()
         var state = widget.state
         //if state is nil or empty using the item state ( OH 1.x compatability )
-        if state == nil || state?.count == 0 {
-            state = widget.item.state
+        if state.count == 0 {
+            state = (widget.item?.state)!
         }
-        if widget.labelValue() != nil {
-            customDetailTextLabel?.text = widget.labelValue()
+        if let customDetailText = widget.labelValue() {
+            self.customDetailTextLabel?.text = customDetailText
         } else {
-            customDetailTextLabel?.text = nil
+            self.customDetailTextLabel?.text = ""
         }
         if state == "ON" {
             widgetSwitch?.isOn = true
@@ -45,6 +43,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
             widgetSwitch?.isOn = false
         }
         widgetSwitch?.addTarget(self, action: #selector(SwitchUITableViewCell.switchChange(_:)), for: .valueChanged)
+        super.displayWidget()
     }
 
     @objc func switchChange(_ sender: Any?) {
