@@ -3,10 +3,8 @@
 //
 #import <NKOColorPickerView/NKOColorPickerView.h>
 #import <AFNetworking/AFNetworking.h>
-//#import "GDataXMLDocument.h"
 #import <GDataXML_HTML/GDataXMLNode.h>
 #import <MMDrawerController/UIViewController+MMDrawerController.h>
-//#import "NSDate+Helper.h"
 #import <TSMessages/TSMessage.h>
 
 // -----------------------------------------------------------------------------
@@ -25,12 +23,12 @@
 // • No need to import the Swift Bridging Header (`openHAB-Swift.h`), since it's already being imported from the .pch file.
 
 //#import "NSObject+Data.h"
-#import <Foundation/Foundation.h>
-#import <QuartzCore/QuartzCore.h>
-#import <SDWebImage/SDWebImageDownloader.h>
-#import <SDWebImage/UIImageView+WebCache.h>
-#import <UIKit/UIKit.h>
-#import <objc/runtime.h>
+//#import <Foundation/Foundation.h>
+//#import <QuartzCore/QuartzCore.h>
+//#import <SDWebImage/SDWebImageDownloader.h>
+//#import <SDWebImage/UIImageView+WebCache.h>
+//#import <UIKit/UIKit.h>
+//#import <objc/runtime.h>
 
 // End Swiftify generated imports
 // -----------------------------------------------------------------------------
