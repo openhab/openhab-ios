@@ -45,8 +45,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
         openHABRootUrl = openHABUrl ?? ""
         appData()?.openHABRootUrl = openHABRootUrl
+
+
         // Checking openHAB version
-        let pageToLoadUrl = URL(string: "\(openHABRootUrl)/rest/bindings")
+        var components = URLComponents(string: openHABRootUrl)
+        components?.path = "/rest/bindings"
+        let pageToLoadUrl = components?.url ?? URL(string: "")
         var pageRequest: NSMutableURLRequest?
         if let pageToLoadUrl = pageToLoadUrl {
             pageRequest = NSMutableURLRequest(url: pageToLoadUrl)

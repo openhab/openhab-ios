@@ -49,8 +49,10 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
-        let sitemapsUrl = URL(string: sitemapsUrlString)
+        var components = URLComponents(string: openHABRootUrl)
+        components?.path = "/rest/sitemaps"
+        let sitemapsUrl = components?.url ?? URL(string: "")
+
         var sitemapsRequest: NSMutableURLRequest?
         if let sitemapsUrl = sitemapsUrl {
             sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
