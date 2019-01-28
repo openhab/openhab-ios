@@ -89,7 +89,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         super.init()
         allowInvalidCertificates = ignoreCertificates
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -97,7 +97,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     init(pinningMode: AFSSLPinningMode) {
         super.init()
     }
-    
+
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
         //    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
         let certificateData = certificate as? Data
@@ -110,7 +110,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         if certificateData == nil {
             return nil
         }
-        let certificate = certificateData?.withUnsafeBytes{ dataBytes in
+        let certificate = certificateData?.withUnsafeBytes {dataBytes in
             CFDataCreate(nil, dataBytes, (certificateData?.count ?? 0))
         }
         //    CFDataRef certificate = SecCertificateCopyData((__bridge CFDataRef)([NSKeyedUnarchiver unarchiveObjectWithData:certificateData]));
@@ -154,20 +154,20 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                         Thread.sleep(forTimeInterval: 0.1)
                     }
                     switch self.evaluateResult {
-                        case 0:
-                            // User decided to abort connection
-                            return false
-                        case 1:
-                            // User decided to accept invalid certificate once
-                            return true
-                        case 2:
-                            // User decided to accept invalid certificate and remember decision
-                            // Add certificate to storage
-                            AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
-                            return true
-                        default:
-                            // Something went wrong, abort connection
-                            return false
+                    case 0:
+                        // User decided to abort connection
+                        return false
+                    case 1:
+                        // User decided to accept invalid certificate once
+                        return true
+                    case 2:
+                        // User decided to accept invalid certificate and remember decision
+                        // Add certificate to storage
+                        AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                        return true
+                    default:
+                        // Something went wrong, abort connection
+                        return false
                     }
                 }
                 return false
@@ -183,20 +183,20 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                 Thread.sleep(forTimeInterval: 0.1)
             }
             switch self.evaluateResult {
-                case 0:
-                    // User decided to abort connection
-                    return false
-                case 1:
-                    // User decided to accept invalid certificate once
-                    return true
-                case 2:
-                    // User decided to accept invalid certificate and remember decision
-                    // Add certificate to storage
-                    AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
-                    return true
-                default:
-                    // Something went wrong, abort connection
-                    return false
+            case 0:
+                // User decided to abort connection
+                return false
+            case 1:
+                // User decided to accept invalid certificate once
+                return true
+            case 2:
+                // User decided to accept invalid certificate and remember decision
+                // Add certificate to storage
+                AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                return true
+            default:
+                // Something went wrong, abort connection
+                return false
             }
         }
         // We have no way of handling it so no access!
