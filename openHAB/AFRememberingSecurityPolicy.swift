@@ -31,22 +31,24 @@ func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
     // certificate at index 0).
     var result: SecCertificate?
 
-    assert(trust != nil)
-
-    if SecTrustGetCertificateCount(trust) > 0 {
-        result = SecTrustGetCertificateAtIndex(trust, 0)
-        assert(result != nil)
+    if let trust = trust {
+        if SecTrustGetCertificateCount(trust) > 0 {
+            result = SecTrustGetCertificateAtIndex(trust, 0)
+            return result
+        } else {
+            return nil
+        }
     } else {
-        result = nil
+        return nil
     }
-    return result
+
 }
 
 class AFRememberingSecurityPolicy: AFSecurityPolicy {
     class func initializeCertificatesStore() {
         print("Initializing cert store")
         self.loadTrustedCertificates()
-        if trustedCertificates == nil {
+        if trustedCertificates.count == 0 {
             print("No cert store, creating")
             trustedCertificates = [AnyHashable : Any]()
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
@@ -91,6 +93,10 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    init(pinningMode: AFSSLPinningMode) {
+        super.init()
+    }
     
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
         //    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
@@ -104,7 +110,9 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         if certificateData == nil {
             return nil
         }
-        let certificate = CFDataCreate(nil, certificateData?.bytes, (certificateData?.count ?? 0))
+        let certificate = certificateData?.withUnsafeBytes{ dataBytes in
+            CFDataCreate(nil, dataBytes, (certificateData?.count ?? 0))
+        }
         //    CFDataRef certificate = SecCertificateCopyData((__bridge CFDataRef)([NSKeyedUnarchiver unarchiveObjectWithData:certificateData]));
         return certificate
     }
@@ -115,18 +123,18 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         }
     }
 
-    func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {
+    override func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {
         // Evaluates trust received during SSL negotiation and checks it against known ones,
         // against policy setting to ignore certificate errors and so on.
         var evaluateResult: SecTrustResultType?
-        SecTrustEvaluate(serverTrust, &evaluateResult)
+        SecTrustEvaluate(serverTrust!, &evaluateResult!)
         if evaluateResult == .unspecified || evaluateResult == .proceed || allowInvalidCertificates {
             // This means system thinks this is a legal/usable certificate, just permit the connection
             return true
         }
-        let certificate = SecTrustGetLeafCertificate(serverTrust)
-        let certificateSummary = SecCertificateCopySubjectSummary(certificate)
-        let certificateData = SecCertificateCopyData(certificate)
+        let certificate = SecTrustGetLeafCertificate(trust: serverTrust)
+        let certificateSummary = SecCertificateCopySubjectSummary(certificate!)
+        let certificateData = SecCertificateCopyData(certificate!)
         // If we have a certificate for this domain
         if AFRememberingSecurityPolicy.certificateData(forDomain: domain) != nil && certificateData != nil {
             // Obtain certificate we have and compare it with the certificate presented by the server
@@ -141,7 +149,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                 // TODO: notify user and wait for decision
                 if delegate != nil {
                     self.evaluateResult = -1
-                    delegate?.evaluateCertificateMismatch(self, summary: forDomain as? certificateSummary as? String, domain)
+                    delegate?.evaluateCertificateMismatch(self, summary: certificateSummary as String?, forDomain: domain)
                     while self.evaluateResult == -1 {
                         Thread.sleep(forTimeInterval: 0.1)
                     }
@@ -169,7 +177,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         if delegate != nil {
             // Delegate should ask user for decision
             self.evaluateResult = -1
-            delegate?.evaluateServerTrust(self, summary: forDomain as? certificateSummary as? String, domain)
+            delegate?.evaluateServerTrust(self, summary: certificateSummary as? String, forDomain: domain)
             // Wait until we get response from delegate with user's decision
             while self.evaluateResult == -1 {
                 Thread.sleep(forTimeInterval: 0.1)
