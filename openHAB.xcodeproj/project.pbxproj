@@ -97,7 +97,7 @@
 		653C09D41EAD691A00BA4C4A /* openHAB.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHAB.entitlements; sourceTree = "<group>"; };
 		653C09D51EAE4C0000BA4C4A /* icon-29x29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-29x29.png"; sourceTree = "<group>"; };
 		653C09D61EAE4C0000BA4C4A /* icon-76x76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-76x76.png"; sourceTree = "<group>"; };
-		656916D81FCB82BC00667B2A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
+		656916D81FCB82BC00667B2A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "openHAB/GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		92D164D7D26248F747AE06CA /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Pods/Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		9D18471F9683BC95AB168CBE /* openHAB-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "openHAB-Bridging-Header.h"; sourceTree = "<group>"; };
 		A0936D4493CB67B1F64C3BED /* Pods_openHAB.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHAB.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -163,8 +163,6 @@
 		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
 		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSettingsViewController.swift; sourceTree = "<group>"; };
-		DFDEE400188322BC008B26AC /* NSObject+Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Data.h"; sourceTree = "<group>"; };
-		DFDEE401188322BC008B26AC /* NSObject+Data.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Data.m"; sourceTree = "<group>"; };
 		DFDEE404188322FA008B26AC /* OpenHABItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABItem.swift; sourceTree = "<group>"; };
 		DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLinkedPage.swift; sourceTree = "<group>"; };
 		DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemap.swift; sourceTree = "<group>"; };
@@ -172,13 +170,8 @@
 		DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemapPage.swift; sourceTree = "<group>"; };
 		DFDEE40B188322FA008B26AC /* OpenHABWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABWidget.h; sourceTree = "<group>"; };
 		DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABWidget.swift; sourceTree = "<group>"; };
-		DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableURLRequest+Auth.h"; sourceTree = "<group>"; };
 		DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableURLRequest+Auth.swift"; sourceTree = "<group>"; };
-		DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABTracker.h; sourceTree = "<group>"; };
 		DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABTracker.swift; sourceTree = "<group>"; };
-		DFDEE4181883EB18008B26AC /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
-		DFDEE4191883EB18008B26AC /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
-		DFDEE41B1883EB99008B26AC /* Reachability+URL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Reachability+URL.h"; sourceTree = "<group>"; };
 		DFDEE41C1883EB99008B26AC /* Reachability+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Reachability+URL.swift"; sourceTree = "<group>"; };
 		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLegalViewController.swift; sourceTree = "<group>"; };
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
@@ -268,7 +261,6 @@
 		DF4B83FD18857FA100F34902 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				DF4A02291CF3157B006C3456 /* Drawer */,
 				DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */,
 				DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */,
 				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */,
@@ -277,8 +269,9 @@
 				DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.swift */,
 				DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABViewController.swift */,
-				DFFD8FCE18EDBD30003B502A /* Util */,
 				DF4B84101886DA9900F34902 /* Widgets */,
+				DF4A02291CF3157B006C3456 /* Drawer */,
+				DFFD8FCE18EDBD30003B502A /* Util */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -286,6 +279,7 @@
 		DF4B84051885AD4600F34902 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				DFB2624518830A3600D3244D /* Images.xcassets */,
 				DF4B84061885AE0E00F34902 /* blankicon.png */,
 				DF05FF13189658FD00FF2F9B /* icons */,
 				A3F4C3A61A49A6AC0019A09F /* launchImage.png */,
@@ -321,11 +315,11 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
-				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
-				DFB2622918830A3600D3244D /* Frameworks */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				55933D2EF2A0967A5346C7B0 /* Pods */,
+				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				DFB2622818830A3600D3244D /* Products */,
+				DFB2622918830A3600D3244D /* Frameworks */,
 				9D18471F9683BC95AB168CBE /* openHAB-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
@@ -355,17 +349,14 @@
 		DFB2623018830A3600D3244D /* openHAB */ = {
 			isa = PBXGroup;
 			children = (
-				656916D81FCB82BC00667B2A /* GoogleService-Info.plist */,
-				653C09D41EAD691A00BA4C4A /* openHAB.entitlements */,
-				DF4B84051885AD4600F34902 /* Images */,
-				DFB2624518830A3600D3244D /* Images.xcassets */,
 				A3F4C3A11A49A5090019A09F /* Main.storyboard */,
 				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
-				DFDEE3FE1883228C008B26AC /* Models */,
 				DFB2623A18830A3600D3244D /* AppDelegate.swift */,
-				DFB2623118830A3600D3244D /* Supporting Files */,
+				DFDEE3FE1883228C008B26AC /* Models */,
 				DF4B83FD18857FA100F34902 /* UI */,
+				DF4B84051885AD4600F34902 /* Images */,
 				DFDEE3FF18832293008B26AC /* Util */,
+				DFB2623118830A3600D3244D /* Supporting Files */,
 			);
 			path = openHAB;
 			sourceTree = "<group>";
@@ -373,6 +364,8 @@
 		DFB2623118830A3600D3244D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				653C09D41EAD691A00BA4C4A /* openHAB.entitlements */,
+				656916D81FCB82BC00667B2A /* GoogleService-Info.plist */,
 				DFB2623318830A3600D3244D /* InfoPlist.strings */,
 				DFDF45301932042B00A6E581 /* legal.rtf */,
 				DFB2623218830A3600D3244D /* openHAB-Info.plist */,
@@ -403,13 +396,6 @@
 			isa = PBXGroup;
 			children = (
 				DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */,
-				DFDEE41218832323008B26AC /* NSMutableURLRequest+Auth.h */,
-				DFDEE400188322BC008B26AC /* NSObject+Data.h */,
-				DFDEE401188322BC008B26AC /* NSObject+Data.m */,
-				DFDEE4151883C6A5008B26AC /* OpenHABTracker.h */,
-				DFDEE4181883EB18008B26AC /* Reachability.h */,
-				DFDEE4191883EB18008B26AC /* Reachability.m */,
-				DFDEE41B1883EB99008B26AC /* Reachability+URL.h */,
 				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */,
 				DF2B6ADC18EF4D660063819F /* NSData+HexString.swift */,
