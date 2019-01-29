@@ -10,12 +10,11 @@ import UIKit
 
 extension UITableView {
 
-    func dequeueReusableCell<T: UITableViewCell>(for indexPath: IndexPath) -> T {
-        guard let cell = dequeueReusableCell(withIdentifier: T.reuseIdentifier, for: indexPath) as? T else {
-            fatalError("Unable to Dequeue Reusable Table View Cell")
-        }
-
-        return cell
+    final func dequeueReusableCell<T: UITableViewCell>(for indexPath: IndexPath, cellType: T.Type = T.self) -> T {
+            guard let cell = self.dequeueReusableCell(withIdentifier: cellType.reuseIdentifier, for: indexPath) as? T else {
+                fatalError("Unable to Dequeue Reusable Table View Cell")
+            }
+            return cell
     }
 
     final func register<T: UITableViewCell>(cellType: T.Type) {

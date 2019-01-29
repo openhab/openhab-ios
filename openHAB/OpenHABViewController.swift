@@ -136,14 +136,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
 
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
-
-        //widgetTableView.register(SwitchUITableViewCell.self, forCellReuseIdentifier: "SwitchWidgetCell")
-        widgetTableView.register(cellType: FrameUITableViewCell.self)
-        widgetTableView.register(cellType: SwitchUITableViewCell.self)
-        widgetTableView.register(cellType: SegmentedUITableViewCell.self)
-        widgetTableView.register(cellType: RollershutterUITableViewCell.self)
-        widgetTableView.register(cellType: SliderUITableViewCell.self)
-        widgetTableView.register(cellType: GenericUITableViewCell.self)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
 
         refreshControl = UIRefreshControl()
@@ -354,54 +346,40 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         switch widget?.type {
         case "Frame":
-            //cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "FrameWidgetCell") as? FrameUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case "Switch":
             if widget?.mappings.count ?? 0 > 0 {
-                //cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-                cell = (tableView.dequeueReusableCell(withIdentifier: "SegmentedWidgetCell") as? SegmentedUITableViewCell)!
+                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 //RollershutterItem changed to Rollershutter in later builds of OH2
             } else if (widget?.item?.type == "RollershutterItem") || (widget?.item?.type == "Rollershutter") || ((widget?.item?.type == "Group") && (widget?.item?.groupType == "Rollershutter")) {
-                //cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
-                cell = (tableView.dequeueReusableCell(withIdentifier: "RollershutterWidgetCell") as? RollershutterUITableViewCell)!
+                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
             } else {
-//                let cell2: SwitchUITableViewCell = tableView.dequeueReusableCell(for: indexPath)
-//                cell = cell2
-                cell = (tableView.dequeueReusableCell(withIdentifier: "SwitchWidgetCell") as? SwitchUITableViewCell)!
+                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
         case "Setpoint":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "SetpointWidgetCell") as? SetpointUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
         case "Slider":
-            //cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "SliderWidgetCell") as? SliderUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
         case "Selection":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "SelectionWidgetCell") as? SelectionUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
         case "Colorpicker":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "ColorPickerWidgetCell") as? ColorPickerUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case "Chart":
-            //cell = tableView.dequeueReusableCell(for: indexPath) as ChartUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "ChartWidgetCell") as? ChartUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as ChartUITableViewCell
             print("Setting cell base url to \(openHABRootUrl)")
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "ImageWidgetCell") as? ImageUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
         case "Video":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "VideoWidgetCell") as? VideoUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
         case "Webview":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "WebviewWidgetCell") as? WebUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
             // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
             cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
         default:
-            //cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
-            cell = (tableView.dequeueReusableCell(withIdentifier: "GenericWidgetCell") as? GenericUITableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
         // No icon is needed for image, video, frame and web widgets
