@@ -126,8 +126,11 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     override func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {
         // Evaluates trust received during SSL negotiation and checks it against known ones,
         // against policy setting to ignore certificate errors and so on.
-        var evaluateResult: SecTrustResultType?
-        SecTrustEvaluate(serverTrust!, &evaluateResult!)
+        var evaluateResult: SecTrustResultType = .invalid
+        guard let serverTrust = serverTrust else {
+            return false
+        }
+        SecTrustEvaluate(serverTrust, &evaluateResult)
         if evaluateResult == .unspecified || evaluateResult == .proceed || allowInvalidCertificates {
             // This means system thinks this is a legal/usable certificate, just permit the connection
             return true
