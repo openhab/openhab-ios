@@ -94,7 +94,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
 
     func increaseValue() {
         if widget.item?.state == "Uninitialized" {
-            widget.sendCommand(widget.minValue )
+            widget.sendCommand(widget.minValue)
         } else {
             if widget.maxValue != "" {
                 if !isIntStep {

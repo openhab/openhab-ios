@@ -20,6 +20,7 @@ PODS:
   - AFNetworking/UIKit (2.6.3):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
+  - Alamofire (4.8.1)
   - Crashlytics (3.9.3):
     - Fabric (~> 1.7.2)
   - Fabric (1.7.13)
@@ -97,6 +98,7 @@ PODS:
 
 DEPENDENCIES:
   - AFNetworking (~> 2.6.0)
+  - Alamofire
   - Crashlytics (~> 3.9.3)
   - Fabric (~> 1.7.2)
   - Firebase/Core
@@ -110,6 +112,7 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - AFNetworking
+    - Alamofire
     - Crashlytics
     - Fabric
     - Firebase
@@ -137,6 +140,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
+  Alamofire: 16ce2c353fb72865124ddae8a57c5942388f4f11
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   Fabric: 25d0963b691fc97be566392243ff0ecef5a68338
   Firebase: 8bb9268bff82374f2cbaaabb143e725743c316ae
@@ -154,6 +158,6 @@ SPEC CHECKSUMS:
   SDWebImage: c325cf02c30337336b95beff20a13df489ec0ec9
   TSMessages: eb3cf27b6900684a21bad4fe9ea426e287b8c839
 
-PODFILE CHECKSUM: 7e843218926a30f4cbb951e03bd4b0da197dc400
+PODFILE CHECKSUM: ee81479887e764a2df7ab75c6cb3d9bcedf9d6bd
 
 COCOAPODS: 1.6.0.beta.1
