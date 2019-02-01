@@ -9,13 +9,14 @@
 #import <UIKit/UIKit.h>
 #import "OpenHABTracker.h"
 #import "OpenHABSitemapPage.h"
-#import "OpenHABSelectionTableViewController.h"
-#import "ColorPickerUITableViewCell.h"
-#import "ColorPickerViewController.h"
-#import "ImageUITableViewCell.h"
 #import "AFRememberingSecurityPolicy.h"
 
 @class OpenHABSitemapPage;
+@class OpenHABSelectionTableViewController;
+@class OpenHABDrawerTableViewController;
+@protocol OpenHABSelectionTableViewControllerDelegate;
+@protocol ColorPickerUITableViewCellDelegate;
+@protocol ImageUITableViewCellDelegate;
 @interface OpenHABViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate>
 {
     OpenHABTracker *tracker;

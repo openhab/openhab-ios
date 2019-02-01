@@ -28,6 +28,6 @@
 @property (nonatomic, retain) NSString *homepageLink;
 
 - (OpenHABSitemap *) initWithXML:(GDataXMLElement *)xmlElement;
-- (OpenHABSitemap *) initWithDictionaty:(NSDictionary *)dictionary;
+- (OpenHABSitemap *) initWithDictionary:(NSDictionary *)dictionary;
 
 @end

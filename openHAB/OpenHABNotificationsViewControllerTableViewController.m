@@ -18,8 +18,6 @@
 #import <SDWebImage/SDWebImageDownloader.h>
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
-#import "OpenHABDrawerTableViewController.h"
-#import "NotificationTableViewCell.h"
 
 
 @interface OpenHABNotificationsViewControllerTableViewController ()

@@ -7,10 +7,8 @@
 //
 
 #import "OpenHABWidget.h"
-#import "OpenHABItem.h"
-#import "OpenHABLinkedPage.h"
+//#import "OpenHABLinkedPage.h"
 #import "GDataXMLNode.h"
-#import "OpenHABWidgetMapping.h"
 
 @implementation OpenHABWidget
 @synthesize widgetId, label, icon, type, url, period, minValue, maxValue, step, refresh, height, isLeaf, iconColor, labelcolor, valuecolor, service, item, linkedPage, text, mappings, delegate, image;
@@ -24,10 +22,11 @@
             if ([[child name] isEqual:@"item"]) {
                 item = [[OpenHABItem alloc] initWithXML:child];
             } else if ([[child name] isEqual:@"mapping"]) {
-                OpenHABWidgetMapping *mapping = [[OpenHABWidgetMapping alloc] initWithXML:child];
-                [self.mappings addObject:mapping];
+               // MARK - HORROR - needs to be reverted
+               OpenHABWidgetMapping *mapping = [[OpenHABWidgetMapping alloc] initWithXML:child];
+               [self.mappings addObject:mapping];
             } else if ([[child name] isEqual:@"linkedPage"]) {
-                linkedPage = [[OpenHABLinkedPage alloc] initWithXML:child];
+               linkedPage = [[OpenHABLinkedPage alloc] initWithXML:child];
             } else {
                 NSString *propertyValue = [child stringValue];
                 if ([[self allPropertyNames] containsObject:[child name]])
