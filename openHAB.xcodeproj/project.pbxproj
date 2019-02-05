@@ -296,7 +296,6 @@
 		DF4B84101886DA9900F34902 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				DAEAA89C21E6B06300267EA3 /* ReusableView.swift */,
 				DF06F1FE18FEFEDF0011E7B9 /* ChartUITableViewCell.swift */,
 				DF06F1F818FEA8420011E7B9 /* ColorPickerUITableViewCell.swift */,
 				DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */,
@@ -313,6 +312,7 @@
 				DFA13CB318872EBD006355C3 /* SwitchUITableViewCell.swift */,
 				DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */,
 				DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */,
+				DAEAA89C21E6B06300267EA3 /* ReusableView.swift */,
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 			);
 			name = Widgets;
@@ -612,17 +612,13 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework",
 				"${BUILT_PRODUCTS_DIR}/GDataXML-HTML/GDataXML_HTML.framework",
-				"${BUILT_PRODUCTS_DIR}/NKOColorPickerView/NKOColorPickerView.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AFNetworking.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GDataXML_HTML.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NKOColorPickerView.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
