@@ -63,60 +63,53 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     }
 
     func decreaseValue() {
-        if widget.item?.state == "Uninitialized" {
-            widget.sendCommand(widget.minValue) // as? String)
-        } else {
-            if widget.minValue != "" {
-                if !isIntStep {
-                    let newValue = (widget.item?.stateAsFloat())! - widget.step.floatValue
-                    if newValue >= widget.minValue.floatValue {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.minValue))
-                    }
-                } else {
-                    let newValue = widget.item!.stateAsInt() - widget.step.intValue
-                    if newValue >= Int(widget.minValue.intValue) {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.minValue.intValue))
-                    }
-                }
+        if let item = widget.item {
+            if item.state == "Uninitialized" {
+                widget.sendCommand(widget.minValue)
             } else {
                 if !isIntStep {
-                    widget.sendCommand(String(format: stateFormat, (widget.item?.stateAsFloat())! - widget.step.floatValue))
+                    var newValue = item.stateAsFloat() - widget.step.floatValue
+                    if widget.minValue != "" {
+                        newValue = max(newValue, widget.minValue.floatValue)
+                    }
+                    widget.sendCommand(String(format: stateFormat, newValue))
+
                 } else {
-                    widget.sendCommand(String(format: stateFormat, widget.item!.stateAsInt() - widget.step.intValue))
+                    var newValue = item.stateAsInt() - widget.step.intValue
+                    if widget.minValue != "" {
+                        newValue = max(newValue, widget.minValue.intValue)
+                    }
+                    widget.sendCommand(String(format: stateFormat, newValue))
                 }
             }
         }
     }
 
     func increaseValue() {
-        if widget.item?.state == "Uninitialized" {
-            widget.sendCommand(widget.minValue)
-        } else {
-            if widget.maxValue != "" {
-                if !isIntStep {
-                    let newValue = (widget.item?.stateAsFloat())! + widget.step.floatValue
-                    if newValue <= widget.maxValue.floatValue {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.maxValue))
-                    }
-                } else {
-                    let newValue = widget.item!.stateAsInt() + widget.step.intValue
-                    if newValue <= Int(widget.maxValue.intValue) {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.maxValue.intValue))
-                    }
-                }
+        if let item = widget.item {
+            if item.state == "Uninitialized" {
+                widget.sendCommand(widget.minValue)
             } else {
-                if !isIntStep {
-                    widget.sendCommand(String(format: stateFormat, (widget.item?.stateAsFloat())! + widget.step.floatValue))
+                if widget.maxValue != "" {
+                    if !isIntStep {
+                        var newValue = item.stateAsFloat() + widget.step.floatValue
+                        if widget.minValue != "" {
+                            newValue = min(newValue, widget.maxValue.floatValue)
+                        }
+                        widget.sendCommand(String(format: stateFormat, newValue))
+                    } else {
+                        var newValue = item.stateAsInt() + widget.step.intValue
+                        if widget.minValue != "" {
+                            newValue = min(newValue, widget.maxValue.intValue)
+                        }
+                        widget.sendCommand(String(format: stateFormat, newValue))
+                    }
                 } else {
-                    widget.sendCommand(String(format: stateFormat, (widget.item?.stateAsInt())! + widget.step.intValue))
+                    if !isIntStep {
+                        widget.sendCommand(String(format: stateFormat, item.stateAsFloat() + widget.step.floatValue))
+                    } else {
+                        widget.sendCommand(String(format: stateFormat, item.stateAsInt() + widget.step.intValue))
+                    }
                 }
             }
         }
