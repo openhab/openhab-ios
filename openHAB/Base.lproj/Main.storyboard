@@ -228,10 +228,10 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <slider opaque="NO" tag="400" contentMode="scaleToFill" horizontalCompressionResistancePriority="800" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Aa2-hH-P4c">
-                                                    <rect key="frame" x="223" y="7" width="173" height="31"/>
+                                                    <rect key="frame" x="258.66666666666669" y="7" width="137.33333333333331" height="31"/>
                                                 </slider>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9hr-4E-GF3">
-                                                    <rect key="frame" x="62" y="22" width="234" height="0.0"/>
+                                                    <rect key="frame" x="61.999999999999986" y="22" width="198.66666666666663" height="0.0"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -241,7 +241,7 @@
                                                 <constraint firstItem="9hr-4E-GF3" firstAttribute="centerY" secondItem="n9y-r4-Qcp" secondAttribute="centerY" id="2WM-vJ-GTO"/>
                                                 <constraint firstItem="Aa2-hH-P4c" firstAttribute="centerY" secondItem="n9y-r4-Qcp" secondAttribute="centerY" id="DrW-MZ-8JZ"/>
                                                 <constraint firstItem="9hr-4E-GF3" firstAttribute="leading" secondItem="n9y-r4-Qcp" secondAttribute="leading" constant="62" id="Gsh-Ti-OC9"/>
-                                                <constraint firstItem="Aa2-hH-P4c" firstAttribute="leading" secondItem="9hr-4E-GF3" secondAttribute="trailing" constant="-71" id="aBo-Bi-p8I"/>
+                                                <constraint firstItem="Aa2-hH-P4c" firstAttribute="leading" secondItem="9hr-4E-GF3" secondAttribute="trailing" id="aBo-Bi-p8I"/>
                                                 <constraint firstAttribute="trailing" secondItem="Aa2-hH-P4c" secondAttribute="trailing" constant="20" id="iT9-vY-faY"/>
                                                 <constraint firstItem="9hr-4E-GF3" firstAttribute="width" secondItem="Aa2-hH-P4c" secondAttribute="width" priority="999" constant="65" id="pYe-aD-i0S"/>
                                             </constraints>
