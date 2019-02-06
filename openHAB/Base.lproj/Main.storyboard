@@ -150,6 +150,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                         <connections>
+                                            <outlet property="customTextLabel" destination="P0E-ry-QYE" id="2Qd-tR-D7K"/>
                                             <outlet property="widgetSegmentControl" destination="WVa-JP-ksR" id="wzs-KU-8Oa"/>
                                         </connections>
                                     </tableViewCell>

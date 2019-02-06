@@ -14,7 +14,7 @@ extension String {
         if let asNumber = NumberFormatter().number(from: self) {
             return asNumber.floatValue
         } else {
-            return 0.0 // MARK - Change this horror
+            return Float.nan
         }
     }
 
@@ -22,7 +22,7 @@ extension String {
         if let asNumber = NumberFormatter().number(from: self) {
             return asNumber.intValue
         } else {
-            return 0 // MARK - Change this horror
+            return Int.max
         }
     }
 }
@@ -47,7 +47,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        customTextLabel?.text = widget.labelText()
+        self.customTextLabel?.text = widget.labelText()
         var widgetValue: String
         if widget.item?.state == "Uninitialized" {
             widgetValue = "N/A"
@@ -60,6 +60,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         }
         widgetSegmentControl?.setTitle(widgetValue, forSegmentAt: 1)
         widgetSegmentControl?.addTarget(self, action: #selector(SetpointUITableViewCell.pickOne(_:)), for: .valueChanged)
+        super.displayWidget()
     }
 
     func decreaseValue() {
@@ -73,7 +74,6 @@ class SetpointUITableViewCell: GenericUITableViewCell {
                         newValue = max(newValue, widget.minValue.floatValue)
                     }
                     widget.sendCommand(String(format: stateFormat, newValue))
-
                 } else {
                     var newValue = item.stateAsInt() - widget.step.intValue
                     if widget.minValue != "" {
