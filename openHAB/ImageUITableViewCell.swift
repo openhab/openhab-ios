@@ -31,7 +31,7 @@ class ImageUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        widgetImage = viewWithTag(901) as? UIImageView
+        //widgetImage = viewWithTag(901) as? UIImageView
         if widget?.image == nil {
             loadImage()
         } else {

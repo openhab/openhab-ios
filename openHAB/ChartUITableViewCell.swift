@@ -15,8 +15,19 @@ class ChartUITableViewCell: ImageUITableViewCell {
 
     override func displayWidget() {
         widgetImage = viewWithTag(801) as? UIImageView
-        var chartUrl: String
         let random = Int(arc4random()) % 1000
+
+        var chartUrl: String
+        var components = URLComponents(string: baseUrl)
+        components?.path = "/api"
+
+        components?.queryItems = [
+            URLQueryItem(name: "period", value: widget.period),
+            URLQueryItem(name: "random", value: String(random))
+        ]
+        components?.queryItems?.append(URLQueryItem(name: "groups", value: widget.item?.name))
+        //chartUrl = components?.url ?? URL(string: "")
+
         if (widget.item?.type == "GroupItem") || (widget.item?.type == "Group") {
             chartUrl = "\(baseUrl)/chart?groups=\(widget.item?.name)&period=\(widget.period)&random=\(random)"
         } else {

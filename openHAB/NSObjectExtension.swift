@@ -10,8 +10,6 @@ import Foundation
 
 extension NSObject {
 
-
-
     func getProperties(from classType: NSObject.Type) -> [String] {
 
         var propertiesCount : CUnsignedInt = 0
