@@ -11,7 +11,9 @@
 extension String {
 
     var floatValue: Float {
-        if let asNumber = NumberFormatter().number(from: self) {
+        let formatter = NumberFormatter()
+        formatter.decimalSeparator = "."
+        if let asNumber = formatter.number(from: self) {
             return asNumber.floatValue
         } else {
             return Float.nan

@@ -20,7 +20,6 @@ class NotificationTableViewCell: UITableViewCell {
         super.init(coder: coder)
 
         separatorInset = .zero
-//        detailTextLabel = viewWithTag(102) as? UILabel
 
     }
 

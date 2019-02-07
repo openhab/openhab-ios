@@ -25,7 +25,6 @@ protocol AFRememberingSecurityPolicyDelegate: NSObjectProtocol {
 
 var trustedCertificates: [AnyHashable : Any] = [:]
 
-
 func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
     // Returns the leaf certificate from a SecTrust object (that is always the
     // certificate at index 0).

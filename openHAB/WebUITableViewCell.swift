@@ -8,8 +8,10 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
-class WebUITableViewCell: GenericUITableViewCell, UIWebViewDelegate {
-    var widgetWebView: UIWebView?
+import WebKit
+
+class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
+    var widgetWebView: WKWebView!
     var isLoadingUrl = false
     var isLoaded = false
 
@@ -18,7 +20,10 @@ class WebUITableViewCell: GenericUITableViewCell, UIWebViewDelegate {
 
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-        widgetWebView = viewWithTag(1001) as? UIWebView
+        let webConfiguration = WKWebViewConfiguration()
+
+        widgetWebView = WKWebView(frame: .zero, configuration: webConfiguration)
+        widgetWebView.uiDelegate = self
 
     }
 
@@ -39,7 +44,7 @@ class WebUITableViewCell: GenericUITableViewCell, UIWebViewDelegate {
         widgetWebView?.scrollView.isScrollEnabled = false
         widgetWebView?.scrollView.bounces = false
         if let nsrequest = nsrequest {
-            widgetWebView?.loadRequest(nsrequest)
+            widgetWebView?.load(nsrequest)
         }
     }
 
