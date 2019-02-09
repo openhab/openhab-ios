@@ -11,10 +11,10 @@
 import WebKit
 
 class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
-    var widgetWebView: WKWebView!
     var isLoadingUrl = false
     var isLoaded = false
 
+    @IBOutlet weak var widgetWebView: WKWebView!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
