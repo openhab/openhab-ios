@@ -11,10 +11,12 @@
 extension String {
 
     var floatValue: Float {
-        if let asNumber = NumberFormatter().number(from: self) {
+        let formatter = NumberFormatter()
+        formatter.decimalSeparator = "."
+        if let asNumber = formatter.number(from: self) {
             return asNumber.floatValue
         } else {
-            return 0.0 // MARK - Change this horror
+            return Float.nan
         }
     }
 
@@ -22,7 +24,7 @@ extension String {
         if let asNumber = NumberFormatter().number(from: self) {
             return asNumber.intValue
         } else {
-            return 0 // MARK - Change this horror
+            return Int.max
         }
     }
 }
@@ -47,7 +49,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        customTextLabel?.text = widget.labelText()
+        self.customTextLabel?.text = widget.labelText()
         var widgetValue: String
         if widget.item?.state == "Uninitialized" {
             widgetValue = "N/A"
@@ -60,63 +62,56 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         }
         widgetSegmentControl?.setTitle(widgetValue, forSegmentAt: 1)
         widgetSegmentControl?.addTarget(self, action: #selector(SetpointUITableViewCell.pickOne(_:)), for: .valueChanged)
+        super.displayWidget()
     }
 
     func decreaseValue() {
-        if widget.item?.state == "Uninitialized" {
-            widget.sendCommand(widget.minValue) // as? String)
-        } else {
-            if widget.minValue != "" {
-                if !isIntStep {
-                    let newValue = (widget.item?.stateAsFloat())! - widget.step.floatValue
-                    if newValue >= widget.minValue.floatValue {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.minValue))
-                    }
-                } else {
-                    let newValue = widget.item!.stateAsInt() - widget.step.intValue
-                    if newValue >= Int(widget.minValue.intValue) {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.minValue.intValue))
-                    }
-                }
+        if let item = widget.item {
+            if item.state == "Uninitialized" {
+                widget.sendCommand(widget.minValue)
             } else {
                 if !isIntStep {
-                    widget.sendCommand(String(format: stateFormat, (widget.item?.stateAsFloat())! - widget.step.floatValue))
+                    var newValue = item.stateAsFloat() - widget.step.floatValue
+                    if widget.minValue != "" {
+                        newValue = max(newValue, widget.minValue.floatValue)
+                    }
+                    widget.sendCommand(String(format: stateFormat, newValue))
                 } else {
-                    widget.sendCommand(String(format: stateFormat, widget.item!.stateAsInt() - widget.step.intValue))
+                    var newValue = item.stateAsInt() - widget.step.intValue
+                    if widget.minValue != "" {
+                        newValue = max(newValue, widget.minValue.intValue)
+                    }
+                    widget.sendCommand(String(format: stateFormat, newValue))
                 }
             }
         }
     }
 
     func increaseValue() {
-        if widget.item?.state == "Uninitialized" {
-            widget.sendCommand(widget.minValue )
-        } else {
-            if widget.maxValue != "" {
-                if !isIntStep {
-                    let newValue = (widget.item?.stateAsFloat())! + widget.step.floatValue
-                    if newValue <= widget.maxValue.floatValue {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.maxValue))
-                    }
-                } else {
-                    let newValue = widget.item!.stateAsInt() + widget.step.intValue
-                    if newValue <= Int(widget.maxValue.intValue) {
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, widget.maxValue.intValue))
-                    }
-                }
+        if let item = widget.item {
+            if item.state == "Uninitialized" {
+                widget.sendCommand(widget.minValue)
             } else {
-                if !isIntStep {
-                    widget.sendCommand(String(format: stateFormat, (widget.item?.stateAsFloat())! + widget.step.floatValue))
+                if widget.maxValue != "" {
+                    if !isIntStep {
+                        var newValue = item.stateAsFloat() + widget.step.floatValue
+                        if widget.minValue != "" {
+                            newValue = min(newValue, widget.maxValue.floatValue)
+                        }
+                        widget.sendCommand(String(format: stateFormat, newValue))
+                    } else {
+                        var newValue = item.stateAsInt() + widget.step.intValue
+                        if widget.minValue != "" {
+                            newValue = min(newValue, widget.maxValue.intValue)
+                        }
+                        widget.sendCommand(String(format: stateFormat, newValue))
+                    }
                 } else {
-                    widget.sendCommand(String(format: stateFormat, (widget.item?.stateAsInt())! + widget.step.intValue))
+                    if !isIntStep {
+                        widget.sendCommand(String(format: stateFormat, item.stateAsFloat() + widget.step.floatValue))
+                    } else {
+                        widget.sendCommand(String(format: stateFormat, item.stateAsInt() + widget.step.intValue))
+                    }
                 }
             }
         }

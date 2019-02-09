@@ -10,6 +10,24 @@
 
 import SDWebImage
 import UIKit
+import Alamofire
+
+//class APIClient {
+//    @discardableResult
+//    private static func performRequest<T:Decodable>(route:APIRouter, decoder: JSONDecoder = JSONDecoder(), completion:@escaping (Result<T>)->Void) -> DataRequest {
+//        return Alamofire.request(route)
+//            .responseJSONDecodable (decoder: decoder){ (response: DataResponse<T>) in
+//                completion(response.result)
+//        }
+//    }
+//
+//    static func getSitemap(completion:@escaping (Result<[OpenHABSitemap]>)->Void) {
+//        let jsonDecoder = JSONDecoder()
+//        performRequest(route: APIRouter.articles, decoder: jsonDecoder, completion: completion)
+//    }
+//}
+
+
 
 class OpenHABSelectSitemapViewController: UITableViewController {
     private var selectedSitemap: Int = 0
@@ -71,7 +89,18 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         if appData()?.openHABVersion == 2 {
             print("Setting serializer to JSON")
             operation?.responseSerializer = AFJSONResponseSerializer()
+            Alamofire.request(sitemapsUrl!)
+                .validate(statusCode: 200..<300)
+                .responseJSON { response in
+                    if (response.result.error == nil) {
+                        debugPrint("HTTP Response Body: \(response.data)")
+                    }
+                    else {
+                        debugPrint("HTTP Request failed: \(response.result.error)")
+                    }
+            }
         }
+
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
             let response = responseObject as? Data
             self.sitemaps = []

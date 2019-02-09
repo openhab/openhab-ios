@@ -190,21 +190,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         return ipString
     }
 
-//    func getStringPort(fromAddressData dataIn: Data?) -> String? {
-//        //MARK - taken out of service
-//
-//        return "8832"
-//        //var socketAddress: sockaddr_in? = nil
-//        var ipPort: String? = nil
-//
-//        //socketAddress = dataIn?.bytes as? sockaddr_in
-//        let data = dataIn! as NSData
-//        let socketAddress: sockaddr_in = data.castToCPointer()
-//
-//        ipPort = String(format: "%hu", ntohs(socketAddress?.sin_port)) ///problem here
-//        return ipPort
-//    }
-
     func isURLReachable(_ url: URL?) -> Bool {
         var response: URLResponse?
         var error: Error?

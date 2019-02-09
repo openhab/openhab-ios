@@ -12,4 +12,9 @@ target 'openHAB' do
     pod 'Firebase/Core'
 	pod 'Fabric', '~> 1.7.2'
 	pod 'Crashlytics', '~> 3.9.3'
+    pod 'Alamofire'
+end
+
+target 'openHABTestsSwift' do
+    pod 'GDataXML-HTML', '~> 1.3.0'
 end

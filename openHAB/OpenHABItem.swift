@@ -59,9 +59,9 @@ import Foundation
         } else {
             let values = state.components(separatedBy: ",")
             if values.count == 3 {
-                let hue = CGFloat(Float(values[0]) ?? 0.0 / 360)
-                let saturation = CGFloat(Float(values[1]) ?? 0.0 / 100)
-                let brightness = CGFloat(Float(values[2]) ?? 0.0 / 100)
+                let hue = CGFloat((Float(values[0]) ?? 0.0)/360)
+                let saturation = CGFloat((Float(values[1]) ?? 0.0)/100)
+                let brightness = CGFloat((Float(values[2]) ?? 0.0)/100)
                 print("\(hue) \(saturation) \(brightness)")
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
