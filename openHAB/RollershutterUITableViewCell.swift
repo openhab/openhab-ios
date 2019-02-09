@@ -36,10 +36,6 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-//        upButton?.setTitle("▲", for: .normal)
-//        stopButton?.setTitle("■", for: .normal)
-//        downButton?.setTitle("▼", for: .normal)
-
         upButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.upButtonPressed), for: .touchUpInside)
         stopButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.stopButtonPressed), for: .touchUpInside)
         downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)

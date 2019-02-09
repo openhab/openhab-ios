@@ -20,10 +20,6 @@ class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
 
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-        let webConfiguration = WKWebViewConfiguration()
-
-        widgetWebView = WKWebView(frame: .zero, configuration: webConfiguration)
-        widgetWebView.uiDelegate = self
 
     }
 
@@ -33,19 +29,20 @@ class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
         let openHABUsername = prefs.value(forKey: "username") as? String
         let openHABPassword = prefs.value(forKey: "password") as? String
         let authStr = "\(openHABUsername ?? ""):\(openHABPassword ?? "")"
-        let authData: Data? = authStr.data(using: .ascii)
-        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-        var mutableRequest: NSMutableURLRequest?
+
+        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
+            return
+        }
+        let base64LoginString = loginData.base64EncodedString()
+
         if let url = URL(string: widget.url) {
-            mutableRequest = NSMutableURLRequest(url: url)
+            var request = URLRequest(url: url)
+            request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+            widgetWebView?.scrollView.isScrollEnabled = false
+            widgetWebView?.scrollView.bounces = false
+            widgetWebView?.load(request)
         }
-        mutableRequest?.setValue(authValue, forHTTPHeaderField: "Authorization")
-        let nsrequest = mutableRequest as? URLRequest
-        widgetWebView?.scrollView.isScrollEnabled = false
-        widgetWebView?.scrollView.bounces = false
-        if let nsrequest = nsrequest {
-            widgetWebView?.load(nsrequest)
-        }
+
     }
 
     func webViewDidStartLoad(_ webView: UIWebView) {
