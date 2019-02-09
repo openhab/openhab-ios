@@ -5,8 +5,7 @@
 //  Created by Victor Belov on 14/07/14.
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
 //
-
-#import "AFSecurityPolicy.h"
+#import <AFNetworking/AFSecurityPolicy.h>
 @class AFRememberingSecurityPolicy;
 @protocol AFRememberingSecurityPolicyDelegate <NSObject>
 

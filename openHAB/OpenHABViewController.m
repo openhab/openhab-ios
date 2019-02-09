@@ -7,7 +7,6 @@
 //
 
 #import "OpenHABViewController.h"
-#import "OpenHABSelectSitemapViewController.h"
 #import "OpenHABTracker.h"
 #import "AFNetworking.h"
 #import <SDWebImage/UIImageView+WebCache.h>
@@ -20,17 +19,13 @@
 #import "OpenHABSitemapPage.h"
 #import "OpenHABWidget.h"
 #import "OpenHABWidgetMapping.h"
-#import "FrameUITableViewCell.h"
 #import "OpenHABLinkedPage.h"
 #import "OpenHABItem.h"
 #import "TSMessage.h"
 #import "Reachability+URL.h"
-#import "ChartUITableViewCell.h"
-#import "UIAlertView+Block.h"
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
-#import "OpenHABDrawerTableViewController.h"
-#import "MapViewTableViewCell.h"
+
 
 static NSString * const OpenHABViewControllerMapViewCellReuseIdentifier = @"OpenHABViewControllerMapViewCellReuseIdentifier";
 
