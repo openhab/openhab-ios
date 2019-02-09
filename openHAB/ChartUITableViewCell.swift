@@ -15,9 +15,9 @@ class ChartUITableViewCell: ImageUITableViewCell {
 
     override func displayWidget() {
         widgetImage = viewWithTag(801) as? UIImageView
-        let random = Int(arc4random()) % 1000
+        let random = Int.random(in: 0..<1000)
 
-        var chartUrl: String
+        var chartUrl: URL
         var components = URLComponents(string: baseUrl)
         components?.path = "/api"
 
@@ -25,20 +25,19 @@ class ChartUITableViewCell: ImageUITableViewCell {
             URLQueryItem(name: "period", value: widget.period),
             URLQueryItem(name: "random", value: String(random))
         ]
-        components?.queryItems?.append(URLQueryItem(name: "groups", value: widget.item?.name))
-        //chartUrl = components?.url ?? URL(string: "")
+        chartUrl = components?.url ?? URL(string: "")!
 
         if (widget.item?.type == "GroupItem") || (widget.item?.type == "Group") {
-            chartUrl = "\(baseUrl)/chart?groups=\(widget.item?.name)&period=\(widget.period)&random=\(random)"
+            components?.queryItems?.append(URLQueryItem(name: "groups", value: widget.item?.name))
         } else {
-            chartUrl = "\(baseUrl)/chart?items=\(widget.item?.name)&period=\(widget.period)&random=\(random)"
+            components?.queryItems?.append(URLQueryItem(name: "items", value: widget.item?.name))
         }
-        if widget.service != nil && widget.service.count > 0 {
-            chartUrl = "\(chartUrl)&service=\(widget.service)"
+        if widget.service != "" && widget.service.count > 0 {
+            components?.queryItems?.append(URLQueryItem(name: "service", value: widget.service))
         }
         print("Chart url \(chartUrl)")
         if widget.image == nil {
-            widgetImage?.sd_setImage(with: URL(string: chartUrl), placeholderImage: nil, options: SDWebImageOptions.cacheMemoryOnly, completed: { image, error, cacheType, imageURL in
+            widgetImage?.sd_setImage(with: chartUrl, placeholderImage: nil, options: .cacheMemoryOnly, completed: { image, error, cacheType, imageURL in
                 // NSLog(@"Image load complete %f %f", self.widgetImage.image.size.width, self.widgetImage.image.size.height);
                 self.widget.image = image
                 self.widgetImage?.frame = self.contentView.frame

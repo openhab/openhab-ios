@@ -17,7 +17,7 @@ import SDWebImage
 var refreshTimer: Timer?
 
 class ImageUITableViewCell: GenericUITableViewCell {
-    var widgetImage: UIImageView?
+    @IBOutlet weak var widgetImage: UIImageView!
     @objc weak var delegate: ImageUITableViewCellDelegate?
 
     @objc override var widget: OpenHABWidget! {
@@ -31,38 +31,34 @@ class ImageUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        //widgetImage = viewWithTag(901) as? UIImageView
         if widget?.image == nil {
             loadImage()
         } else {
             widgetImage?.image = widget?.image
         }
         // If widget have a refresh rate configured, schedule an image update timer
-        if widget.refresh != nil && refreshTimer == nil {
+        if widget.refresh != "" && refreshTimer == nil {
             let refreshInterval = TimeInterval(widget.refresh.floatValue / 1000)
-            refreshTimer = Timer.scheduledTimer(timeInterval: refreshInterval, target: self, selector: #selector(ImageUITableViewCell.refreshImage(_:)), userInfo: nil, repeats: true)
+            refreshTimer = Timer.scheduledTimer(timeInterval: refreshInterval, target: self,
+                                                selector: #selector(ImageUITableViewCell.refreshImage(_:)), userInfo: nil, repeats: true)
         }
     }
 
+    func imageURL() -> URL {
+        let random = Int.random(in: 0..<1000)
+        var components = URLComponents(string: widget.url)
+        components?.queryItems?.append(contentsOf: [
+            URLQueryItem(name: "random", value: String(random))
+            ])
+        return components?.url ?? URL(string: "")!
+    }
+
     func loadImage() {
-        let random = Int(arc4random()) % 1000
-        widgetImage?.sd_setImage(with: URL(string: "\(widget.url)&random=\(random)"), placeholderImage: nil, options: SDWebImageOptions.cacheMemoryOnly, completed: { image, error, cacheType, imageURL in
-            self.widget?.image = image
-            self.widgetImage?.frame = self.contentView.frame
-            if self.delegate != nil {
-                self.delegate?.didLoadImageOf(self)
-            }
-        })
+        widgetImage?.sd_setImage(with: imageURL(), placeholderImage: nil)
     }
 
     @objc func refreshImage(_ timer: Timer?) {
-        let random = Int(arc4random()) % 1000
-        widgetImage?.sd_setImage(with: URL(string: "\(widget.url)&random=\(random)"), placeholderImage: widgetImage?.image, options: SDWebImageOptions.cacheMemoryOnly, completed: { image, error, cacheType, imageURL in
-            self.widget?.image = image
-            if self.delegate != nil {
-                self.delegate?.didLoadImageOf(self)
-            }
-        })
+        widgetImage?.sd_setImage(with: imageURL(), placeholderImage: widgetImage?.image)
     }
 
     func willMove(to newWindow: UIWindow?) {
