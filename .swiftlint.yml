@@ -7,3 +7,5 @@ disabled_rules: # rule identifiers to exclude from running
   - identifier_name
   - type_body_length
   - cyclomatic_complexity
+excluded: 
+  - Pods

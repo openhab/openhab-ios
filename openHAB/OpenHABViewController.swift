@@ -11,6 +11,9 @@
 import SDWebImage
 import UIKit
 
+let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
+
+
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
 
@@ -801,7 +804,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         let authStr = "\(openHABUsername):\(openHABPassword)"
         let authData: Data? = authStr.data(using: .ascii)
         let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-        let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
+        // let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
         manager?.setValue(authValue, forHTTPHeaderField: "Authorization")
     }
 

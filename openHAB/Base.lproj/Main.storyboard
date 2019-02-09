@@ -435,6 +435,9 @@
                                         <accessibility key="accessibilityConfiguration">
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
+                                        <connections>
+                                            <outlet property="widgetImage" destination="qzD-sQ-IZc" id="J8R-bU-FgR"/>
+                                        </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="VideoUITableViewCell" rowHeight="44" id="s2s-Aw-LZh" customClass="VideoUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="497" width="414" height="44"/>
