@@ -391,11 +391,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             var components = URLComponents(string: openHABRootUrl)
 
             if appData()?.openHABVersion == 2 {
-                if let icon = widget?.icon, let item = widget?.item {
-                    let state = item.state
+                if let icon = widget?.icon {
                     components?.path = "/icon/\(icon)"
                     components?.queryItems = [
-                        URLQueryItem(name: "state", value: state )
+                        URLQueryItem(name: "state", value: widget?.item?.state )
                     ]
                 }
             } else {
