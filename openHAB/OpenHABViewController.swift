@@ -154,6 +154,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
         navigationItem.setRightBarButton(rightDrawerButton, animated: true)
+
+        widgetTableView.rowHeight = UITableView.automaticDimension
+        widgetTableView.estimatedRowHeight = 50
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
@@ -313,21 +316,22 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
-        if widget?.type == "Frame" {
+        switch widget?.type {
+        case "Frame":
             if widget?.label.count ?? 0 > 0 {
                 return 35
             } else {
                 return 0
             }
-        } else if widget?.type == "Video" {
+        case "Video":
             return widgetTableView.frame.size.width * 0.75
-        } else if (widget?.type == "Image") || (widget?.type == "Chart") {
+        case "Image", "Chart":
             if widget?.image != nil {
                 return widget?.image?.size.height ?? 0.0 / (widget?.image?.size.width ?? 0.0 / widgetTableView.frame.size.width)
             } else {
                 return 44
             }
-        } else if (widget?.type == "Webview") || (widget?.type == "Mapview") {
+        case "Webview", "Mapview":
             if let height = widget?.height {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
@@ -337,8 +341,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 // return default height for webview/mapview as 8 rows
                 return 44 * 8
             }
+        default: return 44
         }
-        return 44
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
