@@ -26,25 +26,25 @@ class GenericUITableViewCell: UITableViewCell {
             removeConstraints(disclosureConstraints)
             disclosureConstraints = []
         }
-        if accessoryType == .none {
-            // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
-            if customDetailTextLabel != nil {
-                let views = ["customDetailTextLabel": customDetailTextLabel]
-                let formatString = "[customDetailTextLabel]-20.0-|"
-
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String: Any])
-                addConstraints(disclosureConstraints)
-            }
-        } else {
-            // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-            if customDetailTextLabel != nil {
-                let views = ["customDetailTextLabel": customDetailTextLabel]
-                let formatString = "[customDetailTextLabel]|"
-
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String : Any])
-                addConstraints(disclosureConstraints)
-            }
-        }
+//        if accessoryType == .none {
+//            // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
+//            if customDetailTextLabel != nil {
+//                let views = ["customDetailTextLabel": customDetailTextLabel]
+//                let formatString = "[customDetailTextLabel]-20.0-|"
+//
+//                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String: Any])
+//                addConstraints(disclosureConstraints)
+//            }
+//        } else {
+//            // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
+//            if customDetailTextLabel != nil {
+//                let views = ["customDetailTextLabel": customDetailTextLabel]
+//                let formatString = "[customDetailTextLabel]|"
+//
+//                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String : Any])
+//                addConstraints(disclosureConstraints)
+//            }
+//        }
     }
 
     private var _widget: OpenHABWidget!
