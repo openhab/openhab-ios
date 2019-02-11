@@ -685,105 +685,106 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // Select sitemap
     func selectSitemap() {
-        let sitemapsUrlString = "\(openHABRootUrl)/rest/sitemaps"
-        let sitemapsUrl = URL(string: sitemapsUrlString)
-        var sitemapsRequest: NSMutableURLRequest?
-        if let sitemapsUrl = sitemapsUrl {
-            sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
-        }
-        sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        sitemapsRequest?.timeoutInterval = 10.0
-        var operation: AFHTTPRequestOperation?
-        if let sitemapsRequest = sitemapsRequest {
-            operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
-        }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        policy.delegate = self
-        operation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            operation?.securityPolicy.allowInvalidCertificates = true
-        }
-        // If we are talking to openHAB 2+, we expect response to be JSON
-        if appData()?.openHABVersion == 2 {
-            print("Setting serializer to JSON")
-            operation?.responseSerializer = AFJSONResponseSerializer()
-        }
-        operation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            let response = responseObject as? Data
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            self.sitemaps = []
-            // If we are talking to openHAB 1.X, talk XML
-            if self.appData()?.openHABVersion == 1 {
-                if let response = response {
-                    print("\(String(data: response, encoding: .utf8) ?? "")")
-                }
-                var doc: GDataXMLDocument?
-                if let response = response {
-                    doc = try? GDataXMLDocument(data: response)
-                }
-                if doc == nil {
-                    return
-                }
-                if let name = doc?.rootElement().name() {
-                    print("\(name)")
-                }
-                if doc?.rootElement().name() == "sitemaps" {
-                    for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                        if let element = element as? GDataXMLElement {
-                            let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.append(sitemap)
+
+        var components = URLComponents(string: openHABRootUrl)
+        components?.path = "/rest/sitemaps"
+        components?.queryItems = [
+            URLQueryItem(name: "limit", value: "20")
+        ]
+        if let sitemapsUrl = components?.url {
+            var sitemapsRequest = URLRequest(url: sitemapsUrl)
+            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            sitemapsRequest.timeoutInterval = 10.0
+            var operation = AFHTTPRequestOperation(request: sitemapsRequest)
+
+            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            policy.delegate = self
+            operation.securityPolicy = policy
+            if ignoreSSLCertificate {
+                print("Warning - ignoring invalid certificates")
+                operation.securityPolicy.allowInvalidCertificates = true
+            }
+            // If we are talking to openHAB 2+, we expect response to be JSON
+            if appData()?.openHABVersion == 2 {
+                print("Setting serializer to JSON")
+                operation.responseSerializer = AFJSONResponseSerializer()
+            }
+            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+                let response = responseObject as? Data
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                self.sitemaps = []
+                // If we are talking to openHAB 1.X, talk XML
+                if self.appData()?.openHABVersion == 1 {
+                    if let response = response {
+                        print("\(String(data: response, encoding: .utf8) ?? "")")
+                    }
+                    var doc: GDataXMLDocument?
+                    if let response = response {
+                        doc = try? GDataXMLDocument(data: response)
+                    }
+                    if doc == nil {
+                        return
+                    }
+                    if let name = doc?.rootElement().name() {
+                        print("\(name)")
+                    }
+                    if doc?.rootElement().name() == "sitemaps" {
+                        for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
+                            if let element = element as? GDataXMLElement {
+                                let sitemap = OpenHABSitemap(xml: element)
+                                self.sitemaps.append(sitemap)
+                            }
                         }
                     }
-                }
-                // Newer versions speak JSON!
-            } else {
-                if responseObject is [Any] {
-                    print("Response is array")
-                    for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
-                        self.sitemaps.append(sitemap)
-                    }
+                    // Newer versions speak JSON!
                 } else {
-                    // Something went wrong, we should have received an array
+                    if responseObject is [Any] {
+                        print("Response is array")
+                        for sitemapJson: Any? in responseObject as! [Any?] {
+                            let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
+                            self.sitemaps.append(sitemap)
+                        }
+                    } else {
+                        // Something went wrong, we should have received an array
+                    }
                 }
-            }
-            self.appData()?.sitemaps = self.sitemaps
-            if self.sitemaps.count > 0 {
-                if self.sitemaps.count > 1 {
-                    if self.defaultSitemap != "" {
-                        let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
-                        if sitemapToOpen != nil {
-                            self.pageUrl = sitemapToOpen?.homepageLink ?? ""
-                            self.loadPage(false)
+                self.appData()?.sitemaps = self.sitemaps
+                if self.sitemaps.count > 0 {
+                    if self.sitemaps.count > 1 {
+                        if self.defaultSitemap != "" {
+                            let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
+                            if sitemapToOpen != nil {
+                                self.pageUrl = sitemapToOpen?.homepageLink ?? ""
+                                self.loadPage(false)
+                            } else {
+                                self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
+                            }
                         } else {
                             self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
                         }
                     } else {
-                        self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
+                        self.pageUrl = self.sitemaps[0].homepageLink
+                        self.loadPage(false)
                     }
                 } else {
-                    self.pageUrl = self.sitemaps[0].homepageLink
-                    self.loadPage(false)
+                    TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "openHAB returned empty sitemap list", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
                 }
-            } else {
-                TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "openHAB returned empty sitemap list", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
-            }
 
-        }, failure: { operation, error in
-            print("Error:------SelectSitemap>\(error.localizedDescription)")
-            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            // Error
-            if (error as NSError?)?.code == -1012 {
-                TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
-            } else {
-                TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
-            }
-        })
-        print("Firing request")
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        operation?.start()
+            }, failure: { operation, error in
+                print("Error:------SelectSitemap>\(error.localizedDescription)")
+                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                // Error
+                if (error as NSError?)?.code == -1012 {
+                    TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                } else {
+                    TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                }
+            })
+            print("Firing request")
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            operation .start()
+        }
     }
 
     // load app settings

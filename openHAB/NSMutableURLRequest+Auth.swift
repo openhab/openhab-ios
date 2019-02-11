@@ -25,3 +25,12 @@ extension NSMutableURLRequest {
         setValue(authValue, forHTTPHeaderField: "Authorization")
     }
 }
+
+extension URLRequest {
+    mutating func setAuthCredentials(_ username: String?, _ password: String?) {
+        let authStr = "\(username ?? ""):\(password ?? "")"
+        let authData: Data? = authStr.data(using: .ascii)
+        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
+        setValue(authValue, forHTTPHeaderField: "Authorization")
+    }
+}

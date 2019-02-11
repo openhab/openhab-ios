@@ -90,8 +90,8 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2yW-44-jR4">
-                                                    <rect key="frame" x="62" y="11.666666666666666" width="275" height="20.333333333333336"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="500" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2yW-44-jR4">
+                                                    <rect key="frame" x="62" y="11.666666666666666" width="41.666666666666657" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -101,7 +101,7 @@
                                                 </switch>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="2R9-M1-Bbl" firstAttribute="leading" secondItem="2yW-44-jR4" secondAttribute="trailing" constant="8" id="4iW-cF-I8Z"/>
+                                                <constraint firstItem="2R9-M1-Bbl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="2yW-44-jR4" secondAttribute="trailing" priority="750" constant="8" id="4iW-cF-I8Z"/>
                                                 <constraint firstItem="2yW-44-jR4" firstAttribute="centerY" secondItem="rgR-nn-rTm" secondAttribute="centerY" id="L3e-bX-gg8"/>
                                                 <constraint firstAttribute="trailing" secondItem="2R9-M1-Bbl" secondAttribute="trailing" constant="20" id="LnC-OH-9jB"/>
                                                 <constraint firstItem="2yW-44-jR4" firstAttribute="leading" secondItem="rgR-nn-rTm" secondAttribute="leading" constant="62" id="TGp-0H-cLd"/>
@@ -465,7 +465,7 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                                     <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <wkWebViewConfiguration key="configuration">
-                                                        <dataDetectorTypes key="dataDetectorTypes"/>
+                                                        <dataDetectorTypes key="dataDetectorTypes" none="YES"/>
                                                         <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
                                                         <wkPreferences key="preferences"/>
                                                     </wkWebViewConfiguration>
@@ -1336,6 +1336,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="9JR-Li-4ww"/>
+        <segue reference="IN7-RI-eVs"/>
     </inferredMetricsTieBreakers>
 </document>
