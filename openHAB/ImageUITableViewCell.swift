@@ -55,6 +55,10 @@ class ImageUITableViewCell: GenericUITableViewCell {
 
     func loadImage() {
         widgetImage?.sd_setImage(with: imageURL(), placeholderImage: nil)
+//        { (image, error, cacheType, imageURL) in
+//            // Perform operation.
+//            self.widget.image = image
+//        }
     }
 
     @objc func refreshImage(_ timer: Timer?) {
@@ -69,3 +73,40 @@ class ImageUITableViewCell: GenericUITableViewCell {
         }
     }
 }
+
+struct Endpoint {
+    let baseURL: String
+    let path: String
+    let queryItems: [URLQueryItem]
+}
+
+extension Endpoint {
+    // We still have to keep 'url' as an optional, since we're
+    // dealing with dynamic components that could be invalid.
+    var url: URL? {
+        var components = URLComponents(string: baseURL)
+        components?.path = path
+        components?.queryItems = queryItems
+        return components?.url
+    }
+}
+
+//class DataLoader {
+//    func request(_ endpoint: Endpoint,
+//                 then handler: @escaping (Result<Data>) -> Void) {
+//        guard let url = endpoint.url else {
+//            return handler(.failure(Error.invalidURL))
+//        }
+//
+//        let task = urlSession.dataTask(with: url) {
+//            data, _, error in
+//
+//            let result = data.map(Result.success) ??
+//                .failure(Error.network(error))
+//
+//            handler(result)
+//        }
+//
+//        task.resume()
+//    }
+//}
