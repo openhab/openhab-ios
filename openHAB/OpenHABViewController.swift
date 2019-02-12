@@ -155,8 +155,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
         navigationItem.setRightBarButton(rightDrawerButton, animated: true)
 
-        widgetTableView.rowHeight = UITableView.automaticDimension
-        widgetTableView.estimatedRowHeight = 50
+        //widgetTableView.rowHeight = UITableView.automaticDimension
+       // widgetTableView.estimatedRowHeight = 50
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
