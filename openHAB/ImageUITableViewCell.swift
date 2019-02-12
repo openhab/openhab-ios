@@ -59,7 +59,6 @@ class ImageUITableViewCell: GenericUITableViewCell {
 
     @objc func refreshImage(_ timer: Timer?) {
         widgetImage?.sd_setImage(with: imageURL(), placeholderImage: widgetImage?.image)
-        //self.setNeedsLayout()
     }
 
     func willMove(to newWindow: UIWindow?) {
