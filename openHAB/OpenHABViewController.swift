@@ -52,80 +52,73 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Checking openHAB version
         var components = URLComponents(string: openHABRootUrl)
         components?.path = "/rest/bindings"
-        let pageToLoadUrl = components?.url ?? URL(string: "")
-        var pageRequest: NSMutableURLRequest?
-        if let pageToLoadUrl = pageToLoadUrl {
-            pageRequest = NSMutableURLRequest(url: pageToLoadUrl)
-        }
-        pageRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        pageRequest?.timeoutInterval = 10.0
-        var versionPageOperation: AFHTTPRequestOperation?
-        if let pageRequest = pageRequest {
-            versionPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
-        }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        policy.delegate = self
-        currentPageOperation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            currentPageOperation?.securityPolicy.validatesDomainName = false
-            currentPageOperation?.securityPolicy.allowInvalidCertificates = true
-            versionPageOperation?.securityPolicy.allowInvalidCertificates = true
-            versionPageOperation?.securityPolicy.validatesDomainName = false
-        }
-        versionPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            print("This is an openHAB 2.X")
-            self.appData()?.openHABVersion = 2
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            self.selectSitemap()
-        }, failure: { operation, error in
-            print("This is an openHAB 1.X")
-            self.appData()?.openHABVersion = 1
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------On Tracking>\(error.localizedDescription)")
-            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+        if let pageToLoadUrl = components?.url {
+            var pageRequest = URLRequest(url: pageToLoadUrl)
 
-            self.selectSitemap()
-        })
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        versionPageOperation?.start()
+            pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            pageRequest.timeoutInterval = 10.0
+            let versionPageOperation = AFHTTPRequestOperation(request: pageRequest)
+
+            let policy = AFRememberingSecurityPolicy(pinningMode: .none)
+            policy.delegate = self
+            currentPageOperation?.securityPolicy = policy
+            if ignoreSSLCertificate {
+                print("Warning - ignoring invalid certificates")
+                currentPageOperation?.securityPolicy.validatesDomainName = false
+                currentPageOperation?.securityPolicy.allowInvalidCertificates = true
+                versionPageOperation.securityPolicy.allowInvalidCertificates = true
+                versionPageOperation.securityPolicy.validatesDomainName = false
+            }
+            versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
+                print("This is an openHAB 2.X")
+                self.appData()?.openHABVersion = 2
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                self.selectSitemap()
+            }, failure: { operation, error in
+                print("This is an openHAB 1.X")
+                self.appData()?.openHABVersion = 1
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                print("Error:------On Tracking>\(error.localizedDescription)")
+                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                self.selectSitemap()
+            })
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            versionPageOperation.start()
+        }
     }
-
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        let commandUrl = URL(string: item?.link ?? "")
-        var commandRequest: NSMutableURLRequest?
-        if let commandUrl = commandUrl {
-            commandRequest = NSMutableURLRequest(url: commandUrl)
-        }
-        commandRequest?.httpMethod = "POST"
-        commandRequest?.httpBody = command?.data(using: .utf8)
-        commandRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        commandRequest?.setValue("text/plain", forHTTPHeaderField: "Content-type")
-        if commandOperation != nil {
-            commandOperation?.cancel()
-            commandOperation = nil
-        }
-        if let commandRequest = commandRequest {
+        if let commandUrl = URL(string: item?.link ?? ""){
+            var commandRequest = URLRequest(url: commandUrl)
+
+            commandRequest.httpMethod = "POST"
+            commandRequest.httpBody = command?.data(using: .utf8)
+            commandRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
+            if commandOperation != nil {
+                commandOperation?.cancel()
+                commandOperation = nil
+            }
             commandOperation = AFHTTPRequestOperation(request: commandRequest as URLRequest)
+
+            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            policy.delegate = self
+            commandOperation?.securityPolicy = policy
+            if ignoreSSLCertificate {
+                print("Warning - ignoring invalid certificates")
+                commandOperation?.securityPolicy.allowInvalidCertificates = true
+            }
+            commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
+                print("Command sent!")
+            }, failure: { operation, error in
+                print("Error:------>\(error.localizedDescription )")
+                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+            })
+            print("Timeout \(commandRequest.timeoutInterval)")
+            if let link = item?.link {
+                print("OpenHABViewController posting \(command ?? "") command to \(link)")
+            }
+            commandOperation?.start()
         }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        policy.delegate = self
-        commandOperation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            commandOperation?.securityPolicy.allowInvalidCertificates = true
-        }
-        commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            print("Command sent!")
-        }, failure: { operation, error in
-            print("Error:------>\(error.localizedDescription )")
-            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
-        })
-        print("Timeout \(commandRequest?.timeoutInterval ?? 0.0)")
-        if let link = item?.link {
-            print("OpenHABViewController posting \(command ?? "") command to \(link)")
-        }
-        commandOperation?.start()
     }
 
     // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
@@ -155,8 +148,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
         navigationItem.setRightBarButton(rightDrawerButton, animated: true)
 
-        //widgetTableView.rowHeight = UITableView.automaticDimension
-       // widgetTableView.estimatedRowHeight = 50
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
@@ -569,123 +560,120 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             pageNetworkStatusChanged()
         }
         let pageToLoadUrl = URL(string: pageUrl)
-        var pageRequest: NSMutableURLRequest?
         if let pageToLoadUrl = pageToLoadUrl {
-            pageRequest = NSMutableURLRequest(url: pageToLoadUrl)
-        }
-        pageRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        // We accept XML only if openHAB is 1.X
-        if appData()?.openHABVersion == 1 {
-            pageRequest?.setValue("application/xml", forHTTPHeaderField: "Accept")
-        }
-        pageRequest?.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
-        if longPolling {
-            print("long polling, so setting atmosphere transport")
-            pageRequest?.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
-            pageRequest?.timeoutInterval = 300.0
-        } else {
-            atmosphereTrackingId = ""
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            pageRequest?.timeoutInterval = 10.0
-        }
-        if atmosphereTrackingId == "" {
-            pageRequest?.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
-        } else {
-            pageRequest?.setValue("0", forHTTPHeaderField: "X-Atmosphere-tracking-id")
-        }
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
-        if let pageRequest = pageRequest {
-            currentPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
-        }
-        // If we are talking to openHAB 2+, we expect response to be JSON
-        if appData()?.openHABVersion == 2 {
-            print("Setting serializer to JSON")
-            currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
-        }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        policy.delegate = self
-        currentPageOperation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            currentPageOperation?.securityPolicy.allowInvalidCertificates = true
-        }
-        // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
-        let strongSelf: OpenHABViewController = self
-        currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            print("Page loaded with success")
-            let headers = operation.response?.allHeaderFields
-            //        NSLog(@"%@", headers);
+            var pageRequest = URLRequest(url: pageToLoadUrl)
 
-            if headers?["X-Atmosphere-tracking-id"] != nil {
-                if let object = headers?["X-Atmosphere-tracking-id"] {
-                    print("Found X-Atmosphere-tracking-id: \(object)")
-                }
-                // Establish the strong self reference
-                strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+            pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            // We accept XML only if openHAB is 1.X
+            if appData()?.openHABVersion == 1 {
+                pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
             }
-            let response = responseObject as? Data
-            // If we are talking to openHAB 1.X, talk XML
-            if self.appData()?.openHABVersion == 1 {
-                var doc: GDataXMLDocument?
-                if let response = response {
-                    doc = try? GDataXMLDocument(data: response)
-                }
-                if doc == nil {
-                    return
-                }
-                if let name = doc?.rootElement().name() {
-                    print("\(name)")
-                }
-                if doc?.rootElement().name() == "page" {
-                    if let rootElement = doc?.rootElement() {
-                        self.currentPage = OpenHABSitemapPage(xml: rootElement)
+            pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
+            if longPolling {
+                print("long polling, so setting atmosphere transport")
+                pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
+                pageRequest.timeoutInterval = 300.0
+            } else {
+                atmosphereTrackingId = ""
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+                pageRequest.timeoutInterval = 10.0
+            }
+            if atmosphereTrackingId == "" {
+                pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
+            } else {
+                pageRequest.setValue("0", forHTTPHeaderField: "X-Atmosphere-tracking-id")
+            }
+            if currentPageOperation != nil {
+                currentPageOperation?.cancel()
+                currentPageOperation = nil
+            }
+            currentPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
+
+            // If we are talking to openHAB 2+, we expect response to be JSON
+            if appData()?.openHABVersion == 2 {
+                print("Setting serializer to JSON")
+                currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
+            }
+            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            policy.delegate = self
+            currentPageOperation?.securityPolicy = policy
+            if ignoreSSLCertificate {
+                print("Warning - ignoring invalid certificates")
+                currentPageOperation?.securityPolicy.allowInvalidCertificates = true
+            }
+            // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
+            let strongSelf: OpenHABViewController = self
+            currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
+                print("Page loaded with success")
+                let headers = operation.response?.allHeaderFields
+
+                if headers?["X-Atmosphere-tracking-id"] != nil {
+                    if let object = headers?["X-Atmosphere-tracking-id"] {
+                        print("Found X-Atmosphere-tracking-id: \(object)")
                     }
-                } else {
-                    print("Unable to find page root element")
-                    return
+                    // Establish the strong self reference
+                    strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
                 }
-                // Newer versions talk JSON!
-            } else {
-                self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String : Any] )
-            }
-            strongSelf.currentPage?.delegate = strongSelf
-            strongSelf.widgetTableView.reloadData()
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            strongSelf.refreshControl?.endRefreshing()
-            strongSelf.navigationItem.title = strongSelf.currentPage?.title.components(separatedBy: "[")[0]
-            if longPolling == true {
-                strongSelf.loadPage(false)
-            } else {
-                strongSelf.loadPage(true)
-            }
-        }, failure: { operation, error in
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------> on LoadPage \(error.localizedDescription )")
-            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
-            strongSelf.atmosphereTrackingId = ""
-            if (error as NSError?)?.code == -1001 && longPolling {
-                print("Timeout, restarting requests")
-                strongSelf.loadPage(false)
-            } else if (error as NSError?)?.code == -999 {
-                // Request was cancelled
-                print("Request was cancelled")
-            } else {
-                // Error
-                if (error as NSError?)?.code == -1012 {
-                    TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                let response = responseObject as? Data
+                // If we are talking to openHAB 1.X, talk XML
+                if self.appData()?.openHABVersion == 1 {
+                    var doc: GDataXMLDocument?
+                    if let response = response {
+                        doc = try? GDataXMLDocument(data: response)
+                    }
+                    if doc == nil {
+                        return
+                    }
+                    if let name = doc?.rootElement().name() {
+                        print("\(name)")
+                    }
+                    if doc?.rootElement().name() == "page" {
+                        if let rootElement = doc?.rootElement() {
+                            self.currentPage = OpenHABSitemapPage(xml: rootElement)
+                        }
+                    } else {
+                        print("Unable to find page root element")
+                        return
+                    }
+                    // Newer versions talk JSON!
                 } else {
-                    TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String : Any] )
                 }
-                print("Request failed: \(error.localizedDescription)")
-            }
-        })
-        print("OpenHABViewController sending new request")
-        currentPageOperation?.start()
-        print("OpenHABViewController request sent")
-    }
+                strongSelf.currentPage?.delegate = strongSelf
+                strongSelf.widgetTableView.reloadData()
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                strongSelf.refreshControl?.endRefreshing()
+                strongSelf.navigationItem.title = strongSelf.currentPage?.title.components(separatedBy: "[")[0]
+                if longPolling == true {
+                    strongSelf.loadPage(false)
+                } else {
+                    strongSelf.loadPage(true)
+                }
+            }, failure: { operation, error in
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                print("Error:------> on LoadPage \(error.localizedDescription )")
+                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                strongSelf.atmosphereTrackingId = ""
+                if (error as NSError?)?.code == -1001 && longPolling {
+                    print("Timeout, restarting requests")
+                    strongSelf.loadPage(false)
+                } else if (error as NSError?)?.code == -999 {
+                    // Request was cancelled
+                    print("Request was cancelled")
+                } else {
+                    // Error
+                    if (error as NSError?)?.code == -1012 {
+                        TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    } else {
+                        TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    }
+                    print("Request failed: \(error.localizedDescription)")
+                }
+            })
+            print("OpenHABViewController sending new request")
+            currentPageOperation?.start()
+            print("OpenHABViewController request sent")
+        }}
 
     // Select sitemap
     func selectSitemap() {
@@ -699,9 +687,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
-            var operation = AFHTTPRequestOperation(request: sitemapsRequest)
+            let operation = AFHTTPRequestOperation(request: sitemapsRequest)
 
-            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            let policy = AFRememberingSecurityPolicy(pinningMode: .none)
             policy.delegate = self
             operation.securityPolicy = policy
             if ignoreSSLCertificate {
@@ -815,7 +803,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // Find and return sitemap by it's name if any
     func sitemap(byName sitemapName: String?) -> OpenHABSitemap? {
         for sitemap in sitemaps where sitemap.name == sitemapName {
-                return sitemap
+            return sitemap
         }
         return nil
     }
