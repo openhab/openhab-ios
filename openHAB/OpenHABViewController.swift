@@ -212,6 +212,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidAppear(_ animated: Bool) {
         print("OpenHABViewController viewDidAppear")
         super.viewDidAppear(animated)
+        widgetTableView.reloadData() // reloading data for the first tableView serves another purpose, not exactly related to this question.
+        widgetTableView.setNeedsLayout()
+        widgetTableView.layoutIfNeeded()
+        widgetTableView.reloadData()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -308,7 +312,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-            return UITableView.automaticDimension
+            return 44
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -323,12 +327,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Video":
             return widgetTableView.frame.size.width * 0.75
         case "Image", "Chart":
-            if let image = widget?.image {
-                let aspectRatio = image.size.height / image.size.width
-                return widgetTableView.frame.width * aspectRatio
-            } else {
-                return 88
-            }
+            return UITableView.automaticDimension
+//            if let image = widget?.image {
+//                let aspectRatio = image.size.height / image.size.width
+//                return widgetTableView.frame.width * aspectRatio
+//            } else {
+//                return 88
+//            }
         case "Webview", "Mapview":
             if let height = widget?.height {
                 // calculate webview/mapview height and return it
