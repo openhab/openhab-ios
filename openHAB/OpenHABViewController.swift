@@ -174,14 +174,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func doRegisterAps() {
-        let prefs = UserDefaults.standard
-        if Int((prefs.value(forKey: "remoteUrl") as? NSString)?.range(of: "openhab.org").location ?? 0) != NSNotFound {
-            if deviceId != nil && deviceToken != nil && deviceName != nil {
-                if let value = prefs.value(forKey: "remoteUrl") {
-                    print("Registering notifications with \(value)")
-                }
+        if let prefsURL = UserDefaults.standard.value(forKey: "remoteUrl") as? String, prefsURL.contains("openhab.org") {
+            if deviceId != "" && deviceToken != "" && deviceName != "" {
+                print("Registering notifications with \(prefsURL)")
 
-                var components = URLComponents(string: prefs.value(forKey: "remoteUrl") as! String)
+                var components = URLComponents(string: prefsURL)
 
                 components?.path = "/addAppleRegistration"
                 components?.queryItems = [
