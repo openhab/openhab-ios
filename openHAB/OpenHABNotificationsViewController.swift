@@ -57,46 +57,40 @@ class OpenHABNotificationsViewController: UITableViewController {
         components?.queryItems = [
             URLQueryItem(name: "limit", value: "20")
         ]
-        let notificationsUrl = components?.url ?? URL(string: "")
-
-        var notificationsRequest: NSMutableURLRequest?
-        if let notificationsUrl = notificationsUrl {
-            notificationsRequest = NSMutableURLRequest(url: notificationsUrl)
-        }
-        notificationsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        var operation: AFHTTPRequestOperation?
-        if let notificationsRequest = notificationsRequest {
-            operation = AFHTTPRequestOperation(request: notificationsRequest as URLRequest)
-        }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        operation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            operation?.securityPolicy.allowInvalidCertificates = true
-        }
-
-        let decoder = JSONDecoder()
-
-        operation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            do {
-                let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: responseObject as! Data)
-                for codingDatum in codingDatas {
-                    self.notifications.add(codingDatum.openHABNotification)
-                }
-            } catch {
-                print("should not throw \(error)")
+        if let notificationsUrl = components?.url {
+            var notificationsRequest = URLRequest(url: notificationsUrl)
+            notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            let operation = AFHTTPRequestOperation(request: notificationsRequest)
+            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            operation.securityPolicy = policy
+            if ignoreSSLCertificate {
+                print("Warning - ignoring invalid certificates")
+                operation.securityPolicy.allowInvalidCertificates = true
             }
 
-            self.refreshControl?.endRefreshing()
-            self.tableView.reloadData()
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        }, failure: { operation, error in
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------>\(error.localizedDescription)")
-            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
-            self.refreshControl?.endRefreshing()
-        })
-        operation?.start()
+            let decoder = JSONDecoder()
+
+            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+                do {
+                    let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: responseObject as! Data)
+                    for codingDatum in codingDatas {
+                        self.notifications.add(codingDatum.openHABNotification)
+                    }
+                } catch {
+                    print("should not throw \(error)")
+                }
+
+                self.refreshControl?.endRefreshing()
+                self.tableView.reloadData()
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            }, failure: { operation, error in
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                print("Error:------>\(error.localizedDescription)")
+                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                self.refreshControl?.endRefreshing()
+            })
+            operation.start()
+        }
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {

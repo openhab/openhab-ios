@@ -417,7 +417,7 @@
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ImageUITableViewCell" rowHeight="76" id="qAL-2k-0Oq" customClass="ImageUITableViewCell" customModule="openHAB">
                                         <rect key="frame" x="0.0" y="453" width="414" height="76"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="qAL-2k-0Oq" id="TQB-dV-Dmo">
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" tableViewCell="qAL-2k-0Oq" id="TQB-dV-Dmo">
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="75.666666666666671"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
@@ -426,10 +426,10 @@
                                                 </imageView>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="qzD-sQ-IZc" firstAttribute="leading" secondItem="TQB-dV-Dmo" secondAttribute="leading" id="EjL-BK-Fz8"/>
-                                                <constraint firstAttribute="bottom" secondItem="qzD-sQ-IZc" secondAttribute="bottom" id="X3m-Ha-I8R"/>
-                                                <constraint firstAttribute="trailing" secondItem="qzD-sQ-IZc" secondAttribute="trailing" id="ejS-BB-bas"/>
-                                                <constraint firstItem="qzD-sQ-IZc" firstAttribute="top" secondItem="TQB-dV-Dmo" secondAttribute="top" id="gid-cA-H6q"/>
+                                                <constraint firstItem="qzD-sQ-IZc" firstAttribute="top" secondItem="TQB-dV-Dmo" secondAttribute="top" id="5gU-RE-fiS"/>
+                                                <constraint firstItem="qzD-sQ-IZc" firstAttribute="leading" secondItem="TQB-dV-Dmo" secondAttribute="leading" id="7XC-QT-XXS"/>
+                                                <constraint firstAttribute="bottom" secondItem="qzD-sQ-IZc" secondAttribute="bottom" id="B2O-gY-z81"/>
+                                                <constraint firstAttribute="trailing" secondItem="qzD-sQ-IZc" secondAttribute="trailing" id="UM0-kd-kcg"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
