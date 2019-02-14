@@ -15,7 +15,7 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var downButton: UICircleButton!
     @IBOutlet weak var stopButton: UICircleButton!
     @IBOutlet weak var upButton: UICircleButton!
-    //@IBOutlet weak var customTextLabel: UILabel!
+
     required init?(coder: NSCoder) {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(coder: coder)
@@ -29,7 +29,6 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -41,7 +40,6 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
-
     }
 
     override func displayWidget() {
