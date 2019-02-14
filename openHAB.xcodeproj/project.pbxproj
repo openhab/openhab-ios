@@ -23,7 +23,6 @@
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
 		DAA42BAE21DC987C00244B2A /* ImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAD21DC987C00244B2A /* ImageUITableViewCell.swift */; };
-		DADC07DA2213554B00030519 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADC07D92213554B00030519 /* Endpoint.swift */; };
 		DAE2F97D2203A46F008A345E /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
 		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
@@ -120,7 +119,6 @@
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAD21DC987C00244B2A /* ImageUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSObjectExtension.swift; sourceTree = "<group>"; };
-		DADC07D92213554B00030519 /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
 		DAE2F97E220426AE008A345E /* openHABTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "openHABTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSelectionTableViewControllerDelegate.swift; sourceTree = "<group>"; };
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
@@ -323,7 +321,6 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
-				DADC07D92213554B00030519 /* Endpoint.swift */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				55933D2EF2A0967A5346C7B0 /* Pods */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
@@ -707,7 +704,6 @@
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
-				DADC07DA2213554B00030519 /* Endpoint.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				DF2B6ADD18EF4D660063819F /* NSData+HexString.swift in Sources */,
 				DFDEE41418832323008B26AC /* NSMutableURLRequest+Auth.swift in Sources */,
