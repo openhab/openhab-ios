@@ -87,7 +87,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        if let commandUrl = URL(string: item?.link ?? ""){
+        if let commandUrl = URL(string: item?.link ?? "") {
             var commandRequest = URLRequest(url: commandUrl)
 
             commandRequest.httpMethod = "POST"
@@ -98,9 +98,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 commandOperation?.cancel()
                 commandOperation = nil
             }
-            commandOperation = AFHTTPRequestOperation(request: commandRequest as URLRequest)
+            commandOperation = AFHTTPRequestOperation(request: commandRequest)
 
-            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            let policy = AFRememberingSecurityPolicy(pinningMode: .none)
             policy.delegate = self
             commandOperation?.securityPolicy = policy
             if ignoreSSLCertificate {
@@ -180,29 +180,31 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if let value = prefs.value(forKey: "remoteUrl") {
                     print("Registering notifications with \(value)")
                 }
-                var registrationUrlString: String?
-                if let value = prefs.value(forKey: "remoteUrl") {
-                    registrationUrlString = "\(value)/addAppleRegistration?regId=\(deviceToken)&deviceId=\(deviceId)&deviceModel=\(deviceName)"
+
+                var components = URLComponents(string: prefs.value(forKey: "remoteUrl") as! String)
+
+                components?.path = "/addAppleRegistration"
+                components?.queryItems = [
+                    URLQueryItem(name: "regId", value: deviceToken),
+                    URLQueryItem(name: "deviceId", value: deviceId),
+                    URLQueryItem(name: "deviceModel", value: deviceName)
+                ]
+
+                if let registrationUrl = components?.url {
+                    var registrationRequest = URLRequest(url: registrationUrl)
+
+                    print("Registration URL = \(registrationUrl.absoluteString)")
+                    registrationRequest.setAuthCredentials(openHABUsername, openHABPassword)
+                    let registrationOperation = AFHTTPRequestOperation(request: registrationRequest)
+                    registrationOperation.setCompletionBlockWithSuccess({ operation, responseObject in
+                        print("my.openHAB registration sent")
+                    }, failure: { operation, error in
+                        print("my.openHAB registration failed")
+                        print("Error:------>\(error.localizedDescription)")
+                        print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                    })
+                    registrationOperation.start()
                 }
-                let registrationUrl = URL(string: (registrationUrlString as NSString?)?.addingPercentEscapes(using: String.Encoding.utf8.rawValue) ?? "")
-                print("Registration URL = \(registrationUrl?.absoluteString ?? "")")
-                var registrationRequest: NSMutableURLRequest?
-                if let registrationUrl = registrationUrl {
-                    registrationRequest = NSMutableURLRequest(url: registrationUrl)
-                }
-                registrationRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-                var registrationOperation: AFHTTPRequestOperation?
-                if let registrationRequest = registrationRequest {
-                    registrationOperation = AFHTTPRequestOperation(request: registrationRequest as URLRequest)
-                }
-                registrationOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-                    print("my.openHAB registration sent")
-                }, failure: { operation, error in
-                    print("my.openHAB registration failed")
-                    print("Error:------>\(error.localizedDescription)")
-                    print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
-                })
-                registrationOperation?.start()
             }
         }
     }
@@ -305,6 +307,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+            return UITableView.automaticDimension
+    }
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
         switch widget?.type {
@@ -317,10 +323,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Video":
             return widgetTableView.frame.size.width * 0.75
         case "Image", "Chart":
-            if widget?.image != nil {
-                return widget?.image?.size.height ?? 0.0 / (widget?.image?.size.width ?? 0.0 / widgetTableView.frame.size.width)
+            if let image = widget?.image {
+                let aspectRatio = image.size.height / image.size.width
+                return widgetTableView.frame.width * aspectRatio
             } else {
-                return 44
+                return 88
             }
         case "Webview", "Mapview":
             if let height = widget?.height {
@@ -466,12 +473,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func didLoadImageOf(_ cell: ImageUITableViewCell?) {
-        var indexPath: IndexPath?
-        if let cell = cell {
-            indexPath = widgetTableView.indexPath(for: cell)
-        }
-        if indexPath != nil {
-            widgetTableView.reloadRows(at: [indexPath!], with: .none)
+        if let cell = cell, let indexPath = widgetTableView.indexPath(for: cell) {
+            widgetTableView.reloadRows(at: [indexPath], with: .none)
         }
     }
 
