@@ -30,7 +30,6 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         downButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = .none
         separatorInset = .zero
-
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -40,12 +39,10 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         downButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = .none
         separatorInset = .zero
-
     }
 
     override func displayWidget() {
         customTextLabel?.text = widget.labelText()
-
         colorButton?.backgroundColor = widget.item?.stateAsUIColor()
     }
 

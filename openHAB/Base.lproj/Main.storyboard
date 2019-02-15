@@ -217,6 +217,7 @@
                                         </accessibility>
                                         <connections>
                                             <outlet property="colorButton" destination="JzN-PF-zeJ" id="q22-iL-Tqd"/>
+                                            <outlet property="customTextLabel" destination="p1Y-EL-tV3" id="CIR-7l-KKc"/>
                                             <outlet property="downButton" destination="vxc-Zw-Oyh" id="wmx-Ah-YGw"/>
                                             <outlet property="upButton" destination="OR4-bR-Ekg" id="F4j-67-AmO"/>
                                         </connections>
