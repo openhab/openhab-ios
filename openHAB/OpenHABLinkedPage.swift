@@ -47,14 +47,5 @@ import Foundation
                 }
             }
         }
-//        for key: String? in dictionary.keys {
-//            if !(key == "id") {
-//                if allPropertyNames().contains(key ?? "") {
-//                    setValue(dictionary[key], forKey: key ?? "")
-//                }
-//            } else {
-//                pageId = dictionary[key] as? String ?? ""
-//            }
-//        }
     }
 }

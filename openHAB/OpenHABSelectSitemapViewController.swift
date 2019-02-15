@@ -71,92 +71,89 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         components?.path = "/rest/sitemaps"
         let sitemapsUrl = components?.url ?? URL(string: "")
 
-        var sitemapsRequest: NSMutableURLRequest?
-        if let sitemapsUrl = sitemapsUrl {
-            sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
-        }
-        sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        var operation: AFHTTPRequestOperation?
-        if let sitemapsRequest = sitemapsRequest {
-            operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
-        }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        operation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            operation?.securityPolicy.allowInvalidCertificates = true
-        }
-        if appData()?.openHABVersion == 2 {
-            print("Setting serializer to JSON")
-            operation?.responseSerializer = AFJSONResponseSerializer()
-            Alamofire.request(sitemapsUrl!)
-                .validate(statusCode: 200..<300)
-                .responseJSON { response in
-                    if (response.result.error == nil) {
-                        debugPrint("HTTP Response Body: \(response.data)")
-                    }
-                    else {
-                        debugPrint("HTTP Request failed: \(response.result.error)")
-                    }
-            }
-        }
+        if let sitemapsUrl = components?.url {
+            var sitemapsRequest = URLRequest(url: sitemapsUrl)
+            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
 
-        operation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            let response = responseObject as? Data
-            self.sitemaps = []
-            print("Sitemap response")
-            // If we are talking to openHAB 1.X, talk XML
-            if self.appData()?.openHABVersion == 1 {
-                print("openHAB 1")
-                if let response = response {
-                    print("\(String(data: response, encoding: .utf8) ?? "")")
-                }
-                var doc: GDataXMLDocument?
-                if let response = response {
-                    doc = try? GDataXMLDocument(data: response)
-                }
-                if doc == nil {
-                    return
-                }
-                if let name = doc?.rootElement().name() {
-                    print("\(name)")
-                }
-                if doc?.rootElement().name() == "sitemaps" {
-                    for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                        if let element = element as? GDataXMLElement {
-                            let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.append(sitemap)
+            let operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
+
+            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            operation.securityPolicy = policy
+            if ignoreSSLCertificate {
+                print("Warning - ignoring invalid certificates")
+                operation.securityPolicy.allowInvalidCertificates = true
+            }
+            if appData()?.openHABVersion == 2 {
+                print("Setting serializer to JSON")
+                operation.responseSerializer = AFJSONResponseSerializer()
+                Alamofire.request(sitemapsUrl)
+                    .validate(statusCode: 200..<300)
+                    .responseJSON { response in
+                        if response.result.error == nil {
+                            debugPrint("HTTP Response Body: \(response.data)")
+                        } else {
+                            debugPrint("HTTP Request failed: \(response.result.error)")
                         }
-                    }
-                } else {
-                    return
-                }
-                // Newer versions speak JSON!
-            } else {
-                print("openHAB 2")
-                if responseObject is [Any] {
-                    print("Response is array")
-                    for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
-                        if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
-                            print("Sitemap \(String(describing: sitemap.label))")
-                            self.sitemaps.append(sitemap)
-                        }
-                    }
-                } else {
-                    // Something went wrong, we should have received an array
-                    return
                 }
             }
-            self.appData()?.sitemaps = self.sitemaps
-            self.tableView.reloadData()
-        }, failure: { operation, error in
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------>\(error.localizedDescription)")
-            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
-        })
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        operation?.start()
+
+            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+                let response = responseObject as? Data
+                self.sitemaps = []
+                print("Sitemap response")
+                // If we are talking to openHAB 1.X, talk XML
+                if self.appData()?.openHABVersion == 1 {
+                    print("openHAB 1")
+                    if let response = response {
+                        print("\(String(data: response, encoding: .utf8) ?? "")")
+                    }
+                    var doc: GDataXMLDocument?
+                    if let response = response {
+                        doc = try? GDataXMLDocument(data: response)
+                    }
+                    if doc == nil {
+                        return
+                    }
+                    if let name = doc?.rootElement().name() {
+                        print("\(name)")
+                    }
+                    if doc?.rootElement().name() == "sitemaps" {
+                        for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
+                            if let element = element as? GDataXMLElement {
+                                let sitemap = OpenHABSitemap(xml: element)
+                                self.sitemaps.append(sitemap)
+                            }
+                        }
+                    } else {
+                        return
+                    }
+                    // Newer versions speak JSON!
+                } else {
+                    print("openHAB 2")
+                    if responseObject is [Any] {
+                        print("Response is array")
+                        for sitemapJson: Any? in responseObject as! [Any?] {
+                            let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
+                            if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
+                                print("Sitemap \(String(describing: sitemap.label))")
+                                self.sitemaps.append(sitemap)
+                            }
+                        }
+                    } else {
+                        // Something went wrong, we should have received an array
+                        return
+                    }
+                }
+                self.appData()?.sitemaps = self.sitemaps
+                self.tableView.reloadData()
+            }, failure: { operation, error in
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                print("Error:------>\(error.localizedDescription)")
+                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+            })
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            operation.start()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {

@@ -36,88 +36,83 @@ class OpenHABDrawerTableViewController: UITableViewController {
         var components = URLComponents(string: openHABRootUrl)
         components?.path = "/rest/sitemaps"
         print ("Sitemap URL = \(components?.url?.absoluteString ?? "")")
-        let sitemapsUrl = components?.url
 
-        var sitemapsRequest: NSMutableURLRequest?
-        if let sitemapsUrl = sitemapsUrl {
-            sitemapsRequest = NSMutableURLRequest(url: sitemapsUrl)
-        }
-        sitemapsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        var operation: AFHTTPRequestOperation?
-        if let sitemapsRequest = sitemapsRequest {
-            operation = AFHTTPRequestOperation(request: sitemapsRequest as URLRequest)
-        }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        operation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            operation?.securityPolicy.allowInvalidCertificates = true
-        }
-        if appData()?.openHABVersion == 2 {
-            print("Setting serializer to JSON")
-            operation?.responseSerializer = AFJSONResponseSerializer()
-        }
-        operation?.setCompletionBlockWithSuccess({ operation, responseObject in
-            let response = responseObject as? Data
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            self.sitemaps = []
-            print("Sitemap response")
-            // If we are talking to openHAB 1.X, talk XML
-            if self.appData()?.openHABVersion == 1 {
-                print("openHAB 1")
-                if let response = response {
-                    print("\(String(data: response, encoding: .utf8) ?? "")")
-                }
-                var doc: GDataXMLDocument?
-                if let response = response {
-                    doc = try? GDataXMLDocument(data: response)
-                }
-                if doc == nil {
-                    return
-                }
-                if let name = doc?.rootElement().name() {
-                    print("\(name)")
-                }
-                if doc?.rootElement().name() == "sitemaps" {
-                    for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                        if let element = element as? GDataXMLElement {
-                            let sitemap = OpenHABSitemap(xml: element)
-                            self.sitemaps.append(sitemap)
-                        }
-                    }
-                } else {
-                    return
-                }
-                // Newer versions speak JSON!
-            } else {
-                print("openHAB 2")
-                if responseObject is [Any] {
-                    print("Response is array")
-                    for sitemapJson: Any? in responseObject as! [Any?] {
-                        let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [String: Any])!)
-                        if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
-                            print("Sitemap \(sitemap.label)")
-                            self.sitemaps.append(sitemap)
-                        }
-                    }
-                } else {
-                    // Something went wrong, we should have received an array
-                    return
-                }
+        if let sitemapsUrl = components?.url {
+            var sitemapsRequest = URLRequest(url: sitemapsUrl)
+            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            let operation = AFHTTPRequestOperation(request: sitemapsRequest)
+            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
+            operation.securityPolicy = policy
+            if ignoreSSLCertificate {
+                print("Warning - ignoring invalid certificates")
+                operation.securityPolicy.allowInvalidCertificates = true
             }
+            if appData()?.openHABVersion == 2 {
+                print("Setting serializer to JSON")
+                operation.responseSerializer = AFJSONResponseSerializer()
+            }
+            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+                let response = responseObject as? Data
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                self.sitemaps = []
+                print("Sitemap response")
+                // If we are talking to openHAB 1.X, talk XML
+                if self.appData()?.openHABVersion == 1 {
+                    print("openHAB 1")
+                    if let response = response {
+                        print("\(String(data: response, encoding: .utf8) ?? "")")
+                    }
+                    var doc: GDataXMLDocument?
+                    if let response = response {
+                        doc = try? GDataXMLDocument(data: response)
+                    }
+                    if doc == nil {
+                        return
+                    }
+                    if let name = doc?.rootElement().name() {
+                        print("\(name)")
+                    }
+                    if doc?.rootElement().name() == "sitemaps" {
+                        for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
+                            if let element = element as? GDataXMLElement {
+                                let sitemap = OpenHABSitemap(xml: element)
+                                self.sitemaps.append(sitemap)
+                            }
+                        }
+                    } else {
+                        return
+                    }
+                    // Newer versions speak JSON!
+                } else {
+                    print("openHAB 2")
+                    if responseObject is [Any] {
+                        print("Response is array")
+                        for sitemapJson: Any? in responseObject as! [Any?] {
+                            let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [String: Any])!)
+                            if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
+                                print("Sitemap \(sitemap.label)")
+                                self.sitemaps.append(sitemap)
+                            }
+                        }
+                    } else {
+                        // Something went wrong, we should have received an array
+                        return
+                    }
+                }
 
-            // Sort the sitemaps alphabetically.
-            self.sitemaps.sort { $0.name < $1.name }
+                // Sort the sitemaps alphabetically.
+                self.sitemaps.sort { $0.name < $1.name }
 
-            self.appData()?.sitemaps = self.sitemaps
-            self.tableView.reloadData()
-        }, failure: { operation, error in
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            print("Error:------>\(error.localizedDescription)")
-            print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
-        })
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        operation?.start()
+                self.appData()?.sitemaps = self.sitemaps
+                self.tableView.reloadData()
+            }, failure: { operation, error in
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                print("Error:------>\(error.localizedDescription)")
+                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+            })
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            operation.start()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -155,7 +150,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
 
-// MARK: - Table view data source
+    // MARK: - Table view data source
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
