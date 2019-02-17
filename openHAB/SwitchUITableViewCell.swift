@@ -11,18 +11,21 @@
 class SwitchUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet var widgetSwitch: UISwitch!
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
 
+    private func initiliaze() {
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.initiliaze()
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
+        self.initiliaze()
     }
 
     override func displayWidget() {
