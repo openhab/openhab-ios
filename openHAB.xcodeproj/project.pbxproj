@@ -17,6 +17,8 @@
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
 		CA7D4C708413DB6D1BEC9D2F /* OpenHABAppDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */; };
 		DA15FF462217F4E500FF0FDA /* ImageUINewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF452217F4E500FF0FDA /* ImageUINewTableViewCell.swift */; };
+		DA15FF482219B9C900FF0FDA /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF472219B9C900FF0FDA /* ColorUtil.swift */; };
+		DA15FF492219B9C900FF0FDA /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF472219B9C900FF0FDA /* ColorUtil.swift */; };
 		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
 		DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */; };
 		DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
@@ -112,6 +114,7 @@
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
 		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
 		DA15FF452217F4E500FF0FDA /* ImageUINewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageUINewTableViewCell.swift; path = openHAB/ImageUINewTableViewCell.swift; sourceTree = SOURCE_ROOT; };
+		DA15FF472219B9C900FF0FDA /* ColorUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ColorUtil.swift; path = openHAB/ColorUtil.swift; sourceTree = "<group>"; };
 		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABTestsSwift.swift; sourceTree = "<group>"; };
@@ -324,6 +327,7 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
+				DA15FF472219B9C900FF0FDA /* ColorUtil.swift */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				55933D2EF2A0967A5346C7B0 /* Pods */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
@@ -693,6 +697,7 @@
 				DAE2F97D2203A46F008A345E /* OpenHABSitemap.swift in Sources */,
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */,
+				DA15FF492219B9C900FF0FDA /* ColorUtil.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -703,6 +708,7 @@
 				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.swift in Sources */,
 				DF06F1FF18FEFEDF0011E7B9 /* ChartUITableViewCell.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
+				DA15FF482219B9C900FF0FDA /* ColorUtil.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,

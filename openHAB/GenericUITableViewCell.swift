@@ -11,7 +11,6 @@
 import UIKit
 
 class GenericUITableViewCell: UITableViewCell {
-    private var namedColors: [AnyHashable: Any] = [:]
 
     @objc func displayWidget() {
         customTextLabel?.text = widget?.labelText()
@@ -87,21 +86,19 @@ class GenericUITableViewCell: UITableViewCell {
 
     var disclosureConstraints: [NSLayoutConstraint] = []
 
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-
+    func initialize() {
         selectionStyle = .none
         separatorInset = .zero
-        namedColors = ["maroon": "#800000", "red": "#ff0000", "orange": "#ffa500", "olive": "#808000", "yellow": "#ffff00", "purple": "#800080", "fuchsia": "#ff00ff", "white": "#ffffff", "lime": "#00ff00", "green": "#008000", "navy": "#000080", "blue": "#0000ff", "teal": "#008080", "aqua": "#00ffff", "black": "#000000", "silver": "#c0c0c0", "gray": "#808080"]
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        initialize()
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-
-        selectionStyle = .none
-        separatorInset = .zero
-        namedColors = ["maroon": "#800000", "red": "#ff0000", "orange": "#ffa500", "olive": "#808000", "yellow": "#ffff00", "purple": "#800080", "fuchsia": "#ff00ff", "white": "#ffffff", "lime": "#00ff00", "green": "#008000", "navy": "#000080", "blue": "#0000ff", "teal": "#008080", "aqua": "#00ffff", "black": "#000000", "silver": "#c0c0c0", "gray": "#808080"]
-
+        initialize()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -118,37 +115,6 @@ class GenericUITableViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         imageView?.frame = CGRect(x: 13, y: 5, width: 32, height: 32)
-    }
-
-    func namedColor(toHexString namedColor: String?) -> String? {
-        return namedColors[namedColor?.lowercased() ?? ""] as? String
-    }
-
-    func color(fromHexString hexString: String?) -> UIColor? {
-        var cString: String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ??  "x800000"
-
-        if !cString.hasPrefix("#") {
-            if let namedColor = namedColor(toHexString: cString) {
-                cString = namedColor
-            }
-        }
-        if cString.hasPrefix("#") {
-            cString.remove(at: cString.startIndex)
-        }
-
-        if (cString.count) != 6 {
-            return UIColor.gray
-        }
-
-        var rgbValue: UInt32 = 0
-        Scanner(string: cString).scanHexInt32(&rgbValue)
-
-        return UIColor(
-            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
-            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
-            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
-            alpha: CGFloat(1.0)
-        )
     }
 
     static var identifier: String {
