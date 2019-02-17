@@ -23,6 +23,11 @@ class OpenHABTestsSwift: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    func testNamedColors() {
+        XCTAssertEqual("#ff0000", namedColor(toHexString: "red"))
+        XCTAssertEqual(UIColor.red, color(fromHexString: "red"))
+    }
+
     func testJSONNotificationDecoder() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
