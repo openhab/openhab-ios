@@ -127,6 +127,11 @@ class GenericUITableViewCell: UITableViewCell {
     func color(fromHexString hexString: String?) -> UIColor? {
         var cString: String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ??  "x800000"
 
+        if !cString.hasPrefix("#") {
+            if let namedColor = namedColor(toHexString: cString) {
+                cString = namedColor
+            }
+        }
         if cString.hasPrefix("#") {
             cString.remove(at: cString.startIndex)
         }
