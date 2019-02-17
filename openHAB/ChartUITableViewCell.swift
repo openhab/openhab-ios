@@ -14,7 +14,6 @@ class ChartUITableViewCell: ImageUITableViewCell {
     @objc var baseUrl = ""
 
     override func displayWidget() {
-        widgetImage = viewWithTag(801) as? UIImageView
         let random = Int.random(in: 0..<1000)
 
         var chartUrl: URL

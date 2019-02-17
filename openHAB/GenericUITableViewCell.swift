@@ -117,8 +117,4 @@ class GenericUITableViewCell: UITableViewCell {
         imageView?.frame = CGRect(x: 13, y: 5, width: 32, height: 32)
     }
 
-    static var identifier: String {
-        return String(describing: self)
-    }
-
 }
