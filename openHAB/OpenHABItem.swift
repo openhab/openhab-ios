@@ -12,6 +12,14 @@
 import CoreLocation
 import Foundation
 
+extension String {
+    var numberValue:NSNumber? {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        return formatter.number(from: self)
+    }
+}
+
 @objcMembers
 @objc class OpenHABItem: NSObject {
     var type = ""
@@ -46,11 +54,11 @@ import Foundation
     }
 
     func stateAsFloat() -> Float {
-        return Float(state) ?? 0.0
+        return state.numberValue?.floatValue ?? 0
     }
 
     func stateAsInt() -> Int {
-        return Int(state) ?? 0
+        return state.numberValue?.intValue ?? 0
     }
 
     func stateAsUIColor() -> UIColor? {
