@@ -15,7 +15,15 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var downButton: UICircleButton!
     @IBOutlet weak var stopButton: UICircleButton!
     @IBOutlet weak var upButton: UICircleButton!
-    //@IBOutlet weak var customTextLabel: UILabel!
+
+    override func initialize() {
+        upButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.upButtonPressed), for: .touchUpInside)
+        stopButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.stopButtonPressed), for: .touchUpInside)
+        downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
+        selectionStyle = UITableViewCell.SelectionStyle.none
+        separatorInset = UIEdgeInsets.zero
+    }
+
     required init?(coder: NSCoder) {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(coder: coder)
@@ -23,25 +31,14 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         upButton?.setTitle("▲", for: .normal)
         stopButton?.setTitle("■", for: .normal)
         downButton?.setTitle("▼", for: .normal)
-
-        upButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.upButtonPressed), for: .touchUpInside)
-        stopButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.stopButtonPressed), for: .touchUpInside)
-        downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
-
+        initialize()
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        upButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.upButtonPressed), for: .touchUpInside)
-        stopButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.stopButtonPressed), for: .touchUpInside)
-        downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
-
+        initialize()
     }
 
     override func displayWidget() {
