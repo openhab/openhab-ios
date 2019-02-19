@@ -341,7 +341,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
         case "Video":
             return widgetTableView.frame.size.width * 0.75
-        case "Image", "Chart":
+        case "Image":
+            return UITableView.automaticDimension
+        case "Chart":
             if let image = widget?.image {
                 let aspectRatio = image.size.height / image.size.width
                 return widgetTableView.frame.width * aspectRatio
@@ -395,7 +397,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
             cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
-            cell.setNeedsLayout()
+
             //cell = tableView.dequeueReusableCell(for: IndexPath) as ImageUINewTableViewCell
             //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
         case "Video":
@@ -430,6 +432,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             let urlc = components?.url ?? URL(string: "")
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
 
+        }
+
+        if let cell = cell as? ImageUINewTableViewCell {
+            cell.mainImageView.sd_setImage(with: cell.createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            cell.mainImageView.sizeToFit()
         }
 
         if cell is FrameUITableViewCell {
