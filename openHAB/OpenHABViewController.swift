@@ -327,7 +327,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 88
+            return 44
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -341,15 +341,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
         case "Video":
             return widgetTableView.frame.size.width * 0.75
-        case "Image":
+        case "Image", "Chart":
             return UITableView.automaticDimension
-        case "Chart":
-            if let image = widget?.image {
-                let aspectRatio = image.size.height / image.size.width
-                return widgetTableView.frame.width * aspectRatio
-            } else {
-                return UITableView.automaticDimension
-            }
         case "Webview", "Mapview":
             if let height = widget?.height {
                 // calculate webview/mapview height and return it
@@ -754,6 +747,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     if let name = doc?.rootElement().name() {
                         print("\(name)")
                     }
+
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                             if let element = element as? GDataXMLElement {
