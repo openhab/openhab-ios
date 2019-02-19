@@ -13,6 +13,23 @@ import UIKit
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
+//enum Result<Success, Failure> where Failure : Error {
+//    case success(Success)
+//    case failure(Failure)
+//}
+//
+//extension URLSession {
+//    open func dataTask(with url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> URLSessionDataTask {
+//        return self.dataTask(with: url) { (data, response, error) in
+//            guard error == nil else {
+//                completion(.failure(error!))
+//                return
+//            }
+//
+//            completion(.success(data!))
+//        }
+//    }
+//}
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
@@ -133,6 +150,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
+        widgetTableView.register(cellType: ImageUINewTableViewCell.self) //, forCellReuseIdentifer: "ImageUINewTableViewCell")
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -325,12 +343,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             return widgetTableView.frame.size.width * 0.75
         case "Image", "Chart":
             return UITableView.automaticDimension
-//            if let image = widget?.image {
-//                let aspectRatio = image.size.height / image.size.width
-//                return widgetTableView.frame.width * aspectRatio
-//            } else {
-//                return 88
-//            }
         case "Webview", "Mapview":
             if let height = widget?.height {
                 // calculate webview/mapview height and return it
@@ -377,7 +389,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("Setting cell base url to \(openHABRootUrl)")
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
-            cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
+            cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
+
+            //cell = tableView.dequeueReusableCell(for: IndexPath) as ImageUINewTableViewCell
+            //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
         case "Video":
             cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
         case "Webview":
@@ -410,6 +425,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             let urlc = components?.url ?? URL(string: "")
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
 
+        }
+
+        if let cell = cell as? ImageUINewTableViewCell {
+            cell.mainImageView.sd_setImage(with: cell.createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            cell.mainImageView.sizeToFit()
+            cell.setNeedsLayout()
+            cell.layoutIfNeeded()
         }
 
         if cell is FrameUITableViewCell {
@@ -725,6 +747,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     if let name = doc?.rootElement().name() {
                         print("\(name)")
                     }
+
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                             if let element = element as? GDataXMLElement {

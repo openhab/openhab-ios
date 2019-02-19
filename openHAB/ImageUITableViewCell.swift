@@ -55,6 +55,10 @@ class ImageUITableViewCell: GenericUITableViewCell {
 
     func loadImage() {
         widgetImage?.sd_setImage(with: imageURL(), placeholderImage: nil)
+{ (image, error, cacheType, imageURL) in
+                    // Perform operation.
+                    self.widget.image = image
+                }
     }
 
     @objc func refreshImage(_ timer: Timer?) {
