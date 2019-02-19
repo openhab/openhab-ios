@@ -437,6 +437,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if let cell = cell as? ImageUINewTableViewCell {
             cell.mainImageView.sd_setImage(with: cell.createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
             cell.mainImageView.sizeToFit()
+            cell.setNeedsLayout()
+            cell.layoutIfNeeded()
         }
 
         if cell is FrameUITableViewCell {
