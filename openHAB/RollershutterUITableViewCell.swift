@@ -27,6 +27,7 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
        
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
+    }
 
     required init?(coder: NSCoder) {
         print("RollershutterUITableViewCell initWithCoder")
