@@ -754,6 +754,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     if let name = doc?.rootElement().name() {
                         print("\(name)")
                     }
+
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                             if let element = element as? GDataXMLElement {

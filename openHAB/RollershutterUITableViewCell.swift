@@ -34,10 +34,15 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         initialize()
     }
 
+    required init?(coder: NSCoder) {
+        print("RollershutterUITableViewCell initWithCoder")
+        super.init(coder: coder)
+        initialize()
+    }
+
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         print("RollershutterUITableViewCell initWithCoder")
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-
         initialize()
     }
 
