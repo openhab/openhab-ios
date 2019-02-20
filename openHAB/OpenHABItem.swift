@@ -12,14 +12,6 @@
 import CoreLocation
 import Foundation
 
-extension String {
-    var numberValue:NSNumber? {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter.number(from: self)
-    }
-}
-
 @objcMembers
 @objc class OpenHABItem: NSObject {
     var type = ""
