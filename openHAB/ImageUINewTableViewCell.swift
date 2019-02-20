@@ -15,8 +15,7 @@ class ImageUINewTableViewCell: GenericUITableViewCell {
     var mainImageView : UIImageView  = {
         var imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        imageView.autoresizingMask = [.flexibleHeight]
-
+        imageView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
         imageView.translatesAutoresizingMaskIntoConstraints = false
 
         imageView.clipsToBounds = true

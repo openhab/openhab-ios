@@ -133,6 +133,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("Timeout \(commandRequest.timeoutInterval)")
             if let link = item?.link {
                 print("OpenHABViewController posting \(command ?? "") command to \(link)")
+                print(commandRequest.debugDescription)
             }
             commandOperation?.start()
         }

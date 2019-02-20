@@ -17,6 +17,7 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var upButton: UICircleButton!
 
     override func initialize() {
+
         upButton?.setTitle("▲", for: .normal)
         stopButton?.setTitle("■", for: .normal)
         downButton?.setTitle("▼", for: .normal)
