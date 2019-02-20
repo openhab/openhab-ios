@@ -16,7 +16,7 @@ extension String {
     var numberValue:NSNumber? {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        return formatter.number(from: self)
+        return formatter.number(from: self.filter("01234567890.-".contains))
     }
 }
 
