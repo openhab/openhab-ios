@@ -8,27 +8,6 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
-extension String {
-
-    var floatValue: Float {
-        let formatter = NumberFormatter()
-        formatter.decimalSeparator = "."
-        if let asNumber = formatter.number(from: self) {
-            return asNumber.floatValue
-        } else {
-            return Float.nan
-        }
-    }
-
-    var intValue: Int {
-        if let asNumber = NumberFormatter().number(from: self) {
-            return asNumber.intValue
-        } else {
-            return Int.max
-        }
-    }
-}
-
 class SetpointUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var widgetSegmentControl: UISegmentedControl!
 
