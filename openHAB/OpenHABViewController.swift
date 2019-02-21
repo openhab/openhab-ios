@@ -345,7 +345,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Image", "Chart":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
-            if let height = widget?.height {
+            if let height = widget?.height, height.intValue != 0 {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
                 print("Webview/Mapview height would be \(heightValue)")
