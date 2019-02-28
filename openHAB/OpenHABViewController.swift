@@ -13,25 +13,18 @@ import UIKit
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
-//enum Result<Success, Failure> where Failure : Error {
-//    case success(Success)
-//    case failure(Failure)
-//}
-//
-//extension URLSession {
-//    open func dataTask(with url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> URLSessionDataTask {
-//        return self.dataTask(with: url) { (data, response, error) in
-//            guard error == nil else {
-//                completion(.failure(error!))
-//                return
-//            }
-//
-//            completion(.success(data!))
-//        }
-//    }
-//}
+enum WidgetItem {
+    case chart //(Chart)
+    case colorPicker//(ColorPicker)
+    case frame //(Frame)
+    case switcher //(Switch)
+}
+
+var cells: [WidgetItem] = []
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
+
+private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
 
     var tracker: OpenHABTracker?
@@ -103,6 +96,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             versionPageOperation.start()
         }
     }
+
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let commandUrl = URL(string: item?.link ?? "") {
             var commandRequest = URLRequest(url: commandUrl)
@@ -149,9 +143,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
 
-        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
-        widgetTableView.register(cellType: MapViewTableViewCell.self)
-        widgetTableView.register(cellType: ImageUINewTableViewCell.self) //, forCellReuseIdentifer: "ImageUINewTableViewCell")
+        self.registerTableViewCells()
+        self.configureTableView()
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -166,11 +159,27 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
         navigationItem.setRightBarButton(rightDrawerButton, animated: true)
+    }
+
+    func configureTableView() {
+        widgetTableView.dataSource = self
+        widgetTableView.delegate = self
+    }
+
+    func registerTableViewCells() {
+        let imageTableViewCell = UINib(nibName: "NewImageTableViewCell", bundle: nil)
+        self.widgetTableView.register(imageTableViewCell, forCellReuseIdentifier: "NewImageTableViewCell")
+
+        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
+        widgetTableView.register(cellType: MapViewTableViewCell.self)
+        widgetTableView.register(NewImageUITableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier)
 
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
         loadPage(false)
+        widgetTableView.reloadData()
+        widgetTableView.layoutIfNeeded()
         //    [self.widgetTableView reloadData];
         //    [self.widgetTableView layoutIfNeeded];
     }
@@ -336,7 +345,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         switch widget?.type {
         case "Frame":
             if widget?.label.count ?? 0 > 0 {
-                return 35
+                return 35.0
             } else {
                 return 0
             }
@@ -359,17 +368,17 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 return CGFloat(heightValue)
             } else {
                 // return default height for webview/mapview as 8 rows
-                return 44 * 8
+                return 44.0 * 8
             }
-        default: return 44
+        default: return 44.0
         }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cell: GenericUITableViewCell
-
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
+
+        let cell: UITableViewCell
 
         switch widget?.type {
         case "Frame":
@@ -397,7 +406,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("Setting cell base url to \(openHABRootUrl)")
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
-            cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
+            //cell = tableView.dequeueReusableCell(withIdentifier: "NewImageTableViewCell", for: indexPath) as! NewImageTableViewCell
+
+            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
+
+            //cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
 
             //cell = tableView.dequeueReusableCell(for: IndexPath) as ImageUINewTableViewCell
             //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
@@ -435,11 +448,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         }
 
-        if let cell = cell as? ImageUINewTableViewCell {
-            cell.mainImageView.sd_setImage(with: cell.createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
-            cell.mainImageView.sizeToFit()
-            cell.setNeedsLayout()
+        if let cell = cell as? NewImageUITableViewCell {
+            func createImageURL(with urlString: String) -> URL {
+                let random = Int.random(in: 0..<1000)
+                var components = URLComponents(string: urlString)
+                components?.queryItems?.append(contentsOf: [
+                    URLQueryItem(name: "random", value: String(random))
+                    ])
+                return components?.url ?? URL(string: "")!
+            }
+           // cell.mainImageView.image = UIImage(named: "features.png")
+            cell.mainImageView.sd_setImage(with: createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
+                cell.layoutIfNeeded()
+            }
             cell.layoutIfNeeded()
+
         }
 
         if cell is FrameUITableViewCell {
@@ -447,32 +470,33 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else {
             cell.backgroundColor = UIColor.white
         }
-        cell.widget = widget
-        cell.displayWidget()
-        // Check if this is not the last row in the widgets list
-        if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
-
-            let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
-            if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
-                cell.separatorInset = UIEdgeInsets.zero
-            } else if !(widget?.type == "Frame") {
-                cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+        if let cell = cell as? GenericUITableViewCell {
+            cell.widget = widget
+            cell.displayWidget()
+            // Check if this is not the last row in the widgets list
+            if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
+                let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
+                if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
+                    cell.separatorInset = UIEdgeInsets.zero
+                } else if !(widget?.type == "Frame") {
+                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+                }
             }
         }
         return cell
     }
 
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // Prevent the cell from inheriting the Table View's margin settings
-        if cell.responds(to: #selector(setter: UITableViewCell.preservesSuperviewLayoutMargins)) {
-            cell.preservesSuperviewLayoutMargins = false
-        }
-
-        // Explictly set your cell's layout margins
-        if cell.responds(to: #selector(setter: UITableViewCell.layoutMargins)) {
-            cell.layoutMargins = .zero
-        }
-    }
+//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//        // Prevent the cell from inheriting the Table View's margin settings
+//        if cell.responds(to: #selector(setter: UITableViewCell.preservesSuperviewLayoutMargins)) {
+//            cell.preservesSuperviewLayoutMargins = false
+//        }
+//
+//        // Explictly set your cell's layout margins
+//        if cell.responds(to: #selector(setter: UITableViewCell.layoutMargins)) {
+//            cell.layoutMargins = .zero
+//        }
+//    }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
