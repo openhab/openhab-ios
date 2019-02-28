@@ -21,11 +21,11 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         upButton?.setTitle("▲", for: .normal)
         stopButton?.setTitle("■", for: .normal)
         downButton?.setTitle("▼", for: .normal)
-      
+
         upButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.upButtonPressed), for: .touchUpInside)
         stopButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.stopButtonPressed), for: .touchUpInside)
         downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
-       
+
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
     }

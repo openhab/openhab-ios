@@ -8,40 +8,56 @@
 
 import UIKit
 
-class ImageUINewTableViewCell: GenericUITableViewCell {
+class ImageUINewTableViewCell: UITableViewCell {
 
     var fullImage: UIImage!
 
     var mainImageView : UIImageView  = {
-        var imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        var imageView = UIImageView(frame: CGRect.init(x: 0, y: 0, width: 0, height: 0))
         imageView.translatesAutoresizingMaskIntoConstraints = false
+
+        imageView.contentMode = .scaleAspectFit
+        //imageView.autoresizingMask = [.flexibleHeight, .flexibleBottomMargin]
 
         imageView.clipsToBounds = true
         return imageView
     }()
 
-    override func initialize() {
+    func initialize() {
+
+        contentView.addSubview(mainImageView)
+
+        let marginGuide = contentView.layoutMarginsGuide
+
+        mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor).isActive = true
+        mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor).isActive = true
+        mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor).isActive = true
+        mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor).isActive = true
+
         selectionStyle = .none
         separatorInset = .zero
+
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.addSubview(mainImageView)
-        mainImageView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        mainImageView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        mainImageView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        mainImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
 
         initialize()
     }
 
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
 
-        initialize()
+        fatalError("init(coder:) has not been implemented")
+
+//        super.init(coder: aDecoder)
+//
+//        self.addSubview(mainImageView)
+//        mainImageView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
+//        mainImageView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+//        mainImageView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+//        mainImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+//
+//        initialize()
     }
 
     func aspectRatio() -> CGFloat? {
@@ -61,21 +77,27 @@ class ImageUINewTableViewCell: GenericUITableViewCell {
         return components?.url ?? URL(string: "")!
     }
 
-    func loadImage() {
-        mainImageView.sd_setImage(with: createImageURL(with: widget.url), placeholderImage: nil) { [weak self] image, error, cacheType, imageURL in
-            self?.widget.image = image
-            self?.fullImage = image
-            self?.setNeedsLayout()
-            self?.layoutIfNeeded()
-        }
-    }
+//    func loadImage() {
+//        mainImageView.sd_setImage(with: createImageURL(with: widget.url), placeholderImage: nil) { [weak self] image, error, cacheType, imageURL in
+//            self?.widget.image = image
+//            self?.fullImage = image
+//            self?.customDetailTextLabel?.isHidden = true
+//            self?.customTextLabel?.isHidden = true
+////            self?.setNeedsLayout()
+////            self?.layoutIfNeeded()
+//        }
+//    }
 
-    override func displayWidget() {
-        if widget?.image == nil {
-            //loadImage()
-        } else {
-           // mainImageView.image = widget?.image
-        }
+     func displayWidget() {
+//        customDetailTextLabel?.isHidden = true
+//        customTextLabel?.isHidden = true
+//        customDetailTextLabel?.text = "Detail"
+//        customTextLabel?.text = "Text"
+//        if widget?.image == nil {
+//            //loadImage()
+//        } else {
+//           // mainImageView.image = widget?.image
+//        }
         // If widget have a refresh rate configured, schedule an image update timer
 //        if widget.refresh != "" && refreshTimer == nil {
 //            let refreshInterval = TimeInterval(widget.refresh.floatValue / 1000)

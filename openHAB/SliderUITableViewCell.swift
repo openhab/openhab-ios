@@ -14,10 +14,10 @@ class SliderUITableViewCell: GenericUITableViewCell {
     //@IBOutlet weak var customTextLabel: UILabel!
 
     private func initiliaze() {
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
+        selectionStyle = .none
+        separatorInset = .zero
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.initiliaze()

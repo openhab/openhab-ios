@@ -192,7 +192,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 
     func isURLReachable(_ url: URL?) -> Bool {
         var response: URLResponse?
-        var error: Error?
         var data: Data?
         var request: URLRequest?
         if let url = url {

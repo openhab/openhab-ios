@@ -10,7 +10,7 @@
 
 import SDWebImage
 
-@objc protocol ImageUITableViewCellDelegate: NSObjectProtocol {
+protocol ImageUITableViewCellDelegate: NSObjectProtocol {
     func didLoadImageOf(_ cell: ImageUITableViewCell?)
 }
 
@@ -18,7 +18,7 @@ var refreshTimer: Timer?
 
 class ImageUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var widgetImage: UIImageView!
-    @objc weak var delegate: ImageUITableViewCellDelegate?
+    weak var delegate: ImageUITableViewCellDelegate?
 
     @objc override var widget: OpenHABWidget! {
         get {
@@ -54,11 +54,14 @@ class ImageUITableViewCell: GenericUITableViewCell {
     }
 
     func loadImage() {
-        widgetImage?.sd_setImage(with: imageURL(), placeholderImage: nil)
-{ (image, error, cacheType, imageURL) in
-                    // Perform operation.
-                    self.widget.image = image
-                }
+        widgetImage?.sd_setImage(with: imageURL(), placeholderImage: nil) { (image, error, cacheType, imageURL) in
+            // Perform operation.
+            self.widget.image = image
+            self.widgetImage.frame = self.contentView.frame
+            if self.delegate != nil {
+                self.delegate?.didLoadImageOf(self)
+            }
+        }
     }
 
     @objc func refreshImage(_ timer: Timer?) {
