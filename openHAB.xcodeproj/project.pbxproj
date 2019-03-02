@@ -237,6 +237,15 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		DA224B182229DD2700584BE6 /* NewImageTableViewCell */ = {
+			isa = PBXGroup;
+			children = (
+				DAF4F6B72225E0A100C24876 /* NewImageTableViewCell.swift */,
+				DAF4F6B82225E0A200C24876 /* NewImageTableViewCell.xib */,
+			);
+			name = NewImageTableViewCell;
+			sourceTree = "<group>";
+		};
 		DA2DC23021F2736C00830730 /* openHABTestsSwift */ = {
 			isa = PBXGroup;
 			children = (
@@ -323,8 +332,6 @@
 				DAA42BAD21DC987C00244B2A /* ImageUITableViewCell.swift */,
 				DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */,
 				DA15FF452217F4E500FF0FDA /* ImageUINewTableViewCell.swift */,
-				DAF4F6B72225E0A100C24876 /* NewImageTableViewCell.swift */,
-				DAF4F6B82225E0A200C24876 /* NewImageTableViewCell.xib */,
 				B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */,
 				DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */,
 				DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */,
@@ -338,6 +345,7 @@
 				DAEAA89C21E6B06300267EA3 /* ReusableView.swift */,
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 				DAF4F6BB2225E2B700C24876 /* ScaledHeightUIImageView.swift */,
+				DA224B182229DD2700584BE6 /* NewImageTableViewCell */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
