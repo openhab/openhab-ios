@@ -406,21 +406,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("Setting cell base url to \(openHABRootUrl)")
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
-            //cell = tableView.dequeueReusableCell(withIdentifier: "NewImageTableViewCell", for: indexPath) as! NewImageTableViewCell
-
             cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
-
-            //cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
-
-            //cell = tableView.dequeueReusableCell(for: IndexPath) as ImageUINewTableViewCell
             //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
         case "Video":
             cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
             cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
+            // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
         default:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
@@ -457,12 +451,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     ])
                 return components?.url ?? URL(string: "")!
             }
-           // cell.mainImageView.image = UIImage(named: "features.png")
             cell.mainImageView.sd_setImage(with: createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
                 cell.layoutIfNeeded()
             }
             cell.layoutIfNeeded()
-
         }
 
         if cell is FrameUITableViewCell {
@@ -486,17 +478,17 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         return cell
     }
 
-//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-//        // Prevent the cell from inheriting the Table View's margin settings
-//        if cell.responds(to: #selector(setter: UITableViewCell.preservesSuperviewLayoutMargins)) {
-//            cell.preservesSuperviewLayoutMargins = false
-//        }
-//
-//        // Explictly set your cell's layout margins
-//        if cell.responds(to: #selector(setter: UITableViewCell.layoutMargins)) {
-//            cell.layoutMargins = .zero
-//        }
-//    }
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // Prevent the cell from inheriting the Table View's margin settings
+        if cell.responds(to: #selector(setter: UITableViewCell.preservesSuperviewLayoutMargins)) {
+            cell.preservesSuperviewLayoutMargins = false
+        }
+
+        // Explictly set your cell's layout margins
+        if cell.responds(to: #selector(setter: UITableViewCell.layoutMargins)) {
+            cell.layoutMargins = .zero
+        }
+    }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
