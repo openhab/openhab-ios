@@ -554,31 +554,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async(execute: {
-            let alertView = UIAlertView(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", delegate: nil, cancelButtonTitle: NSLocalizedString("Abort", comment: ""), otherButtonTitles: "Once", "Always")
-            alertView.show(withCompletion: { alertView, buttonIndex in
-                if buttonIndex == 0 {
-                    policy?.deny()
-                } else if buttonIndex == 1 {
-                    policy?.permitOnce()
-                } else if buttonIndex == 2 {
-                    policy?.permitAlways()
-                }
-            })
+            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            self.present(alertView, animated: true) {}
         })
     }
 
     func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async(execute: {
-            let alertView = UIAlertView(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is doesn't match the record. Do you want to proceed?", delegate: nil, cancelButtonTitle: NSLocalizedString("Abort", comment: ""), otherButtonTitles: "Once", "Always")
-            alertView.show(withCompletion: { alertView, buttonIndex in
-                if buttonIndex == 0 {
-                    policy?.deny()
-                } else if buttonIndex == 1 {
-                    policy?.permitOnce()
-                } else if buttonIndex == 2 {
-                    policy?.permitAlways()
-                }
-            })
+            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in  policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            self.present(alertView, animated: true) {}
         })
     }
 
