@@ -18,7 +18,9 @@ class OpenHABLegalViewController: UIViewController {
         let legalPath: URL? = Bundle.main.url(forResource: "legal", withExtension: "rtf")
         var legalAttributedString: NSAttributedString?
         if let legalPath = legalPath {
-            legalAttributedString = try? NSAttributedString(fileURL: legalPath, options: [NSAttributedString.DocumentAttributeKey.documentType: NSAttributedString.DocumentType.rtf.rawValue], documentAttributes: nil)
+            legalAttributedString = try? NSAttributedString(url: legalPath,
+                                                            options: [.characterEncoding: String.Encoding.utf8.rawValue],
+                                                            documentAttributes: nil)
         }
         if let legalAttributedString = legalAttributedString {
             legalTextView.attributedText = legalAttributedString
