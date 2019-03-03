@@ -195,14 +195,18 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         var data: Data?
         var request: URLRequest?
         if let url = url {
-            request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+            let request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+            let session = URLSession.shared
+            let task = session.dataTask(with: request,
+                                        completionHandler: { data, response, error -> Void in
+                                            if error == nil {
+                                                result = true
+                                            } else {
+                                                result = false
+                                            }})
+            task.resume()
         }
-
-        if let request = request {
-            data = try? NSURLConnection.sendSynchronousRequest(request, returning: &response)
-        }
-
-        return data != nil && response != nil
+        return result
     }
 
     func string(from status: Reachability.Connection) -> String? {
