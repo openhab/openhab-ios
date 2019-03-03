@@ -61,27 +61,16 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         NSKeyedArchiver.archiveRootObject(trustedCertificates, toFile: self.getPersistensePath() ?? "")
     }
 
+    // Handle the different responses of the user
+    // Ideal for transfer to Result type of swift 5.0
     enum EvaluateResult {
         case undecided
         case deny
         case permitOnce
         case permitAlways
     }
-
-//    func deny() {
-//        evaluateResult = 0
-//    }
-//
-//    func permitOnce() {
-//        evaluateResult = 1
-//    }
-//
-//    func permitAlways() {
-//        evaluateResult = 2
-//    }
-
-    weak var delegate: AFRememberingSecurityPolicyDelegate?
     var evaluateResult: EvaluateResult = .undecided
+    weak var delegate: AFRememberingSecurityPolicyDelegate?
 
     // Init an AFRememberingSecurityPolicy and set ignore certificates setting
     init(ignoreCertificates: Bool) {
@@ -99,7 +88,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
 
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
         //    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
-        let certificateData = certificate as? Data
+        let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
         self.saveTrustedCertificates()
     }
@@ -138,7 +127,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         let certificateSummary = SecCertificateCopySubjectSummary(certificate!)
         let certificateData = SecCertificateCopyData(certificate!)
         // If we have a certificate for this domain
-        if AFRememberingSecurityPolicy.certificateData(forDomain: domain) != nil && certificateData != nil {
+        if AFRememberingSecurityPolicy.certificateData(forDomain: domain) != nil {
             // Obtain certificate we have and compare it with the certificate presented by the server
             let previousCertificateData = AFRememberingSecurityPolicy.certificateData(forDomain: domain)
             let success = CFEqual(previousCertificateData, certificateData)
@@ -179,7 +168,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         if delegate != nil {
             // Delegate should ask user for decision
             self.evaluateResult = .undecided
-            delegate?.evaluateServerTrust(self, summary: certificateSummary as? String, forDomain: domain)
+            delegate?.evaluateServerTrust(self, summary: certificateSummary as String?, forDomain: domain)
             // Wait until we get response from delegate with user's decision
             while self.evaluateResult == .undecided {
                 Thread.sleep(forTimeInterval: 0.1)
