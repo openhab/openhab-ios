@@ -25,7 +25,7 @@ var cells: [WidgetItem] = []
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
 
     var tracker: OpenHABTracker?
 
@@ -402,9 +402,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case "Chart":
-            cell = tableView.dequeueReusableCell(for: indexPath) as ChartUITableViewCell
-            print("Setting cell base url to \(openHABRootUrl)")
-            (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
+            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
         case "Image":
             cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
             //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
@@ -420,7 +418,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
 
         // No icon is needed for image, video, frame and web widgets
-        if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+        if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
             var components = URLComponents(string: openHABRootUrl)
 
@@ -443,6 +441,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
 
         if let cell = cell as? NewImageUITableViewCell {
+
             func createImageURL(with urlString: String) -> URL {
                 let random = Int.random(in: 0..<1000)
                 var components = URLComponents(string: urlString)
@@ -451,7 +450,40 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     ])
                 return components?.url ?? URL(string: "")!
             }
-            cell.mainImageView.sd_setImage(with: createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
+
+            func createChartURL(with baseUrl: String) -> URL {
+                let random = Int.random(in: 0..<1000)
+                var components = URLComponents(string: baseUrl)
+                components?.path = "/api"
+                components?.queryItems = [
+                    URLQueryItem(name: "period", value: widget!.period),
+                    URLQueryItem(name: "random", value: String(random))
+                ]
+
+                if (widget?.item?.type == "GroupItem") || (widget?.item?.type == "Group") {
+                    components?.queryItems?.append(URLQueryItem(name: "groups", value: widget?.item?.name))
+                } else {
+                    components?.queryItems?.append(URLQueryItem(name: "items", value: widget?.item?.name))
+                }
+                if widget?.service != "" && (widget?.service.count)! > 0 {
+                    components?.queryItems?.append(URLQueryItem(name: "service", value: widget?.service))
+                }
+                return components?.url ?? URL(string: "")!
+            }
+
+            let createdURL: URL
+            switch widget?.type {
+            case "Chart":
+                print("Setting cell base url to \(openHABRootUrl)")
+                createdURL = createChartURL(with: openHABRootUrl)
+            case "Image":
+                createdURL = createImageURL(with: widget?.url ?? "")
+            default:
+                createdURL = URL(string: "")!
+            }
+
+            cell.mainImageView.sd_setImage(with: createdURL, placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
+                widget?.image = image
                 cell.layoutIfNeeded()
             }
             cell.layoutIfNeeded()
@@ -517,12 +549,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)
-        }
-    }
-
-    func didLoadImageOf(_ cell: ImageUITableViewCell?) {
-        if let cell = cell, let indexPath = widgetTableView.indexPath(for: cell) {
-            widgetTableView.reloadRows(at: [indexPath], with: .none)
         }
     }
 

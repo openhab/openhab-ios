@@ -10,7 +10,7 @@
 
 import SDWebImage
 
-class ChartUITableViewCell: ImageUITableViewCell {
+class ChartUITableViewCell: NewImageTableViewCell {
     @objc var baseUrl = ""
 
     override func displayWidget() {

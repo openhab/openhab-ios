@@ -393,7 +393,7 @@
                                             <outlet property="upButton" destination="bnc-pN-4ms" id="M4O-f0-D58"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ChartUITableViewCell" rowHeight="44" id="o5c-ql-8Ao" customClass="ChartUITableViewCell" customModule="openHAB">
+                                    <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ChartUITableViewCell" rowHeight="44" id="o5c-ql-8Ao" customClass="NewImageTableViewCell" customModule="openHAB" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="409" width="414" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="o5c-ql-8Ao" id="P0d-ou-gEj">
@@ -458,10 +458,6 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <webView tag="1001" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EF7-Gz-WfH">
-                                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
-                                                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                </webView>
                                                 <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bpq-qh-s5O">
                                                     <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                                     <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -475,12 +471,8 @@
                                             <constraints>
                                                 <constraint firstAttribute="trailing" secondItem="bpq-qh-s5O" secondAttribute="trailing" id="4Uf-fM-rFE"/>
                                                 <constraint firstItem="bpq-qh-s5O" firstAttribute="top" secondItem="Tr2-YU-Z8o" secondAttribute="top" id="A9l-WE-9nf"/>
-                                                <constraint firstItem="EF7-Gz-WfH" firstAttribute="leading" secondItem="Tr2-YU-Z8o" secondAttribute="leading" id="Hgy-TN-VhZ"/>
-                                                <constraint firstAttribute="trailing" secondItem="EF7-Gz-WfH" secondAttribute="trailing" id="Wop-g0-LAm"/>
-                                                <constraint firstAttribute="bottom" secondItem="EF7-Gz-WfH" secondAttribute="bottom" id="ebc-tY-DPo"/>
                                                 <constraint firstAttribute="bottom" secondItem="bpq-qh-s5O" secondAttribute="bottom" id="koD-P3-nTj"/>
                                                 <constraint firstItem="bpq-qh-s5O" firstAttribute="leading" secondItem="Tr2-YU-Z8o" secondAttribute="leading" id="rDZ-IY-OZf"/>
-                                                <constraint firstItem="EF7-Gz-WfH" firstAttribute="top" secondItem="Tr2-YU-Z8o" secondAttribute="top" id="sjd-dv-KkO"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
@@ -544,6 +536,7 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="trailingMargin" secondItem="U49-Vc-87C" secondAttribute="trailing" constant="10" id="OG8-tb-hW5"/>
+                                                <constraint firstItem="U49-Vc-87C" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="dn3-BH-eJh" secondAttribute="trailing" constant="10" id="Vgh-du-Cnp"/>
                                                 <constraint firstItem="dn3-BH-eJh" firstAttribute="centerY" secondItem="oIC-CW-S2k" secondAttribute="centerY" id="XdH-NZ-Jxv"/>
                                                 <constraint firstItem="dn3-BH-eJh" firstAttribute="leading" secondItem="oIC-CW-S2k" secondAttribute="leadingMargin" constant="12" id="eaC-j9-ujS"/>
                                                 <constraint firstItem="U49-Vc-87C" firstAttribute="centerY" secondItem="oIC-CW-S2k" secondAttribute="centerY" id="iIZ-BT-R1p"/>
@@ -721,6 +714,7 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="VTh-or-BWi" firstAttribute="leading" secondItem="XQN-fh-bKl" secondAttribute="leadingMargin" constant="12" id="B8W-j9-qgT"/>
+                                                <constraint firstItem="SSG-Hc-q0a" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="VTh-or-BWi" secondAttribute="trailing" constant="10" id="Eri-2g-2kS"/>
                                                 <constraint firstItem="VTh-or-BWi" firstAttribute="centerY" secondItem="XQN-fh-bKl" secondAttribute="centerY" id="ZqZ-jY-se7"/>
                                                 <constraint firstAttribute="trailingMargin" secondItem="SSG-Hc-q0a" secondAttribute="trailing" constant="10" id="frI-TU-zJk"/>
                                                 <constraint firstItem="SSG-Hc-q0a" firstAttribute="centerY" secondItem="XQN-fh-bKl" secondAttribute="centerY" id="zNM-PJ-iEN"/>
@@ -754,6 +748,7 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="trailingMargin" secondItem="nhl-2h-nOu" secondAttribute="trailing" constant="10" id="BMb-Do-vcf"/>
+                                                <constraint firstItem="nhl-2h-nOu" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="5nH-h0-rdy" secondAttribute="trailing" constant="15" id="KpI-VE-y5q"/>
                                                 <constraint firstItem="5nH-h0-rdy" firstAttribute="leading" secondItem="46j-Bt-6gX" secondAttribute="leadingMargin" constant="12" id="aeF-0y-9hx"/>
                                                 <constraint firstItem="5nH-h0-rdy" firstAttribute="centerY" secondItem="46j-Bt-6gX" secondAttribute="centerY" id="knv-a0-CGH"/>
                                                 <constraint firstItem="nhl-2h-nOu" firstAttribute="centerY" secondItem="46j-Bt-6gX" secondAttribute="centerY" id="v02-LE-tbh"/>
@@ -784,6 +779,7 @@
                                             <constraints>
                                                 <constraint firstItem="0UE-17-MGz" firstAttribute="centerY" secondItem="C1I-js-LCZ" secondAttribute="centerY" id="CWr-Ud-LLu"/>
                                                 <constraint firstItem="0UE-17-MGz" firstAttribute="leading" secondItem="C1I-js-LCZ" secondAttribute="leadingMargin" constant="12" id="ZYT-GM-mme"/>
+                                                <constraint firstAttribute="trailing" secondItem="0UE-17-MGz" secondAttribute="trailing" constant="288.33333333333331" id="dRr-iD-7Cz"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -795,10 +791,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Info" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qfh-lz-UXm">
-                                                    <rect key="frame" x="32" y="11.666666666666666" width="107" height="20.333333333333336"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" constant="107" id="18T-vl-PFk"/>
-                                                    </constraints>
+                                                    <rect key="frame" x="32" y="11.666666666666666" width="29" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -807,6 +800,7 @@
                                                 <constraint firstItem="Qfh-lz-UXm" firstAttribute="centerY" secondItem="Tqr-A3-HHs" secondAttribute="centerY" id="SBh-BJ-rUI"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="Qfh-lz-UXm" secondAttribute="bottom" constant="1" id="fn0-xK-s5a"/>
                                                 <constraint firstItem="Qfh-lz-UXm" firstAttribute="leading" secondItem="Tqr-A3-HHs" secondAttribute="leadingMargin" constant="12" id="mws-cm-0mM"/>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Qfh-lz-UXm" secondAttribute="trailing" constant="10" id="v4p-cx-dml"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
@@ -827,6 +821,7 @@
                                                 </label>
                                             </subviews>
                                             <constraints>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Mbw-pH-g4Y" secondAttribute="trailing" id="DVK-Lu-X52"/>
                                                 <constraint firstItem="Mbw-pH-g4Y" firstAttribute="leading" secondItem="Cya-se-2fH" secondAttribute="leadingMargin" constant="12" id="e4u-6i-O6K"/>
                                                 <constraint firstItem="Mbw-pH-g4Y" firstAttribute="centerY" secondItem="Cya-se-2fH" secondAttribute="centerY" id="jXd-dL-s55"/>
                                             </constraints>
@@ -849,6 +844,7 @@
                                                 </label>
                                             </subviews>
                                             <constraints>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="v8c-Ps-18a" secondAttribute="trailing" id="Cx5-1y-E2e"/>
                                                 <constraint firstItem="v8c-Ps-18a" firstAttribute="centerY" secondItem="szB-fb-9zj" secondAttribute="centerY" id="Lex-Uh-AZm"/>
                                                 <constraint firstItem="v8c-Ps-18a" firstAttribute="leading" secondItem="szB-fb-9zj" secondAttribute="leadingMargin" constant="12" id="w82-TL-53q"/>
                                             </constraints>
@@ -913,7 +909,7 @@
                                         </label>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="4HA-k8-SRV" firstAttribute="trailing" secondItem="s4Z-v6-X0D" secondAttribute="trailingMargin" id="2HJ-eg-vWo"/>
+                                        <constraint firstItem="4HA-k8-SRV" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="s4Z-v6-X0D" secondAttribute="trailingMargin" id="2HJ-eg-vWo"/>
                                         <constraint firstItem="4HA-k8-SRV" firstAttribute="centerY" secondItem="s4Z-v6-X0D" secondAttribute="centerY" id="2Sq-LS-vvB"/>
                                         <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="uwJ-PQ-XzZ" secondAttribute="trailing" constant="20" symbolic="YES" id="7GA-ZC-0C5"/>
                                         <constraint firstItem="uwJ-PQ-XzZ" firstAttribute="top" secondItem="s4Z-v6-X0D" secondAttribute="topMargin" constant="16" id="9Hl-Pq-oNU"/>
@@ -1337,6 +1333,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="IN7-RI-eVs"/>
+        <segue reference="9JR-Li-4ww"/>
     </inferredMetricsTieBreakers>
 </document>
