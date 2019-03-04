@@ -419,10 +419,14 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         // No icon is needed for image, video, frame and web widgets
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 =======
         if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUINewTableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 >>>>>>> intermediate status
+=======
+        if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUINewTableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+>>>>>>> Fix notification center (#211)
 
             var components = URLComponents(string: openHABRootUrl)
 
