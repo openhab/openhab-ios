@@ -303,7 +303,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 print("OpenHABViewController isViewLoaded, restarting network activity")
                 loadPage(false)
             } else {
-                print("OpenHABViewController network status changed while i was inactive")
+                print("OpenHABViewController network status changed while it was inactive")
                 restart()
             }
         }
@@ -391,9 +391,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
         case "Image":
             cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
-
-            //cell = tableView.dequeueReusableCell(for: IndexPath) as ImageUINewTableViewCell
-            //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
         case "Video":
             cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
         case "Webview":
@@ -406,7 +403,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
 
         // No icon is needed for image, video, frame and web widgets
-        if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+        if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUINewTableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
             var components = URLComponents(string: openHABRootUrl)
 

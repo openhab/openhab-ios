@@ -17,7 +17,7 @@ import UserNotifications
 var player: AVAudioPlayer?
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
     var appData: OpenHABDataObject?
@@ -33,21 +33,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //init Firebase crash reporting
         FirebaseApp.configure()
 
-        //    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-        //    manager.operationQueue.maxConcurrentOperationCount = 50;
         let appDefaults = ["CacheDataAgressively" : NSNumber(value: true)]
-        if let appDefaults = appDefaults as? [String : Any] {
-            UserDefaults.standard.register(defaults: appDefaults)
-        }
+        UserDefaults.standard.register(defaults: appDefaults)
+
         loadSettingsDefaults()
+
         AFRememberingSecurityPolicy.initializeCertificatesStore()
+
         // Notification registration depends on iOS version
         // This is the setup for iOS 10 notifications
         let center = UNUserNotificationCenter.current()
+
         center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
             // Enable or disable features based on authorization.
+            if let error = error {
+                print("Error \(error.localizedDescription)")
+            } else {
+                DispatchQueue.main.async {
+                    application.registerForRemoteNotifications()
+                }
+            }
         }
-        application.registerForRemoteNotifications()
 
         print("uniq id \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
         print("device name \(UIDevice.current.name)")
@@ -75,24 +81,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        print("My token is: \(deviceToken.hexString())")
+
+        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+        let token = tokenParts.joined()
+        print("Device Token: \(token)")
+    }
+
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Failed to register: \(error)")
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
+        print("My token is: \(deviceTokenString)")
         let dataDict = [
-            "deviceToken": deviceToken.hexString(),
+            "deviceToken": deviceTokenString,
             "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "" ,
             "deviceName": UIDevice.current.name
         ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
 
-//    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-//
-//        let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
-//        print(deviceTokenString)
-//    }
-
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("Failed to get token, error: \(error)")
+        print("Failed to get token for notifications: \(error.localizedDescription)")
+
     }
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
@@ -102,7 +118,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if let value = userInfo["aps"] {
                 print("\(value)")
             }
-            let message = ((userInfo["aps"] as? [String:String])?["alert"] as? [String:String])?["body"]
+             let message = ((userInfo["aps"] as? [String:String])?["alert"] as? [String:String])?["body"]
             let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
             if let soundPath = soundPath {
                 print("Sound path \(soundPath)")
