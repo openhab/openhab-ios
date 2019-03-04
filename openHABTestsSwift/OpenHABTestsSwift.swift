@@ -59,9 +59,11 @@ class OpenHABTestsSwift: XCTestCase {
         }
     }
 
-//    func testHexString() {
-//        let str = Data("Tim iPhone"
-//        var hex = str.hexString()
-//        XCTAssert (hex == "00020", "hex properly calculated")
-//    }
+    func testHexString() {
+        let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
+        let hex = iPhoneData.hexString().uppercased()
+        let hexWithReduce = iPhoneData.reduce("", {$0 + String(format: "%02X", $1)})
+        XCTAssert (hex == "54696D206950686F6E65", "hex properly calculated")
+        XCTAssert (hexWithReduce == "54696D206950686F6E65", "hex properly calculated with reduce")
+    }
 }
