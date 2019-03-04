@@ -312,7 +312,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 print("OpenHABViewController isViewLoaded, restarting network activity")
                 loadPage(false)
             } else {
-                print("OpenHABViewController network status changed while i was inactive")
+                print("OpenHABViewController network status changed while it was inactive")
                 restart()
             }
         }
@@ -418,7 +418,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
 
         // No icon is needed for image, video, frame and web widgets
+<<<<<<< HEAD
         if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+=======
+        if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUINewTableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+>>>>>>> intermediate status
 
             var components = URLComponents(string: openHABRootUrl)
 
