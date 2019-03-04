@@ -6,13 +6,6 @@
 //  Created by Victor Belov on 14/07/14.
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
 //
-//
-//  AFRememberingSecurityPolicy.swift
-//  openHAB
-//
-//  Created by Victor Belov on 14/07/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
-//
 
 import AFNetworking
 
@@ -68,20 +61,16 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         NSKeyedArchiver.archiveRootObject(trustedCertificates, toFile: self.getPersistensePath() ?? "")
     }
 
-    func deny() {
-        evaluateResult = 0
+    // Handle the different responses of the user
+    // Ideal for transfer to Result type of swift 5.0
+    enum EvaluateResult {
+        case undecided
+        case deny
+        case permitOnce
+        case permitAlways
     }
-
-    func permitOnce() {
-        evaluateResult = 1
-    }
-
-    func permitAlways() {
-        evaluateResult = 2
-    }
-
+    var evaluateResult: EvaluateResult = .undecided
     weak var delegate: AFRememberingSecurityPolicyDelegate?
-    var evaluateResult: Int = 0
 
     // Init an AFRememberingSecurityPolicy and set ignore certificates setting
     init(ignoreCertificates: Bool) {
@@ -99,7 +88,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
 
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
         //    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
-        let certificateData = certificate as? Data
+        let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
         self.saveTrustedCertificates()
     }
@@ -138,7 +127,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         let certificateSummary = SecCertificateCopySubjectSummary(certificate!)
         let certificateData = SecCertificateCopyData(certificate!)
         // If we have a certificate for this domain
-        if AFRememberingSecurityPolicy.certificateData(forDomain: domain) != nil && certificateData != nil {
+        if AFRememberingSecurityPolicy.certificateData(forDomain: domain) != nil {
             // Obtain certificate we have and compare it with the certificate presented by the server
             let previousCertificateData = AFRememberingSecurityPolicy.certificateData(forDomain: domain)
             let success = CFEqual(previousCertificateData, certificateData)
@@ -150,24 +139,24 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                 // differs. We need to warn user about possible MiM attack and wait for users decision.
                 // TODO: notify user and wait for decision
                 if delegate != nil {
-                    self.evaluateResult = -1
+                    self.evaluateResult = .undecided
                     delegate?.evaluateCertificateMismatch(self, summary: certificateSummary as String?, forDomain: domain)
-                    while self.evaluateResult == -1 {
+                    while self.evaluateResult == .undecided {
                         Thread.sleep(forTimeInterval: 0.1)
                     }
                     switch self.evaluateResult {
-                    case 0:
+                    case .deny:
                         // User decided to abort connection
                         return false
-                    case 1:
+                    case .permitOnce:
                         // User decided to accept invalid certificate once
                         return true
-                    case 2:
+                    case .permitAlways:
                         // User decided to accept invalid certificate and remember decision
                         // Add certificate to storage
                         AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
                         return true
-                    default:
+                    case .undecided:
                         // Something went wrong, abort connection
                         return false
                     }
@@ -178,26 +167,25 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         // Warn user about invalid certificate and wait for user's decision
         if delegate != nil {
             // Delegate should ask user for decision
-            self.evaluateResult = -1
-            delegate?.evaluateServerTrust(self, summary: certificateSummary as? String, forDomain: domain)
+            self.evaluateResult = .undecided
+            delegate?.evaluateServerTrust(self, summary: certificateSummary as String?, forDomain: domain)
             // Wait until we get response from delegate with user's decision
-            while self.evaluateResult == -1 {
+            while self.evaluateResult == .undecided {
                 Thread.sleep(forTimeInterval: 0.1)
             }
             switch self.evaluateResult {
-            case 0:
+            case .deny:
                 // User decided to abort connection
                 return false
-            case 1:
+            case .permitOnce:
                 // User decided to accept invalid certificate once
                 return true
-            case 2:
+            case .permitAlways:
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
                 AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
                 return true
-            default:
-                // Something went wrong, abort connection
+            case .undecided:
                 return false
             }
         }

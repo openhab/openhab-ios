@@ -12,6 +12,7 @@
 import AVFoundation
 import Firebase
 import UIKit
+import UserNotifications
 
 var player: AVAudioPlayer?
 
@@ -32,18 +33,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //init Firebase crash reporting
         FirebaseApp.configure()
 
-        //    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-        //    manager.operationQueue.maxConcurrentOperationCount = 50;
         let appDefaults = ["CacheDataAgressively" : NSNumber(value: true)]
-        if let appDefaults = appDefaults as? [String : Any] {
-            UserDefaults.standard.register(defaults: appDefaults)
-        }
+        UserDefaults.standard.register(defaults: appDefaults)
+
         loadSettingsDefaults()
+
         AFRememberingSecurityPolicy.initializeCertificatesStore()
-        // Notification registration now depends on iOS version (befor iOS8 and after it)
-        // iOS 8 Notifications
-        UIApplication.shared.registerUserNotificationSettings(UIUserNotificationSettings(types: [.sound, .alert, .badge], categories: nil))
-        UIApplication.shared.registerForRemoteNotifications()
+
+        registerForPushNotifications()
 
         print("uniq id \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
         print("device name \(UIDevice.current.name)")
@@ -61,6 +58,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    // Notification registration depends on iOS version
+    // This is the setup for iOS >10 notifications
+    func registerForPushNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
+                [weak self] granted, error in
+                guard let self = self else { return }
+                print("Permission granted: \(granted)")
+                guard granted else { return }
+                self.getNotificationSettings()
+        }
+
+    }
+
+    func getNotificationSettings() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            print("Notification settings: \(settings)")
+            guard settings.authorizationStatus == .authorized else { return }
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+    }
+
     func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
@@ -71,10 +91,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        print("My token is: \(deviceToken.hexString())")
+        let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)}) //try "%02.2hhx",
+
+        print("My token is: \(deviceTokenString)")
         let dataDict = [
-            "deviceToken": deviceToken.hexString(),
+            "deviceToken": deviceTokenString,
             "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "" ,
             "deviceName": UIDevice.current.name
         ]
@@ -82,17 +105,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("Failed to get token, error: \(error)")
+        print("Failed to get token for notifications: \(error.localizedDescription)")
+
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    // version without completionHandler is deprecated
+    //func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         print("didReceiveRemoteNotification")
         if application.applicationState == .active {
             print("App is active and got a remote notification")
-            if let value = userInfo["aps"] {
-                print("\(value)")
+            guard let aps = userInfo["aps"] as? [String: AnyObject] else {
+                completionHandler(.failed)
+                return
             }
-            let message = ((userInfo["aps"] as? [String:String])?["alert"] as? [String:String])?["body"]
+            print("\(aps)")
+
+            let message = (aps["alert"] as? [String:String])?["body"] ?? "Message could not be decoded"
             let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
             if let soundPath = soundPath {
                 print("Sound path \(soundPath)")

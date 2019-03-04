@@ -58,4 +58,10 @@ class OpenHABTestsSwift: XCTestCase {
             XCTFail("Whoops, an error occured: \(error)")
         }
     }
+
+    func testHexString() {
+        let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
+        let hexWithReduce = iPhoneData.reduce("", {$0 + String(format: "%02X", $1)})
+        XCTAssert (hexWithReduce == "54696D206950686F6E65", "hex properly calculated with reduce")
+    }
 }
