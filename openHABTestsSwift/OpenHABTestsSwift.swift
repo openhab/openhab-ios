@@ -58,4 +58,10 @@ class OpenHABTestsSwift: XCTestCase {
             XCTFail("Whoops, an error occured: \(error)")
         }
     }
+
+//    func testHexString() {
+//        let str = Data("Tim iPhone"
+//        var hex = str.hexString()
+//        XCTAssert (hex == "00020", "hex properly calculated")
+//    }
 }
