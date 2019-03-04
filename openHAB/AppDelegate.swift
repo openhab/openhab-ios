@@ -12,6 +12,7 @@
 import AVFoundation
 import Firebase
 import UIKit
+import UserNotifications
 
 var player: AVAudioPlayer?
 
@@ -40,10 +41,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         loadSettingsDefaults()
         AFRememberingSecurityPolicy.initializeCertificatesStore()
-        // Notification registration now depends on iOS version (befor iOS8 and after it)
-        // iOS 8 Notifications
-        UIApplication.shared.registerUserNotificationSettings(UIUserNotificationSettings(types: [.sound, .alert, .badge], categories: nil))
-        UIApplication.shared.registerForRemoteNotifications()
+        // Notification registration depends on iOS version
+        // This is the setup for iOS 10 notifications
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
+            // Enable or disable features based on authorization.
+        }
+        application.registerForRemoteNotifications()
 
         print("uniq id \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
         print("device name \(UIDevice.current.name)")
@@ -80,6 +84,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
+
+//    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+//
+//        let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
+//        print(deviceTokenString)
+//    }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to get token, error: \(error)")
