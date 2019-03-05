@@ -10,6 +10,8 @@
 
 import SDWebImage
 import UIKit
+import AVKit
+import AVFoundation
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
@@ -143,8 +145,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
 
+<<<<<<< HEAD
         self.registerTableViewCells()
         self.configureTableView()
+=======
+        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
+        widgetTableView.register(cellType: MapViewTableViewCell.self)
+        widgetTableView.register(cellType: ImageUINewTableViewCell.self)
+        widgetTableView.register(cellType: VideoUITableViewCell.self)
+>>>>>>> Silenced warnings from OpenHABSelectSitemapViewController - debugDescriptions
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -376,6 +385,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
+<<<<<<< HEAD
+=======
+        let cell: UITableViewCell
+
+>>>>>>> Silenced warnings from OpenHABSelectSitemapViewController - debugDescriptions
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
 
         let cell: UITableViewCell
@@ -407,7 +421,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
             //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
         case "Video":
-            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
+            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath)  as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
@@ -502,6 +516,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else {
             cell.backgroundColor = UIColor.white
         }
+<<<<<<< HEAD
         if let cell = cell as? GenericUITableViewCell {
             cell.widget = widget
             cell.displayWidget()
@@ -513,8 +528,32 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 } else if !(widget?.type == "Frame") {
                     cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
                 }
+=======
+
+        if let cell = cell as? VideoUITableViewCell {
+            let url = URL(string: widget?.url ?? "")
+            let avPlayer = AVPlayer(url: url!)
+            cell.playerView?.playerLayer.player = avPlayer
+            return cell
+        }
+
+        if let cell = cell as? GenericUITableViewCell {
+            cell.widget = widget
+            cell.displayWidget()
+        }
+        
+        // Check if this is not the last row in the widgets list
+        if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
+
+            let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
+            if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
+                cell.separatorInset = UIEdgeInsets.zero
+            } else if !(widget?.type == "Frame") {
+                cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+>>>>>>> Silenced warnings from OpenHABSelectSitemapViewController - debugDescriptions
             }
         }
+
         return cell
     }
 
@@ -528,6 +567,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if cell.responds(to: #selector(setter: UITableViewCell.layoutMargins)) {
             cell.layoutMargins = .zero
         }
+
+        guard let videoCell = (cell as? VideoUITableViewCell) else { return }
+        videoCell.playerView.player?.play()
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -560,6 +602,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
+<<<<<<< HEAD
+=======
+    func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        guard let videoCell = cell as? VideoUITableViewCell else { return }
+        videoCell.playerView.player?.pause()
+        videoCell.playerView.player = nil
+    }
+
+    func didLoadImageOf(_ cell: ImageUITableViewCell?) {
+        if let cell = cell, let indexPath = widgetTableView.indexPath(for: cell) {
+            widgetTableView.reloadRows(at: [indexPath], with: .none)
+        }
+    }
+
+>>>>>>> Silenced warnings from OpenHABSelectSitemapViewController - debugDescriptions
     func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async(execute: {
             let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
@@ -887,7 +944,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func pageNetworkStatusChanged() -> Bool {
         print("OpenHABViewController pageNetworkStatusChange")
         if pageUrl != "" {
-            let pageReachability = Reachability( hostname: pageUrl)
+            let pageReachability = Reachability(hostname: pageUrl)
             if !pageNetworkStatusAvailable {
                 pageNetworkStatus = pageReachability?.connection
                 pageNetworkStatusAvailable = true

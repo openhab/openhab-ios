@@ -23,6 +23,7 @@
 		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
 		DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */; };
 		DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
+		DA7E1E48222EB00B002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
@@ -122,6 +123,7 @@
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABTestsSwift.swift; sourceTree = "<group>"; };
 		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
@@ -332,6 +334,7 @@
 				DAEAA89C21E6B06300267EA3 /* ReusableView.swift */,
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 				DA224B182229DD2700584BE6 /* NewImageTableViewCell */,
+				DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -761,6 +764,7 @@
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				DFDEE40F188322FA008B26AC /* OpenHABSitemap.swift in Sources */,
 				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.swift in Sources */,
+				DA7E1E48222EB00B002AEFD8 /* PlayerView.swift in Sources */,
 				DFDEE4171883C6A5008B26AC /* OpenHABTracker.swift in Sources */,
 				DFDEE410188322FA008B26AC /* OpenHABSitemapPage.swift in Sources */,
 				DFDEE4171883C6A5008B26AC /* OpenHABTracker.swift in Sources */,
