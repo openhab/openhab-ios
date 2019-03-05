@@ -153,7 +153,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         widgetTableView.register(cellType: MapViewTableViewCell.self)
         widgetTableView.register(cellType: ImageUINewTableViewCell.self)
         widgetTableView.register(cellType: VideoUITableViewCell.self)
+<<<<<<< HEAD
 >>>>>>> Silenced warnings from OpenHABSelectSitemapViewController - debugDescriptions
+=======
+>>>>>>> Fix for compiler warnings (#212)
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -386,7 +389,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> Fix for compiler warnings (#212)
         let cell: UITableViewCell
 
 >>>>>>> Silenced warnings from OpenHABSelectSitemapViewController - debugDescriptions
@@ -517,6 +523,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell.backgroundColor = UIColor.white
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
         if let cell = cell as? GenericUITableViewCell {
             cell.widget = widget
             cell.displayWidget()
@@ -529,6 +536,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
                 }
 =======
+=======
+>>>>>>> Fix for compiler warnings (#212)
 
         if let cell = cell as? VideoUITableViewCell {
             let url = URL(string: widget?.url ?? "")
@@ -603,7 +612,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> Fix for compiler warnings (#212)
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let videoCell = cell as? VideoUITableViewCell else { return }
         videoCell.playerView.player?.pause()
