@@ -10,26 +10,10 @@
 
 import SDWebImage
 import UIKit
+import AVKit
+import AVFoundation
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
-
-//enum Result<Success, Failure> where Failure : Error {
-//    case success(Success)
-//    case failure(Failure)
-//}
-//
-//extension URLSession {
-//    open func dataTask(with url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> URLSessionDataTask {
-//        return self.dataTask(with: url) { (data, response, error) in
-//            guard error == nil else {
-//                completion(.failure(error!))
-//                return
-//            }
-//
-//            completion(.success(data!))
-//        }
-//    }
-//}
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
@@ -151,7 +135,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
-        widgetTableView.register(cellType: ImageUINewTableViewCell.self) //, forCellReuseIdentifer: "ImageUINewTableViewCell")
+        widgetTableView.register(cellType: ImageUINewTableViewCell.self)
+        widgetTableView.register(cellType: VideoUITableViewCell.self)
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -360,7 +345,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cell: GenericUITableViewCell
+        let cell: UITableViewCell
 
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
 
@@ -392,7 +377,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Image":
             cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
         case "Video":
-            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
+            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath)  as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
@@ -437,8 +422,19 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else {
             cell.backgroundColor = UIColor.white
         }
-        cell.widget = widget
-        cell.displayWidget()
+
+        if let cell = cell as? VideoUITableViewCell {
+            let url = URL(string: widget?.url ?? "")
+            let avPlayer = AVPlayer(url: url!)
+            cell.playerView?.playerLayer.player = avPlayer
+            return cell
+        }
+
+        if let cell = cell as? GenericUITableViewCell {
+            cell.widget = widget
+            cell.displayWidget()
+        }
+        
         // Check if this is not the last row in the widgets list
         if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
 
@@ -449,6 +445,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
             }
         }
+
         return cell
     }
 
@@ -462,6 +459,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if cell.responds(to: #selector(setter: UITableViewCell.layoutMargins)) {
             cell.layoutMargins = .zero
         }
+
+        guard let videoCell = (cell as? VideoUITableViewCell) else { return }
+        videoCell.playerView.player?.play()
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -492,6 +492,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)
         }
+    }
+
+    func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        guard let videoCell = cell as? VideoUITableViewCell else { return }
+        videoCell.playerView.player?.pause()
+        videoCell.playerView.player = nil
     }
 
     func didLoadImageOf(_ cell: ImageUITableViewCell?) {
@@ -827,7 +833,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func pageNetworkStatusChanged() -> Bool {
         print("OpenHABViewController pageNetworkStatusChange")
         if pageUrl != "" {
-            let pageReachability = Reachability( hostname: pageUrl)
+            let pageReachability = Reachability(hostname: pageUrl)
             if !pageNetworkStatusAvailable {
                 pageNetworkStatus = pageReachability?.connection
                 pageNetworkStatusAvailable = true

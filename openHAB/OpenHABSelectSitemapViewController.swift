@@ -89,9 +89,9 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     .validate(statusCode: 200..<300)
                     .responseJSON { response in
                         if response.result.error == nil {
-                            debugPrint("HTTP Response Body: \(response.data)")
+                            debugPrint("HTTP Response Body: \(response.data.debugDescription)")
                         } else {
-                            debugPrint("HTTP Request failed: \(response.result.error)")
+                            debugPrint("HTTP Request failed: \(response.result.error.debugDescription)")
                         }
                 }
             }
