@@ -434,7 +434,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell.widget = widget
             cell.displayWidget()
         }
-        
+
         // Check if this is not the last row in the widgets list
         if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
 

@@ -27,8 +27,6 @@ import Alamofire
 //    }
 //}
 
-
-
 class OpenHABSelectSitemapViewController: UITableViewController {
     private var selectedSitemap: Int = 0
 
