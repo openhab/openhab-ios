@@ -11,8 +11,8 @@ import Foundation
 
 extension OpenHABNotification {
     struct CodingData: Decodable {
-            let _id : String
-            let message : String
+            let _id: String
+            let message: String
             let __v: Int
             let created: String
     }

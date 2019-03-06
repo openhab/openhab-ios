@@ -35,7 +35,7 @@ import Foundation
         }
     }
 
-    @objc init(dictionary: [String : Any]) {
+    @objc init(dictionary: [String: Any]) {
         super.init()
         for key in dictionary.keys {
             if key == "id" {

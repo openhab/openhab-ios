@@ -1,11 +1,12 @@
 disabled_rules: # rule identifiers to exclude from running
-  - colon
-  - comma
   - line_length
   - unused_closure_parameter
   - force_cast
   - identifier_name
   - type_body_length
   - cyclomatic_complexity
+  - file_length
+  - function_body_length
+  - todo
 excluded: 
   - Pods

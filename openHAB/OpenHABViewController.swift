@@ -434,7 +434,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell.widget = widget
             cell.displayWidget()
         }
-        
+
         // Check if this is not the last row in the widgets list
         if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
 
@@ -578,7 +578,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
         if !longPolling {
-            pageNetworkStatusChanged()
+            _ = pageNetworkStatusChanged()
         }
         let pageToLoadUrl = URL(string: pageUrl)
         if let pageToLoadUrl = pageToLoadUrl {
@@ -658,7 +658,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                     // Newer versions talk JSON!
                 } else {
-                    self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String : Any] )
+                    self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String: Any] )
                 }
                 strongSelf.currentPage?.delegate = strongSelf
                 strongSelf.widgetTableView.reloadData()

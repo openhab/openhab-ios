@@ -68,9 +68,9 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                 }
             }
         } else {
-            var errorDetail: [AnyHashable : Any] = [:]
+            var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
-            let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String : Any])
+            let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
             try? delegate?.openHABTrackingError(trackingError)
             reach = Reachability()
             oldReachabilityStatus = reach?.connection
@@ -86,7 +86,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         trackedDiscoveryUrl(openhabUrl)
     }
 
-    func netService(_ netService: NetService, didNotResolve errorDict: [String : NSNumber]) {
+    func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
         print("OpenHABTracker discovery didn't resolve openHAB")
         trackedRemoteUrl()
     }
@@ -111,9 +111,9 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
             delegate?.openHABTrackingProgress("Connecting to remote URL")
             trackedUrl(openHABUrl)
         } else {
-            var errorDetail: [AnyHashable : Any] = [:]
+            var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
-            let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String : Any])
+            let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String: Any])
             try? delegate?.openHABTrackingError(trackingError)
         }
     }
@@ -159,9 +159,8 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 
     // NSNetService delegate methods for Bonjour resolving
     func normalizeUrl(_ url: String?) -> String? {
-        var url = url
-        if url?.hasSuffix("/") ?? false {
-            url = (url as? NSString)?.substring(to: (url?.count ?? 0) - 1)
+        if let url = url, url.hasSuffix("/") {
+            return String(url.dropLast())
         }
         return url
     }

@@ -33,7 +33,7 @@ extension String {
      Independent of locale's decicmal separator
 
      */
-    var numberValue:NSNumber? {
+    var numberValue: NSNumber? {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.decimalSeparator = "."

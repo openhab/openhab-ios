@@ -17,7 +17,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
         selectionStyle = UITableViewCell.SelectionStyle.none
         separatorInset = UIEdgeInsets.zero
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.initiliaze()
