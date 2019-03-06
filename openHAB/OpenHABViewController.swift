@@ -578,7 +578,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
         if !longPolling {
-            pageNetworkStatusChanged()
+            _ = pageNetworkStatusChanged()
         }
         let pageToLoadUrl = URL(string: pageUrl)
         if let pageToLoadUrl = pageToLoadUrl {
