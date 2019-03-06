@@ -126,10 +126,8 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     }
 
     func mappingIndex(byCommand command: String?) -> Int {
-        for mapping in mappings {
-            if mapping.command == command {
-                return (mappings as NSArray).index(of: mapping)
-            }
+        for mapping in mappings where mapping.command == command {
+            return (mappings as NSArray).index(of: mapping)
         }
         return NSNotFound
     }

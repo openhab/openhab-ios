@@ -61,12 +61,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Notification registration depends on iOS version
     // This is the setup for iOS >10 notifications
     func registerForPushNotifications() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
-                [weak self] granted, error in
-                guard let self = self else { return }
-                print("Permission granted: \(granted)")
-                guard granted else { return }
-                self.getNotificationSettings()
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
+            guard let self = self else { return }
+            print("Permission granted: \(granted)")
+            guard granted else { return }
+            self.getNotificationSettings()
         }
 
     }
