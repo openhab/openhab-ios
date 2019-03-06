@@ -7,5 +7,6 @@ disabled_rules: # rule identifiers to exclude from running
   - cyclomatic_complexity
   - file_length
   - function_body_length
+  - todo
 excluded: 
   - Pods
