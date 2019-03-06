@@ -16,7 +16,7 @@ protocol AFRememberingSecurityPolicyDelegate: NSObjectProtocol {
     func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
 }
 
-var trustedCertificates: [AnyHashable : Any] = [:]
+var trustedCertificates: [AnyHashable: Any] = [:]
 
 func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
     // Returns the leaf certificate from a SecTrust object (that is always the
@@ -42,7 +42,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         self.loadTrustedCertificates()
         if trustedCertificates.count == 0 {
             print("No cert store, creating")
-            trustedCertificates = [AnyHashable : Any]()
+            trustedCertificates = [AnyHashable: Any]()
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             self.saveTrustedCertificates()
         } else {
@@ -106,7 +106,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     class func loadTrustedCertificates() {
-        if let unarchive = NSKeyedUnarchiver.unarchiveObject(withFile: self.getPersistensePath() ?? "") as? [AnyHashable : Any] {
+        if let unarchive = NSKeyedUnarchiver.unarchiveObject(withFile: self.getPersistensePath() ?? "") as? [AnyHashable: Any] {
             trustedCertificates = unarchive
         }
     }

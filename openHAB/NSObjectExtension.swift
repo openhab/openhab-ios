@@ -12,9 +12,9 @@ extension NSObject {
 
     func getProperties(from classType: NSObject.Type) -> [String] {
 
-        var propertiesCount : CUnsignedInt = 0
+        var propertiesCount: CUnsignedInt = 0
         let propertiesInAClass = class_copyPropertyList(classType, &propertiesCount)
-        let propertiesArray : [String]
+        let propertiesArray: [String]
 
         for i in 0 ..< Int(propertiesCount) {
             let property = propertiesInAClass?[i]

@@ -12,7 +12,7 @@ class ImageUINewTableViewCell: GenericUITableViewCell {
 
     var fullImage: UIImage!
 
-    var mainImageView : UIImageView  = {
+    var mainImageView: UIImageView  = {
         var imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.autoresizingMask = [.flexibleHeight, .flexibleWidth]

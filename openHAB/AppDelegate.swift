@@ -27,13 +27,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         super.init()
     }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         print("didFinishLaunchingWithOptions started")
 
         //init Firebase crash reporting
         FirebaseApp.configure()
 
-        let appDefaults = ["CacheDataAgressively" : NSNumber(value: true)]
+        let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
         loadSettingsDefaults()
@@ -121,7 +121,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
             print("\(aps)")
 
-            let message = (aps["alert"] as? [String:String])?["body"] ?? "Message could not be decoded"
+            let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
             let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
             if let soundPath = soundPath {
                 print("Sound path \(soundPath)")

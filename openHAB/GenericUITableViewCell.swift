@@ -40,7 +40,7 @@ class GenericUITableViewCell: UITableViewCell {
                 let views = ["customDetailTextLabel": customDetailTextLabel]
                 let formatString = "[customDetailTextLabel]|"
 
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String : Any])
+                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String: Any])
                 addConstraints(disclosureConstraints)
             }
         }
