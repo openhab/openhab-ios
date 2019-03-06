@@ -33,7 +33,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //init Firebase crash reporting
         FirebaseApp.configure()
 
+<<<<<<< HEAD
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
+=======
+        let appDefaults = ["CacheDataAgressively" : NSNumber(value: true)]
+>>>>>>> openhab-ios_swift
         UserDefaults.standard.register(defaults: appDefaults)
 
         loadSettingsDefaults()
@@ -122,6 +126,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("\(aps)")
 
             let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
+
             let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
             if let soundPath = soundPath {
                 print("Sound path \(soundPath)")
