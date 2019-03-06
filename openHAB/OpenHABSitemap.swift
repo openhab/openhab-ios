@@ -13,10 +13,10 @@
 
 import Foundation
 
-struct ValueOrFalse<T:Decodable>: Decodable {
-    let value:T?
+struct ValueOrFalse<T: Decodable>: Decodable {
+    let value: T?
 
-    public init(from decoder:Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let falseValue = try? container.decode(Bool.self)
         if falseValue == nil {
@@ -30,13 +30,13 @@ struct ValueOrFalse<T:Decodable>: Decodable {
 extension OpenHABSitemap: Decodable {
 
     struct CodingData: Decodable {
-        let name : String
-        let label : String
+        let name: String
+        let label: String
         let homepage: HomePage
         let link: String
     }
 
-    struct HomePage : Decodable {
+    struct HomePage: Decodable {
         let link: String
         let leaf: ValueOrFalse<String>
         let timeout: ValueOrFalse<String>
@@ -92,12 +92,12 @@ extension OpenHABSitemap.CodingData {
         }
     }
 
-    init(dictionary: [String : Any]) {
+    init(dictionary: [String: Any]) {
         super.init()
         let keyArray = dictionary.keys
         for key in keyArray {
             if key == "homepage" {
-                let homepageDictionary = dictionary[key] as? [String : Any]
+                let homepageDictionary = dictionary[key] as? [String: Any]
                 let homepageKeyArray = homepageDictionary!.keys
                 for homepageKey in homepageKeyArray {
                     if homepageKey == "link" {

@@ -30,7 +30,7 @@ import Foundation
 
     let propertyNames: Set = ["command", "label"]
 
-    @objc init(dictionary: [String : Any]) {
+    @objc init(dictionary: [String: Any]) {
         super.init()
         for key in dictionary.keys {
             if propertyNames.contains(key) {

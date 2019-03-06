@@ -121,9 +121,9 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <segmentedControl opaque="NO" tag="300" contentMode="scaleToFill" horizontalCompressionResistancePriority="800" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" momentary="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WVa-JP-ksR">
-                                                    <rect key="frame" x="271" y="8" width="123" height="29"/>
+                                                    <rect key="frame" x="251" y="8" width="143" height="29"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" relation="lessThanOrEqual" constant="123" id="ayd-Kj-Zf9"/>
+                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="123" id="ayd-Kj-Zf9"/>
                                                     </constraints>
                                                     <segments>
                                                         <segment title="" image="glyphicons_433_minus.png"/>
@@ -132,7 +132,7 @@
                                                     </segments>
                                                 </segmentedControl>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P0E-ry-QYE">
-                                                    <rect key="frame" x="62" y="22" width="201" height="0.0"/>
+                                                    <rect key="frame" x="62" y="22" width="0.0" height="0.0"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -140,7 +140,7 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="centerY" secondItem="WVa-JP-ksR" secondAttribute="centerY" id="DPf-MT-FW5"/>
-                                                <constraint firstItem="WVa-JP-ksR" firstAttribute="leading" secondItem="P0E-ry-QYE" secondAttribute="trailing" constant="8" id="HZC-3k-8ZA"/>
+                                                <constraint firstItem="WVa-JP-ksR" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="P0E-ry-QYE" secondAttribute="trailing" constant="8" id="HZC-3k-8ZA"/>
                                                 <constraint firstAttribute="trailing" secondItem="WVa-JP-ksR" secondAttribute="trailing" constant="20" id="L1h-XT-K9g"/>
                                                 <constraint firstItem="P0E-ry-QYE" firstAttribute="centerY" secondItem="qzM-Ln-kZD" secondAttribute="centerY" id="QYC-qk-I6t"/>
                                                 <constraint firstItem="P0E-ry-QYE" firstAttribute="leading" secondItem="qzM-Ln-kZD" secondAttribute="leading" constant="62" id="pHy-Me-zR1"/>
@@ -1312,7 +1312,7 @@
                                         <constraint firstItem="Psk-Ip-Gby" firstAttribute="centerY" secondItem="CKg-F0-eHj" secondAttribute="centerY" id="hiy-Fk-7Si"/>
                                         <constraint firstItem="NcF-3h-pDH" firstAttribute="centerY" secondItem="CKg-F0-eHj" secondAttribute="centerY" id="lx2-pg-lQe"/>
                                         <constraint firstItem="Psk-Ip-Gby" firstAttribute="leading" secondItem="CKg-F0-eHj" secondAttribute="leading" constant="16" id="pLt-V9-9sR"/>
-                                        <constraint firstItem="NcF-3h-pDH" firstAttribute="trailing" secondItem="CKg-F0-eHj" secondAttribute="trailingMargin" id="yxi-38-jZe"/>
+                                        <constraint firstItem="NcF-3h-pDH" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="CKg-F0-eHj" secondAttribute="trailingMargin" id="yxi-38-jZe"/>
                                     </constraints>
                                     <variation key="default">
                                         <mask key="constraints">

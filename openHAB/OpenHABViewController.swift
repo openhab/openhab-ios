@@ -781,7 +781,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                     // Newer versions talk JSON!
                 } else {
-                    self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String : Any] )
+                    self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String: Any] )
                 }
                 strongSelf.currentPage?.delegate = strongSelf
                 strongSelf.widgetTableView.reloadData()

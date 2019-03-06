@@ -43,7 +43,7 @@ extension String {
         }
     }
 
-    init(dictionary: [String : Any]) {
+    init(dictionary: [String: Any]) {
         super.init()
 
         for key in dictionary.keys {

@@ -64,20 +64,20 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
         }
     }
 
-    init(dictionary: [String : Any]) {
+    init(dictionary: [String: Any]) {
         super.init()
         widgets = [OpenHABWidget]()
         pageId = dictionary["id"] as? String ?? ""
         title = dictionary["title"] as? String ?? ""
         link = dictionary["link"] as? String ?? ""
         leaf = dictionary["leaf"] as? String ?? ""
-        let widgetsArray = dictionary["widgets"] as? [[String : Any]?]
+        let widgetsArray = dictionary["widgets"] as? [[String: Any]?]
         for widgetDictionary in widgetsArray ?? [] {
             let newWidget = OpenHABWidget(dictionary: widgetDictionary!)
             newWidget.delegate = self
             widgets.append(newWidget)
             if widgetDictionary?["widgets"] != nil {
-                let childWidgetsArray = widgetDictionary?["widgets"] as? [[String : Any]?]
+                let childWidgetsArray = widgetDictionary?["widgets"] as? [[String: Any]?]
                 for childWidgetDictionary in childWidgetsArray ?? [] {
                     let newChildWidget = OpenHABWidget(dictionary: childWidgetDictionary!)
                     newChildWidget.delegate = self
