@@ -159,9 +159,8 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 
     // NSNetService delegate methods for Bonjour resolving
     func normalizeUrl(_ url: String?) -> String? {
-        var url = url
-        if url?.hasSuffix("/") ?? false {
-            url = (url as? NSString)?.substring(to: (url?.count ?? 0) - 1)
+        if let url = url, url.hasSuffix("/") {
+            return String(url.dropLast())
         }
         return url
     }
