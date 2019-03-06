@@ -32,9 +32,6 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     override init(style: UITableView.Style) {
         super.init(style: style)
-
-        // Custom initialization
-
     }
 
     override func viewDidLoad() {
