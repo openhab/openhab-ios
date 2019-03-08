@@ -9,15 +9,26 @@
 
 import Foundation
 
+// We decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
+// We then convert that into a openHABNotification
+// Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
 extension OpenHABNotification {
     struct CodingData: Decodable {
-            let _id: String
+            let id: String
             let message: String
             let __v: Int
             let created: String
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case message
+        case v //= "__v"
+        case created
+    }
 }
 
+// Convenience method to convert a decoded value into a proper OpenHABNotification instance
 extension OpenHABNotification.CodingData {
     var openHABNotification: OpenHABNotification {
         return OpenHABNotification(dictionary: ["message": self.message, "created": self.created ])
