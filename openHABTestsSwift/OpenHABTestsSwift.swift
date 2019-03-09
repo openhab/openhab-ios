@@ -14,7 +14,7 @@ class OpenHABTestsSwift: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        //decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
