@@ -13,6 +13,9 @@
 
 import Foundation
 
+// The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false  (not null).
+// Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
+
 struct ValueOrFalse<T: Decodable>: Decodable {
     let value: T?
 
@@ -65,7 +68,6 @@ extension OpenHABSitemap.CodingData {
         self.label = label
         self.leaf = leaf
         self.homepageLink = homepageLink
-        self.icon = ""
     }
 
     init(xml xmlElement: GDataXMLElement?) {
