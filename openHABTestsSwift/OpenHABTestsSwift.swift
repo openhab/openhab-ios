@@ -59,6 +59,45 @@ class OpenHABTestsSwift: XCTestCase {
         }
     }
 
+    func testWidgetMapping() {
+        let json = """
+[{"command": "0","label": "Overwrite"}, {"command": "1","label": "Calendar"}]
+"""
+        let data = Data(json.utf8)
+        do {
+            let decoded = try decoder.decode([OpenHABWidgetMapping].self, from: data)
+            XCTAssert(decoded[0].label == "Overwrite", "WidgetMapping properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
+    func testLinkedPage() {
+        let json = """
+{"id": "1302", "title": "EG Süd", "icon": "rollershutter", "link": "https://192.168.2.63:8444/rest/sitemaps/myHome/1302"}
+"""
+        let data = Data(json.utf8)
+        do {
+            let decoded = try decoder.decode(OpenHABLinkedPage.self, from: data)
+            XCTAssert(decoded.pageId == "1302", "LinkedPage properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
+    func testItem() {
+        let json = """
+{"link": "https://192.168.2.63:8444/rest/items/lcnDFFOst", "state": "100.0", "editable": false, "type": "Rollershutter", "name": "lcnDFFOst", "label": "DFF Arbeitszimmer", "tags": [], "groupNames": [ "gDZ", "gDFF", "gLcn"]}
+"""
+        let data = Data(json.utf8)
+        do {
+            let decoded = try decoder.decode(OpenHABItem.CodingData.self, from: data)
+            XCTAssert(decoded.name == "lcnDFFOst", "LinkedPage properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
     func testHexString() {
         let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
         let hexWithReduce = iPhoneData.reduce("", {$0 + String(format: "%02X", $1)})

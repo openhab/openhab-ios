@@ -15,7 +15,33 @@ protocol OpenHABSitemapPageDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
 }
 
-class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
+extension OpenHABSitemapPage {
+
+    struct CodingData: Decodable {
+        let pageId: String
+        let title: String
+        let link: String
+        let leaf: String
+        let widgets: [OpenHABWidget.CodingData]
+
+        enum CodingKeys: String, CodingKey {
+            case pageId = "id"
+            case title
+            case link
+            case leaf
+            case widgets
+        }
+    }
+
+}
+
+extension OpenHABSitemapPage.CodingData {
+    var openHABSitemapPage: OpenHABSitemapPage {
+        return OpenHABSitemapPage(pageId: self.pageId, title: self.title, link: self.link, leaf: self.leaf)
+    }
+}
+
+final class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     weak var delegate: OpenHABSitemapPageDelegate?
     var widgets: [OpenHABWidget] = []
     var pageId = ""
@@ -25,41 +51,34 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
 
     let propertyNames: Set = ["pageId", "title", "link", "leaf"]
 
+    init(pageId: String, title: String, link: String, leaf: String) {
+        self.pageId = pageId
+        self.title = title
+        self.link = link
+        self.leaf = leaf
+    }
+
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
         widgets = [OpenHABWidget]()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
-            if !(child.name() == "widget") {
-                if !(child.name() == "id") {
-                    if let name = child.name() {
-                        if propertyNames.contains(name) {
-                            setValue(child.stringValue, forKey: child.name() ?? "")
+                if !(child.name() == "widget") {
+                    if !(child.name() == "id") {
+                        if let name = child.name() {
+                            if propertyNames.contains(name) {
+                                setValue(child.stringValue, forKey: child.name() ?? "")
+                            }
                         }
+                    } else {
+                        pageId = child.stringValue() ?? ""
                     }
                 } else {
-                    pageId = child.stringValue() ?? ""
-                }
-            } else {
-                let newWidget = OpenHABWidget(xml: child)
-                newWidget.delegate = self
-                widgets.append(newWidget)
+                    let newWidget = OpenHABWidget(xml: child)
+                    newWidget.delegate = self
+                    widgets.append(newWidget)
 
-                // If widget have child widgets, cycle through them too
-//                if Int(child.elements(forName: "widget") ?? 0) > 0 {
-//                    for childChild: GDataXMLElement? in child.elements(forName: "widget") ?? [] {
-//                        if child?.name() == "widget" {
-//                            let newChildWidget = OpenHABWidget(xml: childChild) as? OpenHABWidget
-//                            if newChildWidget != nil {
-//                                newChildWidget?.delegate = self
-//                                if let newChildWidget = newChildWidget {
-//                                    widgets.append(newChildWidget)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-            }
+                }
             }
         }
     }

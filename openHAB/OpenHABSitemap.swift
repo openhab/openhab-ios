@@ -29,7 +29,7 @@ struct ValueOrFalse<T: Decodable>: Decodable {
     }
 }
 
-extension OpenHABSitemap: Decodable {
+extension OpenHABSitemap {
 
     struct CodingData: Decodable {
         let name: String
@@ -47,7 +47,8 @@ extension OpenHABSitemap: Decodable {
 
 extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.homepage.leaf.value ?? "", homepageLink: self.homepage.link)
+        let leaf: String = self.homepage.leaf.value ?? ""
+        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: leaf, homepageLink: self.homepage.link)
     }
 }
 

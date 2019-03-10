@@ -717,11 +717,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 print("Warning - ignoring invalid certificates")
                 operation.securityPolicy.allowInvalidCertificates = true
             }
-            // If we are talking to openHAB 2+, we expect response to be JSON
-            if appData()?.openHABVersion == 2 {
-                print("Setting serializer to JSON")
-                operation.responseSerializer = AFJSONResponseSerializer()
-            }
+
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -750,16 +746,19 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                             }
                         }
                     }
-                    // Newer versions speak JSON!
                 } else {
-                    if responseObject is [Any] {
-                        print("Response is array")
-                        for sitemapJson: Any? in responseObject as! [Any?] {
-                            let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
-                            self.sitemaps.append(sitemap)
+                    // Newer versions speak JSON!
+                    let decoder = JSONDecoder()
+                    if let response = response {
+                        do {
+                            print ("Response will be decoded by JSON")
+                            let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+                            for codingDatum in codingData {
+                                self.sitemaps.append(codingDatum.openHABSitemap)
+                            }
+                        } catch {
+                            print("Should not throw \(error)")
                         }
-                    } else {
-                        // Something went wrong, we should have received an array
                     }
                 }
                 self.appData()?.sitemaps = self.sitemaps

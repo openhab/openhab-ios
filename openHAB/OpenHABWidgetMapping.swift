@@ -11,7 +11,7 @@
 
 import Foundation
 
-@objc class OpenHABWidgetMapping: NSObject {
+@objc class OpenHABWidgetMapping: NSObject, Decodable {
     @objc var command = ""
     @objc var label = ""
 

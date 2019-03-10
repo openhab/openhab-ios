@@ -16,7 +16,25 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
 }
 
-@objcMembers class OpenHABWidget: NSObject, MKAnnotation {
+extension OpenHABWidget {
+
+    struct CodingData: Decodable {
+        let widgetId: String
+        let label: String
+        let link: String
+        let icon: String
+        let type: String
+        let url: String
+    }
+}
+
+extension OpenHABWidget.CodingData {
+    var openHABWidget: OpenHABWidget {
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url)
+    }
+}
+
+@objcMembers final class OpenHABWidget: NSObject, MKAnnotation {
     weak var delegate: OpenHABWidgetDelegate?
     var widgetId = ""
     var label = ""
@@ -42,6 +60,14 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     var image: UIImage?
 
     let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
+
+    init(widgetId: String, label: String, icon: String, type: String, url: String) {
+        self.widgetId = widgetId
+        self.label = label
+        self.icon = icon
+        self.type = type
+        self.url = url
+    }
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
