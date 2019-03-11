@@ -17,7 +17,6 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
 }
 
 extension OpenHABWidget {
-
     struct CodingData: Decodable {
         let widgetId: String
         let label: String
@@ -27,13 +26,14 @@ extension OpenHABWidget {
         let item: OpenHABItem.CodingData?
         let linkedPage: OpenHABLinkedPage?
         let mappings: [OpenHABWidgetMapping]
+        let widgets: [OpenHABWidget.CodingData]
     }
-
 }
 
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
-        return OpenHABWidget(widgetId: self.widgetId, label: self.label, type: self.type, icon: self.icon, url: self.url ?? "", item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings)
+        let mappedWidgets = self.widgets.map { $0.openHABWidget }
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, type: self.type, icon: self.icon, url: self.url ?? "", item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
     }
 }
 
@@ -61,10 +61,11 @@ extension OpenHABWidget.CodingData {
     var text = ""
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
+    var widgets: [OpenHABWidget] = []
 
     let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
 
-    init(widgetId: String, label: String, type: String, icon: String, url: String, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping] ) {
+    init(widgetId: String, label: String, type: String, icon: String, url: String, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
         self.widgetId = widgetId
         self.label = label
         self.type = type
@@ -73,6 +74,7 @@ extension OpenHABWidget.CodingData {
         self.item = item
         self.linkedPage = linkedPage
         self.mappings = mappings
+        self.widgets = widgets
     }
 
     init(xml xmlElement: GDataXMLElement?) {

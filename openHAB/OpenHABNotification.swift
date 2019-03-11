@@ -22,8 +22,8 @@ extension DateFormatter {
     }()
 }
 
-// We decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
-// We then convert that into a openHABNotification
+// Decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
+// then convert that into a openHABNotification
 // Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
 extension OpenHABNotification {
     struct CodingData: Decodable {

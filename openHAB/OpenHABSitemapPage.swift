@@ -21,7 +21,7 @@ extension OpenHABSitemapPage {
         let pageId: String
         let title: String
         let link: String
-        let leaf: String
+        let leaf: Bool
         let widgets: [OpenHABWidget.CodingData]
 
         private enum CodingKeys: String, CodingKey {
@@ -51,13 +51,20 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
 
     let propertyNames: Set = ["pageId", "title", "link", "leaf"]
 
-    init(pageId: String, title: String, link: String, leaf: String, widgets: [OpenHABWidget]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title
         self.link = link
-        self.leaf = leaf
-        self.widgets = widgets
+        self.leaf = leaf ? "true" : "false"
+        var ws = [OpenHABWidget]()
+        for w1 in widgets {
+            ws.append(w1)
+            for w2 in w1.widgets {
+                ws.append(w2)
+            }
+        }
+        self.widgets = ws
         self.widgets.forEach { $0.delegate = self }
     }
 

@@ -47,10 +47,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 print("Warning - ignoring invalid certificates")
                 operation.securityPolicy.allowInvalidCertificates = true
             }
-            if appData()?.openHABVersion == 2 {
-                print("Setting serializer to JSON")
-                operation.responseSerializer = AFJSONResponseSerializer()
-            }
+
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -82,21 +79,23 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     } else {
                         return
                     }
-                    // Newer versions speak JSON!
                 } else {
-                    print("openHAB 2")
-                    if responseObject is [Any] {
-                        print("Response is array")
-                        for sitemapJson: Any? in responseObject as! [Any?] {
-                            let sitemap = OpenHABSitemap(dictionary: (sitemapJson as? [String: Any])!)
-                            if (responseObject as AnyObject).count != 1 && !(sitemap.name == "_default") {
-                                print("Sitemap \(sitemap.label)")
-                                self.sitemaps.append(sitemap)
+                    // Newer versions speak JSON!
+                    let decoder = JSONDecoder()
+                    if let response = response {
+                        print("openHAB 2")
+                        do {
+                            print ("Response will be decoded by JSON")
+                            let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+                            for sitemapCodingDatum in sitemapsCodingData {
+                                if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
+                                    print("Sitemap \(sitemapCodingDatum.label)")
+                                    self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
+                                }
                             }
+                        } catch {
+                            print("Should not throw \(error)")
                         }
-                    } else {
-                        // Something went wrong, we should have received an array
-                        return
                     }
                 }
 

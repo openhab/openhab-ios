@@ -613,7 +613,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             // If we are talking to openHAB 2+, we expect response to be JSON
             if appData()?.openHABVersion == 2 {
                 print("Setting serializer to JSON")
-               // currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
+                //currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
             }
             let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
             policy.delegate = self
@@ -658,7 +658,17 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                 } else {
                     // Newer versions talk JSON!
-                    self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String: Any] )
+                    //self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String: Any] )
+                    let decoder = JSONDecoder()
+                    if let response = response {
+                        print("openHAB 2")
+                        do {
+                            let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: response)
+                            self.currentPage = sitemapPageCodingData.openHABSitemapPage
+                        } catch {
+                            print("Should not throw \(error)")
+                        }
+                    }
                 }
                 strongSelf.currentPage?.delegate = strongSelf
                 strongSelf.widgetTableView.reloadData()
@@ -717,11 +727,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 print("Warning - ignoring invalid certificates")
                 operation.securityPolicy.allowInvalidCertificates = true
             }
-            // If we are talking to openHAB 2+, we expect response to be JSON
-            if appData()?.openHABVersion == 2 {
-                print("Setting serializer to JSON")
-                operation.responseSerializer = AFJSONResponseSerializer()
-            }
+
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -750,16 +756,19 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                             }
                         }
                     }
-                    // Newer versions speak JSON!
                 } else {
-                    if responseObject is [Any] {
-                        print("Response is array")
-                        for sitemapJson: Any? in responseObject as! [Any?] {
-                            let sitemap = OpenHABSitemap(dictionary: sitemapJson as! [String: Any])
-                            self.sitemaps.append(sitemap)
+                    // Newer versions speak JSON!
+                    let decoder = JSONDecoder()
+                    if let response = response {
+                        do {
+                            print ("Response will be decoded by JSON")
+                            let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+                            for codingDatum in codingData {
+                                self.sitemaps.append(codingDatum.openHABSitemap)
+                            }
+                        } catch {
+                            print("Should not throw \(error)")
                         }
-                    } else {
-                        // Something went wrong, we should have received an array
                     }
                 }
                 self.appData()?.sitemaps = self.sitemaps
