@@ -15,6 +15,32 @@ protocol OpenHABSitemapPageDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
 }
 
+extension OpenHABSitemapPage {
+
+    struct CodingData: Decodable {
+        let pageId: String
+        let title: String
+        let link: String
+        let leaf: String
+        let widgets: [OpenHABWidget.CodingData]
+
+        private enum CodingKeys: String, CodingKey {
+            case pageId = "id"
+            case title
+            case link
+            case leaf
+            case widgets
+        }
+    }
+}
+
+extension OpenHABSitemapPage.CodingData {
+    var openHABSitemapPage: OpenHABSitemapPage {
+        let mappedWidgets = self.widgets.map { $0.openHABWidget }
+        return OpenHABSitemapPage(pageId: self.pageId, title: self.title, link: self.link, leaf: self.leaf, widgets: mappedWidgets)
+    }
+}
+
 class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     weak var delegate: OpenHABSitemapPageDelegate?
     var widgets: [OpenHABWidget] = []
@@ -24,6 +50,16 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     var leaf = ""
 
     let propertyNames: Set = ["pageId", "title", "link", "leaf"]
+
+    init(pageId: String, title: String, link: String, leaf: String, widgets: [OpenHABWidget]) {
+        super.init()
+        self.pageId = pageId
+        self.title = title
+        self.link = link
+        self.leaf = leaf
+        self.widgets = widgets
+        self.widgets.forEach { $0.delegate = self }
+    }
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()

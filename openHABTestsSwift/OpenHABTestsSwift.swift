@@ -59,9 +59,267 @@ class OpenHABTestsSwift: XCTestCase {
         }
     }
 
+    func testJSONItem() {
+        let json = """
+        {
+            "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch5_1",
+            "state": "OFF",
+            "stateDescription": {
+                "pattern": "Kellertest",
+                "readOnly": false,
+                "options": []
+            },
+            "editable": false,
+            "type": "Switch",
+            "name": "lcnLightSwitch5_1",
+            "label": "Licht Treppe Keller-EG",
+            "tags": [
+            "Lighting"
+            ],
+            "groupNames": [
+            "G_PresenceSimulation",
+            "gLcn"
+            ]
+        }
+""".data(using: .utf8)!
+        do {
+            let codingData = try decoder.decode(OpenHABItem.CodingData.self, from: json)
+            XCTAssert(codingData.type == "Switch", "Item properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
+    func testJSONWidget() {
+        let json = """
+        {
+        "widgetId": "0000",
+        "type": "Switch",
+        "label": "Licht Treppe Keller-EG [Kellertest]",
+        "icon": "switch",
+        "mappings": [],
+        "item": {
+            "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch5_1",
+            "state": "OFF",
+            "stateDescription": {
+                "pattern": "Kellertest",
+                "readOnly": false,
+                "options": []
+            },
+            "editable": false,
+            "type": "Switch",
+            "name": "lcnLightSwitch5_1",
+            "label": "Licht Treppe Keller-EG",
+            "tags": [
+                "Lighting"
+            ],
+            "groupNames": [
+                "G_PresenceSimulation",
+                "gLcn"
+            ]
+        },
+        "widgets": []
+        }
+""".data(using: .utf8)!
+        do {
+            let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
+            XCTAssert(codingData.widgetId == "0000", "Widget properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
     func testHexString() {
         let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
         let hexWithReduce = iPhoneData.reduce("", {$0 + String(format: "%02X", $1)})
         XCTAssert (hexWithReduce == "54696D206950686F6E65", "hex properly calculated with reduce")
     }
+
+    func testJSONLinkedPage() {
+        let json = """
+        {   "id": "1304",
+    "title": "EG West",
+    "icon": "rollershutter",
+    "link": "https://192.168.2.63:8444/rest/sitemaps/myHome/1304",
+    "leaf": true,
+    "timeout": false,
+    "widgets": [
+    {
+    "widgetId": "130400",
+    "type": "Switch",
+    "label": "Jalousie WZ West links",
+    "icon": "rollershutter",
+    "mappings": [],
+    "item": {
+    "link": "https://192.168.2.63:8444/rest/items/lcnJalousieWZWestLinks",
+    "state": "0.0",
+    "editable": false,
+    "type": "Rollershutter",
+    "name": "lcnJalousieWZWestLinks",
+    "label": "Jalousie WZ West links",
+    "tags": [],
+    "groupNames": [
+    "gWZ",
+    "gEGJalousien",
+    "gHausJalousie",
+    "gJalousienWest",
+    "gEGJalousienWest",
+    "gLcn"
+    ]
+    },
+    "widgets": []
+    },
+    {
+    "widgetId": "130401",
+    "type": "Switch",
+    "label": "Jalousie WZ West Mitte",
+    "icon": "rollershutter",
+    "mappings": [],
+    "item": {
+    "link": "https://192.168.2.63:8444/rest/items/lcnJalousieWZWestMitte",
+    "state": "0.0",
+    "editable": false,
+    "type": "Rollershutter",
+    "name": "lcnJalousieWZWestMitte",
+    "label": "Jalousie WZ West Mitte",
+    "tags": [],
+    "groupNames": [
+    "gWZ",
+    "gEGJalousien",
+    "gHausJalousie",
+    "gJalousienWest",
+    "gEGJalousienWest",
+    "gLcn"
+    ]
+    },
+    "widgets": []
+    },
+    {
+    "widgetId": "130402",
+    "type": "Switch",
+    "label": "Jalousie WZ West rechts",
+    "icon": "rollershutter",
+    "mappings": [],
+    "item": {
+    "link": "https://192.168.2.63:8444/rest/items/lcnJalousieWZWestRechts",
+    "state": "0.0",
+    "editable": false,
+    "type": "Rollershutter",
+    "name": "lcnJalousieWZWestRechts",
+    "label": "Jalousie WZ West rechts",
+    "tags": [],
+    "groupNames": [
+    "gWZ",
+    "gEGJalousien",
+    "gHausJalousie",
+    "gJalousienWest",
+    "gEGJalousienWest",
+    "gLcn"
+    ]
+    },
+    "widgets": []
+    }
+    ]
+}
+""".data(using: .utf8)!
+        do {
+            let codingData = try decoder.decode(OpenHABLinkedPage.self, from: json)
+            XCTAssert(codingData.pageId == "1304", "OpenHABLinkedPage properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+}
+
+func testJSONWidgetMapping() {
+    let json = """
+[
+    {
+        "command": "0",
+        "label": "Overwrite"
+    },
+    {
+        "command": "1",
+        "label": "Kalender"
+    },
+    {
+        "command": "2",
+        "label": "Automatik"
+    }
+]
+""".data(using: .utf8)!
+    do {
+        let codingData = try decoder.decode([OpenHABWidgetMapping].self, from: json)
+        XCTAssert(codingData[0].label == "Overwrite", "WidgetMapping properly parsed")
+    } catch {
+        XCTFail("Whoops, an error occured: \(error)")
+    }
+}
+
+    func testJSONWidget2() {
+        let json = """
+{
+    "widgetId": "01",
+    "type": "Frame",
+    "label": "Eingang",
+    "icon": "frame",
+    "mappings": [],
+    "widgets": [
+    {
+    "widgetId": "0100",
+    "type": "Switch",
+    "label": "Licht Eingang",
+    "icon": "switch",
+    "mappings": [],
+    "item": {
+    "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch17_1",
+    "state": "ON",
+    "editable": false,
+    "type": "Switch",
+    "name": "lcnLightSwitch17_1",
+    "label": "Licht Eingang",
+    "tags": [
+    "Lighting"
+    ],
+    "groupNames": [
+    "G_PresenceSimulation",
+    "gLcn"
+    ]
+    },
+    "widgets": []
+    },
+    {
+    "widgetId": "0101",
+    "type": "Switch",
+    "label": "Licht Eingang aussen",
+    "icon": "switch",
+    "mappings": [],
+    "item": {
+    "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch17_2",
+    "state": "OFF",
+    "editable": false,
+    "type": "Switch",
+    "name": "lcnLightSwitch17_2",
+    "label": "Licht Eingang aussen",
+    "tags": [
+    "Lighting"
+    ],
+    "groupNames": [
+    "G_PresenceSimulation",
+    "gLcn"
+    ]
+    },
+    "widgets": []
+    }
+    ]
+    }
+""".data(using: .utf8)!
+        do {
+            let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
+            XCTAssert(codingData.widgetId == "01", "Widget properly parsed")
+            XCTAssert(codingData.mappings.count == 0, "No mappings found")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
 }

@@ -11,12 +11,19 @@
 
 import Foundation
 
-@objc class OpenHABLinkedPage: NSObject {
+@objc class OpenHABLinkedPage: NSObject, Decodable {
     var pageId = ""
     @objc var title = ""
     @objc var icon = ""
     @objc var link = ""
     let propertyNames: Set = ["title", "icon", "link"]
+
+    private enum CodingKeys: String, CodingKey {
+        case pageId = "id"
+        case title
+        case icon
+        case link
+    }
 
     @objc init(xml xmlElement: GDataXMLElement?) {
         super.init()

@@ -29,7 +29,7 @@ struct ValueOrFalse<T: Decodable>: Decodable {
     }
 }
 
-extension OpenHABSitemap: Decodable {
+extension OpenHABSitemap {
 
     struct CodingData: Decodable {
         let name: String
