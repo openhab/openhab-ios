@@ -11,6 +11,24 @@
 
 import CoreLocation
 import Foundation
+import UIKit
+
+extension OpenHABItem {
+
+    struct CodingData: Decodable {
+        let type: String
+        let name: String
+        let link: String
+        let state: String
+    }
+
+}
+
+extension OpenHABItem.CodingData {
+    var openHABItem: OpenHABItem {
+        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link)
+    }
+}
 
 extension String {
     var numberValue:NSNumber? {
@@ -29,6 +47,13 @@ extension String {
     var link = ""
 
     let propertyNames: Set = ["name", "type", "groupType", "state", "link" ]
+
+    init(name: String, type: String, state: String, link: String) {
+        self.name = name
+        self.type = type
+        self.state = state
+        self.link = link
+    }
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()

@@ -16,6 +16,27 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
 }
 
+extension OpenHABWidget {
+
+    struct CodingData: Decodable {
+        let widgetId: String
+        let label: String
+        let type: String
+        let icon: String
+        let url: String?
+        let item: OpenHABItem.CodingData?
+        let linkedPage: OpenHABLinkedPage?
+        let mappings: [OpenHABWidgetMapping]
+    }
+
+}
+
+extension OpenHABWidget.CodingData {
+    var openHABWidget: OpenHABWidget {
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, type: self.type, icon: self.icon, url: self.url ?? "", item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings)
+    }
+}
+
 @objcMembers class OpenHABWidget: NSObject, MKAnnotation {
     weak var delegate: OpenHABWidgetDelegate?
     var widgetId = ""
@@ -42,6 +63,17 @@ protocol OpenHABWidgetDelegate: NSObjectProtocol {
     var image: UIImage?
 
     let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
+
+    init(widgetId: String, label: String, type: String, icon: String, url: String, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping] ) {
+        self.widgetId = widgetId
+        self.label = label
+        self.type = type
+        self.icon = icon
+        self.url = url
+        self.item = item
+        self.linkedPage = linkedPage
+        self.mappings = mappings
+    }
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()
