@@ -375,4 +375,474 @@ class OpenHABTestsSwift: XCTestCase {
             XCTFail("Whoops, an error occured: \(error)")
         }
     }
+
+    func testJSONSitemapPage2() {
+        let json = """
+{
+  "id": "grafana",
+  "title": "grafana",
+  "link": "https://myopenhab.org/rest/sitemaps/grafana/grafana",
+  "leaf": false,
+  "timeout": false,
+  "widgets": [
+    {
+      "widgetId": "00",
+      "type": "Frame",
+      "label": "Date",
+      "icon": "frame",
+      "mappings": [],
+      "widgets": [
+        {
+          "widgetId": "0000",
+          "type": "Text",
+          "label": "Date",
+          "icon": "text",
+          "mappings": [],
+          "widgets": []
+        },
+        {
+          "widgetId": "0001",
+          "type": "Switch",
+          "label": "bliblablu-bliblablu-bliblablu-bliblablu-bliblablu [Kellertest]",
+          "icon": "switch",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/lcnLightSwitch5_1",
+            "state": "OFF",
+            "stateDescription": {
+              "pattern": "Kellertest",
+              "readOnly": false,
+              "options": []
+            },
+            "editable": false,
+            "type": "Switch",
+            "name": "lcnLightSwitch5_1",
+            "label": "Licht Treppe Keller-EG",
+            "tags": [
+              "Lighting"
+            ],
+            "groupNames": [
+              "G_PresenceSimulation",
+              "gLcn"
+            ]
+          },
+          "widgets": []
+        }
+      ]
+    },
+    {
+      "widgetId": "01",
+      "type": "Frame",
+      "label": "Gas",
+      "icon": "frame",
+      "mappings": [],
+      "widgets": [
+        {
+          "widgetId": "0100",
+          "type": "Setpoint",
+          "label": "Pauli Thermostat [- °C]",
+          "icon": "number",
+          "mappings": [],
+          "minValue": 4.5,
+          "maxValue": 26,
+          "step": 0.5,
+          "item": {
+            "link": "https://myopenhab.org/rest/items/HMCCRTDNLinks_4_SetTemperature",
+            "state": "NULL",
+            "editable": false,
+            "type": "Number:Temperature",
+            "name": "HMCCRTDNLinks_4_SetTemperature",
+            "label": "Set Temperature",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0101",
+          "type": "Image",
+          "label": "",
+          "icon": "image",
+          "mappings": [],
+          "url": "https://myopenhab.org/proxy?sitemap=grafana.sitemap&widgetId=0101",
+          "widgets": []
+        },
+        {
+          "widgetId": "0102",
+          "type": "Setpoint",
+          "label": "bliblablu-bliblablu-bliblablu-bliblablu-bliblablu",
+          "icon": "setpoint",
+          "mappings": [],
+          "minValue": 0,
+          "maxValue": 100,
+          "step": 5,
+          "item": {
+            "link": "https://myopenhab.org/rest/items/OSRAMClassicA60WClearLIGHTIFY_LevelControl",
+            "state": "5",
+            "editable": false,
+            "type": "Dimmer",
+            "name": "OSRAMClassicA60WClearLIGHTIFY_LevelControl",
+            "label": "Osram Bulb 01 Dimmer",
+            "tags": [],
+            "groupNames": [
+              "gRemoteItems"
+            ]
+          },
+          "widgets": []
+        }
+      ]
+    },
+    {
+      "widgetId": "02",
+      "type": "Frame",
+      "label": "Map",
+      "icon": "frame",
+      "mappings": [],
+      "widgets": [
+        {
+          "widgetId": "0200",
+          "type": "Mapview",
+          "label": "Demo_Location",
+          "icon": "mapview",
+          "mappings": [],
+          "height": 0,
+          "widgets": []
+        }
+      ]
+    },
+    {
+      "widgetId": "03",
+      "type": "Frame",
+      "label": "Test",
+      "icon": "frame",
+      "mappings": [],
+      "widgets": [
+        {
+          "widgetId": "0300",
+          "type": "Group",
+          "label": "Whats ON",
+          "icon": "info",
+          "mappings": [],
+          "item": {
+            "members": [],
+            "link": "https://myopenhab.org/rest/items/gStateON",
+            "state": "NULL",
+            "editable": false,
+            "type": "Group",
+            "name": "gStateON",
+            "label": "Whats ON",
+            "category": "info",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0305",
+          "type": "Mapview",
+          "label": "Location [-°N -°E -m]",
+          "icon": "mapview",
+          "mappings": [],
+          "height": 0,
+          "item": {
+            "link": "https://myopenhab.org/rest/items/GPSTrackerTi_Location",
+            "state": "NULL",
+            "stateDescription": {
+              "pattern": "%2$s°N %3$s°E %1$sm",
+              "readOnly": true,
+              "options": []
+            },
+            "editable": false,
+            "type": "Location",
+            "name": "GPSTrackerTi_Location",
+            "label": "Location",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0306",
+          "type": "Text",
+          "label": "Battery Level [68 %]",
+          "icon": "battery",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/GPSTrackerTi_BatteryLevel",
+            "state": "68.0",
+            "stateDescription": {
+              "minimum": 0,
+              "maximum": 100,
+              "step": 1,
+              "pattern": "%.0f %%",
+              "readOnly": true,
+              "options": []
+            },
+            "editable": false,
+            "type": "Number",
+            "name": "GPSTrackerTi_BatteryLevel",
+            "label": "Battery Level",
+            "category": "Battery",
+            "tags": [],
+            "groupNames": [
+              "gGPSTracker"
+            ]
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0307",
+          "type": "Text",
+          "label": "Location [-°N -°E -m]",
+          "icon": "text",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/GPSTrackerTi_Location",
+            "state": "NULL",
+            "stateDescription": {
+              "pattern": "%2$s°N %3$s°E %1$sm",
+              "readOnly": true,
+              "options": []
+            },
+            "editable": false,
+            "type": "Location",
+            "name": "GPSTrackerTi_Location",
+            "label": "Location",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0308",
+          "type": "Text",
+          "label": "Accuracy [- -]",
+          "icon": "number",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/GPSTrackerTi_Accuracy",
+            "state": "NULL",
+            "stateDescription": {
+              "pattern": "%d %unit%",
+              "readOnly": true,
+              "options": []
+            },
+            "editable": false,
+            "type": "Number:Length",
+            "name": "GPSTrackerTi_Accuracy",
+            "label": "Accuracy",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0309",
+          "type": "Setpoint",
+          "label": "Min/Max/Step/Int [- °C]",
+          "icon": "number",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/Wassertemperatur_Soll_Setpoint",
+            "state": "NULL",
+            "editable": false,
+            "type": "Number",
+            "name": "Wassertemperatur_Soll_Setpoint",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0310",
+          "type": "Setpoint",
+          "label": "Warne nach [- Min]",
+          "icon": "shield",
+          "mappings": [],
+          "minValue": 0,
+          "maxValue": 1440,
+          "step": 10,
+          "item": {
+            "link": "https://myopenhab.org/rest/items/Wassertemperatur_Soll_Setpoint",
+            "state": "NULL",
+            "editable": false,
+            "type": "Number",
+            "name": "Wassertemperatur_Soll_Setpoint",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0311",
+          "type": "Text",
+          "label": "Status [3.8 °C]",
+          "icon": "house",
+          "valuecolor": "red",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/TempAussen",
+            "state": "3.8125",
+            "stateDescription": {
+              "pattern": "%.1f °C",
+              "readOnly": false,
+              "options": []
+            },
+            "editable": false,
+            "type": "Number",
+            "name": "TempAussen",
+            "label": "Aussentemperatur",
+            "category": "temperature",
+            "tags": [],
+            "groupNames": [
+              "gOnewire"
+            ]
+          },
+          "widgets": []
+        }
+      ]
+    },
+    {
+      "widgetId": "05",
+      "type": "Frame",
+      "label": "test",
+      "icon": "frame",
+      "mappings": [],
+      "widgets": [
+        {
+          "widgetId": "0500",
+          "type": "Text",
+          "label": "MySensor [- -]",
+          "icon": "number",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/MySensor",
+            "state": "NULL",
+            "stateDescription": {
+              "pattern": "%.1f %unit%",
+              "readOnly": false,
+              "options": []
+            },
+            "editable": false,
+            "type": "Number:Temperature",
+            "name": "MySensor",
+            "label": "MySensor",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0501",
+          "type": "Switch",
+          "label": "gKellerLicht",
+          "icon": "switch",
+          "mappings": [],
+          "item": {
+            "members": [],
+            "link": "https://myopenhab.org/rest/items/gKellerLicht",
+            "state": "NULL",
+            "editable": false,
+            "type": "Group",
+            "name": "gKellerLicht",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0507",
+          "type": "Text",
+          "label": "Tim's iPhone: Last Seen [21:23:59]",
+          "icon": "text",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/unifiIPhoneTimLastSeen",
+            "state": "2019-03-12T21:23:59.000+0100",
+            "stateDescription": {
+              "pattern": "%1$tH:%1$tM:%1$tS",
+              "readOnly": true,
+              "options": []
+            },
+            "editable": false,
+            "type": "DateTime",
+            "name": "unifiIPhoneTimLastSeen",
+            "label": "Tim's iPhone: Last Seen",
+            "tags": [],
+            "groupNames": [
+              "gUnifi"
+            ]
+          },
+          "widgets": []
+        },
+        {
+          "widgetId": "0508",
+          "type": "Text",
+          "label": "MoonPhase [Waxing crescent]",
+          "icon": "text",
+          "mappings": [],
+          "item": {
+            "link": "https://myopenhab.org/rest/items/MoonPhase",
+            "state": "WAXING_CRESCENT",
+            "stateDescription": {
+              "pattern": "%s",
+              "readOnly": true,
+              "options": [
+                {
+                  "value": "NEW",
+                  "label": "New moon"
+                },
+                {
+                  "value": "WAXING_CRESCENT",
+                  "label": "Waxing crescent"
+                },
+                {
+                  "value": "FIRST_QUARTER",
+                  "label": "First quarter"
+                },
+                {
+                  "value": "WAXING_GIBBOUS",
+                  "label": "Waxing gibbous"
+                },
+                {
+                  "value": "FULL",
+                  "label": "Full moon"
+                },
+                {
+                  "value": "WANING_GIBBOUS",
+                  "label": "Waning gibbous"
+                },
+                {
+                  "value": "THIRD_QUARTER",
+                  "label": "Third quarter"
+                },
+                {
+                  "value": "WANING_CRESCENT",
+                  "label": "Waning crescent"
+                }
+              ]
+            },
+            "editable": false,
+            "type": "String",
+            "name": "MoonPhase",
+            "label": "MoonPhase",
+            "tags": [],
+            "groupNames": []
+          },
+          "widgets": []
+        }
+      ]
+    }
+  ]
+}
+""".data(using: .utf8)!
+        do {
+            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: json)
+            XCTAssert(codingData.leaf == false, "OpenHABSitemapPage properly parsed")
+            XCTAssert(codingData.widgets[0].widgetId == "00", "widget properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
 }
