@@ -8,12 +8,30 @@
 //
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
-
+import UIKit
 import CoreLocation
 import Foundation
+import UIKit
+
+extension OpenHABItem {
+
+    struct CodingData: Decodable {
+        let type: String
+        let groupType: String?
+        let name: String
+        let link: String
+        let state: String
+    }
+}
+
+extension OpenHABItem.CodingData {
+    var openHABItem: OpenHABItem {
+        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link)
+    }
+}
 
 @objcMembers
-@objc class OpenHABItem: NSObject {
+@objc final class OpenHABItem: NSObject {
     var type = ""
     var groupType = ""
     var name = ""
@@ -21,6 +39,13 @@ import Foundation
     var link = ""
 
     let propertyNames: Set = ["name", "type", "groupType", "state", "link" ]
+
+    init(name: String, type: String, state: String, link: String) {
+        self.name = name
+        self.type = type
+        self.state = state
+        self.link = link
+    }
 
     init(xml xmlElement: GDataXMLElement?) {
         super.init()

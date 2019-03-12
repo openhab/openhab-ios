@@ -69,15 +69,18 @@ class OpenHABNotificationsViewController: UITableViewController {
             }
 
             let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
-                do {
-                    let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: responseObject as! Data)
-                    for codingDatum in codingDatas {
-                        self.notifications.add(codingDatum.openHABNotification)
+                if let response = responseObject as? Data {
+                    do {
+                        let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: response)
+                        for codingDatum in codingDatas {
+                            self.notifications.add(codingDatum.openHABNotification)
+                        }
+                    } catch {
+                        print("should not throw \(error)")
                     }
-                } catch {
-                    print("should not throw \(error)")
                 }
 
                 self.refreshControl?.endRefreshing()

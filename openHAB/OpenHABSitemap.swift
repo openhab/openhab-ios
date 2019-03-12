@@ -13,9 +13,8 @@
 
 import Foundation
 
-// The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false  (not null).
+// The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
 // Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
-
 struct ValueOrFalse<T: Decodable>: Decodable {
     let value: T?
 
@@ -30,7 +29,7 @@ struct ValueOrFalse<T: Decodable>: Decodable {
     }
 }
 
-extension OpenHABSitemap: Decodable {
+extension OpenHABSitemap {
 
     struct CodingData: Decodable {
         let name: String
@@ -41,14 +40,14 @@ extension OpenHABSitemap: Decodable {
 
     struct HomePage: Decodable {
         let link: String
-        let leaf: ValueOrFalse<String>
+        let leaf: Bool
         let timeout: ValueOrFalse<String>
     }
 }
 
 extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.homepage.leaf.value ?? "", homepageLink: self.homepage.link)
+        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.homepage.leaf, homepageLink: self.homepage.link)
     }
 }
 
@@ -62,11 +61,11 @@ extension OpenHABSitemap.CodingData {
 
     let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
 
-    init(name: String, link: String, label: String, leaf: String, homepageLink: String) {
+    init(name: String, link: String, label: String, leaf: Bool, homepageLink: String) {
         self.name = name
         self.link = link
         self.label = label
-        self.leaf = leaf
+        self.leaf = leaf ? "true" : "false"
         self.homepageLink = homepageLink
     }
 
