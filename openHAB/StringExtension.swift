@@ -10,13 +10,13 @@ import Foundation
 
 extension String {
 
-    var floatValue: Float {
+    var DoubleValue: Double {
         let formatter = NumberFormatter()
         formatter.decimalSeparator = "."
         if let asNumber = formatter.number(from: self) {
-            return asNumber.floatValue
+            return asNumber.doubleValue
         } else {
-            return Float.nan
+            return Double.nan
         }
     }
 

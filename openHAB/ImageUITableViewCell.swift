@@ -37,11 +37,11 @@ class ImageUITableViewCell: GenericUITableViewCell {
             widgetImage?.image = widget?.image
         }
         // If widget have a refresh rate configured, schedule an image update timer
-        if widget.refresh != "" && refreshTimer == nil {
-            let refreshInterval = TimeInterval(widget.refresh.floatValue / 1000)
-            refreshTimer = Timer.scheduledTimer(timeInterval: refreshInterval, target: self,
-                                                selector: #selector(ImageUITableViewCell.refreshImage(_:)), userInfo: nil, repeats: true)
-        }
+//        if let refresh = widget.refresh, let refreshTimer = refreshTimer {
+//            let refreshInterval = TimeInterval(refresh / 1000)
+//            self.refreshTimer = Timer.scheduledTimer(timeInterval: refreshInterval, target: self,
+//                                                selector: #selector(ImageUITableViewCell.refreshImage(_:)), userInfo: nil, repeats: true)
+//        }
     }
 
     func imageURL() -> URL {

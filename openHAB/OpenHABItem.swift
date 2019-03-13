@@ -70,8 +70,8 @@ extension OpenHABItem.CodingData {
         }
     }
 
-    func stateAsFloat() -> Float {
-        return state.numberValue?.floatValue ?? 0
+    func stateAsDouble() -> Double {
+        return state.numberValue?.doubleValue ?? 0
     }
 
     func stateAsInt() -> Int {

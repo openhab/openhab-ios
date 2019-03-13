@@ -12,7 +12,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var widgetSegmentControl: UISegmentedControl!
 
     private var isIntStep: Bool {
-        return widget.step.floatValue.truncatingRemainder(dividingBy: 1) == 0
+        return widget.step.truncatingRemainder(dividingBy: 1) == 0
     }
 
     private var stateFormat: String {
@@ -34,7 +34,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
             widgetValue = "N/A"
         } else {
             if !isIntStep {
-                widgetValue = String(format: stateFormat, (widget.item?.stateAsFloat())!)
+                widgetValue = String(format: stateFormat, (widget.item?.stateAsDouble())!)
             } else {
                 widgetValue = String(format: stateFormat, (widget.item?.stateAsInt())!)
             }
@@ -50,16 +50,12 @@ class SetpointUITableViewCell: GenericUITableViewCell {
                 widget.sendCommand(widget.minValue)
             } else {
                 if !isIntStep {
-                    var newValue = item.stateAsFloat() - widget.step.floatValue
-                    if widget.minValue != "" {
-                        newValue = max(newValue, widget.minValue.floatValue)
-                    }
+                    var newValue = item.stateAsDouble() - widget.step
+                    newValue = max(newValue, widget.minValue)
                     widget.sendCommand(String(format: stateFormat, newValue))
                 } else {
-                    var newValue = item.stateAsInt() - widget.step.intValue
-                    if widget.minValue != "" {
-                        newValue = max(newValue, widget.minValue.intValue)
-                    }
+                    var newValue = item.stateAsInt() - Int(widget.step)
+                    newValue = max(newValue, Int(widget.minValue))
                     widget.sendCommand(String(format: stateFormat, newValue))
                 }
             }
@@ -71,26 +67,14 @@ class SetpointUITableViewCell: GenericUITableViewCell {
             if item.state == "Uninitialized" {
                 widget.sendCommand(widget.minValue)
             } else {
-                if widget.maxValue != "" {
-                    if !isIntStep {
-                        var newValue = item.stateAsFloat() + widget.step.floatValue
-                        if widget.minValue != "" {
-                            newValue = min(newValue, widget.maxValue.floatValue)
-                        }
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    } else {
-                        var newValue = item.stateAsInt() + widget.step.intValue
-                        if widget.minValue != "" {
-                            newValue = min(newValue, widget.maxValue.intValue)
-                        }
-                        widget.sendCommand(String(format: stateFormat, newValue))
-                    }
+                if !isIntStep {
+                    var newValue = item.stateAsDouble() + widget.step
+                    newValue = min(newValue, widget.maxValue)
+                    widget.sendCommand(String(format: stateFormat, newValue))
                 } else {
-                    if !isIntStep {
-                        widget.sendCommand(String(format: stateFormat, item.stateAsFloat() + widget.step.floatValue))
-                    } else {
-                        widget.sendCommand(String(format: stateFormat, item.stateAsInt() + widget.step.intValue))
-                    }
+                    var newValue = item.stateAsInt() + Int(widget.step)
+                    newValue = min(newValue, Int(widget.maxValue))
+                    widget.sendCommand(String(format: stateFormat, newValue))
                 }
             }
         }
