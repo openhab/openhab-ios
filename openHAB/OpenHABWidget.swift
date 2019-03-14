@@ -27,7 +27,7 @@ extension OpenHABWidget {
         let minValue: Double?
         let maxValue: Double?
         let step: Double?
-        let refresh: Double?
+        let refresh: Int?
         let height: Double?
         let isLeaf: String?
         let iconColor: String?
@@ -50,18 +50,18 @@ extension OpenHABWidget.CodingData {
     }
 }
 
-@objcMembers class OpenHABWidget: NSObject, MKAnnotation {
+class OpenHABWidget: NSObject, MKAnnotation {
     weak var delegate: OpenHABWidgetDelegate?
     var widgetId = ""
-    var label = ""
-    var icon = ""
+    var label = "" // String?
+    var icon = ""// String?
     var type = ""
     var url = ""
     var period = ""
-    var minValue = ""
-    var maxValue = ""
-    var step = ""
-    var refresh = ""
+    var minValue = 0.0
+    var maxValue = 100.0
+    var step = 1.0
+    var refresh: Int?
     var height = ""
     var isLeaf = ""
     var iconColor = ""
@@ -80,7 +80,7 @@ extension OpenHABWidget.CodingData {
 
     // This is an ugly initializer
 
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: Double?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Double?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: Double?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let d = with else { return ""}
@@ -92,10 +92,10 @@ extension OpenHABWidget.CodingData {
         self.icon = icon
         self.url = url ?? ""
         self.period = toString(period)
-        self.minValue = toString(minValue)
-        self.maxValue = toString(maxValue)
-        self.step = toString(maxValue)
-        self.refresh = toString(refresh)
+        self.minValue = minValue ?? 0.0
+        self.maxValue = maxValue ?? 100.0
+        self.step = step ?? 1.0
+        self.refresh = refresh
         self.height = toString(height)
         self.isLeaf = isLeaf ?? ""
         self.iconColor = iconColor ?? ""
@@ -108,6 +108,10 @@ extension OpenHABWidget.CodingData {
         self.linkedPage = linkedPage
         self.mappings = mappings
         self.widgets = widgets
+
+        // Sanitize minValue, maxValue and step: min <= max, step >= 0
+        self.maxValue = max(self.minValue, self.maxValue)
+        self.step = abs(self.step)
     }
 
     init(xml xmlElement: GDataXMLElement?) {
@@ -178,6 +182,10 @@ extension OpenHABWidget.CodingData {
             return array[1].trimmingCharacters(in: characterSet)
         }
         return nil
+    }
+
+    func sendCommand(_ command: Double) {
+        sendCommand(String(command))
     }
 
     func sendCommand(_ command: String?) {

@@ -87,6 +87,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             versionPageOperation.start()
         }
     }
+
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let commandUrl = URL(string: item?.link ?? "") {
             var commandRequest = URLRequest(url: commandUrl)
