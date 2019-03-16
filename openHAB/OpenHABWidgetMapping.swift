@@ -15,6 +15,8 @@ import Foundation
     @objc var command = ""
     @objc var label = ""
 
+    let propertyNames: Set = ["command", "label"]
+
     @objc init(xml xmlElement: GDataXMLElement?) {
         super.init()
         for child in (xmlElement?.children())! {
@@ -24,17 +26,6 @@ import Foundation
                         setValue(child.stringValue, forKey: child.name() ?? "")
                     }
                 }
-            }
-        }
-    }
-
-    let propertyNames: Set = ["command", "label"]
-
-    @objc init(dictionary: [String: Any]) {
-        super.init()
-        for key in dictionary.keys {
-            if propertyNames.contains(key) {
-                    setValue(dictionary[key], forKey: key)
             }
         }
     }

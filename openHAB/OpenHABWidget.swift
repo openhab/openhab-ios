@@ -139,33 +139,33 @@ class OpenHABWidget: NSObject, MKAnnotation {
         }
     }
 
-    init(dictionary: [String: Any]) {
-        super.init()
-        mappings = [OpenHABWidgetMapping]()
-        for key in dictionary.keys {
-            if key == "item" {
-                item = OpenHABItem(dictionary: dictionary[key] as! [String: Any])
-            } else if key == "mappings" {
-                let widgetMappings = dictionary["mappings"] as? [[String: Any]?]
-                for mappingDictionary in widgetMappings ?? [] {
-                    let mapping = OpenHABWidgetMapping(dictionary: mappingDictionary!)
-                    mappings.append(mapping)
-                }
-            } else if key == "linkedPage" {
-                linkedPage = OpenHABLinkedPage(dictionary: dictionary[key] as! [String: Any])
-            } else {
-                if dictionary[key] is String {
-                    if propertyNames.contains(key) {
-                        setValue(dictionary[key], forKey: key)
-                    }
-                } else {
-                    if propertyNames.contains(key) {
-                        setValue((dictionary[key] as? NSNumber)?.stringValue ?? "", forKey: key )
-                    }
-                }
-            }
-        }
-    }
+//    init(dictionary: [String: Any]) {
+//        super.init()
+//        mappings = [OpenHABWidgetMapping]()
+//        for key in dictionary.keys {
+//            if key == "item" {
+//                item = OpenHABItem(dictionary: dictionary[key] as! [String: Any])
+//            } else if key == "mappings" {
+//                let widgetMappings = dictionary["mappings"] as? [[String: Any]?]
+//                for mappingDictionary in widgetMappings ?? [] {
+//                    let mapping = OpenHABWidgetMapping(dictionary: mappingDictionary!)
+//                    mappings.append(mapping)
+//                }
+//            } else if key == "linkedPage" {
+//                linkedPage = OpenHABLinkedPage(dictionary: dictionary[key] as! [String: Any])
+//            } else {
+//                if dictionary[key] is String {
+//                    if propertyNames.contains(key) {
+//                        setValue(dictionary[key], forKey: key)
+//                    }
+//                } else {
+//                    if propertyNames.contains(key) {
+//                        setValue((dictionary[key] as? NSNumber)?.stringValue ?? "", forKey: key )
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     // Text prior to "["
     func labelText() -> String? {

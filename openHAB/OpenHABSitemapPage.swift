@@ -58,6 +58,7 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
         self.link = link
         self.leaf = leaf ? "true" : "false"
         var ws = [OpenHABWidget]()
+        // This could be expressed recursively but this does the job on 2 levels 
         for w1 in widgets {
             ws.append(w1)
             for w2 in w1.widgets {
@@ -107,28 +108,28 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
         }
     }
 
-    init(dictionary: [String: Any]) {
-        super.init()
-        widgets = [OpenHABWidget]()
-        pageId = dictionary["id"] as? String ?? ""
-        title = dictionary["title"] as? String ?? ""
-        link = dictionary["link"] as? String ?? ""
-        leaf = dictionary["leaf"] as? String ?? ""
-        let widgetsArray = dictionary["widgets"] as? [[String: Any]?]
-        for widgetDictionary in widgetsArray ?? [] {
-            let newWidget = OpenHABWidget(dictionary: widgetDictionary!)
-            newWidget.delegate = self
-            widgets.append(newWidget)
-            if widgetDictionary?["widgets"] != nil {
-                let childWidgetsArray = widgetDictionary?["widgets"] as? [[String: Any]?]
-                for childWidgetDictionary in childWidgetsArray ?? [] {
-                    let newChildWidget = OpenHABWidget(dictionary: childWidgetDictionary!)
-                    newChildWidget.delegate = self
-                    widgets.append(newChildWidget)
-                }
-            }
-        }
-    }
+//    init(dictionary: [String: Any]) {
+//        super.init()
+//        widgets = [OpenHABWidget]()
+//        pageId = dictionary["id"] as? String ?? ""
+//        title = dictionary["title"] as? String ?? ""
+//        link = dictionary["link"] as? String ?? ""
+//        leaf = dictionary["leaf"] as? String ?? ""
+//        let widgetsArray = dictionary["widgets"] as? [[String: Any]?]
+//        for widgetDictionary in widgetsArray ?? [] {
+//            let newWidget = OpenHABWidget(dictionary: widgetDictionary!)
+//            newWidget.delegate = self
+//            widgets.append(newWidget)
+//            if widgetDictionary?["widgets"] != nil {
+//                let childWidgetsArray = widgetDictionary?["widgets"] as? [[String: Any]?]
+//                for childWidgetDictionary in childWidgetsArray ?? [] {
+//                    let newChildWidget = OpenHABWidget(dictionary: childWidgetDictionary!)
+//                    newChildWidget.delegate = self
+//                    widgets.append(newChildWidget)
+//                }
+//            }
+//        }
+//    }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let name = item?.name {
