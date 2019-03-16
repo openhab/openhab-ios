@@ -190,7 +190,13 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     }
 
     func isURLReachable(_ url: URL?) -> Bool {
+<<<<<<< HEAD
         var result: Bool = false
+=======
+        var response: URLResponse?
+        var data: Data?
+        var request: URLRequest?
+>>>>>>> debugColorPicker
         if let url = url {
             let request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
             let session = URLSession.shared

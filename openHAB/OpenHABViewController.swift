@@ -15,8 +15,22 @@ import AVFoundation
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
+<<<<<<< HEAD
+=======
+enum WidgetItem {
+    case chart //(Chart)
+    case colorPicker//(ColorPicker)
+    case frame //(Frame)
+    case switcher //(Switch)
+}
+
+var cells: [WidgetItem] = []
+
+>>>>>>> debugColorPicker
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
+
+private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
 
     var tracker: OpenHABTracker?
 
@@ -134,10 +148,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
 
+<<<<<<< HEAD
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
         widgetTableView.register(cellType: ImageUINewTableViewCell.self)
         widgetTableView.register(cellType: VideoUITableViewCell.self)
+=======
+        self.registerTableViewCells()
+        self.configureTableView()
+>>>>>>> debugColorPicker
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
@@ -152,11 +171,27 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
         navigationItem.setRightBarButton(rightDrawerButton, animated: true)
+    }
+
+    func configureTableView() {
+        widgetTableView.dataSource = self
+        widgetTableView.delegate = self
+    }
+
+    func registerTableViewCells() {
+        let imageTableViewCell = UINib(nibName: "NewImageTableViewCell", bundle: nil)
+        self.widgetTableView.register(imageTableViewCell, forCellReuseIdentifier: "NewImageTableViewCell")
+
+        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
+        widgetTableView.register(cellType: MapViewTableViewCell.self)
+        widgetTableView.register(NewImageUITableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier)
 
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
         loadPage(false)
+        widgetTableView.reloadData()
+        widgetTableView.layoutIfNeeded()
         //    [self.widgetTableView reloadData];
         //    [self.widgetTableView layoutIfNeeded];
     }
@@ -314,7 +349,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 44
+            return 44.0
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -322,7 +357,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         switch widget?.type {
         case "Frame":
             if widget?.label.count ?? 0 > 0 {
-                return 35
+                return 35.0
             } else {
                 return 0
             }
@@ -331,24 +366,29 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Image", "Chart":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
-            if let height = widget?.height {
+            if let height = widget?.height, height.intValue != 0 {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
                 print("Webview/Mapview height would be \(heightValue)")
                 return CGFloat(heightValue)
             } else {
                 // return default height for webview/mapview as 8 rows
-                return 44 * 8
+                return 44.0 * 8
             }
-        default: return 44
+        default: return 44.0
         }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
+<<<<<<< HEAD
         let cell: UITableViewCell
 
+=======
+>>>>>>> debugColorPicker
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
+
+        let cell: UITableViewCell
 
         switch widget?.type {
         case "Frame":
@@ -372,24 +412,31 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case "Chart":
-            cell = tableView.dequeueReusableCell(for: indexPath) as ChartUITableViewCell
-            print("Setting cell base url to \(openHABRootUrl)")
-            (cell as? ChartUITableViewCell)?.baseUrl = openHABRootUrl
+            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
         case "Image":
+<<<<<<< HEAD
             cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
+=======
+            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
+            //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
+>>>>>>> debugColorPicker
         case "Video":
             cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath)  as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
-            // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
             cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
+            // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
         default:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
         // No icon is needed for image, video, frame and web widgets
+<<<<<<< HEAD
         if (widget?.icon != nil) && !(cell is ChartUITableViewCell || (cell is ImageUINewTableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+=======
+        if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+>>>>>>> debugColorPicker
 
             var components = URLComponents(string: openHABRootUrl)
 
@@ -411,10 +458,52 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         }
 
-        if let cell = cell as? ImageUINewTableViewCell {
-            cell.mainImageView.sd_setImage(with: cell.createImageURL(with: widget?.url ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
-            cell.mainImageView.sizeToFit()
-            cell.setNeedsLayout()
+        if let cell = cell as? NewImageUITableViewCell {
+
+            func createImageURL(with urlString: String) -> URL {
+                let random = Int.random(in: 0..<1000)
+                var components = URLComponents(string: urlString)
+                components?.queryItems?.append(contentsOf: [
+                    URLQueryItem(name: "random", value: String(random))
+                    ])
+                return components?.url ?? URL(string: "")!
+            }
+
+            func createChartURL(with baseUrl: String) -> URL {
+                let random = Int.random(in: 0..<1000)
+                var components = URLComponents(string: baseUrl)
+                components?.path = "/api"
+                components?.queryItems = [
+                    URLQueryItem(name: "period", value: widget!.period),
+                    URLQueryItem(name: "random", value: String(random))
+                ]
+
+                if (widget?.item?.type == "GroupItem") || (widget?.item?.type == "Group") {
+                    components?.queryItems?.append(URLQueryItem(name: "groups", value: widget?.item?.name))
+                } else {
+                    components?.queryItems?.append(URLQueryItem(name: "items", value: widget?.item?.name))
+                }
+                if widget?.service != "" && (widget?.service.count)! > 0 {
+                    components?.queryItems?.append(URLQueryItem(name: "service", value: widget?.service))
+                }
+                return components?.url ?? URL(string: "")!
+            }
+
+            let createdURL: URL
+            switch widget?.type {
+            case "Chart":
+                print("Setting cell base url to \(openHABRootUrl)")
+                createdURL = createChartURL(with: openHABRootUrl)
+            case "Image":
+                createdURL = createImageURL(with: widget?.url ?? "")
+            default:
+                createdURL = URL(string: "")!
+            }
+
+            cell.mainImageView.sd_setImage(with: createdURL, placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
+                widget?.image = image
+                cell.layoutIfNeeded()
+            }
             cell.layoutIfNeeded()
         }
 
@@ -423,6 +512,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         } else {
             cell.backgroundColor = UIColor.white
         }
+<<<<<<< HEAD
 
         if let cell = cell as? VideoUITableViewCell {
             let url = URL(string: widget?.url ?? "")
@@ -444,6 +534,19 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 cell.separatorInset = UIEdgeInsets.zero
             } else if !(widget?.type == "Frame") {
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+=======
+        if let cell = cell as? GenericUITableViewCell {
+            cell.widget = widget
+            cell.displayWidget()
+            // Check if this is not the last row in the widgets list
+            if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
+                let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
+                if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
+                    cell.separatorInset = UIEdgeInsets.zero
+                } else if !(widget?.type == "Frame") {
+                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+                }
+>>>>>>> debugColorPicker
             }
         }
 
@@ -495,6 +598,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
+<<<<<<< HEAD
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let videoCell = cell as? VideoUITableViewCell else { return }
         videoCell.playerView.player?.pause()
@@ -507,6 +611,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
+=======
+>>>>>>> debugColorPicker
     func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async(execute: {
             let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)

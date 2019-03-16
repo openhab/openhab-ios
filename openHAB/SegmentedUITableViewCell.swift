@@ -15,16 +15,16 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
+        selectionStyle = .none
+        separatorInset = .zero
 
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
+        selectionStyle = .none
+        separatorInset = .zero
 
     }
 
