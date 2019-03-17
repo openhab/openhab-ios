@@ -16,7 +16,6 @@ class OpenHABNotificationsViewController: UITableViewController {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-    var ignoreSSLCertificate = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,15 +60,9 @@ class OpenHABNotificationsViewController: UITableViewController {
             notificationsRequest = NSMutableURLRequest(url: notificationsUrl)
         }
         notificationsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
-        var operation: AFHTTPRequestOperation?
+        var operation: OpenHABHTTPRequestOperation?
         if let notificationsRequest = notificationsRequest {
-            operation = AFHTTPRequestOperation(request: notificationsRequest as URLRequest)
-        }
-        let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-        operation?.securityPolicy = policy
-        if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
-            operation?.securityPolicy.allowInvalidCertificates = true
+            operation = OpenHABHTTPRequestOperation(request: notificationsRequest as URLRequest)
         }
         operation?.responseSerializer = AFJSONResponseSerializer()
         operation?.setCompletionBlockWithSuccess({ operation, responseObject in
@@ -161,7 +154,6 @@ class OpenHABNotificationsViewController: UITableViewController {
         let prefs = UserDefaults.standard
         openHABUsername = prefs.value(forKey: "username") as? String ?? ""
         openHABPassword = prefs.value(forKey: "password") as? String ?? ""
-        ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
         //    self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
         //    self.idleOff = [prefs boolForKey:@"idleOff"];
         appData()?.openHABUsername = openHABUsername

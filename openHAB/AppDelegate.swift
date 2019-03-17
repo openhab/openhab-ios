@@ -87,7 +87,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("Calling Application Bundle ID: \(sourceApplication ?? "")")
         print("URL scheme:\(url.scheme ?? "")")
         print("URL query: \(url.query ?? "")")
-
+        if url.isFileURL {
+            let clientCertificateManager = OpenHABHTTPRequestOperation.clientCertificateManager;
+            clientCertificateManager.delegate = appData!.rootViewController!
+            return clientCertificateManager.startImportClientCertificate(url: url)
+        }
         return true
     }
 

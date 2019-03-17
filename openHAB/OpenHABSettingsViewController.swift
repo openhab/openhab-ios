@@ -98,9 +98,9 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
                 ret = 5
             }
         case 1:
-            ret = 6
+            ret = 7
         default:
-            ret = 6
+            ret = 7
         }
         return ret
     }
