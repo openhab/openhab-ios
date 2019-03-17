@@ -16,13 +16,13 @@ import AVFoundation
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate {
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, ImageUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate {
 
     var tracker: OpenHABTracker?
 
     private var selectedWidgetRow: Int = 0
-    private var currentPageOperation: AFHTTPRequestOperation?
-    private var commandOperation: AFHTTPRequestOperation?
+    private var currentPageOperation: OpenHABHTTPRequestOperation?
+    private var commandOperation: OpenHABHTTPRequestOperation?
 
     @IBOutlet var widgetTableView: UITableView!
     var pageUrl = ""
@@ -30,7 +30,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var openHABUsername = ""
     var openHABPassword = ""
     var defaultSitemap = ""
-    var ignoreSSLCertificate = false
     var idleOff = false
     var sitemaps: [OpenHABSitemap] = []
     var currentPage: OpenHABSitemapPage?
@@ -58,18 +57,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
             pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
             pageRequest.timeoutInterval = 10.0
-            let versionPageOperation = AFHTTPRequestOperation(request: pageRequest)
+            let versionPageOperation = OpenHABHTTPRequestOperation(request: pageRequest, delegate: self)
 
-            let policy = AFRememberingSecurityPolicy(pinningMode: .none)
-            policy.delegate = self
-            currentPageOperation?.securityPolicy = policy
-            if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
-                currentPageOperation?.securityPolicy.validatesDomainName = false
-                currentPageOperation?.securityPolicy.allowInvalidCertificates = true
-                versionPageOperation.securityPolicy.allowInvalidCertificates = true
-                versionPageOperation.securityPolicy.validatesDomainName = false
-            }
             versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
                 print("This is an openHAB 2.X")
                 self.appData()?.openHABVersion = 2
@@ -100,15 +89,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 commandOperation?.cancel()
                 commandOperation = nil
             }
-            commandOperation = AFHTTPRequestOperation(request: commandRequest)
+            commandOperation = OpenHABHTTPRequestOperation(request: commandRequest, delegate: self)
 
-            let policy = AFRememberingSecurityPolicy(pinningMode: .none)
-            policy.delegate = self
-            commandOperation?.securityPolicy = policy
-            if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
-                commandOperation?.securityPolicy.allowInvalidCertificates = true
-            }
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
                 print("Command sent!")
             }, failure: { operation, error in
@@ -197,7 +179,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
                     print("Registration URL = \(registrationUrl.absoluteString)")
                     registrationRequest.setAuthCredentials(openHABUsername, openHABPassword)
-                    let registrationOperation = AFHTTPRequestOperation(request: registrationRequest)
+                    let registrationOperation = OpenHABHTTPRequestOperation(request: registrationRequest, delegate: self)
                     registrationOperation.setCompletionBlockWithSuccess({ operation, responseObject in
                         print("my.openHAB registration sent")
                     }, failure: { operation, error in
@@ -526,6 +508,56 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.present(alertView, animated: true) {}
         })
     }
+    
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
+        let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
+        
+        let okay = UIAlertAction(title: "Okay", style: .default) { (action:UIAlertAction) in
+            clientCertificateManager!.clientCertificateAccepted(password: nil)
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action:UIAlertAction) in
+            clientCertificateManager!.clientCertificateRejected();
+        }
+        
+        alertController.addAction(okay)
+        alertController.addAction(cancel)
+        self.present(alertController, animated: true, completion: nil)
+    }
+
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
+        let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
+
+        let okay = UIAlertAction(title: "Okay", style: .default) { (action:UIAlertAction) in
+            let txtField = alertController.textFields?.first
+            let password = txtField?.text
+
+            clientCertificateManager!.clientCertificateAccepted(password: password)
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action:UIAlertAction) in
+            clientCertificateManager!.clientCertificateRejected();
+        }
+    
+        alertController.addTextField { (textField) in
+            textField.placeholder = "Password"
+            textField.isSecureTextEntry = true
+        }
+        
+        alertController.addAction(okay)
+        alertController.addAction(cancel)
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
+        let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
+        
+        let okay = UIAlertAction(title: "Okay", style: .default)
+       
+        alertController.addAction(okay)
+        self.present(alertController, animated: true, completion: nil)
+    }
+
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         print("OpenHABViewController prepareForSegue \(segue.identifier ?? "")")
@@ -609,19 +641,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 currentPageOperation?.cancel()
                 currentPageOperation = nil
             }
-            currentPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
+            currentPageOperation = OpenHABHTTPRequestOperation(request: pageRequest as URLRequest, delegate: self)
 
             // If we are talking to openHAB 2+, we expect response to be JSON
             if appData()?.openHABVersion == 2 {
                 print("Setting serializer to JSON")
                 //currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
-            }
-            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-            policy.delegate = self
-            currentPageOperation?.securityPolicy = policy
-            if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
-                currentPageOperation?.securityPolicy.allowInvalidCertificates = true
             }
             // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
             let strongSelf: OpenHABViewController = self
@@ -719,15 +744,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
-            let operation = AFHTTPRequestOperation(request: sitemapsRequest)
-
-            let policy = AFRememberingSecurityPolicy(pinningMode: .none)
-            policy.delegate = self
-            operation.securityPolicy = policy
-            if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
-                operation.securityPolicy.allowInvalidCertificates = true
-            }
+            let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: self)
 
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
@@ -816,7 +833,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         let prefs = UserDefaults.standard
         openHABUsername = prefs.value(forKey: "username") as? String ?? ""
         openHABPassword = prefs.value(forKey: "password") as? String ?? ""
-        ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
         defaultSitemap = prefs.value(forKey: "defaultSitemap") as? String ?? ""
         idleOff = prefs.bool(forKey: "idleOff")
         appData()?.openHABUsername = openHABUsername

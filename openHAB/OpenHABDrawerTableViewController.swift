@@ -16,7 +16,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
     @objc var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-    var ignoreSSLCertificate = false
     var cellCount: Int = 0
     var drawerItems: [AnyHashable] = []
 
@@ -40,14 +39,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if let sitemapsUrl = components?.url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
-            let operation = AFHTTPRequestOperation(request: sitemapsRequest)
-            let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
-            operation.securityPolicy = policy
-            if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
-                operation.securityPolicy.allowInvalidCertificates = true
-            }
-
+            let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: nil)
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -253,7 +245,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         let prefs = UserDefaults.standard
         openHABUsername = prefs.value(forKey: "username") as? String ?? ""
         openHABPassword = prefs.value(forKey: "password") as? String ?? ""
-        ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
     }
 
     // App wide data access
