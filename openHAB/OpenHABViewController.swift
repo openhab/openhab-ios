@@ -209,16 +209,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             if deviceId != "" && deviceToken != "" && deviceName != "" {
                 print("Registering notifications with \(prefsURL)")
 
-                var components = URLComponents(string: prefsURL)
-
-                components?.path = "/addAppleRegistration"
-                components?.queryItems = [
-                    URLQueryItem(name: "regId", value: deviceToken),
-                    URLQueryItem(name: "deviceId", value: deviceId),
-                    URLQueryItem(name: "deviceModel", value: deviceName)
-                ]
-
-                if let registrationUrl = components?.url {
+                if let registrationUrl = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
                     var registrationRequest = URLRequest(url: registrationUrl)
 
                     print("Registration URL = \(registrationUrl.absoluteString)")

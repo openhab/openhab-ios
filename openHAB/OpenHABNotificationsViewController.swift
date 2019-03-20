@@ -52,12 +52,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         let prefs = UserDefaults.standard
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-        var components = URLComponents(string: prefs.value(forKey: "remoteUrl") as! String)
-        components?.path = "/api/v1/notifications"
-        components?.queryItems = [
-            URLQueryItem(name: "limit", value: "20")
-        ]
-        if let notificationsUrl = components?.url {
+        if let notificationsUrl = Endpoint.notification(prefsURL: prefs.value(forKey: "remoteUrl") as! String).url {
             var notificationsRequest = URLRequest(url: notificationsUrl)
             notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             let operation = AFHTTPRequestOperation(request: notificationsRequest)
