@@ -8,11 +8,10 @@
 class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
     static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
 
-
-    init(request : URLRequest, delegate: AFRememberingSecurityPolicyDelegate?) {
-        super.init(request: request);
+    init(request: URLRequest, delegate: AFRememberingSecurityPolicyDelegate?) {
+        super.init(request: request)
         super.setWillSendRequestForAuthenticationChallenge { (connection: NSURLConnection, challenge: URLAuthenticationChallenge) in
-            
+
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 if self.securityPolicy.evaluateServerTrust(challenge.protectionSpace.serverTrust!, forDomain: challenge.protectionSpace.host) {
                     let credential = URLCredential.init(trust: challenge.protectionSpace.serverTrust!)
@@ -48,18 +47,18 @@ class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
         }
         self.securityPolicy = policy
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
         let dns = challenge.protectionSpace.distinguishedNames
         if dns != nil {
             let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns!)
             if identity != nil {
                 let credential = URLCredential.init(identity: identity!, certificates: nil, persistence: URLCredential.Persistence.forSession)
-                challenge.sender!.use(credential, for:challenge)
+                challenge.sender!.use(credential, for: challenge)
                 return
             }
         }
@@ -68,4 +67,3 @@ class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
         challenge.sender!.cancel(challenge)
     }
 }
-
