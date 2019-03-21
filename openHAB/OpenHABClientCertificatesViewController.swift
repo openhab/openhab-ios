@@ -16,7 +16,7 @@ class OpenHABClientCertificatesViewController: UITableViewController {
         print("OpenHABClientCertificatesViewController viewDidLoad")
 
         tableView.tableFooterView = UIView()
-        tableView.allowsMultipleSelectionDuringEditing = false;
+        tableView.allowsMultipleSelectionDuringEditing = false
     }
 
     override func viewWillAppear(_ animated: Bool) {

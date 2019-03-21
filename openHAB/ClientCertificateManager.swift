@@ -15,10 +15,10 @@ protocol ClientCertificateManagerDelegate: NSObjectProtocol {
 }
 
 class ClientCertificateManager {
-    private var importingRawCert : Data? = nil
-    private var importingClientKey : SecKey? = nil
-    private var importingClientCert : SecCertificate? = nil
-    private var importingPassword : String? = nil
+    private var importingRawCert: Data?
+    private var importingClientKey: SecKey?
+    private var importingClientCert: SecCertificate?
+    private var importingPassword: String?
 
     weak var delegate: ClientCertificateManagerDelegate?
 
@@ -34,7 +34,7 @@ class ClientCertificateManager {
             kSecReturnRef as String: true,
             kSecMatchLimit as String: kSecMatchLimitAll
         ]
-        var items: CFTypeRef?;
+        var items: CFTypeRef?
         let status = SecItemCopyMatching(getIdentityQuery as CFDictionary, &items)
         if status == errSecSuccess {
             clientIdentities = items as! [SecIdentity]
@@ -85,9 +85,7 @@ class ClientCertificateManager {
             if status == noErr {
                 // Refresh identities from the keychain
                 loadFromKeychain()
-            }
-            else
-            {
+            } else {
                 // Private key add failed so clean up the previously added cert
                 let deleteCertQuery : [ String: Any ] = [ kSecClass as String: kSecClassCertificate,
                                                        kSecValueRef as String: cert ]
@@ -95,7 +93,7 @@ class ClientCertificateManager {
                 print("SecItemDelete(cert) result=", status)
             }
         }
-        
+
         return status
     }
 
@@ -106,7 +104,7 @@ class ClientCertificateManager {
         SecIdentityCopyCertificate(identity, &cert)
         var key: SecKey?
         SecIdentityCopyPrivateKey(identity, &key)
-        
+
         let deleteCertQuery : [ String: Any ] = [ kSecClass as String: kSecClassCertificate,
                                                kSecValueRef as String: cert! ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
@@ -125,11 +123,11 @@ class ClientCertificateManager {
         do {
             // Import PKCS12 client cert
             importingRawCert = try Data(contentsOf: url)
-            
+
             if delegate != nil {
                 delegate!.askForClientCertificateImport(self)
             } else {
-                return false;
+                return false
             }
         } catch {
             print("Unable to read certificate from URL")
@@ -162,7 +160,7 @@ class ClientCertificateManager {
         importingRawCert = nil
         importingPassword = nil
     }
-    
+
     func addClientCertificateToKeychain() {
         let status = addToKeychain(key: importingClientKey!, cert: importingClientCert!)
         if status != noErr {
@@ -178,11 +176,11 @@ class ClientCertificateManager {
 
     private func decodePKCS12() -> OSStatus {
         // Import PKCS12 client cert
-        var importResult: CFArray? = nil
+        var importResult: CFArray?
         let status = SecPKCS12Import(importingRawCert! as CFData, [kSecImportExportPassphrase as String: importingPassword ?? "" ] as NSDictionary, &importResult)
         if status == noErr {
             // Extract the certifcate and private key
-            let identityDictionaries = importResult as! [[String:Any]]
+            let identityDictionaries = importResult as! [[String: Any]]
             let identity = identityDictionaries[0][kSecImportItemIdentity as String] as! SecIdentity
             SecIdentityCopyPrivateKey(identity, &importingClientKey)
             SecIdentityCopyCertificate(identity, &importingClientCert)
@@ -191,6 +189,5 @@ class ClientCertificateManager {
         }
         return status
     }
-    
-}
 
+}
