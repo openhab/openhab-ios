@@ -42,8 +42,6 @@
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
-		DAF4F6B92225E0A200C24876 /* NewImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6B72225E0A100C24876 /* NewImageTableViewCell.swift */; };
-		DAF4F6BA2225E0A200C24876 /* NewImageTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAF4F6B82225E0A200C24876 /* NewImageTableViewCell.xib */; };
 		DAF4F6BE2225E7A800C24876 /* features.png in Resources */ = {isa = PBXBuildFile; fileRef = DAF4F6BD2225E7A500C24876 /* features.png */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
@@ -140,8 +138,6 @@
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
-		DAF4F6B72225E0A100C24876 /* NewImageTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewImageTableViewCell.swift; sourceTree = "<group>"; };
-		DAF4F6B82225E0A200C24876 /* NewImageTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NewImageTableViewCell.xib; sourceTree = "<group>"; };
 		DAF4F6BD2225E7A500C24876 /* features.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = features.png; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
@@ -234,15 +230,6 @@
 				57BCEAB0B457501810D10C66 /* Pods-openHABTestsSwift.release.xcconfig */,
 			);
 			name = Pods;
-			sourceTree = "<group>";
-		};
-		DA224B182229DD2700584BE6 /* NewImageTableViewCell */ = {
-			isa = PBXGroup;
-			children = (
-				DAF4F6B72225E0A100C24876 /* NewImageTableViewCell.swift */,
-				DAF4F6B82225E0A200C24876 /* NewImageTableViewCell.xib */,
-			);
-			name = NewImageTableViewCell;
 			sourceTree = "<group>";
 		};
 		DA2DC23021F2736C00830730 /* openHABTestsSwift */ = {
@@ -341,7 +328,6 @@
 				DAEAA89C21E6B06300267EA3 /* ReusableView.swift */,
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 				DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */,
-				DA224B182229DD2700584BE6 /* NewImageTableViewCell */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -575,7 +561,6 @@
 				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
 				653C09D71EAE4C0000BA4C4A /* icon-29x29.png in Resources */,
-				DAF4F6BA2225E0A200C24876 /* NewImageTableViewCell.xib in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
 				653C09D81EAE4C0000BA4C4A /* icon-76x76.png in Resources */,
 				A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */,
@@ -749,7 +734,6 @@
 				DA7E1E4A22302287002AEFD8 /* OpenHABSitemapPage.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.swift in Sources */,
-				DAF4F6B92225E0A200C24876 /* NewImageTableViewCell.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */,

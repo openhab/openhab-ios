@@ -169,8 +169,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func registerTableViewCells() {
-//        let imageTableViewCell = UINib(nibName: "NewImageTableViewCell", bundle: nil)
-//        self.widgetTableView.register(imageTableViewCell, forCellReuseIdentifier: "NewImageTableViewCell")
 
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
