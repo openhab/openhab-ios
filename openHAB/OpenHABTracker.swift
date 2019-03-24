@@ -191,6 +191,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
 
     func isURLReachable(_ url: URL?) -> Bool {
         var result: Bool = false
+
         if let url = url {
             let request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
             let session = URLSession.shared

@@ -79,7 +79,5 @@ extension OpenHABNotification.CodingData {
             }
         }
     }
-    init (message: String) {
-        self.message = message
-    }
+
 }

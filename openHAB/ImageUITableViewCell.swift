@@ -10,7 +10,7 @@
 
 import SDWebImage
 
-@objc protocol ImageUITableViewCellDelegate: NSObjectProtocol {
+protocol ImageUITableViewCellDelegate: NSObjectProtocol {
     func didLoadImageOf(_ cell: ImageUITableViewCell?)
 }
 
@@ -18,7 +18,7 @@ var refreshTimer: Timer?
 
 class ImageUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var widgetImage: UIImageView!
-    @objc weak var delegate: ImageUITableViewCellDelegate?
+    weak var delegate: ImageUITableViewCellDelegate?
 
     @objc override var widget: OpenHABWidget! {
         get {
