@@ -54,7 +54,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     weak var delegate: OpenHABWidgetDelegate?
     var widgetId = ""
     var label = ""
-    var icon = ""IM
+    var icon = ""
     var type = ""
     var url = ""
     var period = ""
