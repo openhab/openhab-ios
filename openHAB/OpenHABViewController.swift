@@ -15,15 +15,6 @@ import AVFoundation
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
-//enum WidgetItem {
-//    case chart //(Chart)
-//    case colorPicker//(ColorPicker)
-//    case frame //(Frame)
-//    case switcher //(Switch)
-//}
-//
-//var cells: [WidgetItem] = []
-
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
@@ -389,16 +380,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Chart":
             cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
         case "Image":
-  //          cell=tableView.dequeueReusableCell(withIdentifier: "ImageUINewTableViewCell", for: indexPath)  as! ImageUINewTableViewCell
             cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
-            //cell = tableView.dequeueReusableCell(for: indexPath) as ImageUITableViewCell
         case "Video":
             cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath)  as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
             cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
-            // cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
         default:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
@@ -501,17 +489,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 cell.separatorInset = UIEdgeInsets.zero
             } else if !(widget?.type == "Frame") {
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
-//        if let cell = cell as? GenericUITableViewCell {
-//            cell.widget = widget
-//            cell.displayWidget()
-//            // Check if this is not the last row in the widgets list
-//            if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
-//                let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
-//                if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
-//                    cell.separatorInset = UIEdgeInsets.zero
-//                } else if !(widget?.type == "Frame") {
-//                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
-//                }
             }
         }
 

@@ -55,19 +55,9 @@ class ImageUITableViewCell: GenericUITableViewCell {
 
     func loadImage() {
         widgetImage?.sd_setImage(with: imageURL(), placeholderImage: nil) { (image, error, cacheType, imageURL) in
-<<<<<<< HEAD
                     // Perform operation.
                     self.widget.image = image
                 }
-=======
-            // Perform operation.
-            self.widget.image = image
-            self.widgetImage.frame = self.contentView.frame
-            if self.delegate != nil {
-                self.delegate?.didLoadImageOf(self)
-            }
-        }
->>>>>>> debugColorPicker
     }
 
     @objc func refreshImage(_ timer: Timer?) {

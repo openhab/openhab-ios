@@ -89,47 +89,10 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
                 newWidget.delegate = self
                 widgets.append(newWidget)
 
-                // If widget have child widgets, cycle through them too
-//                if Int(child.elements(forName: "widget") ?? 0) > 0 {
-//                    for childChild: GDataXMLElement? in child.elements(forName: "widget") ?? [] {
-//                        if child?.name() == "widget" {
-//                            let newChildWidget = OpenHABWidget(xml: childChild) as? OpenHABWidget
-//                            if newChildWidget != nil {
-//                                newChildWidget?.delegate = self
-//                                if let newChildWidget = newChildWidget {
-//                                    widgets.append(newChildWidget)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
             }
             }
         }
     }
-
-//    init(dictionary: [String: Any]) {
-//        super.init()
-//        widgets = [OpenHABWidget]()
-//        pageId = dictionary["id"] as? String ?? ""
-//        title = dictionary["title"] as? String ?? ""
-//        link = dictionary["link"] as? String ?? ""
-//        leaf = dictionary["leaf"] as? String ?? ""
-//        let widgetsArray = dictionary["widgets"] as? [[String: Any]?]
-//        for widgetDictionary in widgetsArray ?? [] {
-//            let newWidget = OpenHABWidget(dictionary: widgetDictionary!)
-//            newWidget.delegate = self
-//            widgets.append(newWidget)
-//            if widgetDictionary?["widgets"] != nil {
-//                let childWidgetsArray = widgetDictionary?["widgets"] as? [[String: Any]?]
-//                for childWidgetDictionary in childWidgetsArray ?? [] {
-//                    let newChildWidget = OpenHABWidget(dictionary: childWidgetDictionary!)
-//                    newChildWidget.delegate = self
-//                    widgets.append(newChildWidget)
-//                }
-//            }
-//        }
-//    }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let name = item?.name {
