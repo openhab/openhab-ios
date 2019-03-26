@@ -11,7 +11,7 @@ import Foundation
 struct Endpoint {
     let baseURL: String
     let path: String
-    let queryItems: [URLQueryItem]
+    var queryItems: [URLQueryItem]
 }
 
 extension Endpoint {
@@ -38,6 +38,86 @@ extension Endpoint {
                 URLQueryItem(name: "limit", value: "20")
             ]
         )
+    }
+
+    static func tracker (openHABRootUrl: String) -> Endpoint {
+        return Endpoint (
+            baseURL: openHABRootUrl,
+            path: "/rest/bindings",
+            queryItems: []
+        )
+    }
+
+    static func sitemaps (openHABRootUrl: String) -> Endpoint {
+        return Endpoint (
+            baseURL: openHABRootUrl,
+            path: "/rest/sitemaps",
+            queryItems: [
+                URLQueryItem(name: "limit", value: "20")
+            ]
+        )
+    }
+
+    static func chart (rootUrl: String, period: String?, type: String?, service: String?, name: String?) -> Endpoint {
+
+        let random = Int.random(in: 0..<1000)
+        var endpoint = Endpoint (
+            baseURL: rootUrl,
+            path: "/api",
+            queryItems: [
+                URLQueryItem(name: "period", value: period),
+                URLQueryItem(name: "random", value: String(random))
+            ]
+        )
+        if (type == "GroupItem") || (type == "Group") {
+            endpoint.queryItems.append(URLQueryItem(name: "groups", value: name))
+        } else {
+            endpoint.queryItems.append(URLQueryItem(name: "items", value: name))
+        }
+        if service != "" && (service!.count) > 0 {
+            endpoint.queryItems.append(URLQueryItem(name: "service", value: service))
+        }
+        return endpoint
+    }
+
+    static func icon (rootUrl: String, version: Int, icon: String?, value: String) -> Endpoint {
+        if version == 2 {
+            if let icon = icon {
+                return Endpoint(
+                    baseURL: rootUrl,
+                    path: "/icon/\(icon)",
+                    queryItems: [
+                        URLQueryItem(name: "state", value: value )
+                    ]
+                )
+            }
+        } else {
+            if let icon = icon {
+                return Endpoint(
+                    baseURL: rootUrl,
+                    path: "/images/\(icon).png",
+                    queryItems: []
+                )
+            }
+        }
+        return Endpoint(baseURL: "", path: "", queryItems: [])
+    }
+
+    static func iconForDrawer (rootUrl: String, version: Int, icon: String) -> Endpoint {
+
+        if version == 2 {
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/icon/\(icon).png",
+                queryItems: []
+            )
+        } else {
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/images/\(icon).png",
+                queryItems: []
+            )
+        }
     }
 
     var url: URL? {
