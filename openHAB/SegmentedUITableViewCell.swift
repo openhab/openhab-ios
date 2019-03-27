@@ -35,7 +35,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
 
         for mapping in widget?.mappings ?? [] {
-                widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.index(of: mapping)!, animated: false)
+                widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
         }
 
         widgetSegmentControl?.selectedSegmentIndex = Int(widget.mappingIndex(byCommand: widget.item?.state))

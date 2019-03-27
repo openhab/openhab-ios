@@ -92,25 +92,4 @@ extension OpenHABSitemap.CodingData {
             }
         }
     }
-
-    init(dictionary: [String: Any]) {
-        super.init()
-        let keyArray = dictionary.keys
-        for key in keyArray {
-            if key == "homepage" {
-                let homepageDictionary = dictionary[key] as? [String: Any]
-                let homepageKeyArray = homepageDictionary!.keys
-                for homepageKey in homepageKeyArray {
-                    if homepageKey == "link" {
-                        homepageLink = homepageDictionary?[homepageKey] as? String ?? ""
-                    }
-                    if homepageKey == "leaf" {
-                        leaf = homepageDictionary?[homepageKey] as? String ?? ""
-                    }
-                }
-            } else if propertyNames.contains(key) {
-                setValue(dictionary[key], forKey: key)
-            }
-        }
-    }
 }
