@@ -21,6 +21,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     @IBOutlet weak var localUrlTextField: UITextField!
     @IBOutlet weak var idleOffSwitch: UISwitch!
     @IBOutlet weak var ignoreSSLSwitch: UISwitch!
+    @IBOutlet weak var iconSegmentedControl: UISegmentedControl!
 
     var settingsLocalUrl = ""
     var settingsRemoteUrl = ""
@@ -29,6 +30,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     var settingsIgnoreSSL = false
     var settingsDemomode = false
     var settingsIdleOff = false
+    var settingsIconType = 0
 
     override init(style: UITableView.Style) {
         super.init(style: style)
@@ -98,9 +100,9 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
                 ret = 5
             }
         case 1:
-            ret = 6
+            ret = 7
         default:
-            ret = 6
+            ret = 7
         }
         return ret
     }
@@ -146,6 +148,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         ignoreSSLSwitch?.isOn = settingsIgnoreSSL
         demomodeSwitch?.isOn = settingsDemomode
         idleOffSwitch?.isOn = settingsIdleOff
+        iconSegmentedControl?.selectedSegmentIndex = settingsIconType
         if settingsDemomode == true {
             disableConnectionSettings()
         } else {
@@ -162,6 +165,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         settingsIgnoreSSL = prefs.bool(forKey: "ignoreSSL")
         settingsDemomode = prefs.bool(forKey: "demomode")
         settingsIdleOff = prefs.bool(forKey: "ildeOff")
+        settingsIconType = prefs.integer(forKey: "iconType")
     }
 
     func updateSettings() {
@@ -172,6 +176,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         settingsIgnoreSSL = ignoreSSLSwitch?.isOn ?? false
         settingsDemomode = demomodeSwitch?.isOn ?? false
         settingsIdleOff = idleOffSwitch?.isOn ?? false
+        settingsIconType = iconSegmentedControl.selectedSegmentIndex
     }
 
     func saveSettings() {
@@ -183,6 +188,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         prefs.set(settingsIgnoreSSL, forKey: "ignoreSSL")
         prefs.set(settingsDemomode, forKey: "demomode")
         prefs.set(settingsIdleOff, forKey: "idleOff")
+        prefs.set(settingsIconType, forKey: "iconType")
     }
 
     func appData() -> OpenHABDataObject? {

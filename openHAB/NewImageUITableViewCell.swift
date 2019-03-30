@@ -25,10 +25,14 @@ class NewImageUITableViewCell: UITableViewCell {
         mainImageView.contentMode = .scaleAspectFit
 
         NSLayoutConstraint.activate([
-            mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
-            mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
-            mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
-            mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
+            mainImageView.leftAnchor.constraint(equalTo: mainImageView.leftAnchor),
+            mainImageView.rightAnchor.constraint(equalTo: mainImageView.rightAnchor),
+            mainImageView.topAnchor.constraint(equalTo: mainImageView.topAnchor),
+            mainImageView.bottomAnchor.constraint(equalTo: mainImageView.bottomAnchor)
+//            mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
+//            mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
+//            mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
+//            mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
             ])
     }
 

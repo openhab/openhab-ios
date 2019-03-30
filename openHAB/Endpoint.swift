@@ -80,14 +80,16 @@ extension Endpoint {
         return endpoint
     }
 
-    static func icon (rootUrl: String, version: Int, icon: String?, value: String) -> Endpoint {
+    static func icon (rootUrl: String, version: Int, icon: String?, value: String, iconType: Int) -> Endpoint {
+        // determineOH2IconPath
         if version == 2 {
             if let icon = icon {
                 return Endpoint(
                     baseURL: rootUrl,
                     path: "/icon/\(icon)",
                     queryItems: [
-                        URLQueryItem(name: "state", value: value )
+                        URLQueryItem(name: "state", value: value ),
+                        URLQueryItem(name: "format", value: (iconType == 0) ? "PNG": "SVG")
                     ]
                 )
             }
@@ -124,6 +126,7 @@ extension Endpoint {
         var components = URLComponents(string: baseURL)
         components?.path = path
         components?.queryItems = queryItems
+        print("\(components?.url)")
         return components?.url
     }
 

@@ -13,6 +13,7 @@ target 'openHAB' do
 	pod 'Fabric', '~> 1.7.2'
 	pod 'Crashlytics', '~> 3.9.3'
     pod 'Alamofire'
+    pod 'SwiftSVG', '~> 2.0'
 end
 
 target 'openHABTestsSwift' do

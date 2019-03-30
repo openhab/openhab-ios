@@ -120,23 +120,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 completionHandler(.failed)
                 return
             }
-            print("\(aps)")
-
-            let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
 
             let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
             if let soundPath = soundPath {
-                print("Sound path \(soundPath)")
-            }
-            if let soundPath = soundPath {
+                do {
+                    print("Sound path \(soundPath)")
+                    player = try AVAudioPlayer(contentsOf: soundPath)
+                    player?.numberOfLoops = 0
+                    player?.play()
+                } catch let error {
+                    print(error.localizedDescription)
+                }
                 player = try? AVAudioPlayer(contentsOf: soundPath)
             }
-            if player != nil {
-                player?.numberOfLoops = 0
-                player?.play()
-            } else {
-                print("AVPlayer error")
-            }
+
+            print("\(aps)")
+            let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
             TSMessage.showNotification(in: ((window?.rootViewController as? MMDrawerController)?.centerViewController as? UINavigationController)?.visibleViewController, title: "Notification", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
 
         }
@@ -187,5 +186,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if prefs.object(forKey: "idleOff") == nil {
             prefs.set(false, forKey: "idleOff")
         }
+        if prefs.object(forKey: "iconType") == nil {
+            prefs.set(false, forKey: "iconType")
+        }
+
     }
 }

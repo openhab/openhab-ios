@@ -45,6 +45,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var deviceName = ""
     var atmosphereTrackingId = ""
     var refreshControl: UIRefreshControl?
+    var iconType: Int = 0
 
     func openHABTracked(_ openHABUrl: String?) {
         print("OpenHABViewController openHAB URL = \(openHABUrl ?? "")")
@@ -394,7 +395,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
                                     version: appData()?.openHABVersion ?? 2,
                                     icon: widget?.icon,
-                                    value: widget?.item?.state ?? "").url
+                                    value: widget?.item?.state ?? "",
+                                    iconType: iconType).url
+            cell.imageView? = UIView(SVGNamed: urlc)
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
         }
 
@@ -809,11 +812,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // load app settings
     func loadSettings() {
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
         ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
-        defaultSitemap = prefs.value(forKey: "defaultSitemap") as? String ?? ""
+        defaultSitemap = prefs.string(forKey: "defaultSitemap") ?? ""
         idleOff = prefs.bool(forKey: "idleOff")
+        iconType = prefs.integer(forKey: "iconType")
         appData()?.openHABUsername = openHABUsername
         appData()?.openHABPassword = openHABPassword
     }

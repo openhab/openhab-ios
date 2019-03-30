@@ -10,6 +10,7 @@
 
 import SDWebImage
 import UIKit
+import os.log
 
 class OpenHABNotificationsViewController: UITableViewController {
     var notifications: NSMutableArray = []
@@ -59,7 +60,7 @@ class OpenHABNotificationsViewController: UITableViewController {
             let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
             operation.securityPolicy = policy
             if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
+                os_log("Warning - ignoring invalid certificates", log: .default, type: .info)
                 operation.securityPolicy.allowInvalidCertificates = true
             }
 
@@ -83,6 +84,8 @@ class OpenHABNotificationsViewController: UITableViewController {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+
                 print("Error:------>\(error.localizedDescription)")
                 print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
                 self.refreshControl?.endRefreshing()
@@ -119,20 +122,10 @@ class OpenHABNotificationsViewController: UITableViewController {
         let createdInLocalTimezone = notification?.created?.addingTimeInterval(timeZoneSeconds)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
+        
         cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
-
-        var iconUrlString: String?
-        if appData()?.openHABVersion == 2 {
-            if let app = appData()?.openHABRootUrl, let icon = notification?.icon {
-                iconUrlString = "\(app)/icon/\(icon).png"
-            }
-        } else {
-            if let app = appData()?.openHABRootUrl, let icon = notification?.icon {
-                iconUrlString = "\(app)/images/\(icon).png"
-            }
-        }
-        print("\(iconUrlString ?? "")")
-        cell?.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
+        let iconUrl = Endpoint.icon(rootUrl: appData()!.openHABRootUrl, version: appData()!.openHABVersion, icon: notification?.icon, value: "", iconType: 0).url
+        cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
         }
