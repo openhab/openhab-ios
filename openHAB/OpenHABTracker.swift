@@ -71,7 +71,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
             var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
             let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
-            try? delegate?.openHABTrackingError(trackingError)
+            _  = try? delegate?.openHABTrackingError(trackingError)
             reach = Reachability()
             oldReachabilityStatus = reach?.connection
             NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: NSNotification.Name.reachabilityChanged, object: reach)

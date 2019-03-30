@@ -11,7 +11,6 @@
 import UIKit
 import CoreLocation
 import Foundation
-import UIKit
 
 extension OpenHABItem {
 
@@ -56,16 +55,6 @@ extension OpenHABItem.CodingData {
                         setValue(child.stringValue, forKey: child.name() ?? "")
                     }
                 }
-            }
-        }
-    }
-
-    init(dictionary: [String: Any]) {
-        super.init()
-
-        for key in dictionary.keys {
-            if propertyNames.contains(key) {
-                setValue(dictionary[key], forKey: key)
             }
         }
     }

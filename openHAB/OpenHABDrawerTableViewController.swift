@@ -33,11 +33,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         print("OpenHABDrawerTableViewController viewWillAppear")
 
-        var components = URLComponents(string: openHABRootUrl)
-        components?.path = "/rest/sitemaps"
-        print ("Sitemap URL = \(components?.url?.absoluteString ?? "")")
-
-        if let sitemapsUrl = components?.url {
+        if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             let operation = AFHTTPRequestOperation(request: sitemapsRequest)
@@ -168,18 +164,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
                 cell?.customTextLabel?.text = sitemaps[indexPath.row - 1].label
-
-                var components = URLComponents(string: openHABRootUrl)
-
-                if appData()?.openHABVersion == 2 {
-                    let object = sitemaps[indexPath.row - 1].icon
-                    components?.path = "/icon/\(object).png"
-                } else {
-                    let object = sitemaps[indexPath.row - 1].icon
-                    components?.path = "/images/\(object).png"
-                }
-                print("\(components?.url?.absoluteString ?? "")")
-                cell?.customImageView?.sd_setImage(with: components?.url ?? URL(string: ""), placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData()?.openHABVersion ?? 2, icon: sitemaps[indexPath.row - 1].icon ).url
+                cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
             } else {
                 // Then menu items
                 cell?.customTextLabel?.text = (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.label

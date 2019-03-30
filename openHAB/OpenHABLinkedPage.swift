@@ -41,18 +41,4 @@ import Foundation
             }
         }
     }
-
-    @objc init(dictionary: [String: Any]) {
-        super.init()
-        for key in dictionary.keys {
-            if key == "id" {
-                pageId = dictionary[key] as? String ?? ""
-            } else {
-
-                if propertyNames.contains(key) {
-                    setValue(dictionary[key], forKey: key)
-                }
-            }
-        }
-    }
 }

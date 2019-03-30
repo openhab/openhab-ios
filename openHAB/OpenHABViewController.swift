@@ -45,6 +45,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var deviceName = ""
     var atmosphereTrackingId = ""
     var refreshControl: UIRefreshControl?
+    var iconType: Int = 0
 
     func openHABTracked(_ openHABUrl: String?) {
         print("OpenHABViewController openHAB URL = \(openHABUrl ?? "")")
@@ -52,10 +53,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         openHABRootUrl = openHABUrl ?? ""
         appData()?.openHABRootUrl = openHABRootUrl
 
-        // Checking openHAB version
-        var components = URLComponents(string: openHABRootUrl)
-        components?.path = "/rest/bindings"
-        if let pageToLoadUrl = components?.url {
+        if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             var pageRequest = URLRequest(url: pageToLoadUrl)
 
             pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
@@ -394,64 +392,24 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // No icon is needed for image, video, frame and web widgets
         if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
-            var components = URLComponents(string: openHABRootUrl)
-
-            if appData()?.openHABVersion == 2 {
-                if let icon = widget?.icon {
-                    components?.path = "/icon/\(icon)"
-                    components?.queryItems = [
-                        URLQueryItem(name: "state", value: widget?.item?.state )
-                    ]
-                }
-            } else {
-                if let icon = widget?.icon {
-                    components?.path = "/images/\(icon).png"
-                }
-            }
-
-            let urlc = components?.url ?? URL(string: "")
+            let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
+                                    version: appData()?.openHABVersion ?? 2,
+                                    icon: widget?.icon,
+                                    value: widget?.item?.state ?? "",
+                                    iconType: iconType).url
+            //cell.imageView? = UIView(SVGNamed: urlc)
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
-
         }
 
         if let cell = cell as? NewImageUITableViewCell {
 
-            func createImageURL(with urlString: String) -> URL {
-                let random = Int.random(in: 0..<1000)
-                var components = URLComponents(string: urlString)
-                components?.queryItems?.append(contentsOf: [
-                    URLQueryItem(name: "random", value: String(random))
-                    ])
-                return components?.url ?? URL(string: "")!
-            }
-
-            func createChartURL(with baseUrl: String) -> URL {
-                let random = Int.random(in: 0..<1000)
-                var components = URLComponents(string: baseUrl)
-                components?.path = "/api"
-                components?.queryItems = [
-                    URLQueryItem(name: "period", value: widget!.period),
-                    URLQueryItem(name: "random", value: String(random))
-                ]
-
-                if (widget?.item?.type == "GroupItem") || (widget?.item?.type == "Group") {
-                    components?.queryItems?.append(URLQueryItem(name: "groups", value: widget?.item?.name))
-                } else {
-                    components?.queryItems?.append(URLQueryItem(name: "items", value: widget?.item?.name))
-                }
-                if widget?.service != "" && (widget?.service.count)! > 0 {
-                    components?.queryItems?.append(URLQueryItem(name: "service", value: widget?.service))
-                }
-                return components?.url ?? URL(string: "")!
-            }
-
             let createdURL: URL
             switch widget?.type {
             case "Chart":
+                createdURL = Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
                 print("Setting cell base url to \(openHABRootUrl)")
-                createdURL = createChartURL(with: openHABRootUrl)
             case "Image":
-                createdURL = createImageURL(with: widget?.url ?? "")
+                createdURL = URL(string: widget!.url)!
             default:
                 createdURL = URL(string: "")!
             }
@@ -755,12 +713,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // Select sitemap
     func selectSitemap() {
 
-        var components = URLComponents(string: openHABRootUrl)
-        components?.path = "/rest/sitemaps"
-        components?.queryItems = [
-            URLQueryItem(name: "limit", value: "20")
-        ]
-        if let sitemapsUrl = components?.url {
+        if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
@@ -859,11 +812,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // load app settings
     func loadSettings() {
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
         ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
-        defaultSitemap = prefs.value(forKey: "defaultSitemap") as? String ?? ""
+        defaultSitemap = prefs.string(forKey: "defaultSitemap") ?? ""
         idleOff = prefs.bool(forKey: "idleOff")
+        iconType = prefs.integer(forKey: "iconType")
         appData()?.openHABUsername = openHABUsername
         appData()?.openHABPassword = openHABPassword
     }

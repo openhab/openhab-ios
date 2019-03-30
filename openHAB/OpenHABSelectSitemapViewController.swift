@@ -65,10 +65,8 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        var components = URLComponents(string: openHABRootUrl)
-        components?.path = "/rest/sitemaps"
 
-        if let sitemapsUrl = components?.url {
+        if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
 
