@@ -397,7 +397,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                     icon: widget?.icon,
                                     value: widget?.item?.state ?? "",
                                     iconType: iconType).url
-            cell.imageView? = UIView(SVGNamed: urlc)
+            //cell.imageView? = UIView(SVGNamed: urlc)
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
         }
 

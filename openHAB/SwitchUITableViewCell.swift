@@ -32,7 +32,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         var state = widget.state
         //if state is nil or empty using the item state ( OH 1.x compatability )
         if state.count == 0 {
-            state = (widget.item?.state)!
+            state = (widget.item?.state) ?? ""
         }
         if let customDetailText = widget.labelValue() {
             self.customDetailTextLabel?.text = customDetailText
