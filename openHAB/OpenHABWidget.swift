@@ -53,8 +53,8 @@ extension OpenHABWidget.CodingData {
 class OpenHABWidget: NSObject, MKAnnotation {
     weak var delegate: OpenHABWidgetDelegate?
     var widgetId = ""
-    var label = ""
-    var icon = ""
+    var label = "" // String?
+    var icon = ""// String?
     var type = ""
     var url = ""
     var period = ""
