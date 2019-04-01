@@ -95,8 +95,8 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         super.init()
         let prefs = UserDefaults.standard
         openHABDemoMode = prefs.bool(forKey: "demomode")
-        openHABLocalUrl = prefs.value(forKey: "localUrl") as? String ?? ""
-        openHABRemoteUrl = prefs.value(forKey: "remoteUrl") as? String ?? ""
+        openHABLocalUrl = prefs.string(forKey: "localUrl") ?? ""
+        openHABRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
     }
 
     func trackedLocalUrl() {

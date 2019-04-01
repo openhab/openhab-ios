@@ -11,21 +11,7 @@
 import SDWebImage
 import UIKit
 import Alamofire
-
-//class APIClient {
-//    @discardableResult
-//    private static func performRequest<T:Decodable>(route:APIRouter, decoder: JSONDecoder = JSONDecoder(), completion:@escaping (Result<T>)->Void) -> DataRequest {
-//        return Alamofire.request(route)
-//            .responseJSONDecodable (decoder: decoder){ (response: DataResponse<T>) in
-//                completion(response.result)
-//        }
-//    }
-//
-//    static func getSitemap(completion:@escaping (Result<[OpenHABSitemap]>)->Void) {
-//        let jsonDecoder = JSONDecoder()
-//        performRequest(route: APIRouter.articles, decoder: jsonDecoder, completion: completion)
-//    }
-//}
+import os.log
 
 class OpenHABSelectSitemapViewController: UITableViewController {
     private var selectedSitemap: Int = 0
@@ -58,8 +44,8 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         //sitemaps = []
         openHABRootUrl = appData()?.openHABRootUrl ?? ""
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
         ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
     }
 
@@ -75,7 +61,8 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
             operation.securityPolicy = policy
             if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
+                os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
+
                 operation.securityPolicy.allowInvalidCertificates = true
             }
             if appData()?.openHABVersion == 2 {
@@ -126,7 +113,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     if let response = response {
                         print("openHAB 2")
                         do {
-                            print ("Response will be decoded by JSON")
+                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                             let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
                             for sitemapCodingDatum in sitemapsCodingData {
                                 if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {

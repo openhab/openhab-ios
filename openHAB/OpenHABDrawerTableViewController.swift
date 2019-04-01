@@ -10,6 +10,7 @@
 
 import SDWebImage
 import UIKit
+import os.log
 
 class OpenHABDrawerTableViewController: UITableViewController {
     var sitemaps: [OpenHABSitemap] = []
@@ -81,7 +82,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     if let response = response {
                         print("openHAB 2")
                         do {
-                            print ("Response will be decoded by JSON")
+                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                             let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
                             for sitemapCodingDatum in sitemapsCodingData {
                                 if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
@@ -115,7 +116,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems.removeAll()
         // check if we are using my.openHAB, add notifications menu item then
         let prefs = UserDefaults.standard
-        if Int((prefs.value(forKey: "remoteUrl") as? NSString)?.range(of: "openhab.org").location ?? 0) != NSNotFound {
+
+        // Actually this should better test whether the host of the remoteUrl is on openhab.org
+        if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false {
             let notificationsItem = OpenHABDrawerItem()
             notificationsItem.label = "Notifications"
             notificationsItem.tag = "notifications"
@@ -237,8 +240,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     func loadSettings() {
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
         ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
     }
 

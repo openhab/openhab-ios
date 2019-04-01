@@ -53,7 +53,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         let prefs = UserDefaults.standard
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-        if let notificationsUrl = Endpoint.notification(prefsURL: prefs.value(forKey: "remoteUrl") as! String).url {
+        if let notificationsUrl = Endpoint.notification(prefsURL: prefs.string(forKey: "remoteUrl") ?? "").url {
             var notificationsRequest = URLRequest(url: notificationsUrl)
             notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             let operation = AFHTTPRequestOperation(request: notificationsRequest)
@@ -122,7 +122,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         let createdInLocalTimezone = notification?.created?.addingTimeInterval(timeZoneSeconds)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
-        
+
         cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
         let iconUrl = Endpoint.icon(rootUrl: appData()!.openHABRootUrl, version: appData()!.openHABVersion, icon: notification?.icon, value: "", iconType: 0).url
         cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
@@ -144,8 +144,8 @@ class OpenHABNotificationsViewController: UITableViewController {
 
     func loadSettings() {
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
         ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
         //    self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
         //    self.idleOff = [prefs boolForKey:@"idleOff"];

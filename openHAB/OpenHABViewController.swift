@@ -12,6 +12,7 @@ import SDWebImage
 import UIKit
 import AVKit
 import AVFoundation
+import os.log
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
@@ -71,12 +72,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 versionPageOperation.securityPolicy.validatesDomainName = false
             }
             versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
-                print("This is an openHAB 2.X")
+                os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
                 self.appData()?.openHABVersion = 2
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.selectSitemap()
             }, failure: { operation, error in
-                print("This is an openHAB 1.X")
+                os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
                 self.appData()?.openHABVersion = 1
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 print("Error:------On Tracking>\(error.localizedDescription)")
@@ -106,7 +107,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             policy.delegate = self
             commandOperation?.securityPolicy = policy
             if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
+                os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
                 commandOperation?.securityPolicy.allowInvalidCertificates = true
             }
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
@@ -578,7 +579,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if pageUrl == "" {
             return
         }
-        print("pageUrl = \(pageUrl)")
+        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
         if !longPolling {
@@ -595,7 +597,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
             if longPolling {
-                print("long polling, so setting atmosphere transport")
+                os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
                 pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
                 pageRequest.timeoutInterval = 300.0
             } else {
@@ -614,22 +616,18 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             currentPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
 
-            // If we are talking to openHAB 2+, we expect response to be JSON
-            if appData()?.openHABVersion == 2 {
-                print("Setting serializer to JSON")
-                //currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
-            }
             let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
             policy.delegate = self
             currentPageOperation?.securityPolicy = policy
             if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
+                os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
                 currentPageOperation?.securityPolicy.allowInvalidCertificates = true
             }
+
             // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
             let strongSelf: OpenHABViewController = self
             currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-                print("Page loaded with success")
+                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
                 let headers = operation.response?.allHeaderFields
 
                 if headers?["X-Atmosphere-tracking-id"] != nil {
@@ -665,12 +663,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     //self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String: Any] )
                     let decoder = JSONDecoder()
                     if let response = response {
-                        print("openHAB 2")
+                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
                         do {
                             let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: response)
                             self.currentPage = sitemapPageCodingData.openHABSitemapPage
                         } catch {
-                            print("Should not throw \(error)")
+                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                         }
                     }
                 }
@@ -686,15 +684,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                print("Error:------> on LoadPage \(error.localizedDescription )")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("On LoadPage %{PUBLIC}@ code: %{PUBLIC}@ ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 strongSelf.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001 && longPolling {
-                    print("Timeout, restarting requests")
+                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
                     strongSelf.loadPage(false)
                 } else if (error as NSError?)?.code == -999 {
-                    // Request was cancelled
-                    print("Request was cancelled")
+                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
                 } else {
                     // Error
                     if (error as NSError?)?.code == -1012 {
@@ -702,12 +698,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     } else {
                         TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
                     }
-                    print("Request failed: \(error.localizedDescription)")
+                    os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                 }
             })
-            print("OpenHABViewController sending new request")
+            os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
             currentPageOperation?.start()
-            print("OpenHABViewController request sent")
+            os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
         }}
 
     // Select sitemap
@@ -723,7 +719,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             policy.delegate = self
             operation.securityPolicy = policy
             if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
+                os_log("Warning - ignoring invalid certificates", log: .remoteAccess, type: .error)
                 operation.securityPolicy.allowInvalidCertificates = true
             }
 
@@ -760,13 +756,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     let decoder = JSONDecoder()
                     if let response = response {
                         do {
-                            print ("Response will be decoded by JSON")
+                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                             let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
                             for codingDatum in codingData {
                                 self.sitemaps.append(codingDatum.openHABSitemap)
                             }
                         } catch {
-                            print("Should not throw \(error)")
+                            os_log("Should not throw %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                         }
                     }
                 }
@@ -840,7 +836,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func pageNetworkStatusChanged() -> Bool {
-        print("OpenHABViewController pageNetworkStatusChange")
+        os_log("OpenHABViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
         if pageUrl != "" {
             let pageReachability = Reachability(hostname: pageUrl)
             if !pageNetworkStatusAvailable {

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 struct Endpoint {
     let baseURL: String
@@ -126,7 +127,7 @@ extension Endpoint {
         var components = URLComponents(string: baseURL)
         components?.path = path
         components?.queryItems = queryItems
-        print("\(components?.url)")
+        os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url.debugDescription ?? "")
         return components?.url
     }
 

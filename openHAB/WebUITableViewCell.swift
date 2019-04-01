@@ -26,8 +26,8 @@ class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
     override func displayWidget() {
         print("webview loading url \(widget.url)")
         let prefs = UserDefaults.standard
-        let openHABUsername = prefs.value(forKey: "username") as? String
-        let openHABPassword = prefs.value(forKey: "password") as? String
+        let openHABUsername = prefs.string(forKey: "username")
+        let openHABPassword = prefs.string(forKey: "password")
         let authStr = "\(openHABUsername ?? ""):\(openHABPassword ?? "")"
 
         guard let loginData = authStr.data(using: String.Encoding.utf8) else {

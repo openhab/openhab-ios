@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import os.log
 
 protocol OpenHABSitemapPageDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
@@ -96,6 +97,8 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let name = item?.name {
+            os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", name)
+
             print("SitemapPage sending command \(command ?? "") to \(name)")
         }
         if delegate != nil {
