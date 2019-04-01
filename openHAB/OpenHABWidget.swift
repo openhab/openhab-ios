@@ -76,8 +76,6 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var image: UIImage?
     var widgets: [OpenHABWidget] = []
 
-    let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
-
     // This is an ugly initializer
 
     init(widgetId: String, label: String, icon: String, type: String, url: String?, period: Double?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
@@ -115,6 +113,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     init(xml xmlElement: GDataXMLElement?) {
+        let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
         super.init()
         mappings = [OpenHABWidgetMapping]()
         for child in (xmlElement?.children())! {

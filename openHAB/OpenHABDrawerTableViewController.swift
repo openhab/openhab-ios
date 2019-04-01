@@ -95,7 +95,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
                         }
                     }
                 }
-
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.name < $1.name }
 
@@ -103,8 +102,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                print("Error:------>\(error.localizedDescription)")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             operation.start()
@@ -179,7 +177,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
             //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
-
         }
 
         cell?.preservesSuperviewLayoutMargins = false

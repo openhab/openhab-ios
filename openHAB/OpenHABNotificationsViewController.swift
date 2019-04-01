@@ -75,7 +75,7 @@ class OpenHABNotificationsViewController: UITableViewController {
                             self.notifications.add(codingDatum.openHABNotification)
                         }
                     } catch {
-                        print("should not throw \(error)")
+                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
                 }
 
@@ -84,10 +84,7 @@ class OpenHABNotificationsViewController: UITableViewController {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-
-                print("Error:------>\(error.localizedDescription)")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 self.refreshControl?.endRefreshing()
             })
             operation.start()
@@ -95,7 +92,7 @@ class OpenHABNotificationsViewController: UITableViewController {
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
-        print("Refresh pulled")
+        os_log("Refresh pulled", log: .default, type: .info)
         loadNotifications()
     }
 

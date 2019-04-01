@@ -113,8 +113,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
                 print("Command sent!")
             }, failure: { operation, error in
-                print("Error:------>\(error.localizedDescription )")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                 os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             print("Timeout \(commandRequest.timeoutInterval)")
             if let link = item?.link {
@@ -206,9 +205,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     registrationOperation.setCompletionBlockWithSuccess({ operation, responseObject in
                         print("my.openHAB registration sent")
                     }, failure: { operation, error in
-                        print("my.openHAB registration failed")
-                        print("Error:------>\(error.localizedDescription)")
-                        print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                        os_log("my.openHAB registration failed %{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                     })
                     registrationOperation.start()
                 }
@@ -789,8 +786,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
 
             }, failure: { operation, error in
-                print("Error:------SelectSitemap>\(error.localizedDescription)")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 // Error
                 if (error as NSError?)?.code == -1012 {

@@ -6,6 +6,8 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
+// Inspired by https://www.avanderlee.com/debugging/oslog-unified-logging/
+
 import Foundation
 
 import os.log
