@@ -11,6 +11,7 @@
 
 import Foundation
 import MapKit
+import os.log
 
 protocol OpenHABWidgetDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
