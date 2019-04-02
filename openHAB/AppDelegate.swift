@@ -132,6 +132,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if let soundPath = soundPath {
                 do {
                     os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
+
                     player = try AVAudioPlayer(contentsOf: soundPath)
                     player?.numberOfLoops = 0
                     player?.play()

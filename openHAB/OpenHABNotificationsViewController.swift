@@ -85,6 +85,7 @@ class OpenHABNotificationsViewController: UITableViewController {
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
             })
             operation.start()
@@ -119,7 +120,6 @@ class OpenHABNotificationsViewController: UITableViewController {
         let createdInLocalTimezone = notification?.created?.addingTimeInterval(timeZoneSeconds)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
-
         cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
         let iconUrl = Endpoint.icon(rootUrl: appData()!.openHABRootUrl, version: appData()!.openHABVersion, icon: notification?.icon, value: "", iconType: 0).url
         cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
