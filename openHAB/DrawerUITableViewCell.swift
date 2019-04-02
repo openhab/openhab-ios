@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import os.log
 
 class DrawerUITableViewCell: UITableViewCell {
     //var textLabel: UILabel?
@@ -16,7 +17,7 @@ class DrawerUITableViewCell: UITableViewCell {
     @IBOutlet weak var customImageView: UIImageView!
 
     required init?(coder: NSCoder) {
-        print("DrawerUITableViewCell initWithCoder")
+        os_log("DrawerUITableViewCell initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
 
         separatorInset = .zero

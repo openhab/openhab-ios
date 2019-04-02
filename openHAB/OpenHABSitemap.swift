@@ -59,8 +59,6 @@ extension OpenHABSitemap.CodingData {
     var leaf = ""
     var homepageLink = ""
 
-    let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
-
     init(name: String, link: String, label: String, leaf: Bool, homepageLink: String) {
         self.name = name
         self.link = link
@@ -70,6 +68,7 @@ extension OpenHABSitemap.CodingData {
     }
 
     init(xml xmlElement: GDataXMLElement?) {
+        let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
         super.init()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {

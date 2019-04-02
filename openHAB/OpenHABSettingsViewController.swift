@@ -10,6 +10,7 @@
 
 import SDWebImage
 import UIKit
+import os.log
 
 class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelegate, UITextFieldDelegate {
     @IBOutlet var settingsTableView: UITableView!
@@ -38,7 +39,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("OpenHABSettingsViewController viewDidLoad")
+        os_log("OpenHABSettingsViewController viewDidLoad", log: .viewCycle, type: .info)
         navigationItem.hidesBackButton = true
         let leftBarButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(OpenHABSettingsViewController.cancelButtonPressed(_:)))
         let rightBarButton = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(OpenHABSettingsViewController.saveButtonPressed(_:)))
@@ -68,12 +69,14 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     @objc func cancelButtonPressed(_ sender: Any?) {
         navigationController?.popViewController(animated: true)
-        print("Cancel button pressed")
+        os_log("Cancel button pressed", log: .viewCycle, type: .info)
+
     }
 
     @objc func saveButtonPressed(_ sender: Any?) {
         // TODO: Make a check if any of the preferences has changed
-        print("Save button pressed")
+        os_log("Save button pressed", log: .viewCycle, type: .info)
+
         updateSettings()
         saveSettings()
         appData()?.rootViewController?.pageUrl = ""
@@ -82,10 +85,10 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     @objc func demomodeSwitchChange(_ sender: Any?) {
         if (demomodeSwitch?.isOn)! {
-            print("Demo is ON")
+            os_log("Demo is ON", log: .viewCycle, type: .info)
             disableConnectionSettings()
         } else {
-            print("Demo is OFF")
+            os_log("Demo is OFF", log: .viewCycle, type: .info)
             enableConnectionSettings()
         }
     }
@@ -109,9 +112,10 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         settingsTableView.deselectRow(at: indexPath, animated: true)
-        print(String(format: "Row selected %ld %ld", indexPath.section, indexPath.row))
+        os_log("Row selected %{PUBLIC}@ %{PUBLIC}@", log: .notifications, type: .info, indexPath.section, indexPath.row)
+
         if indexPath.section == 1 && indexPath.row == 2 {
-            print("Clearing image cache")
+            os_log("Clearing image cache", log: .viewCycle, type: .info)
             let imageCache = SDImageCache.shared()
             imageCache?.clearMemory()
             imageCache?.clearDisk()
@@ -132,9 +136,11 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        print("OpenHABSettingsViewController prepareForSegue")
+        os_log("OpenHABSettingsViewController prepareForSegue", log: .viewCycle, type: .info)
+
         if segue.identifier == "showSelectSitemap" {
-            print("OpenHABSettingsViewController showSelectSitemap")
+            os_log("OpenHABSettingsViewController showSelectSitemap", log: .viewCycle, type: .info)
+
             updateSettings()
             saveSettings()
         }

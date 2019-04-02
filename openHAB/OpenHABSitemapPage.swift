@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import os.log
 
 protocol OpenHABSitemapPageDelegate: NSObjectProtocol {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
@@ -49,8 +50,6 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     var link = ""
     var leaf = ""
 
-    let propertyNames: Set = ["pageId", "title", "link", "leaf"]
-
     init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
@@ -70,6 +69,7 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     }
 
     init(xml xmlElement: GDataXMLElement?) {
+        let propertyNames: Set = ["pageId", "title", "link", "leaf"]
         super.init()
         widgets = [OpenHABWidget]()
         for child in (xmlElement?.children())! {
@@ -96,7 +96,7 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let name = item?.name {
-            print("SitemapPage sending command \(command ?? "") to \(name)")
+            os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", name)
         }
         if delegate != nil {
             delegate?.sendCommand(item, commandToSend: command)

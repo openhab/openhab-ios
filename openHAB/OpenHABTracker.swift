@@ -9,6 +9,7 @@
 
 import Foundation
 import SystemConfiguration
+import os.log
 
 protocol OpenHABTrackerDelegate: AnyObject {
     func openHABTracked(_ openHABUrl: String?)
@@ -43,16 +44,16 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         if isNetworkConnected2() {
             // Check if demo mode is switched on in preferences
             if openHABDemoMode {
-                print("OpenHABTracker demo mode preference is on")
+                os_log("OpenHABTracker demo mode preference is on", log: .default, type: .info)
                 trackedDemoMode()
             } else {
                 // Check if network is WiFi. If not, go for remote URL
                 if !isNetworkWiFi() {
-                    print("OpenHABTracker network is not WiFi")
+                    os_log("OpenHABTracker network is not WiFi", log: .default, type: .info)
                     trackedRemoteUrl()
                     // If it is WiFi
                 } else {
-                    print("OpenHABTracker network is Wifi")
+                    os_log("OpenHABTracker network is Wifi", log: .default, type: .info)
                     // Check if local URL is configured, if yes
                     if openHABLocalUrl.count > 0 {
                         //if Reachability(hostname: openHABLocalUrl) {
@@ -82,12 +83,12 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     // NSNetService delegate methods for publication
     func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
         let openhabUrl = "https://\(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(resolvedNetService.port)"
-        print("OpenHABTracker discovered:\(openhabUrl)")
+        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
         trackedDiscoveryUrl(openhabUrl)
     }
 
     func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
-        print("OpenHABTracker discovery didn't resolve openHAB")
+        os_log("OpenHABTracker discovery didn't resolve openHAB", log: .default, type: .info)
         trackedRemoteUrl()
     }
 
@@ -95,8 +96,8 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         super.init()
         let prefs = UserDefaults.standard
         openHABDemoMode = prefs.bool(forKey: "demomode")
-        openHABLocalUrl = prefs.value(forKey: "localUrl") as? String ?? ""
-        openHABRemoteUrl = prefs.value(forKey: "remoteUrl") as? String ?? ""
+        openHABLocalUrl = prefs.string(forKey: "localUrl") ?? ""
+        openHABRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
     }
 
     func trackedLocalUrl() {
@@ -137,7 +138,8 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
             let nStatus = changedReach.connection
             if nStatus != oldReachabilityStatus {
                 if let oldReachabilityStatus = oldReachabilityStatus { //}, let nStatus = nStatus {
-                print("Network status changed from \(string(from: oldReachabilityStatus) ?? "") to \(string(from: nStatus) ?? "")")
+                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, string(from: oldReachabilityStatus) ?? "", string(from: nStatus) ?? "")
+
                 }
                 oldReachabilityStatus = nStatus
                 if let delegate = delegate as? OpenHABTrackerExtendedDelegate {
@@ -150,7 +152,8 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     }
 
     func startDiscovery() {
-        print("OpenHABTracking starting Bonjour discovery")
+        os_log("OpenHABTracking starting Bonjour discovery", log: .default, type: .info)
+
         delegate?.openHABTrackingProgress("Discovering openHAB")
         netService = NetService(domain: "local.", type: "_openhab-server-ssl._tcp.", name: "openHAB-ssl")
         netService!.delegate = self

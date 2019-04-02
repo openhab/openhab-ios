@@ -11,6 +11,7 @@
 import UIKit
 import CoreLocation
 import Foundation
+import os.log
 
 extension OpenHABItem {
 
@@ -37,8 +38,6 @@ extension OpenHABItem.CodingData {
     var state = ""
     var link = ""
 
-    let propertyNames: Set = ["name", "type", "groupType", "state", "link" ]
-
     init(name: String, type: String, state: String, link: String) {
         self.name = name
         self.type = type
@@ -47,6 +46,7 @@ extension OpenHABItem.CodingData {
     }
 
     init(xml xmlElement: GDataXMLElement?) {
+        let propertyNames: Set = ["name", "type", "groupType", "state", "link" ]
         super.init()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
@@ -76,7 +76,7 @@ extension OpenHABItem.CodingData {
                 let hue = CGFloat((Float(values[0]) ?? 0.0)/360)
                 let saturation = CGFloat((Float(values[1]) ?? 0.0)/100)
                 let brightness = CGFloat((Float(values[2]) ?? 0.0)/100)
-                print("\(hue) \(saturation) \(brightness)")
+                os_log("%{PUBLIC}@ %{PUBLIC}@ %{PUBLIC}@ ", log: .default, type: .info, hue, saturation, brightness)
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
                 return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)

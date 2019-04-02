@@ -7,6 +7,7 @@
 //
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
+import os.log
 
 class SetpointUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var widgetSegmentControl: UISegmentedControl!
@@ -82,7 +83,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
 
     @objc func pickOne(_ sender: Any?) {
         let segmentedControl = sender as? UISegmentedControl
-        print(String(format: "Setpoint pressed %ld", segmentedControl?.selectedSegmentIndex ?? 0))
+        os_log("Setpoint pressed %{PUBLIC}@", log: .default, type: .info, segmentedControl?.selectedSegmentIndex ?? 0)
+
         // Deselect segment in the middle
         if segmentedControl?.selectedSegmentIndex == 1 {
             widgetSegmentControl?.selectedSegmentIndex = -1

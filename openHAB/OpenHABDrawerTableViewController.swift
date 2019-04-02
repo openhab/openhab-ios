@@ -10,6 +10,7 @@
 
 import SDWebImage
 import UIKit
+import os.log
 
 class OpenHABDrawerTableViewController: UITableViewController {
     var sitemaps: [OpenHABSitemap] = []
@@ -26,12 +27,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems = [AnyHashable]()
         sitemaps = []
         loadSettings()
-        print("OpenHABDrawerTableViewController did load")
+        os_log("OpenHABDrawerTableViewController did load", log: .viewCycle, type: .info)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("OpenHABDrawerTableViewController viewWillAppear")
+        os_log("OpenHABDrawerTableViewController viewWillAppear", log: .viewCycle, type: .info)
 
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
@@ -40,7 +41,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
             operation.securityPolicy = policy
             if ignoreSSLCertificate {
-                print("Warning - ignoring invalid certificates")
+                os_log("Warning - ignoring invalid certificates", log: .remoteAccess, type: .info)
                 operation.securityPolicy.allowInvalidCertificates = true
             }
 
@@ -48,12 +49,14 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.sitemaps = []
-                print("Sitemap response")
+                os_log("Sitemap response", log: .viewCycle, type: .info)
+
                 // If we are talking to openHAB 1.X, talk XML
                 if self.appData()?.openHABVersion == 1 {
-                    print("openHAB 1")
+                    os_log("openHAB 1", log: .viewCycle, type: .info)
+
                     if let response = response {
-                        print("\(String(data: response, encoding: .utf8) ?? "")")
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
                     }
                     var doc: GDataXMLDocument?
                     if let response = response {
@@ -63,7 +66,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                         return
                     }
                     if let name = doc?.rootElement().name() {
-                        print("\(name)")
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
                     }
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
@@ -79,22 +82,22 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     // Newer versions speak JSON!
                     let decoder = JSONDecoder()
                     if let response = response {
-                        print("openHAB 2")
+                        os_log("openHAB 2", log: .viewCycle, type: .info)
                         do {
-                            print ("Response will be decoded by JSON")
+                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                             let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
                             for sitemapCodingDatum in sitemapsCodingData {
                                 if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
-                                    print("Sitemap \(sitemapCodingDatum.label)")
+                                    os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
                                     self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
                                 }
                             }
                         } catch {
-                            print("Should not throw \(error)")
+                            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+
                         }
                     }
                 }
-
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.name < $1.name }
 
@@ -102,8 +105,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                print("Error:------>\(error.localizedDescription)")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             operation.start()
@@ -115,7 +117,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems.removeAll()
         // check if we are using my.openHAB, add notifications menu item then
         let prefs = UserDefaults.standard
-        if Int((prefs.value(forKey: "remoteUrl") as? NSString)?.range(of: "openhab.org").location ?? 0) != NSNotFound {
+
+        // Actually this should better test whether the host of the remoteUrl is on openhab.org
+        if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false {
             let notificationsItem = OpenHABDrawerItem()
             notificationsItem.label = "Notifications"
             notificationsItem.tag = "notifications"
@@ -130,14 +134,15 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems.append(settingsItem)
         //    self.sitemaps = [[self appData] sitemaps];
         tableView.reloadData()
-        print("RightDrawerViewController viewDidAppear")
-        print(String(format: "Sitemaps count: %lu", UInt(sitemaps.count)))
-        print(String(format: "Menu items count: %lu", UInt(drawerItems.count)))
+        os_log("RightDrawerViewController viewDidAppear", log: .viewCycle, type: .info)
+        os_log("Sitemap count: %{PUBLIC}@", log: .viewCycle, type: .info, UInt(sitemaps.count))
+        os_log("Menu items count: %{PUBLIC}@", log: .viewCycle, type: .info, UInt(drawerItems.count))
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated) // Call the super class implementation.
-        print("RightDrawerViewController viewDidDisappear")
+        os_log("RightDrawerViewController viewDidDisappear", log: .viewCycle, type: .info)
+
     }
 
     override func didReceiveMemoryWarning() {
@@ -176,7 +181,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
             //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
-
         }
 
         cell?.preservesSuperviewLayoutMargins = false
@@ -195,7 +199,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // open a alert with an OK and cancel button
-        print(String(format: "Clicked on drawer row #%ld", indexPath.row))
+        os_log("Clicked on drawer row %{PUBLIC}@", log: .viewCycle, type: .info, indexPath.row)
+
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row != 0 {
             // First sitemaps
@@ -222,7 +227,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 if ((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "notifications" {
                     let nav = mm_drawerController.centerViewController as? UINavigationController
                     if nav?.visibleViewController is OpenHABNotificationsViewController {
-                        print("Notifications are already open")
+                        os_log("Notifications are already open", log: .notifications, type: .info)
                     } else {
                         let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController
                         if let newViewController = newViewController {
@@ -237,8 +242,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     func loadSettings() {
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
         ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
     }
 
