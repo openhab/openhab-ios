@@ -47,18 +47,18 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func upButtonPressed() {
-        print("up button pressed")
+        os_log("up button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("UP")
 
     }
 
     @objc func stopButtonPressed() {
-        print("stop button pressed")
+        os_log("stop button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("STOP")
     }
 
     @objc func downButtonPressed() {
-        print("down button pressed")
+        os_log("down button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("DOWN")
     }
 }

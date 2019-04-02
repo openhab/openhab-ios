@@ -13,6 +13,7 @@ import AVFoundation
 import Firebase
 import UIKit
 import UserNotifications
+import os.log
 
 var player: AVAudioPlayer?
 
@@ -28,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        print("didFinishLaunchingWithOptions started")
+        os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
 
         //init Firebase crash reporting
         FirebaseApp.configure()
@@ -43,8 +44,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         registerForPushNotifications()
 
-        print("uniq id \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
-        print("device name \(UIDevice.current.name)")
+        os_log("uniq id: %{PUBLIC}@", log: .notifications, type: .info, UIDevice.current.identifierForVendor?.uuidString ?? "")
+        os_log("device name: %{PUBLIC}@", log: .notifications, type: .info, UIDevice.current.name)
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -52,10 +53,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 try audioSession.setCategory(.playback, mode: .default, options: [])
             }
         } catch {
-            print("Setting category to AVAudioSessionCategoryPlayback failed.")
+            os_log("Setting category to AVAudioSessionCategoryPlayback failed.", log: .default, type: .info)
         }
 
-        print("didFinishLaunchingWithOptions ended")
+        os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
+
         return true
     }
 
@@ -64,7 +66,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func registerForPushNotifications() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
             guard let self = self else { return }
-            print("Permission granted: \(granted)")
+            os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
             self.getNotificationSettings()
         }
@@ -73,7 +75,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func getNotificationSettings() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
-            print("Notification settings: \(settings)")
+            os_log("Notification settings: %{PUBLIC}@", log: .notifications, type: .info, settings)
+
             guard settings.authorizationStatus == .authorized else { return }
             DispatchQueue.main.async {
                 UIApplication.shared.registerForRemoteNotifications()
@@ -84,18 +87,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
-        print("Calling Application Bundle ID: \(sourceApplication ?? "")")
-        print("URL scheme:\(url.scheme ?? "")")
-        print("URL query: \(url.query ?? "")")
+
+        os_log("Calling Application Bundle ID: %{PUBLIC}@", log: .notifications, type: .info, sourceApplication ?? "")
+        os_log("URL scheme: %{PUBLIC}@", log: .notifications, type: .info, url.scheme ?? "")
+        os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
 
         return true
     }
 
     // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+
         let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)}) //try "%02.2hhx",
 
-        print("My token is: \(deviceTokenString)")
+        os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
+
         let dataDict = [
             "deviceToken": deviceTokenString,
             "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "" ,
@@ -105,17 +111,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("Failed to get token for notifications: \(error.localizedDescription)")
-
+        os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
     // version without completionHandler is deprecated
     //func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-        print("didReceiveRemoteNotification")
+        os_log("didReceiveRemoteNotification", log: .notifications, type: .info)
+
         if application.applicationState == .active {
-            print("App is active and got a remote notification")
+            os_log("App is active and got a remote notification", log: .notifications, type: .info)
+
             guard let aps = userInfo["aps"] as? [String: AnyObject] else {
                 completionHandler(.failed)
                 return
@@ -124,17 +131,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
             if let soundPath = soundPath {
                 do {
-                    print("Sound path \(soundPath)")
+                    os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
                     player = try AVAudioPlayer(contentsOf: soundPath)
                     player?.numberOfLoops = 0
                     player?.play()
                 } catch let error {
-                    print(error.localizedDescription)
+                    os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
                 }
                 player = try? AVAudioPlayer(contentsOf: soundPath)
             }
+            os_log("%{PUBLIC}@", log: .notifications, type: .info, aps)
 
-            print("\(aps)")
             let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
             TSMessage.showNotification(in: ((window?.rootViewController as? MMDrawerController)?.centerViewController as? UINavigationController)?.visibleViewController, title: "Notification", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
 

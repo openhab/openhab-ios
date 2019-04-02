@@ -9,6 +9,7 @@
 //
 
 import WebKit
+import os.log
 
 class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
     var isLoadingUrl = false
@@ -24,7 +25,8 @@ class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
     }
 
     override func displayWidget() {
-        print("webview loading url \(widget.url)")
+        os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
+
         let prefs = UserDefaults.standard
         let openHABUsername = prefs.string(forKey: "username")
         let openHABPassword = prefs.string(forKey: "password")
@@ -46,15 +48,15 @@ class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
     }
 
     func webViewDidStartLoad(_ webView: UIWebView) {
-        print("webview started loading")
+        os_log("webview started loading", log: .viewCycle, type: .info)
     }
 
     func webViewDidFinishLoad(_ webView: UIWebView) {
-        print("webview finished load")
+        os_log("webview finished load", log: .viewCycle, type: .info)
     }
 
     func setFrame(_ frame: CGRect) {
-        print("setFrame")
+        os_log("setFrame", log: .viewCycle, type: .info)
         super.frame = frame
         widgetWebView?.reload()
     }

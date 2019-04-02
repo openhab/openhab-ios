@@ -8,6 +8,8 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import os.log
+
 class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet weak var widgetSlider: UISlider!
@@ -36,7 +38,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func sliderDidEndSliding (_ sender: UISlider) { //(_ notification: Notification?) {
-        print("Slider new value = \(widgetSlider?.value ?? 0.0)")
+        os_log("Slider new value = %{PUBLIC}@", log: .default, type: .info, widgetSlider?.value ?? 0.0)
+
         let intValue = Int((widgetSlider?.value ?? 0.0) * 100)
         widget.sendCommand("\(intValue)")
     }

@@ -50,7 +50,6 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     var link = ""
     var leaf = ""
 
-
     init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId

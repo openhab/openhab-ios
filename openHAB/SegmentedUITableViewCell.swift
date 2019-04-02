@@ -7,6 +7,7 @@
 //
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
+import os.log
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
 
@@ -44,7 +45,8 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
 
     @objc func pickOne(_ sender: Any?) {
         let segmentedControl = sender as? UISegmentedControl
-        print(String(format: "Segment pressed %ld", Int(segmentedControl?.selectedSegmentIndex ?? 0)))
+        os_log("Segment pressed %{PUBLIC}@", log: .default, type: .info, Int(segmentedControl?.selectedSegmentIndex ?? 0))
+
         let mapping = widget.mappings[segmentedControl?.selectedSegmentIndex ?? 0]
         widget.sendCommand(mapping.command)
     }

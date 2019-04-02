@@ -31,13 +31,14 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("OpenHABSelectSitemapViewController viewDidLoad")
+        os_log("OpenHABSelectSitemapViewController viewDidLoad", log: .viewCycle, type: .info)
+
         if sitemaps.count != 0 {
-            print("We have sitemap list here!")
+            os_log("We have sitemap list here!", log: .viewCycle, type: .info)
         }
         if appData()?.openHABRootUrl != nil {
             if let open = appData()?.openHABRootUrl {
-                print("OpenHABSelectSitemapViewController openHABRootUrl = \(open)")
+                os_log("OpenHABSelectSitemapViewController openHABRootUrl : %{PUBLIC}@", log: .viewCycle, type: .info, open)
             }
         }
         tableView.tableFooterView = UIView()
@@ -61,7 +62,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
             operation.securityPolicy = policy
             if ignoreSSLCertificate {
-                os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
+                os_log("Warning - ignoring invalid certificates", log: .remoteAccess, type: .info)
 
                 operation.securityPolicy.allowInvalidCertificates = true
             }
@@ -70,9 +71,9 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     .validate(statusCode: 200..<300)
                     .responseJSON { response in
                         if response.result.error == nil {
-                            debugPrint("HTTP Response Body: \(response.data.debugDescription)")
+                            os_log("HTTP Response Body: %{PUBLIC}@", log: .default, type: .info, response.data.debugDescription)
                         } else {
-                            debugPrint("HTTP Request failed: \(response.result.error.debugDescription)")
+                            os_log("HTTP Request failed: %{PUBLIC}@", log: .default, type: .error, response.result.error.debugDescription)
                         }
                 }
             }
@@ -80,12 +81,14 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
                 self.sitemaps = []
-                print("Sitemap response")
+                os_log("Sitemap response", log: .default, type: .info)
+
                 // If we are talking to openHAB 1.X, talk XML
                 if self.appData()?.openHABVersion == 1 {
-                    print("openHAB 1")
+                    os_log("openHAB 1", log: .default, type: .info)
+
                     if let response = response {
-                        print("\(String(data: response, encoding: .utf8) ?? "")")
+                        os_log("%{PUBLIC}@", log: .default, type: .info, String(data: response, encoding: .utf8) ?? "")
                     }
                     var doc: GDataXMLDocument?
                     if let response = response {
@@ -95,7 +98,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                         return
                     }
                     if let name = doc?.rootElement().name() {
-                        print("\(name)")
+                        os_log("%{PUBLIC}@", log: .default, type: .info, name)
                     }
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
@@ -111,18 +114,20 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     // Newer versions speak JSON!
                     let decoder = JSONDecoder()
                     if let response = response {
-                        print("openHAB 2")
+                        os_log("openHAB 2", log: .default, type: .info)
+
                         do {
                             os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                             let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
                             for sitemapCodingDatum in sitemapsCodingData {
                                 if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
-                                    print("Sitemap \(sitemapCodingDatum.label)")
+                                    os_log("Sitemap %{PUBLIC}@", log: .default, type: .info, sitemapCodingDatum.label)
+
                                     self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
                                 }
                             }
                         } catch {
-                            print("Should not throw \(error)")
+                            os_log("Should not throw %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
                         }
                     }
                 }
@@ -169,7 +174,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         if sitemap.icon != "" {
             var iconUrlString: String?
             iconUrlString = String(format: imageBase, openHABRootUrl, sitemap.icon )
-            print("icon url = \(iconUrlString ?? "")")
+            os_log("icon url = %{PUBLIC}@", log: .default, type: .info, iconUrlString ?? "")
             cell.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
         } else {
             let iconUrlString = String(format: imageBase, openHABRootUrl, "")
@@ -179,7 +184,8 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(String(format: "Selected sitemap %ld", indexPath.row))
+        os_log("Selected sitemap %{PUBLIC}@", log: .default, type: .info, indexPath.row)
+
         let sitemap = sitemaps[indexPath.row]
         let prefs = UserDefaults.standard
         prefs.setValue(sitemap.name, forKey: "defaultSitemap")

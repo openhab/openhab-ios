@@ -7,6 +7,7 @@
 //
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
+import os.log
 
 class SwitchUITableViewCell: GenericUITableViewCell {
 
@@ -50,10 +51,10 @@ class SwitchUITableViewCell: GenericUITableViewCell {
 
     @objc func switchChange(_ sender: Any?) {
         if (widgetSwitch?.isOn)! {
-            print("Switch to ON")
+            os_log("Switch to ON", log: .viewCycle, type: .info)
             widget.sendCommand("ON")
         } else {
-            print("Switch to OFF")
+            os_log("Switch to OFF", log: .viewCycle, type: .info)
             widget.sendCommand("OFF")
         }
     }

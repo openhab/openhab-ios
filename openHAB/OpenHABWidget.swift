@@ -164,10 +164,10 @@ class OpenHABWidget: NSObject, MKAnnotation {
             delegate?.sendCommand(item, commandToSend: command)
         }
         if item == nil {
-            print("Item = nil")
+            os_log("Item = nil", log: .default, type: .info)
         }
         if delegate == nil {
-            print("Delegate = nil")
+            os_log("Delegate = nil", log: .default, type: .info)
         }
     }
 

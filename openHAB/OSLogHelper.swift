@@ -24,4 +24,6 @@ extension OSLog {
     /// Logs the URL composition
     static let urlComposition = OSLog(subsystem: subsystem, category: "urlComposition")
 
+    /// Logs the notifications
+    static let notifications = OSLog(subsystem: subsystem, category: "notifications")
 }
