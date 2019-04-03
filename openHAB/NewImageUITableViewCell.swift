@@ -19,16 +19,16 @@ class NewImageUITableViewCell: UITableViewCell {
 
         contentView.addSubview(mainImageView)
 
-        let marginGuide = contentView.layoutMarginsGuide
+        let positionGuide = contentView //contentView.layoutMarginsGuide if more margin would be appreciated
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
         mainImageView.contentMode = .scaleAspectFit
 
         NSLayoutConstraint.activate([
-            mainImageView.leftAnchor.constraint(equalTo: mainImageView.leftAnchor),
-            mainImageView.rightAnchor.constraint(equalTo: mainImageView.rightAnchor),
-            mainImageView.topAnchor.constraint(equalTo: mainImageView.topAnchor),
-            mainImageView.bottomAnchor.constraint(equalTo: mainImageView.bottomAnchor)
+            mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
+            mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
+            mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
+            mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)
             ])
     }
 

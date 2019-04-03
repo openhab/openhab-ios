@@ -135,8 +135,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
         //    self.sitemaps = [[self appData] sitemaps];
         tableView.reloadData()
         os_log("RightDrawerViewController viewDidAppear", log: .viewCycle, type: .info)
-        os_log("Sitemap count: %{PUBLIC}@", log: .viewCycle, type: .info, UInt(sitemaps.count))
-        os_log("Menu items count: %{PUBLIC}@", log: .viewCycle, type: .info, UInt(drawerItems.count))
+        os_log("Sitemap count: %d", log: .viewCycle, type: .info, Int(sitemaps.count))
+        os_log("Menu items count: %d", log: .viewCycle, type: .info, Int(drawerItems.count))
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -199,7 +199,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // open a alert with an OK and cancel button
-        os_log("Clicked on drawer row %{PUBLIC}@", log: .viewCycle, type: .info, indexPath.row)
+        os_log("Clicked on drawer row %d", log: .viewCycle, type: .info, indexPath.row)
 
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row != 0 {
