@@ -457,14 +457,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         // Prevent the cell from inheriting the Table View's margin settings
-        if cell.responds(to: #selector(setter: UITableViewCell.preservesSuperviewLayoutMargins)) {
-            cell.preservesSuperviewLayoutMargins = false
-        }
+        cell.preservesSuperviewLayoutMargins = false
 
         // Explictly set your cell's layout margins
-        if cell.responds(to: #selector(setter: UITableViewCell.layoutMargins)) {
-            cell.layoutMargins = .zero
-        }
+        cell.layoutMargins = .zero
 
         guard let videoCell = (cell as? VideoUITableViewCell) else { return }
         videoCell.playerView.player?.play()
@@ -616,7 +612,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 currentPageOperation?.cancel()
                 currentPageOperation = nil
             }
-            currentPageOperation = AFHTTPRequestOperation(request: pageRequest as URLRequest)
+            currentPageOperation = AFHTTPRequestOperation(request: pageRequest)
 
             let policy = AFRememberingSecurityPolicy(pinningMode: AFSSLPinningMode.none)
             policy.delegate = self
