@@ -186,7 +186,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         os_log("Selected sitemap %d", log: .default, type: .info, indexPath.row)
-
         let sitemap = sitemaps[indexPath.row]
         let prefs = UserDefaults.standard
         prefs.setValue(sitemap.name, forKey: "defaultSitemap")

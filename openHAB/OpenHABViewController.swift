@@ -117,7 +117,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                  os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
-
             if let link = item?.link {
                 os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
                 os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
@@ -207,6 +206,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         os_log("my.openHAB registration sent", log: .notifications, type: .info)
                     }, failure: { operation, error in
                         os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+
                     })
                     registrationOperation.start()
                 }
@@ -340,7 +340,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
-
                 return CGFloat(heightValue)
             } else {
                 // return default height for webview/mapview as 8 rows
