@@ -11,53 +11,35 @@
 import WebKit
 import os.log
 
-class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
+class WebUITableViewCell: GenericUITableViewCell, WKNavigationDelegate {
     var isLoadingUrl = false
     var isLoaded = false
 
     @IBOutlet weak var widgetWebView: WKWebView!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
 
-        selectionStyle = .none
-        separatorInset = .zero
-
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        widgetWebView.navigationDelegate = self
     }
 
     override func displayWidget() {
-        os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
-
-        let prefs = UserDefaults.standard
-        let openHABUsername = prefs.string(forKey: "username")
-        let openHABPassword = prefs.string(forKey: "password")
-        let authStr = "\(openHABUsername ?? ""):\(openHABPassword ?? "")"
-
-        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
-            return
-        }
-        let base64LoginString = loginData.base64EncodedString()
-
-        if let url = URL(string: widget.url) {
-            var request = URLRequest(url: url)
-            request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+        os_log("webview loading url %{PUBLIC}@", log: .viewCycle, type: .info, widget.url)
+        if let url = URL(string: widget.url), let urlrequest = URLRequest.webUIRequest(url: url) {
             widgetWebView?.scrollView.isScrollEnabled = false
             widgetWebView?.scrollView.bounces = false
-            widgetWebView?.load(request)
+            widgetWebView?.load(urlrequest)
         }
-
     }
 
-    func webViewDidStartLoad(_ webView: UIWebView) {
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         os_log("webview started loading", log: .viewCycle, type: .info)
     }
 
-    func webViewDidFinishLoad(_ webView: UIWebView) {
-        os_log("webview finished load", log: .viewCycle, type: .info)
-    }
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        os_log("webview finished loading", log: .viewCycle, type: .info)
 
-    func setFrame(_ frame: CGRect) {
-        os_log("setFrame", log: .viewCycle, type: .info)
-        super.frame = frame
-        widgetWebView?.reload()
     }
 }
