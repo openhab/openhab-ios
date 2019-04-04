@@ -27,7 +27,12 @@ class WebUITableViewCell: GenericUITableViewCell, WKNavigationDelegate {
 
     override func displayWidget() {
         os_log("webview loading url %{PUBLIC}@", log: .viewCycle, type: .info, widget.url)
-        if let url = URL(string: widget.url), let urlrequest = URLRequest.webUIRequest(url: url) {
+        if let url = URL(string: widget.url) {
+            var urlrequest = URLRequest(url: url)
+            let prefs = UserDefaults.standard
+            let openHABUsername = prefs.string(forKey: "username")
+            let openHABPassword = prefs.string(forKey: "password")
+            urlrequest.setAuthCredentials(openHABUsername, openHABPassword)
             widgetWebView?.scrollView.isScrollEnabled = false
             widgetWebView?.scrollView.bounces = false
             widgetWebView?.load(urlrequest)
