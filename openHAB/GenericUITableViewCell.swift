@@ -20,28 +20,14 @@ class GenericUITableViewCell: UITableViewCell {
             customDetailTextLabel?.text = ""
         }
         customDetailTextLabel?.sizeToFit()
-        // Clean any detailTextLabel constraints we set before, or they will start to interfere with new ones because of UITableViewCell caching
-        if !disclosureConstraints.isEmpty {
-            removeConstraints(disclosureConstraints)
-            disclosureConstraints = []
-        }
-        if accessoryType == .none {
-            // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
-            if customDetailTextLabel != nil {
-                let views = ["customDetailTextLabel": customDetailTextLabel]
-                let formatString = "[customDetailTextLabel]-20.0-|"
 
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String: Any])
-                addConstraints(disclosureConstraints)
-            }
-        } else {
-            // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-            if customDetailTextLabel != nil {
-                let views = ["customDetailTextLabel": customDetailTextLabel]
-                let formatString = "[customDetailTextLabel]|"
-
-                disclosureConstraints = NSLayoutConstraint.constraints(withVisualFormat: formatString, options: [], metrics: nil, views: views as [String: Any])
-                addConstraints(disclosureConstraints)
+        if customDetailTextLabel != nil {
+            if accessoryType == .none {
+                // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
+                customDetailTextLabelConstraint.constant = 20.0
+            } else {
+                // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
+                customDetailTextLabelConstraint.constant = 0.0
             }
         }
     }
@@ -83,8 +69,7 @@ class GenericUITableViewCell: UITableViewCell {
 
     @IBOutlet weak var customTextLabel: UILabel!
     @IBOutlet weak var customDetailTextLabel: UILabel!
-
-    var disclosureConstraints: [NSLayoutConstraint] = []
+    @IBOutlet weak var customDetailTextLabelConstraint: NSLayoutConstraint!
 
     func initialize() {
         selectionStyle = .none
