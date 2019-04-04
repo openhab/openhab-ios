@@ -112,7 +112,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         settingsTableView.deselectRow(at: indexPath, animated: true)
-        os_log("Row selected %{PUBLIC}@ %{PUBLIC}@", log: .notifications, type: .info, indexPath.section, indexPath.row)
+        os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
 
         if indexPath.section == 1 && indexPath.row == 2 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)

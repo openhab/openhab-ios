@@ -38,7 +38,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func sliderDidEndSliding (_ sender: UISlider) { //(_ notification: Notification?) {
-        os_log("Slider new value = %{PUBLIC}@", log: .default, type: .info, widgetSlider?.value ?? 0.0)
+        os_log("Slider new value = %g", log: .default, type: .info, widgetSlider?.value ?? 0.0)
 
         let intValue = Int((widgetSlider?.value ?? 0.0) * 100)
         widget.sendCommand("\(intValue)")

@@ -83,7 +83,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
 
     @objc func pickOne(_ sender: Any?) {
         let segmentedControl = sender as? UISegmentedControl
-        os_log("Setpoint pressed %{PUBLIC}@", log: .default, type: .info, segmentedControl?.selectedSegmentIndex ?? 0)
+        os_log("Setpoint pressed %d", log: .default, type: .info, segmentedControl?.selectedSegmentIndex ?? 0)
 
         // Deselect segment in the middle
         if segmentedControl?.selectedSegmentIndex == 1 {

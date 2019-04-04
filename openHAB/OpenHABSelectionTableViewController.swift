@@ -66,7 +66,7 @@ import os.log
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        os_log("Selected mapping %{PUBLIC}@", log: .viewCycle, type: .info, indexPath.row)
+        os_log("Selected mapping %d", log: .viewCycle, type: .info, indexPath.row)
 
         if delegate != nil {
             delegate?.didSelectWidgetMapping(indexPath.row)

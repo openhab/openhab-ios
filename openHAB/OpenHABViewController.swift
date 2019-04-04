@@ -82,7 +82,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
                 self.appData()?.openHABVersion = 1
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("On Tracking %{PUBLIC}@ %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 self.selectSitemap()
             })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -114,9 +114,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
                 os_log("Command sent!", log: .remoteAccess, type: .info)
             }, failure: { operation, error in
-                 os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
-            os_log("Timeout %{PUBLIC}@", log: .default, type: .info, commandRequest.timeoutInterval)
+            os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
 
             if let link = item?.link {
                 os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
@@ -206,7 +206,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     registrationOperation.setCompletionBlockWithSuccess({ operation, responseObject in
                         os_log("my.openHAB registration sent", log: .notifications, type: .info)
                     }, failure: { operation, error in
-                        os_log("my.openHAB registration failed %{PUBLIC}@ %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                     })
                     registrationOperation.start()
                 }
@@ -339,7 +339,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             if let height = widget?.height, height.intValue != 0 {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
-                os_log("Webview/Mapview height would be %{PUBLIC}@", log: .viewCycle, type: .info, heightValue)
+                os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
 
                 return CGFloat(heightValue)
             } else {
@@ -682,7 +682,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("On LoadPage %{PUBLIC}@ code: %{PUBLIC}@ ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 strongSelf.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001 && longPolling {
                     os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
@@ -786,7 +786,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
 
             }, failure: { operation, error in
-                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 // Error
                 if (error as NSError?)?.code == -1012 {
