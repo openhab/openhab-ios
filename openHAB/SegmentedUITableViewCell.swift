@@ -46,7 +46,6 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
     @objc func pickOne(_ sender: Any?) {
         let segmentedControl = sender as? UISegmentedControl
         os_log("Segment pressed %d", log: .default, type: .info, Int(segmentedControl?.selectedSegmentIndex ?? 0))
-
         let mapping = widget.mappings[segmentedControl?.selectedSegmentIndex ?? 0]
         widget.sendCommand(mapping.command)
     }
