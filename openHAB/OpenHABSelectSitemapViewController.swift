@@ -58,7 +58,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest as URLRequest, delegate: nil)
 
             if appData()?.openHABVersion == 2 {
-                Alamofire.request(sitemapsUrl)
+                Alamofire.request(sitemapsRequest)
                     .validate(statusCode: 200..<300)
                     .responseJSON { response in
                         if response.result.error == nil {
@@ -175,8 +175,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        os_log("Selected sitemap %{PUBLIC}@", log: .default, type: .info, indexPath.row)
-
+        os_log("Selected sitemap %d", log: .default, type: .info, indexPath.row)
         let sitemap = sitemaps[indexPath.row]
         let prefs = UserDefaults.standard
         prefs.setValue(sitemap.name, forKey: "defaultSitemap")

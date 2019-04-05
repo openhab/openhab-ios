@@ -29,7 +29,7 @@ class ColorPickerViewController: UIViewController {
             hue *= 360
             saturation *= 100
             brightness *= 100
-            os_log("Color changed to %{PUBLIC}@ %{PUBLIC}@ %{PUBLIC}@", log: .default, type: .info, hue, saturation, brightness)
+            os_log("Color changed to %g %g %g", log: .default, type: .info, hue, saturation, brightness)
 
             let command = "\(hue),\(saturation),\(brightness)"
             self.widget?.sendCommand(command)

@@ -43,7 +43,7 @@ class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
         let ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
 
         if ignoreSSLCertificate {
-            os_log("Warning - ignoring invalid certificates", log: .default, type: .info)
+            os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
             policy.allowInvalidCertificates = true
             policy.validatesDomainName = false
         }

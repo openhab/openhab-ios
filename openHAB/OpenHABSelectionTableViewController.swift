@@ -26,7 +26,7 @@ import os.log
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        os_log("I have %{PUBLIC}@ mappings", log: .viewCycle, type: .info, UInt(mappings.count))
+        os_log("I have %d mappings", log: .viewCycle, type: .info, mappings.count)
 
         // Uncomment the following line to preserve selection between presentations.
         // self.clearsSelectionOnViewWillAppear = NO;
@@ -66,7 +66,7 @@ import os.log
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        os_log("Selected mapping %{PUBLIC}@", log: .viewCycle, type: .info, indexPath.row)
+        os_log("Selected mapping %d", log: .viewCycle, type: .info, indexPath.row)
 
         if delegate != nil {
             delegate?.didSelectWidgetMapping(indexPath.row)

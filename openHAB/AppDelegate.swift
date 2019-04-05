@@ -44,8 +44,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         registerForPushNotifications()
 
-        os_log("uniq id: %{PUBLIC}@", log: .notifications, type: .info, UIDevice.current.identifierForVendor?.uuidString ?? "")
-        os_log("device name: %{PUBLIC}@", log: .notifications, type: .info, UIDevice.current.name)
+        os_log("uniq id: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.identifierForVendor?.uuidString ?? "")
+        os_log("device name: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.name)
 
         let audioSession = AVAudioSession.sharedInstance()
         do {

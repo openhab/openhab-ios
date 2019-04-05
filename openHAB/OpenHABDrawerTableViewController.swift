@@ -97,7 +97,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             operation.start()
@@ -127,8 +127,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
         //    self.sitemaps = [[self appData] sitemaps];
         tableView.reloadData()
         os_log("RightDrawerViewController viewDidAppear", log: .viewCycle, type: .info)
-        os_log("Sitemap count: %{PUBLIC}u", log: .viewCycle, type: .info, UInt(sitemaps.count))
-        os_log("Menu items count: %{PUBLIC}u", log: .viewCycle, type: .info, UInt(drawerItems.count))
+        os_log("Sitemap count: %d", log: .viewCycle, type: .info, Int(sitemaps.count))
+        os_log("Menu items count: %d", log: .viewCycle, type: .info, Int(drawerItems.count))
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -191,7 +191,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // open a alert with an OK and cancel button
-        os_log("Clicked on drawer row %{PUBLIC}d", log: .viewCycle, type: .info, indexPath.row)
+        os_log("Clicked on drawer row %d", log: .viewCycle, type: .info, indexPath.row)
 
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row != 0 {

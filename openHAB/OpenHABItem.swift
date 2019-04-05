@@ -76,7 +76,7 @@ extension OpenHABItem.CodingData {
                 let hue = CGFloat((Float(values[0]) ?? 0.0)/360)
                 let saturation = CGFloat((Float(values[1]) ?? 0.0)/100)
                 let brightness = CGFloat((Float(values[2]) ?? 0.0)/100)
-                os_log("%{PUBLIC}@ %{PUBLIC}@ %{PUBLIC}@ ", log: .default, type: .info, hue, saturation, brightness)
+                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
                 return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
