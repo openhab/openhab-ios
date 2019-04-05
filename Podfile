@@ -1,4 +1,4 @@
-platform :ios, '8.0'
+platform :ios, '10.0'
 use_frameworks!
 
 target 'openHAB' do
@@ -12,8 +12,7 @@ target 'openHAB' do
     pod 'Firebase/Core'
 	pod 'Fabric', '~> 1.7.2'
 	pod 'Crashlytics', '~> 3.9.3'
-    pod 'Alamofire'
-    pod 'SwiftSVG', '~> 2.0'
+    pod 'Alamofire', '~> 5.0.0-beta.4'
 end
 
 target 'openHABTestsSwift' do

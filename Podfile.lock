@@ -20,54 +20,55 @@ PODS:
   - AFNetworking/UIKit (2.6.3):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
-  - Alamofire (4.8.1)
+  - Alamofire (5.0.0-beta.4)
   - Crashlytics (3.9.3):
     - Fabric (~> 1.7.2)
   - Fabric (1.7.13)
-  - Firebase/Core (5.16.0):
+  - Firebase/Core (5.20.1):
     - Firebase/CoreOnly
-    - FirebaseAnalytics (= 5.5.0)
-  - Firebase/CoreOnly (5.16.0):
-    - FirebaseCore (= 5.2.0)
-  - FirebaseAnalytics (5.5.0):
-    - FirebaseCore (~> 5.2)
-    - FirebaseInstanceID (~> 3.4)
-    - GoogleAppMeasurement (= 5.5.0)
+    - FirebaseAnalytics (= 5.8.0)
+  - Firebase/CoreOnly (5.20.1):
+    - FirebaseCore (= 5.4.1)
+  - FirebaseAnalytics (5.8.0):
+    - FirebaseCore (~> 5.4)
+    - FirebaseInstanceID (~> 3.8)
+    - GoogleAppMeasurement (= 5.8.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
     - GoogleUtilities/MethodSwizzler (~> 5.2)
     - GoogleUtilities/Network (~> 5.2)
     - "GoogleUtilities/NSData+zlib (~> 5.2)"
     - nanopb (~> 0.3)
-  - FirebaseCore (5.2.0):
+  - FirebaseCore (5.4.1):
+    - GoogleUtilities/Environment (~> 5.2)
     - GoogleUtilities/Logger (~> 5.2)
-  - FirebaseInstanceID (3.4.0):
+  - FirebaseInstanceID (3.8.1):
     - FirebaseCore (~> 5.2)
-    - GoogleUtilities/Environment (~> 5.3)
-    - GoogleUtilities/UserDefaults (~> 5.3)
+    - GoogleUtilities/Environment (~> 5.2)
+    - GoogleUtilities/UserDefaults (~> 5.2)
   - GDataXML-HTML (1.3.0)
-  - GoogleAppMeasurement (5.5.0):
+  - GoogleAppMeasurement (5.8.0):
     - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
     - GoogleUtilities/MethodSwizzler (~> 5.2)
     - GoogleUtilities/Network (~> 5.2)
     - "GoogleUtilities/NSData+zlib (~> 5.2)"
     - nanopb (~> 0.3)
-  - GoogleUtilities/AppDelegateSwizzler (5.3.7):
+  - GoogleUtilities/AppDelegateSwizzler (5.5.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (5.3.7)
-  - GoogleUtilities/Logger (5.3.7):
+  - GoogleUtilities/Environment (5.5.0)
+  - GoogleUtilities/Logger (5.5.0):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (5.3.7):
+  - GoogleUtilities/MethodSwizzler (5.5.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (5.3.7):
+  - GoogleUtilities/Network (5.5.0):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (5.3.7)"
-  - GoogleUtilities/Reachability (5.3.7):
+  - "GoogleUtilities/NSData+zlib (5.5.0)"
+  - GoogleUtilities/Reachability (5.5.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (5.3.7):
+  - GoogleUtilities/UserDefaults (5.5.0):
     - GoogleUtilities/Logger
   - HexColors (2.3.0)
   - MMDrawerController (0.5.7):
@@ -93,13 +94,12 @@ PODS:
   - SDWebImage (3.7.6):
     - SDWebImage/Core (= 3.7.6)
   - SDWebImage/Core (3.7.6)
-  - SwiftSVG (2.2.0)
   - TSMessages (0.9.13):
     - HexColors (~> 2.3.0)
 
 DEPENDENCIES:
   - AFNetworking (~> 2.6.0)
-  - Alamofire
+  - Alamofire (~> 5.0.0-beta.4)
   - Crashlytics (~> 3.9.3)
   - Fabric (~> 1.7.2)
   - Firebase/Core
@@ -108,7 +108,6 @@ DEPENDENCIES:
   - "MMDrawerController+Storyboard"
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 3.7.3)
-  - SwiftSVG (~> 2.0)
   - TSMessages (from `https://github.com/KrauseFx/TSMessages.git`)
 
 SPEC REPOS:
@@ -130,7 +129,6 @@ SPEC REPOS:
     - nanopb
     - NKOColorPickerView
     - SDWebImage
-    - SwiftSVG
 
 EXTERNAL SOURCES:
   TSMessages:
@@ -143,25 +141,24 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
-  Alamofire: 16ce2c353fb72865124ddae8a57c5942388f4f11
+  Alamofire: 6458d95477bc40adf10129f22c67cfb014162dc8
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   Fabric: 25d0963b691fc97be566392243ff0ecef5a68338
-  Firebase: 749a8ff4962f9d8c79dda1966de20f6f77583d67
-  FirebaseAnalytics: d35d47c03c50c73c14a7fd31463c5775843e78a9
-  FirebaseCore: ea2d1816723ef21492b8e9113303e1350db5e08c
-  FirebaseInstanceID: 97ea7a5dca9afd72c79bfcdddb7a44aa1cbb42a1
+  Firebase: 2f5235e62f141cb86181c3af0dfe4509706351ac
+  FirebaseAnalytics: fd72a26bf8dac84cefba2f0864366f718555a5b0
+  FirebaseCore: f1a9a8be1aee4bf71a2fc0f4096df6788bdfda61
+  FirebaseInstanceID: a122b0c258720cf250551bb2bedf48c699f80d90
   GDataXML-HTML: 7adc03668cab35c288f1dbb8929a179f0fece898
-  GoogleAppMeasurement: 621f3bc6211d5ba548debe01fafad30cf5ab6859
-  GoogleUtilities: 111a012f4c3a29c9e7c954c082fafd6ee3c999c0
+  GoogleAppMeasurement: 1624046ab1bcc5e170061a56ef5679000b079c8e
+  GoogleUtilities: 6481e6318c5fcabaaa8513ef8120f329055d7c10
   HexColors: 6ad3947c3447a055a3aa8efa859def096351fe5f
   MMDrawerController: 7a4cf8e25596bf2434e03ce50d22a8608ddee6a1
   "MMDrawerController+Storyboard": c98f86c0f32cdef1d466d19a7da3ad2fc6c6ac00
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
   SDWebImage: c325cf02c30337336b95beff20a13df489ec0ec9
-  SwiftSVG: 19bc4e434dcf236ece45ddf75f5ee1d3ef8061e6
   TSMessages: eb3cf27b6900684a21bad4fe9ea426e287b8c839
 
-PODFILE CHECKSUM: f0c384b46300e977b8549474ce92b2ba197fb12c
+PODFILE CHECKSUM: c1dc5bc57b2d1d5a6d3c4961f5d9c15328676eaf
 
 COCOAPODS: 1.6.0.beta.1

@@ -67,79 +67,146 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 operation.securityPolicy.allowInvalidCertificates = true
             }
 
-            if appData()?.openHABVersion == 2 {
-                Alamofire.request(sitemapsRequest)
-                    .validate(statusCode: 200..<300)
-                    .responseJSON { response in
-                        if response.result.error == nil {
-                            os_log("HTTP Response Body: %{PUBLIC}@", log: .default, type: .info, response.data.debugDescription)
-                        } else {
-                            os_log("HTTP Request failed: %{PUBLIC}@", log: .default, type: .error, response.result.error.debugDescription)
-                        }
+            struct TestCertificates {
+                static let rootCA = TestCertificates.certificate(filename: "expired.badssl.com-root-ca")
+                static let intermediateCA1 = TestCertificates.certificate(filename: "expired.badssl.com-intermediate-ca-1")
+                static let intermediateCA2 = TestCertificates.certificate(filename: "expired.badssl.com-intermediate-ca-2")
+                static let leaf = TestCertificates.certificate(filename: "expired.badssl.com-leaf")
+
+                static func certificate(filename: String) -> SecCertificate {
+                    class Locator {}
+                    let filePath = Bundle(for: Locator.self).path(forResource: filename, ofType: "cer")!
+                    let data = try? Data(contentsOf: URL(fileURLWithPath: filePath))
+                    let certificate = SecCertificateCreateWithData(nil, data as! CFData)!
+
+                    return certificate
                 }
             }
 
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
-                let response = responseObject as? Data
-                self.sitemaps = []
-                os_log("Sitemap response", log: .default, type: .info)
+            let expiredHost = "expired.badssl.com"
 
-                // If we are talking to openHAB 1.X, talk XML
-                if self.appData()?.openHABVersion == 1 {
-                    os_log("openHAB 1", log: .default, type: .info)
+            let certificates = [TestCertificates.leaf]
 
-                    if let response = response {
-                        os_log("%{PUBLIC}@", log: .default, type: .info, String(data: response, encoding: .utf8) ?? "")
-                    }
-                    var doc: GDataXMLDocument?
-                    if let response = response {
-                        doc = try? GDataXMLDocument(data: response)
-                    }
-                    if doc == nil {
-                        return
-                    }
-                    if let name = doc?.rootElement().name() {
-                        os_log("%{PUBLIC}@", log: .default, type: .info, name)
-                    }
-                    if doc?.rootElement().name() == "sitemaps" {
-                        for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                            if let element = element as? GDataXMLElement {
-                                let sitemap = OpenHABSitemap(xml: element)
-                                self.sitemaps.append(sitemap)
-                            }
-                        }
-                    } else {
-                        return
-                    }
-                } else {
-                    // Newer versions speak JSON!
-                    let decoder = JSONDecoder()
-                    if let response = response {
-                        os_log("openHAB 2", log: .default, type: .info)
+            let evaluators = [
+                expiredHost: PinnedCertificatesTrustEvaluator(certificates: certificates)
+            ]
 
-                        do {
-                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                            let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+            var configuration: URLSessionConfiguration!
+
+            func setUp() {
+                configuration = URLSessionConfiguration.ephemeral
+                configuration.urlCache = nil
+                configuration.urlCredentialStorage = nil
+            }
+
+            setUp()
+
+            let manager = Session(
+                configuration: configuration,
+                serverTrustManager: ServerTrustManager(evaluators: evaluators)
+            )
+//            let serverTrustPolicies: [String: ServerTrustPolicy] = [
+//                "test.example.com": .pinCertificates(
+//                    certificates: ServerTrustPolicy.certificates(),
+//                    validateCertificateChain: true,
+//                    validateHost: true
+//                ),
+//                "insecure.expired-apis.com": .disableEvaluation
+//            ]
+//
+//            let sessionManager = SessionManager(
+//                serverTrustPolicyManager: ServerTrustPolicyManager(policies: serverTrustPolicies)
+//            )
+            // SessionManager --> Session
+            // serverTrustPolicyManager --> serverTrustManager
+            // ServerTrustPolicyManager --> ServerTrustManager
+
+            // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
+            if appData()?.openHABVersion == 2 {
+                let jsonDecoder = JSONDecoder()
+                //jsonDecoder.dateDecodingStrategy = .formatted(DateFormatter.articleDateFormatter)
+                manager.request(sitemapsRequest)
+                    .validate(statusCode: 200..<300)
+                    .responseDecodable(decoder: jsonDecoder) { (response: DataResponse<[OpenHABSitemap.CodingData]>) in
+                        switch response.result {
+                        case .failure(let error):
+                            os_log("HTTP Response Body: %{PUBLIC}@", log: .default, type: .info, response.data.debugDescription)
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                        case .success(let sitemapsCodingData):
                             for sitemapCodingDatum in sitemapsCodingData {
                                 if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
                                     os_log("Sitemap %{PUBLIC}@", log: .default, type: .info, sitemapCodingDatum.label)
-
                                     self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
                                 }
                             }
-                        } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                            self.appData()?.sitemaps = self.sitemaps
+                            self.tableView.reloadData()
                         }
-                    }
                 }
-                self.appData()?.sitemaps = self.sitemaps
-                self.tableView.reloadData()
-            }, failure: { operation, error in
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-            })
+            }
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            operation.start()
+
+//            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+//                let response = responseObject as? Data
+//                self.sitemaps = []
+//                os_log("Sitemap response", log: .default, type: .info)
+//
+//                // If we are talking to openHAB 1.X, talk XML
+//                if self.appData()?.openHABVersion == 1 {
+//                    os_log("openHAB 1", log: .default, type: .info)
+//
+//                    if let response = response {
+//                        os_log("%{PUBLIC}@", log: .default, type: .info, String(data: response, encoding: .utf8) ?? "")
+//                    }
+//                    var doc: GDataXMLDocument?
+//                    if let response = response {
+//                        doc = try? GDataXMLDocument(data: response)
+//                    }
+//                    if doc == nil {
+//                        return
+//                    }
+//                    if let name = doc?.rootElement().name() {
+//                        os_log("%{PUBLIC}@", log: .default, type: .info, name)
+//                    }
+//                    if doc?.rootElement().name() == "sitemaps" {
+//                        for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
+//                            if let element = element as? GDataXMLElement {
+//                                let sitemap = OpenHABSitemap(xml: element)
+//                                self.sitemaps.append(sitemap)
+//                            }
+//                        }
+//                    } else {
+//                        return
+//                    }
+//                } else {
+//                    // Newer versions speak JSON!
+//                    let decoder = JSONDecoder()
+//                    if let response = response {
+//                        os_log("openHAB 2", log: .default, type: .info)
+//
+//                        do {
+//                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
+//                            let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+//                            for sitemapCodingDatum in sitemapsCodingData {
+//                                if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
+//                                    os_log("Sitemap %{PUBLIC}@", log: .default, type: .info, sitemapCodingDatum.label)
+//                                    self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
+//                                }
+//                            }
+//                        } catch {
+//                            os_log("Should not throw %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+//                        }
+//                    }
+//                }
+//                self.appData()?.sitemaps = self.sitemaps
+//                self.tableView.reloadData()
+//            }, failure: { operation, error in
+//                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+//                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+//            })
+//            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+//            operation.start()
         }
     }
 

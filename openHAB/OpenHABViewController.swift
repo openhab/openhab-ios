@@ -674,6 +674,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 strongSelf.refreshControl?.endRefreshing()
                 strongSelf.navigationItem.title = strongSelf.currentPage?.title.components(separatedBy: "[")[0]
+                // Essential for the repetitive calling of loadPage
                 if longPolling == true {
                     strongSelf.loadPage(false)
                 } else {
