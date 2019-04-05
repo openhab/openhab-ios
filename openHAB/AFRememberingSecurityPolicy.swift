@@ -8,6 +8,7 @@
 //
 
 import AFNetworking
+import os.log
 
 protocol AFRememberingSecurityPolicyDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on what to do with invalid certificate
@@ -38,15 +39,15 @@ func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
 
 class AFRememberingSecurityPolicy: AFSecurityPolicy {
     class func initializeCertificatesStore() {
-        print("Initializing cert store")
+        os_log("Initializing cert store", log: .remoteAccess, type: .info)
         self.loadTrustedCertificates()
         if trustedCertificates.count == 0 {
-            print("No cert store, creating")
+            os_log("No cert store, creating", log: .remoteAccess, type: .info)
             trustedCertificates = [AnyHashable: Any]()
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             self.saveTrustedCertificates()
         } else {
-            print("Loaded existing cert store")
+            os_log("Loaded existing cert store", log: .remoteAccess, type: .info)
         }
     }
 

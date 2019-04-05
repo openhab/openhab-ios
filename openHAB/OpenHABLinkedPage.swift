@@ -16,7 +16,6 @@ import Foundation
     @objc var title = ""
     @objc var icon = ""
     @objc var link = ""
-    let propertyNames: Set = ["title", "icon", "link"]
 
     private enum CodingKeys: String, CodingKey {
         case pageId = "id"
@@ -26,6 +25,7 @@ import Foundation
     }
 
     @objc init(xml xmlElement: GDataXMLElement?) {
+        let propertyNames: Set = ["title", "icon", "link"]
         super.init()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
@@ -37,20 +37,6 @@ import Foundation
                     }
                 } else {
                     pageId = child.stringValue() ?? ""
-                }
-            }
-        }
-    }
-
-    @objc init(dictionary: [String: Any]) {
-        super.init()
-        for key in dictionary.keys {
-            if key == "id" {
-                pageId = dictionary[key] as? String ?? ""
-            } else {
-
-                if propertyNames.contains(key) {
-                    setValue(dictionary[key], forKey: key)
                 }
             }
         }

@@ -12,6 +12,7 @@ import SDWebImage
 import UIKit
 import AVKit
 import AVFoundation
+import os.log
 
 let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
@@ -44,34 +45,31 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var deviceName = ""
     var atmosphereTrackingId = ""
     var refreshControl: UIRefreshControl?
+    var iconType: Int = 0
 
     func openHABTracked(_ openHABUrl: String?) {
-        print("OpenHABViewController openHAB URL = \(openHABUrl ?? "")")
+        os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, openHABUrl ?? "")
+
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
         openHABRootUrl = openHABUrl ?? ""
         appData()?.openHABRootUrl = openHABRootUrl
 
-        // Checking openHAB version
-        var components = URLComponents(string: openHABRootUrl)
-        components?.path = "/rest/bindings"
-        if let pageToLoadUrl = components?.url {
+        if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             var pageRequest = URLRequest(url: pageToLoadUrl)
 
             pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
             pageRequest.timeoutInterval = 10.0
             let versionPageOperation = OpenHABHTTPRequestOperation(request: pageRequest, delegate: self)
-
             versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
-                print("This is an openHAB 2.X")
+                os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
                 self.appData()?.openHABVersion = 2
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.selectSitemap()
             }, failure: { operation, error in
-                print("This is an openHAB 1.X")
+                os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
                 self.appData()?.openHABVersion = 1
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                print("Error:------On Tracking>\(error.localizedDescription)")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("On Tracking %{PUBLIC}@ %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 self.selectSitemap()
             })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -92,17 +90,16 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 commandOperation = nil
             }
             commandOperation = OpenHABHTTPRequestOperation(request: commandRequest, delegate: self)
-
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-                print("Command sent!")
+                os_log("Command sent!", log: .remoteAccess, type: .info)
             }, failure: { operation, error in
-                print("Error:------>\(error.localizedDescription )")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                 os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
-            print("Timeout \(commandRequest.timeoutInterval)")
+            os_log("Timeout %{PUBLIC}@", log: .default, type: .info, commandRequest.timeoutInterval)
+
             if let link = item?.link {
-                print("OpenHABViewController posting \(command ?? "") command to \(link)")
-                print(commandRequest.debugDescription)
+                os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
+                os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
             }
             commandOperation?.start()
         }
@@ -111,7 +108,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("OpenHABViewController viewDidLoad")
+        os_log("OpenHABViewController viewDidLoad", log: .default, type: .info)
+
         pageNetworkStatus = nil //NetworkStatus(rawValue: -1)
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
@@ -159,7 +157,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     @objc func handleApsRegistration(_ note: Notification?) {
-        print("handleApsRegistration")
+        os_log("handleApsRegistration", log: .notifications, type: .info)
         let theData = note?.userInfo
         if theData != nil {
             deviceId = theData?["deviceId"] as? String ?? ""
@@ -176,22 +174,18 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func doRegisterAps() {
-        if let prefsURL = UserDefaults.standard.value(forKey: "remoteUrl") as? String, prefsURL.contains("openhab.org") {
+        if let prefsURL = UserDefaults.standard.string(forKey: "remoteUrl"), prefsURL.contains("openhab.org") {
             if deviceId != "" && deviceToken != "" && deviceName != "" {
-                print("Registering notifications with \(prefsURL)")
-
+                os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 if let registrationUrl = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
                     var registrationRequest = URLRequest(url: registrationUrl)
-
-                    print("Registration URL = \(registrationUrl.absoluteString)")
+                    os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
                     registrationRequest.setAuthCredentials(openHABUsername, openHABPassword)
                     let registrationOperation = OpenHABHTTPRequestOperation(request: registrationRequest, delegate: self)
                     registrationOperation.setCompletionBlockWithSuccess({ operation, responseObject in
-                        print("my.openHAB registration sent")
+                        os_log("my.openHAB registration sent", log: .notifications, type: .info)
                     }, failure: { operation, error in
-                        print("my.openHAB registration failed")
-                        print("Error:------>\(error.localizedDescription)")
-                        print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                        os_log("my.openHAB registration failed %{PUBLIC}@ %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                     })
                     registrationOperation.start()
                 }
@@ -200,7 +194,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        print("OpenHABViewController viewDidAppear")
+        os_log("OpenHABViewController viewDidAppear", log: .viewCycle, type: .info)
+
         super.viewDidAppear(animated)
         widgetTableView.reloadData() // reloading data for the first tableView serves another purpose, not exactly related to this question.
         widgetTableView.setNeedsLayout()
@@ -209,7 +204,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        print("OpenHABViewController viewWillAppear")
+        os_log("OpenHABViewController viewWillAppear", log: .viewCycle, type: .info)
         super.viewDidAppear(animated)
         // Load settings into local properties
         loadSettings()
@@ -232,24 +227,24 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 currentPage?.widgets = []
                 widgetTableView.reloadData()
             }
-            print("OpenHABViewController pageUrl is empty, this is first launch")
+            os_log("OpenHABViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             tracker = OpenHABTracker()
             tracker?.delegate = self
             tracker?.start()
         } else {
             if !pageNetworkStatusChanged() {
-                print("OpenHABViewController pageUrl = \(pageUrl), loading page")
+                os_log("OpenHABViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
                 loadPage(false)
             } else {
-                print("OpenHABViewController network status changed while I was not appearing")
+                os_log("OpenHABViewController network status changed while I was not appearing", log: .viewCycle, type: .info)
                 restart()
             }
         }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        print("OpenHABViewController viewWillDisappear")
+        os_log("OpenHABViewController viewWillDisappear", log: .viewCycle, type: .info)
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
@@ -258,7 +253,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     @objc func didEnterBackground(_ notification: Notification?) {
-        print("OpenHABViewController didEnterBackground")
+        os_log("OpenHABViewController didEnterBackground", log: .viewCycle, type: .info)
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
@@ -267,17 +262,17 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     @objc func didBecomeActive(_ notification: Notification?) {
-        print("OpenHABViewController didBecomeActive")
+        os_log("OpenHABViewController didBecomeActive", log: .viewCycle, type: .info)
         // re disable idle off timer
         if idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
         }
         if isViewLoaded && view.window != nil && pageUrl != "" {
             if !pageNetworkStatusChanged() {
-                print("OpenHABViewController isViewLoaded, restarting network activity")
+                os_log("OpenHABViewController isViewLoaded, restarting network activity", log: .viewCycle, type: .info)
                 loadPage(false)
             } else {
-                print("OpenHABViewController network status changed while it was inactive")
+                os_log("OpenHABViewController network status changed while it was inactive", log: .viewCycle, type: .info)
                 restart()
             }
         }
@@ -285,7 +280,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func restart() {
         if appData()?.rootViewController == self {
-            print("I am a rootViewController!")
+            os_log("I am a rootViewController!", log: .viewCycle, type: .info)
+
         } else {
             appData()?.rootViewController?.pageUrl = ""
             navigationController?.popToRootViewController(animated: true)
@@ -322,7 +318,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             if let height = widget?.height, height.intValue != 0 {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
-                print("Webview/Mapview height would be \(heightValue)")
+                os_log("Webview/Mapview height would be %{PUBLIC}@", log: .viewCycle, type: .info, heightValue)
+
                 return CGFloat(heightValue)
             } else {
                 // return default height for webview/mapview as 8 rows
@@ -376,64 +373,24 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // No icon is needed for image, video, frame and web widgets
         if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
-            var components = URLComponents(string: openHABRootUrl)
-
-            if appData()?.openHABVersion == 2 {
-                if let icon = widget?.icon {
-                    components?.path = "/icon/\(icon)"
-                    components?.queryItems = [
-                        URLQueryItem(name: "state", value: widget?.item?.state )
-                    ]
-                }
-            } else {
-                if let icon = widget?.icon {
-                    components?.path = "/images/\(icon).png"
-                }
-            }
-
-            let urlc = components?.url ?? URL(string: "")
+            let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
+                                    version: appData()?.openHABVersion ?? 2,
+                                    icon: widget?.icon,
+                                    value: widget?.item?.state ?? "",
+                                    iconType: iconType).url
+            //cell.imageView? = UIView(SVGNamed: urlc)
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
-
         }
 
         if let cell = cell as? NewImageUITableViewCell {
 
-            func createImageURL(with urlString: String) -> URL {
-                let random = Int.random(in: 0..<1000)
-                var components = URLComponents(string: urlString)
-                components?.queryItems?.append(contentsOf: [
-                    URLQueryItem(name: "random", value: String(random))
-                    ])
-                return components?.url ?? URL(string: "")!
-            }
-
-            func createChartURL(with baseUrl: String) -> URL {
-                let random = Int.random(in: 0..<1000)
-                var components = URLComponents(string: baseUrl)
-                components?.path = "/api"
-                components?.queryItems = [
-                    URLQueryItem(name: "period", value: widget!.period),
-                    URLQueryItem(name: "random", value: String(random))
-                ]
-
-                if (widget?.item?.type == "GroupItem") || (widget?.item?.type == "Group") {
-                    components?.queryItems?.append(URLQueryItem(name: "groups", value: widget?.item?.name))
-                } else {
-                    components?.queryItems?.append(URLQueryItem(name: "items", value: widget?.item?.name))
-                }
-                if widget?.service != "" && (widget?.service.count)! > 0 {
-                    components?.queryItems?.append(URLQueryItem(name: "service", value: widget?.service))
-                }
-                return components?.url ?? URL(string: "")!
-            }
-
             let createdURL: URL
             switch widget?.type {
             case "Chart":
-                print("Setting cell base url to \(openHABRootUrl)")
-                createdURL = createChartURL(with: openHABRootUrl)
+                createdURL = Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
+                os_log("Setting cell base url to  %{PUBLIC}@", log: .viewCycle, type: .info, openHABRootUrl)
             case "Image":
-                createdURL = createImageURL(with: widget?.url ?? "")
+                createdURL = URL(string: widget!.url)!
             default:
                 createdURL = URL(string: "")!
             }
@@ -496,7 +453,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
         if widget?.linkedPage != nil {
             if let link = widget?.linkedPage?.link {
-                print("Selected \(link)")
+                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
             }
             selectedWidgetRow = indexPath.row
             let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABViewController
@@ -506,7 +463,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 navigationController?.pushViewController(newViewController, animated: true)
             }
         } else if widget?.type == "Selection" {
-            print("Selected selection widget")
+            os_log("Selected selection widget", log: .viewCycle, type: .info)
+
             selectedWidgetRow = indexPath.row
             let selectionViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController
             let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
@@ -604,25 +562,25 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        print("OpenHABViewController prepareForSegue \(segue.identifier ?? "")")
+        os_log("OpenHABViewController prepareForSegue %{PUBLIC}@", log: .viewCycle, type: .info, segue.identifier ?? "")
         if segue.identifier?.isEqual("showPage") ?? false {
             let newViewController = segue.destination as? OpenHABViewController
             let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
             newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
         } else if segue.identifier?.isEqual("showSelectionView") ?? false {
-            print("Selection seague")
+            os_log("Selection seague", log: .viewCycle, type: .info)
         }
     }
 
     // OpenHABTracker delegate methods
     func openHABTrackingProgress(_ message: String?) {
-        print("OpenHABViewController \(message ?? "")")
+        os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
         TSMessage.showNotification(in: navigationController, title: "Connecting", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 3.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
     }
 
     func openHABTrackingError(_ error: Error) throws {
-        print("OpenHABViewController discovery error")
+        os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
         TSMessage.showNotification(in: navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 60.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
     }
@@ -651,7 +609,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if pageUrl == "" {
             return
         }
-        print("pageUrl = \(pageUrl)")
+        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
         if !longPolling {
@@ -668,7 +627,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
             if longPolling {
-                print("long polling, so setting atmosphere transport")
+                os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
                 pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
                 pageRequest.timeoutInterval = 300.0
             } else {
@@ -687,20 +646,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             currentPageOperation = OpenHABHTTPRequestOperation(request: pageRequest as URLRequest, delegate: self)
 
-            // If we are talking to openHAB 2+, we expect response to be JSON
-            if appData()?.openHABVersion == 2 {
-                print("Setting serializer to JSON")
-                //currentPageOperation?.responseSerializer = AFJSONResponseSerializer()
-            }
             // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
             let strongSelf: OpenHABViewController = self
             currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-                print("Page loaded with success")
+                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
                 let headers = operation.response?.allHeaderFields
 
                 if headers?["X-Atmosphere-tracking-id"] != nil {
                     if let object = headers?["X-Atmosphere-tracking-id"] {
-                        print("Found X-Atmosphere-tracking-id: \(object)")
+                        os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, object as! CVarArg)
                     }
                     // Establish the strong self reference
                     strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
@@ -716,14 +670,14 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         return
                     }
                     if let name = doc?.rootElement().name() {
-                        print("\(name)")
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
                     }
                     if doc?.rootElement().name() == "page" {
                         if let rootElement = doc?.rootElement() {
                             self.currentPage = OpenHABSitemapPage(xml: rootElement)
                         }
                     } else {
-                        print("Unable to find page root element")
+                        os_log("Unable to find page root element", log: .remoteAccess, type: .info)
                         return
                     }
                 } else {
@@ -731,12 +685,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     //self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String: Any] )
                     let decoder = JSONDecoder()
                     if let response = response {
-                        print("openHAB 2")
+                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
                         do {
                             let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: response)
                             self.currentPage = sitemapPageCodingData.openHABSitemapPage
                         } catch {
-                            print("Should not throw \(error)")
+                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                         }
                     }
                 }
@@ -752,15 +706,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                print("Error:------> on LoadPage \(error.localizedDescription )")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("On LoadPage %{PUBLIC}@ code: %{PUBLIC}@ ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 strongSelf.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001 && longPolling {
-                    print("Timeout, restarting requests")
+                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
                     strongSelf.loadPage(false)
                 } else if (error as NSError?)?.code == -999 {
-                    // Request was cancelled
-                    print("Request was cancelled")
+                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
                 } else {
                     // Error
                     if (error as NSError?)?.code == -1012 {
@@ -768,23 +720,18 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     } else {
                         TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
                     }
-                    print("Request failed: \(error.localizedDescription)")
+                    os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                 }
             })
-            print("OpenHABViewController sending new request")
+            os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
             currentPageOperation?.start()
-            print("OpenHABViewController request sent")
+            os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
         }}
 
     // Select sitemap
     func selectSitemap() {
 
-        var components = URLComponents(string: openHABRootUrl)
-        components?.path = "/rest/sitemaps"
-        components?.queryItems = [
-            URLQueryItem(name: "limit", value: "20")
-        ]
-        if let sitemapsUrl = components?.url {
+        if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
@@ -797,7 +744,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 // If we are talking to openHAB 1.X, talk XML
                 if self.appData()?.openHABVersion == 1 {
                     if let response = response {
-                        print("\(String(data: response, encoding: .utf8) ?? "")")
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
                     }
                     var doc: GDataXMLDocument?
                     if let response = response {
@@ -807,9 +754,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         return
                     }
                     if let name = doc?.rootElement().name() {
-                        print("\(name)")
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
                     }
-
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                             if let element = element as? GDataXMLElement {
@@ -823,13 +769,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     let decoder = JSONDecoder()
                     if let response = response {
                         do {
-                            print ("Response will be decoded by JSON")
+                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                             let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
                             for codingDatum in codingData {
                                 self.sitemaps.append(codingDatum.openHABSitemap)
                             }
                         } catch {
-                            print("Should not throw \(error)")
+                            os_log("Should not throw %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                         }
                     }
                 }
@@ -856,8 +802,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
 
             }, failure: { operation, error in
-                print("Error:------SelectSitemap>\(error.localizedDescription)")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 // Error
                 if (error as NSError?)?.code == -1012 {
@@ -866,7 +811,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
                 }
             })
-            print("Firing request")
+            os_log("Firing request", log: .viewCycle, type: .info)
+
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             operation .start()
         }
@@ -875,10 +821,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // load app settings
     func loadSettings() {
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
-        defaultSitemap = prefs.value(forKey: "defaultSitemap") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
+        defaultSitemap = prefs.string(forKey: "defaultSitemap") ?? ""
         idleOff = prefs.bool(forKey: "idleOff")
+        iconType = prefs.integer(forKey: "iconType")
         appData()?.openHABUsername = openHABUsername
         appData()?.openHABPassword = openHABPassword
     }
@@ -901,7 +848,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func pageNetworkStatusChanged() -> Bool {
-        print("OpenHABViewController pageNetworkStatusChange")
+        os_log("OpenHABViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
         if pageUrl != "" {
             let pageReachability = Reachability(hostname: pageUrl)
             if !pageNetworkStatusAvailable {

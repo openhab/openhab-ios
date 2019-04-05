@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import os.log
 
 class NotificationTableViewCell: UITableViewCell {
 
@@ -16,11 +17,9 @@ class NotificationTableViewCell: UITableViewCell {
     @IBOutlet weak var customDetailTextLabel: UILabel!
 
     required init?(coder: NSCoder) {
-        print("DrawerUITableViewCell initWithCoder")
+        os_log("DrawerUITableViewCell initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
-
         separatorInset = .zero
-
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

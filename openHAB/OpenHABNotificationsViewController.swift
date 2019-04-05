@@ -10,6 +10,7 @@
 
 import SDWebImage
 import UIKit
+import os.log
 
 class OpenHABNotificationsViewController: UITableViewController {
     var notifications: NSMutableArray = []
@@ -51,7 +52,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         let prefs = UserDefaults.standard
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-        if let notificationsUrl = Endpoint.notification(prefsURL: prefs.value(forKey: "remoteUrl") as! String).url {
+        if let notificationsUrl = Endpoint.notification(prefsURL: prefs.string(forKey: "remoteUrl") ?? "").url {
             var notificationsRequest = URLRequest(url: notificationsUrl)
             notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             let operation = OpenHABHTTPRequestOperation(request: notificationsRequest, delegate: nil)
@@ -67,7 +68,7 @@ class OpenHABNotificationsViewController: UITableViewController {
                             self.notifications.add(codingDatum.openHABNotification)
                         }
                     } catch {
-                        print("should not throw \(error)")
+                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
                 }
 
@@ -76,8 +77,8 @@ class OpenHABNotificationsViewController: UITableViewController {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                print("Error:------>\(error.localizedDescription)")
-                print(String(format: "error code %ld", Int(operation.response?.statusCode ?? 0)))
+                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
             })
             operation.start()
@@ -85,7 +86,7 @@ class OpenHABNotificationsViewController: UITableViewController {
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
-        print("Refresh pulled")
+        os_log("Refresh pulled", log: .default, type: .info)
         loadNotifications()
     }
 
@@ -113,19 +114,8 @@ class OpenHABNotificationsViewController: UITableViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
         cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
-
-        var iconUrlString: String?
-        if appData()?.openHABVersion == 2 {
-            if let app = appData()?.openHABRootUrl, let icon = notification?.icon {
-                iconUrlString = "\(app)/icon/\(icon).png"
-            }
-        } else {
-            if let app = appData()?.openHABRootUrl, let icon = notification?.icon {
-                iconUrlString = "\(app)/images/\(icon).png"
-            }
-        }
-        print("\(iconUrlString ?? "")")
-        cell?.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
+        let iconUrl = Endpoint.icon(rootUrl: appData()!.openHABRootUrl, version: appData()!.openHABVersion, icon: notification?.icon, value: "", iconType: 0).url
+        cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
         }
@@ -144,8 +134,8 @@ class OpenHABNotificationsViewController: UITableViewController {
 
     func loadSettings() {
         let prefs = UserDefaults.standard
-        openHABUsername = prefs.value(forKey: "username") as? String ?? ""
-        openHABPassword = prefs.value(forKey: "password") as? String ?? ""
+        openHABUsername = prefs.string(forKey: "username") ?? ""
+        openHABPassword = prefs.string(forKey: "password") ?? ""
         //    self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
         //    self.idleOff = [prefs boolForKey:@"idleOff"];
         appData()?.openHABUsername = openHABUsername

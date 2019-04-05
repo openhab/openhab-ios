@@ -8,7 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
-import QuartzCore
+import os.log
 
 class RollershutterUITableViewCell: GenericUITableViewCell {
 
@@ -31,13 +31,13 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     }
 
     required init?(coder: NSCoder) {
-        print("RollershutterUITableViewCell initWithCoder")
+        os_log("RollershutterUITableViewCell initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
         initialize()
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        print("RollershutterUITableViewCell initWithCoder")
+        os_log("RollershutterUITableViewCell initWithStyle", log: .viewCycle, type: .info)
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
     }
@@ -47,18 +47,18 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func upButtonPressed() {
-        print("up button pressed")
+        os_log("up button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("UP")
 
     }
 
     @objc func stopButtonPressed() {
-        print("stop button pressed")
+        os_log("stop button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("STOP")
     }
 
     @objc func downButtonPressed() {
-        print("down button pressed")
+        os_log("down button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("DOWN")
     }
 }

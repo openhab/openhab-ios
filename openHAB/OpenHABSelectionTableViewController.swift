@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import os.log
 
 @objc class OpenHABSelectionTableViewController: UITableViewController {
     @objc var mappings: [AnyHashable] = []
@@ -25,7 +26,7 @@ import UIKit
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        print(String(format: "I have %lu mappings", UInt(mappings.count)))
+        os_log("I have %{PUBLIC}@ mappings", log: .viewCycle, type: .info, UInt(mappings.count))
 
         // Uncomment the following line to preserve selection between presentations.
         // self.clearsSelectionOnViewWillAppear = NO;
@@ -56,7 +57,7 @@ import UIKit
         let mapping = mappings[indexPath.row] as? OpenHABWidgetMapping
         cell.textLabel?.text = mapping?.label
         if selectionItem?.state == mapping?.command {
-            print("This item is selected")
+            os_log("This item is selected", log: .viewCycle, type: .info)
             cell.accessoryType = .checkmark
         } else {
             cell.accessoryType = .none
@@ -65,7 +66,8 @@ import UIKit
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(String(format: "Selected mapping %ld", indexPath.row))
+        os_log("Selected mapping %{PUBLIC}@", log: .viewCycle, type: .info, indexPath.row)
+
         if delegate != nil {
             delegate?.didSelectWidgetMapping(indexPath.row)
         }

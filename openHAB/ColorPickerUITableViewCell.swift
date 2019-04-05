@@ -8,6 +8,8 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import os.log
+
 @objc protocol ColorPickerUITableViewCellDelegate: NSObjectProtocol {
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?)
 }
@@ -23,7 +25,8 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     @objc weak var delegate: ColorPickerUITableViewCellDelegate?
 
     required init?(coder: NSCoder) {
-        print("RollershutterUITableViewCell initWithCoder")
+        os_log("ColorPickerUITableViewCell initWithCoder", log: OSLog.viewCycle, type: .info)
+
         super.init(coder: coder)
 
         upButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.upButtonPressed), for: .touchUpInside)

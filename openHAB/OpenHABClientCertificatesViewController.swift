@@ -7,13 +7,14 @@
 
 import SDWebImage
 import UIKit
+import os.log
 
 class OpenHABClientCertificatesViewController: UITableViewController {
     var clientCertificates: [SecIdentity] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("OpenHABClientCertificatesViewController viewDidLoad")
+        os_log("OpenHABClientCertificatesViewController viewDidLoad", log: .default, type: .info)
 
         tableView.tableFooterView = UIView()
         tableView.allowsMultipleSelectionDuringEditing = false

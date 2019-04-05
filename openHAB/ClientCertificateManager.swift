@@ -5,6 +5,8 @@
 //  Created by David O'Neill on 03/09/19.
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
+import os.log
+
 protocol ClientCertificateManagerDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?)
@@ -74,14 +76,14 @@ class ClientCertificateManager {
         let addCertQuery : [ String: Any ] = [ kSecClass as String: kSecClassCertificate,
                                                kSecValueRef as String: cert ]
         var status = SecItemAdd(addCertQuery as NSDictionary, nil)
-        print("SecItemAdd(cert) result=", status)
+        os_log("SecItemAdd(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
         if status == noErr {
             let addKeyQuery : [ String: Any ] = [ kSecClass as String: kSecClassKey,
                                                   kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
                                                   kSecAttrIsPermanent as String: true,
                                                   kSecValueRef as String: key ]
             status = SecItemAdd(addKeyQuery as NSDictionary, nil)
-            print("SecItemAdd(key) result=", status)
+            os_log("SecItemAdd(key) result=%{PUBLIC}d", log: .default, type: .info, status)
             if status == noErr {
                 // Refresh identities from the keychain
                 loadFromKeychain()
@@ -90,7 +92,7 @@ class ClientCertificateManager {
                 let deleteCertQuery : [ String: Any ] = [ kSecClass as String: kSecClassCertificate,
                                                        kSecValueRef as String: cert ]
                 let status = SecItemDelete(deleteCertQuery as NSDictionary)
-                print("SecItemDelete(cert) result=", status)
+                os_log("SecItemDelete(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
             }
         }
 
@@ -108,12 +110,12 @@ class ClientCertificateManager {
         let deleteCertQuery : [ String: Any ] = [ kSecClass as String: kSecClassCertificate,
                                                kSecValueRef as String: cert! ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
-        print("SecItemDelete(cert) result=", status)
+        os_log("SecItemDelete(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
         if status == noErr {
             let deleteKeyQuery : [ String: Any ] = [ kSecClass as String: kSecClassKey,
                                                   kSecValueRef as String: key! ]
             status = SecItemDelete(deleteKeyQuery as NSDictionary)
-            print("SecItemDelete(key) result=", status)
+            os_log("SecItemDelete(key) result=%{PUBLIC}d", log: .default, type: .info, status)
             clientIdentities.remove(at: index)
         }
         return status
@@ -130,7 +132,7 @@ class ClientCertificateManager {
                 return false
             }
         } catch {
-            print("Unable to read certificate from URL")
+            os_log("Unable to read certificate from URL", log: .default, type: .info)
             return false
         }
         return true
@@ -185,7 +187,7 @@ class ClientCertificateManager {
             SecIdentityCopyPrivateKey(identity, &importingClientKey)
             SecIdentityCopyCertificate(identity, &importingClientCert)
         } else {
-            print("SecPKCS12Import failed; result=", status)
+            os_log("SecPKCS12Import failed; result=%{PUBLIC}d", log: .default, type: .info, status)
         }
         return status
     }

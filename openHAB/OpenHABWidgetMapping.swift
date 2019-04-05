@@ -15,9 +15,8 @@ import Foundation
     @objc var command = ""
     @objc var label = ""
 
-    let propertyNames: Set = ["command", "label"]
-
     @objc init(xml xmlElement: GDataXMLElement?) {
+        let propertyNames: Set = ["command", "label"]
         super.init()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {

@@ -5,6 +5,8 @@
 //  Created by David O'Neill on 03/09/19.
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
+import os.log
+
 class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
     static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
 
@@ -41,7 +43,7 @@ class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
         let ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
 
         if ignoreSSLCertificate {
-            print("Warning - ignoring invalid certificates")
+            os_log("Warning - ignoring invalid certificates", log: .default, type: .info)
             policy.allowInvalidCertificates = true
             policy.validatesDomainName = false
         }

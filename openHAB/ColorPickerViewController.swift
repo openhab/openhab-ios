@@ -9,27 +9,28 @@
 //
 
 import UIKit
+import os.log
 
 class ColorPickerViewController: UIViewController {
     @objc var widget: OpenHABWidget?
     var colorPickerView: NKOColorPickerView?
 
     required init?(coder: NSCoder) {
-        print("ColorPickerViewController initWithCoder")
+        os_log("ColorPickerViewController initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
     }
 
     override func viewDidLoad() {
-        print("ColorPickerViewController viewDidLoad")
+        os_log("ColorPickerViewController viewDidLoad", log: .viewCycle, type: .info)
         let colorDidChangeBlock: NKOColorPickerDidChangeColorBlock = { color in
-
             var (hue, saturation, brightness, alpha): (CGFloat, CGFloat, CGFloat, CGFloat) = (0.0, 0.0, 0.0, 0.0)
             color?.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
 
             hue *= 360
             saturation *= 100
             brightness *= 100
-            print("Color changed to \(hue) \(saturation) \(brightness)")
+            os_log("Color changed to %{PUBLIC}@ %{PUBLIC}@ %{PUBLIC}@", log: .default, type: .info, hue, saturation, brightness)
+
             let command = "\(hue),\(saturation),\(brightness)"
             self.widget?.sendCommand(command)
 
@@ -47,7 +48,7 @@ class ColorPickerViewController: UIViewController {
     }
 
     override func didRotate(from fromInterfaceOrientation: UIInterfaceOrientation) {
-        print("Rotation!")
+        os_log("Rotation!", log: .viewCycle, type: .info)
         let viewFrame: CGRect = view.frame
         let pickerFrame = CGRect(x: viewFrame.origin.x, y: viewFrame.origin.y, width: viewFrame.size.width, height: viewFrame.size.height - viewFrame.size.height / 5)
         colorPickerView?.frame = pickerFrame

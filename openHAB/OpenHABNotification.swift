@@ -55,7 +55,6 @@ extension OpenHABNotification.CodingData {
     var created: Date?
     var icon = ""
     var severity = ""
-    let propertyNames: Set = ["message", "icon", "severity"]
 
     init(message: String, created: Date?) {
         self.message = message
@@ -63,6 +62,7 @@ extension OpenHABNotification.CodingData {
     }
 
     init(dictionary: [String: Any]) {
+        let propertyNames: Set = ["message", "icon", "severity"]
         super.init()
         let keyArray = dictionary.keys
         for key in keyArray {

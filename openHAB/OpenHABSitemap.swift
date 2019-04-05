@@ -59,8 +59,6 @@ extension OpenHABSitemap.CodingData {
     var leaf = ""
     var homepageLink = ""
 
-    let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
-
     init(name: String, link: String, label: String, leaf: Bool, homepageLink: String) {
         self.name = name
         self.link = link
@@ -70,6 +68,7 @@ extension OpenHABSitemap.CodingData {
     }
 
     init(xml xmlElement: GDataXMLElement?) {
+        let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
         super.init()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
@@ -89,27 +88,6 @@ extension OpenHABSitemap.CodingData {
                         setValue(child.stringValue, forKey: child.name() )
                     }
                 }
-            }
-        }
-    }
-
-    init(dictionary: [String: Any]) {
-        super.init()
-        let keyArray = dictionary.keys
-        for key in keyArray {
-            if key == "homepage" {
-                let homepageDictionary = dictionary[key] as? [String: Any]
-                let homepageKeyArray = homepageDictionary!.keys
-                for homepageKey in homepageKeyArray {
-                    if homepageKey == "link" {
-                        homepageLink = homepageDictionary?[homepageKey] as? String ?? ""
-                    }
-                    if homepageKey == "leaf" {
-                        leaf = homepageDictionary?[homepageKey] as? String ?? ""
-                    }
-                }
-            } else if propertyNames.contains(key) {
-                setValue(dictionary[key], forKey: key)
             }
         }
     }
