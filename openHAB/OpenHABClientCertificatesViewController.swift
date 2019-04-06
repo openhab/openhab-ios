@@ -40,7 +40,7 @@ class OpenHABClientCertificatesViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if (editingStyle == UITableViewCell.EditingStyle.delete) {
+        if editingStyle == UITableViewCell.EditingStyle.delete {
             let status = OpenHABHTTPRequestOperation.clientCertificateManager.deleteFromKeychain(index: indexPath.row)
             if status == noErr {
                 tableView.deleteRows(at: [indexPath], with: .fade)

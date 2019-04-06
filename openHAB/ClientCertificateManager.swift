@@ -62,10 +62,8 @@ class ClientCertificateManager {
             var cert: SecCertificate?
             SecIdentityCopyCertificate(identity, &cert)
             let issuer = SecCertificateCopyNormalizedIssuerSequence(cert!)
-            for dn in distinguishedNames {
-                if dn == issuer! as Data {
-                    return identity
-                }
+            for dn in distinguishedNames where dn == issuer! as Data {
+                return identity
             }
         }
         return nil
