@@ -92,6 +92,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("URL scheme: %{PUBLIC}@", log: .notifications, type: .info, url.scheme ?? "")
         os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
 
+        if url.isFileURL {
+            let clientCertificateManager = OpenHABHTTPRequestOperation.clientCertificateManager
+            clientCertificateManager.delegate = appData!.rootViewController!
+            return clientCertificateManager.startImportClientCertificate(url: url)
+        }
+
         return true
     }
 

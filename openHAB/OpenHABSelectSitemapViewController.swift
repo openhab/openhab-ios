@@ -20,7 +20,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-    var ignoreSSLCertificate = false
 
     override init(style: UITableView.Style) {
         super.init(style: style)
@@ -47,7 +46,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         let prefs = UserDefaults.standard
         openHABUsername = prefs.string(forKey: "username") ?? ""
         openHABPassword = prefs.string(forKey: "password") ?? ""
-        ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -57,15 +55,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
 
-            let operation = AFHTTPRequestOperation(request: sitemapsRequest)
-
-            let policy = AFRememberingSecurityPolicy(pinningMode: .none)
-            operation.securityPolicy = policy
-            if ignoreSSLCertificate {
-                os_log("Warning - ignoring invalid certificates", log: .remoteAccess, type: .info)
-
-                operation.securityPolicy.allowInvalidCertificates = true
-            }
+            let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest as URLRequest, delegate: nil)
 
             if appData()?.openHABVersion == 2 {
                 Alamofire.request(sitemapsRequest)
