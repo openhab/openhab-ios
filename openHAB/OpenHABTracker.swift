@@ -54,17 +54,18 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                     // If it is WiFi
                 } else {
                     os_log("OpenHABTracker network is Wifi", log: .default, type: .info)
-                    // Check if local URL is configured, if yes
-                    if openHABLocalUrl.count > 0 {
-                        //if Reachability(hostname: openHABLocalUrl) {
-                        if isURLReachable(URL(string: openHABLocalUrl)) {
-                            trackedLocalUrl()
-                        } else {
-                            trackedRemoteUrl()
-                        }
-                        // If not, go for Bonjour discovery
-                    } else {
+                    // Check if local URL is configured
+                    if openHABLocalUrl.isEmpty {
                         startDiscovery()
+                    } else {
+                        let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+                        URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
+                            if error == nil {
+                                self.trackedLocalUrl()
+                            } else {
+                                self.trackedRemoteUrl()
+                            }
+                        }).resume()
                     }
                 }
             }
@@ -190,24 +191,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         let socketAddress: sockaddr_in = data.castToCPointer()
         ipString = String(cString: inet_ntoa(socketAddress.sin_addr), encoding: .ascii)  ///problem here
         return ipString
-    }
-
-    func isURLReachable(_ url: URL?) -> Bool {
-        var result: Bool = false
-
-        if let url = url {
-            let request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-            let session = URLSession.shared
-            let task = session.dataTask(with: request,
-                                        completionHandler: { data, response, error -> Void in
-                                            if error == nil {
-                                                result = true
-                                            } else {
-                                                result = false
-                                            }})
-            task.resume()
-        }
-        return result
     }
 
     func string(from status: Reachability.Connection) -> String? {
