@@ -9,23 +9,27 @@
 //
 import os.log
 
+fileprivate extension Selector {
+    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
+}
+
 class SwitchUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet var widgetSwitch: UISwitch!
 
-    private func initiliaze() {
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
+    override func initialize() {
+        selectionStyle = .none
+        separatorInset = .zero
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        self.initiliaze()
+        self.initialize()
     }
 
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.initiliaze()
+        self.initialize()
     }
 
     override func displayWidget() {
@@ -45,11 +49,11 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         } else {
             widgetSwitch?.isOn = false
         }
-        widgetSwitch?.addTarget(self, action: #selector(SwitchUITableViewCell.switchChange(_:)), for: .valueChanged)
+        widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
         super.displayWidget()
     }
 
-    @objc func switchChange(_ sender: Any?) {
+    @objc func switchChange() {
         if (widgetSwitch?.isOn)! {
             os_log("Switch to ON", log: .viewCycle, type: .info)
             widget.sendCommand("ON")
