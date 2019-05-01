@@ -23,8 +23,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
+        selectionStyle = .none
+        separatorInset = .zero
 
     }
 
