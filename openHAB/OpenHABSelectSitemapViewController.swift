@@ -10,7 +10,6 @@
 
 import SDWebImage
 import UIKit
-import Alamofire
 import os.log
 
 class OpenHABSelectSitemapViewController: UITableViewController {
@@ -56,18 +55,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
 
             let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest as URLRequest, delegate: nil)
-
-            if appData()?.openHABVersion == 2 {
-                Alamofire.request(sitemapsRequest)
-                    .validate(statusCode: 200..<300)
-                    .responseJSON { response in
-                        if response.result.error == nil {
-                            os_log("HTTP Response Body: %{PUBLIC}@", log: .default, type: .info, response.data.debugDescription)
-                        } else {
-                            os_log("HTTP Request failed: %{PUBLIC}@", log: .default, type: .error, response.result.error.debugDescription)
-                        }
-                }
-            }
 
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data

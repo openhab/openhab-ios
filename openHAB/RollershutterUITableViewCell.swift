@@ -10,6 +10,14 @@
 
 import os.log
 
+// inspired by: Selectors in swift: A better approach using extensions
+// https://medium.com/@abhimuralidharan/selectors-in-swift-a-better-approach-using-extensions-aa6b0416e850
+fileprivate extension Selector {
+    static let upButtonPressed = #selector(RollershutterUITableViewCell.upButtonPressed)
+    static let stopButtonPressed = #selector(RollershutterUITableViewCell.stopButtonPressed)
+    static let downButtonPressed = #selector(RollershutterUITableViewCell.downButtonPressed)
+}
+
 class RollershutterUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet weak var downButton: UICircleButton!
@@ -17,17 +25,8 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var upButton: UICircleButton!
 
     override func initialize() {
-
-        upButton?.setTitle("▲", for: .normal)
-        stopButton?.setTitle("■", for: .normal)
-        downButton?.setTitle("▼", for: .normal)
-
-        upButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.upButtonPressed), for: .touchUpInside)
-        stopButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.stopButtonPressed), for: .touchUpInside)
-        downButton?.addTarget(self, action: #selector(RollershutterUITableViewCell.downButtonPressed), for: .touchUpInside)
-
-        selectionStyle = UITableViewCell.SelectionStyle.none
-        separatorInset = UIEdgeInsets.zero
+        selectionStyle = .none
+        separatorInset = .zero
     }
 
     required init?(coder: NSCoder) {
@@ -44,12 +43,19 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
 
     override func displayWidget() {
         customTextLabel?.text = widget.labelText()
+
+        self.upButton?.setTitle("▲", for: .normal)
+        self.stopButton?.setTitle("■", for: .normal)
+        downButton?.setTitle("▼", for: .normal)
+
+        upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
+        stopButton?.addTarget(self, action: .stopButtonPressed, for: .touchUpInside)
+        downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
     }
 
     @objc func upButtonPressed() {
         os_log("up button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("UP")
-
     }
 
     @objc func stopButtonPressed() {

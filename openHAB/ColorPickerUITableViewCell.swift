@@ -14,6 +14,11 @@ import os.log
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?)
 }
 
+fileprivate extension Selector {
+    static let upButtonPressed = #selector(ColorPickerUITableViewCell.upButtonPressed)
+    static let downButtonPressed = #selector(ColorPickerUITableViewCell.downButtonPressed)
+}
+
 class ColorPickerUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var upButton: UICircleButton!
     @IBOutlet weak var colorButton: UICircleButton!
@@ -29,8 +34,6 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
 
         super.init(coder: coder)
 
-        upButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.upButtonPressed), for: .touchUpInside)
-        downButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = .none
         separatorInset = .zero
     }
@@ -38,8 +41,6 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        upButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.upButtonPressed), for: .touchUpInside)
-        downButton?.addTarget(self, action: #selector(ColorPickerUITableViewCell.downButtonPressed), for: .touchUpInside)
         selectionStyle = .none
         separatorInset = .zero
     }
@@ -47,13 +48,18 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         customTextLabel?.text = widget.labelText()
         colorButton?.backgroundColor = widget.item?.stateAsUIColor()
+        upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
+        downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
+
     }
 
     @objc func upButtonPressed() {
+        os_log("ON button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("ON")
     }
 
     @objc func downButtonPressed() {
+        os_log("OFF button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("OFF")
     }
 }
