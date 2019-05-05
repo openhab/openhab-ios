@@ -8,8 +8,8 @@
 //
 
 import Foundation
-import SystemConfiguration
 import os.log
+import SystemConfiguration
 
 protocol OpenHABTrackerDelegate: AnyObject {
     func openHABTracked(_ openHABUrl: String?)

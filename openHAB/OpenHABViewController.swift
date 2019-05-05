@@ -8,13 +8,13 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import AVFoundation
+import AVKit
+import os.log
 import SDWebImage
 import UIKit
-import AVKit
-import AVFoundation
-import os.log
 
-let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
+//let manager: SDWebImageDownloader? = SDWebImageManager.shared.imageLoader
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
@@ -50,7 +50,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func openHABTracked(_ openHABUrl: String?) {
         os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, openHABUrl ?? "")
 
-        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        }
         openHABRootUrl = openHABUrl ?? ""
         appData()?.openHABRootUrl = openHABRootUrl
 
@@ -63,12 +65,16 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
                 os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
                 self.appData()?.openHABVersion = 2
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                DispatchQueue.main.async {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
                 self.selectSitemap()
             }, failure: { operation, error in
                 os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
                 self.appData()?.openHABVersion = 1
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                DispatchQueue.main.async {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
                 os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 self.selectSitemap()
             })
@@ -381,25 +387,25 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
         }
 
-        if let cell = cell as? NewImageUITableViewCell {
-
-            let createdURL: URL
-            switch widget?.type {
-            case "Chart":
-                createdURL = Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
-                os_log("Setting cell base url to  %{PUBLIC}@", log: .viewCycle, type: .info, openHABRootUrl)
-            case "Image":
-                createdURL = URL(string: widget!.url)!
-            default:
-                createdURL = URL(string: "")!
-            }
-
-            cell.mainImageView.sd_setImage(with: createdURL, placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
-                widget?.image = image
-                cell.layoutIfNeeded()
-            }
-            cell.layoutIfNeeded()
-        }
+//        if let cell = cell as? NewImageUITableViewCell {
+//
+//            let createdURL: URL
+//            switch widget?.type {
+//            case "Chart":
+//                createdURL = Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
+//                os_log("Setting cell base url to  %{PUBLIC}@", log: .viewCycle, type: .info, openHABRootUrl)
+//            case "Image":
+//                createdURL = URL(string: widget!.url)!
+//            default:
+//                createdURL = URL(string: "")!
+//            }
+//
+//            cell.mainImageView.sd_setImage(with: createdURL, placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
+//                widget?.image = image
+//                cell.layoutIfNeeded()
+//            }
+//            cell.layoutIfNeeded()
+//        }
 
         if cell is FrameUITableViewCell {
             cell.backgroundColor = UIColor.groupTableViewBackground
@@ -571,13 +577,18 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // OpenHABTracker delegate methods
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        TSMessage.showNotification(in: navigationController, title: "Connecting", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 3.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+        DispatchQueue.main.async {
+            TSMessage.showNotification(in: self.navigationController, title: "Connecting", subtitle: message, image: nil, type: .message, duration: 3.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at:
+                TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+        }
     }
 
     func openHABTrackingError(_ error: Error) throws {
         os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
-        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        TSMessage.showNotification(in: navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 60.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 60.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+        }
     }
 
     // send command to an item
@@ -710,10 +721,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
                 } else {
                     // Error
-                    if (error as NSError?)?.code == -1012 {
-                        TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
-                    } else {
-                        TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    DispatchQueue.main.async {
+                        if (error as NSError?)?.code == -1012 {
+                            TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                        } else {
+                            TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                        }
                     }
                     os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                 }
@@ -793,17 +806,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         self.loadPage(false)
                     }
                 } else {
+                    DispatchQueue.main.async {
                     TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "openHAB returned empty sitemap list", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    }
                 }
 
             }, failure: { operation, error in
                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                // Error
-                if (error as NSError?)?.code == -1012 {
-                    TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
-                } else {
-                    TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                DispatchQueue.main.async {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                    // Error
+                    if (error as NSError?)?.code == -1012 {
+                        TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    } else {
+                        TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    }
                 }
             })
             os_log("Firing request", log: .viewCycle, type: .info)
@@ -827,11 +844,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // Set SDImage (used for widget icons and images) authentication
     func setSDImageAuth() {
-        let authStr = "\(openHABUsername):\(openHABPassword)"
-        let authData: Data? = authStr.data(using: .ascii)
-        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-        // let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
-        manager?.setValue(authValue, forHTTPHeaderField: "Authorization")
+//        let authStr = "\(openHABUsername):\(openHABPassword)"
+//        let authData: Data? = authStr.data(using: .ascii)
+//        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
+//        let manager: SDImageLoader = SDWebImageManager.shared.imageLoader
+//        manager.setValue(authValue, forHTTPHeaderField: "Authorization")
+
+        let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
+            let authStr = "\(self.openHABUsername):\(self.openHABPassword)"
+            let authData: Data? = authStr.data(using: .ascii)
+            let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
+            var r = request
+            r.setValue(authValue, forHTTPHeaderField: "Authorization")
+            return r
+        }
+        SDWebImageDownloader.shared.requestModifier = requestModifier
     }
 
     // Find and return sitemap by it's name if any

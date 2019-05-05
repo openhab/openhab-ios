@@ -54,15 +54,15 @@ extension OpenHABWidget.CodingData {
 class OpenHABWidget: NSObject, MKAnnotation {
     weak var delegate: OpenHABWidgetDelegate?
     var widgetId = ""
-    var label = "" // String?
-    var icon = ""// String?
+    var label = ""
+    var icon = ""
     var type = ""
     var url = ""
     var period = ""
     var minValue = 0.0
     var maxValue = 100.0
     var step = 1.0
-    var refresh: Int?
+    var refresh = 0
     var height = ""
     var isLeaf = ""
     var iconColor = ""
@@ -94,7 +94,12 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.minValue = minValue ?? 0.0
         self.maxValue = maxValue ?? 100.0
         self.step = step ?? 1.0
-        self.refresh = refresh
+        // Consider a minimal refresh rate of 100 ms, but 0 is special and means 'no refresh'
+        if let refreshVal = refresh, refreshVal > 0 {
+            self.refresh = max(100, refreshVal)
+        } else {
+            self.refresh = 0
+        }
         self.height = toString(height)
         self.isLeaf = isLeaf ?? ""
         self.iconColor = iconColor ?? ""

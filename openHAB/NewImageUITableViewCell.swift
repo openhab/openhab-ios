@@ -6,11 +6,20 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
+import os.log
+import SDWebImage
 import UIKit
 
-class NewImageUITableViewCell: UITableViewCell {
+protocol NewImageUITableViewCellDelegate: class {
+    func didLoadImageOf(_ cell: NewImageUITableViewCell?)
+}
+
+class NewImageUITableViewCell: GenericUITableViewCell {
 
     var mainImageView: ScaledHeightImageView!
+    var refreshTimer: Timer?
+
+    weak var delegate: NewImageUITableViewCellDelegate?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -36,6 +45,61 @@ class NewImageUITableViewCell: UITableViewCell {
 
         fatalError("init(coder:) has not been implemented")
 
+    }
+
+    override func displayWidget() {
+        if widget?.image == nil {
+            loadImage()
+        } else {
+            mainImageView.image = widget?.image
+        }
+        // If widget have a refresh rate configured, i.e. different from zero, schedule an image update timer
+        if widget.refresh != 0 {
+            if refreshTimer != nil {
+                refreshTimer?.invalidate()
+                refreshTimer = nil
+            }
+            let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
+            if refreshInterval > 0.09 {
+                os_log("Sheduling image refresh every %g seconds", log: .viewCycle, type: .info, refreshInterval)
+                refreshTimer = Timer.scheduledTimer(timeInterval: refreshInterval, target: self,
+                                                    selector: #selector(NewImageUITableViewCell.refreshImage(_:)), userInfo: nil, repeats: true)
+            }
+        }
+    }
+
+    func createURL() -> URL {
+        switch widget?.type {
+//        case "Chart":
+//            return Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
+        case "Image":
+            return URL(string: widget!.url)!
+        default:
+            return URL(string: "")!
+        }
+    }
+
+    // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
+    func loadImage() { //, options: .cacheMemoryOnly
+        mainImageView?.sd_setImage(with: createURL(), placeholderImage: UIImage(named: "blankicon.png")) { [weak self] (image, error, cacheType, imageURL) in
+            self?.widget?.image = image
+            self?.layoutIfNeeded()
+            if self?.delegate != nil {
+                self?.delegate?.didLoadImageOf(self)
+            }
+        }
+    }
+
+    @objc func refreshImage(_ timer: Timer?) {
+        os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
+        //  options: .cacheMemoryOnly
+        mainImageView?.sd_setImage(with: createURL(), placeholderImage: widget?.image) { [weak self] (image, error, cacheType, imageURL) in
+            self?.widget?.image = image
+            self?.layoutIfNeeded()
+            if self?.delegate != nil {
+                self?.delegate?.didLoadImageOf(self)
+            }
+        }
     }
 }
 

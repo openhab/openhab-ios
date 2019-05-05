@@ -8,9 +8,9 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import os.log
 import SDWebImage
 import UIKit
-import os.log
 
 class OpenHABNotificationsViewController: UITableViewController {
     var notifications: NSMutableArray = []
