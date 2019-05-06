@@ -54,7 +54,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
         }
         openHABRootUrl = openHABUrl ?? ""
-        appData()?.openHABRootUrl = openHABRootUrl
+        appData?.openHABRootUrl = openHABRootUrl
 
         if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             var pageRequest = URLRequest(url: pageToLoadUrl)
@@ -64,21 +64,23 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             let versionPageOperation = OpenHABHTTPRequestOperation(request: pageRequest, delegate: self)
             versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
                 os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
-                self.appData()?.openHABVersion = 2
+                self.appData?.openHABVersion = 2
                 DispatchQueue.main.async {
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
                 self.selectSitemap()
             }, failure: { operation, error in
                 os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
-                self.appData()?.openHABVersion = 1
+                self.appData?.openHABVersion = 1
                 DispatchQueue.main.async {
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
                 os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 self.selectSitemap()
             })
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            DispatchQueue.main.async {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            }
             versionPageOperation.start()
         }
     }
@@ -226,7 +228,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // if pageUrl == "" it means we are the first opened OpenHABViewController
         if pageUrl == "" {
             // Set self as root view controller
-            appData()?.rootViewController = self
+            appData?.rootViewController = self
             // Add self as observer for APS registration
             NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
             if currentPage != nil {
@@ -285,11 +287,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func restart() {
-        if appData()?.rootViewController == self {
+        if appData?.rootViewController == self {
             os_log("I am a rootViewController!", log: .viewCycle, type: .info)
 
         } else {
-            appData()?.rootViewController?.pageUrl = ""
+            appData?.rootViewController?.pageUrl = ""
             navigationController?.popToRootViewController(animated: true)
         }
     }
@@ -379,7 +381,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
             let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
-                                    version: appData()?.openHABVersion ?? 2,
+                                    version: appData?.openHABVersion ?? 2,
                                     icon: widget?.icon,
                                     value: widget?.item?.state ?? "",
                                     iconType: iconType).url
@@ -628,7 +630,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
             pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
             // We accept XML only if openHAB is 1.X
-            if appData()?.openHABVersion == 1 {
+            if appData?.openHABVersion == 1 {
                 pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
             }
             pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
@@ -667,7 +669,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 let response = responseObject as? Data
                 // If we are talking to openHAB 1.X, talk XML
-                if self.appData()?.openHABVersion == 1 {
+                if self.appData?.openHABVersion == 1 {
                     var doc: GDataXMLDocument?
                     if let response = response {
                         doc = try? GDataXMLDocument(data: response)
@@ -750,7 +752,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.sitemaps = []
                 // If we are talking to openHAB 1.X, talk XML
-                if self.appData()?.openHABVersion == 1 {
+                if self.appData?.openHABVersion == 1 {
                     if let response = response {
                         os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
                     }
@@ -787,7 +789,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         }
                     }
                 }
-                self.appData()?.sitemaps = self.sitemaps
+                self.appData?.sitemaps = self.sitemaps
                 if self.sitemaps.count > 0 {
                     if self.sitemaps.count > 1 {
                         if self.defaultSitemap != "" {
@@ -826,7 +828,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             os_log("Firing request", log: .viewCycle, type: .info)
 
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            operation .start()
+            operation.start()
         }
     }
 
@@ -838,8 +840,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         defaultSitemap = prefs.string(forKey: "defaultSitemap") ?? ""
         idleOff = prefs.bool(forKey: "idleOff")
         iconType = prefs.integer(forKey: "iconType")
-        appData()?.openHABUsername = openHABUsername
-        appData()?.openHABPassword = openHABPassword
+        appData?.openHABUsername = openHABUsername
+        appData?.openHABPassword = openHABPassword
     }
 
     // Set SDImage (used for widget icons and images) authentication
@@ -890,9 +892,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     // App wide data access
-    func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? AppDelegate
-        return theDelegate?.appData
+    // https://stackoverflow.com/questions/45832155/how-do-i-refactor-my-code-to-call-appdelegate-on-the-main-thread
+//    func appData() -> OpenHABDataObject? {
+//        return AppDelegate.appDelegate.appData
+////        let theDelegate = UIApplication.shared.delegate as? AppDelegate
+////        return theDelegate?.appData
+//    }
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
     }
 
     override func didReceiveMemoryWarning() {

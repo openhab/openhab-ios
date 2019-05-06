@@ -114,7 +114,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
         cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
-        let iconUrl = Endpoint.icon(rootUrl: appData()!.openHABRootUrl, version: appData()!.openHABVersion, icon: notification?.icon, value: "", iconType: 0).url
+        let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification?.icon, value: "", iconType: 0).url
         cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
@@ -138,12 +138,17 @@ class OpenHABNotificationsViewController: UITableViewController {
         openHABPassword = prefs.string(forKey: "password") ?? ""
         //    self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
         //    self.idleOff = [prefs boolForKey:@"idleOff"];
-        appData()?.openHABUsername = openHABUsername
-        appData()?.openHABPassword = openHABPassword
+        appData?.openHABUsername = openHABUsername
+        appData?.openHABPassword = openHABPassword
     }
 
-    func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? AppDelegate
-        return theDelegate?.appData
+//    func appData() -> OpenHABDataObject? {
+//        return AppDelegate.appDelegate.appData
+//        //let theDelegate = UIApplication.shared.delegate as? AppDelegate
+//        //return theDelegate?.appData
+//    }
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
     }
 }
