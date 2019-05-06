@@ -85,7 +85,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         mainImageView?.sd_setImage(with: createURL(), placeholderImage: UIImage(named: "blankicon.png"), options: .cacheMemoryOnly) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
-            self?.layoutSubviews()
             if self?.delegate != nil {
                 self?.delegate?.didLoadImageOf(self)
             }
@@ -98,7 +97,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         mainImageView?.sd_setImage(with: createURL(), placeholderImage: widget?.image, options: .cacheMemoryOnly) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
-            self?.layoutSubviews()
             if self?.delegate != nil {
                 self?.delegate?.didLoadImageOf(self)
             }
