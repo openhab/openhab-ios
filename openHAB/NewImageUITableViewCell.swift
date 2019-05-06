@@ -73,6 +73,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 //        case "Chart":
 //            return Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
         case "Image":
+            os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, widget.url)
             return URL(string: widget!.url)!
         default:
             return URL(string: "")!

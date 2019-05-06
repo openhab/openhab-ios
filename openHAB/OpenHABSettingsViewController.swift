@@ -116,8 +116,8 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         if indexPath.section == 1 && indexPath.row == 2 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
             let imageCache = SDImageCache.shared
-            imageCache().clearMemory()
-            imageCache().clearDisk()
+            imageCache()?.clearMemory()
+            imageCache()?.clearDisk()
         }
     }
 
