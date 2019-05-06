@@ -14,7 +14,7 @@ import os.log
 import SDWebImage
 import UIKit
 
-//let manager: SDWebImageDownloader? = SDWebImageManager.shared.imageLoader
+let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
@@ -846,21 +846,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // Set SDImage (used for widget icons and images) authentication
     func setSDImageAuth() {
-//        let authStr = "\(openHABUsername):\(openHABPassword)"
-//        let authData: Data? = authStr.data(using: .ascii)
-//        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-//        let manager: SDImageLoader = SDWebImageManager.shared.imageLoader
-//        manager.setValue(authValue, forHTTPHeaderField: "Authorization")
+        let authStr = "\(openHABUsername):\(openHABPassword)"
+        let authData: Data? = authStr.data(using: .ascii)
+        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
+        //let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
+        manager?.setValue(authValue, forHTTPHeaderField: "Authorization")
 
-        let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
-            let authStr = "\(self.openHABUsername):\(self.openHABPassword)"
-            let authData: Data? = authStr.data(using: .ascii)
-            let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-            var r = request
-            r.setValue(authValue, forHTTPHeaderField: "Authorization")
-            return r
-        }
-        SDWebImageDownloader.shared.requestModifier = requestModifier
+//        let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
+//            let authStr = "\(self.openHABUsername):\(self.openHABPassword)"
+//            let authData: Data? = authStr.data(using: .ascii)
+//            let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
+//            var r = request
+//            r.setValue(authValue, forHTTPHeaderField: "Authorization")
+//            return r
+//        }
+//        SDWebImageDownloader.shared.requestModifier = requestModifier
     }
 
     // Find and return sitemap by it's name if any

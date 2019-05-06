@@ -91,9 +91,9 @@ PODS:
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
   - NKOColorPickerView (0.5)
-  - SDWebImage (5.0.2):
-    - SDWebImage/Core (= 5.0.2)
-  - SDWebImage/Core (5.0.2)
+  - SDWebImage (4.4.6):
+    - SDWebImage/Core (= 4.4.6)
+  - SDWebImage/Core (4.4.6)
   - SwiftSVG (2.3.0)
   - TSMessages (0.9.13):
     - HexColors (~> 2.3.0)
@@ -108,7 +108,7 @@ DEPENDENCIES:
   - MMDrawerController (~> 0.5.7)
   - "MMDrawerController+Storyboard"
   - NKOColorPickerView (~> 0.5)
-  - SDWebImage (~> 5.0)
+  - SDWebImage (~> 4.0)
   - SwiftSVG (~> 2.0)
   - TSMessages (from `https://github.com/KrauseFx/TSMessages.git`)
 
@@ -159,10 +159,10 @@ SPEC CHECKSUMS:
   "MMDrawerController+Storyboard": c98f86c0f32cdef1d466d19a7da3ad2fc6c6ac00
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
-  SDWebImage: 6764b5fa0f73c203728052955dbefa2bf1f33282
+  SDWebImage: 3f3f0c02f09798048c47a5ed0a13f17b063572d8
   SwiftSVG: a864db6198fbddfd377f8169849580df18512e67
   TSMessages: eb3cf27b6900684a21bad4fe9ea426e287b8c839
 
-PODFILE CHECKSUM: 9a8a9b478a89ffef1a75e19304136e04352aac95
+PODFILE CHECKSUM: c7109bd0818a8fa70ed2acba6f6f824938c3e40b
 
 COCOAPODS: 1.6.0.beta.1

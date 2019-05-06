@@ -80,8 +80,8 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     }
 
     // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
-    func loadImage() { //, options: .cacheMemoryOnly
-        mainImageView?.sd_setImage(with: createURL(), placeholderImage: UIImage(named: "blankicon.png"), options: .fromLoaderOnly) { [weak self] (image, error, cacheType, imageURL) in
+    func loadImage() { //, options: .cacheMemoryOnly ((fromLoaderOnly
+        mainImageView?.sd_setImage(with: createURL(), placeholderImage: UIImage(named: "blankicon.png"), options: .cacheMemoryOnly) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
             self?.layoutSubviews()
@@ -94,7 +94,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     @objc func refreshImage(_ timer: Timer?) {
         os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
         //  options: .cacheMemoryOnly
-        mainImageView?.sd_setImage(with: createURL(), placeholderImage: widget?.image, options: .fromLoaderOnly) { [weak self] (image, error, cacheType, imageURL) in
+        mainImageView?.sd_setImage(with: createURL(), placeholderImage: widget?.image, options: .cacheMemoryOnly) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
             self?.layoutSubviews()
