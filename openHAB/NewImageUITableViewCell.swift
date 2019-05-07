@@ -6,7 +6,7 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
-import Kingfisher
+//import Kingfisher
 import os.log
 import SDWebImage
 import UIKit
@@ -82,7 +82,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     }
 
     // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
-    func loadImage() { //, options: .cacheMemoryOnly ((fromLoaderOnly
+    func loadImage() {
 //        mainImageView?.kf.setImage(with: createURL(),
 //                                   placeholder: UIImage(named: "blankicon.png"),
 //                                   options: [.memoryCacheExpiration(.expired), .diskCacheExpiration(.expired)] ) { result in
@@ -99,10 +99,15 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 //                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
 //            }
 //        }
-        mainImageView?.sd_setImage(with: createURL(),
-                                   placeholderImage: UIImage(named: "blankicon.png"),
-                                   options: [.allowInvalidSSLCertificates,
-                                             .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
+        let prefs = UserDefaults.standard
+        let ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
+
+        // See https://developer.apple.com/documentation/swift/optionset
+        var imageOptions: SDWebImageOptions = .fromLoaderOnly
+        if ignoreSSLCertificate {
+            imageOptions.insert(.allowInvalidSSLCertificates)
+        }
+        mainImageView?.sd_setImage(with: createURL(), placeholderImage: UIImage(named: "blankicon.png"), options: imageOptions) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
             self?.layoutSubviews()

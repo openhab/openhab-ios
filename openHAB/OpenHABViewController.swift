@@ -493,7 +493,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func didLoadImageOf(_ cell: NewImageUITableViewCell?) {
         if let cell = cell, let indexPath = widgetTableView.indexPath(for: cell) {
             widgetTableView.reloadRows(at: [indexPath], with: .none)
-            widgetTableView.layoutSubviews()
         }
     }
 
