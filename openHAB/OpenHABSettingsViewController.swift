@@ -79,7 +79,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
         updateSettings()
         saveSettings()
-        appData()?.rootViewController?.pageUrl = ""
+        appData?.rootViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
     }
 
@@ -196,9 +196,8 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         prefs.set(settingsIconType, forKey: "iconType")
     }
 
-    func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? AppDelegate
-        return theDelegate?.appData
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
     }
 
     required init?(coder aDecoder: NSCoder) {

@@ -894,12 +894,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // App wide data access
     // https://stackoverflow.com/questions/45832155/how-do-i-refactor-my-code-to-call-appdelegate-on-the-main-thread
-//    func appData() -> OpenHABDataObject? {
-//        return AppDelegate.appDelegate.appData
-////        let theDelegate = UIApplication.shared.delegate as? AppDelegate
-////        return theDelegate?.appData
-//    }
-
     var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
     }

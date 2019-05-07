@@ -142,12 +142,6 @@ class OpenHABNotificationsViewController: UITableViewController {
         appData?.openHABPassword = openHABPassword
     }
 
-//    func appData() -> OpenHABDataObject? {
-//        return AppDelegate.appDelegate.appData
-//        //let theDelegate = UIApplication.shared.delegate as? AppDelegate
-//        //return theDelegate?.appData
-//    }
-
     var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
     }

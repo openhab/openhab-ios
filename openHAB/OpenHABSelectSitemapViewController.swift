@@ -34,14 +34,14 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         if sitemaps.count != 0 {
             os_log("We have sitemap list here!", log: .viewCycle, type: .info)
         }
-        if appData()?.openHABRootUrl != nil {
-            if let open = appData()?.openHABRootUrl {
+        if appData?.openHABRootUrl != nil {
+            if let open = appData?.openHABRootUrl {
                 os_log("OpenHABSelectSitemapViewController openHABRootUrl : %{PUBLIC}@", log: .viewCycle, type: .info, open)
             }
         }
         tableView.tableFooterView = UIView()
         //sitemaps = []
-        openHABRootUrl = appData()?.openHABRootUrl ?? ""
+        openHABRootUrl = appData?.openHABRootUrl ?? ""
         let prefs = UserDefaults.standard
         openHABUsername = prefs.string(forKey: "username") ?? ""
         openHABPassword = prefs.string(forKey: "password") ?? ""
@@ -62,7 +62,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 os_log("Sitemap response", log: .default, type: .info)
 
                 // If we are talking to openHAB 1.X, talk XML
-                if self.appData()?.openHABVersion == 1 {
+                if self.appData?.openHABVersion == 1 {
                     os_log("openHAB 1", log: .default, type: .info)
 
                     if let response = response {
@@ -109,7 +109,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                         }
                     }
                 }
-                self.appData()?.sitemaps = self.sitemaps
+                self.appData?.sitemaps = self.sitemaps
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -147,7 +147,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             cell.textLabel?.text = sitemap.name
         }
 
-        let imageBase = appData()?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@"
+        let imageBase = appData?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@"
 
         if sitemap.icon != "" {
             var iconUrlString: String?
@@ -167,16 +167,15 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         let prefs = UserDefaults.standard
         prefs.setValue(sitemap.name, forKey: "defaultSitemap")
         selectedSitemap = indexPath.row
-        appData()?.rootViewController?.pageUrl = ""
+        appData?.rootViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     }
 
-    func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? AppDelegate
-        return theDelegate?.appData
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
     }
 
     required init?(coder aDecoder: NSCoder) {

@@ -69,16 +69,20 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
     }
 
-    func createURL() -> URL {
+    var createURL: URL {
         switch widget?.type {
-//        case "Chart":
-//            return Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
+        case "Chart":
+            return Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
         case "Image":
             os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, widget.url)
             return URL(string: widget!.url)!
         default:
             return URL(string: "")!
         }
+    }
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
     }
 
     // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
@@ -107,7 +111,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         if ignoreSSLCertificate {
             imageOptions.insert(.allowInvalidSSLCertificates)
         }
-        mainImageView?.sd_setImage(with: createURL(), placeholderImage: UIImage(named: "blankicon.png"), options: imageOptions) { [weak self] (image, error, cacheType, imageURL) in
+        mainImageView?.sd_setImage(with: createURL, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptions) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
             self?.layoutSubviews()
@@ -136,7 +140,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 //                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
 //            }
 //        }
-        mainImageView?.sd_setImage(with: createURL(),
+        mainImageView?.sd_setImage(with: createURL,
                                    placeholderImage: widget?.image,
                                    options: [.allowInvalidSSLCertificates,
                                              .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
