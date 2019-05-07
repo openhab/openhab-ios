@@ -6,6 +6,7 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
+import Kingfisher
 import os.log
 import SDWebImage
 import UIKit
@@ -82,9 +83,29 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
     func loadImage() { //, options: .cacheMemoryOnly ((fromLoaderOnly
-        mainImageView?.sd_setImage(with: createURL(), placeholderImage: UIImage(named: "blankicon.png"), options: .cacheMemoryOnly) { [weak self] (image, error, cacheType, imageURL) in
+//        mainImageView?.kf.setImage(with: createURL(),
+//                                   placeholder: UIImage(named: "blankicon.png"),
+//                                   options: [.memoryCacheExpiration(.expired), .diskCacheExpiration(.expired)] ) { result in
+//            switch result {
+//            case .success(let value):
+//                os_log("Download done for: %{PUBLIC}@", log: .urlComposition, type: .debug, value.source.url?.absoluteString ?? "")
+//                self.widget?.image = value.image
+//                self.layoutIfNeeded()
+//                self.layoutSubviews()
+//                if self.delegate != nil {
+//                    self.delegate?.didLoadImageOf(self)
+//                }
+//            case .failure(let error):
+//                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+//            }
+//        }
+        mainImageView?.sd_setImage(with: createURL(),
+                                   placeholderImage: UIImage(named: "blankicon.png"),
+                                   options: [.allowInvalidSSLCertificates,
+                                             .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
+            self?.layoutSubviews()
             if self?.delegate != nil {
                 self?.delegate?.didLoadImageOf(self)
             }
@@ -94,9 +115,29 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     @objc func refreshImage(_ timer: Timer?) {
         os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
         //  options: .cacheMemoryOnly
-        mainImageView?.sd_setImage(with: createURL(), placeholderImage: widget?.image, options: .cacheMemoryOnly) { [weak self] (image, error, cacheType, imageURL) in
+//        mainImageView?.kf.setImage(with: createURL(),
+//                                   placeholder: widget?.image,
+//                                   options: [.memoryCacheExpiration(.expired), .diskCacheExpiration(.expired)]) { result in
+//            switch result {
+//            case .success(let value):
+//                os_log("Download done for: %{PUBLIC}@", log: .urlComposition, type: .debug, value.source.url?.absoluteString ?? "")
+//                self.widget?.image = value.image
+//                self.layoutIfNeeded()
+//                self.layoutSubviews()
+//                if self.delegate != nil {
+//                    self.delegate?.didLoadImageOf(self)
+//                }
+//            case .failure(let error):
+//                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+//            }
+//        }
+        mainImageView?.sd_setImage(with: createURL(),
+                                   placeholderImage: widget?.image,
+                                   options: [.allowInvalidSSLCertificates,
+                                             .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
             self?.widget?.image = image
             self?.layoutIfNeeded()
+            self?.layoutSubviews()
             if self?.delegate != nil {
                 self?.delegate?.didLoadImageOf(self)
             }
