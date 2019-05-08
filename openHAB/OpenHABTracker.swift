@@ -55,7 +55,9 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                 } else {
                     os_log("OpenHABTracker network is Wifi", log: .default, type: .info)
                     // Check if local URL is configured
-                    if openHABLocalUrl.count > 0 {
+                    if openHABLocalUrl.isEmpty {
+                        startDiscovery()
+                    } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
                         URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
                             if error == nil {
@@ -64,8 +66,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                                 self.trackedRemoteUrl()
                             }
                         }).resume()
-                    } else {
-                        startDiscovery()
                     }
                 }
             }
