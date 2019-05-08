@@ -154,7 +154,6 @@ import os.log
                     return
                 }
             }
-
             // No client certificate available
             challenge.sender!.cancel(challenge)
         }
