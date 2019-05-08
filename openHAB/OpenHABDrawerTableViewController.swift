@@ -159,7 +159,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if indexPath.row != 0 {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
 
-            if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
+            if indexPath.row <= sitemaps.count && !sitemaps.isEmpty {
                 cell?.customTextLabel?.text = sitemaps[indexPath.row - 1].label
                 let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row - 1].icon ).url
                 cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
@@ -196,7 +196,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row != 0 {
             // First sitemaps
-            if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
+            if indexPath.row <= sitemaps.count && !sitemaps.isEmpty {
                 let sitemap = sitemaps[indexPath.row - 1]
                 let prefs = UserDefaults.standard
                 prefs.setValue(sitemap.name, forKey: "defaultSitemap")

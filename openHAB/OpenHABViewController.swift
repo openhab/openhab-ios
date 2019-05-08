@@ -791,7 +791,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                 }
                 self.appData?.sitemaps = self.sitemaps
-                if self.sitemaps.count > 0 {
+                if !self.sitemaps.isEmpty {
                     if self.sitemaps.count > 1 {
                         if self.defaultSitemap != "" {
                             let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)

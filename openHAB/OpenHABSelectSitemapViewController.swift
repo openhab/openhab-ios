@@ -31,7 +31,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         super.viewDidLoad()
         os_log("OpenHABSelectSitemapViewController viewDidLoad", log: .viewCycle, type: .info)
 
-        if sitemaps.count != 0 {
+        if !sitemaps.isEmpty {
             os_log("We have sitemap list here!", log: .viewCycle, type: .info)
         }
         if appData?.openHABRootUrl != nil {

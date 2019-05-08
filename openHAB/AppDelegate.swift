@@ -87,7 +87,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    func application(_ application: UIApplication, open url: URL, options: [ UIApplication.OpenURLOptionsKey : Any ]) -> Bool {
+    func application(_ application: UIApplication, open url: URL, options: [ UIApplication.OpenURLOptionsKey: Any ]) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
 
