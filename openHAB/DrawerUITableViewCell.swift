@@ -7,8 +7,8 @@
 //  Copyright © 2016 Victor Belov. All rights reserved.
 //
 
-import UIKit
 import os.log
+import UIKit
 
 class DrawerUITableViewCell: UITableViewCell {
     //var textLabel: UILabel?

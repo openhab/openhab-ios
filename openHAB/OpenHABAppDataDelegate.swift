@@ -10,5 +10,5 @@
 import Foundation
 
 protocol OpenHABAppDataDelegate: NSObjectProtocol {
-    func appData() -> OpenHABDataObject?
+    //var appData: OpenHABDataObject?
 }

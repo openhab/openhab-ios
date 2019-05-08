@@ -41,7 +41,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     class func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
         self.loadTrustedCertificates()
-        if trustedCertificates.count == 0 {
+        if trustedCertificates.isEmpty {
             os_log("No cert store, creating", log: .remoteAccess, type: .info)
             trustedCertificates = [AnyHashable: Any]()
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
