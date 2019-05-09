@@ -4,6 +4,7 @@ use_frameworks!
 target 'openHAB' do
 	pod 'AFNetworking', '~> 2.6.0'
     pod 'SDWebImage', '~> 5.0' , :modular_headers => true
+    pod 'SDWebImageSVGCoder'
     #pod 'Kingfisher', '~> 5.0'
 	pod 'GDataXML-HTML', '~> 1.3.0'
 	pod 'TSMessages', :git => 'https://github.com/KrauseFx/TSMessages.git'
