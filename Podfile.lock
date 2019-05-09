@@ -20,6 +20,9 @@ PODS:
   - AFNetworking/UIKit (2.6.3):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
+  - CocoaLumberjack (3.5.3):
+    - CocoaLumberjack/Core (= 3.5.3)
+  - CocoaLumberjack/Core (3.5.3)
   - Crashlytics (3.9.3):
     - Fabric (~> 1.7.2)
   - Fabric (1.7.13)
@@ -93,6 +96,11 @@ PODS:
   - SDWebImage (5.0.2):
     - SDWebImage/Core (= 5.0.2)
   - SDWebImage/Core (5.0.2)
+  - SDWebImageSVGCoder (0.2.0):
+    - SDWebImage/Core (~> 5.0)
+    - SVGKit (>= 2.1)
+  - SVGKit (2.1.0):
+    - CocoaLumberjack (~> 3.0)
   - TSMessages (0.9.13):
     - HexColors (~> 2.3.0)
 
@@ -106,11 +114,13 @@ DEPENDENCIES:
   - "MMDrawerController+Storyboard"
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 5.0)
+  - SDWebImageSVGCoder
   - TSMessages (from `https://github.com/KrauseFx/TSMessages.git`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - AFNetworking
+    - CocoaLumberjack
     - Crashlytics
     - Fabric
     - Firebase
@@ -126,6 +136,9 @@ SPEC REPOS:
     - nanopb
     - NKOColorPickerView
     - SDWebImage
+    - SDWebImageSVGCoder
+    - SVGKit
+
 
 EXTERNAL SOURCES:
   TSMessages:
@@ -138,6 +151,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
+  CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   Fabric: 25d0963b691fc97be566392243ff0ecef5a68338
   Firebase: fa80b9d987ca014a1ba9357496ef2a0178b28b12
@@ -153,8 +167,10 @@ SPEC CHECKSUMS:
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
   SDWebImage: 6764b5fa0f73c203728052955dbefa2bf1f33282
+  SDWebImageSVGCoder: 61f60a3064db079de646a34a5f5aa8d3ac258345
+  SVGKit: 8a2fc74258bdb2abb54d3b65f3dd68b0277a9c4d
   TSMessages: eb3cf27b6900684a21bad4fe9ea426e287b8c839
 
-PODFILE CHECKSUM: 071b1f9b326f8cb7e7e941def99f5c3a4dd93ca0
+PODFILE CHECKSUM: ab07e81a9ab7d1aeb5dd570e887b0d41662b5d8a
 
 COCOAPODS: 1.6.0.beta.1
