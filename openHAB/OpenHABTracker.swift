@@ -14,7 +14,7 @@ import SystemConfiguration
 protocol OpenHABTrackerDelegate: AnyObject {
     func openHABTracked(_ openHABUrl: String?)
     func openHABTrackingProgress(_ message: String?)
-    func openHABTrackingError(_ error: Error) throws
+    func openHABTrackingError(_ error: Error)
 }
 
 protocol OpenHABTrackerExtendedDelegate: OpenHABTrackerDelegate {
@@ -73,11 +73,15 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
             var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
             let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
-            _  = try? delegate?.openHABTrackingError(trackingError)
+            delegate?.openHABTrackingError(trackingError)
             reach = Reachability()
             oldReachabilityStatus = reach?.connection
             NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: NSNotification.Name.reachabilityChanged, object: reach)
-            try? reach?.startNotifier()
+            do {
+                try reach?.startNotifier()
+            } catch {
+                os_log("Start notifier throws ", log: .remoteAccess, type: .info)
+            }
         }
     }
 
@@ -116,7 +120,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
             var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
             let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String: Any])
-            try? delegate?.openHABTrackingError(trackingError)
+            delegate?.openHABTrackingError(trackingError)
         }
     }
 
