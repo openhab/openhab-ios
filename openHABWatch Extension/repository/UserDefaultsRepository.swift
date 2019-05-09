@@ -51,7 +51,7 @@ class UserDefaultsRepository {
         }
         
         guard let remoteUrl = defaults.string(forKey: "remoteUrl") else {
-            return "https://dhe.ddns.net:444"
+            return "https://defineme:444"
         }
         
         let trimmedUri = uriWithoutTrailingSlashes(remoteUrl).trimmingCharacters(
