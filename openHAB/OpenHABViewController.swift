@@ -12,6 +12,7 @@ import AVFoundation
 import AVKit
 import os.log
 import SDWebImage
+import SDWebImageSVGCoder
 import UIKit
 
 //let manager: SDWebImageDownloader? = SDWebImageManager.shared.imageDownloader
@@ -386,29 +387,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                     icon: widget?.icon,
                                     value: widget?.item?.state ?? "",
                                     iconType: iconType).url
-            //cell.imageView? = UIView(SVGNamed: urlc)
-            cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
-        }
+            if iconType == 0 {
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            } else {
+                let SVGCoder = SDImageSVGCoder.shared
+                SDImageCodersManager.shared.addCoder(SVGCoder)
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            }
 
-//        if let cell = cell as? NewImageUITableViewCell {
-//
-//            let createdURL: URL
-//            switch widget?.type {
-//            case "Chart":
-//                createdURL = Endpoint.chart(rootUrl: openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
-//                os_log("Setting cell base url to  %{PUBLIC}@", log: .viewCycle, type: .info, openHABRootUrl)
-//            case "Image":
-//                createdURL = URL(string: widget!.url)!
-//            default:
-//                createdURL = URL(string: "")!
-//            }
-//
-//            cell.mainImageView.sd_setImage(with: createdURL, placeholderImage: UIImage(named: "blankicon.png"), options: []) { (image, error, cacheType, imageURL) in
-//                widget?.image = image
-//                cell.layoutIfNeeded()
-//            }
-//            cell.layoutIfNeeded()
-//        }
+        }
 
         if cell is FrameUITableViewCell {
             cell.backgroundColor = UIColor.groupTableViewBackground
