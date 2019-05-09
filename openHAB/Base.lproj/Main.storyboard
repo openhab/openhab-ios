@@ -748,6 +748,7 @@
                                             <constraints>
                                                 <constraint firstItem="cT1-QE-49w" firstAttribute="centerY" secondItem="jfm-uY-49i" secondAttribute="centerYWithinMargins" id="CCa-yj-c32"/>
                                                 <constraint firstItem="cT1-QE-49w" firstAttribute="leading" secondItem="jfm-uY-49i" secondAttribute="leadingMargin" constant="12" id="SMx-Qq-fld"/>
+                                                <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="cT1-QE-49w" secondAttribute="trailing" id="V2q-ln-LO9"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
@@ -1418,6 +1419,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="IN7-RI-eVs"/>
+        <segue reference="9JR-Li-4ww"/>
     </inferredMetricsTieBreakers>
 </document>
