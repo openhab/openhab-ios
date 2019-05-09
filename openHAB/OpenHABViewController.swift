@@ -586,7 +586,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
-    func openHABTrackingError(_ error: Error) throws {
+    func openHABTrackingError(_ error: Error) {
         os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
         DispatchQueue.main.async {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
