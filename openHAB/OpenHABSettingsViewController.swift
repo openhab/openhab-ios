@@ -171,6 +171,8 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         settingsDemomode = prefs.bool(forKey: "demomode")
         settingsIdleOff = prefs.bool(forKey: "ildeOff")
         settingsIconType = prefs.integer(forKey: "iconType")
+        
+        sendSettingsToWatch()
     }
 
     func updateSettings() {
@@ -194,10 +196,24 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         prefs.set(settingsDemomode, forKey: "demomode")
         prefs.set(settingsIdleOff, forKey: "idleOff")
         prefs.set(settingsIconType, forKey: "iconType")
+        
+        sendSettingsToWatch()
     }
 
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+    func sendSettingsToWatch() {
+        let prefs = UserDefaults.standard
+        
+        WatchService.singleton.sendToWatch(
+            prefs.string(forKey: "localUrl") ?? "",
+            remoteUrl: prefs.string(forKey: "remoteUrl") ?? "",
+            username: prefs.string(forKey: "username") ?? "",
+            password: prefs.string(forKey: "password") ?? "",
+            sitemapName: "watch")
+    }
+    
+    func appData() -> OpenHABDataObject? {
+        let theDelegate = UIApplication.shared.delegate as? AppDelegate
+        return theDelegate?.appData
     }
 
     required init?(coder aDecoder: NSCoder) {
