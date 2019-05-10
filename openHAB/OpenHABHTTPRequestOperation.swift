@@ -5,8 +5,8 @@
 //  Created by David O'Neill on 03/09/19.
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
+//import Alamofire
 import os.log
-import Alamofire
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
 // Transition from AFNetworking to Alamofire
@@ -97,8 +97,6 @@ import Alamofire
     //                serverTrustPolicyManager: ServerTrustPolicyManager(policies: serverTrustPolicies)
     //            )
 
-
-
     class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
         static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
 
@@ -156,7 +154,6 @@ import Alamofire
                     return
                 }
             }
-
             // No client certificate available
             challenge.sender!.cancel(challenge)
         }
