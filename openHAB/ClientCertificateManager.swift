@@ -57,14 +57,17 @@ class ClientCertificateManager {
     }
 
     func evaluateTrust(distinguishedNames: [Data]) -> SecIdentity? {
-        // Check if any of the identities we have in the keychain match the DN of the certificate being requested by the server
-        for identity in clientIdentities {
-            var cert: SecCertificate?
-            SecIdentityCopyCertificate(identity, &cert)
-            let issuer = SecCertificateCopyNormalizedIssuerSequence(cert!)
-            for dn in distinguishedNames where dn == issuer! as Data {
-                return identity
-            }
+        // Search the keychain for an identity that matches the DN of the certificate being requested by the server
+        let getIdentityQuery: [String: Any] = [
+            kSecClass as String: kSecClassIdentity,
+            kSecReturnRef as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecMatchIssuers as String: distinguishedNames
+        ]
+        var identity: CFTypeRef?
+        let status = SecItemCopyMatching(getIdentityQuery as CFDictionary, &identity)
+        if status == errSecSuccess {
+            return (identity as! SecIdentity)
         }
         return nil
     }
