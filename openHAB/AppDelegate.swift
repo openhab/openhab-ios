@@ -11,6 +11,7 @@
 
 import AVFoundation
 import Firebase
+import os.log
 import UIKit
 import UserNotifications
 import os.log
@@ -34,9 +35,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     
+    static var appDelegate: AppDelegate!
+
     override init() {
         appData = OpenHABDataObject()
         super.init()
+        AppDelegate.appDelegate = self
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -103,7 +107,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    func application(_ application: UIApplication, open url: URL, options: [ UIApplication.OpenURLOptionsKey : Any ]) -> Bool {
+    func application(_ application: UIApplication, open url: URL, options: [ UIApplication.OpenURLOptionsKey: Any ]) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
 
@@ -169,8 +173,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             os_log("%{PUBLIC}@", log: .notifications, type: .info, aps)
 
             let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
-            TSMessage.showNotification(in: ((window?.rootViewController as? MMDrawerController)?.centerViewController as? UINavigationController)?.visibleViewController, title: "Notification", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
-
+            DispatchQueue.main.async {
+                TSMessage.showNotification(in: ((self.window?.rootViewController as? MMDrawerController)?.centerViewController as? UINavigationController)?.visibleViewController, title: "Notification", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+            }
         }
     }
 

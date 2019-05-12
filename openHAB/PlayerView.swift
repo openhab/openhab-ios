@@ -10,8 +10,9 @@
 
 // See https://developer.apple.com/documentation/avfoundation/avplayerlayer
 // A convenient way of using AVPlayerLayer as the backing layer for a UIView
-import AVKit
+
 import AVFoundation
+import AVKit
 
 class PlayerView: UIView {
     var player: AVPlayer? {

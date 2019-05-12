@@ -31,7 +31,7 @@ class ChartUITableViewCell: NewImageTableViewCell {
         } else {
             components?.queryItems?.append(URLQueryItem(name: "items", value: widget.item?.name))
         }
-        if widget.service != "" && widget.service.count > 0 {
+        if widget.service != "" && !widget.service.isEmpty {
             components?.queryItems?.append(URLQueryItem(name: "service", value: widget.service))
         }
         print("Chart url \(chartUrl)")

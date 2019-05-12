@@ -8,9 +8,9 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import os.log
 import SDWebImage
 import UIKit
-import os.log
 
 class OpenHABDrawerTableViewController: UITableViewController {
     var sitemaps: [OpenHABSitemap] = []
@@ -44,7 +44,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
                 // If we are talking to openHAB 1.X, talk XML
-                if self.appData()?.openHABVersion == 1 {
+                if self.appData?.openHABVersion == 1 {
                     os_log("openHAB 1", log: .viewCycle, type: .info)
 
                     if let response = response {
@@ -93,7 +93,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.name < $1.name }
 
-                self.appData()?.sitemaps = self.sitemaps
+                self.appData?.sitemaps = self.sitemaps
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -159,9 +159,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if indexPath.row != 0 {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
 
-            if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
+            if indexPath.row <= sitemaps.count && !sitemaps.isEmpty {
                 cell?.customTextLabel?.text = sitemaps[indexPath.row - 1].label
-                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData()?.openHABVersion ?? 2, icon: sitemaps[indexPath.row - 1].icon ).url
+                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row - 1].icon ).url
                 cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
             } else {
                 // Then menu items
@@ -196,11 +196,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row != 0 {
             // First sitemaps
-            if indexPath.row <= sitemaps.count && sitemaps.count > 0 {
+            if indexPath.row <= sitemaps.count && !sitemaps.isEmpty {
                 let sitemap = sitemaps[indexPath.row - 1]
                 let prefs = UserDefaults.standard
                 prefs.setValue(sitemap.name, forKey: "defaultSitemap")
-                appData()?.rootViewController?.pageUrl = ""
+                appData?.rootViewController?.pageUrl = ""
                 let nav = mm_drawerController.centerViewController as? UINavigationController
                 let dummyViewController: UIViewController? = storyboard?.instantiateViewController(withIdentifier: "DummyViewController")
                 if let dummyViewController = dummyViewController {
@@ -239,8 +239,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     // App wide data access
-    func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? AppDelegate?
-        return theDelegate??.appData
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
     }
+
 }

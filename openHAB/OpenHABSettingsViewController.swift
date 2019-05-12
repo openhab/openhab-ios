@@ -8,9 +8,9 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import os.log
 import SDWebImage
 import UIKit
-import os.log
 
 class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelegate, UITextFieldDelegate {
     @IBOutlet var settingsTableView: UITableView!
@@ -79,7 +79,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
         updateSettings()
         saveSettings()
-        appData()?.rootViewController?.pageUrl = ""
+        appData?.rootViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
     }
 
@@ -115,9 +115,9 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
         if indexPath.section == 1 && indexPath.row == 2 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
-            let imageCache = SDImageCache.shared()
-            imageCache?.clearMemory()
-            imageCache?.clearDisk()
+            let imageCache = SDImageCache.shared
+            imageCache.clearMemory()
+            imageCache.clearDisk()
         }
     }
 
