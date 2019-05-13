@@ -357,7 +357,7 @@ class OpenHABTestsSwift: XCTestCase {
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
             XCTAssert(codingData.widgetId == "01", "Widget properly parsed")
-            XCTAssert(codingData.mappings.count == 0, "No mappings found")
+            XCTAssert(codingData.mappings.isEmpty, "No mappings found")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }

@@ -25,8 +25,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-import SystemConfiguration
 import Foundation
+import SystemConfiguration
 
 public enum ReachabilityError: Error {
     case FailedToCreateWithAddress(sockaddr_in)

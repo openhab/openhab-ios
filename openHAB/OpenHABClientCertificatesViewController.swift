@@ -5,9 +5,9 @@
 //  Created by David O'Neill on 03/09/19.
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
+import os.log
 import SDWebImage
 import UIKit
-import os.log
 
 class OpenHABClientCertificatesViewController: UITableViewController {
     var clientCertificates: [SecIdentity] = []

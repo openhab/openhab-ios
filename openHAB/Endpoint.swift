@@ -127,7 +127,7 @@ extension Endpoint {
         var components = URLComponents(string: baseURL)
         components?.path = path
         components?.queryItems = queryItems
-        os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url.debugDescription ?? "")
+        os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url?.absoluteString ?? "")
         return components?.url
     }
 
