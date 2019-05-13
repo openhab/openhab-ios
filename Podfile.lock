@@ -139,7 +139,6 @@ SPEC REPOS:
     - SDWebImageSVGCoder
     - SVGKit
 
-
 EXTERNAL SOURCES:
   TSMessages:
     :git: https://github.com/KrauseFx/TSMessages.git
@@ -171,6 +170,6 @@ SPEC CHECKSUMS:
   SVGKit: 8a2fc74258bdb2abb54d3b65f3dd68b0277a9c4d
   TSMessages: eb3cf27b6900684a21bad4fe9ea426e287b8c839
 
-PODFILE CHECKSUM: ab07e81a9ab7d1aeb5dd570e887b0d41662b5d8a
+PODFILE CHECKSUM: b64ff21771c7644b6e71d8a869f8bb74e41bab64
 
 COCOAPODS: 1.6.1
