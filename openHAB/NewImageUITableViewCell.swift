@@ -112,7 +112,9 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             imageOptions.insert(.allowInvalidSSLCertificates)
         }
         mainImageView?.sd_setImage(with: createURL, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptions) { [weak self] (image, error, cacheType, imageURL) in
-            self?.widget?.image = image
+            DispatchQueue.main.async {
+                self?.widget?.image = image
+            }
             self?.layoutIfNeeded()
             self?.layoutSubviews()
             if self?.delegate != nil {
