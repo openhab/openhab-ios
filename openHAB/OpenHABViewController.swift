@@ -386,11 +386,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                     value: widget?.item?.state ?? "",
                                     iconType: iconType).url
             if iconType == 0 {
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptionsNoCache)
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptionsIgnoreInvalidCertIfDefined)
             } else {
                 let SVGCoder = SDImageSVGCoder.shared
                 SDImageCodersManager.shared.addCoder(SVGCoder)
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptionsNoCache)
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptionsIgnoreInvalidCertIfDefined)
             }
         }
 
