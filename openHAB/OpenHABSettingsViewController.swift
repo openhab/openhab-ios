@@ -211,9 +211,8 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
             sitemapName: "watch")
     }
     
-    func appData() -> OpenHABDataObject? {
-        let theDelegate = UIApplication.shared.delegate as? AppDelegate
-        return theDelegate?.appData
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
     }
 
     required init?(coder aDecoder: NSCoder) {
