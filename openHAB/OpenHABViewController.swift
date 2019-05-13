@@ -15,8 +15,6 @@ import SDWebImage
 import SDWebImageSVGCoder
 import UIKit
 
-//let manager: SDWebImageDownloader? = SDWebImageManager.shared.imageDownloader
-
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
@@ -367,10 +365,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Chart":
             cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
         case "Image":
-            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
+            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath) as! NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.delegate = self
         case "Video":
-            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath)  as! VideoUITableViewCell
+            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
@@ -388,13 +386,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                     value: widget?.item?.state ?? "",
                                     iconType: iconType).url
             if iconType == 0 {
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptionsNoCache)
             } else {
                 let SVGCoder = SDImageSVGCoder.shared
                 SDImageCodersManager.shared.addCoder(SVGCoder)
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptionsNoCache)
             }
-
         }
 
         if cell is FrameUITableViewCell {
