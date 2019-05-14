@@ -14,6 +14,8 @@ import Firebase
 import os.log
 import UIKit
 import UserNotifications
+import os.log
+import WatchConnectivity
 
 var player: AVAudioPlayer?
 
@@ -25,6 +27,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static var appDelegate: AppDelegate!
 
+    // Delegate Requests from the Watch to the WatchMessageService
+    var session: WCSession? {
+        didSet {
+            if let session = session {
+                session.delegate = WatchMessageService.singleton
+                session.activate()
+            }
+        }
+    }
+    
     override init() {
         appData = OpenHABDataObject()
         super.init()
@@ -61,9 +73,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
 
+        activateWatchConnectivity()
+        
         return true
     }
 
+    func activateWatchConnectivity() {
+        if WCSession.isSupported() {
+            session = WCSession.default
+        }
+    }
+    
     // Notification registration depends on iOS version
     // This is the setup for iOS >10 notifications
     func registerForPushNotifications() {

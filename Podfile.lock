@@ -96,10 +96,10 @@ PODS:
   - SDWebImage (5.0.2):
     - SDWebImage/Core (= 5.0.2)
   - SDWebImage/Core (5.0.2)
-  - SDWebImageSVGCoder (0.2.0):
+  - SDWebImageSVGCoder (0.3.0):
     - SDWebImage/Core (~> 5.0)
     - SVGKit (>= 2.1)
-  - SVGKit (2.1.0):
+  - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
   - TSMessages (0.9.13):
     - HexColors (~> 2.3.0)
@@ -166,10 +166,10 @@ SPEC CHECKSUMS:
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
   SDWebImage: 6764b5fa0f73c203728052955dbefa2bf1f33282
-  SDWebImageSVGCoder: 61f60a3064db079de646a34a5f5aa8d3ac258345
-  SVGKit: 8a2fc74258bdb2abb54d3b65f3dd68b0277a9c4d
+  SDWebImageSVGCoder: 4b354bcdc7d74ce14d9fdb3c9ed9ab2c667f3b57
+  SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   TSMessages: eb3cf27b6900684a21bad4fe9ea426e287b8c839
 
 PODFILE CHECKSUM: b64ff21771c7644b6e71d8a869f8bb74e41bab64
 
-COCOAPODS: 1.6.0.beta.1
+COCOAPODS: 1.6.1
