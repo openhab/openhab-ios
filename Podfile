@@ -20,4 +20,6 @@ end
 
 target 'openHABTestsSwift' do
     pod 'GDataXML-HTML', '~> 1.3.0'
+    pod 'AFNetworking', '~> 2.6.0'
 end
+
