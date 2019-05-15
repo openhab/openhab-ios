@@ -146,12 +146,14 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                                    placeholderImage: widget?.image,
                                    options: [.allowInvalidSSLCertificates,
                                              .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
-            self?.widget?.image = image
-            self?.layoutIfNeeded()
-            self?.layoutSubviews()
-            if self?.delegate != nil {
-                self?.delegate?.didLoadImageOf(self)
-            }
+                                                DispatchQueue.main.async {
+                                                    self?.widget?.image = image
+                                                }
+                                                self?.layoutIfNeeded()
+                                                self?.layoutSubviews()
+                                                if self?.delegate != nil {
+                                                    self?.delegate?.didLoadImageOf(self)
+                                                }
         }
     }
 }
