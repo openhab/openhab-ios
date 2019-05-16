@@ -13,7 +13,6 @@ class WatchService {
     
     static let singleton = WatchService()
     
-    private var lastSentNightscoutDataTime: NSNumber?
     private var lastWatchUpdateTime: Date?
     private var lastWatchComplicationUpdateTime: Date?
     
