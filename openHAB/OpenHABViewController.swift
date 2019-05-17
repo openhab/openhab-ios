@@ -13,6 +13,7 @@ import AVKit
 import os.log
 import SDWebImage
 import SDWebImageSVGCoder
+import SwiftMessages
 import UIKit
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
@@ -127,7 +128,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
-        //    self.refreshControl.tintColor = [UIColor whiteColor];
+
         refreshControl?.addTarget(self, action: #selector(OpenHABViewController.handleRefresh(_:)), for: .valueChanged)
         if let refreshControl = refreshControl {
             widgetTableView.addSubview(refreshControl)
@@ -158,8 +159,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         loadPage(false)
         widgetTableView.reloadData()
         widgetTableView.layoutIfNeeded()
-        //    [self.widgetTableView reloadData];
-        //    [self.widgetTableView layoutIfNeeded];
     }
 
     @objc func handleApsRegistration(_ note: Notification?) {
@@ -217,8 +216,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         loadSettings()
         // Set authentication parameters to SDImag
         setSDImageAuth()
-        // Set default controller for TSMessage to self
-        TSMessage.setDefaultViewController(navigationController)
         // Disable idle timeout if configured in settings
         if idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
@@ -564,17 +561,36 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // OpenHABTracker delegate methods
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        DispatchQueue.main.async {
-            TSMessage.showNotification(in: self.navigationController, title: "Connecting", subtitle: message, image: nil, type: .message, duration: 3.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at:
-                TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 3)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            let view = MessageView.viewFromNib(layout: .cardView)
+            view.configureTheme(.info)
+            view.configureContent(title: "Connecting", body: message ?? "")
+            view.button?.setTitle("Dismiss", for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
         }
     }
 
     func openHABTrackingError(_ error: Error) {
         os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
-        DispatchQueue.main.async {
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 60)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 60.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+            let view = MessageView.viewFromNib(layout: .cardView)
+            // ... configure the view
+            view.configureTheme(.error)
+            view.configureContent(title: "Error", body: error.localizedDescription)
+            view.button?.setTitle("Dismiss", for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
         }
     }
 
@@ -710,9 +726,35 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     // Error
                     DispatchQueue.main.async {
                         if (error as NSError?)?.code == -1012 {
-                            TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: "Error", body: "SSL Certificate Error")
+                                view.button?.setTitle("Dismiss", for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
                         } else {
-                            TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: "Error", body: error.localizedDescription)
+                                view.button?.setTitle("Dismiss", for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
                         }
                     }
                     os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
@@ -793,8 +835,19 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         self.loadPage(false)
                     }
                 } else {
-                    DispatchQueue.main.async {
-                    TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "openHAB returned empty sitemap list", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    var config = SwiftMessages.Config()
+                    config.duration = .seconds(seconds: 5)
+                    config.presentationStyle = .bottom
+
+                    SwiftMessages.show(config: config) {
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        let view = MessageView.viewFromNib(layout: .cardView)
+                        // ... configure the view
+                        view.configureTheme(.error)
+                        view.configureContent(title: "Error", body: "openHAB returned empty sitemap list")
+                        view.button?.setTitle("Dismiss", for: .normal)
+                        view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                        return view
                     }
                 }
 
@@ -804,9 +857,33 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                     // Error
                     if (error as NSError?)?.code == -1012 {
-                        TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
+
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: "SSL Certificate Error")
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
+                        }
                     } else {
-                        TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
+
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: error.localizedDescription)
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
+                        }
                     }
                 }
             })
