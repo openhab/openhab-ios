@@ -9,8 +9,8 @@
 import Foundation
 
 class AppState {
-    
+
     static let singleton = AppState()
-    
+
     var active = false
 }
