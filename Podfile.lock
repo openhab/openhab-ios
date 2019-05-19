@@ -72,7 +72,6 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (6.0.0):
     - GoogleUtilities/Logger
-  - HexColors (2.3.0)
   - MMDrawerController (0.5.7):
     - MMDrawerController/Core (= 0.5.7)
     - MMDrawerController/MMDrawerBarButtonItem (= 0.5.7)
@@ -101,8 +100,9 @@ PODS:
     - SVGKit (>= 2.1)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
-  - TSMessages (0.9.13):
-    - HexColors (~> 2.3.0)
+  - SwiftMessages (6.0.2):
+    - SwiftMessages/App (= 6.0.2)
+  - SwiftMessages/App (6.0.2)
 
 DEPENDENCIES:
   - AFNetworking (~> 2.6.0)
@@ -115,7 +115,7 @@ DEPENDENCIES:
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 5.0)
   - SDWebImageSVGCoder
-  - TSMessages (from `https://github.com/KrauseFx/TSMessages.git`)
+  - SwiftMessages
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -130,7 +130,6 @@ SPEC REPOS:
     - GDataXML-HTML
     - GoogleAppMeasurement
     - GoogleUtilities
-    - HexColors
     - MMDrawerController
     - "MMDrawerController+Storyboard"
     - nanopb
@@ -138,15 +137,7 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageSVGCoder
     - SVGKit
-
-EXTERNAL SOURCES:
-  TSMessages:
-    :git: https://github.com/KrauseFx/TSMessages.git
-
-CHECKOUT OPTIONS:
-  TSMessages:
-    :commit: e4802d290362c87ba8a35c1afae88668dba8ab9a
-    :git: https://github.com/KrauseFx/TSMessages.git
+    - SwiftMessages
 
 SPEC CHECKSUMS:
   AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
@@ -160,7 +151,6 @@ SPEC CHECKSUMS:
   GDataXML-HTML: 7adc03668cab35c288f1dbb8929a179f0fece898
   GoogleAppMeasurement: 7f028ea162b72c8f326daec74afc95d94f7a47d6
   GoogleUtilities: f1faafc033ea203adf1783ce00af455bb99d0e5b
-  HexColors: 6ad3947c3447a055a3aa8efa859def096351fe5f
   MMDrawerController: 7a4cf8e25596bf2434e03ce50d22a8608ddee6a1
   "MMDrawerController+Storyboard": c98f86c0f32cdef1d466d19a7da3ad2fc6c6ac00
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
@@ -170,6 +160,6 @@ SPEC CHECKSUMS:
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   TSMessages: eb3cf27b6900684a21bad4fe9ea426e287b8c839
 
-PODFILE CHECKSUM: b64ff21771c7644b6e71d8a869f8bb74e41bab64
+PODFILE CHECKSUM: 4c963287cd6a2d94e48737e6b87cd7c1d1c5ddb7
 
 COCOAPODS: 1.6.0.beta.1

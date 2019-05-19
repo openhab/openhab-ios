@@ -5,7 +5,6 @@
 #import <AFNetworking/AFNetworking.h>
 #import <GDataXML_HTML/GDataXMLNode.h>
 #import <MMDrawerController/UIViewController+MMDrawerController.h>
-#import <TSMessages/TSMessage.h>
 
 // -----------------------------------------------------------------------------
 // Begin Swiftify generated imports
