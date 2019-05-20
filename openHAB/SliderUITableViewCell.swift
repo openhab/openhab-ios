@@ -44,10 +44,10 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func sliderDidEndSliding (_ sender: UISlider) {
-        os_log("Slider new value = %g", log: .default, type: .info, widgetSlider?.value ?? 0.0)
         let input = Double(widgetSlider?.value ?? Float (widget.minValue))
         let minV = widget.minValue
         let res = floor(( input - minV) / widget.step) * widget.step + widget.minValue
+        os_log("Slider new value = %g, adjusted to: %g", log: .default, type: .info, widgetSlider?.value ?? 0.0, res)
         widget.sendCommand("\(res)")
     }
 }
