@@ -103,15 +103,8 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 //                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
 //            }
 //        }
-        let prefs = UserDefaults.standard
-        let ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
 
-        // See https://developer.apple.com/documentation/swift/optionset
-        var imageOptions: SDWebImageOptions = .fromLoaderOnly
-        if ignoreSSLCertificate {
-            imageOptions.insert(.allowInvalidSSLCertificates)
-        }
-        mainImageView?.sd_setImage(with: createURL, placeholderImage: UIImage(named: "blankicon.png"), options: imageOptions) { [weak self] (image, error, cacheType, imageURL) in
+        mainImageView?.sd_setImage(with: createURL, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionFromLoaderOnlyIgnoreInvalidCert) { [weak self] (image, error, cacheType, imageURL) in
             DispatchQueue.main.async {
                 self?.widget?.image = image
             }
@@ -146,12 +139,15 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                                    placeholderImage: widget?.image,
                                    options: [.allowInvalidSSLCertificates,
                                              .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
-            self?.widget?.image = image
-            self?.layoutIfNeeded()
-            self?.layoutSubviews()
-            if self?.delegate != nil {
-                self?.delegate?.didLoadImageOf(self)
-            }
+                                                DispatchQueue.main.async {
+                                                    self?.widget?.image = image
+                                                }
+                                                self?.layoutIfNeeded()
+                                                self?.layoutSubviews()
+                                                if self?.delegate != nil {
+                                                    self?.delegate?.didLoadImageOf(self)
+                                                }
+
         }
     }
 }

@@ -95,15 +95,8 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     class func certificateData(forDomain domain: String?) -> CFData? {
-        let certificateData = trustedCertificates[domain] as? Data
-        if certificateData == nil {
-            return nil
-        }
-        let certificate = certificateData?.withUnsafeBytes {dataBytes in
-            CFDataCreate(nil, dataBytes, (certificateData?.count ?? 0))
-        }
-        //    CFDataRef certificate = SecCertificateCopyData((__bridge CFDataRef)([NSKeyedUnarchiver unarchiveObjectWithData:certificateData]));
-        return certificate
+        guard let certificateData = trustedCertificates[domain] as? Data else { return nil  }
+        return certificateData as CFData
     }
 
     class func loadTrustedCertificates() {
@@ -128,11 +121,9 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         let certificateSummary = SecCertificateCopySubjectSummary(certificate!)
         let certificateData = SecCertificateCopyData(certificate!)
         // If we have a certificate for this domain
-        if AFRememberingSecurityPolicy.certificateData(forDomain: domain) != nil {
-            // Obtain certificate we have and compare it with the certificate presented by the server
-            let previousCertificateData = AFRememberingSecurityPolicy.certificateData(forDomain: domain)
-            let success = CFEqual(previousCertificateData, certificateData)
-            if success {
+        // Obtain certificate we have and compare it with the certificate presented by the server
+        if let previousCertificateData = AFRememberingSecurityPolicy.certificateData(forDomain: domain) {
+            if CFEqual(previousCertificateData, certificateData) {
                 // If certificate matched one in our store - permit this connection
                 return true
             } else {
