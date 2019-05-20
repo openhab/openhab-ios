@@ -134,15 +134,18 @@ class UserDefaultsRepository {
             return Sitemap.init(frames: [])
         }
         
-        return try! NSKeyedUnarchiver.unarchivedObject(ofClass: Sitemap.self, from: sitemap) ?? Sitemap.init(frames: [])
+        guard let sitemapValue = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Sitemap.self, from: sitemap) else {
+            return Sitemap.init(frames: [])
+        }
+        return sitemapValue;
     }
     
     static func saveSitemap(_ sitemap : Sitemap) {
         
         let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
         defaults!.set(
-            try! NSKeyedArchiver.archivedData(withRootObject: sitemap, requiringSecureCoding: false),
-            forKey: "sitemap")
+            try? NSKeyedArchiver.archivedData(withRootObject: sitemap, requiringSecureCoding: true) ,
+                            forKey: "sitemap")
     }
     
     fileprivate static func validateUrl(_ stringURL : String) -> Bool {
