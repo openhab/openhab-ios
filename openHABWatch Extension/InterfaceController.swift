@@ -46,7 +46,7 @@ class InterfaceController: WKInterfaceController {
     
     fileprivate func refresh(_ sitemap: (Sitemap)) {
         
-        if sitemap.frames.count == 0 {
+        if sitemap.frames.isEmpty {
             return
         }
         
