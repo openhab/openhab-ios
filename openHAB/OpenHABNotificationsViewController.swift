@@ -10,6 +10,7 @@
 
 import os.log
 import SDWebImage
+import SideMenu
 import UIKit
 
 class OpenHABNotificationsViewController: UITableViewController {
@@ -32,9 +33,10 @@ class OpenHABNotificationsViewController: UITableViewController {
         if let refreshControl = refreshControl {
             tableView.sendSubviewToBack(refreshControl)
         }
-        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABNotificationsViewController.rightDrawerButtonPress(_:)))
-        navigationItem.setRightBarButton(rightDrawerButton, animated: true)
-
+//        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABNotificationsViewController.rightDrawerButtonPress(_:)))
+//        navigationItem.setRightBarButton(rightDrawerButton, animated: true)
+        let rightDrawerButton = UIBarButtonItem(image: UIImage(named: "hamburgerMenuIcon-50.png"), style: .plain, target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
     }
 
     override func didReceiveMemoryWarning() {
@@ -91,7 +93,7 @@ class OpenHABNotificationsViewController: UITableViewController {
     }
 
     @objc func rightDrawerButtonPress(_ sender: Any?) {
-        mm_drawerController.toggle(MMDrawerSide.right, animated: true, completion: nil)
+        present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {

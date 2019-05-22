@@ -13,13 +13,22 @@ import AVKit
 import os.log
 import SDWebImage
 import SDWebImageSVGCoder
+import SideMenu
 import SwiftMessages
 import UIKit
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, NewImageUITableViewCellDelegate {
+enum TargetController {
+    case settings
+    case notifications
+}
+protocol ModalHandler: class {
+    func modalDismissed(to: TargetController)
+}
+
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, NewImageUITableViewCellDelegate, ModalHandler {
 
     var tracker: OpenHABTracker?
 
@@ -46,6 +55,23 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var atmosphereTrackingId = ""
     var refreshControl: UIRefreshControl?
     var iconType: Int = 0
+
+    func modalDismissed(to: TargetController) {
+        switch to {
+        case .settings:
+            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
+                navigationController?.pushViewController(newViewController, animated: true)
+            }
+        case .notifications:
+            if navigationController?.visibleViewController is OpenHABNotificationsViewController {
+                os_log("Notifications are already open", log: .notifications, type: .info)
+            } else {
+                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
+                    navigationController?.pushViewController(newViewController, animated: true)
+                }
+            }
+        }
+    }
 
     func openHABTracked(_ openHABUrl: String?) {
         os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, openHABUrl ?? "")
@@ -137,8 +163,22 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             widgetTableView.sendSubviewToBack(refreshControl)
         }
 
-        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
-        navigationItem.setRightBarButton(rightDrawerButton, animated: true)
+//        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+//        let rightDrawerButton = UIBarButtonItem(image: UIImage(named: "hamburgerMenuIcon-50.png"), style: .plain, target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+//        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
+        setupSideMenu()
+    }
+
+    fileprivate func setupSideMenu() {
+        // Define the menus
+
+        SideMenuManager.default.menuRightNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? UISideMenuNavigationController
+
+        // Enable gestures. The left and/or right menus must be set up above for these to work.
+        // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
+        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
+        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
+
     }
 
     func configureTableView() {
@@ -173,9 +213,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     @objc func rightDrawerButtonPress(_ sender: Any?) {
-        let drawer = mm_drawerController.rightDrawerViewController as? OpenHABDrawerTableViewController
-        drawer?.openHABRootUrl = openHABRootUrl
-        mm_drawerController.toggle(MMDrawerSide.right, animated: true, completion: nil)
+
+        present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
+
     }
 
     func doRegisterAps() {
@@ -548,14 +588,29 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         os_log("OpenHABViewController prepareForSegue %{PUBLIC}@", log: .viewCycle, type: .info, segue.identifier ?? "")
-        if segue.identifier?.isEqual("showPage") ?? false {
+
+        switch segue.identifier {
+        case "showPage":
             let newViewController = segue.destination as? OpenHABViewController
             let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
             newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
-        } else if segue.identifier?.isEqual("showSelectionView") ?? false {
-            os_log("Selection seague", log: .viewCycle, type: .info)
+        case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
+        case "sideMenu":
+            let navigation = segue.destination as? UINavigationController
+            let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
+            drawer?.openHABRootUrl = openHABRootUrl
+            drawer?.delegate = self
+        default: break
         }
+//        if segue.identifier?.isEqual("showPage") ?? false {
+//            let newViewController = segue.destination as? OpenHABViewController
+//            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+//            newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
+//            newViewController?.openHABRootUrl = openHABRootUrl
+//        } else if segue.identifier?.isEqual("showSelectionView") ?? false {
+//            os_log("Selection seague", log: .viewCycle, type: .info)
+//        }
     }
 
     // OpenHABTracker delegate methods
