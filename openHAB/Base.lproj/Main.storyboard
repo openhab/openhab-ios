@@ -231,12 +231,22 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <slider opaque="NO" tag="400" contentMode="scaleToFill" horizontalCompressionResistancePriority="800" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Aa2-hH-P4c">
-                                                    <rect key="frame" x="258.66666666666669" y="7" width="137.33333333333331" height="31"/>
+                                                    <rect key="frame" x="242" y="7" width="154" height="31"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="150" id="0RU-Mh-mu2"/>
+                                                        <constraint firstAttribute="height" constant="30" id="Fo8-Gh-C1v"/>
+                                                    </constraints>
                                                 </slider>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9hr-4E-GF3">
-                                                    <rect key="frame" x="61.999999999999986" y="22" width="198.66666666666663" height="0.0"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Dimmer" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9hr-4E-GF3">
+                                                    <rect key="frame" x="62" y="11.333333333333336" width="60" height="21"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rCE-g4-UjE">
+                                                    <rect key="frame" x="210" y="11.333333333333336" width="26" height="21"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                    <color key="textColor" red="0.66666666669999997" green="0.66666666669999997" blue="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
@@ -244,15 +254,17 @@
                                                 <constraint firstItem="9hr-4E-GF3" firstAttribute="centerY" secondItem="n9y-r4-Qcp" secondAttribute="centerY" id="2WM-vJ-GTO"/>
                                                 <constraint firstItem="Aa2-hH-P4c" firstAttribute="centerY" secondItem="n9y-r4-Qcp" secondAttribute="centerY" id="DrW-MZ-8JZ"/>
                                                 <constraint firstItem="9hr-4E-GF3" firstAttribute="leading" secondItem="n9y-r4-Qcp" secondAttribute="leading" constant="62" id="Gsh-Ti-OC9"/>
-                                                <constraint firstItem="Aa2-hH-P4c" firstAttribute="leading" secondItem="9hr-4E-GF3" secondAttribute="trailing" id="aBo-Bi-p8I"/>
+                                                <constraint firstItem="rCE-g4-UjE" firstAttribute="centerY" secondItem="n9y-r4-Qcp" secondAttribute="centerY" id="cN6-rl-QHp"/>
+                                                <constraint firstItem="rCE-g4-UjE" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="9hr-4E-GF3" secondAttribute="trailing" constant="8" id="fBT-md-VoG"/>
                                                 <constraint firstAttribute="trailing" secondItem="Aa2-hH-P4c" secondAttribute="trailing" constant="20" id="iT9-vY-faY"/>
-                                                <constraint firstItem="9hr-4E-GF3" firstAttribute="width" secondItem="Aa2-hH-P4c" secondAttribute="width" priority="999" constant="65" id="pYe-aD-i0S"/>
+                                                <constraint firstItem="Aa2-hH-P4c" firstAttribute="leading" secondItem="rCE-g4-UjE" secondAttribute="trailing" constant="8" id="qjz-H9-rKq"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                         <connections>
+                                            <outlet property="customDetailText" destination="rCE-g4-UjE" id="2Ep-Sj-vKB"/>
                                             <outlet property="customTextLabel" destination="9hr-4E-GF3" id="YWZ-MU-Cnv"/>
                                             <outlet property="widgetSlider" destination="Aa2-hH-P4c" id="C8O-Bi-GFX"/>
                                         </connections>
