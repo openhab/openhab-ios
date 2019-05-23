@@ -163,9 +163,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             widgetTableView.sendSubviewToBack(refreshControl)
         }
 
-//        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
-//        let rightDrawerButton = UIBarButtonItem(image: UIImage(named: "hamburgerMenuIcon-50.png"), style: .plain, target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
-//        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
+        let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
+        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
+
         setupSideMenu()
     }
 
@@ -213,9 +213,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     @objc func rightDrawerButtonPress(_ sender: Any?) {
-
-        present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
-
+        performSegue(withIdentifier: "sideMenu", sender: nil)
     }
 
     func doRegisterAps() {
@@ -603,14 +601,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             drawer?.delegate = self
         default: break
         }
-//        if segue.identifier?.isEqual("showPage") ?? false {
-//            let newViewController = segue.destination as? OpenHABViewController
-//            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
-//            newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
-//            newViewController?.openHABRootUrl = openHABRootUrl
-//        } else if segue.identifier?.isEqual("showSelectionView") ?? false {
-//            os_log("Selection seague", log: .viewCycle, type: .info)
-//        }
     }
 
     // OpenHABTracker delegate methods
@@ -963,12 +953,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // Set SDImage (used for widget icons and images) authentication
     func setSDImageAuth() {
-//        let authStr = "\(openHABUsername):\(openHABPassword)"
-//        let authData: Data? = authStr.data(using: .ascii)
-//        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-//        //let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
-//        manager?.setValue(authValue, forHTTPHeaderField: "Authorization")
-
         let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
             let authStr = "\(self.openHABUsername):\(self.openHABPassword)"
             let authData: Data? = authStr.data(using: .ascii)

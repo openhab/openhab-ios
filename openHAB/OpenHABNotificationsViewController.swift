@@ -13,6 +13,22 @@ import SDWebImage
 import SideMenu
 import UIKit
 
+extension UIBarButtonItem {
+
+    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: imageName), for: .normal)
+        button.addTarget(target, action: action, for: .touchUpInside)
+
+        let menuBarItem = UIBarButtonItem(customView: button)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
+
+        return menuBarItem
+    }
+}
+
 class OpenHABNotificationsViewController: UITableViewController {
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
@@ -33,9 +49,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         if let refreshControl = refreshControl {
             tableView.sendSubviewToBack(refreshControl)
         }
-//        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABNotificationsViewController.rightDrawerButtonPress(_:)))
-//        navigationItem.setRightBarButton(rightDrawerButton, animated: true)
-        let rightDrawerButton = UIBarButtonItem(image: UIImage(named: "hamburgerMenuIcon-50.png"), style: .plain, target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+        let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
         navigationItem.setRightBarButton (rightDrawerButton, animated: true)
     }
 

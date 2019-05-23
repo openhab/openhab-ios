@@ -498,16 +498,11 @@
                             <constraint firstAttribute="trailing" secondItem="S7g-eE-wf7" secondAttribute="trailing" id="yz9-6F-Iw8"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="N7h-KT-EtL">
-                        <barButtonItem key="rightBarButtonItem" title="Item" id="UEG-2u-eCB">
-                            <connections>
-                                <segue destination="TS8-mI-318" kind="presentation" identifier="sideMenu" id="AdA-Pz-DF3"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" id="N7h-KT-EtL"/>
                     <connections>
                         <outlet property="widgetTableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
                         <segue destination="1hm-c1-IPh" kind="show" identifier="showSelectSitemap" id="IN7-RI-eVs"/>
+                        <segue destination="TS8-mI-318" kind="presentation" identifier="sideMenu" id="UQA-38-N3R"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
