@@ -2,6 +2,7 @@ platform :ios, '11.0'
 use_frameworks!
 
 target 'openHAB' do
+    #pod 'AFNetworking', '~> 3.0'
     pod 'AFNetworking', '~> 2.6.0'
     pod 'SDWebImage', '~> 5.0' , :modular_headers => true
     pod 'SDWebImageSVGCoder'
@@ -17,5 +18,6 @@ end
 target 'openHABTestsSwift' do
     pod 'GDataXML-HTML', '~> 1.3.0'
     pod 'AFNetworking', '~> 2.6.0'
+    #pod 'AFNetworking', '~> 3.0'
 end
 
