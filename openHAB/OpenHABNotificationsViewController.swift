@@ -10,7 +10,24 @@
 
 import os.log
 import SDWebImage
+import SideMenu
 import UIKit
+
+extension UIBarButtonItem {
+
+    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: imageName), for: .normal)
+        button.addTarget(target, action: action, for: .touchUpInside)
+
+        let menuBarItem = UIBarButtonItem(customView: button)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
+
+        return menuBarItem
+    }
+}
 
 class OpenHABNotificationsViewController: UITableViewController {
     var notifications: NSMutableArray = []
@@ -32,9 +49,8 @@ class OpenHABNotificationsViewController: UITableViewController {
         if let refreshControl = refreshControl {
             tableView.sendSubviewToBack(refreshControl)
         }
-        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABNotificationsViewController.rightDrawerButtonPress(_:)))
-        navigationItem.setRightBarButton(rightDrawerButton, animated: true)
-
+        let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
+        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
     }
 
     override func didReceiveMemoryWarning() {
@@ -91,7 +107,7 @@ class OpenHABNotificationsViewController: UITableViewController {
     }
 
     @objc func rightDrawerButtonPress(_ sender: Any?) {
-        mm_drawerController.toggle(MMDrawerSide.right, animated: true, completion: nil)
+        present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {

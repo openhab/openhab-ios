@@ -19,6 +19,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     var openHABPassword = ""
     var cellCount: Int = 0
     var drawerItems: [AnyHashable] = []
+    weak var delegate: ModalHandler?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -201,35 +202,21 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 let prefs = UserDefaults.standard
                 prefs.setValue(sitemap.name, forKey: "defaultSitemap")
                 appData?.rootViewController?.pageUrl = ""
-                let nav = mm_drawerController.centerViewController as? UINavigationController
-                let dummyViewController: UIViewController? = storyboard?.instantiateViewController(withIdentifier: "DummyViewController")
-                if let dummyViewController = dummyViewController {
-                    nav?.pushViewController(dummyViewController, animated: false)
-                }
-                nav?.popToRootViewController(animated: true)
+                dismiss(animated: true, completion: nil)
             } else {
                 // Then menu items
                 if ((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "settings" {
-                    let nav = mm_drawerController.centerViewController as? UINavigationController
-                    let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController
-                    if let newViewController = newViewController {
-                        nav?.pushViewController(newViewController, animated: true)
+                    dismiss(animated: true) {
+                        self.delegate?.modalDismissed(to: .settings)
                     }
                 }
                 if ((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "notifications" {
-                    let nav = mm_drawerController.centerViewController as? UINavigationController
-                    if nav?.visibleViewController is OpenHABNotificationsViewController {
-                        os_log("Notifications are already open", log: .notifications, type: .info)
-                    } else {
-                        let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController
-                        if let newViewController = newViewController {
-                            nav?.pushViewController(newViewController, animated: true)
-                        }
+                    dismiss(animated: true) {
+                        self.delegate?.modalDismissed(to: .notifications)
                     }
                 }
             }
         }
-        mm_drawerController.closeDrawer(animated: true, completion: nil)
     }
 
     func loadSettings() {

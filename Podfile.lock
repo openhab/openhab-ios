@@ -72,20 +72,6 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (6.0.0):
     - GoogleUtilities/Logger
-  - MMDrawerController (0.5.7):
-    - MMDrawerController/Core (= 0.5.7)
-    - MMDrawerController/MMDrawerBarButtonItem (= 0.5.7)
-    - MMDrawerController/MMDrawerVisualStates (= 0.5.7)
-    - MMDrawerController/Subclass (= 0.5.7)
-  - "MMDrawerController+Storyboard (0.0.2)":
-    - MMDrawerController
-  - MMDrawerController/Core (0.5.7)
-  - MMDrawerController/MMDrawerBarButtonItem (0.5.7):
-    - MMDrawerController/Core
-  - MMDrawerController/MMDrawerVisualStates (0.5.7):
-    - MMDrawerController/Core
-  - MMDrawerController/Subclass (0.5.7):
-    - MMDrawerController/Core
   - nanopb (0.3.901):
     - nanopb/decode (= 0.3.901)
     - nanopb/encode (= 0.3.901)
@@ -98,6 +84,7 @@ PODS:
   - SDWebImageSVGCoder (0.2.0):
     - SDWebImage/Core (~> 5.0)
     - SVGKit (>= 2.1)
+  - SideMenu (5.0.3)
   - SVGKit (2.1.0):
     - CocoaLumberjack (~> 3.0)
   - SwiftMessages (6.0.2):
@@ -110,11 +97,10 @@ DEPENDENCIES:
   - Fabric (~> 1.7.2)
   - Firebase/Core
   - GDataXML-HTML (~> 1.3.0)
-  - MMDrawerController (~> 0.5.7)
-  - "MMDrawerController+Storyboard"
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 5.0)
   - SDWebImageSVGCoder
+  - SideMenu
   - SwiftMessages
 
 SPEC REPOS:
@@ -130,12 +116,11 @@ SPEC REPOS:
     - GDataXML-HTML
     - GoogleAppMeasurement
     - GoogleUtilities
-    - MMDrawerController
-    - "MMDrawerController+Storyboard"
     - nanopb
     - NKOColorPickerView
     - SDWebImage
     - SDWebImageSVGCoder
+    - SideMenu
     - SVGKit
     - SwiftMessages
 
@@ -151,15 +136,14 @@ SPEC CHECKSUMS:
   GDataXML-HTML: 7adc03668cab35c288f1dbb8929a179f0fece898
   GoogleAppMeasurement: 7f028ea162b72c8f326daec74afc95d94f7a47d6
   GoogleUtilities: f1faafc033ea203adf1783ce00af455bb99d0e5b
-  MMDrawerController: 7a4cf8e25596bf2434e03ce50d22a8608ddee6a1
-  "MMDrawerController+Storyboard": c98f86c0f32cdef1d466d19a7da3ad2fc6c6ac00
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
   SDWebImage: 6764b5fa0f73c203728052955dbefa2bf1f33282
   SDWebImageSVGCoder: 61f60a3064db079de646a34a5f5aa8d3ac258345
+  SideMenu: 1dcaabce84538c53325c287f7fe62999379a641c
   SVGKit: 8a2fc74258bdb2abb54d3b65f3dd68b0277a9c4d
   SwiftMessages: 8b3cc68dba2f1c91aac1a74c90b10287aac35371
 
-PODFILE CHECKSUM: 4c963287cd6a2d94e48737e6b87cd7c1d1c5ddb7
+PODFILE CHECKSUM: e0ae2ba5f680b548be04dc00baed71b80ca9e0d3
 
 COCOAPODS: 1.6.0.beta.1
