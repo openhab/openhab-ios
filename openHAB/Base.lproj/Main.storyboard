@@ -230,12 +230,18 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <slider opaque="NO" tag="400" contentMode="scaleToFill" horizontalCompressionResistancePriority="800" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Aa2-hH-P4c">
+                                                <slider opaque="NO" tag="400" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Aa2-hH-P4c">
                                                     <rect key="frame" x="242" y="7" width="154" height="31"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="150" id="0RU-Mh-mu2"/>
                                                         <constraint firstAttribute="height" constant="30" id="Fo8-Gh-C1v"/>
                                                     </constraints>
+                                                    <connections>
+                                                        <action selector="sliderTouchOutside:" destination="S22-0C-9Sl" eventType="touchUpOutside" id="Av9-4g-ezL"/>
+                                                        <action selector="sliderTouchUp:" destination="S22-0C-9Sl" eventType="touchUpInside" id="HkQ-HY-m11"/>
+                                                        <action selector="sliderValueChanged:" destination="S22-0C-9Sl" eventType="valueChanged" id="QVX-2Z-6cm"/>
+                                                    </connections>
+
                                                 </slider>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Dimmer" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9hr-4E-GF3">
                                                     <rect key="frame" x="62" y="11.333333333333336" width="60" height="21"/>
@@ -243,7 +249,7 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rCE-g4-UjE">
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rCE-g4-UjE">
                                                     <rect key="frame" x="210" y="11.333333333333336" width="26" height="21"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.66666666669999997" green="0.66666666669999997" blue="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

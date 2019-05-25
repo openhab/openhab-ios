@@ -179,6 +179,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
         SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
 
+        SideMenuManager.default.menuFadeStatusBar = false
+
     }
 
     func configureTableView() {
