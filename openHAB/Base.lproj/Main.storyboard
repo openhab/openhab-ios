@@ -241,6 +241,7 @@
                                                         <action selector="sliderTouchUp:" destination="S22-0C-9Sl" eventType="touchUpInside" id="HkQ-HY-m11"/>
                                                         <action selector="sliderValueChanged:" destination="S22-0C-9Sl" eventType="valueChanged" id="QVX-2Z-6cm"/>
                                                     </connections>
+
                                                 </slider>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Dimmer" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9hr-4E-GF3">
                                                     <rect key="frame" x="62" y="11.333333333333336" width="60" height="21"/>
@@ -1414,6 +1415,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="9JR-Li-4ww"/>
+        <segue reference="IN7-RI-eVs"/>
     </inferredMetricsTieBreakers>
 </document>
