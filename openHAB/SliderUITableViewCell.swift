@@ -13,7 +13,21 @@ import os.log
 class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet weak var widgetSlider: UISlider!
-    //@IBOutlet weak var customTextLabel: UILabel!
+
+    @IBAction func sliderValueChanged(_ sender: Any) {
+        let widgetValue = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
+        customDetailText?.text = valueText(widgetValue)
+    }
+
+    @IBAction func sliderTouchUp(_ sender: Any) {
+        sliderDidEndSliding(widgetSlider)
+    }
+
+    @IBAction func sliderTouchOutside(_ sender: Any) {
+        sliderDidEndSliding(widgetSlider)
+    }
+
+    @IBOutlet weak var customDetailText: UILabel!
 
     private func initiliaze() {
         selectionStyle = .none
@@ -30,24 +44,36 @@ class SliderUITableViewCell: GenericUITableViewCell {
         self.initiliaze()
     }
 
-    override func displayWidget() {
-        customTextLabel?.text = widget.labelText()
-        if let item = widget.item {
-            widgetSlider?.minimumValue = Float(widget.minValue)
-            widgetSlider?.maximumValue = Float(widget.maxValue)
-            let valueAdjustedToStep = floor((item.stateAsDouble() - widget.minValue) / widget.step) + widget.minValue
-            let widgetValue = min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
-            widgetSlider?.value = Float(widgetValue)
+    func adj(_ raw: Double) -> Double {
+        let valueAdjustedToStep = floor((raw - widget.minValue) / widget.step) + widget.minValue
+        return min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
+    }
 
-            widgetSlider?.addTarget(self, action: #selector(SliderUITableViewCell.sliderDidEndSliding(_:)), for: [.touchUpInside, .touchUpOutside])
+    func adjustedValue() -> Double {
+        if let item = widget.item {
+            return adj(item.stateAsDouble())
+        } else {
+            return widget.minValue
         }
     }
 
+    func valueText(_ widgetValue: Double) -> String {
+        let digits = max (-Decimal(widget.step).exponent, 0)
+        return String(format: "%.\(digits)f", widgetValue)
+    }
+
+    override func displayWidget() {
+        customTextLabel?.text = widget.labelText()
+        widgetSlider?.minimumValue = Float(widget.minValue)
+        widgetSlider?.maximumValue = Float(widget.maxValue)
+        let widgetValue = adjustedValue()
+        widgetSlider?.value = Float(widgetValue)
+        customDetailText?.text = valueText(widgetValue)
+    }
+
     @objc func sliderDidEndSliding (_ sender: UISlider) {
-        let input = Double(widgetSlider?.value ?? Float (widget.minValue))
-        let minV = widget.minValue
-        let res = floor(( input - minV) / widget.step) * widget.step + widget.minValue
-        os_log("Slider new value = %g, adjusted to: %g", log: .default, type: .info, widgetSlider?.value ?? 0.0, res)
+        let res = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
+        os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider?.value ?? 0.0, res)
         widget.sendCommand("\(res)")
     }
 }
