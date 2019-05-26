@@ -841,7 +841,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Nhm-Th-r6X">
-                                                    <rect key="frame" x="273" y="8" width="121" height="29"/>
+                                                    <rect key="frame" x="309" y="8" width="85" height="29"/>
                                                     <segments>
                                                         <segment title="PNG"/>
                                                         <segment title="SVG"/>
@@ -851,7 +851,7 @@
                                             <constraints>
                                                 <constraint firstItem="ess-BT-orH" firstAttribute="leading" secondItem="J6r-rN-wn4" secondAttribute="leadingMargin" constant="12" id="0r0-en-ZFA"/>
                                                 <constraint firstItem="ess-BT-orH" firstAttribute="centerY" secondItem="J6r-rN-wn4" secondAttribute="centerY" id="GSn-nf-d1X"/>
-                                                <constraint firstItem="Nhm-Th-r6X" firstAttribute="leading" secondItem="ess-BT-orH" secondAttribute="trailing" constant="166.66666666666669" id="Hpd-xb-pR3"/>
+                                                <constraint firstItem="Nhm-Th-r6X" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ess-BT-orH" secondAttribute="trailing" constant="8" id="Hpd-xb-pR3"/>
                                                 <constraint firstAttribute="trailing" secondItem="Nhm-Th-r6X" secondAttribute="trailing" constant="20" id="nzn-RF-LpT"/>
                                                 <constraint firstItem="Nhm-Th-r6X" firstAttribute="centerY" secondItem="J6r-rN-wn4" secondAttribute="centerY" id="rvN-w0-tLN"/>
                                             </constraints>
@@ -1414,6 +1414,6 @@
         <image name="glyphicons_433_minus.png" width="18" height="4"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="IN7-RI-eVs"/>
+        <segue reference="9JR-Li-4ww"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -27,6 +27,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
         sliderDidEndSliding(widgetSlider)
     }
 
+    @IBOutlet weak var customDetailText: UILabel!
+
     private func initiliaze() {
         selectionStyle = .none
         separatorInset = .zero
@@ -68,8 +70,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
         widgetSlider?.value = Float(widgetValue)
         customDetailText?.text = valueText(widgetValue)
     }
-
-    @IBOutlet weak var customDetailText: UILabel!
 
     @objc func sliderDidEndSliding (_ sender: UISlider) {
         let res = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
