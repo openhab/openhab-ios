@@ -93,7 +93,7 @@ class OpenHABNotificationsViewController: UITableViewController {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
             })

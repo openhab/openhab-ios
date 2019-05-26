@@ -18,13 +18,13 @@ class OpenHABDrawerTableViewController: UITableViewController {
     var openHABUsername = ""
     var openHABPassword = ""
     var cellCount: Int = 0
-    var drawerItems: [AnyHashable] = []
+    var drawerItems: [OpenHABDrawerItem] = []
     weak var delegate: ModalHandler?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.tableFooterView = UIView()
-        drawerItems = [AnyHashable]()
+        drawerItems = [OpenHABDrawerItem]()
         sitemaps = []
         loadSettings()
         os_log("OpenHABDrawerTableViewController did load", log: .viewCycle, type: .info)
@@ -95,6 +95,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.sitemaps.sort { $0.name < $1.name }
 
                 self.appData?.sitemaps = self.sitemaps
+                self.drawerItems.removeAll()
+                self.setDrawerItems()
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -105,12 +107,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         }
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        drawerItems.removeAll()
+    private func setDrawerItems() {
         // check if we are using my.openHAB, add notifications menu item then
         let prefs = UserDefaults.standard
-
         // Actually this should better test whether the host of the remoteUrl is on openhab.org
         if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false {
             let notificationsItem = OpenHABDrawerItem()
@@ -125,7 +124,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
         settingsItem.tag = "settings"
         settingsItem.icon = "glyphicons-137-cogwheel.png"
         drawerItems.append(settingsItem)
-        //    self.sitemaps = [[self appData] sitemaps];
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         tableView.reloadData()
         os_log("RightDrawerViewController viewDidAppear", log: .viewCycle, type: .info)
         os_log("Sitemap count: %d", log: .viewCycle, type: .info, Int(sitemaps.count))
@@ -135,7 +137,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated) // Call the super class implementation.
         os_log("RightDrawerViewController viewDidDisappear", log: .viewCycle, type: .info)
-
     }
 
     override func didReceiveMemoryWarning() {
@@ -162,18 +163,20 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             if indexPath.row <= sitemaps.count && !sitemaps.isEmpty {
                 cell?.customTextLabel?.text = sitemaps[indexPath.row - 1].label
-                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row - 1].icon ).url
-                cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+                if sitemaps[indexPath.row - 1].icon != "" {
+                    let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row - 1].icon ).url
+                    cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+                } else {
+                    cell?.customImageView?.image = UIImage(named: "icon-76x76.png")
+                }
             } else {
                 // Then menu items
-                cell?.customTextLabel?.text = (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.label
-                let iconUrlString: String? = nil
-                cell?.customImageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: (drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.icon ?? ""), options: [])
+                cell?.customTextLabel?.text = drawerItems[indexPath.row - sitemaps.count - 1].label
+                cell?.customImageView?.image = UIImage(named: drawerItems[indexPath.row - sitemaps.count - 1].icon)
             }
             cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
         } else {
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
-            //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
         }
 
         cell?.preservesSuperviewLayoutMargins = false
@@ -205,12 +208,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 dismiss(animated: true, completion: nil)
             } else {
                 // Then menu items
-                if ((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "settings" {
+                if drawerItems[indexPath.row - sitemaps.count - 1].tag == "settings" {
                     dismiss(animated: true) {
                         self.delegate?.modalDismissed(to: .settings)
                     }
                 }
-                if ((drawerItems[indexPath.row - sitemaps.count - 1] as? OpenHABDrawerItem)?.tag) == "notifications" {
+                if drawerItems[indexPath.row - sitemaps.count - 1].tag == "notifications" {
                     dismiss(animated: true) {
                         self.delegate?.modalDismissed(to: .notifications)
                     }
