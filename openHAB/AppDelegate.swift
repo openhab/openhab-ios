@@ -12,6 +12,7 @@
 import AVFoundation
 import Firebase
 import os.log
+import SwiftMessages
 import UIKit
 import UserNotifications
 
@@ -153,8 +154,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             os_log("%{PUBLIC}@", log: .notifications, type: .info, aps)
 
             let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
-            DispatchQueue.main.async {
-                TSMessage.showNotification(in: ((self.window?.rootViewController as? MMDrawerController)?.centerViewController as? UINavigationController)?.visibleViewController, title: "Notification", subtitle: message, image: nil, type: TSMessageNotificationType.message, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+
+            var config = SwiftMessages.Config()
+            config.duration = .seconds(seconds: 5)
+            config.presentationStyle = .bottom
+
+            SwiftMessages.show(config: config) {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                let view = MessageView.viewFromNib(layout: .cardView)
+                // ... configure the view
+                view.configureTheme(.info)
+                view.configureContent(title: "Notification", body: message)
+                view.button?.setTitle("Dismiss", for: .normal)
+                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                return view
             }
         }
     }

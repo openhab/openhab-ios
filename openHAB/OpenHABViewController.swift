@@ -13,14 +13,22 @@ import AVKit
 import os.log
 import SDWebImage
 import SDWebImageSVGCoder
+import SideMenu
+import SwiftMessages
 import UIKit
-
-//let manager: SDWebImageDownloader? = SDWebImageManager.shared.imageDownloader
 
 private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, NewImageUITableViewCellDelegate {
+enum TargetController {
+    case settings
+    case notifications
+}
+protocol ModalHandler: class {
+    func modalDismissed(to: TargetController)
+}
+
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, NewImageUITableViewCellDelegate, ModalHandler {
 
     var tracker: OpenHABTracker?
 
@@ -47,6 +55,23 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var atmosphereTrackingId = ""
     var refreshControl: UIRefreshControl?
     var iconType: Int = 0
+
+    func modalDismissed(to: TargetController) {
+        switch to {
+        case .settings:
+            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
+                navigationController?.pushViewController(newViewController, animated: true)
+            }
+        case .notifications:
+            if navigationController?.visibleViewController is OpenHABNotificationsViewController {
+                os_log("Notifications are already open", log: .notifications, type: .info)
+            } else {
+                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
+                    navigationController?.pushViewController(newViewController, animated: true)
+                }
+            }
+        }
+    }
 
     func openHABTracked(_ openHABUrl: String?) {
         os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, openHABUrl ?? "")
@@ -129,7 +154,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         refreshControl = UIRefreshControl()
         refreshControl?.backgroundColor = UIColor.groupTableViewBackground
-        //    self.refreshControl.tintColor = [UIColor whiteColor];
+
         refreshControl?.addTarget(self, action: #selector(OpenHABViewController.handleRefresh(_:)), for: .valueChanged)
         if let refreshControl = refreshControl {
             widgetTableView.addSubview(refreshControl)
@@ -138,8 +163,23 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             widgetTableView.sendSubviewToBack(refreshControl)
         }
 
-        let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
-        navigationItem.setRightBarButton(rightDrawerButton, animated: true)
+        let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
+        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
+
+        setupSideMenu()
+    }
+
+    fileprivate func setupSideMenu() {
+        // Define the menus
+
+        SideMenuManager.default.menuRightNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? UISideMenuNavigationController
+
+        // Enable gestures. The left and/or right menus must be set up above for these to work.
+        // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
+        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
+        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
+
+        SideMenuManager.default.menuFadeStatusBar = false
     }
 
     func configureTableView() {
@@ -160,8 +200,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         loadPage(false)
         widgetTableView.reloadData()
         widgetTableView.layoutIfNeeded()
-        //    [self.widgetTableView reloadData];
-        //    [self.widgetTableView layoutIfNeeded];
     }
 
     @objc func handleApsRegistration(_ note: Notification?) {
@@ -176,9 +214,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     @objc func rightDrawerButtonPress(_ sender: Any?) {
-        let drawer = mm_drawerController.rightDrawerViewController as? OpenHABDrawerTableViewController
-        drawer?.openHABRootUrl = openHABRootUrl
-        mm_drawerController.toggle(MMDrawerSide.right, animated: true, completion: nil)
+        performSegue(withIdentifier: "sideMenu", sender: nil)
     }
 
     func doRegisterAps() {
@@ -219,8 +255,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         loadSettings()
         // Set authentication parameters to SDImag
         setSDImageAuth()
-        // Set default controller for TSMessage to self
-        TSMessage.setDefaultViewController(navigationController)
         // Disable idle timeout if configured in settings
         if idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
@@ -367,10 +401,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Chart":
             cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
         case "Image":
-            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath)  as! NewImageUITableViewCell
+            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath) as! NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.delegate = self
         case "Video":
-            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath)  as! VideoUITableViewCell
+            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
@@ -388,13 +422,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                     value: widget?.item?.state ?? "",
                                     iconType: iconType).url
             if iconType == 0 {
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             } else {
                 let SVGCoder = SDImageSVGCoder.shared
                 SDImageCodersManager.shared.addCoder(SVGCoder)
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: [])
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             }
-
         }
 
         if cell is FrameUITableViewCell {
@@ -554,30 +587,56 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         os_log("OpenHABViewController prepareForSegue %{PUBLIC}@", log: .viewCycle, type: .info, segue.identifier ?? "")
-        if segue.identifier?.isEqual("showPage") ?? false {
+
+        switch segue.identifier {
+        case "showPage":
             let newViewController = segue.destination as? OpenHABViewController
             let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
             newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
-        } else if segue.identifier?.isEqual("showSelectionView") ?? false {
-            os_log("Selection seague", log: .viewCycle, type: .info)
+        case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
+        case "sideMenu":
+            let navigation = segue.destination as? UINavigationController
+            let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
+            drawer?.openHABRootUrl = openHABRootUrl
+            drawer?.delegate = self
+        default: break
         }
     }
 
     // OpenHABTracker delegate methods
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        DispatchQueue.main.async {
-            TSMessage.showNotification(in: self.navigationController, title: "Connecting", subtitle: message, image: nil, type: .message, duration: 3.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at:
-                TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 3)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            let view = MessageView.viewFromNib(layout: .cardView)
+            view.configureTheme(.info)
+            view.configureContent(title: "Connecting", body: message ?? "")
+            view.button?.setTitle("Dismiss", for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
         }
     }
 
     func openHABTrackingError(_ error: Error) {
         os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
-        DispatchQueue.main.async {
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 60)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 60.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+            let view = MessageView.viewFromNib(layout: .cardView)
+            // ... configure the view
+            view.configureTheme(.error)
+            view.configureContent(title: "Error", body: error.localizedDescription)
+            view.button?.setTitle("Dismiss", for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
         }
     }
 
@@ -713,9 +772,35 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     // Error
                     DispatchQueue.main.async {
                         if (error as NSError?)?.code == -1012 {
-                            TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: "Error", body: "SSL Certificate Error")
+                                view.button?.setTitle("Dismiss", for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
                         } else {
-                            TSMessage.showNotification(in: strongSelf.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: "Error", body: error.localizedDescription)
+                                view.button?.setTitle("Dismiss", for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
                         }
                     }
                     os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
@@ -796,8 +881,19 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         self.loadPage(false)
                     }
                 } else {
-                    DispatchQueue.main.async {
-                    TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "openHAB returned empty sitemap list", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                    var config = SwiftMessages.Config()
+                    config.duration = .seconds(seconds: 5)
+                    config.presentationStyle = .bottom
+
+                    SwiftMessages.show(config: config) {
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        let view = MessageView.viewFromNib(layout: .cardView)
+                        // ... configure the view
+                        view.configureTheme(.error)
+                        view.configureContent(title: "Error", body: "openHAB returned empty sitemap list")
+                        view.button?.setTitle("Dismiss", for: .normal)
+                        view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                        return view
                     }
                 }
 
@@ -807,9 +903,33 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                     // Error
                     if (error as NSError?)?.code == -1012 {
-                        TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: "SSL Certificate Error", image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
+
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: "SSL Certificate Error")
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
+                        }
                     } else {
-                        TSMessage.showNotification(in: self.navigationController, title: "Error", subtitle: error.localizedDescription, image: nil, type: TSMessageNotificationType.error, duration: 5.0, callback: nil, buttonTitle: nil, buttonCallback: nil, at: TSMessageNotificationPosition.bottom, canBeDismissedByUser: true)
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
+
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: error.localizedDescription)
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
+                        }
                     }
                 }
             })
@@ -834,12 +954,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // Set SDImage (used for widget icons and images) authentication
     func setSDImageAuth() {
-//        let authStr = "\(openHABUsername):\(openHABPassword)"
-//        let authData: Data? = authStr.data(using: .ascii)
-//        let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-//        //let manager: SDWebImageDownloader? = SDWebImageManager.shared().imageDownloader
-//        manager?.setValue(authValue, forHTTPHeaderField: "Authorization")
-
         let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
             let authStr = "\(self.openHABUsername):\(self.openHABPassword)"
             let authData: Data? = authStr.data(using: .ascii)
