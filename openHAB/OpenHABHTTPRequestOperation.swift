@@ -7,6 +7,7 @@
 
 //import Alamofire
 import os.log
+import AFNetworking
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
 // Transition from AFNetworking to Alamofire
