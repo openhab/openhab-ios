@@ -963,7 +963,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             return r
         }
         SDWebImageDownloader.shared.requestModifier = requestModifier
-        
+
         // Setup SDWebImage to use our downloader operation which handles client certificates
         SDWebImageDownloader.shared.config.operationClass = OpenHABSDWebImageDownloaderOperation.self
     }
