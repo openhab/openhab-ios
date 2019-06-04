@@ -5,7 +5,9 @@
 //  Created by David O'Neill on 03/09/19.
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
+import Foundation
 import os.log
+import Security
 
 protocol ClientCertificateManagerDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain

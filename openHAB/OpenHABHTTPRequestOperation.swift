@@ -6,6 +6,7 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 //import Alamofire
+import AFNetworking
 import os.log
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
