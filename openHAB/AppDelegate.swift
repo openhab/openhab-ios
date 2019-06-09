@@ -15,6 +15,7 @@ import os.log
 import SwiftMessages
 import UIKit
 import UserNotifications
+import WatchConnectivity
 
 var player: AVAudioPlayer?
 
@@ -25,6 +26,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var appData: OpenHABDataObject?
 
     static var appDelegate: AppDelegate!
+
+    // Delegate Requests from the Watch to the WatchMessageService
+    var session: WCSession? {
+        didSet {
+            if let session = session {
+                session.delegate = WatchMessageService.singleton
+                session.activate()
+            }
+        }
+    }
 
     override init() {
         appData = OpenHABDataObject()
@@ -62,7 +73,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
 
+        activateWatchConnectivity()
+
         return true
+    }
+
+    func activateWatchConnectivity() {
+        if WCSession.isSupported() {
+            session = WCSession.default
+        }
     }
 
     // Notification registration depends on iOS version
