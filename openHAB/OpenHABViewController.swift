@@ -127,7 +127,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
                 os_log("Command sent!", log: .remoteAccess, type: .info)
             }, failure: { operation, error in
-                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
             if let link = item?.link {
@@ -341,7 +341,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 44.0
+        return 44.0
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -417,10 +417,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
             let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
-                                    version: appData?.openHABVersion ?? 2,
-                                    icon: widget?.icon,
-                                    value: widget?.item?.state ?? "",
-                                    iconType: iconType).url
+                                     version: appData?.openHABVersion ?? 2,
+                                     icon: widget?.icon,
+                                     value: widget?.item?.state ?? "",
+                                     iconType: iconType).url
             if iconType == 0 {
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             } else {
@@ -671,145 +671,144 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         if !longPolling {
             _ = pageNetworkStatusChanged()
         }
-        let pageToLoadUrl = URL(string: pageUrl)
-        if let pageToLoadUrl = pageToLoadUrl {
-            var pageRequest = URLRequest(url: pageToLoadUrl)
+        //let pageToLoadUrl = URL(string: pageUrl)
+        guard let pageToLoadUrl = URL(string: pageUrl) else { return }
+        var pageRequest = URLRequest(url: pageToLoadUrl)
 
-            pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
-            // We accept XML only if openHAB is 1.X
-            if appData?.openHABVersion == 1 {
-                pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
-            }
-            pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
-            if longPolling {
-                os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
-                pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
-                pageRequest.timeoutInterval = 300.0
-            } else {
-                atmosphereTrackingId = ""
-                UIApplication.shared.isNetworkActivityIndicatorVisible = true
-                pageRequest.timeoutInterval = 10.0
-            }
-            if atmosphereTrackingId == "" {
-                pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
-            } else {
-                pageRequest.setValue("0", forHTTPHeaderField: "X-Atmosphere-tracking-id")
-            }
-            if currentPageOperation != nil {
-                currentPageOperation?.cancel()
-                currentPageOperation = nil
-            }
-            currentPageOperation = OpenHABHTTPRequestOperation(request: pageRequest as URLRequest, delegate: self)
+        pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
+        // We accept XML only if openHAB is 1.X
+        if appData?.openHABVersion == 1 {
+            pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
+        }
+        pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
+        if longPolling {
+            os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
+            pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
+            pageRequest.timeoutInterval = 300.0
+        } else {
+            atmosphereTrackingId = ""
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            pageRequest.timeoutInterval = 10.0
+        }
+        if atmosphereTrackingId == "" {
+            pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
+        } else {
+            pageRequest.setValue("0", forHTTPHeaderField: "X-Atmosphere-tracking-id")
+        }
+        if currentPageOperation != nil {
+            currentPageOperation?.cancel()
+            currentPageOperation = nil
+        }
+        currentPageOperation = OpenHABHTTPRequestOperation(request: pageRequest as URLRequest, delegate: self)
 
-            // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
-            let strongSelf: OpenHABViewController = self
-            currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
-                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
-                let headers = operation.response?.allHeaderFields
+        // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
+        let strongSelf: OpenHABViewController = self
+        currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
+            os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
+            let headers = operation.response?.allHeaderFields
 
-                if headers?["X-Atmosphere-tracking-id"] != nil {
-                    if let object = headers?["X-Atmosphere-tracking-id"] {
-                        os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, object as! CVarArg)
-                    }
-                    // Establish the strong self reference
-                    strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+            if headers?["X-Atmosphere-tracking-id"] != nil {
+                if let object = headers?["X-Atmosphere-tracking-id"] {
+                    os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, object as! CVarArg)
                 }
-                let response = responseObject as? Data
-                // If we are talking to openHAB 1.X, talk XML
-                if self.appData?.openHABVersion == 1 {
-                    var doc: GDataXMLDocument?
-                    if let response = response {
-                        doc = try? GDataXMLDocument(data: response)
+                // Establish the strong self reference
+                strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+            }
+            let response = responseObject as? Data
+            // If we are talking to openHAB 1.X, talk XML
+            if self.appData?.openHABVersion == 1 {
+                var doc: GDataXMLDocument?
+                if let response = response {
+                    doc = try? GDataXMLDocument(data: response)
+                }
+                if doc == nil {
+                    return
+                }
+                if let name = doc?.rootElement().name() {
+                    os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                }
+                if doc?.rootElement().name() == "page" {
+                    if let rootElement = doc?.rootElement() {
+                        self.currentPage = OpenHABSitemapPage(xml: rootElement)
                     }
-                    if doc == nil {
-                        return
+                } else {
+                    os_log("Unable to find page root element", log: .remoteAccess, type: .info)
+                    return
+                }
+            } else {
+                // Newer versions talk JSON!
+                let decoder = JSONDecoder()
+                if let response = response {
+                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                    do {
+                        let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: response)
+                        self.currentPage = sitemapPageCodingData.openHABSitemapPage
+                    } catch {
+                        os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                     }
-                    if let name = doc?.rootElement().name() {
-                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                    }
-                    if doc?.rootElement().name() == "page" {
-                        if let rootElement = doc?.rootElement() {
-                            self.currentPage = OpenHABSitemapPage(xml: rootElement)
+                }
+            }
+            strongSelf.currentPage?.delegate = strongSelf
+            strongSelf.widgetTableView.reloadData()
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            strongSelf.refreshControl?.endRefreshing()
+            strongSelf.navigationItem.title = strongSelf.currentPage?.title.components(separatedBy: "[")[0]
+            if longPolling == true {
+                strongSelf.loadPage(false)
+            } else {
+                strongSelf.loadPage(true)
+            }
+        }, failure: { operation, error in
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+            strongSelf.atmosphereTrackingId = ""
+            if (error as NSError?)?.code == -1001 && longPolling {
+                os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
+                strongSelf.loadPage(false)
+            } else if (error as NSError?)?.code == -999 {
+                os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
+            } else {
+                // Error
+                DispatchQueue.main.async {
+                    if (error as NSError?)?.code == -1012 {
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
+
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            // ... configure the view
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: "SSL Certificate Error")
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
                         }
                     } else {
-                        os_log("Unable to find page root element", log: .remoteAccess, type: .info)
-                        return
-                    }
-                } else {
-                    // Newer versions talk JSON!
-                    //self.currentPage = OpenHABSitemapPage(dictionary: responseObject as! [String: Any] )
-                    let decoder = JSONDecoder()
-                    if let response = response {
-                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                        do {
-                            let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: response)
-                            self.currentPage = sitemapPageCodingData.openHABSitemapPage
-                        } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
+
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            // ... configure the view
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: error.localizedDescription)
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
                         }
                     }
                 }
-                strongSelf.currentPage?.delegate = strongSelf
-                strongSelf.widgetTableView.reloadData()
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                strongSelf.refreshControl?.endRefreshing()
-                strongSelf.navigationItem.title = strongSelf.currentPage?.title.components(separatedBy: "[")[0]
-                if longPolling == true {
-                    strongSelf.loadPage(false)
-                } else {
-                    strongSelf.loadPage(true)
-                }
-            }, failure: { operation, error in
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                strongSelf.atmosphereTrackingId = ""
-                if (error as NSError?)?.code == -1001 && longPolling {
-                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                    strongSelf.loadPage(false)
-                } else if (error as NSError?)?.code == -999 {
-                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
-                } else {
-                    // Error
-                    DispatchQueue.main.async {
-                        if (error as NSError?)?.code == -1012 {
-                            var config = SwiftMessages.Config()
-                            config.duration = .seconds(seconds: 5)
-                            config.presentationStyle = .bottom
-
-                            SwiftMessages.show(config: config) {
-                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                let view = MessageView.viewFromNib(layout: .cardView)
-                                // ... configure the view
-                                view.configureTheme(.error)
-                                view.configureContent(title: "Error", body: "SSL Certificate Error")
-                                view.button?.setTitle("Dismiss", for: .normal)
-                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                return view
-                            }
-                        } else {
-                            var config = SwiftMessages.Config()
-                            config.duration = .seconds(seconds: 5)
-                            config.presentationStyle = .bottom
-
-                            SwiftMessages.show(config: config) {
-                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                let view = MessageView.viewFromNib(layout: .cardView)
-                                // ... configure the view
-                                view.configureTheme(.error)
-                                view.configureContent(title: "Error", body: error.localizedDescription)
-                                view.button?.setTitle("Dismiss", for: .normal)
-                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                return view
-                            }
-                        }
-                    }
-                    os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-                }
-            })
-            os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
-            currentPageOperation?.start()
-            os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
-        }}
+                os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+            }
+        })
+        os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
+        currentPageOperation?.start()
+        os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
+    }
 
     // Select sitemap
     func selectSitemap() {

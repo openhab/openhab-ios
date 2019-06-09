@@ -42,6 +42,7 @@ extension OpenHABSitemap {
         let link: String
         let leaf: Bool
         let timeout: ValueOrFalse<String>
+        let widgets: [OpenHABWidget.CodingData]?
     }
 }
 

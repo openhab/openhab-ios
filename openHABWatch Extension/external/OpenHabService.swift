@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 class OpenHabService {
 
@@ -22,8 +23,9 @@ class OpenHabService {
         }
 
         // Get the current data from REST-Call
-        let requestUrl = baseUrl + "/rest/sitemaps/" + sitemapName + "?jsoncallback=callback"
-        var request = URLRequest(url: URL(string: requestUrl)!, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
+
+        guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
+        var request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
         request.setValue("Basic \(getBase64EncodedCredentials())", forHTTPHeaderField: "Authorization")
         let session = URLSession.shared
         let task = session.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
@@ -36,6 +38,7 @@ class OpenHabService {
                 return
             }
 
+            // swiftlint:disable empty_count
             DispatchQueue.main.async {
                 do {
                     let json = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.mutableContainers)
@@ -68,6 +71,7 @@ class OpenHabService {
                     print(error.localizedDescription)
                 }
             }
+            // swiftlint:enable  empty_count
         })
         task.resume()
     }
@@ -75,9 +79,12 @@ class OpenHabService {
     private func readWidgets(widgets: NSMutableArray) -> Frame {
 
         var items: [Item] = []
+        // swiftlint:disable empty_count
+
         if widgets.count == 0 {
             return Frame.init(items: items)
         }
+        // swiftlint:enable empty_count
 
         for widget in widgets {
             let widgetDict = widget as! NSDictionary

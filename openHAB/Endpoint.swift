@@ -16,6 +16,17 @@ struct Endpoint {
 }
 
 extension Endpoint {
+
+    static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
+        return Endpoint(
+            baseURL: openHABRootUrl,
+            path: "/rest/sitemaps/" + sitemapName,
+            queryItems: [
+                URLQueryItem(name: "jsoncallback", value: "callback")
+            ]
+        )
+    }
+
     static func appleRegistration (prefsURL: String,
                                    deviceToken: String,
                                    deviceId: String,
