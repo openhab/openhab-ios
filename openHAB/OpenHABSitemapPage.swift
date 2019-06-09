@@ -68,6 +68,8 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
         self.widgets.forEach { $0.delegate = self }
     }
 
+#if canImport(GDataXMLElement)
+
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["pageId", "title", "link", "leaf"]
         super.init()
@@ -93,6 +95,7 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
             }
         }
     }
+#endif
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let name = item?.name {

@@ -34,14 +34,16 @@ class OpenHabService {
                 resultHandler(Sitemap.init(frames: []), "Can't read the sitemap from '\(requestUrl)'. Message is '\(String(describing: error))'")
                 return
             }
-            guard data != nil else {
-                return
-            }
+            guard let data = data else { return }
 
             // swiftlint:disable empty_count
             DispatchQueue.main.async {
                 do {
-                    let json = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.mutableContainers)
+                    let decoder = JSONDecoder()
+
+                    let sitemapPageCodingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: data)
+
+                    let json = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
                     guard let jsonDict: NSDictionary = json as? NSDictionary else {
                         resultHandler(Sitemap.init(frames: []), "Can't get json payload using baseUrl '\(requestUrl)'")
                         return
@@ -68,7 +70,7 @@ class OpenHabService {
 
                     resultHandler(sitemap, "")
                 } catch let error as NSError {
-                    print(error.localizedDescription)
+                    os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 }
             }
             // swiftlint:enable  empty_count

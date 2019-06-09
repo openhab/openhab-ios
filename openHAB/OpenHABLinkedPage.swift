@@ -23,7 +23,7 @@ import Foundation
         case icon
         case link
     }
-
+#if canImport(GDataXMLElement)
     @objc init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["title", "icon", "link"]
         super.init()
@@ -41,4 +41,5 @@ import Foundation
             }
         }
     }
+#endif
 }

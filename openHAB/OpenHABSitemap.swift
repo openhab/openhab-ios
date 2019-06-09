@@ -68,6 +68,7 @@ extension OpenHABSitemap.CodingData {
         self.homepageLink = homepageLink
     }
 
+#if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
         super.init()
@@ -92,4 +93,5 @@ extension OpenHABSitemap.CodingData {
             }
         }
     }
+#endif
 }

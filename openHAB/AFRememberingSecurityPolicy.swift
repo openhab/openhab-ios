@@ -59,7 +59,13 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     class func saveTrustedCertificates() {
-        NSKeyedArchiver.archiveRootObject(trustedCertificates, toFile: self.getPersistensePath() ?? "")
+
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: trustedCertificates, requiringSecureCoding: false)
+            try data.write(to: URL(string: self.getPersistensePath() ?? "")!)
+        } catch {
+            os_log("Could not save trusted certificates", log: .default)
+        }
     }
 
     // Handle the different responses of the user
@@ -88,7 +94,6 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
-        //    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
         let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
         self.saveTrustedCertificates()
@@ -100,9 +105,15 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     class func loadTrustedCertificates() {
-        if let unarchive = NSKeyedUnarchiver.unarchiveObject(withFile: self.getPersistensePath() ?? "") as? [AnyHashable: Any] {
-            trustedCertificates = unarchive
+        do {
+            let rawdata = try Data(contentsOf: URL( string: self.getPersistensePath() ?? "" )!)
+            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [AnyHashable: Any] {
+                trustedCertificates = unarchive
+            }
+        } catch {
+            os_log("Could not load trusted certificates", log: .default)
         }
+
     }
 
     override func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {

@@ -118,6 +118,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.step = abs(self.step)
     }
 
+#if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
         super.init()
@@ -143,6 +144,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
             }
         }
     }
+#endif
 
     // Text prior to "["
     func labelText() -> String? {

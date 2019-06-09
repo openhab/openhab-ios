@@ -729,7 +729,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 if doc?.rootElement().name() == "page" {
                     if let rootElement = doc?.rootElement() {
+                        #if canImport(GDataXMLElement)
                         self.currentPage = OpenHABSitemapPage(xml: rootElement)
+                        #endif
                     }
                 } else {
                     os_log("Unable to find page root element", log: .remoteAccess, type: .info)
@@ -841,8 +843,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                             if let element = element as? GDataXMLElement {
+                                #if canImport(GDataXMLElement)
                                 let sitemap = OpenHABSitemap(xml: element)
                                 self.sitemaps.append(sitemap)
+                                #endif
                             }
                         }
                     }

@@ -16,6 +16,7 @@ target 'openHAB' do
 end
 
 target 'openHABTestsSwift' do
+    inherit! :search_paths
     pod 'GDataXML-HTML', '~> 1.3.0'
     pod 'AFNetworking', '~> 2.6.0'
     #pod 'AFNetworking', '~> 3.0'

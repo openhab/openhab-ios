@@ -45,6 +45,7 @@ extension OpenHABItem.CodingData {
         self.link = link
     }
 
+    #if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["name", "type", "groupType", "state", "link" ]
         super.init()
@@ -58,6 +59,7 @@ extension OpenHABItem.CodingData {
             }
         }
     }
+    #endif
 
     func stateAsDouble() -> Double {
         return state.numberValue?.doubleValue ?? 0

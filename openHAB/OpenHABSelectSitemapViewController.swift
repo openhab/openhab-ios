@@ -81,8 +81,11 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                             if let element = element as? GDataXMLElement {
+                                #if canImport(GDataXMLElement)
+
                                 let sitemap = OpenHABSitemap(xml: element)
                                 self.sitemaps.append(sitemap)
+                                #endif
                             }
                         }
                     } else {
