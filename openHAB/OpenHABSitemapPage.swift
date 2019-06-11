@@ -69,7 +69,6 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     }
 
 #if canImport(GDataXMLElement)
-
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["pageId", "title", "link", "leaf"]
         super.init()

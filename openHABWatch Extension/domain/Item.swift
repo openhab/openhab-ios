@@ -37,3 +37,10 @@ class Item: NSObject, NSCoding {
         coder.encode(state, forKey: "state")
     }
 }
+
+extension Item {
+    convenience init? (with codingData: OpenHABItem.CodingData?) {
+        guard let codingData = codingData else { return nil }
+        self.init(name: codingData.name, label: codingData.name, state: codingData.state )
+    }
+}

@@ -39,9 +39,6 @@ class OpenHabService {
             // swiftlint:disable empty_count
             DispatchQueue.main.async {
                 do {
-                    let decoder = JSONDecoder()
-
-                    let sitemapPageCodingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: data)
 
                     let json = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
                     guard let jsonDict: NSDictionary = json as? NSDictionary else {
