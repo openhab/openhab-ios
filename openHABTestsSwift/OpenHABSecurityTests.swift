@@ -21,20 +21,7 @@ class OpenHABSecurityTests: XCTestCase {
     private var currentPageOperation: OpenHABHTTPRequestOperation?
 
     func testAFSecurity() {
-        AFRememberingSecurityPolicy.initializeCertificatesStore()
-
-        let pageToLoadUrl = URL(string: "192.168.2.15")
-        let pageRequest = URLRequest(url: pageToLoadUrl!)
-        currentPageOperation = OpenHABHTTPRequestOperation(request: pageRequest as URLRequest, delegate: self as? AFRememberingSecurityPolicyDelegate)
-
-        let domain: String? = "ts"
-        if let previousCertificateData = AFRememberingSecurityPolicy.certificateData(forDomain: domain) {
-//            if CFEqual(previousCertificateData, certificateData) {
-//                // If certificate matched one in our store - permit this connection
-//                return true
-//            } else {
-//            }
-        }
+      return
     }
 
 }

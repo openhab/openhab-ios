@@ -66,7 +66,7 @@ class OpenHabService {
                     let sitemap = Sitemap.init(frames: frames)
 
                     resultHandler(sitemap, "")
-                } catch let error as NSError {
+                } catch let error {
                     os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 }
             }

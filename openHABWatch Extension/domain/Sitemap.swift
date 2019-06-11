@@ -26,3 +26,10 @@ class Sitemap: NSObject, NSCoding {
         coder.encode(frames, forKey: "frames")
     }
 }
+
+extension Sitemap {
+    convenience init? (with codingData: OpenHABSitemap.CodingData?) {
+        let frame = Frame.init(with: codingData)!
+        self.init(frames: [frame])
+    }
+}
