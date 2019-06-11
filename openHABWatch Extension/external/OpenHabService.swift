@@ -26,8 +26,12 @@ class OpenHabService {
 
         guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
         var request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
-        request.setValue("Basic \(getBase64EncodedCredentials())", forHTTPHeaderField: "Authorization")
-        let session = URLSession.shared
+        request.setAuthCredentials(UserDefaultsRepository.readUsername(), UserDefaultsRepository.readPassword())
+        //let session = URLSession.shared
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: CertificatePinningURLSessionDelegate(),
+            delegateQueue: nil)
         let task = session.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
 
             guard error == nil else {
@@ -57,7 +61,7 @@ class OpenHabService {
         let url = URL(string: UserDefaultsRepository.readRemoteUrl() + "/rest/items/" + itemName)!
         var request = URLRequest(url: url)
         request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
-        request.setValue("Basic \(getBase64EncodedCredentials())", forHTTPHeaderField: "Authorization")
+        request.setAuthCredentials(UserDefaultsRepository.readUsername(), UserDefaultsRepository.readPassword())
         request.httpMethod = "POST"
         let postString = "TOGGLE"
         request.httpBody = postString.data(using: .utf8)
@@ -69,11 +73,4 @@ class OpenHabService {
         task.resume()
     }
 
-    private func getBase64EncodedCredentials() -> String {
-        let loginString = "\(UserDefaultsRepository.readUsername()):\(UserDefaultsRepository.readPassword())"
-        guard let loginData = loginString.data(using: String.Encoding.utf8) else {
-            return ""
-        }
-        return loginData.base64EncodedString()
-    }
 }

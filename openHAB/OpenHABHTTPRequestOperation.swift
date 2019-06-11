@@ -57,10 +57,10 @@ import os.log
 
         func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
             let dns = challenge.protectionSpace.distinguishedNames
-            if dns != nil {
-                let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns!)
-                if identity != nil {
-                    let credential = URLCredential.init(identity: identity!, certificates: nil, persistence: URLCredential.Persistence.forSession)
+            if let dns = dns {
+                let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+                if let identity = identity {
+                    let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
                     challenge.sender!.use(credential, for: challenge)
                     return
                 }
