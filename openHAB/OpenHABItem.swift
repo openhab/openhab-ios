@@ -21,12 +21,13 @@ extension OpenHABItem {
         let name: String
         let link: String
         let state: String
+        let label: String
     }
 }
 
 extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
-        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link)
+        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link, label: self.label)
     }
 }
 
@@ -37,12 +38,14 @@ extension OpenHABItem.CodingData {
     var name = ""
     var state = ""
     var link = ""
+    var label = ""
 
-    init(name: String, type: String, state: String, link: String) {
+    init(name: String, type: String, state: String, link: String, label: String) {
         self.name = name
         self.type = type
         self.state = state
         self.link = link
+        self.label = label
     }
 
     #if canImport(GDataXMLElement)

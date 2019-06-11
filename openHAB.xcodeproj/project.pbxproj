@@ -87,6 +87,7 @@
 		DAC9395222AD8F7000C5F423 /* OpenHABWidgetMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */; };
 		DAC9395322AD94C400C5F423 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
+		DAC9395622B0128A00C5F423 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
 		DAE2F97D2203A46F008A345E /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
 		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
@@ -1033,6 +1034,7 @@
 				1224F7B9228A8DE200750965 /* PrefsInterfaceController.swift in Sources */,
 				1224F7C6228A8EB600750965 /* AppState.swift in Sources */,
 				1224F7A4228A8AE500750965 /* InterfaceController.swift in Sources */,
+				DAC9395622B0128A00C5F423 /* OpenHABNotification.swift in Sources */,
 				1224F7DA228A8F4700750965 /* ButtonTableRowController.swift in Sources */,
 				1224F7D5228A8F1700750965 /* OpenHabService.swift in Sources */,
 				DAC9395222AD8F7000C5F423 /* OpenHABWidgetMapping.swift in Sources */,
