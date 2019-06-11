@@ -65,7 +65,11 @@ class OpenHabService {
         request.httpMethod = "POST"
         let postString = "TOGGLE"
         request.httpBody = postString.data(using: .utf8)
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: CertificatePinningURLSessionDelegate(),
+            delegateQueue: nil)
+        let task = session.dataTask(with: request) { data, response, error in
             DispatchQueue.main.sync {
                 resultHandler(data, response, error)
             }

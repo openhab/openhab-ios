@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 import Security
 
 // Inspired by https://code.tutsplus.com/articles/securing-communications-on-ios--cms-28529 and
@@ -46,37 +47,69 @@ extension Certificate {
 }
 
 class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
+
+    static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+
     func urlSession(_ session: URLSession,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void) {
-        guard let serverTrust = challenge.protectionSpace.serverTrust,
-            challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust else {
-                completionHandler(.cancelAuthenticationChallenge, nil)
+        let protectionSpace = challenge.protectionSpace
+        if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust, let serverTrust = protectionSpace.serverTrust {
+
+            if UserDefaultsRepository.readIgnoreSSLCertificate() {
+                let credential = URLCredential(trust: serverTrust)
+                os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
+                completionHandler(.useCredential, credential)
                 return
-        }
+            }
 
-        //Set policy to validate domain
-        let policy = SecPolicyCreateSSL(true, "yourdomain.com" as CFString)
-        let policies = NSArray(object: policy)
-        SecTrustSetPolicies(serverTrust, policies)
+            //Set policy to validate domain
+            let policy = SecPolicyCreateSSL(true, "yourdomain.com" as CFString)
+            let policies = NSArray(object: policy)
+            SecTrustSetPolicies(serverTrust, policies)
 
-        let certificateCount = SecTrustGetCertificateCount(serverTrust)
-        guard certificateCount > 0,
-            let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0) else {
-                completionHandler(.cancelAuthenticationChallenge, nil)
-                return
-        }
+            let certificateCount = SecTrustGetCertificateCount(serverTrust)
+            guard certificateCount > 0,
+                let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0) else {
+                    completionHandler(.cancelAuthenticationChallenge, nil)
+                    return
+            }
 
-        let serverCertificateData = SecCertificateCopyData(certificate) as Data
-        let certificates = Certificate.localCertificates()
-        for localCert in certificates {
-            if localCert.validate(against: serverCertificateData, using: serverTrust) {
-                completionHandler(.useCredential, URLCredential(trust: serverTrust))
-                return // exit as soon as we found a match
+            let serverCertificateData = SecCertificateCopyData(certificate) as Data
+            let certificates = Certificate.localCertificates()
+            for localCert in certificates {
+                if localCert.validate(against: serverCertificateData, using: serverTrust) {
+                    completionHandler(.useCredential, URLCredential(trust: serverTrust))
+                    return // exit as soon as we found a match
+                }
+            }
+
+            // No valid cert available
+            completionHandler(.cancelAuthenticationChallenge, nil)
+
+        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
+            self.evaluateClientTrust(challenge: challenge)
+        } else {
+            if challenge.previousFailureCount == 0 {
+                let credential = URLCredential(trust: challenge.protectionSpace.serverTrust!)
+                completionHandler(.useCredential, credential)
+            } else {
+                completionHandler(.useCredential, nil)
             }
         }
+    }
 
-        // No valid cert available
-        completionHandler(.cancelAuthenticationChallenge, nil)
+    func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
+        let dns = challenge.protectionSpace.distinguishedNames
+        if let dns = dns {
+            let identity = CertificatePinningURLSessionDelegate.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+            if let identity = identity {
+                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                challenge.sender!.use(credential, for: challenge)
+                return
+            }
+        }
+        // No client certificate available
+        challenge.sender!.cancel(challenge)
     }
 }

@@ -62,11 +62,12 @@ class InterfaceController: WKInterfaceController {
     }
 
     func displayAlert(message: String) {
-        let okAction = WKAlertAction.init(title: "Ok", style: .default) {
-            print("ok action")
-        }
-
-        presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
+        DispatchQueue.main.async(execute: {
+            let okAction = WKAlertAction.init(title: "Ok", style: .default) {
+                print("ok action")
+            }
+            self.presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
+        })
     }
 
     func displayActivityImage() {

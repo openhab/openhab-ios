@@ -5,6 +5,7 @@
 //  Copyright © 2018 private. All rights reserved.
 //
 import Foundation
+import os.log
 import UIKit
 
 /*
@@ -104,6 +105,21 @@ class UserDefaultsRepository {
 
         let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
         defaults!.setValue(password, forKey: "password")
+    }
+
+    static func readIgnoreSSLCertificate() -> Bool {
+        guard let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID) else {
+            return false
+        }
+        let ignoreCerts = defaults.bool(forKey: "ignoreSSL")
+        os_log("Loading ignoring invalid certificates %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, ignoreCerts ? "YES" : "NO")
+        return true
+        return ignoreCerts
+    }
+
+    static func saveIgnoreSSLCertificate(_ ignoreSSLCertificat: Bool) {
+        let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
+        defaults!.setValue(ignoreSSLCertificat, forKey: "ignoreSSL")
     }
 
     static func readSitemapName() -> String {

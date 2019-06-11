@@ -36,6 +36,10 @@ class AppMessageService: NSObject, WCSessionDelegate {
         if let password = applicationContext["password"] as? String {
             UserDefaultsRepository.savePassword(password)
         }
+
+        if let ignoreSSLCertificate = applicationContext["ignoreSSL"] as? Bool {
+            UserDefaultsRepository.saveIgnoreSSLCertificate(ignoreSSLCertificate)
+        }
     }
 
     @available(watchOSApplicationExtension 2.2, *)

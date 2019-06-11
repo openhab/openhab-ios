@@ -537,52 +537,48 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
-        let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
-
-        let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
-            clientCertificateManager!.clientCertificateAccepted(password: nil)
-        }
-
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
-            clientCertificateManager!.clientCertificateRejected()
-        }
-
-        alertController.addAction(okay)
-        alertController.addAction(cancel)
-        self.present(alertController, animated: true, completion: nil)
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateAccepted(password: nil)
+            }
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateRejected()
+            }
+            alertController.addAction(okay)
+            alertController.addAction(cancel)
+            self.present(alertController, animated: true, completion: nil)
+        })
     }
 
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
-        let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
-
-        let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
-            let txtField = alertController.textFields?.first
-            let password = txtField?.text
-
-            clientCertificateManager!.clientCertificateAccepted(password: password)
-        }
-
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
-            clientCertificateManager!.clientCertificateRejected()
-        }
-
-        alertController.addTextField { (textField) in
-            textField.placeholder = "Password"
-            textField.isSecureTextEntry = true
-        }
-
-        alertController.addAction(okay)
-        alertController.addAction(cancel)
-        self.present(alertController, animated: true, completion: nil)
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+                let txtField = alertController.textFields?.first
+                let password = txtField?.text
+                clientCertificateManager!.clientCertificateAccepted(password: password)
+            }
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateRejected()
+            }
+            alertController.addTextField { (textField) in
+                textField.placeholder = "Password"
+                textField.isSecureTextEntry = true
+            }
+            alertController.addAction(okay)
+            alertController.addAction(cancel)
+            self.present(alertController, animated: true, completion: nil)
+        })
     }
 
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
-        let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
-
-        let okay = UIAlertAction(title: "Okay", style: .default)
-
-        alertController.addAction(okay)
-        self.present(alertController, animated: true, completion: nil)
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default)
+            alertController.addAction(okay)
+            self.present(alertController, animated: true, completion: nil)
+        })
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
