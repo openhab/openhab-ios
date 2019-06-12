@@ -46,6 +46,6 @@ class Item: NSObject, NSCoding {
 extension Item {
     convenience init? (with codingData: OpenHABItem.CodingData?) {
         guard let codingData = codingData else { return nil }
-        self.init(name: codingData.name, label: codingData.label, state: codingData.state, link: codingData.link)
+        self.init(name: codingData.name, label: codingData.label ?? "", state: codingData.state, link: codingData.link)
     }
 }

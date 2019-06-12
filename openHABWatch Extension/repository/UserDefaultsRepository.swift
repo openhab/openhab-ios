@@ -12,6 +12,20 @@ import UIKit
  * This class stores all values e.g. like the localUrl und the username in the NSUserDefaults.
  */
 
+struct Preferences {
+    static private let defaults = UserDefaults.shared
+
+    static var localUrl: String {
+        get {
+            guard let localUrl = defaults.string(forKey: #function) else { return ""}
+            let trimmedUri = UserDefaultsRepository.uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
+                in: CharacterSet.whitespacesAndNewlines)
+            if !UserDefaultsRepository.validateUrl(trimmedUri) { return ""}
+            return trimmedUri
+        }
+        set {defaults.setValue(newValue, forKey: #function) }
+    }
+}
 
 class UserDefaultsRepository {
 
@@ -24,16 +38,16 @@ class UserDefaultsRepository {
         return readLocalUrl()
     }
 
-    var readLocalUrlAs: String {
+    static var localUrl: String {
         get {
-            guard let localUrl = UserDefaults.shared.string(forKey: "localUrl") else { return ""}
+            guard let localUrl = UserDefaults.shared.string(forKey: #function) else { return ""}
             let trimmedUri = UserDefaultsRepository.uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
                 in: CharacterSet.whitespacesAndNewlines)
             if !UserDefaultsRepository.validateUrl(trimmedUri) { return ""}
             return trimmedUri
         }
         set {
-            UserDefaults.shared.setValue(newValue, forKey: "localUrl")
+            UserDefaults.shared.setValue(newValue, forKey: #function)
         }
 
     }
