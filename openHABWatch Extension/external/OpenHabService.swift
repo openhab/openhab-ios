@@ -56,14 +56,13 @@ class OpenHabService {
         task.resume()
     }
 
-    func switchOpenHabItem(itemName: String, _ resultHandler : @escaping ((Data?, URLResponse?, Error?) -> Void)) {
-
-        let url = URL(string: UserDefaultsRepository.readRemoteUrl() + "/rest/items/" + itemName)!
-        var request = URLRequest(url: url)
+    func switchOpenHabItem(for item: Item, command: String, _ resultHandler : @escaping ((Data?, URLResponse?, Error?) -> Void)) {
+        guard let commandUrl = URL(string: item.link) else { return }
+        var request = URLRequest(url: commandUrl)
         request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
         request.setAuthCredentials(UserDefaultsRepository.readUsername(), UserDefaultsRepository.readPassword())
         request.httpMethod = "POST"
-        let postString = "TOGGLE"
+        let postString = command
         request.httpBody = postString.data(using: .utf8)
         let session = URLSession(
             configuration: URLSessionConfiguration.ephemeral,
@@ -76,5 +75,4 @@ class OpenHabService {
         }
         task.resume()
     }
-
 }

@@ -14,6 +14,12 @@ class InterfaceController: WKInterfaceController {
     @IBOutlet weak var activityImage: WKInterfaceImage!
     @IBOutlet weak var buttonTable: WKInterfaceTable!
 
+//    private let defaults: UserDefaults
+//
+//    init(defaults: UserDefaults = .shared) {
+//        self.defaults = defaults
+//    }
+
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
 

@@ -71,6 +71,7 @@
 		DAB2D1BC22357A34009C6276 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */; };
 		DAB2D1BE22357A3F009C6276 /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
+		DAC019B322B0E19500A0ED7B /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */; };
 		DAC9394422AD4A7A00C5F423 /* OpenHABWatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */; };
 		DAC9394522AD538300C5F423 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DAC9394622AD541C00C5F423 /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
@@ -257,6 +258,7 @@
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA60D0D2295E62800674C1D /* hamburgerMenuIcon-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamburgerMenuIcon-50.png"; sourceTree = "<group>"; };
 		DAB0B65D228C92630053E69B /* OpenHABSecurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSecurityTests.swift; sourceTree = "<group>"; };
+		DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
 		DAC9395722B0209100C5F423 /* URLSessionPinningDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionPinningDelegate.swift; sourceTree = "<group>"; };
@@ -435,6 +437,7 @@
 			isa = PBXGroup;
 			children = (
 				1224F7D1228A8F0800750965 /* UserDefaultsRepository.swift */,
+				DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */,
 			);
 			name = repository;
 			sourceTree = "<group>";
@@ -1029,6 +1032,7 @@
 				DAC9394F22AD8E6E00C5F423 /* OpenHABWidget.swift in Sources */,
 				1224F7D0228A8EFC00750965 /* Item.swift in Sources */,
 				DAC9395122AD8F6700C5F423 /* OpenHABLinkedPage.swift in Sources */,
+				DAC019B322B0E19500A0ED7B /* UserDefaultsExtension.swift in Sources */,
 				1224F7D9228A8F4700750965 /* ComplicationController.swift in Sources */,
 				1224F7D2228A8F0800750965 /* UserDefaultsRepository.swift in Sources */,
 				DAC9394522AD538300C5F423 /* Endpoint.swift in Sources */,

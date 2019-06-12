@@ -11,6 +11,8 @@ import UIKit
 /*
  * This class stores all values e.g. like the localUrl und the username in the NSUserDefaults.
  */
+
+
 class UserDefaultsRepository {
 
     //FIXME: Determine the right URI which should be used
@@ -20,6 +22,20 @@ class UserDefaultsRepository {
             return readRemoteUrl()
         }
         return readLocalUrl()
+    }
+
+    var readLocalUrlAs: String {
+        get {
+            guard let localUrl = UserDefaults.shared.string(forKey: "localUrl") else { return ""}
+            let trimmedUri = UserDefaultsRepository.uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
+                in: CharacterSet.whitespacesAndNewlines)
+            if !UserDefaultsRepository.validateUrl(trimmedUri) { return ""}
+            return trimmedUri
+        }
+        set {
+            UserDefaults.shared.setValue(newValue, forKey: "localUrl")
+        }
+
     }
 
     static func readLocalUrl() -> String {
@@ -113,13 +129,12 @@ class UserDefaultsRepository {
         }
         let ignoreCerts = defaults.bool(forKey: "ignoreSSL")
         os_log("Loading ignoring invalid certificates %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, ignoreCerts ? "YES" : "NO")
-        return true
         return ignoreCerts
     }
 
-    static func saveIgnoreSSLCertificate(_ ignoreSSLCertificat: Bool) {
+    static func saveIgnoreSSLCertificate(_ ignoreSSLCertificate: Bool) {
         let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
-        defaults!.setValue(ignoreSSLCertificat, forKey: "ignoreSSL")
+        defaults!.setValue(ignoreSSLCertificate, forKey: "ignoreSSL")
     }
 
     static func readSitemapName() -> String {
