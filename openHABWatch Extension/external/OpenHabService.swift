@@ -16,8 +16,8 @@ class OpenHabService {
     /* Reads the sitemap that should be displayed on the watch */
     func readSitemap(_ resultHandler : @escaping ((Sitemap, String) -> Void)) {
 
-        let baseUrl = UserDefaultsRepository.readActiveUrl()
-        let sitemapName = UserDefaultsRepository.readSitemapName()
+        let baseUrl = Preferences.readActiveUrl()
+        let sitemapName = Preferences.sitemapName
         if baseUrl == "" {
             return
         }
@@ -26,7 +26,7 @@ class OpenHabService {
 
         guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
         var request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
-        request.setAuthCredentials(UserDefaultsRepository.readUsername(), UserDefaultsRepository.readPassword())
+        request.setAuthCredentials(Preferences.username, Preferences.password)
         //let session = URLSession.shared
         let session = URLSession(
             configuration: URLSessionConfiguration.ephemeral,
@@ -60,7 +60,7 @@ class OpenHabService {
         guard let commandUrl = URL(string: item.link) else { return }
         var request = URLRequest(url: commandUrl)
         request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
-        request.setAuthCredentials(UserDefaultsRepository.readUsername(), UserDefaultsRepository.readPassword())
+        request.setAuthCredentials(Preferences.username, Preferences.password)
         request.httpMethod = "POST"
         let postString = command
         request.httpBody = postString.data(using: .utf8)

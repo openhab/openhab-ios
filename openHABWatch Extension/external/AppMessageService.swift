@@ -18,27 +18,27 @@ class AppMessageService: NSObject, WCSessionDelegate {
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
 
         if let localUrl = applicationContext["localUrl"] as? String {
-            UserDefaultsRepository.saveLocalUrl(localUrl)
+            Preferences.localUrl = localUrl
         }
 
         if let remoteUrl = applicationContext["remoteUrl"] as? String {
-            UserDefaultsRepository.saveRemoteUrl(remoteUrl)
+            Preferences.remoteUrl = remoteUrl
         }
 
         if let sitemapName = applicationContext["sitemapName"] as? String {
-            UserDefaultsRepository.saveSitemapName(sitemapName)
+            Preferences.sitemapName = sitemapName
         }
 
         if let username = applicationContext["username"] as? String {
-            UserDefaultsRepository.saveUsername(username)
+            Preferences.username = username
         }
 
         if let password = applicationContext["password"] as? String {
-            UserDefaultsRepository.savePassword(password)
+            Preferences.password = password
         }
 
         if let ignoreSSLCertificate = applicationContext["ignoreSSL"] as? Bool {
-            UserDefaultsRepository.saveIgnoreSSLCertificate(ignoreSSLCertificate)
+            Preferences.ignoreSSL = ignoreSSLCertificate
         }
     }
 

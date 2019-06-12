@@ -781,9 +781,7 @@
 						TestTargetID = DFB2622618830A3600D3244D;
 					};
 					DFB2622618830A3600D3244D = {
-						DevelopmentTeam = PBAPXHRAM9;
 						LastSwiftMigration = "";
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;

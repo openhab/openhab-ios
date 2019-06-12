@@ -56,7 +56,7 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
         let protectionSpace = challenge.protectionSpace
         if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust, let serverTrust = protectionSpace.serverTrust {
 
-            if UserDefaultsRepository.readIgnoreSSLCertificate() {
+            if Preferences.ignoreSSL {
                 let credential = URLCredential(trust: serverTrust)
                 os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
                 completionHandler(.useCredential, credential)

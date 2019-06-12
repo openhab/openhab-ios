@@ -31,7 +31,7 @@ class InterfaceController: WKInterfaceController {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
 
-        self.refresh(UserDefaultsRepository.readSitemap())
+        self.refresh(Preferences.sitemap)
         // load the current Sitemap
         OpenHabService.singleton.readSitemap({(sitemap, errorString) -> Void in
 
@@ -43,7 +43,7 @@ class InterfaceController: WKInterfaceController {
                     return
                 }
             }
-            UserDefaultsRepository.saveSitemap(sitemap)
+            Preferences.sitemap = sitemap
             self.refresh(sitemap)
         })
     }
