@@ -77,7 +77,7 @@ struct Preferences {
             }
             return sitemapValue }
         set { defaults.set(
-            try? NSKeyedArchiver.archivedData(withRootObject: sitemap, requiringSecureCoding: true) ,
+            try? NSKeyedArchiver.archivedData(withRootObject: newValue, requiringSecureCoding: true) ,
             forKey: #function) }
     }
 
