@@ -11,6 +11,29 @@
 
 import Foundation
 
+//extension OpenHABLinkedPage {
+//
+//    struct CodingData: Decodable {
+//        let name: String
+//        let label: String
+//        let homepage: HomePage
+//        let link: String
+//    }
+//
+//    struct HomePage: Decodable {
+//        let link: String
+//        let leaf: Bool
+//        let timeout: ValueOrFalse<String>
+//        let widgets: [OpenHABWidget.CodingData]?
+//    }
+//}
+//
+//extension OpenHABLinkedPage.CodingData {
+//    var openHABLinkedPage: OpenHABLinkedPage {
+//        return OpenHABLinkedPage(link: self.link, label: self.label, icon: self.homepage.leaf, homepageLink: self.homepage.link)
+//    }
+//}
+
 @objc class OpenHABLinkedPage: NSObject, Decodable {
     var pageId = ""
     @objc var title = ""
@@ -23,6 +46,7 @@ import Foundation
         case icon
         case link
     }
+
 #if canImport(GDataXMLElement)
     @objc init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["title", "icon", "link"]

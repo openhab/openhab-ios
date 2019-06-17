@@ -19,11 +19,11 @@ protocol OpenHABSitemapPageDelegate: NSObjectProtocol {
 extension OpenHABSitemapPage {
 
     struct CodingData: Decodable {
-        let pageId: String
-        let title: String
-        let link: String
-        let leaf: Bool
-        let widgets: [OpenHABWidget.CodingData]
+        let pageId: String?
+        let title: String?
+        let link: String?
+        let leaf: Bool?
+        let widgets: [OpenHABWidget.CodingData]?
 
         private enum CodingKeys: String, CodingKey {
             case pageId = "id"
@@ -37,8 +37,8 @@ extension OpenHABSitemapPage {
 
 extension OpenHABSitemapPage.CodingData {
     var openHABSitemapPage: OpenHABSitemapPage {
-        let mappedWidgets = self.widgets.map { $0.openHABWidget }
-        return OpenHABSitemapPage(pageId: self.pageId, title: self.title, link: self.link, leaf: self.leaf, widgets: mappedWidgets)
+        let mappedWidgets = self.widgets?.map { $0.openHABWidget } ?? []
+        return OpenHABSitemapPage(pageId: self.pageId ?? "", title: self.title ?? "", link: self.link ?? "", leaf: self.leaf ?? false, widgets: mappedWidgets)
     }
 }
 
