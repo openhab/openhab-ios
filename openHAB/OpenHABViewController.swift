@@ -398,13 +398,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Colorpicker":
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
-        case "Chart":
-            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
-        case "Image":
-            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath) as! NewImageUITableViewCell
+        case "Image", "Chart":
+            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.delegate = self
         case "Video":
-            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
+            cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
@@ -511,8 +509,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func didLoadImageOf(_ cell: NewImageUITableViewCell?) {
-        if let cell = cell, let indexPath = widgetTableView.indexPath(for: cell) {
-            widgetTableView.reloadRows(at: [indexPath], with: .none)
+        UIView.performWithoutAnimation {
+            widgetTableView.beginUpdates()
+            widgetTableView.endUpdates()
         }
     }
 

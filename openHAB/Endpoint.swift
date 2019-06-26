@@ -75,7 +75,7 @@ extension Endpoint {
         let random = Int.random(in: 0..<1000)
         var endpoint = Endpoint (
             baseURL: rootUrl,
-            path: "/api",
+            path: "/chart",
             queryItems: [
                 URLQueryItem(name: "period", value: period),
                 URLQueryItem(name: "random", value: String(random))
