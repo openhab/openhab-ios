@@ -56,10 +56,8 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
         // If widget have a refresh rate configured, i.e. different from zero, schedule an image update timer
         if widget.refresh != 0 {
-            if refreshTimer != nil {
-                refreshTimer?.invalidate()
-                refreshTimer = nil
-            }
+            refreshTimer?.invalidate()
+            refreshTimer = nil
             let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
             if refreshInterval > 0.09 {
                 os_log("Sheduling image refresh every %g seconds", log: .viewCycle, type: .info, refreshInterval)
@@ -105,14 +103,8 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 //        }
 
         mainImageView?.sd_setImage(with: createURL, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionFromLoaderOnlyIgnoreInvalidCert) { [weak self] (image, error, cacheType, imageURL) in
-            DispatchQueue.main.async {
-                self?.widget?.image = image
-            }
-            self?.layoutIfNeeded()
-            self?.layoutSubviews()
-            if self?.delegate != nil {
-                self?.delegate?.didLoadImageOf(self)
-            }
+            self?.widget?.image = image
+            self?.delegate?.didLoadImageOf(self)
         }
     }
 
@@ -135,19 +127,9 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 //                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
 //            }
 //        }
-        mainImageView?.sd_setImage(with: createURL,
-                                   placeholderImage: widget?.image,
-                                   options: [.allowInvalidSSLCertificates,
-                                             .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
-                                                DispatchQueue.main.async {
-                                                    self?.widget?.image = image
-                                                }
-                                                self?.layoutIfNeeded()
-                                                self?.layoutSubviews()
-                                                if self?.delegate != nil {
-                                                    self?.delegate?.didLoadImageOf(self)
-                                                }
-
+        mainImageView?.sd_setImage(with: createURL, placeholderImage: widget?.image, options: [.allowInvalidSSLCertificates, .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
+            self?.widget?.image = image
+            self?.delegate?.didLoadImageOf(self)
         }
     }
 }
