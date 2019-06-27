@@ -17,7 +17,7 @@ protocol NewImageUITableViewCellDelegate: class {
 
 class NewImageUITableViewCell: GenericUITableViewCell {
 
-    var mainImageView: ScaledHeightImageView!
+    var mainImageView: ScaleAspectFitImageView!
     var refreshTimer: Timer?
 
     weak var delegate: NewImageUITableViewCellDelegate?
@@ -25,14 +25,13 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        mainImageView = ScaledHeightImageView()
+        mainImageView = ScaleAspectFitImageView()
 
         contentView.addSubview(mainImageView)
 
         let positionGuide = contentView //contentView.layoutMarginsGuide if more margin would be appreciated
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
-        mainImageView.contentMode = .scaleAspectFit
 
         NSLayoutConstraint.activate([
             mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
@@ -43,9 +42,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     }
 
     required init?(coder aDecoder: NSCoder) {
-
         fatalError("init(coder:) has not been implemented")
-
     }
 
     override func displayWidget() {
@@ -85,24 +82,11 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
     func loadImage() {
-//        mainImageView?.kf.setImage(with: createURL(),
-//                                   placeholder: UIImage(named: "blankicon.png"),
-//                                   options: [.memoryCacheExpiration(.expired), .diskCacheExpiration(.expired)] ) { result in
-//            switch result {
-//            case .success(let value):
-//                os_log("Download done for: %{PUBLIC}@", log: .urlComposition, type: .debug, value.source.url?.absoluteString ?? "")
-//                self.widget?.image = value.image
-//                self.layoutIfNeeded()
-//                self.layoutSubviews()
-//                if self.delegate != nil {
-//                    self.delegate?.didLoadImageOf(self)
-//                }
-//            case .failure(let error):
-//                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
-//            }
-//        }
-
         mainImageView?.sd_setImage(with: createURL, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionFromLoaderOnlyIgnoreInvalidCert) { [weak self] (image, error, cacheType, imageURL) in
+            if let error = error {
+                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+                return
+            }
             self?.widget?.image = image
             self?.delegate?.didLoadImageOf(self)
         }
@@ -110,53 +94,13 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     @objc func refreshImage(_ timer: Timer?) {
         os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
-        //  options: .cacheMemoryOnly
-//        mainImageView?.kf.setImage(with: createURL(),
-//                                   placeholder: widget?.image,
-//                                   options: [.memoryCacheExpiration(.expired), .diskCacheExpiration(.expired)]) { result in
-//            switch result {
-//            case .success(let value):
-//                os_log("Download done for: %{PUBLIC}@", log: .urlComposition, type: .debug, value.source.url?.absoluteString ?? "")
-//                self.widget?.image = value.image
-//                self.layoutIfNeeded()
-//                self.layoutSubviews()
-//                if self.delegate != nil {
-//                    self.delegate?.didLoadImageOf(self)
-//                }
-//            case .failure(let error):
-//                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
-//            }
-//        }
         mainImageView?.sd_setImage(with: createURL, placeholderImage: widget?.image, options: [.allowInvalidSSLCertificates, .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
+            if let error = error {
+                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+                return
+            }
             self?.widget?.image = image
             self?.delegate?.didLoadImageOf(self)
-        }
-    }
-}
-
-/// An image view that computes its intrinsic height from its width while preserving aspect ratio
-/// Source: https://stackoverflow.com/a/48476446
-class ScaledHeightImageView: UIImageView {
-
-    // Track the width that the intrinsic size was computed for,
-    // to invalidate the intrinsic size when needed
-    private var layoutedWidth: CGFloat = 0
-
-    override var intrinsicContentSize: CGSize {
-        layoutedWidth = bounds.width
-        if let image = self.image {
-            let viewWidth = bounds.width
-            let ratio = viewWidth / image.size.width
-            return CGSize(width: viewWidth, height: image.size.height * ratio)
-        }
-        return super.intrinsicContentSize
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        if layoutedWidth != bounds.width {
-            invalidateIntrinsicContentSize()
         }
     }
 }
