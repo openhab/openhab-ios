@@ -67,7 +67,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     var createURL: URL {
         switch widget?.type {
         case "Chart":
-            return Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name).url!
+            return Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name, legend: widget!.legend).url!
         case "Image":
             os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, widget.url)
             return URL(string: widget!.url)!
