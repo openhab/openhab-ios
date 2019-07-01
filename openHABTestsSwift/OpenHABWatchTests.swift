@@ -72,11 +72,6 @@ class OpenHABWatchTests: XCTestCase {
                 XCTFail("Not able to parse")
                 return
             }
-            if let errorKey = jsonDict.object(forKey: "error") {
-                let errorMessage = (errorKey as! NSDictionary).value(forKey: "message") as! String
-                XCTFail("Error")
-                return
-            }
             let homepageDict = jsonDict.object(forKey: "homepage") as! NSDictionary
             if homepageDict.count == 0 {
                 XCTFail("Not finding homepage")
