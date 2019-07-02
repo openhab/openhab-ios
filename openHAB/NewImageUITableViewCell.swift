@@ -15,6 +15,12 @@ protocol NewImageUITableViewCellDelegate: class {
     func didLoadImageOf(_ cell: NewImageUITableViewCell?)
 }
 
+enum ImageType {
+    case link(url: URL?)
+    case embedded(image: UIImage?)
+    case empty
+}
+
 class NewImageUITableViewCell: GenericUITableViewCell {
 
     var mainImageView: ScaleAspectFitImageView!
@@ -73,44 +79,45 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     func loadImage() {
         switch widgetPayload {
-        case let image as UIImage:
+        case .embedded(let image):
             mainImageView.image = image
             delegate?.didLoadImageOf(self)
-        case let url as URL:
+        case .link(let url):
+            guard let url = url else { return }
             loadRemoteImage(withURL: url)
         default:
             os_log("Failed to determine widget payload.", log: .urlComposition, type: .debug)
         }
     }
 
-    private var widgetPayload: Any? {
-        guard let widget = widget else { return  nil }
+    private var widgetPayload: ImageType {
+        guard let widget = widget else { return .empty }
 
         switch widget.type {
         case "Chart":
-            return Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend).url
+            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend).url)
         case "Image":
             if let item = widget.item {
                 return widgetPayload(fromItem: item)
             }
-            return URL(string: widget.url)
+            return .link(url: URL(string: widget.url))
         default:
-            return nil
+            return .empty
         }
     }
 
-    private func widgetPayload(fromItem item: OpenHABItem) -> Any? {
+    private func widgetPayload(fromItem item: OpenHABItem) -> ImageType {
         switch item.type {
         case "Image":
             os_log("Image base64Encoded.", log: .urlComposition, type: .debug)
             guard let data = item.state.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
-                return nil
+                return .empty
             }
-            return UIImage(data: decodedData)
+            return .embedded(image: UIImage(data: decodedData))
         case "String":
-            return URL(string: item.state)
+            return .link(url: URL(string: item.state))
         default:
-            return nil
+            return .empty
         }
     }
 
