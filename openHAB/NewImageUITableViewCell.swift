@@ -15,12 +15,17 @@ protocol NewImageUITableViewCellDelegate: class {
     func didLoadImageOf(_ cell: NewImageUITableViewCell?)
 }
 
+enum ImageType {
+    case link(url: URL?)
+    case embedded(image: UIImage?)
+    case empty
+}
+
 class NewImageUITableViewCell: GenericUITableViewCell {
 
     var mainImageView: ScaleAspectFitImageView!
-    var refreshTimer: Timer?
-
     weak var delegate: NewImageUITableViewCellDelegate?
+    private var refreshTimer: Timer?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -45,6 +50,14 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func willMove(toSuperview newSuperview: UIView?) {
+        super.willMove(toSuperview: newSuperview)
+
+        if newSuperview == nil {
+            refreshTimer?.invalidate()
+        }
+    }
+
     override func displayWidget() {
         if widget?.image == nil {
             loadImage()
@@ -64,25 +77,58 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
     }
 
-    var createURL: URL {
-        switch widget?.type {
-        case "Chart":
-            return Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget!.period, type: widget!.item!.type, service: widget!.service, name: widget!.item!.name, legend: widget!.legend).url!
-        case "Image":
-            os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, widget.url)
-            return URL(string: widget!.url)!
+    func loadImage() {
+        switch widgetPayload {
+        case .embedded(let image):
+            mainImageView.image = image
+            delegate?.didLoadImageOf(self)
+        case .link(let url):
+            guard let url = url else { return }
+            loadRemoteImage(withURL: url)
         default:
-            return URL(string: "")!
+            os_log("Failed to determine widget payload.", log: .urlComposition, type: .debug)
         }
     }
 
-    var appData: OpenHABDataObject? {
+    private var widgetPayload: ImageType {
+        guard let widget = widget else { return .empty }
+
+        switch widget.type {
+        case "Chart":
+            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend).url)
+        case "Image":
+            if let item = widget.item {
+                return widgetPayload(fromItem: item)
+            }
+            return .link(url: URL(string: widget.url))
+        default:
+            return .empty
+        }
+    }
+
+    private func widgetPayload(fromItem item: OpenHABItem) -> ImageType {
+        switch item.type {
+        case "Image":
+            os_log("Image base64Encoded.", log: .urlComposition, type: .debug)
+            guard let data = item.state.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
+                return .empty
+            }
+            return .embedded(image: UIImage(data: decodedData))
+        case "String":
+            return .link(url: URL(string: item.state))
+        default:
+            return .empty
+        }
+    }
+
+    private var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
     }
 
     // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
-    func loadImage() {
-        mainImageView?.sd_setImage(with: createURL, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionFromLoaderOnlyIgnoreInvalidCert) { [weak self] (image, error, cacheType, imageURL) in
+    private func loadRemoteImage(withURL url: URL) {
+        os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
+        mainImageView?.sd_setImage(with: url, placeholderImage: widget?.image ?? UIImage(named: "blankicon.png"), options: .imageOptionFromLoaderOnlyIgnoreInvalidCert) { [weak self] (image, error, cacheType, imageURL) in
             if let error = error {
                 os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
                 return
@@ -94,13 +140,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     @objc func refreshImage(_ timer: Timer?) {
         os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
-        mainImageView?.sd_setImage(with: createURL, placeholderImage: widget?.image, options: [.allowInvalidSSLCertificates, .fromLoaderOnly]) { [weak self] (image, error, cacheType, imageURL) in
-            if let error = error {
-                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
-                return
-            }
-            self?.widget?.image = image
-            self?.delegate?.didLoadImageOf(self)
-        }
+        loadImage()
     }
 }
