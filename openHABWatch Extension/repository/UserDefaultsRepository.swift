@@ -7,6 +7,29 @@
 import Foundation
 import UIKit
 
+extension UserDefaults {
+
+    private struct Keys {
+
+        // MARK: - Constants
+
+        static let iconType = "iconType"
+
+    }
+
+    // MARK: - Temperature Notation
+
+    class var iconType: IconType {
+        let storedValue = UserDefaults.standard.integer(forKey: UserDefaults.Keys.iconType)
+        return IconType(rawValue: storedValue) ?? .png
+    }
+
+    class func set(iconType: IconType) {
+        UserDefaults.standard.set(iconType.rawValue, forKey: UserDefaults.Keys.iconType)
+    }
+
+}
+
 /*
  * This class stores all values e.g. like the localUrl und the username in the NSUserDefaults.
  */
@@ -51,7 +74,7 @@ class UserDefaultsRepository {
         }
 
         guard let remoteUrl = defaults.string(forKey: "remoteUrl") else {
-            return "https://defineme:444"
+            return "https://openhab.org:444"
         }
 
         let trimmedUri = uriWithoutTrailingSlashes(remoteUrl).trimmingCharacters(

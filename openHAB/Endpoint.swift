@@ -9,6 +9,11 @@
 import Foundation
 import os.log
 
+enum IconType: Int {
+    case png
+    case svg
+}
+
 struct Endpoint {
     let baseURL: String
     let path: String
@@ -97,7 +102,7 @@ extension Endpoint {
         return endpoint
     }
 
-    static func icon (rootUrl: String, version: Int, icon: String?, value: String, iconType: Int) -> Endpoint {
+    static func icon (rootUrl: String, version: Int, icon: String?, value: String, iconType: IconType) -> Endpoint {
         guard let icon = icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
@@ -109,7 +114,7 @@ extension Endpoint {
                 path: "/icon/\(icon)",
                 queryItems: [
                     URLQueryItem(name: "state", value: value ),
-                    URLQueryItem(name: "format", value: (iconType == 0) ? "PNG": "SVG")
+                    URLQueryItem(name: "format", value: (iconType == .png) ? "PNG": "SVG")
                 ]
             )
         } else {

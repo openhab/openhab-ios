@@ -54,7 +54,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var deviceName = ""
     var atmosphereTrackingId = ""
     var refreshControl: UIRefreshControl?
-    var iconType: Int = 0
+    var iconType: IconType = .png
 
     func modalDismissed(to: TargetController) {
         switch to {
@@ -419,9 +419,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                      icon: widget?.icon,
                                      value: widget?.item?.state ?? "",
                                      iconType: iconType).url
-            if iconType == 0 {
+            switch iconType {
+            case .png :
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
-            } else {
+            case .svg:
                 let SVGCoder = SDImageSVGCoder.shared
                 SDImageCodersManager.shared.addCoder(SVGCoder)
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
@@ -945,7 +946,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         openHABPassword = prefs.string(forKey: "password") ?? ""
         defaultSitemap = prefs.string(forKey: "defaultSitemap") ?? ""
         idleOff = prefs.bool(forKey: "idleOff")
-        iconType = prefs.integer(forKey: "iconType")
+        let rawIconType = prefs.integer(forKey: "iconType")
+        iconType = IconType(rawValue: rawIconType) ?? .png
+
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
     }
