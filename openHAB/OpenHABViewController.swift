@@ -701,9 +701,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         currentPageOperation = OpenHABHTTPRequestOperation(request: pageRequest as URLRequest, delegate: self)
 
-        // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
-        let strongSelf: OpenHABViewController = self
-        currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
+        currentPageOperation?.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
+            guard let self = self else { return }
+
             os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
             let headers = operation.response?.allHeaderFields
 
@@ -712,7 +712,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, object as! CVarArg)
                 }
                 // Establish the strong self reference
-                strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+                self.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
             }
             let response = responseObject as? Data
             // If we are talking to openHAB 1.X, talk XML
@@ -748,23 +748,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                 }
             }
-            strongSelf.currentPage?.delegate = strongSelf
-            strongSelf.widgetTableView.reloadData()
+            self.currentPage?.delegate = self
+            self.widgetTableView.reloadData()
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            strongSelf.refreshControl?.endRefreshing()
-            strongSelf.navigationItem.title = strongSelf.currentPage?.title.components(separatedBy: "[")[0]
-            if longPolling == true {
-                strongSelf.loadPage(false)
-            } else {
-                strongSelf.loadPage(true)
-            }
-        }, failure: { operation, error in
+            self.refreshControl?.endRefreshing()
+            self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+            self.loadPage(true)
+        }, failure: { [weak self] operation, error in
+            guard let self = self else { return }
+
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-            strongSelf.atmosphereTrackingId = ""
+            self.atmosphereTrackingId = ""
             if (error as NSError?)?.code == -1001 && longPolling {
                 os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                strongSelf.loadPage(false)
+                self.loadPage(false)
             } else if (error as NSError?)?.code == -999 {
                 os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
             } else {
