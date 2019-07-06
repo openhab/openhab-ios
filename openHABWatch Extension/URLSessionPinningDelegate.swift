@@ -56,12 +56,12 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
         let protectionSpace = challenge.protectionSpace
         if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust, let serverTrust = protectionSpace.serverTrust {
 
-//            if Preferences.ignoreSSL {
+            if Preferences.ignoreSSL {
                 let credential = URLCredential(trust: serverTrust)
                 os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
                 completionHandler(.useCredential, credential)
                 return
-//            }
+            }
 
             //Set policy to validate domain
             let policy = SecPolicyCreateSSL(true, "yourdomain.com" as CFString)
