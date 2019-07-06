@@ -14,7 +14,6 @@ let defaultValues = ["username": "test", "password": "test", "sitemapName": "wat
 // Much shorter but to be reworked when Property Wrappers are available
 struct Preferences {
     static private let defaults = UserDefaults.shared
-
     static func readActiveUrl() -> String {
 
         if Preferences.remoteUrl != "" {
@@ -41,7 +40,7 @@ struct Preferences {
                 in: CharacterSet.whitespacesAndNewlines)
             if !validateUrl(trimmedUri) { return ""}
             return trimmedUri
-        }
+       }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 

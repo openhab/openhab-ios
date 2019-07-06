@@ -24,7 +24,7 @@ extension OpenHABWidget {
         let type: String
         let icon: String
         let url: String?
-        let period: Double?
+        let period: String?
         let minValue: Double?
         let maxValue: Double?
         let step: Double?
@@ -37,8 +37,9 @@ extension OpenHABWidget {
         let service: String?
         let state: String?
         let text: String?
+        let legend: Bool?
         let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABSitemapPage.CodingData?
+        let linkedPage: OpenHABLinkedPage?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [OpenHABWidget.CodingData]
     }
@@ -47,8 +48,8 @@ extension OpenHABWidget {
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = self.widgets.map { $0.openHABWidget }
-        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, item: self.item?.openHABItem, linkedPage: self.linkedPage?.openHABSitemapPage, mappings: self.mappings, widgets: mappedWidgets)
-    }
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
+   }
 }
 
 class OpenHABWidget: NSObject, MKAnnotation {
@@ -71,15 +72,16 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var service = ""
     var state = ""
     var text = ""
+    var legend = false
     var item: OpenHABItem?
-    var linkedPage: OpenHABSitemapPage?
+    var linkedPage: OpenHABLinkedPage?
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
     var widgets: [OpenHABWidget] = []
 
     // This is an ugly initializer
 
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: Double?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+     init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let d = with else { return ""}
@@ -90,7 +92,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.type = type
         self.icon = icon
         self.url = url ?? ""
-        self.period = toString(period)
+        self.period = period ?? ""
         self.minValue = minValue ?? 0.0
         self.maxValue = maxValue ?? 100.0
         self.step = step ?? 1.0
@@ -108,6 +110,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.service = service ?? ""
         self.state = state ?? ""
         self.text = text ?? ""
+        self.legend = legend ?? false
         self.item = item
         self.linkedPage = linkedPage
         self.mappings = mappings
@@ -120,7 +123,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
 
 #if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text" ]
+        let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text", "legend"]
         super.init()
         mappings = [OpenHABWidgetMapping]()
         for child in (xmlElement?.children())! {

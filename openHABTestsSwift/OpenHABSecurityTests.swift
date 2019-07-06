@@ -22,6 +22,6 @@ class OpenHABSecurityTests: XCTestCase {
 
     func testAFSecurity() {
       return
-    }
+   }
 
 }

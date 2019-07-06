@@ -54,7 +54,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var deviceName = ""
     var atmosphereTrackingId = ""
     var refreshControl: UIRefreshControl?
-    var iconType: Int = 0
+    var iconType: IconType = .png
 
     func modalDismissed(to: TargetController) {
         switch to {
@@ -398,13 +398,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Colorpicker":
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
-        case "Chart":
-            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
-        case "Image":
-            cell=tableView.dequeueReusableCell(withIdentifier: "OpenHABViewControllerImageViewCellReuseIdentifier", for: indexPath) as! NewImageUITableViewCell
+        case "Image", "Chart":
+            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.delegate = self
         case "Video":
-            cell=tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
+            cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
@@ -421,9 +419,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                      icon: widget?.icon,
                                      value: widget?.item?.state ?? "",
                                      iconType: iconType).url
-            if iconType == 0 {
+            switch iconType {
+            case .png :
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
-            } else {
+            case .svg:
                 let SVGCoder = SDImageSVGCoder.shared
                 SDImageCodersManager.shared.addCoder(SVGCoder)
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
@@ -511,8 +510,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func didLoadImageOf(_ cell: NewImageUITableViewCell?) {
-        if let cell = cell, let indexPath = widgetTableView.indexPath(for: cell) {
-            widgetTableView.reloadRows(at: [indexPath], with: .none)
+        UIView.performWithoutAnimation {
+            widgetTableView.beginUpdates()
+            widgetTableView.endUpdates()
         }
     }
 
@@ -697,9 +697,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         currentPageOperation = OpenHABHTTPRequestOperation(request: pageRequest as URLRequest, delegate: self)
 
-        // FIX Capturing 'self' strongly in this block is likely to lead to a retain cycleCapturing 'self' strongly in this block is likely to lead to a retain cycle
-        let strongSelf: OpenHABViewController = self
-        currentPageOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
+        currentPageOperation?.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
+            guard let self = self else { return }
+
             os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
             let headers = operation.response?.allHeaderFields
 
@@ -708,7 +708,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, object as! CVarArg)
                 }
                 // Establish the strong self reference
-                strongSelf.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+                self.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
             }
             let response = responseObject as? Data
             // If we are talking to openHAB 1.X, talk XML
@@ -746,23 +746,21 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                 }
             }
-            strongSelf.currentPage?.delegate = strongSelf
-            strongSelf.widgetTableView.reloadData()
+            self.currentPage?.delegate = self
+            self.widgetTableView.reloadData()
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            strongSelf.refreshControl?.endRefreshing()
-            strongSelf.navigationItem.title = strongSelf.currentPage?.title.components(separatedBy: "[")[0]
-            if longPolling == true {
-                strongSelf.loadPage(false)
-            } else {
-                strongSelf.loadPage(true)
-            }
-        }, failure: { operation, error in
+            self.refreshControl?.endRefreshing()
+            self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+            self.loadPage(true)
+        }, failure: { [weak self] operation, error in
+            guard let self = self else { return }
+
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-            strongSelf.atmosphereTrackingId = ""
+            self.atmosphereTrackingId = ""
             if (error as NSError?)?.code == -1001 && longPolling {
                 os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                strongSelf.loadPage(false)
+                self.loadPage(false)
             } else if (error as NSError?)?.code == -999 {
                 os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
             } else {
@@ -946,7 +944,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         openHABPassword = prefs.string(forKey: "password") ?? ""
         defaultSitemap = prefs.string(forKey: "defaultSitemap") ?? ""
         idleOff = prefs.bool(forKey: "idleOff")
-        iconType = prefs.integer(forKey: "iconType")
+        let rawIconType = prefs.integer(forKey: "iconType")
+        iconType = IconType(rawValue: rawIconType) ?? .png
+
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
     }

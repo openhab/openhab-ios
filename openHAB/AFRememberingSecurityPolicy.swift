@@ -59,7 +59,6 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     class func saveTrustedCertificates() {
-
         do {
             let data = try NSKeyedArchiver.archivedData(withRootObject: trustedCertificates, requiringSecureCoding: false)
             try data.write(to: URL(string: self.getPersistensePath() ?? "")!)

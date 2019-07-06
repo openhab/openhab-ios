@@ -19,12 +19,12 @@
 	<key>CFBundleShortVersionString</key>
 	<string>2.0.4</string>
 	<key>CFBundleVersion</key>
-	<string>2.0.4.2</string>
-    <key>NSAppTransportSecurity</key>
-    <dict>
-        <key>NSAllowsArbitraryLoads</key>
-        <true/>
-    </dict>
+	<string>272</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>

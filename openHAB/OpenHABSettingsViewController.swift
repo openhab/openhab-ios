@@ -31,7 +31,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     var settingsIgnoreSSL = false
     var settingsDemomode = false
     var settingsIdleOff = false
-    var settingsIconType = 0
+    var settingsIconType: IconType = .png
 
     override init(style: UITableView.Style) {
         super.init(style: style)
@@ -153,7 +153,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         ignoreSSLSwitch?.isOn = settingsIgnoreSSL
         demomodeSwitch?.isOn = settingsDemomode
         idleOffSwitch?.isOn = settingsIdleOff
-        iconSegmentedControl?.selectedSegmentIndex = settingsIconType
+        iconSegmentedControl?.selectedSegmentIndex = settingsIconType.rawValue
         if settingsDemomode == true {
             disableConnectionSettings()
         } else {
@@ -169,8 +169,9 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         settingsPassword = prefs.string(forKey: "password") ?? ""
         settingsIgnoreSSL = prefs.bool(forKey: "ignoreSSL")
         settingsDemomode = prefs.bool(forKey: "demomode")
-        settingsIdleOff = prefs.bool(forKey: "ildeOff")
-        settingsIconType = prefs.integer(forKey: "iconType")
+        settingsIdleOff = prefs.bool(forKey: "idleOff")
+        let rawSettingsIconType = prefs.integer(forKey: "iconType")
+        settingsIconType = IconType(rawValue: rawSettingsIconType) ?? .png
 
         sendSettingsToWatch()
     }
@@ -183,7 +184,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         settingsIgnoreSSL = ignoreSSLSwitch?.isOn ?? false
         settingsDemomode = demomodeSwitch?.isOn ?? false
         settingsIdleOff = idleOffSwitch?.isOn ?? false
-        settingsIconType = iconSegmentedControl.selectedSegmentIndex
+        settingsIconType = IconType(rawValue: iconSegmentedControl.selectedSegmentIndex) ?? .png
     }
 
     func saveSettings() {
@@ -195,7 +196,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         prefs.set(settingsIgnoreSSL, forKey: "ignoreSSL")
         prefs.set(settingsDemomode, forKey: "demomode")
         prefs.set(settingsIdleOff, forKey: "idleOff")
-        prefs.set(settingsIconType, forKey: "iconType")
+        prefs.set(settingsIconType.rawValue, forKey: "iconType")
 
         sendSettingsToWatch()
     }

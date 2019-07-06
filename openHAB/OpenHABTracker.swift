@@ -48,7 +48,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                 trackedDemoMode()
             } else {
                 // Check if network is WiFi. If not, go for remote URL
-                if !isNetworkWiFi() {
+                if !isNetworkWiFi(), !isNetworkVPN() {
                     os_log("OpenHABTracker network is not WiFi", log: .default, type: .info)
                     trackedRemoteUrl()
                     // If it is WiFi
@@ -187,6 +187,16 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     func isNetworkWiFi() -> Bool {
         let wifiReach = Reachability()
         return wifiReach?.connection == .wifi ? true : false
+    }
+
+    func isNetworkVPN() -> Bool {
+        if let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any],
+            let scopes = settings["__SCOPED__"] as? [String: Any] {
+            for key in scopes.keys where key.contains("tap") || key.contains("tun") || key.contains("ppp") || key.contains("ipsec") || key.contains("ipsec0") {
+                return true
+            }
+        }
+        return false
     }
 
     func getStringIp(fromAddressData dataIn: Data?) -> String? {

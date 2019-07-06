@@ -9,6 +9,11 @@
 import Foundation
 import os.log
 
+enum IconType: Int {
+    case png
+    case svg
+}
+
 struct Endpoint {
     let baseURL: String
     let path: String
@@ -70,7 +75,8 @@ extension Endpoint {
         )
     }
 
-    static func chart (rootUrl: String, period: String?, type: String?, service: String?, name: String?) -> Endpoint {
+    // swiftlint:disable:next function_parameter_count
+    static func chart (rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?) -> Endpoint {
 
         let random = Int.random(in: 0..<1000)
         var endpoint = Endpoint (
@@ -81,40 +87,43 @@ extension Endpoint {
                 URLQueryItem(name: "random", value: String(random))
             ]
         )
-        if (type == "GroupItem") || (type == "Group") {
+
+        if let type = type, (type == "GroupItem" || type == "Group") {
             endpoint.queryItems.append(URLQueryItem(name: "groups", value: name))
         } else {
             endpoint.queryItems.append(URLQueryItem(name: "items", value: name))
         }
-        if service != "" && (service!.count) > 0 {
+        if let service = service, !service.isEmpty {
             endpoint.queryItems.append(URLQueryItem(name: "service", value: service))
+        }
+        if let legend = legend, legend != false {
+            endpoint.queryItems.append(URLQueryItem(name: "legend", value: String(legend)))
         }
         return endpoint
     }
 
-    static func icon (rootUrl: String, version: Int, icon: String?, value: String, iconType: Int) -> Endpoint {
+    static func icon (rootUrl: String, version: Int, icon: String?, value: String, iconType: IconType) -> Endpoint {
+        guard let icon = icon, !icon.isEmpty else {
+            return Endpoint(baseURL: "", path: "", queryItems: [])
+        }
+
         // determineOH2IconPath
         if version == 2 {
-            if let icon = icon {
-                return Endpoint(
-                    baseURL: rootUrl,
-                    path: "/icon/\(icon)",
-                    queryItems: [
-                        URLQueryItem(name: "state", value: value ),
-                        URLQueryItem(name: "format", value: (iconType == 0) ? "PNG": "SVG")
-                    ]
-                )
-            }
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/icon/\(icon)",
+                queryItems: [
+                    URLQueryItem(name: "state", value: value ),
+                    URLQueryItem(name: "format", value: (iconType == .png) ? "PNG": "SVG")
+                ]
+            )
         } else {
-            if let icon = icon {
-                return Endpoint(
-                    baseURL: rootUrl,
-                    path: "/images/\(icon).png",
-                    queryItems: []
-                )
-            }
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/images/\(icon).png",
+                queryItems: []
+            )
         }
-        return Endpoint(baseURL: "", path: "", queryItems: [])
     }
 
     static func iconForDrawer (rootUrl: String, version: Int, icon: String) -> Endpoint {
