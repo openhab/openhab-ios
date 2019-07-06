@@ -845,91 +845,90 @@ class OpenHABTestsSwift: XCTestCase {
         }
     }
 
-func testLinkedSitemapPageForCharts() {
-    let json = """
-{"linkedPage":{"id":"0000","title":"Current Temperature [23.0 °C]","icon":"temperature","link":"https://192.168.2.15:8444/rest/sitemaps/charts/0000","leaf":true,"timeout":false,"widgets":[{"widgetId":"000000","type":"Chart","label":"Current Temperature [23.0 °C]","icon":"temperature","mappings":[],"refresh":600,"period":"h","item":{"link":"https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature","state":"23.0 °C","stateDescription":{"pattern":"%.1f %unit%","readOnly":true,"options":[]},"editable":false,"type":"Number:Temperature","name":"CometDECT2PauliRechts_CurrentTemperature","label":"Current Temperature","category":"Temperature","tags":[],"groupNames":[]},"widgets":[]},{"widgetId":"000001","type":"Chart","label":"Current Temperature [23.0 °C]","icon":"temperature","mappings":[],"refresh":600,"period":"d","item":{"link":"https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature","state":"23.0 °C","stateDescription":{"pattern":"%.1f %unit%","readOnly":true,"options":[]},"editable":false,"type":"Number:Temperature","name":"CometDECT2PauliRechts_CurrentTemperature","label":"Current Temperature","category":"Temperature","tags":[],"groupNames":[]},"widgets":[]}]},"widgets":[]}]}]}}
-""".data(using: .utf8)!
-    do {
-        let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: json)
-        XCTAssert(codingData.widgets[0].type == "false", "OpenHABSitemapPage properly parsed")
-//        XCTAssert(codingData.openHABSitemapPage. widgets[0].type == "Frame", "")
-//        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
-    } catch {
-        XCTFail("Whoops, an error occured: \(error)")
-    }
-    }
-
-    func testLinkedSitemapPageForCharts2() {
-        let json = """
-{"linkedPage": {
-    "id": "0000",
-    "title": "Current Temperature [23.0 °C]",
-    "icon": "temperature",
-    "link": "https://192.168.2.15:8444/rest/sitemaps/charts/0000",
-    "leaf": true,
-    "timeout": false,
-    "widgets": [{
-    "widgetId": "000000",
-    "type": "Chart",
-    "label": "Current Temperature [23.0 °C]",
-    "icon": "temperature",
-    "mappings": [],
-    "refresh": 600,
-    "period": "h",
-    "item": {
-    "link": "https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature",
-    "state": "23.0 °C",
-    "stateDescription": {
-    "pattern": "%.1f %unit%",
-    "readOnly": true,
-    "options": []
-    },
-    "editable": false,
-    "type": "Number:Temperature",
-    "name": "CometDECT2PauliRechts_CurrentTemperature",
-    "label": "Current Temperature",
-    "category": "Temperature",
-    "tags": [],
-    "groupNames": []
-    },
-    "widgets": []
-    }, {
-    "widgetId": "000001",
-    "type": "Chart",
-    "label": "Current Temperature [23.0 °C]",
-    "icon": "temperature",
-    "mappings": [],
-    "refresh": 600,
-    "period": "d",
-    "item": {
-    "link": "https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature",
-    "state": "23.0 °C",
-    "stateDescription": {
-    "pattern": "%.1f %unit%",
-    "readOnly": true,
-    "options": []
-    },
-    "editable": false,
-    "type": "Number:Temperature",
-    "name": "CometDECT2PauliRechts_CurrentTemperature",
-    "label": "Current Temperature",
-    "category": "Temperature",
-    "tags": [],
-    "groupNames": []
-    },
-    "widgets": []
-    }]
-    }
-""".data(using: .utf8)!
-        do {
-            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: json)
-            XCTAssert(codingData. .type == "false", "OpenHABSitemapPage properly parsed")
-            //        XCTAssert(codingData.openHABSitemapPage. widgets[0].type == "Frame", "")
-            //        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
-        } catch {
-            XCTFail("Whoops, an error occured: \(error)")
-        }
-    }
+//func testLinkedSitemapPageForCharts() {
+//    let json = """
+//{"linkedPage":{"id":"0000","title":"Current Temperature [23.0 °C]","icon":"temperature","link":"https://192.168.2.15:8444/rest/sitemaps/charts/0000","leaf":true,"timeout":false,"widgets":[{"widgetId":"000000","type":"Chart","label":"Current Temperature [23.0 °C]","icon":"temperature","mappings":[],"refresh":600,"period":"h","item":{"link":"https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature","state":"23.0 °C","stateDescription":{"pattern":"%.1f %unit%","readOnly":true,"options":[]},"editable":false,"type":"Number:Temperature","name":"CometDECT2PauliRechts_CurrentTemperature","label":"Current Temperature","category":"Temperature","tags":[],"groupNames":[]},"widgets":[]},{"widgetId":"000001","type":"Chart","label":"Current Temperature [23.0 °C]","icon":"temperature","mappings":[],"refresh":600,"period":"d","item":{"link":"https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature","state":"23.0 °C","stateDescription":{"pattern":"%.1f %unit%","readOnly":true,"options":[]},"editable":false,"type":"Number:Temperature","name":"CometDECT2PauliRechts_CurrentTemperature","label":"Current Temperature","category":"Temperature","tags":[],"groupNames":[]},"widgets":[]}]},"widgets":[]}]}]}}
+//""".data(using: .utf8)!
+//    do {
+//        let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: json)
+//        XCTAssert(codingData.widgets?[0].type == "false", "OpenHABSitemapPage properly parsed")
+////        XCTAssert(codingData.openHABSitemapPage. widgets[0].type == "Frame", "")
+////        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
+//    } catch {
+//        XCTFail("Whoops, an error occured: \(error)")
+//    }
+//    }
+//
+//    func testLinkedSitemapPageForCharts2() {
+//        let json = """
+//{"linkedPage": {
+//    "id": "0000",
+//    "title": "Current Temperature [23.0 °C]",
+//    "icon": "temperature",
+//    "link": "https://192.168.2.15:8444/rest/sitemaps/charts/0000",
+//    "leaf": true,
+//    "timeout": false,
+//    "widgets": [{
+//    "widgetId": "000000",
+//    "type": "Chart",
+//    "label": "Current Temperature [23.0 °C]",
+//    "icon": "temperature",
+//    "mappings": [],
+//    "refresh": 600,
+//    "period": "h",
+//    "item": {
+//    "link": "https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature",
+//    "state": "23.0 °C",
+//    "stateDescription": {
+//    "pattern": "%.1f %unit%",
+//    "readOnly": true,
+//    "options": []
+//    },
+//    "editable": false,
+//    "type": "Number:Temperature",
+//    "name": "CometDECT2PauliRechts_CurrentTemperature",
+//    "label": "Current Temperature",
+//    "category": "Temperature",
+//    "tags": [],
+//    "groupNames": []
+//    },
+//    "widgets": []
+//    }, {
+//    "widgetId": "000001",
+//    "type": "Chart",
+//    "label": "Current Temperature [23.0 °C]",
+//    "icon": "temperature",
+//    "mappings": [],
+//    "refresh": 600,
+//    "period": "d",
+//    "item": {
+//    "link": "https://192.168.2.15:8444/rest/items/CometDECT2PauliRechts_CurrentTemperature",
+//    "state": "23.0 °C",
+//    "stateDescription": {
+//    "pattern": "%.1f %unit%",
+//    "readOnly": true,
+//    "options": []
+//    },
+//    "editable": false,
+//    "type": "Number:Temperature",
+//    "name": "CometDECT2PauliRechts_CurrentTemperature",
+//    "label": "Current Temperature",
+//    "category": "Temperature",
+//    "tags": [],
+//    "groupNames": []
+//    },
+//    "widgets": []
+//    }]
+//    }
+//""".data(using: .utf8)!
+//        do {
+//            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: json)
+//            XCTAssert(codingData.leaf == false, "OpenHABSitemapPage properly parsed")
+//            XCTAssert(codingData.widgets?[0].widgetId == "00", "widget properly parsed")
+//        } catch {
+//            XCTFail("Whoops, an error occured: \(error)")
+//        }
+//    }
 
     func testEndPoints() {
        let urlc = Endpoint.icon(rootUrl: "http://192.169.2.1",
