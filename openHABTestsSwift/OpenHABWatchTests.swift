@@ -99,8 +99,8 @@ class OpenHABWatchTests: XCTestCase {
         do {
             let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: data)
             XCTAssert(codingData.label == "watch", "OpenHABSitemap properly parsed")
-            XCTAssert(codingData.homepage.widgets?[0].widgets[0].type == "Switch", "widget properly parsed")
-            let widgets = try require(codingData.homepage.widgets?[0].widgets)
+            XCTAssert(codingData.page.widgets?[0].widgets[0].type == "Switch", "widget properly parsed")
+            let widgets = try require(codingData.page.widgets?[0].widgets)
             items = widgets.compactMap { Item.init(with: $0.item) }
             XCTAssert(items[0].name == "lcnLightSwitch14_1", "Construction of items failed" )
         } catch {

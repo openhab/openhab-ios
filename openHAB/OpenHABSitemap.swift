@@ -34,8 +34,42 @@ extension OpenHABSitemap {
     struct CodingData: Decodable {
         let name: String
         let label: String
-        let homepage: HomePage
+        let page: HomePage
         let link: String
+
+        private enum CodingKeys: String, CodingKey {
+            case page = "homepage"
+            case name
+            case label
+            case link
+        }
+    }
+
+    enum PageType: Decodable {
+        case homepage(HomePage)
+        case linkedPage(HomePage)
+
+        private enum CodingKeys: String, CodingKey {
+            case homepage
+            case linkedPage
+        }
+
+        enum PostTypeCodingError: Error {
+            case decoding(String)
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            if let homePageValue = try? container.decode(HomePage.self, forKey: .homepage) {
+                self = .homepage(homePageValue)
+                return
+            }
+            if let linkedPageValue = try? container.decode(HomePage.self, forKey: .linkedPage) {
+                self = .linkedPage(linkedPageValue)
+                return
+            }
+            throw PostTypeCodingError.decoding("Whoops! \(dump(container))")
+        }
     }
 
     struct HomePage: Decodable {
@@ -48,7 +82,7 @@ extension OpenHABSitemap {
 
 extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.homepage.leaf, homepageLink: self.homepage.link)
+        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.page.leaf, homepageLink: self.page.link)
     }
 }
 
