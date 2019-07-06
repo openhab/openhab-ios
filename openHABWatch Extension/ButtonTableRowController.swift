@@ -11,9 +11,6 @@ import WatchKit
 
 class ButtonTableRowController: NSObject {
 
-    var lightGray = UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0)
-    var darkGray = UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0)
-
     @IBOutlet var buttonSwitch: WKInterfaceSwitch!
 
     var item: Item?
@@ -36,9 +33,9 @@ class ButtonTableRowController: NSObject {
     }
 
     private func toggleButtonColor(button: WKInterfaceButton) {
-        button.setBackgroundColor(self.darkGray)
+        button.setBackgroundColor(UIColor.darkGray)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(250)) {
-            button.setBackgroundColor(self.lightGray)
+            button.setBackgroundColor(UIColor.lightGray)
         }
     }
 

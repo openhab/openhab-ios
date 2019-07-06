@@ -13,6 +13,7 @@ let defaultValues = ["username": "test", "password": "test", "sitemapName": "wat
 // Convenient access to UserDefaults
 // Much shorter but to be reworked when Property Wrappers are available
 struct Preferences {
+
     static private let defaults = UserDefaults.shared
     static func readActiveUrl() -> String {
 
