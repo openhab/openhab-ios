@@ -20,17 +20,33 @@
 	<string>2.0.4</string>
 	<key>CFBundleVersion</key>
 	<string>2.0.4.2</string>
-    <key>NSAppTransportSecurity</key>
-    <dict>
-        <key>NSAllowsArbitraryLoads</key>
-        <true/>
-    </dict>
+	<key>CLKComplicationPrincipalClass</key>
+	<string>ComplicationController</string>
+	<key>CLKComplicationSupportedFamilies</key>
+	<array>
+		<string>CLKComplicationFamilyCircularSmall</string>
+		<string>CLKComplicationFamilyExtraLarge</string>
+		<string>CLKComplicationFamilyGraphicBezel</string>
+		<string>CLKComplicationFamilyGraphicCircular</string>
+		<string>CLKComplicationFamilyGraphicCorner</string>
+		<string>CLKComplicationFamilyGraphicRectangular</string>
+		<string>CLKComplicationFamilyModularLarge</string>
+		<string>CLKComplicationFamilyModularSmall</string>
+		<string>CLKComplicationFamilyUtilitarianLarge</string>
+		<string>CLKComplicationFamilyUtilitarianSmall</string>
+		<string>CLKComplicationFamilyUtilitarianSmallFlat</string>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>
 		<dict>
 			<key>WKAppBundleIdentifier</key>
-			<string>es.spaphone.openhab.watchkitapp</string>
+			<string>es.spaphone.test.openhab.watchkitapp</string>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.watchkit</string>

@@ -26,7 +26,7 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
-	<string>es.spaphone.openhab</string>
+	<string>es.spaphone.test.openhab</string>
 	<key>WKWatchKitApp</key>
 	<true/>
 </dict>

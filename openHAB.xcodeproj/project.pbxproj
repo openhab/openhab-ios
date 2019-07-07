@@ -59,7 +59,7 @@
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
-		DAA42BAE21DC987C00244B2A /* BuildFile in Sources */ = {isa = PBXBuildFile; };
+		DAA42BAE21DC987C00244B2A /* (null) in Sources */ = {isa = PBXBuildFile; };
 		DAB0B65E228C92630053E69B /* OpenHABSecurityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0B65D228C92630053E69B /* OpenHABSecurityTests.swift */; };
 		DAB0B65F228C92A30053E69B /* AFRememberingSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */; };
 		DAB0B660228C995B0053E69B /* OpenHABHTTPRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C40F1D222E272C00E29713 /* OpenHABHTTPRequestOperation.swift */; };
@@ -705,7 +705,6 @@
 				DFB2622518830A3600D3244D /* Resources */,
 				CE459E4F9AA10964E3EDBD8A /* [CP] Embed Pods Frameworks */,
 				6562C91D1FCF2B56008C61CE /* ShellScript */,
-				DAEAA89921E1F4BD00267EA3 /* ShellScript */,
 				1224F7B7228A8AE600750965 /* Embed Watch Content */,
 			);
 			buildRules = (
@@ -737,13 +736,11 @@
 					};
 					DA2DC22E21F2736C00830730 = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = D6A95UZXVC;
 						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 						TestTargetID = DFB2622618830A3600D3244D;
 					};
 					DFB2622618830A3600D3244D = {
-						DevelopmentTeam = PBAPXHRAM9;
 						LastSwiftMigration = "";
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
@@ -959,23 +956,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openHAB/Pods-openHAB-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		DAEAA89921E1F4BD00267EA3 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; then\n    swiftlint\nelse\n   echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1078,7 +1058,7 @@
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
-				DAA42BAE21DC987C00244B2A /* BuildFile in Sources */,
+				DAA42BAE21DC987C00244B2A /* (null) in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				CA7D4C708413DB6D1BEC9D2F /* OpenHABAppDataDelegate.swift in Sources */,
 				A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */,
@@ -1147,6 +1127,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = "openHABWatch Extension/Info.plist";
@@ -1157,7 +1138,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp.watchkitextension;
+				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.test.openhab.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -1183,6 +1164,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = "openHABWatch Extension/Info.plist";
@@ -1193,7 +1175,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp.watchkitextension;
+				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.test.openhab.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -1220,14 +1202,14 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				IBSC_MODULE = openHABWatch_Extension;
 				INFOPLIST_FILE = openHABWatch/Info.plist;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.test.openhab.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -1256,14 +1238,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				IBSC_MODULE = openHABWatch_Extension;
 				INFOPLIST_FILE = openHABWatch/Info.plist;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.test.openhab.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -1289,7 +1271,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = D6A95UZXVC;
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
@@ -1328,7 +1310,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = D6A95UZXVC;
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
@@ -1464,7 +1446,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -1479,7 +1461,7 @@
 					"@loader_path/../../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab;
+				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.test.openhab;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1500,7 +1482,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = BSAVUVP8PV;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -1515,7 +1497,7 @@
 					"@loader_path/../../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab;
+				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.test.openhab;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
