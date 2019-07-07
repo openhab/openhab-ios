@@ -122,15 +122,19 @@ class OpenHABNotificationsViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OpenHABNotificationsViewController.tableViewCellIdentifier) as? NotificationTableViewCell
-        let notification = notifications[indexPath.row] as? OpenHABNotification
-        cell?.customTextLabel?.text = notification?.message
-        // First convert date of notification from UTC from my.OH to local time for device
-        let timeZoneSeconds = TimeInterval(NSTimeZone.local.secondsFromGMT())
-        let createdInLocalTimezone = notification?.created?.addingTimeInterval(timeZoneSeconds)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm:ss"
-        cell?.customDetailTextLabel?.text = dateFormatter.string(from: createdInLocalTimezone!)
-        let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification?.icon, value: "", iconType: .png).url
+        guard let notification = notifications[indexPath.row] as? OpenHABNotification else { return UITableViewCell() }
+
+        cell?.customTextLabel?.text = notification.message
+
+        if let timeStamp = notification.created {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .medium
+            dateFormatter.timeZone = TimeZone.current
+            cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
+        }
+
+        let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url
         cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false

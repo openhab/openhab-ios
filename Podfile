@@ -13,6 +13,7 @@ target 'openHAB' do
     pod 'Crashlytics', '~> 3.9.3'
     pod 'SwiftMessages'
     pod 'SideMenu'
+    #pod 'SideMenuSwift'
 end
 
 target 'openHABTestsSwift' do

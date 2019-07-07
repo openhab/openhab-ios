@@ -596,6 +596,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
             drawer?.delegate = self
+        case "sideMenu2":
+            let navigation = segue.destination as? UINavigationController
+            let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
+            drawer?.openHABRootUrl = openHABRootUrl
+            drawer?.delegate = self
         default: break
         }
     }
