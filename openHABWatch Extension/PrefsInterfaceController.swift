@@ -27,12 +27,10 @@ class PrefsInterfaceController: WKInterfaceController {
 
         displayTheApplicationVersionNumber()
 
-        localUrlLabel.setText(UserDefaultsRepository.readLocalUrl())
-        remoteUrlLabel.setText(UserDefaultsRepository.readRemoteUrl())
-
-        sitemapLabel.setText(UserDefaultsRepository.readSitemapName())
-
-        usernameLabel.setText(UserDefaultsRepository.readUsername())
+        localUrlLabel.setText(Preferences.localUrl)
+        remoteUrlLabel.setText(Preferences.remoteUrl)
+        sitemapLabel.setText(Preferences.sitemapName)
+        usernameLabel.setText(Preferences.username)
     }
 
     func displayTheApplicationVersionNumber() {

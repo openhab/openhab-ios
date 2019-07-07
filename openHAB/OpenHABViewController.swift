@@ -537,52 +537,48 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
-        let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
-
-        let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
-            clientCertificateManager!.clientCertificateAccepted(password: nil)
-        }
-
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
-            clientCertificateManager!.clientCertificateRejected()
-        }
-
-        alertController.addAction(okay)
-        alertController.addAction(cancel)
-        self.present(alertController, animated: true, completion: nil)
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateAccepted(password: nil)
+            }
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateRejected()
+            }
+            alertController.addAction(okay)
+            alertController.addAction(cancel)
+            self.present(alertController, animated: true, completion: nil)
+        })
     }
 
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
-        let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
-
-        let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
-            let txtField = alertController.textFields?.first
-            let password = txtField?.text
-
-            clientCertificateManager!.clientCertificateAccepted(password: password)
-        }
-
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
-            clientCertificateManager!.clientCertificateRejected()
-        }
-
-        alertController.addTextField { (textField) in
-            textField.placeholder = "Password"
-            textField.isSecureTextEntry = true
-        }
-
-        alertController.addAction(okay)
-        alertController.addAction(cancel)
-        self.present(alertController, animated: true, completion: nil)
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+                let txtField = alertController.textFields?.first
+                let password = txtField?.text
+                clientCertificateManager!.clientCertificateAccepted(password: password)
+            }
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateRejected()
+            }
+            alertController.addTextField { (textField) in
+                textField.placeholder = "Password"
+                textField.isSecureTextEntry = true
+            }
+            alertController.addAction(okay)
+            alertController.addAction(cancel)
+            self.present(alertController, animated: true, completion: nil)
+        })
     }
 
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
-        let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
-
-        let okay = UIAlertAction(title: "Okay", style: .default)
-
-        alertController.addAction(okay)
-        self.present(alertController, animated: true, completion: nil)
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default)
+            alertController.addAction(okay)
+            self.present(alertController, animated: true, completion: nil)
+        })
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -596,6 +592,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             newViewController?.openHABRootUrl = openHABRootUrl
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
         case "sideMenu":
+            let navigation = segue.destination as? UINavigationController
+            let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
+            drawer?.openHABRootUrl = openHABRootUrl
+            drawer?.delegate = self
+        case "sideMenu2":
             let navigation = segue.destination as? UINavigationController
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
@@ -729,7 +730,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 if doc?.rootElement().name() == "page" {
                     if let rootElement = doc?.rootElement() {
+                        #if canImport(GDataXMLElement)
                         self.currentPage = OpenHABSitemapPage(xml: rootElement)
+                        #endif
                     }
                 } else {
                     os_log("Unable to find page root element", log: .remoteAccess, type: .info)
@@ -839,8 +842,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     if doc?.rootElement().name() == "sitemaps" {
                         for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                             if let element = element as? GDataXMLElement {
+                                #if canImport(GDataXMLElement)
                                 let sitemap = OpenHABSitemap(xml: element)
                                 self.sitemaps.append(sitemap)
+                                #endif
                             }
                         }
                     }

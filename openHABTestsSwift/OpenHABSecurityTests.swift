@@ -21,7 +21,7 @@ class OpenHABSecurityTests: XCTestCase {
     private var currentPageOperation: OpenHABHTTPRequestOperation?
 
     func testAFSecurity() {
-        return
-    }
+      return
+   }
 
 }

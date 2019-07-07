@@ -14,6 +14,12 @@ class InterfaceController: WKInterfaceController {
     @IBOutlet weak var activityImage: WKInterfaceImage!
     @IBOutlet weak var buttonTable: WKInterfaceTable!
 
+//    private let defaults: UserDefaults
+//
+//    init(defaults: UserDefaults = .shared) {
+//        self.defaults = defaults
+//    }
+
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
 
@@ -25,7 +31,7 @@ class InterfaceController: WKInterfaceController {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
 
-        self.refresh(UserDefaultsRepository.readSitemap())
+        self.refresh(Preferences.sitemap)
         // load the current Sitemap
         OpenHabService.singleton.readSitemap({(sitemap, errorString) -> Void in
 
@@ -37,7 +43,7 @@ class InterfaceController: WKInterfaceController {
                     return
                 }
             }
-            UserDefaultsRepository.saveSitemap(sitemap)
+            Preferences.sitemap = sitemap
             self.refresh(sitemap)
         })
     }
@@ -62,11 +68,12 @@ class InterfaceController: WKInterfaceController {
     }
 
     func displayAlert(message: String) {
-        let okAction = WKAlertAction.init(title: "Ok", style: .default) {
-            print("ok action")
-        }
-
-        presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
+        DispatchQueue.main.async(execute: {
+            let okAction = WKAlertAction.init(title: "Ok", style: .default) {
+                print("ok action")
+            }
+            self.presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
+        })
     }
 
     func displayActivityImage() {

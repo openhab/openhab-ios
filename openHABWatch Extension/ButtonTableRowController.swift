@@ -11,9 +11,6 @@ import WatchKit
 
 class ButtonTableRowController: NSObject {
 
-    var lightGray = UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0)
-    var darkGray = UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0)
-
     @IBOutlet var buttonSwitch: WKInterfaceSwitch!
 
     var item: Item?
@@ -30,26 +27,22 @@ class ButtonTableRowController: NSObject {
     }
 
     @IBAction func doSwitchButtonPressed(_ value: Bool) {
-        //toggleButtonColor(button: buttonSwitch)
-        if item?.state == "ON" {
-            item?.state = "OFF"
-        } else {
-            item?.state = "ON"
-        }
-        switchOpenHabItem(itemName: item!.name)
+        guard let item = item else { return }
+        let command = value ? "ON" : "OFF"
+        switchOpenHabItem(for: item, command: command)
     }
 
     private func toggleButtonColor(button: WKInterfaceButton) {
-        button.setBackgroundColor(self.darkGray)
+        button.setBackgroundColor(UIColor.darkGray)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(250)) {
-            button.setBackgroundColor(self.lightGray)
+            button.setBackgroundColor(UIColor.lightGray)
         }
     }
 
-    private func switchOpenHabItem(itemName: String) {
+    private func switchOpenHabItem(for item: Item, command: String) {
 
         interfaceController!.displayActivityImage()
-        OpenHabService.singleton.switchOpenHabItem(itemName: itemName, {(data, response, error) -> Void in
+        OpenHabService.singleton.switchOpenHabItem(for: item, command: command, {(data, response, error) -> Void in
 
             self.interfaceController!.hideActivityImage()
             guard let data = data, error == nil else {                                                 // check for fundamental networking error

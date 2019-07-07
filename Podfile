@@ -13,9 +13,11 @@ target 'openHAB' do
     pod 'Crashlytics', '~> 3.9.3'
     pod 'SwiftMessages'
     pod 'SideMenu'
+    #pod 'SideMenuSwift'
 end
 
 target 'openHABTestsSwift' do
+    inherit! :search_paths
     pod 'GDataXML-HTML', '~> 1.3.0'
     pod 'AFNetworking', '~> 2.6.0'
     #pod 'AFNetworking', '~> 3.0'

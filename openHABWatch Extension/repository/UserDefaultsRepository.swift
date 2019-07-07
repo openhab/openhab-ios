@@ -5,177 +5,85 @@
 //  Copyright © 2018 private. All rights reserved.
 //
 import Foundation
+import os.log
 import UIKit
 
-extension UserDefaults {
+let defaultValues = ["username": "test", "password": "test", "sitemapName": "watch"]
 
-    private struct Keys {
+// Convenient access to UserDefaults
+// Much shorter but to be reworked when Property Wrappers are available
+struct Preferences {
 
-        // MARK: - Constants
-
-        static let iconType = "iconType"
-
-    }
-
-    // MARK: - Temperature Notation
-
-    class var iconType: IconType {
-        let storedValue = UserDefaults.standard.integer(forKey: UserDefaults.Keys.iconType)
-        return IconType(rawValue: storedValue) ?? .png
-    }
-
-    class func set(iconType: IconType) {
-        UserDefaults.standard.set(iconType.rawValue, forKey: UserDefaults.Keys.iconType)
-    }
-
-}
-
-/*
- * This class stores all values e.g. like the localUrl und the username in the NSUserDefaults.
- */
-class UserDefaultsRepository {
-
-    //FIXME: Determine the right URI which should be used
+    static private let defaults = UserDefaults.shared
     static func readActiveUrl() -> String {
 
-        if readRemoteUrl() != "" {
-            return readRemoteUrl()
+        if Preferences.remoteUrl != "" {
+            return Preferences.remoteUrl
         }
-        return readLocalUrl()
+        return Preferences.localUrl
     }
 
-    static func readLocalUrl() -> String {
-        guard let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID) else {
-            return ""
+    static var localUrl: String {
+        get {
+            guard let localUrl = defaults.string(forKey: #function) else { return ""}
+            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
+                in: CharacterSet.whitespacesAndNewlines)
+            if !validateUrl(trimmedUri) { return ""}
+            return trimmedUri
         }
-
-        guard let localUrl = defaults.string(forKey: "localUrl") else {
-            return ""
-        }
-
-        let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
-            in: CharacterSet.whitespacesAndNewlines)
-
-        if !validateUrl(trimmedUri) {
-            return ""
-        }
-
-        return trimmedUri
+        set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static func saveLocalUrl(_ localUrl: String) {
-        let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
-        defaults!.setValue(localUrl, forKey: "localUrl")
+    static var remoteUrl: String {
+        get {
+            guard let localUrl = defaults.string(forKey: #function) else { return "https://openhab.org:8444" }
+            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
+                in: CharacterSet.whitespacesAndNewlines)
+            if !validateUrl(trimmedUri) { return ""}
+            return trimmedUri
+       }
+        set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static func readRemoteUrl() -> String {
-        guard let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID) else {
-            return ""
-        }
-
-        guard let remoteUrl = defaults.string(forKey: "remoteUrl") else {
-            return "https://openhab.org:444"
-        }
-
-        let trimmedUri = uriWithoutTrailingSlashes(remoteUrl).trimmingCharacters(
-            in: CharacterSet.whitespacesAndNewlines)
-
-        if !validateUrl(trimmedUri) {
-            return ""
-        }
-
-        return trimmedUri
+    static var username: String {
+        get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
+              return string }
+        set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static func saveRemoteUrl(_ remoteUrl: String) {
-
-        let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
-        defaults!.setValue(remoteUrl, forKey: "remoteUrl")
+    static var password: String {
+        get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
+            return string }
+        set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static func readUsername() -> String {
-        guard let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID) else {
-            return ""
-        }
-
-        guard let username = defaults.string(forKey: "username") else {
-            return "test"
-        }
-
-        return username
+    static var ignoreSSL: Bool {
+        get { return defaults.bool(forKey: #function) }
+        set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static func saveUsername(_ username: String) {
-
-        let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
-        defaults!.setValue(username, forKey: "username")
+    static var sitemapName: String {
+        get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
+            return string }
+        set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static func readPassword() -> String {
-        guard let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID) else {
-            return ""
-        }
-
-        guard let password = defaults.string(forKey: "password") else {
-            return "test"
-        }
-
-        return password
-    }
-
-    static func savePassword(_ password: String) {
-
-        let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
-        defaults!.setValue(password, forKey: "password")
-    }
-
-    static func readSitemapName() -> String {
-        guard let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID) else {
-            return ""
-        }
-
-        guard let sitemapName = defaults.string(forKey: "sitemapName") else {
-            return "watch"
-        }
-
-        return sitemapName
-    }
-
-    static func saveSitemapName(_ sitemapName: String) {
-
-        let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
-        defaults!.setValue(sitemapName, forKey: "sitemapName")
-    }
-
-    static func readSitemap() -> Sitemap {
-
-        guard let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID) else {
-            return Sitemap.init(frames: [])
-        }
-
-        guard let sitemap = defaults.object(forKey: "sitemap") as! Data? else {
-            return Sitemap.init(frames: [])
-        }
-
-        guard let sitemapValue = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Sitemap.self, from: sitemap) else {
-            return Sitemap.init(frames: [])
-        }
-        return sitemapValue
-    }
-
-    static func saveSitemap(_ sitemap: Sitemap) {
-
-        let defaults = UserDefaults(suiteName: AppConstants.APP_GROUP_ID)
-        defaults!.set(
-            try? NSKeyedArchiver.archivedData(withRootObject: sitemap, requiringSecureCoding: true) ,
-                            forKey: "sitemap")
+    static var sitemap: Sitemap {
+        get {
+            guard
+                let sitemap = defaults.object(forKey: #function) as! Data?,
+                let sitemapValue = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Sitemap.self, from: sitemap) else {
+                    return Sitemap.init(frames: [])
+            }
+            return sitemapValue }
+        set { defaults.set(
+            try? NSKeyedArchiver.archivedData(withRootObject: newValue, requiringSecureCoding: true) ,
+            forKey: #function) }
     }
 
     fileprivate static func validateUrl(_ stringURL: String) -> Bool {
-
         // return nil if the URL has not a valid format
         let url: URL? = URL.init(string: stringURL)
-
         return url != nil
     }
 
@@ -186,4 +94,5 @@ class UserDefaultsRepository {
 
         return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
     }
+
 }

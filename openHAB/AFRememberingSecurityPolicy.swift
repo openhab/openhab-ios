@@ -93,7 +93,6 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
-        //    NSData *certificateData = [NSKeyedArchiver archivedDataWithRootObject:(__bridge id)(certificate)];
         let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
         self.saveTrustedCertificates()
@@ -113,6 +112,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         } catch {
             os_log("Could not load trusted certificates", log: .default)
         }
+
     }
 
     override func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {

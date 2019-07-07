@@ -213,7 +213,8 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
             remoteUrl: prefs.string(forKey: "remoteUrl") ?? "",
             username: prefs.string(forKey: "username") ?? "",
             password: prefs.string(forKey: "password") ?? "",
-            sitemapName: "watch")
+            sitemapName: "watch",
+            ignoreSSL: prefs.bool(forKey: "ignoreSSL"))
     }
 
     required init?(coder aDecoder: NSCoder) {
