@@ -28,7 +28,7 @@ class Frame: NSObject, NSCoding {
 
 extension Frame {
     convenience init? (with codingData: OpenHABSitemap.CodingData?) {
-        guard let widgets = codingData?.page.widgets?[0].widgets else { return nil }
+        guard let widgets = codingData?.page.widgets else { return nil }
         self.init(items: widgets.compactMap { Item.init(with: $0.item) })
     }
 }
