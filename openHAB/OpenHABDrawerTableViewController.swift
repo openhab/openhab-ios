@@ -89,7 +89,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
                             }
                         } catch {
                             os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-
                         }
                     }
                 }
@@ -152,34 +151,29 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // Empty first (index 0) row + sitemaps + menu items
-        return 1 + sitemaps.count + drawerItems.count
+        return sitemaps.count + drawerItems.count
     }
 
     static let tableViewCellIdentifier = "DrawerCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell: DrawerUITableViewCell?
-        if indexPath.row != 0 {
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
+        cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
 
-            if indexPath.row <= sitemaps.count && !sitemaps.isEmpty {
-                cell?.customTextLabel?.text = sitemaps[indexPath.row - 1].label
-                if sitemaps[indexPath.row - 1].icon != "" {
-                    let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row - 1].icon ).url
-                    cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
-                } else {
-                    cell?.customImageView?.image = UIImage(named: "icon-76x76.png")
-                }
+        if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
+            cell?.customTextLabel?.text = sitemaps[indexPath.row].label
+            if sitemaps[indexPath.row].icon != "" {
+                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url
+                cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
             } else {
-                // Then menu items
-                cell?.customTextLabel?.text = drawerItems[indexPath.row - sitemaps.count - 1].label
-                cell?.customImageView?.image = UIImage(named: drawerItems[indexPath.row - sitemaps.count - 1].icon)
+                cell?.customImageView?.image = UIImage(named: "icon-76x76.png")
             }
-            cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
         } else {
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
+            // Then menu items
+            cell?.customTextLabel?.text = drawerItems[indexPath.row - sitemaps.count].label
+            cell?.customImageView?.image = UIImage(named: drawerItems[indexPath.row - sitemaps.count].icon)
         }
+        cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
 
         cell?.preservesSuperviewLayoutMargins = false
         cell?.layoutMargins = .zero
@@ -188,11 +182,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row == 0 {
-            return 64
-        } else {
-            return 44
-        }
+        return 44
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -200,25 +190,22 @@ class OpenHABDrawerTableViewController: UITableViewController {
         os_log("Clicked on drawer row %d", log: .viewCycle, type: .info, indexPath.row)
 
         tableView.deselectRow(at: indexPath, animated: false)
-        if indexPath.row != 0 {
-            // First sitemaps
-            if indexPath.row <= sitemaps.count && !sitemaps.isEmpty {
-                let sitemap = sitemaps[indexPath.row - 1]
-                let prefs = UserDefaults.standard
-                prefs.setValue(sitemap.name, forKey: "defaultSitemap")
-                appData?.rootViewController?.pageUrl = ""
-                dismiss(animated: true, completion: nil)
-            } else {
-                // Then menu items
-                if drawerItems[indexPath.row - sitemaps.count - 1].tag == "settings" {
-                    dismiss(animated: true) {
-                        self.delegate?.modalDismissed(to: .settings)
-                    }
+        // First sitemaps
+        if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
+            let sitemap = sitemaps[indexPath.row]
+            let prefs = UserDefaults.standard
+            prefs.setValue(sitemap.name, forKey: "defaultSitemap")
+            appData?.rootViewController?.pageUrl = ""
+            dismiss(animated: true, completion: nil)
+        } else {
+            // Then menu items
+            if drawerItems[indexPath.row - sitemaps.count].tag == "settings" {
+                dismiss(animated: true) {
+                    self.delegate?.modalDismissed(to: .settings)
                 }
-                if drawerItems[indexPath.row - sitemaps.count - 1].tag == "notifications" {
-                    dismiss(animated: true) {
-                        self.delegate?.modalDismissed(to: .notifications)
-                    }
+            } else if drawerItems[indexPath.row - sitemaps.count].tag == "notifications" {
+                dismiss(animated: true) {
+                    self.delegate?.modalDismissed(to: .notifications)
                 }
             }
         }
