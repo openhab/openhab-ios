@@ -510,7 +510,7 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="S7g-eE-wf7" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" id="9UY-UR-3dN"/>
-                            <constraint firstItem="O3I-rs-9RL" firstAttribute="top" secondItem="S7g-eE-wf7" secondAttribute="bottom" id="eFN-zn-mDT"/>
+                            <constraint firstAttribute="bottom" secondItem="S7g-eE-wf7" secondAttribute="bottom" id="eFN-zn-mDT"/>
                             <constraint firstItem="S7g-eE-wf7" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="mYQ-UM-mPh"/>
                             <constraint firstAttribute="trailing" secondItem="S7g-eE-wf7" secondAttribute="trailing" id="yz9-6F-Iw8"/>
                         </constraints>
