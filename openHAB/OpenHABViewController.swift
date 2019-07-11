@@ -28,7 +28,7 @@ protocol ModalHandler: class {
     func modalDismissed(to: TargetController)
 }
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, NewImageUITableViewCellDelegate, ModalHandler {
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, NewImageUITableViewCellDelegate, ModalHandler, VideoUITableViewCellDelegate {
 
     var tracker: OpenHABTracker?
 
@@ -353,9 +353,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             } else {
                 return 0
             }
-        case "Video":
-            return widgetTableView.frame.size.width * 0.75
-        case "Image", "Chart":
+        case "Image", "Chart", "Video":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
             if let height = widget?.height, height.intValue != 0 {
@@ -436,9 +434,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
 
         if let cell = cell as? VideoUITableViewCell {
-            let url = URL(string: widget?.url ?? "")
-            let avPlayer = AVPlayer(url: url!)
-            cell.playerView?.playerLayer.player = avPlayer
+            cell.delegate = self
+            cell.url = URL(string: widget?.url ?? "")
             return cell
         }
 
@@ -504,12 +501,26 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let videoCell = cell as? VideoUITableViewCell else { return }
-        videoCell.playerView.player?.pause()
-        videoCell.playerView.player = nil
+        // stop playback only if the cell is not visible, otherwise playback would be interrupted if a long polling request finishes
+        guard let videoCell = cell as? VideoUITableViewCell,
+            let indexPath = tableView.indexPath(for: cell),
+            let visibleIndexPaths = tableView.indexPathsForVisibleRows,
+            !visibleIndexPaths.contains(indexPath)
+        else {
+            return
+        }
+
+        videoCell.url = nil
     }
 
     func didLoadImageOf(_ cell: NewImageUITableViewCell?) {
+        UIView.performWithoutAnimation {
+            widgetTableView.beginUpdates()
+            widgetTableView.endUpdates()
+        }
+    }
+
+    func didLoadVideoOf(_ cell: VideoUITableViewCell?) {
         UIView.performWithoutAnimation {
             widgetTableView.beginUpdates()
             widgetTableView.endUpdates()
