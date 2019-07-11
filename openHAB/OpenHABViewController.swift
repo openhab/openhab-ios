@@ -176,10 +176,22 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
-        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
-        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
+        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar).addTarget(self, action: #selector(prepareSideMenuViewController))
+        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view).filter({ $0.edges == .right }).forEach({ $0.addTarget(self, action: #selector(prepareSideMenuViewController)) })
 
         SideMenuManager.default.menuFadeStatusBar = false
+    }
+
+    @objc private func prepareSideMenuViewController() {
+        guard let nvc = SideMenuManager.default.menuRightNavigationController,
+            let drawer = nvc.viewControllers[0] as? OpenHABDrawerTableViewController,
+            (drawer.delegate == nil || drawer.openHABRootUrl.isEmpty)
+        else {
+            return
+        }
+
+        drawer.openHABRootUrl = openHABRootUrl
+        drawer.delegate = self
     }
 
     func configureTableView() {
@@ -602,12 +614,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
-        case "sideMenu":
-            let navigation = segue.destination as? UINavigationController
-            let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
-            drawer?.openHABRootUrl = openHABRootUrl
-            drawer?.delegate = self
-        case "sideMenu2":
+        case "sideMenu", "sideMenu2":
             let navigation = segue.destination as? UINavigationController
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
