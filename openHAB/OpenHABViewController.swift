@@ -614,7 +614,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
-        case "sideMenu", "sideMenu2":
+        case "sideMenu":
             let navigation = segue.destination as? UINavigationController
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
