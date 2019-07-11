@@ -1,3 +1,5 @@
+install! 'cocoapods', :generate_multiple_pod_projects => true, :incremental_installation => true
+
 platform :ios, '11.0'
 use_frameworks!
 
@@ -22,4 +24,3 @@ target 'openHABTestsSwift' do
     pod 'AFNetworking', '~> 2.6.0'
     #pod 'AFNetworking', '~> 3.0'
 end
-
