@@ -76,7 +76,6 @@
 		DAC019B422B0EE4000A0ED7B /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */; };
 		DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395722B0209100C5F423 /* URLSessionPinningDelegate.swift */; };
 		DAC019B622B0EE8F00A0ED7B /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */; };
-		DAC9394422AD4A7A00C5F423 /* OpenHABWatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */; };
 		DAC9394522AD538300C5F423 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DAC9394622AD541C00C5F423 /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7CC228A8EFC00750965 /* Frame.swift */; };
@@ -1029,7 +1028,6 @@
 				DAB2D1B922348152009C6276 /* OpenHABWidget.swift in Sources */,
 				DAB0B65E228C92630053E69B /* OpenHABSecurityTests.swift in Sources */,
 				DAC9394C22AD659C00C5F423 /* AppConstants.swift in Sources */,
-				DAC9394422AD4A7A00C5F423 /* OpenHABWatchTests.swift in Sources */,
 				DAC9394922AD62F500C5F423 /* OpenHabService.swift in Sources */,
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
 				DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */,
