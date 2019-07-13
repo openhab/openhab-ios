@@ -11,12 +11,10 @@
 		1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78D228A89FC00750965 /* WatchMessageService.swift */; };
 		1224F796228A8AE400750965 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1224F794228A8AE400750965 /* Interface.storyboard */; };
 		1224F798228A8AE500750965 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1224F797228A8AE500750965 /* Assets.xcassets */; };
-		1224F79F228A8AE500750965 /* openHABWatch Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 1224F79E228A8AE500750965 /* openHABWatch Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1224F7A4228A8AE500750965 /* InterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7A3228A8AE500750965 /* InterfaceController.swift */; };
 		1224F7A6228A8AE500750965 /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7A5228A8AE500750965 /* ExtensionDelegate.swift */; };
 		1224F7A8228A8AE500750965 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7A7228A8AE500750965 /* NotificationController.swift */; };
 		1224F7AA228A8AE600750965 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1224F7A9228A8AE600750965 /* Assets.xcassets */; };
-		1224F7AF228A8AE600750965 /* openHABWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 1224F792228A8AE400750965 /* openHABWatch.app */; };
 		1224F7B9228A8DE200750965 /* PrefsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7B8228A8DE200750965 /* PrefsInterfaceController.swift */; };
 		1224F7C5228A8EB600750965 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7C3228A8EB600750965 /* AppConstants.swift */; };
 		1224F7C6228A8EB600750965 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7C4228A8EB600750965 /* AppState.swift */; };
@@ -78,7 +76,6 @@
 		DAC019B422B0EE4000A0ED7B /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */; };
 		DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395722B0209100C5F423 /* URLSessionPinningDelegate.swift */; };
 		DAC019B622B0EE8F00A0ED7B /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */; };
-		DAC9394422AD4A7A00C5F423 /* OpenHABWatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */; };
 		DAC9394522AD538300C5F423 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DAC9394622AD541C00C5F423 /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7CC228A8EFC00750965 /* Frame.swift */; };
@@ -163,13 +160,6 @@
 			remoteGlobalIDString = 1224F79D228A8AE500750965;
 			remoteInfo = "openHABWatch Extension";
 		};
-		1224F7AD228A8AE600750965 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1224F791228A8AE400750965;
-			remoteInfo = openHABWatch;
-		};
 		DA2DC23421F2736C00830730 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
@@ -186,7 +176,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1224F79F228A8AE500750965 /* openHABWatch Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -197,7 +186,6 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				1224F7AF228A8AE600750965 /* openHABWatch.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -756,7 +744,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				1224F7AE228A8AE600750965 /* PBXTargetDependency */,
 			);
 			name = openHAB;
 			productName = openHAB;
@@ -1041,7 +1028,6 @@
 				DAB2D1B922348152009C6276 /* OpenHABWidget.swift in Sources */,
 				DAB0B65E228C92630053E69B /* OpenHABSecurityTests.swift in Sources */,
 				DAC9394C22AD659C00C5F423 /* AppConstants.swift in Sources */,
-				DAC9394422AD4A7A00C5F423 /* OpenHABWatchTests.swift in Sources */,
 				DAC9394922AD62F500C5F423 /* OpenHabService.swift in Sources */,
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
 				DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */,
@@ -1138,11 +1124,6 @@
 			isa = PBXTargetDependency;
 			target = 1224F79D228A8AE500750965 /* openHABWatch Extension */;
 			targetProxy = 1224F7A0228A8AE500750965 /* PBXContainerItemProxy */;
-		};
-		1224F7AE228A8AE600750965 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1224F791228A8AE400750965 /* openHABWatch */;
-			targetProxy = 1224F7AD228A8AE600750965 /* PBXContainerItemProxy */;
 		};
 		DA2DC23521F2736C00830730 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
