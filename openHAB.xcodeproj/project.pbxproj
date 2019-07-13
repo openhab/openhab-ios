@@ -15,7 +15,6 @@
 		1224F7A6228A8AE500750965 /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7A5228A8AE500750965 /* ExtensionDelegate.swift */; };
 		1224F7A8228A8AE500750965 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7A7228A8AE500750965 /* NotificationController.swift */; };
 		1224F7AA228A8AE600750965 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1224F7A9228A8AE600750965 /* Assets.xcassets */; };
-		1224F7AF228A8AE600750965 /* openHABWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 1224F792228A8AE400750965 /* openHABWatch.app */; };
 		1224F7B9228A8DE200750965 /* PrefsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7B8228A8DE200750965 /* PrefsInterfaceController.swift */; };
 		1224F7C5228A8EB600750965 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7C3228A8EB600750965 /* AppConstants.swift */; };
 		1224F7C6228A8EB600750965 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7C4228A8EB600750965 /* AppState.swift */; };
@@ -188,7 +187,6 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				1224F7AF228A8AE600750965 /* openHABWatch.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
