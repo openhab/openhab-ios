@@ -56,6 +56,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     var refreshControl: UIRefreshControl?
     var iconType: IconType = .png
 
+    let search = UISearchController(searchResultsController: nil)
+    var filteredPage: OpenHABSitemapPage?
+
     func modalDismissed(to: TargetController) {
         switch to {
         case .settings:
@@ -165,6 +168,15 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
         navigationItem.setRightBarButton (rightDrawerButton, animated: true)
+
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+
+        search.searchResultsUpdater = self
+        self.navigationItem.searchController = search
+
+        search.obscuresBackgroundDuringPresentation = false
+        search.searchBar.placeholder = "Search OpenHAB items"
+        definesPresentationContext = true
 
         setupSideMenu()
     }
@@ -346,6 +358,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // Here goes everything about our main UITableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if currentPage != nil {
+            if isFiltering() {
+                return filteredPage?.widgets.count ?? 0
+            }
             return currentPage?.widgets.count ?? 0
         } else {
             return 0
@@ -357,7 +372,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
+        let widget: OpenHABWidget? = relevantPage?.widgets[indexPath.row]
         switch widget?.type {
         case "Frame":
             if widget?.label.count ?? 0 > 0 {
@@ -381,9 +396,20 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func relevantWidget(indexPath: IndexPath) -> OpenHABWidget? {
+        return relevantPage?.widgets[indexPath.row]
+    }
 
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
+    var relevantPage: OpenHABSitemapPage? {
+        if isFiltering() {
+            return filteredPage
+        } else {
+            return currentPage
+        }
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
 
         let cell: UITableViewCell
 
@@ -457,9 +483,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
 
         // Check if this is not the last row in the widgets list
-        if indexPath.row < (currentPage?.widgets.count ?? 1) - 1 {
+        if indexPath.row < (relevantPage?.widgets.count ?? 1) - 1 {
 
-            let nextWidget: OpenHABWidget? = currentPage?.widgets[indexPath.row + 1]
+            let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
             if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
                 cell.separatorInset = UIEdgeInsets.zero
             } else if !(widget?.type == "Frame") {
@@ -482,7 +508,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let widget: OpenHABWidget? = currentPage?.widgets[indexPath.row]
+        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
         if widget?.linkedPage != nil {
             if let link = widget?.linkedPage?.link {
                 os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
@@ -499,14 +525,14 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
             selectedWidgetRow = indexPath.row
             let selectionViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController
-            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+            let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
             selectionViewController?.mappings = (selectedWidget?.mappings)!
             selectionViewController?.delegate = self
             selectionViewController?.selectionItem = selectedWidget?.item
             if let selectionViewController = selectionViewController {
                 navigationController?.pushViewController(selectionViewController, animated: true)
             }
-        }
+         }
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)
         }
@@ -610,7 +636,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         switch segue.identifier {
         case "showPage":
             let newViewController = segue.destination as? OpenHABViewController
-            let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+            let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
             newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
             newViewController?.openHABRootUrl = openHABRootUrl
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
@@ -663,7 +689,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // send command on selected selection widget mapping
     func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
-        let selectedWidget: OpenHABWidget? = currentPage?.widgets[selectedWidgetRow]
+        let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
         let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
         sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
     }
@@ -671,7 +697,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell = cell {
-            colorPickerViewController?.widget = currentPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
+            colorPickerViewController?.widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
         }
         if let colorPickerViewController = colorPickerViewController {
             navigationController?.pushViewController(colorPickerViewController, animated: true)
@@ -1028,4 +1054,33 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+
+    // MARK: - Private instance methods
+
+    func searchBarIsEmpty() -> Bool {
+        // Returns true if the text is empty or nil
+        return search.searchBar.text?.isEmpty ?? true
+    }
+
+    func filterContentForSearchText(_ searchText: String, scope: String = "All") {
+        filteredPage = currentPage?.filter {
+            os_log("Filtering %{PUBLIC}@", log: .default, type: .debug, $0.label.lowercased())
+
+            return $0.label.lowercased().contains(searchText.lowercased())
+
+        }
+        widgetTableView.reloadData()
+    }
+
+    func isFiltering() -> Bool {
+        return search.isActive && !searchBarIsEmpty()
+    }
+}
+
+extension OpenHABViewController: UISearchResultsUpdating {
+
+    func updateSearchResults(for searchController: UISearchController) {
+        filterContentForSearchText(searchController.searchBar.text!)
+    }
+
 }

@@ -104,4 +104,33 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
             delegate?.sendCommand(item, commandToSend: command)
         }
     }
+
+    public typealias Element = OpenHABWidget
+
+    var current = 0
+}
+
+extension OpenHABSitemapPage: NSCopying {
+    func copy(with zone: NSZone? = nil) -> Any {
+        let copy = OpenHABSitemapPage(pageId: pageId, title: title, link: link, leaf: leaf == "true" ? true : false, widgets: widgets)
+        return copy
+
+    }
+}
+
+extension OpenHABSitemapPage {
+    func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+        let target = self.copy() as! OpenHABSitemapPage
+        target.widgets = try target.widgets.filter { return try isIncluded($0) }
+        return target
+    }
+}
+
+extension OpenHABSitemapPage: Sequence, IteratorProtocol {
+    func next() -> Element? {
+        defer {
+            current += 1
+        }
+        return widgets[current]
+    }
 }
