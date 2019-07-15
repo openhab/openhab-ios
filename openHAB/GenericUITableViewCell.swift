@@ -13,7 +13,7 @@ import UIKit
 class GenericUITableViewCell: UITableViewCell {
 
     @objc func displayWidget() {
-        customTextLabel?.text = widget?.labelText()
+        customTextLabel?.text = widget?.labelText
         if widget?.labelValue() != nil {
             customDetailTextLabel?.text = widget?.labelValue()
         } else {

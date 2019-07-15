@@ -42,7 +42,7 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        customTextLabel?.text = widget.labelText()
+        customTextLabel?.text = widget.labelText
 
         self.upButton?.setTitle("▲", for: .normal)
         self.stopButton?.setTitle("■", for: .normal)

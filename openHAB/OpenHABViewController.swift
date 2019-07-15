@@ -1066,7 +1066,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         filteredPage = currentPage?.filter {
 
             os_log("Filtering %{PUBLIC}@", log: .default, type: .debug, $0.label.lowercased())
-
+            
             return $0.label.lowercased().contains(searchText.lowercased())
 
         }

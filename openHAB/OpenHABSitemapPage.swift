@@ -117,7 +117,7 @@ extension OpenHABSitemapPage: NSCopying {
 extension OpenHABSitemapPage {
     func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
         let target = self.copy() as! OpenHABSitemapPage
-        target.widgets = try target.widgets.filter(isIncluded) // return try isIncluded($0) }
+        target.widgets = try target.widgets.filter(isIncluded)
         return target
     }
 }

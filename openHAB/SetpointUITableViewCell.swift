@@ -29,7 +29,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        self.customTextLabel?.text = widget.labelText()
+        self.customTextLabel?.text = widget.labelText
         var widgetValue: String
         if widget.item?.state == "Uninitialized" {
             widgetValue = "N/A"
