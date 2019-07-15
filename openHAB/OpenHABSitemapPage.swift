@@ -104,10 +104,6 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
             delegate?.sendCommand(item, commandToSend: command)
         }
     }
-
-    public typealias Element = OpenHABWidget
-
-    var current = 0
 }
 
 extension OpenHABSitemapPage: NSCopying {
@@ -121,16 +117,7 @@ extension OpenHABSitemapPage: NSCopying {
 extension OpenHABSitemapPage {
     func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
         let target = self.copy() as! OpenHABSitemapPage
-        target.widgets = try target.widgets.filter { return try isIncluded($0) }
+        target.widgets = try target.widgets.filter(isIncluded) // return try isIncluded($0) }
         return target
-    }
-}
-
-extension OpenHABSitemapPage: Sequence, IteratorProtocol {
-    func next() -> Element? {
-        defer {
-            current += 1
-        }
-        return widgets[current]
     }
 }
