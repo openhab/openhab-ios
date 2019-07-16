@@ -11,21 +11,30 @@
 import os.log
 import WebKit
 
-class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
-    var isLoadingUrl = false
-    var isLoaded = false
-
+class WebUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var widgetWebView: WKWebView!
+
+    private var url: URL?
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
         selectionStyle = .none
         separatorInset = .zero
+    }
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        widgetWebView.navigationDelegate = self
     }
 
     override func displayWidget() {
         os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
+
+        guard url?.absoluteString != widget.url else {
+            os_log("webview URL has not changed, abort loading", log: .viewCycle, type: .info)
+            return
+        }
 
         let prefs = UserDefaults.standard
         let openHABUsername = prefs.string(forKey: "username")
@@ -38,26 +47,53 @@ class WebUITableViewCell: GenericUITableViewCell, WKUIDelegate {
         let base64LoginString = loginData.base64EncodedString()
 
         if let url = URL(string: widget.url) {
+            self.url = url
             var request = URLRequest(url: url)
             request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
             widgetWebView?.scrollView.isScrollEnabled = false
             widgetWebView?.scrollView.bounces = false
             widgetWebView?.load(request)
         }
-
-    }
-
-    func webViewDidStartLoad(_ webView: UIWebView) {
-        os_log("webview started loading", log: .viewCycle, type: .info)
-    }
-
-    func webViewDidFinishLoad(_ webView: UIWebView) {
-        os_log("webview finished load", log: .viewCycle, type: .info)
     }
 
     func setFrame(_ frame: CGRect) {
         os_log("setFrame", log: .viewCycle, type: .info)
         super.frame = frame
         widgetWebView?.reload()
+    }
+}
+
+extension WebUITableViewCell: GenericCellCacheProtocol {
+    func invalidateCache() {
+        url = nil
+        widgetWebView?.stopLoading()
+    }
+}
+
+extension WebUITableViewCell: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        os_log("webview started loading with URL: %{PUBLIC}s", log: .viewCycle, type: .info, widget.url)
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        os_log("webview finished load with URL: %{PUBLIC}s", log: .viewCycle, type: .info, widget.url)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if let response = navigationResponse.response as? HTTPURLResponse, response.statusCode >= 400 {
+            os_log("webview failed with status code: %{PUBLIC}i", log: .urlComposition, type: .debug, response.statusCode)
+            url = nil
+        }
+        decisionHandler(.allow)
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
+        url = nil
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
+        url = nil
     }
 }

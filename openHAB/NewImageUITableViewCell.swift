@@ -11,10 +11,6 @@ import os.log
 import SDWebImage
 import UIKit
 
-protocol NewImageUITableViewCellDelegate: class {
-    func didLoadImageOf(_ cell: NewImageUITableViewCell?)
-}
-
 enum ImageType {
     case link(url: URL?)
     case embedded(image: UIImage?)
@@ -23,8 +19,9 @@ enum ImageType {
 
 class NewImageUITableViewCell: GenericUITableViewCell {
 
-    var mainImageView: ScaleAspectFitImageView!
-    weak var delegate: NewImageUITableViewCellDelegate?
+    var didLoad: (() -> Void)?
+
+    private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -81,7 +78,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         switch widgetPayload {
         case .embedded(let image):
             mainImageView.image = image
-            delegate?.didLoadImageOf(self)
+            didLoad?()
         case .link(let url):
             guard let url = url else { return }
             loadRemoteImage(withURL: url)
@@ -134,7 +131,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                 return
             }
             self?.widget?.image = image
-            self?.delegate?.didLoadImageOf(self)
+            self?.didLoad?()
         }
     }
 

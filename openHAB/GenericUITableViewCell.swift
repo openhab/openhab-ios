@@ -10,6 +10,10 @@
 
 import UIKit
 
+protocol GenericCellCacheProtocol: UITableViewCell {
+    func invalidateCache()
+}
+
 class GenericUITableViewCell: UITableViewCell {
 
     @objc func displayWidget() {
