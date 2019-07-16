@@ -14,11 +14,7 @@ class GenericUITableViewCell: UITableViewCell {
 
     @objc func displayWidget() {
         customTextLabel?.text = widget?.labelText
-        if widget?.labelValue() != nil {
-            customDetailTextLabel?.text = widget?.labelValue()
-        } else {
-            customDetailTextLabel?.text = ""
-        }
+        customDetailTextLabel?.text = widget?.labelValue ?? ""
         customDetailTextLabel?.sizeToFit()
 
         if customDetailTextLabel != nil {

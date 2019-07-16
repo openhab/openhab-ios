@@ -39,16 +39,8 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         if state.isEmpty {
             state = (widget.item?.state) ?? ""
         }
-        if let customDetailText = widget.labelValue() {
-            self.customDetailTextLabel?.text = customDetailText
-        } else {
-            self.customDetailTextLabel?.text = ""
-        }
-        if state == "ON" {
-            widgetSwitch?.isOn = true
-        } else {
-            widgetSwitch?.isOn = false
-        }
+        self.customDetailTextLabel?.text = widget.labelValue ?? ""
+        widgetSwitch?.isOn =  state == "ON" ? true : false
         widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
         super.displayWidget()
     }

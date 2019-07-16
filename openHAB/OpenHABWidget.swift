@@ -156,7 +156,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     // Text after "["
-    func labelValue() -> String? {
+    var labelValue: String? {
         let array = label.components(separatedBy: "[")
         if array.count > 1 {
             var characterSet = CharacterSet.whitespaces

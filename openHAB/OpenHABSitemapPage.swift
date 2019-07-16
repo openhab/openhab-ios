@@ -104,20 +104,24 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
             delegate?.sendCommand(item, commandToSend: command)
         }
     }
-}
 
-extension OpenHABSitemapPage: NSCopying {
-    func copy(with zone: NSZone? = nil) -> Any {
-        let copy = OpenHABSitemapPage(pageId: pageId, title: title, link: link, leaf: leaf == "true" ? true : false, widgets: widgets)
-        return copy
-
+    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
+        super.init()
+        self.pageId = pageId
+        self.title = title
+        self.link = link
+        self.leaf = leaf ? "true" : "false"
+        self.widgets = expandedWidgets
+        self.widgets.forEach { $0.delegate = self }
     }
 }
 
 extension OpenHABSitemapPage {
     func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
-        let target = self.copy() as! OpenHABSitemapPage
-        target.widgets = try target.widgets.filter(isIncluded)
-        return target
+        return OpenHABSitemapPage(pageId: self.pageId,
+                                  title: self.title,
+                                  link: self.link,
+                                  leaf: self.leaf == "true" ? true : false,
+                                  expandedWidgets: try self.widgets.filter(isIncluded))
     }
 }
