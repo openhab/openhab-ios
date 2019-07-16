@@ -1039,6 +1039,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         filteredPage = currentPage?.filter {
             return $0.label.lowercased().contains(searchText.lowercased())
         }
+        filteredPage?.delegate = self
         widgetTableView.reloadData()
     }
 
