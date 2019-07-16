@@ -12,20 +12,16 @@ import AVFoundation
 import AVKit
 import os.log
 
-protocol VideoUITableViewCellDelegate: class {
-    func didLoadVideoOf(_ cell: VideoUITableViewCell?)
-}
+class VideoUITableViewCell: GenericUITableViewCell {
 
-class VideoUITableViewCell: UITableViewCell {
+    var didLoad: (() -> Void)?
 
-    var url: URL? {
+    private var url: URL? {
         didSet {
             guard oldValue?.absoluteString != url?.absoluteString else { return }
             prepareToPlay()
         }
     }
-    weak var delegate: VideoUITableViewCellDelegate?
-
     private(set) var playerView: PlayerView!
     private let activityIndicator = UIActivityIndicatorView(style: .gray)
     private var playerObserver: NSKeyValueObservation?
@@ -61,6 +57,10 @@ class VideoUITableViewCell: UITableViewCell {
             ])
 
         NotificationCenter.default.addObserver(self, selector: #selector(stopPlayback), name: UIApplication.didEnterBackgroundNotification, object: nil)
+    }
+
+    override func displayWidget() {
+        url = URL(string: widget.url)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -104,7 +104,7 @@ class VideoUITableViewCell: UITableViewCell {
                     constraint.priority = UILayoutPriority(rawValue: 999)
                     self.playerView.addConstraint(constraint)
                     self.aspectRatioConstraint = constraint
-                    self.delegate?.didLoadVideoOf(self)
+                    self.didLoad?()
                 }
             }
         })
@@ -116,5 +116,11 @@ class VideoUITableViewCell: UITableViewCell {
         url = nil
         playerObserver = nil
         playerView?.playerLayer.player = nil
+    }
+}
+
+extension VideoUITableViewCell: GenericCellCacheProtocol {
+    func invalidateCache() {
+        url = nil
     }
 }

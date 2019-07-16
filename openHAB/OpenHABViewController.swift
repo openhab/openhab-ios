@@ -28,7 +28,7 @@ protocol ModalHandler: class {
     func modalDismissed(to: TargetController)
 }
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, NewImageUITableViewCellDelegate, ModalHandler, VideoUITableViewCellDelegate {
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler {
 
     var tracker: OpenHABTracker?
 
@@ -212,12 +212,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func registerTableViewCells() {
-
         widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
         widgetTableView.register(NewImageUITableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier)
         widgetTableView.register(cellType: VideoUITableViewCell.self)
-
     }
 
     @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
@@ -436,9 +434,16 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case "Image", "Chart":
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
-            (cell as? NewImageUITableViewCell)?.delegate = self
+            (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
+                self?.widgetTableView.beginUpdates()
+                self?.widgetTableView.endUpdates()
+            }
         case "Video":
             cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
+            (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
+                self?.widgetTableView.beginUpdates()
+                self?.widgetTableView.endUpdates()
+            }
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
@@ -469,12 +474,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             cell.backgroundColor = UIColor.groupTableViewBackground
         } else {
             cell.backgroundColor = UIColor.white
-        }
-
-        if let cell = cell as? VideoUITableViewCell {
-            cell.delegate = self
-            cell.url = URL(string: widget?.url ?? "")
-            return cell
         }
 
         if let cell = cell as? GenericUITableViewCell {
@@ -539,29 +538,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // stop playback only if the cell is not visible, otherwise playback would be interrupted if a long polling request finishes
-        guard let videoCell = cell as? VideoUITableViewCell,
-            let indexPath = tableView.indexPath(for: cell),
-            let visibleIndexPaths = tableView.indexPathsForVisibleRows,
-            !visibleIndexPaths.contains(indexPath)
-        else {
-            return
-        }
-
-        videoCell.url = nil
-    }
-
-    func didLoadImageOf(_ cell: NewImageUITableViewCell?) {
-        UIView.performWithoutAnimation {
-            widgetTableView.beginUpdates()
-            widgetTableView.endUpdates()
-        }
-    }
-
-    func didLoadVideoOf(_ cell: VideoUITableViewCell?) {
-        UIView.performWithoutAnimation {
-            widgetTableView.beginUpdates()
-            widgetTableView.endUpdates()
+        // invalidate cache only if the cell is not visible
+        if let cell = cell as? GenericCellCacheProtocol, let indexPath = tableView.indexPath(for: cell), let visibleIndexPaths = tableView.indexPathsForVisibleRows, !visibleIndexPaths.contains(indexPath) {
+            cell.invalidateCache()
         }
     }
 
@@ -731,15 +710,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
             pageRequest.timeoutInterval = 300.0
         } else {
-            atmosphereTrackingId = ""
+            atmosphereTrackingId = "0"
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             pageRequest.timeoutInterval = 10.0
         }
-        if atmosphereTrackingId == "" {
-            pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
-        } else {
-            pageRequest.setValue("0", forHTTPHeaderField: "X-Atmosphere-tracking-id")
-        }
+        pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
+
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
@@ -752,12 +728,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
             let headers = operation.response?.allHeaderFields
 
-            if headers?["X-Atmosphere-tracking-id"] != nil {
-                if let object = headers?["X-Atmosphere-tracking-id"] {
-                    os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, object as! CVarArg)
-                }
-                // Establish the strong self reference
-                self.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+            self.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+            if !self.atmosphereTrackingId.isEmpty {
+                os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, self.atmosphereTrackingId)
             }
             let response = responseObject as? Data
             // If we are talking to openHAB 1.X, talk XML
