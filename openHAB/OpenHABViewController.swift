@@ -409,14 +409,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         case "Image", "Chart":
             cell = tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
-                self?.widgetTableView.beginUpdates()
-                self?.widgetTableView.endUpdates()
+                self?.updateWidgetTableView()
             }
         case "Video":
             cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
             (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
-                self?.widgetTableView.beginUpdates()
-                self?.widgetTableView.endUpdates()
+                self?.updateWidgetTableView()
             }
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
@@ -515,6 +513,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // invalidate cache only if the cell is not visible
         if let cell = cell as? GenericCellCacheProtocol, let indexPath = tableView.indexPath(for: cell), let visibleIndexPaths = tableView.indexPathsForVisibleRows, !visibleIndexPaths.contains(indexPath) {
             cell.invalidateCache()
+        }
+    }
+
+    private func updateWidgetTableView() {
+        UIView.performWithoutAnimation {
+            widgetTableView.beginUpdates()
+            widgetTableView.endUpdates()
         }
     }
 
