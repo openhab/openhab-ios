@@ -42,7 +42,7 @@ extension OpenHABSitemapPage.CodingData {
     }
 }
 
-class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
+class OpenHABSitemapPage: NSObject {
     weak var delegate: OpenHABSitemapPageDelegate?
     var widgets: [OpenHABWidget] = []
     var pageId = ""
@@ -65,7 +65,11 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
             }
         }
         self.widgets = ws
-        self.widgets.forEach { $0.delegate = self }
+        self.widgets.forEach {
+            $0.sendCommand = { [weak self] (item, command) in
+                self?.sendCommand(item, commandToSend: command)
+            }
+        }
     }
 
 #if canImport(GDataXMLElement)
@@ -95,7 +99,7 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     }
 #endif
 
-    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
+    private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let name = item?.name {
             os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", name)
             delegate?.sendCommand(item, commandToSend: command)
@@ -109,17 +113,21 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
         self.link = link
         self.leaf = leaf ? "true" : "false"
         self.widgets = expandedWidgets
+        self.widgets.forEach {
+            $0.sendCommand = { [weak self] (item, command) in
+                self?.sendCommand(item, commandToSend: command)
+            }
+        }
     }
 }
 
 extension OpenHABSitemapPage {
     func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
-        let filteredOpenHABSitemapPage =  OpenHABSitemapPage(pageId: self.pageId,
+        let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: self.pageId,
                                   title: self.title,
                                   link: self.link,
                                   leaf: self.leaf == "true" ? true : false,
                                   expandedWidgets: try self.widgets.filter(isIncluded))
-        filteredOpenHABSitemapPage.widgets.forEach { $0.delegate = self }
         return filteredOpenHABSitemapPage
     }
 }

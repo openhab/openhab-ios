@@ -13,10 +13,6 @@ import Foundation
 import MapKit
 import os.log
 
-protocol OpenHABWidgetDelegate: NSObjectProtocol {
-    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
-}
-
 extension OpenHABWidget {
     struct CodingData: Decodable {
         let widgetId: String
@@ -53,7 +49,7 @@ extension OpenHABWidget.CodingData {
 }
 
 class OpenHABWidget: NSObject, MKAnnotation {
-    weak var delegate: OpenHABWidgetDelegate?
+    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""
     var label = ""
     var icon = ""
@@ -171,15 +167,16 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     func sendCommand(_ command: String?) {
-        if delegate != nil && item != nil {
-            delegate?.sendCommand(item, commandToSend: command)
+        guard let item = item, let sendCommand = sendCommand else {
+            if self.item == nil {
+                os_log("Item = nil", log: .default, type: .info)
+            }
+            if self.sendCommand == nil {
+                os_log("sendCommand closure not set", log: .default, type: .info)
+            }
+            return
         }
-        if item == nil {
-            os_log("Item = nil", log: .default, type: .info)
-        }
-        if delegate == nil {
-            os_log("Delegate = nil", log: .default, type: .info)
-        }
+        sendCommand(item, command)
     }
 
     func mappingIndex(byCommand command: String?) -> Int {
