@@ -33,22 +33,14 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        self.customTextLabel?.text = widget.labelText()
+        self.customTextLabel?.text = widget.labelText
         var state = widget.state
         //if state is nil or empty using the item state ( OH 1.x compatability )
         if state.isEmpty {
             state = (widget.item?.state) ?? ""
         }
-        if let customDetailText = widget.labelValue() {
-            self.customDetailTextLabel?.text = customDetailText
-        } else {
-            self.customDetailTextLabel?.text = ""
-        }
-        if state == "ON" {
-            widgetSwitch?.isOn = true
-        } else {
-            widgetSwitch?.isOn = false
-        }
+        self.customDetailTextLabel?.text = widget.labelValue ?? ""
+        widgetSwitch?.isOn = state == "ON" ? true : false
         widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
         super.displayWidget()
     }

@@ -44,9 +44,9 @@ class MapViewTableViewCell: GenericUITableViewCell {
         set(widget) {
 
             let oldLocationCoordinate: CLLocationCoordinate2D? = self.widget?.coordinate
-            let oldLocationTitle = self.widget?.title ?? ""
+            let oldLocationTitle = self.widget?.labelText ?? ""
             let newLocationCoordinate: CLLocationCoordinate2D? = widget?.coordinate
-            let newLocationTitle = widget?.title
+            let newLocationTitle = widget?.labelText
 
             super.widget = widget
 

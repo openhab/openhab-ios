@@ -17,12 +17,8 @@ protocol GenericCellCacheProtocol: UITableViewCell {
 class GenericUITableViewCell: UITableViewCell {
 
     @objc func displayWidget() {
-        customTextLabel?.text = widget?.labelText()
-        if widget?.labelValue() != nil {
-            customDetailTextLabel?.text = widget?.labelValue()
-        } else {
-            customDetailTextLabel?.text = ""
-        }
+        customTextLabel?.text = widget?.labelText
+        customDetailTextLabel?.text = widget?.labelValue ?? ""
         customDetailTextLabel?.sizeToFit()
 
         if customDetailTextLabel != nil {

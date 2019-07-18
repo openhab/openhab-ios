@@ -63,7 +63,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        customTextLabel?.text = widget.labelText()
+        customTextLabel?.text = widget.labelText
         widgetSlider?.minimumValue = Float(widget.minValue)
         widgetSlider?.maximumValue = Float(widget.maxValue)
         let widgetValue = adjustedValue()

@@ -150,13 +150,13 @@ class OpenHABWidget: NSObject, MKAnnotation {
 #endif
 
     // Text prior to "["
-    func labelText() -> String? {
+    var labelText: String? {
         let array = label.components(separatedBy: "[")
         return array[0].trimmingCharacters(in: .whitespaces)
     }
 
     // Text after "["
-    func labelValue() -> String? {
+    var labelValue: String? {
         let array = label.components(separatedBy: "[")
         if array.count > 1 {
             var characterSet = CharacterSet.whitespaces
@@ -193,7 +193,4 @@ class OpenHABWidget: NSObject, MKAnnotation {
         return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
-    var title: String? {
-        return labelText()
-    }
 }

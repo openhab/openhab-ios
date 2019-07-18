@@ -75,22 +75,21 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
         widgets = [OpenHABWidget]()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
-            if !(child.name() == "widget") {
-                if !(child.name() == "id") {
-                    if let name = child.name() {
-                        if propertyNames.contains(name) {
-                            setValue(child.stringValue, forKey: child.name() ?? "")
+                if !(child.name() == "widget") {
+                    if !(child.name() == "id") {
+                        if let name = child.name() {
+                            if propertyNames.contains(name) {
+                                setValue(child.stringValue, forKey: child.name() ?? "")
+                            }
                         }
+                    } else {
+                        pageId = child.stringValue() ?? ""
                     }
                 } else {
-                    pageId = child.stringValue() ?? ""
+                    let newWidget = OpenHABWidget(xml: child)
+                    newWidget.delegate = self
+                    widgets.append(newWidget)
                 }
-            } else {
-                let newWidget = OpenHABWidget(xml: child)
-                newWidget.delegate = self
-                widgets.append(newWidget)
-
-            }
             }
         }
     }
@@ -99,9 +98,28 @@ class OpenHABSitemapPage: NSObject, OpenHABWidgetDelegate {
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let name = item?.name {
             os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", name)
-        }
-        if delegate != nil {
             delegate?.sendCommand(item, commandToSend: command)
         }
+    }
+
+    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
+        super.init()
+        self.pageId = pageId
+        self.title = title
+        self.link = link
+        self.leaf = leaf ? "true" : "false"
+        self.widgets = expandedWidgets
+    }
+}
+
+extension OpenHABSitemapPage {
+    func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+        let filteredOpenHABSitemapPage =  OpenHABSitemapPage(pageId: self.pageId,
+                                  title: self.title,
+                                  link: self.link,
+                                  leaf: self.leaf == "true" ? true : false,
+                                  expandedWidgets: try self.widgets.filter(isIncluded))
+        filteredOpenHABSitemapPage.widgets.forEach { $0.delegate = self }
+        return filteredOpenHABSitemapPage
     }
 }
