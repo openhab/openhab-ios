@@ -12,10 +12,6 @@
 import Foundation
 import os.log
 
-protocol OpenHABSitemapPageDelegate: NSObjectProtocol {
-    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?)
-}
-
 extension OpenHABSitemapPage {
 
     struct CodingData: Decodable {
@@ -43,7 +39,7 @@ extension OpenHABSitemapPage.CodingData {
 }
 
 class OpenHABSitemapPage: NSObject {
-    weak var delegate: OpenHABSitemapPageDelegate?
+    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgets: [OpenHABWidget] = []
     var pageId = ""
     var title = ""
@@ -91,7 +87,9 @@ class OpenHABSitemapPage: NSObject {
                     }
                 } else {
                     let newWidget = OpenHABWidget(xml: child)
-                    newWidget.delegate = self
+                    newWidget.sendCommand = { [weak self] (item, command) in
+                        self?.sendCommand(item, commandToSend: command)
+                    }
                     widgets.append(newWidget)
                 }
             }
@@ -100,10 +98,10 @@ class OpenHABSitemapPage: NSObject {
 #endif
 
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        if let name = item?.name {
-            os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", name)
-            delegate?.sendCommand(item, commandToSend: command)
-        }
+        guard let item = item else { return }
+
+        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", item.name)
+        sendCommand?(item, command)
     }
 
     init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {

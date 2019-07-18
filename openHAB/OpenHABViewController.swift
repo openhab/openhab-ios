@@ -28,7 +28,7 @@ protocol ModalHandler: class {
     func modalDismissed(to: TargetController)
 }
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler {
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler {
 
     var tracker: OpenHABTracker?
 
@@ -771,7 +771,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                 }
             }
-            self.currentPage?.delegate = self
+            self.currentPage?.sendCommand = { [weak self] (item, command) in
+                self?.sendCommand(item, commandToSend: command)
+            }
             self.widgetTableView.reloadData()
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             self.refreshControl?.endRefreshing()
@@ -1046,9 +1048,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         guard let searchText = searchText else { return }
 
         filteredPage = currentPage?.filter {
-            return $0.label.lowercased().contains(searchText.lowercased())
+            return $0.label.lowercased().contains(searchText.lowercased()) && $0.type != "Frame"
         }
-        filteredPage?.delegate = self
+        filteredPage?.sendCommand = { [weak self] (item, command) in
+            self?.sendCommand(item, commandToSend: command)
+        }
         widgetTableView.reloadData()
     }
 }
