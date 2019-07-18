@@ -21,7 +21,7 @@ class GenericUITableViewCell: UITableViewCell {
         customDetailTextLabel?.text = widget?.labelValue ?? ""
         customDetailTextLabel?.sizeToFit()
 
-        if customDetailTextLabel != nil {
+        if customDetailTextLabel != nil, customDetailTextLabelConstraint != nil {
             if accessoryType == .none {
                 // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
                 customDetailTextLabelConstraint.constant = 20.0
