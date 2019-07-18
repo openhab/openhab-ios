@@ -1055,6 +1055,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         widgetTableView.reloadData()
     }
+
 }
 
 extension OpenHABViewController: UISearchResultsUpdating {

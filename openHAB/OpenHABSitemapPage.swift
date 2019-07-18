@@ -115,7 +115,29 @@ class OpenHABSitemapPage: NSObject {
             $0.sendCommand = { [weak self] (item, command) in
                 self?.sendCommand(item, commandToSend: command)
             }
+
         }
+    }
+
+    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
+        super.init()
+        self.pageId = pageId
+        self.title = title
+        self.link = link
+        self.leaf = leaf ? "true" : "false"
+        self.widgets = expandedWidgets
+    }
+}
+
+extension OpenHABSitemapPage {
+    func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+        let filteredOpenHABSitemapPage =  OpenHABSitemapPage(pageId: self.pageId,
+                                  title: self.title,
+                                  link: self.link,
+                                  leaf: self.leaf == "true" ? true : false,
+                                  expandedWidgets: try self.widgets.filter(isIncluded))
+        filteredOpenHABSitemapPage.widgets.forEach { $0.delegate = self }
+        return filteredOpenHABSitemapPage
     }
 }
 
