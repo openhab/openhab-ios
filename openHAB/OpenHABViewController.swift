@@ -28,7 +28,7 @@ protocol ModalHandler: class {
     func modalDismissed(to: TargetController)
 }
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSitemapPageDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler {
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler {
 
     var tracker: OpenHABTracker?
 
@@ -356,7 +356,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     // Here goes everything about our main UITableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if currentPage != nil {
-            if isFiltering() {
+            if isFiltering {
                 return filteredPage?.widgets.count ?? 0
             }
             return currentPage?.widgets.count ?? 0
@@ -399,7 +399,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     var relevantPage: OpenHABSitemapPage? {
-        if isFiltering() {
+        if isFiltering {
             return filteredPage
         } else {
             return currentPage
@@ -763,12 +763,17 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     do {
                         let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: response)
                         self.currentPage = sitemapPageCodingData.openHABSitemapPage
+                        if self.isFiltering {
+                            self.filterContentForSearchText(self.search.searchBar.text)
+                        }
                     } catch {
                         os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                     }
                 }
             }
-            self.currentPage?.delegate = self
+            self.currentPage?.sendCommand = { [weak self] (item, command) in
+                self?.sendCommand(item, commandToSend: command)
+            }
             self.widgetTableView.reloadData()
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             self.refreshControl?.endRefreshing()
@@ -1030,28 +1035,33 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     // MARK: - Private instance methods
 
-    func searchBarIsEmpty() -> Bool {
+    var searchBarIsEmpty: Bool {
         // Returns true if the text is empty or nil
         return search.searchBar.text?.isEmpty ?? true
     }
 
-    func filterContentForSearchText(_ searchText: String, scope: String = "All") {
+    var isFiltering: Bool {
+        return search.isActive && !searchBarIsEmpty
+    }
+
+    func filterContentForSearchText(_ searchText: String?, scope: String = "All") {
+        guard let searchText = searchText else { return }
+
         filteredPage = currentPage?.filter {
-            return $0.label.lowercased().contains(searchText.lowercased())
+            return $0.label.lowercased().contains(searchText.lowercased()) && $0.type != "Frame"
         }
-        filteredPage?.delegate = self
+        filteredPage?.sendCommand = { [weak self] (item, command) in
+            self?.sendCommand(item, commandToSend: command)
+        }
         widgetTableView.reloadData()
     }
 
-    func isFiltering() -> Bool {
-        return search.isActive && !searchBarIsEmpty()
-    }
 }
 
 extension OpenHABViewController: UISearchResultsUpdating {
 
     func updateSearchResults(for searchController: UISearchController) {
-        filterContentForSearchText(searchController.searchBar.text!)
+        filterContentForSearchText(searchController.searchBar.text)
     }
 
 }
