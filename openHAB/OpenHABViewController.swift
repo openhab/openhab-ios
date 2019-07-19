@@ -28,7 +28,7 @@ protocol ModalHandler: class {
     func modalDismissed(to: TargetController)
 }
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler {
+class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler, UISideMenuNavigationControllerDelegate {
 
     var tracker: OpenHABTracker?
 
@@ -188,15 +188,14 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
-        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar).addTarget(self, action: #selector(prepareSideMenuViewController))
-        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view).filter({ $0.edges == .right }).forEach({ $0.addTarget(self, action: #selector(prepareSideMenuViewController)) })
+        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
+        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
 
         SideMenuManager.default.menuFadeStatusBar = false
     }
 
-    @objc private func prepareSideMenuViewController() {
-        guard let nvc = SideMenuManager.default.menuRightNavigationController,
-            let drawer = nvc.viewControllers[0] as? OpenHABDrawerTableViewController,
+    func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
+        guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
             (drawer.delegate == nil || drawer.openHABRootUrl.isEmpty)
         else {
             return
