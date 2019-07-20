@@ -6,7 +6,6 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import os.log
-import SDWebImage
 import UIKit
 
 class OpenHABClientCertificatesViewController: UITableViewController {

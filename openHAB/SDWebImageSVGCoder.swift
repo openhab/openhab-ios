@@ -12,6 +12,8 @@ import SVGKit
 
 class MySDWebImageSVGCoder: NSObject, SDImageCoder {
 
+    static let shared = MySDWebImageSVGCoder()
+
     var data: Data?
 
     func canDecode(from data: Data?) -> Bool {

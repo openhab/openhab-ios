@@ -12,7 +12,6 @@ import AVFoundation
 import AVKit
 import os.log
 import SDWebImage
-import SDWebImageSVGCoder
 import SideMenu
 import SwiftMessages
 import UIKit
@@ -145,6 +144,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABViewController viewDidLoad", log: .default, type: .info)
+
+        SDImageCodersManager.shared.addCoder(MySDWebImageSVGCoder.shared)
 
         pageNetworkStatus = nil //NetworkStatus(rawValue: -1)
         sitemaps = []
@@ -461,8 +462,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             case .png :
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             case .svg:
-                let coder = MySDWebImageSVGCoder()
-                SDImageCodersManager.shared.addCoder(coder)
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             }
         }
