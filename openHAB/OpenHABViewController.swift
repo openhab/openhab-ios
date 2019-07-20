@@ -461,8 +461,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             case .png :
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             case .svg:
-                let SVGCoder = SDImageSVGCoder.shared
-                SDImageCodersManager.shared.addCoder(SVGCoder)
+                let coder = MySDWebImageSVGCoder()
+                SDImageCodersManager.shared.addCoder(coder)
                 cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             }
         }
