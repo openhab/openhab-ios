@@ -14,8 +14,7 @@ target 'openHAB' do
     pod 'Fabric', '~> 1.7.2'
     pod 'Crashlytics', '~> 3.9.3'
     pod 'SwiftMessages'
-    pod 'SideMenu'
-    #pod 'SideMenuSwift'
+    pod 'SideMenu', '~> 5.0'
 end
 
 target 'openHABTestsSwift' do
