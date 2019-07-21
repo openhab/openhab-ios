@@ -9,7 +9,6 @@
 //
 
 import os.log
-import SDWebImage
 import UIKit
 
 class OpenHABDrawerTableViewController: UITableViewController {
@@ -163,8 +162,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
             cell?.customTextLabel?.text = sitemaps[indexPath.row].label
             if sitemaps[indexPath.row].icon != "" {
-                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url
-                cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+                if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url {
+                    cell?.customImageView?.setImageWith(iconURL, placeholderImage: UIImage(named: "icon-76x76.png"))
+                }
             } else {
                 cell?.customImageView?.image = UIImage(named: "icon-76x76.png")
             }

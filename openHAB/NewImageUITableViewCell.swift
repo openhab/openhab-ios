@@ -6,9 +6,7 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
-//import Kingfisher
 import os.log
-import SDWebImage
 import UIKit
 
 enum ImageType {
@@ -122,17 +120,26 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         return AppDelegate.appDelegate.appData
     }
 
-    // https://github.com/SDWebImage/SDWebImage/wiki/Common-Problems#handle-self-capture-in-completion-block
     private func loadRemoteImage(withURL url: URL) {
         os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
-        mainImageView?.sd_setImage(with: url, placeholderImage: widget?.image ?? UIImage(named: "blankicon.png"), options: .imageOptionFromLoaderOnlyIgnoreInvalidCert) { [weak self] (image, error, cacheType, imageURL) in
-            if let error = error {
-                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
-                return
+
+        var imageRequest = URLRequest(url: url)
+
+        imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
+        imageRequest.timeoutInterval = 10.0
+        let imageOperation = OpenHABHTTPRequestOperation(request: imageRequest, delegate: self as? AFRememberingSecurityPolicyDelegate)
+
+        imageOperation.setCompletionBlockWithSuccess({ [weak self] (operation, responseObject) in
+            if let response = responseObject as? Data {
+                self?.mainImageView?.image = UIImage(data: response)
+                self?.widget?.image = UIImage(data: response)
+                self?.didLoad?()
             }
-            self?.widget?.image = image
-            self?.didLoad?()
-        }
+
+        }, failure: { operation, error in
+            os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+        })
+        imageOperation.start()
     }
 
     @objc func refreshImage(_ timer: Timer?) {

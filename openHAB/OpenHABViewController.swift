@@ -11,7 +11,6 @@
 import AVFoundation
 import AVKit
 import os.log
-import SDWebImage
 import SideMenu
 import SVGKit
 import SwiftMessages
@@ -274,8 +273,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         super.viewDidAppear(animated)
         // Load settings into local properties
         loadSettings()
-        // Set authentication parameters to SDImag
-        setSDImageAuth()
         // Disable idle timeout if configured in settings
         if idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
@@ -452,35 +449,29 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         // No icon is needed for image, video, frame and web widgets
         if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
 
-            let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
-                                     version: appData?.openHABVersion ?? 2,
-                                     icon: widget?.icon,
-                                     value: widget?.item?.state ?? "",
-                                     iconType: iconType).url
-
-            switch iconType {
-            case .png :
-                cell.imageView?.setImageWith(urlc!, placeholderImage: UIImage(named: "blankicon.png"))
-//                sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
-            case .svg:
-
-                var imageRequest = URLRequest(url: urlc!)
-
-                imageRequest.setAuthCredentials(openHABUsername, openHABPassword)
-                imageRequest.timeoutInterval = 10.0
-                let imageOperation = OpenHABHTTPRequestOperation(request: imageRequest, delegate: self)
-
-                imageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
-                    if let response = responseObject as? Data {
-                        let receivedIcon: SVGKImage = SVGKImage(data: response)
-                        cell.imageView?.image = receivedIcon.uiImage
-                    }
-
+            if let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
+                                        version: appData?.openHABVersion ?? 2,
+                                        icon: widget?.icon,
+                                        value: widget?.item?.state ?? "",
+                                        iconType: iconType).url {
+                switch iconType {
+                case .png :
+                    cell.imageView?.setImageWith(urlc, placeholderImage: UIImage(named: "blankicon.png"))
+                case .svg:
+                    var imageRequest = URLRequest(url: urlc)
+                    imageRequest.setAuthCredentials(openHABUsername, openHABPassword)
+                    imageRequest.timeoutInterval = 10.0
+                    let imageOperation = OpenHABHTTPRequestOperation(request: imageRequest, delegate: self)
+                    imageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
+                        if let response = responseObject as? Data {
+                            let receivedIcon: SVGKImage = SVGKImage(data: response)
+                            cell.imageView?.image = receivedIcon.uiImage
+                        }
                     }, failure: { operation, error in
-                            cell.imageView?.image = UIImage(named: "blankicon.png")
-                })
-                imageOperation.start()
-
+                        cell.imageView?.image = UIImage(named: "blankicon.png")
+                    })
+                    imageOperation.start()
+                }
             }
         }
 
@@ -997,22 +988,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
-    }
-
-    // Set SDImage (used for widget icons and images) authentication
-    func setSDImageAuth() {
-        let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
-            let authStr = "\(self.openHABUsername):\(self.openHABPassword)"
-            let authData: Data? = authStr.data(using: .ascii)
-            let authValue = "Basic \(authData?.base64EncodedString(options: []) ?? "")"
-            var r = request
-            r.setValue(authValue, forHTTPHeaderField: "Authorization")
-            return r
-        }
-        SDWebImageDownloader.shared.requestModifier = requestModifier
-
-        // Setup SDWebImage to use our downloader operation which handles client certificates
-        SDWebImageDownloader.shared.config.operationClass = OpenHABSDWebImageDownloaderOperation.self
     }
 
     // Find and return sitemap by it's name if any

@@ -35,7 +35,6 @@
 		A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */; };
 		A08FF14A2233498700203EED /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
 		A0C40F1E222E272C00E29713 /* OpenHABHTTPRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C40F1D222E272C00E29713 /* OpenHABHTTPRequestOperation.swift */; };
-		A0CA7D9722A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CA7D9622A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift */; };
 		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
@@ -44,7 +43,6 @@
 		DA15FF4B221DF7D800FF0FDA /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DA15FF4C221DF7D800FF0FDA /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
-		DA222EA1228A03C2002B1171 /* ImageDownloadUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */; };
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA28C363225292FF00AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
@@ -232,7 +230,6 @@
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A08FF1492233498600203EED /* ClientCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientCertificateManager.swift; sourceTree = "<group>"; };
 		A0C40F1D222E272C00E29713 /* OpenHABHTTPRequestOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABHTTPRequestOperation.swift; sourceTree = "<group>"; };
-		A0CA7D9622A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSDWebImageDownloaderOperation.swift; sourceTree = "<group>"; };
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
@@ -240,7 +237,6 @@
 		BCF72F56B17C7E8A29FE3759 /* Pods-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
 		DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
-		DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageDownloadUtil.swift; sourceTree = "<group>"; };
 		DA28C35F2251F07000AB409C /* OSLogHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogHelper.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -654,8 +650,6 @@
 				DFDEE41C1883EB99008B26AC /* Reachability+URL.swift */,
 				DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */,
 				DA28C35F2251F07000AB409C /* OSLogHelper.swift */,
-				DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */,
-				A0CA7D9622A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift */,
 				9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */,
 			);
 			name = Util;
@@ -1067,7 +1061,6 @@
 				A0C40F1E222E272C00E29713 /* OpenHABHTTPRequestOperation.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,
-				A0CA7D9722A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DA15FF4B221DF7D800FF0FDA /* StringExtension.swift in Sources */,
 				A08FF14A2233498700203EED /* ClientCertificateManager.swift in Sources */,
@@ -1101,7 +1094,6 @@
 				DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */,
 				DFDEE411188322FA008B26AC /* OpenHABWidget.swift in Sources */,
 				DFA16EBE1889867B00EDB0BB /* OpenHABWidgetMapping.swift in Sources */,
-				DA222EA1228A03C2002B1171 /* ImageDownloadUtil.swift in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */,

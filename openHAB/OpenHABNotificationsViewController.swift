@@ -9,7 +9,6 @@
 //
 
 import os.log
-import SDWebImage
 import SideMenu
 import UIKit
 
@@ -134,8 +133,9 @@ class OpenHABNotificationsViewController: UITableViewController {
             cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
         }
 
-        let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url
-        cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
+        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
+            cell?.imageView?.setImageWith(iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"))
+        }
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
         }
