@@ -7,7 +7,8 @@ target 'openHAB' do
     #pod 'AFNetworking', '~> 3.0'
     pod 'AFNetworking', '~> 2.6.0'
     pod 'SDWebImage', '~> 5.0' , :modular_headers => true
-    pod 'SDWebImageSVGCoder'
+    pod 'SVGKit'
+    # pod 'SDWebImageSVGCoder'
     pod 'GDataXML-HTML', '~> 1.3.0'
     pod 'NKOColorPickerView', '~> 0.5'
     pod 'Firebase/Core'

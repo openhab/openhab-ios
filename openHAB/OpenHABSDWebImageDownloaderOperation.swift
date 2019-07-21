@@ -11,21 +11,17 @@ import SDWebImage
 class OpenHABSDWebImageDownloaderOperation: SDWebImageDownloaderOperation {
     override func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
-            let dns = challenge.protectionSpace.distinguishedNames
-            if dns != nil {
-                let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns!)
-                if identity != nil {
-                    let credential = URLCredential.init(identity: identity!, certificates: nil, persistence: URLCredential.Persistence.forSession)
-                    let disposition = URLSession.AuthChallengeDisposition.useCredential
-                    completionHandler(disposition, credential)
-                    return
-                }
+            if let dns = challenge.protectionSpace.distinguishedNames,
+                let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns) {
+                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                let disposition = URLSession.AuthChallengeDisposition.useCredential
+                completionHandler(disposition, credential)
+                return
             }
             let disposition = URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge
             completionHandler(disposition, nil)
             return
         }
-
         // Not a client certificate request to run the default handler
         super.urlSession(session, task: task, didReceive: challenge, completionHandler: completionHandler)
     }

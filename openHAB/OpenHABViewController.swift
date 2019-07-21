@@ -13,6 +13,7 @@ import AVKit
 import os.log
 import SDWebImage
 import SideMenu
+import SVGKit
 import SwiftMessages
 import UIKit
 
@@ -458,11 +459,30 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                                      icon: widget?.icon,
                                      value: widget?.item?.state ?? "",
                                      iconType: iconType).url
+
             switch iconType {
             case .png :
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
+                cell.imageView?.setImageWith(urlc!, placeholderImage: UIImage(named: "blankicon.png"))
+//                sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
             case .svg:
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
+
+                var imageRequest = URLRequest(url: urlc!)
+
+                imageRequest.setAuthCredentials(openHABUsername, openHABPassword)
+                imageRequest.timeoutInterval = 10.0
+                let imageOperation = OpenHABHTTPRequestOperation(request: imageRequest, delegate: self)
+
+                imageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
+                    if let response = responseObject as? Data {
+                        let receivedIcon: SVGKImage = SVGKImage(data: response)
+                        cell.imageView?.image = receivedIcon.uiImage
+                    }
+
+                    }, failure: { operation, error in
+                            cell.imageView?.image = UIImage(named: "blankicon.png")
+                })
+                imageOperation.start()
+
             }
         }
 

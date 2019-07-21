@@ -42,6 +42,7 @@
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
 		CA7D4C708413DB6D1BEC9D2F /* OpenHABAppDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */; };
 		DA02AA3822E2FD0F00D81CE4 /* SDWebImageSVGCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA02AA3722E2FD0F00D81CE4 /* SDWebImageSVGCoder.swift */; };
+		DA02AAB022E451CD00D81CE4 /* SVG2UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA02AAAF22E451CD00D81CE4 /* SVG2UIImage.swift */; };
 		DA15FF4B221DF7D800FF0FDA /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DA15FF4C221DF7D800FF0FDA /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
@@ -240,6 +241,7 @@
 		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
 		BCF72F56B17C7E8A29FE3759 /* Pods-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
 		DA02AA3722E2FD0F00D81CE4 /* SDWebImageSVGCoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDWebImageSVGCoder.swift; sourceTree = "<group>"; };
+		DA02AAAF22E451CD00D81CE4 /* SVG2UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVG2UIImage.swift; sourceTree = "<group>"; };
 		DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageDownloadUtil.swift; sourceTree = "<group>"; };
@@ -669,6 +671,7 @@
 				938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */,
 				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				DA02AA3722E2FD0F00D81CE4 /* SDWebImageSVGCoder.swift */,
+				DA02AAAF22E451CD00D81CE4 /* SVG2UIImage.swift */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -1090,6 +1093,7 @@
 				DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
 				DFDEE40E188322FA008B26AC /* OpenHABLinkedPage.swift in Sources */,
+				DA02AAB022E451CD00D81CE4 /* SVG2UIImage.swift in Sources */,
 				DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */,
 				DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */,
 				DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */,

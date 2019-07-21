@@ -81,9 +81,6 @@ PODS:
   - SDWebImage (5.0.6):
     - SDWebImage/Core (= 5.0.6)
   - SDWebImage/Core (5.0.6)
-  - SDWebImageSVGCoder (0.3.0):
-    - SDWebImage/Core (~> 5.0)
-    - SVGKit (>= 2.1)
   - SideMenu (5.0.3)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
@@ -99,8 +96,8 @@ DEPENDENCIES:
   - GDataXML-HTML (~> 1.3.0)
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 5.0)
-  - SDWebImageSVGCoder
   - SideMenu (~> 5.0)
+  - SVGKit
   - SwiftMessages
 
 SPEC REPOS:
@@ -119,7 +116,6 @@ SPEC REPOS:
     - nanopb
     - NKOColorPickerView
     - SDWebImage
-    - SDWebImageSVGCoder
     - SideMenu
     - SVGKit
     - SwiftMessages
@@ -139,11 +135,10 @@ SPEC CHECKSUMS:
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   NKOColorPickerView: 895ca86fe5bd16f27c311ce8f5888907efee29ad
   SDWebImage: 920f1a2ff1ca8296ad34f6e0510a1ef1d70ac965
-  SDWebImageSVGCoder: 4b354bcdc7d74ce14d9fdb3c9ed9ab2c667f3b57
   SideMenu: 1dcaabce84538c53325c287f7fe62999379a641c
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   SwiftMessages: a952f7a9103d9aeab93730a2861d2d8fcdd8758f
 
-PODFILE CHECKSUM: 6759fc294e888165d6fbf8fcb11b62feaa2cf752
+PODFILE CHECKSUM: 4536db3aea904a48217cea5f277233bbb7f31cc0
 
 COCOAPODS: 1.7.1

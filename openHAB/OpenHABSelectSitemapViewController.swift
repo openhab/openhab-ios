@@ -150,7 +150,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             cell.textLabel?.text = sitemap.name
         }
 
-        let imageBase = appData?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@"
+        let imageBase = (appData?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@")
 
         if sitemap.icon != "" {
             var iconUrlString: String?
