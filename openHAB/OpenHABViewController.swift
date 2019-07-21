@@ -146,8 +146,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         super.viewDidLoad()
         os_log("OpenHABViewController viewDidLoad", log: .default, type: .info)
 
-        SDImageCodersManager.shared.addCoder(MySDWebImageSVGCoder.shared)
-
         pageNetworkStatus = nil //NetworkStatus(rawValue: -1)
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
