@@ -100,7 +100,7 @@ DEPENDENCIES:
   - NKOColorPickerView (~> 0.5)
   - SDWebImage (~> 5.0)
   - SDWebImageSVGCoder
-  - SideMenu
+  - SideMenu (~> 5.0)
   - SwiftMessages
 
 SPEC REPOS:
@@ -144,6 +144,6 @@ SPEC CHECKSUMS:
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   SwiftMessages: a952f7a9103d9aeab93730a2861d2d8fcdd8758f
 
-PODFILE CHECKSUM: 74949b2de9f7544457a11abc7b09ebd7e6d40b0a
+PODFILE CHECKSUM: 6759fc294e888165d6fbf8fcb11b62feaa2cf752
 
 COCOAPODS: 1.7.1
