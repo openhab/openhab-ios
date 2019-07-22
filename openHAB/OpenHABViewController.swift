@@ -372,11 +372,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         let widget: OpenHABWidget? = relevantPage?.widgets[indexPath.row]
         switch widget?.type {
         case "Frame":
-            if widget?.label.count ?? 0 > 0 {
-                return 35.0
-            } else {
-                return 0
-            }
+            return widget?.label.count ?? 0 > 0 ? 35.0 : 0
         case "Image", "Chart", "Video":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
