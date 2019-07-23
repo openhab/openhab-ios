@@ -131,7 +131,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <segmentedControl opaque="NO" tag="300" contentMode="scaleToFill" horizontalCompressionResistancePriority="802" contentHorizontalAlignment="left" contentVerticalAlignment="top" apportionsSegmentWidthsByContent="YES" segmentControlStyle="plain" momentary="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WVa-JP-ksR">
-                                                    <rect key="frame" x="185" y="8" width="115" height="29"/>
+                                                    <rect key="frame" x="191" y="8" width="109" height="29"/>
                                                     <segments>
                                                         <segment title="" image="glyphicons_433_minus.png"/>
                                                         <segment title="-22.0"/>
@@ -145,7 +145,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K4G-S8-9TQ">
-                                                    <rect key="frame" x="135" y="11.5" width="42" height="21"/>
+                                                    <rect key="frame" x="141" y="11.5" width="42" height="21"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.66278773546218872" green="0.66665643453598022" blue="0.66666722297668457" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                     <nil key="highlightedColor"/>
