@@ -103,6 +103,13 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         openHABDemoMode = prefs.bool(forKey: "demomode")
         openHABLocalUrl = prefs.string(forKey: "localUrl") ?? ""
         openHABRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
+
+        #if DEBUG
+        // always activate demo mode for UITest
+        if ProcessInfo.processInfo.environment["UITest"] != nil {
+            openHABDemoMode = true
+        }
+        #endif
     }
 
     func trackedLocalUrl() {
