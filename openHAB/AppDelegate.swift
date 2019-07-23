@@ -87,6 +87,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Notification registration depends on iOS version
     // This is the setup for iOS >10 notifications
     func registerForPushNotifications() {
+        #if DEBUG
+        // do not request authorization if running UITest
+        if ProcessInfo.processInfo.environment["UITest"] != nil {
+            return
+        }
+        #endif
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
             guard let self = self else { return }
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")

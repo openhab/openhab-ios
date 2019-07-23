@@ -179,6 +179,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         definesPresentationContext = true
 
         setupSideMenu()
+
+        #if DEBUG
+        // setup accessibilityIdentifiers for UITest
+        widgetTableView.accessibilityIdentifier = "OpenHABViewControllerWidgetTableView"
+        #endif
     }
 
     fileprivate func setupSideMenu() {
@@ -976,6 +981,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
+
+        #if DEBUG
+        // always use demo sitemap for UITest
+        if ProcessInfo.processInfo.environment["UITest"] != nil {
+            defaultSitemap = "demo"
+        }
+        #endif
     }
 
     // Set SDImage (used for widget icons and images) authentication
