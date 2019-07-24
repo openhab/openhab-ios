@@ -27,6 +27,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems = [OpenHABDrawerItem]()
         sitemaps = []
         loadSettings()
+        setStandardDrawerItems()
         os_log("OpenHABDrawerTableViewController did load", log: .viewCycle, type: .info)
     }
 
@@ -37,6 +38,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            sitemapsRequest.timeoutInterval = 10.0
             let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: nil)
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
@@ -94,25 +96,27 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 }
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.name < $1.name }
-
                 self.appData?.sitemaps = self.sitemaps
                 self.drawerItems.removeAll()
-                self.setDrawerItems()
+                self.setStandardDrawerItems()
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                self.drawerItems.removeAll()
+                self.setStandardDrawerItems()
+                self.tableView.reloadData()
             })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             operation.start()
         }
     }
 
-    private func setDrawerItems() {
+    private func setStandardDrawerItems() {
         // check if we are using my.openHAB, add notifications menu item then
         let prefs = UserDefaults.standard
         // Actually this should better test whether the host of the remoteUrl is on openhab.org
-        if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false {
+        if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false && !prefs.bool(forKey: "demomode") {
             let notificationsItem = OpenHABDrawerItem()
             notificationsItem.label = "Notifications"
             notificationsItem.tag = "notifications"
@@ -163,7 +167,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
             cell?.customTextLabel?.text = sitemaps[indexPath.row].label
             if sitemaps[indexPath.row].icon != "" {
-                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url
+                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url
                 cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
             } else {
                 cell?.customImageView?.image = UIImage(named: "icon-76x76.png")
