@@ -681,7 +681,9 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell = cell {
-            colorPickerViewController?.widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
+            let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
+            colorPickerViewController?.title = widget?.labelText
+            colorPickerViewController?.widget = widget
         }
         if let colorPickerViewController = colorPickerViewController {
             navigationController?.pushViewController(colorPickerViewController, animated: true)
