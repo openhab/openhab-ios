@@ -183,6 +183,7 @@
                                                         <constraint firstAttribute="width" constant="30" id="6Un-wa-yZa"/>
                                                         <constraint firstAttribute="height" constant="30" id="Joo-6D-b9d"/>
                                                     </constraints>
+                                                    <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <state key="normal">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
