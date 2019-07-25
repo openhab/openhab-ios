@@ -525,25 +525,23 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
             }
             selectedWidgetRow = indexPath.row
-            let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABViewController
-            newViewController?.pageUrl = widget?.linkedPage?.link ?? ""
-            newViewController?.openHABRootUrl = openHABRootUrl
-            if let newViewController = newViewController {
-                navigationController?.pushViewController(newViewController, animated: true)
-            }
+            let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABViewController)!
+            newViewController.title = widget?.linkedPage?.title.components(separatedBy: "[")[0]
+            newViewController.pageUrl = widget?.linkedPage?.link ?? ""
+            newViewController.openHABRootUrl = openHABRootUrl
+            navigationController?.pushViewController(newViewController, animated: true)
         } else if widget?.type == "Selection" {
             os_log("Selected selection widget", log: .viewCycle, type: .info)
 
             selectedWidgetRow = indexPath.row
-            let selectionViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController
+            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-            selectionViewController?.mappings = (selectedWidget?.mappings)!
-            selectionViewController?.delegate = self
-            selectionViewController?.selectionItem = selectedWidget?.item
-            if let selectionViewController = selectionViewController {
-                navigationController?.pushViewController(selectionViewController, animated: true)
-            }
-         }
+            selectionViewController.title = selectedWidget?.labelText
+            selectionViewController.mappings = (selectedWidget?.mappings)!
+            selectionViewController.delegate = self
+            selectionViewController.selectionItem = selectedWidget?.item
+            navigationController?.pushViewController(selectionViewController, animated: true)
+        }
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)
         }
@@ -632,11 +630,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         os_log("OpenHABViewController prepareForSegue %{PUBLIC}@", log: .viewCycle, type: .info, segue.identifier ?? "")
 
         switch segue.identifier {
-        case "showPage":
-            let newViewController = segue.destination as? OpenHABViewController
-            let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-            newViewController?.pageUrl = selectedWidget?.linkedPage?.link ?? ""
-            newViewController?.openHABRootUrl = openHABRootUrl
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
         case "sideMenu":
             let navigation = segue.destination as? UINavigationController
