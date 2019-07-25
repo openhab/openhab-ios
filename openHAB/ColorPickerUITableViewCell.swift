@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import DynamicButton
 import os.log
 
 @objc protocol ColorPickerUITableViewCellDelegate: NSObjectProtocol {
@@ -20,9 +21,9 @@ fileprivate extension Selector {
 }
 
 class ColorPickerUITableViewCell: GenericUITableViewCell {
-    @IBOutlet weak var upButton: UICircleButton!
+    @IBOutlet weak var upButton: DynamicButton!
     @IBOutlet weak var colorButton: UICircleButton!
-    @IBOutlet weak var downButton: UICircleButton!
+    @IBOutlet weak var downButton: DynamicButton!
 
     @IBAction func colorButtonPressed(_ sender: Any) {
         delegate?.didPressColorButton(self)
@@ -46,11 +47,13 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
+        self.downButton.setStyle(.caretDown, animated: false)
+        self.upButton.setStyle(.caretUp, animated: false)
+
         customTextLabel?.text = widget.labelText
         colorButton?.backgroundColor = widget.item?.stateAsUIColor()
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
-
     }
 
     @objc func upButtonPressed() {

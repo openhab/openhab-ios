@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import DynamicButton
 import os.log
 import SDWebImage
 import SideMenu
@@ -29,11 +30,13 @@ extension UIBarButtonItem {
     }
 }
 
-class OpenHABNotificationsViewController: UITableViewController {
+class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavigationControllerDelegate {
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
+
+    var hamburgerButton: DynamicButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,8 +52,22 @@ class OpenHABNotificationsViewController: UITableViewController {
         if let refreshControl = refreshControl {
             tableView.sendSubviewToBack(refreshControl)
         }
-        let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
-        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
+
+        self.hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
+        hamburgerButton.setStyle(.hamburger, animated: true)
+        hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+        hamburgerButton.strokeColor = self.view.tintColor
+
+        let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
+        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
+    }
+
+    func sideMenuWillDisappear(menu: UISideMenuNavigationController, animated: Bool) {
+        self.hamburgerButton.setStyle(.hamburger, animated: animated)
+    }
+
+    func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
+        self.hamburgerButton.setStyle(.arrowRight, animated: animated)
     }
 
     override func didReceiveMemoryWarning() {

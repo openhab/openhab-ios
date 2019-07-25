@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import DynamicButton
 import os.log
 import SDWebImage
 import UIKit
@@ -120,14 +121,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let notificationsItem = OpenHABDrawerItem()
             notificationsItem.label = "Notifications"
             notificationsItem.tag = "notifications"
-            notificationsItem.icon = "glyphicons-334-bell.png"
             drawerItems.append(notificationsItem)
         }
         // Settings always go last
         let settingsItem = OpenHABDrawerItem()
         settingsItem.label = "Settings"
         settingsItem.tag = "settings"
-        settingsItem.icon = "glyphicons-137-cogwheel.png"
         drawerItems.append(settingsItem)
     }
 
@@ -161,28 +160,48 @@ class OpenHABDrawerTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "DrawerCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell: DrawerUITableViewCell?
-        cell = tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell
+        let cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell)!
+
+        cell.customImageView.subviews.forEach { $0.removeFromSuperview() }
 
         if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
-            cell?.customTextLabel?.text = sitemaps[indexPath.row].label
+            cell.customTextLabel?.text = sitemaps[indexPath.row].label
             if sitemaps[indexPath.row].icon != "" {
                 let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url
-                cell?.customImageView?.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+
+                let imageView = UIImageView(frame: cell.customImageView.bounds)
+                imageView.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+                cell.customImageView.addSubview(imageView)
             } else {
-                cell?.customImageView?.image = UIImage(named: "icon-76x76.png")
+                let imageView = UIImageView(frame: cell.customImageView.bounds)
+                imageView.image = UIImage(named: "icon-76x76.png")
+                cell.customImageView.addSubview(imageView)
             }
         } else {
             // Then menu items
-            cell?.customTextLabel?.text = drawerItems[indexPath.row - sitemaps.count].label
-            cell?.customImageView?.image = UIImage(named: drawerItems[indexPath.row - sitemaps.count].icon)
+            let drawerItem = drawerItems[indexPath.row - sitemaps.count]
+
+            cell.customTextLabel?.text = drawerItem.label
+
+            let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
+            buttonIcon.bounceButtonOnTouch = false
+            buttonIcon.strokeColor = self.view.tintColor
+            buttonIcon.lineWidth = 1
+
+            if drawerItem.tag == "notifications" {
+                buttonIcon.style = .custom(DynamicButtonStyleBell.self)
+                cell.customImageView.addSubview(buttonIcon)
+            } else if drawerItem.tag == "settings" {
+                buttonIcon.style = .custom(DynamicButtonStyleGear.self)
+                cell.customImageView.addSubview(buttonIcon)
+            }
         }
-        cell?.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+        cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
 
-        cell?.preservesSuperviewLayoutMargins = false
-        cell?.layoutMargins = .zero
+        cell.preservesSuperviewLayoutMargins = false
+        cell.layoutMargins = .zero
 
-        return cell!
+        return cell
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -203,11 +222,13 @@ class OpenHABDrawerTableViewController: UITableViewController {
             dismiss(animated: true, completion: nil)
         } else {
             // Then menu items
-            if drawerItems[indexPath.row - sitemaps.count].tag == "settings" {
+            let drawerItem = drawerItems[indexPath.row - sitemaps.count]
+
+            if drawerItem.tag == "settings" {
                 dismiss(animated: true) {
                     self.delegate?.modalDismissed(to: .settings)
                 }
-            } else if drawerItems[indexPath.row - sitemaps.count].tag == "notifications" {
+            } else if drawerItem.tag == "notifications" {
                 dismiss(animated: true) {
                     self.delegate?.modalDismissed(to: .notifications)
                 }
