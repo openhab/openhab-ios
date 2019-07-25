@@ -103,9 +103,6 @@
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
-		DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */; };
-		DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */; };
-		DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */; };
@@ -116,8 +113,6 @@
 		DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */; };
 		DF4A02441CF46986006C3456 /* glyphicons-137-cogwheel.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */; };
 		DF4A02461CF4721B006C3456 /* glyphicons-334-bell.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02451CF4721B006C3456 /* glyphicons-334-bell.png */; };
-		DF4A02481CF47757006C3456 /* glyphicons-597-activity.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */; };
-		DF4A024A1CF47794006C3456 /* glyphicons-731-puzzle.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */; };
 		DF4B840018857FD900F34902 /* OpenHABSelectSitemapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.swift */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.swift */; };
 		DF4B84071885AE0E00F34902 /* blankicon.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4B84061885AE0E00F34902 /* blankicon.png */; };
@@ -275,9 +270,6 @@
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
-		DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_207_remove_2@2x.png"; sourceTree = "<group>"; };
-		DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_212_down_arrow@2x.png"; sourceTree = "<group>"; };
-		DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_213_up_arrow@2x.png"; sourceTree = "<group>"; };
 		DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RollershutterUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSelectionTableViewController.swift; sourceTree = "<group>"; };
@@ -288,8 +280,6 @@
 		DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDrawerItem.swift; sourceTree = "<group>"; };
 		DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-137-cogwheel.png"; sourceTree = "<group>"; };
 		DF4A02451CF4721B006C3456 /* glyphicons-334-bell.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-334-bell.png"; sourceTree = "<group>"; };
-		DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-597-activity.png"; sourceTree = "<group>"; };
-		DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-731-puzzle.png"; sourceTree = "<group>"; };
 		DF4B83FF18857FD900F34902 /* OpenHABSelectSitemapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSelectSitemapViewController.swift; sourceTree = "<group>"; };
 		DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABAppDataDelegate.swift; sourceTree = "<group>"; };
 		DF4B84031885A53700F34902 /* OpenHABDataObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDataObject.swift; sourceTree = "<group>"; };
@@ -492,11 +482,6 @@
 				653C09D61EAE4C0000BA4C4A /* icon-76x76.png */,
 				DF4A02431CF46986006C3456 /* glyphicons-137-cogwheel.png */,
 				DF4A02451CF4721B006C3456 /* glyphicons-334-bell.png */,
-				DF4A02471CF47757006C3456 /* glyphicons-597-activity.png */,
-				DF4A02491CF47794006C3456 /* glyphicons-731-puzzle.png */,
-				DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */,
-				DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */,
-				DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */,
 			);
 			name = icons;
 			sourceTree = "<group>";
@@ -902,11 +887,6 @@
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				DF4A02441CF46986006C3456 /* glyphicons-137-cogwheel.png in Resources */,
 				DF4A02461CF4721B006C3456 /* glyphicons-334-bell.png in Resources */,
-				DF4A02481CF47757006C3456 /* glyphicons-597-activity.png in Resources */,
-				DF4A024A1CF47794006C3456 /* glyphicons-731-puzzle.png in Resources */,
-				DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */,
-				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
-				DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
 				653C09D71EAE4C0000BA4C4A /* icon-29x29.png in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
