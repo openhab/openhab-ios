@@ -107,8 +107,6 @@
 		DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */; };
 		DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */; };
 		DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */; };
-		DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF1A189659AF00FF2F9B /* glyphicons_432_plus@2x.png */; };
-		DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */; };
@@ -282,8 +280,6 @@
 		DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_207_remove_2@2x.png"; sourceTree = "<group>"; };
 		DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_212_down_arrow@2x.png"; sourceTree = "<group>"; };
 		DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_213_up_arrow@2x.png"; sourceTree = "<group>"; };
-		DF05FF1A189659AF00FF2F9B /* glyphicons_432_plus@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_432_plus@2x.png"; sourceTree = "<group>"; };
-		DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons_433_minus@2x.png"; sourceTree = "<group>"; };
 		DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RollershutterUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSelectionTableViewController.swift; sourceTree = "<group>"; };
@@ -503,8 +499,6 @@
 				DF05FF141896594000FF2F9B /* glyphicons_207_remove_2@2x.png */,
 				DF05FF161896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png */,
 				DF05FF181896595600FF2F9B /* glyphicons_213_up_arrow@2x.png */,
-				DF05FF1A189659AF00FF2F9B /* glyphicons_432_plus@2x.png */,
-				DF05FF1C189659C500FF2F9B /* glyphicons_433_minus@2x.png */,
 				DAA60D0D2295E62800674C1D /* hamburgerMenuIcon-50.png */,
 			);
 			name = icons;
@@ -916,8 +910,6 @@
 				DF05FF151896594000FF2F9B /* glyphicons_207_remove_2@2x.png in Resources */,
 				DF05FF171896594F00FF2F9B /* glyphicons_212_down_arrow@2x.png in Resources */,
 				DF05FF191896595600FF2F9B /* glyphicons_213_up_arrow@2x.png in Resources */,
-				DF05FF1B189659AF00FF2F9B /* glyphicons_432_plus@2x.png in Resources */,
-				DF05FF1D189659C500FF2F9B /* glyphicons_433_minus@2x.png in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
 				653C09D71EAE4C0000BA4C4A /* icon-29x29.png in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,

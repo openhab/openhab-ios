@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import DynamicButton
 import os.log
 
 // inspired by: Selectors in swift: A better approach using extensions
@@ -20,9 +21,9 @@ fileprivate extension Selector {
 
 class RollershutterUITableViewCell: GenericUITableViewCell {
 
-    @IBOutlet weak var downButton: UICircleButton!
-    @IBOutlet weak var stopButton: UICircleButton!
-    @IBOutlet weak var upButton: UICircleButton!
+    @IBOutlet weak var downButton: DynamicButton!
+    @IBOutlet weak var stopButton: DynamicButton!
+    @IBOutlet weak var upButton: DynamicButton!
 
     override func initialize() {
         selectionStyle = .none
@@ -42,11 +43,11 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        customTextLabel?.text = widget.labelText
+        self.upButton.setStyle(.caretUp, animated: false)
+        self.stopButton.setStyle(.stop, animated: false)
+        self.downButton.setStyle(.caretDown, animated: false)
 
-        self.upButton?.setTitle("▲", for: .normal)
-        self.stopButton?.setTitle("■", for: .normal)
-        downButton?.setTitle("▼", for: .normal)
+        customTextLabel?.text = widget.labelText
 
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         stopButton?.addTarget(self, action: .stopButtonPressed, for: .touchUpInside)

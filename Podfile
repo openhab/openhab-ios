@@ -15,6 +15,7 @@ target 'openHAB' do
     pod 'SwiftMessages'
     pod 'SideMenu', '~> 5.0'
     pod 'FlexColorPicker'
+    pod 'DynamicButton', '~> 6.2'
 end
 
 target 'openHABTestsSwift' do
