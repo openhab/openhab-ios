@@ -10,6 +10,7 @@
 
 import AVFoundation
 import AVKit
+import DynamicButton
 import os.log
 import SDWebImage
 import SDWebImageSVGCoder
@@ -31,6 +32,8 @@ protocol ModalHandler: class {
 class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler, UISideMenuNavigationControllerDelegate {
 
     var tracker: OpenHABTracker?
+
+    var hamburgerButton: DynamicButton!
 
     private var selectedWidgetRow: Int = 0
     private var currentPageOperation: OpenHABHTTPRequestOperation?
@@ -141,6 +144,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
+    func sideMenuWillDisappear(menu: UISideMenuNavigationController, animated: Bool) {
+        self.hamburgerButton.setStyle(.hamburger, animated: animated)
+    }
+
     // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -166,8 +173,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             widgetTableView.sendSubviewToBack(refreshControl)
         }
 
-        let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
-        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
+        self.hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
+        hamburgerButton.setStyle(.hamburger, animated: true)
+        hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+        hamburgerButton.strokeColor = self.view.tintColor
+
+        let hamburgerButtomItem = UIBarButtonItem(customView: hamburgerButton)
+        navigationItem.setRightBarButton(hamburgerButtomItem, animated: true)
 
         self.navigationController?.navigationBar.prefersLargeTitles = true
 
@@ -200,6 +212,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
+        self.hamburgerButton.setStyle(.arrowRight, animated: animated)
+
         guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
             (drawer.delegate == nil || drawer.openHABRootUrl.isEmpty)
         else {
