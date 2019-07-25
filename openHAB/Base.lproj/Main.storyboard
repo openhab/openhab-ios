@@ -183,6 +183,7 @@
                                                         <constraint firstAttribute="width" constant="30" id="6Un-wa-yZa"/>
                                                         <constraint firstAttribute="height" constant="30" id="Joo-6D-b9d"/>
                                                     </constraints>
+                                                    <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <state key="normal">
                                                         <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </state>
@@ -1262,7 +1263,7 @@
         <!--Color Picker View Controller-->
         <scene sceneID="1cJ-Yb-6jQ">
             <objects>
-                <viewController storyboardIdentifier="ColorPickerViewController" automaticallyAdjustsScrollViewInsets="NO" id="XTW-gz-4RR" customClass="ColorPickerViewController" customModule="openHAB" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ColorPickerViewController" id="XTW-gz-4RR" customClass="ColorPickerViewController" customModule="openHAB" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Nl6-qJ-2g2"/>
                         <viewControllerLayoutGuide type="bottom" id="fDm-8Z-sSa"/>
@@ -1272,7 +1273,6 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
-                    <extendedEdge key="edgesForExtendedLayout"/>
                     <navigationItem key="navigationItem" id="AYD-aP-DDS"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="o8x-QB-mZ6" userLabel="First Responder" sceneMemberID="firstResponder"/>
