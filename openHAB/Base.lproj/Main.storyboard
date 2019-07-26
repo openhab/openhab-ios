@@ -130,13 +130,13 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="801" text="Setpoint" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P0E-ry-QYE">
-                                                    <rect key="frame" x="62.000000000000007" y="11.666666666666666" width="64.666666666666686" height="20.333333333333336"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Setpoint blablabala allallslslslsl" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P0E-ry-QYE">
+                                                    <rect key="frame" x="62" y="11.666666666666666" width="167" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K4G-S8-9TQ">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K4G-S8-9TQ">
                                                     <rect key="frame" x="275" y="11.333333333333336" width="42" height="21"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.66278773546218872" green="0.66665643453598022" blue="0.66666722297668457" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -210,7 +210,7 @@
                                                         </userDefinedRuntimeAttribute>
                                                     </userDefinedRuntimeAttributes>
                                                 </button>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Light Room blablaballa llala" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p1Y-EL-tV3">
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Light Room blablaballa llala" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p1Y-EL-tV3">
                                                     <rect key="frame" x="62" y="11.666666666666666" width="179" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
@@ -237,7 +237,7 @@
                                                 <constraint firstItem="vxc-Zw-Oyh" firstAttribute="centerY" secondItem="9lZ-hN-dkV" secondAttribute="centerY" id="cSm-7R-sGC"/>
                                                 <constraint firstItem="JzN-PF-zeJ" firstAttribute="centerY" secondItem="9lZ-hN-dkV" secondAttribute="centerY" id="d5v-SN-e8v"/>
                                                 <constraint firstItem="OR4-bR-Ekg" firstAttribute="leading" secondItem="JzN-PF-zeJ" secondAttribute="trailing" constant="8" id="k0W-Ms-eh0"/>
-                                                <constraint firstItem="vxc-Zw-Oyh" firstAttribute="leading" secondItem="p1Y-EL-tV3" secondAttribute="trailing" constant="8" id="zhd-5c-teh"/>
+                                                <constraint firstItem="vxc-Zw-Oyh" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="p1Y-EL-tV3" secondAttribute="trailing" constant="8" id="zhd-5c-teh"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
