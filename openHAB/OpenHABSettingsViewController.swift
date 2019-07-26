@@ -84,7 +84,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     }
 
     @objc func demomodeSwitchChange(_ sender: Any?) {
-        if (demomodeSwitch?.isOn)! {
+        if demomodeSwitch!.isOn {
             os_log("Demo is ON", log: .viewCycle, type: .info)
             disableConnectionSettings()
         } else {
@@ -97,15 +97,15 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         var ret: Int
         switch section {
         case 0:
-            if (demomodeSwitch?.isOn)! {
+            if demomodeSwitch!.isOn {
                 ret = 1
             } else {
                 ret = 5
             }
         case 1:
-            ret = 7
+            ret = 8
         default:
-            ret = 7
+            ret = 8
         }
         return ret
     }
