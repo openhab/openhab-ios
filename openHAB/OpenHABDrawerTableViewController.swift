@@ -185,11 +185,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
             buttonIcon.bounceButtonOnTouch = false
-            buttonIcon.strokeColor = self.view.tintColor
+            buttonIcon.strokeColor = .black
             buttonIcon.lineWidth = 1
 
             if drawerItem.tag == "notifications" {
                 buttonIcon.style = .custom(DynamicButtonStyleBell.self)
+
                 cell.customImageView.addSubview(buttonIcon)
             } else if drawerItem.tag == "settings" {
                 buttonIcon.style = .custom(DynamicButtonStyleGear.self)
