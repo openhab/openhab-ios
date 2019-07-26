@@ -343,25 +343,27 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <segmentedControl opaque="NO" tag="500" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" segmentControlStyle="plain" selectedSegmentIndex="0" momentary="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QBf-tO-eE0">
-                                                    <rect key="frame" x="184" y="8" width="171" height="29"/>
+                                                <segmentedControl opaque="NO" tag="500" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" segmentControlStyle="plain" selectedSegmentIndex="0" momentary="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QBf-tO-eE0">
+                                                    <rect key="frame" x="232" y="8" width="123" height="29"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="75" id="1sI-kA-uUe"/>
+                                                    </constraints>
                                                     <segments>
-                                                        <segment title="" width="61"/>
-                                                        <segment title="" width="61"/>
+                                                        <segment title="ON" width="61"/>
+                                                        <segment title="OFF" width="61"/>
                                                     </segments>
                                                     <color key="tintColor" red="0.0" green="0.47843137254901957" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </segmentedControl>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Switch Room Blabblalalsls" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dGQ-sz-j4J">
-                                                    <rect key="frame" x="62" y="11.666666666666666" width="114" height="20.333333333333336"/>
+                                                    <rect key="frame" x="62" y="11.666666666666666" width="162" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="leading" secondItem="dGQ-sz-j4J" secondAttribute="trailing" constant="8" id="21I-9b-hQv"/>
+                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="dGQ-sz-j4J" secondAttribute="trailing" constant="8" id="21I-9b-hQv"/>
                                                 <constraint firstItem="dGQ-sz-j4J" firstAttribute="centerY" secondItem="bbE-Hw-4gl" secondAttribute="centerY" id="GRd-gd-6L4"/>
                                                 <constraint firstItem="dGQ-sz-j4J" firstAttribute="leading" secondItem="bbE-Hw-4gl" secondAttribute="leading" constant="62" id="UTE-PO-DoV"/>
-                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="width" secondItem="dGQ-sz-j4J" secondAttribute="width" multiplier="1.5" id="UgV-C4-7x3"/>
                                                 <constraint firstAttribute="trailing" secondItem="QBf-tO-eE0" secondAttribute="trailing" constant="20" id="ZvK-a2-hS8"/>
                                                 <constraint firstAttribute="centerY" secondItem="QBf-tO-eE0" secondAttribute="centerY" id="yzX-TK-6OX"/>
                                             </constraints>
