@@ -170,7 +170,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url
 
                 let imageView = UIImageView(frame: cell.customImageView.bounds)
-                imageView.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: [])
+                imageView.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
                 cell.customImageView.addSubview(imageView)
             } else {
                 let imageView = UIImageView(frame: cell.customImageView.bounds)
