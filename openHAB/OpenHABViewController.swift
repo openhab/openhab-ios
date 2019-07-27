@@ -163,14 +163,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.configureTableView()
 
         refreshControl = UIRefreshControl()
-        refreshControl?.backgroundColor = UIColor.groupTableViewBackground
 
         refreshControl?.addTarget(self, action: #selector(OpenHABViewController.handleRefresh(_:)), for: .valueChanged)
         if let refreshControl = refreshControl {
-            widgetTableView.addSubview(refreshControl)
-        }
-        if let refreshControl = refreshControl {
-            widgetTableView.sendSubviewToBack(refreshControl)
+            widgetTableView.refreshControl = refreshControl
         }
 
         self.hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
