@@ -72,8 +72,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func sliderDidEndSliding (_ sender: UISlider) {
-        let res = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
-        os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider?.value ?? 0.0, res)
-        widget.sendCommand("\(res)")
+        let res = adj(Double(widgetSlider!.value))
+        os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider!.value, res)
+        widget.sendCommand(valueText(res))
     }
 }
