@@ -43,14 +43,9 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         notifications = []
         tableView.tableFooterView = UIView()
         refreshControl = UIRefreshControl()
-        refreshControl?.backgroundColor = UIColor.groupTableViewBackground
-        //    self.refreshControl.tintColor = [UIColor whiteColor];
         refreshControl?.addTarget(self, action: #selector(OpenHABNotificationsViewController.handleRefresh(_:)), for: .valueChanged)
         if let refreshControl = refreshControl {
-            tableView.addSubview(refreshControl)
-        }
-        if let refreshControl = refreshControl {
-            tableView.sendSubviewToBack(refreshControl)
+            tableView.refreshControl = refreshControl
         }
 
         self.hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
