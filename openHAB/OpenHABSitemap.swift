@@ -36,12 +36,14 @@ extension OpenHABSitemap {
         let label: String
         let page: HomePage
         let link: String
+        let icon: String?
 
         private enum CodingKeys: String, CodingKey {
             case page = "homepage"
             case name
             case label
             case link
+            case icon
         }
     }
 
@@ -82,7 +84,7 @@ extension OpenHABSitemap {
 
 extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.page.leaf, homepageLink: self.page.link)
+        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.page.leaf, homepageLink: self.page.link, icon: self.icon ?? "")
     }
 }
 
@@ -94,8 +96,9 @@ extension OpenHABSitemap.CodingData {
     var leaf = ""
     var homepageLink = ""
 
-    init(name: String, link: String, label: String, leaf: Bool, homepageLink: String) {
+    init(name: String, link: String, label: String, leaf: Bool, homepageLink: String, icon: String) {
         self.name = name
+        self.icon = icon
         self.link = link
         self.label = label
         self.leaf = leaf ? "true" : "false"

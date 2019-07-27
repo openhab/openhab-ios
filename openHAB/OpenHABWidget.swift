@@ -34,6 +34,7 @@ extension OpenHABWidget {
         let state: String?
         let text: String?
         let legend: Bool?
+        let groupType: String?
         let item: OpenHABItem.CodingData?
         let linkedPage: OpenHABLinkedPage?
         let mappings: [OpenHABWidgetMapping]
@@ -77,7 +78,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
 
     // This is an ugly initializer
 
-     init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let d = with else { return ""}

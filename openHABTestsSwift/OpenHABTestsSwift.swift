@@ -868,4 +868,52 @@ class OpenHABTestsSwift: XCTestCase {
         XCTAssert(urlc == URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }
 
+    let jsonInputForGroup = """
+{
+    "id": "watch",
+    "title": "Watch",
+    "link": "https://server/rest/sitemaps/watch/watch",
+    "leaf": true,
+    "timeout": false,
+    "widgets": [
+    {
+        "widgetId": "00",
+        "type": "Switch",
+        "label": "Rollladen Erdgeschoss",
+        "icon": "blinds",
+        "mappings": [],
+        "item": {
+            "members": [],
+            "groupType": "Rollershutter",
+            "function": {
+                "name": "EQUALITY"
+            },
+            "link": "https://server/rest/items/gRollladen_EG",
+            "state": "UNDEF",
+            "editable": false,
+            "type": "Group",
+            "name": "gRollladen_EG",
+            "label": "Rollladen Erdgeschoss",
+            "category": "blinds",
+            "tags": [],
+            "groupNames": []
+        },
+        "widgets": []
+    }
+    ]
+}
+"""
+    func testParsingforRollerShutter() {
+
+        let data = Data(jsonInputForGroup.utf8)
+        do {
+            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: data)
+            let widget = codingData.widgets?[0]
+            XCTAssert( widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter", "")
+            XCTAssert(codingData.widgets?[0].item?.groupType == "Rollershutter", "")
+            XCTAssert(codingData.widgets?[0].item?.type == "Group", "")
+        } catch {
+            XCTFail("Failed parsing")
+        }
+    }
 }
