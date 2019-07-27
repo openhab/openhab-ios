@@ -121,7 +121,7 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(openHABRemoteUrl)
         if (openHABUrl?.count ?? 0) > 0 {
-            delegate?.openHABTrackingProgress("Connecting to remote URL")
+            //delegate?.openHABTrackingProgress("Connecting to remote URL")
             trackedUrl(openHABUrl)
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
