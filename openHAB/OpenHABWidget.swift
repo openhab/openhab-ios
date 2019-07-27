@@ -34,6 +34,7 @@ extension OpenHABWidget {
         let state: String?
         let text: String?
         let legend: Bool?
+        let groupType: String?
         let item: OpenHABItem.CodingData?
         let linkedPage: OpenHABLinkedPage?
         let mappings: [OpenHABWidgetMapping]
@@ -44,7 +45,7 @@ extension OpenHABWidget {
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = self.widgets.map { $0.openHABWidget }
-        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, groupType: self.groupType, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
    }
 }
 
@@ -69,6 +70,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var state = ""
     var text = ""
     var legend = false
+    var groupType = ""
     var item: OpenHABItem?
     var linkedPage: OpenHABLinkedPage?
     var mappings: [OpenHABWidgetMapping] = []
@@ -77,7 +79,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
 
     // This is an ugly initializer
 
-     init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, groupType: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let d = with else { return ""}
@@ -107,6 +109,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.state = state ?? ""
         self.text = text ?? ""
         self.legend = legend ?? false
+        self.groupType = groupType ?? ""
         self.item = item
         self.linkedPage = linkedPage
         self.mappings = mappings
