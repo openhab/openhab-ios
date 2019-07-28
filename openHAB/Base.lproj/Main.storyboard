@@ -767,7 +767,6 @@
                                                 </switch>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="SSG-Hc-q0a" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="VTh-or-BWi" secondAttribute="trailing" id="AGn-zV-cGv"/>
                                                 <constraint firstItem="VTh-or-BWi" firstAttribute="leading" secondItem="XQN-fh-bKl" secondAttribute="leadingMargin" constant="12" id="B8W-j9-qgT"/>
                                                 <constraint firstItem="SSG-Hc-q0a" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="VTh-or-BWi" secondAttribute="trailing" constant="10" id="Eri-2g-2kS"/>
                                                 <constraint firstItem="VTh-or-BWi" firstAttribute="centerY" secondItem="XQN-fh-bKl" secondAttribute="centerY" id="ZqZ-jY-se7"/>
@@ -875,7 +874,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Nhm-Th-r6X">
-                                                    <rect key="frame" x="270" y="8" width="85" height="29"/>
+                                                    <rect key="frame" x="264" y="8" width="85" height="29"/>
                                                     <segments>
                                                         <segment title="PNG"/>
                                                         <segment title="SVG"/>
@@ -886,7 +885,7 @@
                                                 <constraint firstItem="ess-BT-orH" firstAttribute="leading" secondItem="J6r-rN-wn4" secondAttribute="leadingMargin" constant="12" id="0r0-en-ZFA"/>
                                                 <constraint firstItem="ess-BT-orH" firstAttribute="centerY" secondItem="J6r-rN-wn4" secondAttribute="centerY" id="GSn-nf-d1X"/>
                                                 <constraint firstItem="Nhm-Th-r6X" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ess-BT-orH" secondAttribute="trailing" constant="8" id="Hpd-xb-pR3"/>
-                                                <constraint firstAttribute="trailing" secondItem="Nhm-Th-r6X" secondAttribute="trailing" constant="20" id="nzn-RF-LpT"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="Nhm-Th-r6X" secondAttribute="trailing" constant="10" id="nzn-RF-LpT"/>
                                                 <constraint firstItem="Nhm-Th-r6X" firstAttribute="centerY" secondItem="J6r-rN-wn4" secondAttribute="centerY" id="rvN-w0-tLN"/>
                                             </constraints>
                                         </tableViewCellContentView>
@@ -1444,6 +1443,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="IN7-RI-eVs"/>
+        <segue reference="9JR-Li-4ww"/>
     </inferredMetricsTieBreakers>
 </document>
