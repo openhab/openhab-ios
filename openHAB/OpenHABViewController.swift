@@ -276,17 +276,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidAppear(_ animated: Bool) {
         os_log("OpenHABViewController viewDidAppear", log: .viewCycle, type: .info)
-
         super.viewDidAppear(animated)
-        widgetTableView.reloadData() // reloading data for the first tableView serves another purpose, not exactly related to this question.
-        widgetTableView.setNeedsLayout()
-        widgetTableView.layoutIfNeeded()
-        widgetTableView.reloadData()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         os_log("OpenHABViewController viewWillAppear", log: .viewCycle, type: .info)
-        super.viewDidAppear(animated)
+        super.viewWillAppear(animated)
         // Load settings into local properties
         loadSettings()
         // Set authentication parameters to SDImag
