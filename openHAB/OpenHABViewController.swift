@@ -276,17 +276,12 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidAppear(_ animated: Bool) {
         os_log("OpenHABViewController viewDidAppear", log: .viewCycle, type: .info)
-
         super.viewDidAppear(animated)
-        widgetTableView.reloadData() // reloading data for the first tableView serves another purpose, not exactly related to this question.
-        widgetTableView.setNeedsLayout()
-        widgetTableView.layoutIfNeeded()
-        widgetTableView.reloadData()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         os_log("OpenHABViewController viewWillAppear", log: .viewCycle, type: .info)
-        super.viewDidAppear(animated)
+        super.viewWillAppear(animated)
         // Load settings into local properties
         loadSettings()
         // Set authentication parameters to SDImag
@@ -329,6 +324,26 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             currentPageOperation = nil
         }
         super.viewWillDisappear(animated)
+
+        // workaround for #309 (see: https://stackoverflow.com/questions/46301813/broken-uisearchbar-animation-embedded-in-navigationitem)
+        if #available(iOS 13.0, *) {
+            // do nothing
+        } else {
+            if animated, !search.isActive, !search.isEditing, navigationController.map({$0.viewControllers.last != self}) ?? false,
+                let searchBarSuperview = search.searchBar.superview,
+                let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
+                    $0.firstAttribute == .height
+                        && $0.secondItem == nil
+                        && $0.secondAttribute == .notAnAttribute
+                        && $0.constant > 0
+                }) {
+
+                UIView.performWithoutAnimation {
+                    searchBarHeightConstraint.constant = 0
+                    searchBarSuperview.superview?.layoutIfNeeded()
+                }
+            }
+        }
     }
 
     @objc func didEnterBackground(_ notification: Notification?) {
