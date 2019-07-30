@@ -91,7 +91,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 if let response = responseObject as? Data {
                     do {
-                        let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: response)
+                        let codingDatas = try response.decoded(using: decoder) as [OpenHABNotification.CodingData]
                         for codingDatum in codingDatas {
                             self.notifications.add(codingDatum.openHABNotification)
                         }

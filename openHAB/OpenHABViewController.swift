@@ -782,11 +782,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             } else {
                 // Newer versions talk JSON!
-                let decoder = JSONDecoder()
                 if let response = response {
                     os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
                     do {
-                        let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: response)
+                        let sitemapPageCodingData = try response.decoded() as OpenHABSitemapPage.CodingData
                         self.currentPage = sitemapPageCodingData.openHABSitemapPage
                         if self.isFiltering {
                             self.filterContentForSearchText(self.search.searchBar.text)
@@ -898,11 +897,10 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                 } else {
                     // Newer versions speak JSON!
-                    let decoder = JSONDecoder()
                     if let response = response {
                         do {
                             os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                            let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+                            let codingData = try response.decoded() as [OpenHABSitemap.CodingData]
                             for codingDatum in codingData {
                                 self.sitemaps.append(codingDatum.openHABSitemap)
                             }

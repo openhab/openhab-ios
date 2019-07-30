@@ -84,7 +84,14 @@ extension OpenHABSitemap {
 
 extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(name: self.name, link: self.link, label: self.label, leaf: self.page.leaf, homepageLink: self.page.link, icon: self.icon ?? "")
+        return OpenHABSitemap(
+            name: self.name,
+            icon: self.icon ?? "",
+            label: self.label,
+            link: self.link,
+            leaf: self.page.leaf,
+            homepageLink: self.page.link
+        )
     }
 }
 
@@ -96,11 +103,11 @@ extension OpenHABSitemap.CodingData {
     var leaf = ""
     var homepageLink = ""
 
-    init(name: String, link: String, label: String, leaf: Bool, homepageLink: String, icon: String) {
+    init(name: String, icon: String, label: String, link: String, leaf: Bool, homepageLink: String) {
         self.name = name
         self.icon = icon
-        self.link = link
         self.label = label
+        self.link = link
         self.leaf = leaf ? "true" : "false"
         self.homepageLink = homepageLink
     }
