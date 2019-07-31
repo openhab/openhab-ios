@@ -100,7 +100,7 @@ extension OpenHABSitemap.CodingData {
     var icon = ""
     var label = ""
     var link = ""
-    var leaf = ""
+    var leaf: Bool?
     var homepageLink = ""
 
     init(name: String, icon: String, label: String, link: String, leaf: Bool, homepageLink: String) {
@@ -108,7 +108,7 @@ extension OpenHABSitemap.CodingData {
         self.icon = icon
         self.label = label
         self.link = link
-        self.leaf = leaf ? "true" : "false"
+        self.leaf = leaf
         self.homepageLink = homepageLink
     }
 
