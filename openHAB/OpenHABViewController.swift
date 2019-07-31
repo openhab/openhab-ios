@@ -757,6 +757,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             if !self.atmosphereTrackingId.isEmpty {
                 os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, self.atmosphereTrackingId)
             }
+
             let response = responseObject as? Data
             // If we are talking to openHAB 1.X, talk XML
             if self.appData?.openHABVersion == 1 {
@@ -785,8 +786,14 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if let response = response {
                     os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
                     do {
-                        let sitemapPageCodingData = try response.decoded() as OpenHABSitemapPage.CodingData
-                        self.currentPage = sitemapPageCodingData.openHABSitemapPage
+                        // Self-executing closure
+                        // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                        let openHABSitemapPage: OpenHABSitemapPage = try {
+                            let sitemapPageCodingData = try response.decoded() as OpenHABSitemapPage.CodingData
+                            return sitemapPageCodingData.openHABSitemapPage
+                        }()
+
+                        self.currentPage = openHABSitemapPage
                         if self.isFiltering {
                             self.filterContentForSearchText(self.search.searchBar.text)
                         }
@@ -910,24 +917,24 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                     }
                 }
                 self.appData?.sitemaps = self.sitemaps
-                if !self.sitemaps.isEmpty {
-                    if self.sitemaps.count > 1 {
-                        if self.defaultSitemap != "" {
-                            let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
-                            if sitemapToOpen != nil {
-                                self.pageUrl = sitemapToOpen?.homepageLink ?? ""
-                                self.loadPage(false)
-                            } else {
-                                self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
-                            }
+
+                switch self.sitemaps.count {
+                case 2...:
+                    if self.defaultSitemap != "" {
+                        let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
+                        if sitemapToOpen != nil {
+                            self.pageUrl = sitemapToOpen?.homepageLink ?? ""
+                            self.loadPage(false)
                         } else {
                             self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
                         }
                     } else {
-                        self.pageUrl = self.sitemaps[0].homepageLink
-                        self.loadPage(false)
+                        self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
                     }
-                } else {
+                case 1:
+                    self.pageUrl = self.sitemaps[0].homepageLink
+                    self.loadPage(false)
+                case ...0:
                     var config = SwiftMessages.Config()
                     config.duration = .seconds(seconds: 5)
                     config.presentationStyle = .bottom
@@ -942,8 +949,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
                         view.buttonTapHandler = { _ in SwiftMessages.hide() }
                         return view
                     }
+                default: break
                 }
-
             }, failure: { operation, error in
                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 DispatchQueue.main.async {
