@@ -22,6 +22,7 @@ private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewContro
 private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
 enum TargetController {
+    case root
     case settings
     case notifications
 }
@@ -64,6 +65,8 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     func modalDismissed(to: TargetController) {
         switch to {
+        case .root:
+            navigationController?.popToRootViewController(animated: true)
         case .settings:
             if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
                 navigationController?.pushViewController(newViewController, animated: true)

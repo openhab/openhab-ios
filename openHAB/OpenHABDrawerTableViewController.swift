@@ -219,7 +219,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let prefs = UserDefaults.standard
             prefs.setValue(sitemap.name, forKey: "defaultSitemap")
             appData?.rootViewController?.pageUrl = ""
-            dismiss(animated: true, completion: nil)
+            dismiss(animated: true) {
+                self.delegate?.modalDismissed(to: .root)
+            }
         } else {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]
