@@ -12,7 +12,7 @@ import os.log
 import SystemConfiguration
 
 protocol OpenHABTrackerDelegate: AnyObject {
-    func openHABTracked(_ openHABUrl: String?)
+    func openHABTracked(_ openHABUrl: URL?)
     func openHABTrackingProgress(_ message: String?)
     func openHABTrackingError(_ error: Error)
 }
@@ -29,7 +29,7 @@ extension NSData {
     }
 }
 
-class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
+class OpenHABTracker: NSObject {
     var oldReachabilityStatus: Reachability.Connection?
 
     weak var delegate: OpenHABTrackerDelegate?
@@ -85,18 +85,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         }
     }
 
-    // NSNetService delegate methods for publication
-    func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
-        let openhabUrl = "https://\(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(resolvedNetService.port)"
-        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
-        trackedDiscoveryUrl(openhabUrl)
-    }
-
-    func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
-        os_log("OpenHABTracker discovery didn't resolve openHAB", log: .default, type: .info)
-        trackedRemoteUrl()
-    }
-
     override init() {
         super.init()
         let prefs = UserDefaults.standard
@@ -115,14 +103,14 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
     func trackedLocalUrl() {
         delegate?.openHABTrackingProgress("Connecting to local URL")
         let openHABUrl = normalizeUrl(openHABLocalUrl)
-        trackedUrl(openHABUrl)
+        trackedUrl(URL(string: openHABUrl!))
     }
 
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(openHABRemoteUrl)
         if (openHABUrl?.count ?? 0) > 0 {
             //delegate?.openHABTrackingProgress("Connecting to remote URL")
-            trackedUrl(openHABUrl)
+            trackedUrl(URL(string: openHABUrl!))
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
@@ -131,17 +119,17 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         }
     }
 
-    func trackedDiscoveryUrl(_ discoveryUrl: String?) {
+    func trackedDiscoveryUrl(_ discoveryUrl: URL?) {
         delegate?.openHABTrackingProgress("Connecting to discovered URL")
         trackedUrl(discoveryUrl)
     }
 
     func trackedDemoMode() {
         delegate?.openHABTrackingProgress("Running in demo mode. Check settings to disable demo mode.")
-        trackedUrl("http://demo.openhab.org:8080")
+        trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
     }
 
-    func trackedUrl(_ trackedUrl: String?) {
+    func trackedUrl(_ trackedUrl: URL?) {
         delegate?.openHABTracked(trackedUrl)
     }
 
@@ -172,7 +160,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         netService!.resolve(withTimeout: 5.0)
     }
 
-    // NSNetService delegate methods for Bonjour resolving
     func normalizeUrl(_ url: String?) -> String? {
         if let url = url, url.hasSuffix("/") {
             return String(url.dropLast())
@@ -206,19 +193,45 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         return false
     }
 
-    func getStringIp(fromAddressData dataIn: Data?) -> String? {
-        var ipString: String?
-        let data = dataIn! as NSData
-        let socketAddress: sockaddr_in = data.castToCPointer()
-        ipString = String(cString: inet_ntoa(socketAddress.sin_addr), encoding: .ascii)  ///problem here
-        return ipString
-    }
-
     func string(from status: Reachability.Connection) -> String? {
         switch status {
         case .none: return "unreachable"
         case .wifi: return "WiFi"
         case .cellular: return "WWAN"
         }
+    }
+
+}
+
+extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
+
+    // NSNetService delegate methods for publication
+    func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
+
+        func getStringIp(fromAddressData dataIn: Data?) -> String? {
+            var ipString: String?
+            let data = dataIn! as NSData
+            let socketAddress: sockaddr_in = data.castToCPointer()
+            ipString = String(cString: inet_ntoa(socketAddress.sin_addr), encoding: .ascii)
+            return ipString
+        }
+
+        guard let data = resolvedNetService.addresses?.first else { return }
+        let resolvedComponents: URLComponents = {
+            var components = URLComponents()
+            components.host = getStringIp(fromAddressData: data)
+            components.scheme = "https"
+            components.port = resolvedNetService.port
+            return components
+        }()
+
+        let openhabUrl = "\(resolvedComponents.url!)"
+        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
+        trackedDiscoveryUrl(resolvedComponents.url)
+    }
+
+    func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
+        os_log("OpenHABTracker discovery didn't resolve openHAB", log: .default, type: .info)
+        trackedRemoteUrl()
     }
 }

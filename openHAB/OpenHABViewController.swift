@@ -82,13 +82,13 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
-    func openHABTracked(_ openHABUrl: String?) {
-        os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, openHABUrl ?? "")
+    func openHABTracked(_ openHABUrl: URL?) {
+        os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
 
         DispatchQueue.main.async {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
         }
-        openHABRootUrl = openHABUrl ?? ""
+        openHABRootUrl = openHABUrl == nil ? "" : "\(openHABUrl!)"
         appData?.openHABRootUrl = openHABRootUrl
 
         if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
@@ -658,7 +658,7 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
         var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 3)
+        config.duration = .seconds(seconds: 1.5)
         config.presentationStyle = .bottom
 
         SwiftMessages.show(config: config) {
