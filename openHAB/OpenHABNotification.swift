@@ -44,7 +44,6 @@ extension OpenHABNotification {
 // Convenience method to convert a decoded value into a proper OpenHABNotification instance
 extension OpenHABNotification.CodingData {
     var openHABNotification: OpenHABNotification {
-        //return OpenHABNotification(dictionary: ["message": self.message, "created": self.created ])
         return OpenHABNotification(message: self.message, created: self.created)
     }
 
@@ -72,7 +71,6 @@ extension OpenHABNotification.CodingData {
                 dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
                 created = dateFormatter.date(from: dictionary[key] as? String ?? "")
             } else {
-//                setValue("test", forKey: "message")
                 if propertyNames.contains(key) {
                     setValue(dictionary[key], forKey: key)
                 }

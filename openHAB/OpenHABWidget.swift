@@ -26,7 +26,7 @@ extension OpenHABWidget {
         let step: Double?
         let refresh: Int?
         let height: Double?
-        let isLeaf: String?
+        let isLeaf: Bool?
         let iconColor: String?
         let labelcolor: String?
         let valuecolor: String?
@@ -62,7 +62,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var step = 1.0
     var refresh = 0
     var height = ""
-    var isLeaf = ""
+    var isLeaf = false
     var iconColor = ""
     var labelcolor = ""
     var valuecolor = ""
@@ -78,7 +78,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
 
     // This is an ugly initializer
 
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: String?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let d = with else { return ""}
@@ -100,7 +100,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
             self.refresh = 0
         }
         self.height = toString(height)
-        self.isLeaf = isLeaf ?? ""
+        self.isLeaf = isLeaf ?? false
         self.iconColor = iconColor ?? ""
         self.labelcolor = labelColor ?? ""
         self.valuecolor = valueColor ?? ""

@@ -78,12 +78,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     }
                 } else {
                     // Newer versions speak JSON!
-                    let decoder = JSONDecoder()
                     if let response = response {
                         os_log("openHAB 2", log: .viewCycle, type: .info)
                         do {
                             os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                            let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+                            let sitemapsCodingData = try response.decoded() as [OpenHABSitemap.CodingData]
                             for sitemapCodingDatum in sitemapsCodingData {
                                 if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
                                     os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
@@ -220,7 +219,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let prefs = UserDefaults.standard
             prefs.setValue(sitemap.name, forKey: "defaultSitemap")
             appData?.rootViewController?.pageUrl = ""
-            dismiss(animated: true, completion: nil)
+            dismiss(animated: true) {
+                self.delegate?.modalDismissed(to: .root)
+            }
         } else {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]

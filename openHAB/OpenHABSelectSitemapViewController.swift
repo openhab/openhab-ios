@@ -93,13 +93,12 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     }
                 } else {
                     // Newer versions speak JSON!
-                    let decoder = JSONDecoder()
                     if let response = response {
                         os_log("openHAB 2", log: .default, type: .info)
 
                         do {
                             os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                            let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
+                            let sitemapsCodingData = try response.decoded() as [OpenHABSitemap.CodingData]
                             for sitemapCodingDatum in sitemapsCodingData {
                                 if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
                                     os_log("Sitemap %{PUBLIC}@", log: .default, type: .info, sitemapCodingDatum.label)
