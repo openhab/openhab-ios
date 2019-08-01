@@ -29,7 +29,7 @@ extension NSData {
     }
 }
 
-class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
+class OpenHABTracker: NSObject {
     var oldReachabilityStatus: Reachability.Connection?
 
     weak var delegate: OpenHABTrackerDelegate?
@@ -83,18 +83,6 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
                 os_log("Start notifier throws ", log: .remoteAccess, type: .info)
             }
         }
-    }
-
-    // NSNetService delegate methods for publication
-    func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
-        let openhabUrl = "https://\(getStringIp(fromAddressData: resolvedNetService.addresses![0]) ?? ""):\(resolvedNetService.port)"
-        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
-        trackedDiscoveryUrl(openhabUrl)
-    }
-
-    func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
-        os_log("OpenHABTracker discovery didn't resolve openHAB", log: .default, type: .info)
-        trackedRemoteUrl()
     }
 
     override init() {
@@ -206,19 +194,45 @@ class OpenHABTracker: NSObject, NetServiceDelegate, NetServiceBrowserDelegate {
         return false
     }
 
-    func getStringIp(fromAddressData dataIn: Data?) -> String? {
-        var ipString: String?
-        let data = dataIn! as NSData
-        let socketAddress: sockaddr_in = data.castToCPointer()
-        ipString = String(cString: inet_ntoa(socketAddress.sin_addr), encoding: .ascii)  ///problem here
-        return ipString
-    }
-
     func string(from status: Reachability.Connection) -> String? {
         switch status {
         case .none: return "unreachable"
         case .wifi: return "WiFi"
         case .cellular: return "WWAN"
         }
+    }
+
+}
+
+extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
+
+    // NSNetService delegate methods for publication
+    func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
+
+        func getStringIp(fromAddressData dataIn: Data?) -> String? {
+            var ipString: String?
+            let data = dataIn! as NSData
+            let socketAddress: sockaddr_in = data.castToCPointer()
+            ipString = String(cString: inet_ntoa(socketAddress.sin_addr), encoding: .ascii)  ///problem here
+            return ipString
+        }
+
+        guard let data = resolvedNetService.addresses?.first else { return }
+        let resolvedComponents: URLComponents = {
+            var components = URLComponents()
+            components.host = getStringIp(fromAddressData: data)
+            components.scheme = "https"
+            components.port = resolvedNetService.port
+            return components
+        }()
+
+        let openhabUrl = "\(resolvedComponents.url!)"
+        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
+        trackedDiscoveryUrl(openhabUrl)
+    }
+
+    func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
+        os_log("OpenHABTracker discovery didn't resolve openHAB", log: .default, type: .info)
+        trackedRemoteUrl()
     }
 }
