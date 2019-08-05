@@ -20,13 +20,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     var openHABUsername = ""
     var openHABPassword = ""
 
-    override init(style: UITableView.Style) {
-        super.init(style: style)
-
-        // Custom initialization
-
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABSelectSitemapViewController viewDidLoad", log: .viewCycle, type: .info)
@@ -122,18 +115,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
         }
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // Return the number of rows in the section.
         return sitemaps.count
     }
 

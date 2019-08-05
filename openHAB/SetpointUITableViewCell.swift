@@ -31,11 +31,14 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        self.downButton.setStyle(.caretDown, animated: false)
-        self.upButton.setStyle(.caretUp, animated: false)
+        downButton.setStyle(.caretDown, animated: false)
+        upButton.setStyle(.caretUp, animated: false)
 
         downButton.addTarget(self, action: #selector(SetpointUITableViewCell.decreaseValue), for: .touchUpInside)
         upButton.addTarget(self, action: #selector(SetpointUITableViewCell.increaseValue), for: .touchUpInside)
+
+        downButton.highlightStokeColor = Colors.hightlightStrokeColor
+        upButton.highlightStokeColor =  Colors.hightlightStrokeColor
 
         super.displayWidget()
     }

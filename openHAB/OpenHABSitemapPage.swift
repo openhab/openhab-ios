@@ -52,7 +52,7 @@ class OpenHABSitemapPage: NSObject {
         self.title = title
         self.link = link
         self.leaf = leaf
-        var ws = [OpenHABWidget]()
+        var ws: [OpenHABWidget] = []
         // This could be expressed recursively but this does the job on 2 levels 
         for w1 in widgets {
             ws.append(w1)

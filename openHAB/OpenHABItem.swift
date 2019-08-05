@@ -9,7 +9,6 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 import CoreLocation
-import Foundation
 import os.log
 import UIKit
 

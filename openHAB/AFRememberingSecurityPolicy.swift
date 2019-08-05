@@ -43,7 +43,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         self.loadTrustedCertificates()
         if trustedCertificates.isEmpty {
             os_log("No cert store, creating", log: .remoteAccess, type: .info)
-            trustedCertificates = [AnyHashable: Any]()
+            trustedCertificates = [:]
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             self.saveTrustedCertificates()
         } else {

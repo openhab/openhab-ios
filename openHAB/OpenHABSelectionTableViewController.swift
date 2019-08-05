@@ -16,13 +16,6 @@ import UIKit
     @objc weak var delegate: OpenHABSelectionTableViewControllerDelegate?
     @objc var selectionItem: OpenHABItem?
 
-    override init(style: UITableView.Style) {
-        super.init(style: style)
-
-        // Custom initialization
-
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -35,15 +28,7 @@ import UIKit
         // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
 // MARK: - Table view data source
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return mappings.count

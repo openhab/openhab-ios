@@ -47,13 +47,15 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        self.downButton.setStyle(.caretDown, animated: false)
-        self.upButton.setStyle(.caretUp, animated: false)
+        downButton.setStyle(.caretDown, animated: false)
+        upButton.setStyle(.caretUp, animated: false)
 
         customTextLabel?.text = widget.labelText
         colorButton?.backgroundColor = widget.item?.stateAsUIColor()
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
+        downButton?.highlightStokeColor = Colors.hightlightStrokeColor
+        upButton?.highlightStokeColor =  Colors.hightlightStrokeColor
     }
 
     @objc func upButtonPressed() {
