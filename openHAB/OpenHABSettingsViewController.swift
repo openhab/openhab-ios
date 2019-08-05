@@ -12,7 +12,7 @@ import os.log
 import SDWebImage
 import UIKit
 
-class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelegate, UITextFieldDelegate {
+class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate {
     @IBOutlet var settingsTableView: UITableView!
 
     @IBOutlet weak var demomodeSwitch: UISwitch!
@@ -127,11 +127,6 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
 
     func disableConnectionSettings() {
         settingsTableView.reloadData()
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

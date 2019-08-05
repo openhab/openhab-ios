@@ -28,6 +28,7 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     override func initialize() {
         selectionStyle = .none
         separatorInset = .zero
+
     }
 
     required init?(coder: NSCoder) {
@@ -43,15 +44,17 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        self.upButton.setStyle(.caretUp, animated: false)
-        self.stopButton.setStyle(.stop, animated: false)
-        self.downButton.setStyle(.caretDown, animated: false)
-
         customTextLabel?.text = widget.labelText
 
+        upButton?.setStyle(.caretUp, animated: true)
+        stopButton?.setStyle(.stop, animated: true)
+        downButton?.setStyle(.caretDown, animated: true)
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         stopButton?.addTarget(self, action: .stopButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
+        downButton?.highlightStokeColor = Colors.hightlightStrokeColor
+        upButton?.highlightStokeColor =  Colors.hightlightStrokeColor
+        stopButton?.highlightStokeColor =  Colors.hightlightStrokeColor
     }
 
     @objc func upButtonPressed() {

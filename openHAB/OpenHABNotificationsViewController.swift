@@ -57,19 +57,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
     }
 
-    func sideMenuWillDisappear(menu: UISideMenuNavigationController, animated: Bool) {
-        self.hamburgerButton.setStyle(.hamburger, animated: animated)
-    }
-
-    func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
-        self.hamburgerButton.setStyle(.arrowRight, animated: animated)
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         loadSettings()
@@ -120,10 +107,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
     @objc func rightDrawerButtonPress(_ sender: Any?) {
         present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
-    }
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

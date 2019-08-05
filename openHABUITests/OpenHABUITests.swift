@@ -77,8 +77,5 @@ class OpenHABUITests: XCTestCase {
         sleep(1)
         snapshot("7_Settings")
 
-   //     app.children(matching: .window).element(boundBy: 0).children(matching: .other).element.children(matching: .other).element(boundBy: 1).tap()
-
-//        app.tables["OpenHABViewControllerWidgetTableView"].tap()
     }
 }

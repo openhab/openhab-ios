@@ -25,7 +25,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.tableFooterView = UIView()
-        drawerItems = [OpenHABDrawerItem]()
+        drawerItems = []
         sitemaps = []
         loadSettings()
         setStandardDrawerItems()
@@ -142,15 +142,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         os_log("RightDrawerViewController viewDidDisappear", log: .viewCycle, type: .info)
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     // MARK: - Table view data source
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return sitemaps.count + drawerItems.count

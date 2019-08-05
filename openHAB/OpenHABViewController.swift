@@ -30,7 +30,7 @@ protocol ModalHandler: class {
     func modalDismissed(to: TargetController)
 }
 
-class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OpenHABTrackerDelegate, OpenHABSelectionTableViewControllerDelegate, ColorPickerUITableViewCellDelegate, AFRememberingSecurityPolicyDelegate, ClientCertificateManagerDelegate, ModalHandler, UISideMenuNavigationControllerDelegate {
+class OpenHABViewController: UIViewController {
 
     var tracker: OpenHABTracker?
 
@@ -62,63 +62,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     let search = UISearchController(searchResultsController: nil)
     var filteredPage: OpenHABSitemapPage?
-
-    func modalDismissed(to: TargetController) {
-        switch to {
-        case .root:
-            navigationController?.popToRootViewController(animated: true)
-        case .settings:
-            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
-                navigationController?.pushViewController(newViewController, animated: true)
-            }
-        case .notifications:
-            if navigationController?.visibleViewController is OpenHABNotificationsViewController {
-                os_log("Notifications are already open", log: .notifications, type: .info)
-            } else {
-                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
-                    navigationController?.pushViewController(newViewController, animated: true)
-                }
-            }
-        }
-    }
-
-    func openHABTracked(_ openHABUrl: URL?) {
-        os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
-
-        DispatchQueue.main.async {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        }
-        openHABRootUrl = openHABUrl == nil ? "" : "\(openHABUrl!)"
-        appData?.openHABRootUrl = openHABRootUrl
-
-        if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
-            var pageRequest = URLRequest(url: pageToLoadUrl)
-
-            pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
-            pageRequest.timeoutInterval = 10.0
-            let versionPageOperation = OpenHABHTTPRequestOperation(request: pageRequest, delegate: self)
-            versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
-                os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
-                self.appData?.openHABVersion = 2
-                DispatchQueue.main.async {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                }
-                self.selectSitemap()
-            }, failure: { operation, error in
-                os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
-                self.appData?.openHABVersion = 1
-                DispatchQueue.main.async {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                }
-                os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                self.selectSitemap()
-            })
-            DispatchQueue.main.async {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            }
-            versionPageOperation.start()
-        }
-    }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         if let commandUrl = URL(string: item?.link ?? "") {
@@ -208,19 +151,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
 
         SideMenuManager.default.menuFadeStatusBar = false
-    }
-
-    func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
-        self.hamburgerButton.setStyle(.arrowRight, animated: animated)
-
-        guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
-            (drawer.delegate == nil || drawer.openHABRootUrl.isEmpty)
-        else {
-            return
-        }
-
-        drawer.openHABRootUrl = openHABRootUrl
-        drawer.delegate = self
     }
 
     func configureTableView() {
@@ -385,43 +315,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
-    // Here goes everything about our main UITableView
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if currentPage != nil {
-            if isFiltering {
-                return filteredPage?.widgets.count ?? 0
-            }
-            return currentPage?.widgets.count ?? 0
-        } else {
-            return 0
-        }
-    }
-
-    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 44.0
-    }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let widget: OpenHABWidget? = relevantPage?.widgets[indexPath.row]
-        switch widget?.type {
-        case "Frame":
-            return widget?.label.count ?? 0 > 0 ? 35.0 : 0
-        case "Image", "Chart", "Video":
-            return UITableView.automaticDimension
-        case "Webview", "Mapview":
-            if let height = widget?.height, height.intValue != 0 {
-                // calculate webview/mapview height and return it
-                let heightValue = (Double(height) ?? 0.0) * 44
-                os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
-                return CGFloat(heightValue)
-            } else {
-                // return default height for webview/mapview as 8 rows
-                return 44.0 * 8
-            }
-        default: return 44.0
-        }
-    }
-
     func relevantWidget(indexPath: IndexPath) -> OpenHABWidget? {
         return relevantPage?.widgets[indexPath.row]
     }
@@ -434,210 +327,11 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-
-        let cell: UITableViewCell
-
-        switch widget?.type {
-        case "Frame":
-            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
-        case "Switch":
-            if widget?.mappings.count ?? 0 > 0 {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-                //RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if widget?.item?.type == "RollershutterItem" || widget?.item?.type == "Rollershutter" || (widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter") {
-                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            }
-        case "Setpoint":
-            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
-        case "Slider":
-            cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
-        case "Selection":
-            cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
-        case "Colorpicker":
-            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
-            (cell as? ColorPickerUITableViewCell)?.delegate = self
-        case "Image", "Chart":
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
-            (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case "Video":
-            cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
-            (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case "Webview":
-            cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
-        case "Mapview":
-            cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
-        default:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
-        }
-
-        // No icon is needed for image, video, frame and web widgets
-        if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
-
-            let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
-                                     version: appData?.openHABVersion ?? 2,
-                                     icon: widget?.icon,
-                                     value: widget?.item?.state ?? "",
-                                     iconType: iconType).url
-            switch iconType {
-            case .png :
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
-            case .svg:
-                let SVGCoder = SDImageSVGCoder.shared
-                SDImageCodersManager.shared.addCoder(SVGCoder)
-                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
-            }
-        }
-
-        if cell is FrameUITableViewCell {
-            cell.backgroundColor = UIColor.groupTableViewBackground
-        } else {
-            cell.backgroundColor = UIColor.white
-        }
-
-        if let cell = cell as? GenericUITableViewCell {
-            cell.widget = widget
-            cell.displayWidget()
-        }
-
-        // Check if this is not the last row in the widgets list
-        if indexPath.row < (relevantPage?.widgets.count ?? 1) - 1 {
-
-            let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
-            if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
-                cell.separatorInset = UIEdgeInsets.zero
-            } else if !(widget?.type == "Frame") {
-                cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
-            }
-        }
-
-        return cell
-    }
-
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // Prevent the cell from inheriting the Table View's margin settings
-        cell.preservesSuperviewLayoutMargins = false
-
-        // Explictly set your cell's layout margins
-        cell.layoutMargins = .zero
-
-        guard let videoCell = (cell as? VideoUITableViewCell) else { return }
-        videoCell.playerView.player?.play()
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-        if widget?.linkedPage != nil {
-            if let link = widget?.linkedPage?.link {
-                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
-            }
-            selectedWidgetRow = indexPath.row
-            let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABViewController)!
-            newViewController.title = widget?.linkedPage?.title.components(separatedBy: "[")[0]
-            newViewController.pageUrl = widget?.linkedPage?.link ?? ""
-            newViewController.openHABRootUrl = openHABRootUrl
-            navigationController?.pushViewController(newViewController, animated: true)
-        } else if widget?.type == "Selection" {
-            os_log("Selected selection widget", log: .viewCycle, type: .info)
-
-            selectedWidgetRow = indexPath.row
-            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
-            let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-            selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = (selectedWidget?.mappings)!
-            selectionViewController.delegate = self
-            selectionViewController.selectionItem = selectedWidget?.item
-            navigationController?.pushViewController(selectionViewController, animated: true)
-        }
-        if let index = widgetTableView.indexPathForSelectedRow {
-            widgetTableView.deselectRow(at: index, animated: false)
-        }
-    }
-
-    func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // invalidate cache only if the cell is not visible
-        if let cell = cell as? GenericCellCacheProtocol, let indexPath = tableView.indexPath(for: cell), let visibleIndexPaths = tableView.indexPathsForVisibleRows, !visibleIndexPaths.contains(indexPath) {
-            cell.invalidateCache()
-        }
-    }
-
     private func updateWidgetTableView() {
         UIView.performWithoutAnimation {
             widgetTableView.beginUpdates()
             widgetTableView.endUpdates()
         }
-    }
-
-    func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async(execute: {
-            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
-        })
-    }
-
-    func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async(execute: {
-            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in  policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
-        })
-    }
-
-    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
-        DispatchQueue.main.async(execute: {
-            let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
-                clientCertificateManager!.clientCertificateAccepted(password: nil)
-            }
-            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
-                clientCertificateManager!.clientCertificateRejected()
-            }
-            alertController.addAction(okay)
-            alertController.addAction(cancel)
-            self.present(alertController, animated: true, completion: nil)
-        })
-    }
-
-    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
-        DispatchQueue.main.async(execute: {
-            let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
-                let txtField = alertController.textFields?.first
-                let password = txtField?.text
-                clientCertificateManager!.clientCertificateAccepted(password: password)
-            }
-            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
-                clientCertificateManager!.clientCertificateRejected()
-            }
-            alertController.addTextField { (textField) in
-                textField.placeholder = "Password"
-                textField.isSecureTextEntry = true
-            }
-            alertController.addAction(okay)
-            alertController.addAction(cancel)
-            self.present(alertController, animated: true, completion: nil)
-        })
-    }
-
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
-        DispatchQueue.main.async(execute: {
-            let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default)
-            alertController.addAction(okay)
-            self.present(alertController, animated: true, completion: nil)
-        })
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -651,63 +345,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
             drawer?.openHABRootUrl = openHABRootUrl
             drawer?.delegate = self
         default: break
-        }
-    }
-
-    // OpenHABTracker delegate methods
-    func openHABTrackingProgress(_ message: String?) {
-        os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 1.5)
-        config.presentationStyle = .bottom
-
-        SwiftMessages.show(config: config) {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            let view = MessageView.viewFromNib(layout: .cardView)
-            view.configureTheme(.info)
-            view.configureContent(title: "Connecting", body: message ?? "")
-            view.button?.setTitle("Dismiss", for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-            return view
-        }
-    }
-
-    func openHABTrackingError(_ error: Error) {
-        os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 60)
-        config.presentationStyle = .bottom
-
-        SwiftMessages.show(config: config) {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            let view = MessageView.viewFromNib(layout: .cardView)
-            // ... configure the view
-            view.configureTheme(.error)
-            view.configureContent(title: "Error", body: error.localizedDescription)
-            view.button?.setTitle("Dismiss", for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-            return view
-        }
-    }
-
-    // send command to an item
-
-    // send command on selected selection widget mapping
-    func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
-        let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
-        sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
-    }
-
-    func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
-        let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
-        if let cell = cell {
-            let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
-            colorPickerViewController?.title = widget?.labelText
-            colorPickerViewController?.widget = widget
-        }
-        if let colorPickerViewController = colorPickerViewController {
-            navigationController?.pushViewController(colorPickerViewController, animated: true)
         }
     }
 
@@ -1068,11 +705,6 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
         return AppDelegate.appDelegate.appData
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     // MARK: - Private instance methods
 
     var searchBarIsEmpty: Bool {
@@ -1098,10 +730,402 @@ class OpenHABViewController: UIViewController, UITableViewDelegate, UITableViewD
 
 }
 
+// MARK: - OpenHABTrackerDelegate
+extension OpenHABViewController: OpenHABTrackerDelegate {
+
+    func openHABTracked(_ openHABUrl: URL?) {
+        os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
+
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        }
+        openHABRootUrl = openHABUrl == nil ? "" : "\(openHABUrl!)"
+        appData?.openHABRootUrl = openHABRootUrl
+
+        if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
+            var pageRequest = URLRequest(url: pageToLoadUrl)
+
+            pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            pageRequest.timeoutInterval = 10.0
+            let versionPageOperation = OpenHABHTTPRequestOperation(request: pageRequest, delegate: self)
+            versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
+                os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
+                self.appData?.openHABVersion = 2
+                DispatchQueue.main.async {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
+                self.selectSitemap()
+            }, failure: { operation, error in
+                os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
+                self.appData?.openHABVersion = 1
+                DispatchQueue.main.async {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
+                os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                self.selectSitemap()
+            })
+            DispatchQueue.main.async {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            }
+            versionPageOperation.start()
+        }
+    }
+
+    func openHABTrackingProgress(_ message: String?) {
+        os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 1.5)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            let view = MessageView.viewFromNib(layout: .cardView)
+            view.configureTheme(.info)
+            view.configureContent(title: "Connecting", body: message ?? "")
+            view.button?.setTitle("Dismiss", for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
+        }
+    }
+
+    func openHABTrackingError(_ error: Error) {
+        os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 60)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            let view = MessageView.viewFromNib(layout: .cardView)
+            // ... configure the view
+            view.configureTheme(.error)
+            view.configureContent(title: "Error", body: error.localizedDescription)
+            view.button?.setTitle("Dismiss", for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
+        }
+    }
+}
+
+// MARK: - OpenHABSelectionTableViewControllerDelegate
+extension OpenHABViewController: OpenHABSelectionTableViewControllerDelegate {
+    // send command on selected selection widget mapping
+    func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
+        let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
+        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
+        sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
+    }
+}
+
+// MARK: - UISearchResultsUpdating
 extension OpenHABViewController: UISearchResultsUpdating {
 
     func updateSearchResults(for searchController: UISearchController) {
         filterContentForSearchText(searchController.searchBar.text)
     }
 
+}
+
+// MARK: - ColorPickerUITableViewCellDelegate
+extension OpenHABViewController: ColorPickerUITableViewCellDelegate {
+    func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
+        let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
+        if let cell = cell {
+            let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
+            colorPickerViewController?.title = widget?.labelText
+            colorPickerViewController?.widget = widget
+        }
+        if let colorPickerViewController = colorPickerViewController {
+            navigationController?.pushViewController(colorPickerViewController, animated: true)
+        }
+    }
+}
+
+// MARK: - AFRememberingSecurityPolicyDelegate
+extension OpenHABViewController: AFRememberingSecurityPolicyDelegate {
+    // delegate should ask user for a decision on what to do with invalid certificate
+    func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
+        DispatchQueue.main.async(execute: {
+            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            self.present(alertView, animated: true) {}
+        })
+    }
+
+    // certificate received from openHAB doesn't match our record, ask user for a decision
+    func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
+        DispatchQueue.main.async(execute: {
+            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in  policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            self.present(alertView, animated: true) {}
+        })
+    }
+}
+
+// MARK: - ClientCertificateManagerDelegate
+extension OpenHABViewController: ClientCertificateManagerDelegate {
+
+    // delegate should ask user for a decision on whether to import the client certificate into the keychain
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateAccepted(password: nil)
+            }
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateRejected()
+            }
+            alertController.addAction(okay)
+            alertController.addAction(cancel)
+            self.present(alertController, animated: true, completion: nil)
+        })
+    }
+
+    // delegate should ask user for the export password used to decode the PKCS#12
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+                let txtField = alertController.textFields?.first
+                let password = txtField?.text
+                clientCertificateManager!.clientCertificateAccepted(password: password)
+            }
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+                clientCertificateManager!.clientCertificateRejected()
+            }
+            alertController.addTextField { (textField) in
+                textField.placeholder = "Password"
+                textField.isSecureTextEntry = true
+            }
+            alertController.addAction(okay)
+            alertController.addAction(cancel)
+            self.present(alertController, animated: true, completion: nil)
+        })
+    }
+
+    // delegate should alert the user that an error occured importing the certificate
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
+        DispatchQueue.main.async(execute: {
+            let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
+            let okay = UIAlertAction(title: "Okay", style: .default)
+            alertController.addAction(okay)
+            self.present(alertController, animated: true, completion: nil)
+        })
+    }
+}
+
+// MARK: - ModalHandler
+extension OpenHABViewController: ModalHandler {
+    func modalDismissed(to: TargetController) {
+        switch to {
+        case .root:
+            navigationController?.popToRootViewController(animated: true)
+        case .settings:
+            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
+                navigationController?.pushViewController(newViewController, animated: true)
+            }
+        case .notifications:
+            if navigationController?.visibleViewController is OpenHABNotificationsViewController {
+                os_log("Notifications are already open", log: .notifications, type: .info)
+            } else {
+                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
+                    navigationController?.pushViewController(newViewController, animated: true)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - UISideMenuNavigationControllerDelegate
+extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
+    func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
+        self.hamburgerButton.setStyle(.arrowRight, animated: animated)
+
+        guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
+            (drawer.delegate == nil || drawer.openHABRootUrl.isEmpty)
+            else {
+                return
+        }
+
+        drawer.openHABRootUrl = openHABRootUrl
+        drawer.delegate = self
+    }
+}
+
+// MARK: - UITableViewDelegate, UITableViewDataSource
+extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if currentPage != nil {
+            if isFiltering {
+                return filteredPage?.widgets.count ?? 0
+            }
+            return currentPage?.widgets.count ?? 0
+        } else {
+            return 0
+        }
+    }
+
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 44.0
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let widget: OpenHABWidget? = relevantPage?.widgets[indexPath.row]
+        switch widget?.type {
+        case "Frame":
+            return widget?.label.count ?? 0 > 0 ? 35.0 : 0
+        case "Image", "Chart", "Video":
+            return UITableView.automaticDimension
+        case "Webview", "Mapview":
+            if let height = widget?.height, height.intValue != 0 {
+                // calculate webview/mapview height and return it
+                let heightValue = (Double(height) ?? 0.0) * 44
+                os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
+                return CGFloat(heightValue)
+            } else {
+                // return default height for webview/mapview as 8 rows
+                return 44.0 * 8
+            }
+        default: return 44.0
+        }
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
+
+        let cell: UITableViewCell
+
+        switch widget?.type {
+        case "Frame":
+            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
+        case "Switch":
+            if widget?.mappings.count ?? 0 > 0 {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
+                //RollershutterItem changed to Rollershutter in later builds of OH2
+            } else if widget?.item?.type == "RollershutterItem" || widget?.item?.type == "Rollershutter" || (widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter") {
+                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+            } else {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
+            }
+        case "Setpoint":
+            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
+        case "Slider":
+            cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+        case "Selection":
+            cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
+        case "Colorpicker":
+            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
+            (cell as? ColorPickerUITableViewCell)?.delegate = self
+        case "Image", "Chart":
+            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
+            (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
+                self?.updateWidgetTableView()
+            }
+        case "Video":
+            cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
+            (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
+                self?.updateWidgetTableView()
+            }
+        case "Webview":
+            cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
+        case "Mapview":
+            cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
+        default:
+            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+        }
+
+        // No icon is needed for image, video, frame and web widgets
+        if (widget?.icon != nil) && !( (cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell) ) {
+
+            let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
+                                     version: appData?.openHABVersion ?? 2,
+                                     icon: widget?.icon,
+                                     value: widget?.item?.state ?? "",
+                                     iconType: iconType).url
+            switch iconType {
+            case .png :
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
+            case .svg:
+                let SVGCoder = SDImageSVGCoder.shared
+                SDImageCodersManager.shared.addCoder(SVGCoder)
+                cell.imageView?.sd_setImage(with: urlc, placeholderImage: UIImage(named: "blankicon.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
+            }
+        }
+
+        if cell is FrameUITableViewCell {
+            cell.backgroundColor = UIColor.groupTableViewBackground
+        } else {
+            cell.backgroundColor = UIColor.white
+        }
+
+        if let cell = cell as? GenericUITableViewCell {
+            cell.widget = widget
+            cell.displayWidget()
+        }
+
+        // Check if this is not the last row in the widgets list
+        if indexPath.row < (relevantPage?.widgets.count ?? 1) - 1 {
+
+            let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
+            if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
+                cell.separatorInset = UIEdgeInsets.zero
+            } else if !(widget?.type == "Frame") {
+                cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+            }
+        }
+
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // Prevent the cell from inheriting the Table View's margin settings
+        cell.preservesSuperviewLayoutMargins = false
+
+        // Explictly set your cell's layout margins
+        cell.layoutMargins = .zero
+
+        guard let videoCell = (cell as? VideoUITableViewCell) else { return }
+        videoCell.playerView.player?.play()
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
+        if widget?.linkedPage != nil {
+            if let link = widget?.linkedPage?.link {
+                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
+            }
+            selectedWidgetRow = indexPath.row
+            let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABViewController)!
+            newViewController.title = widget?.linkedPage?.title.components(separatedBy: "[")[0]
+            newViewController.pageUrl = widget?.linkedPage?.link ?? ""
+            newViewController.openHABRootUrl = openHABRootUrl
+            navigationController?.pushViewController(newViewController, animated: true)
+        } else if widget?.type == "Selection" {
+            os_log("Selected selection widget", log: .viewCycle, type: .info)
+
+            selectedWidgetRow = indexPath.row
+            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
+            let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
+            selectionViewController.title = selectedWidget?.labelText
+            selectionViewController.mappings = (selectedWidget?.mappings)!
+            selectionViewController.delegate = self
+            selectionViewController.selectionItem = selectedWidget?.item
+            navigationController?.pushViewController(selectionViewController, animated: true)
+        }
+        if let index = widgetTableView.indexPathForSelectedRow {
+            widgetTableView.deselectRow(at: index, animated: false)
+        }
+    }
+
+    func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // invalidate cache only if the cell is not visible
+        if let cell = cell as? GenericCellCacheProtocol, let indexPath = tableView.indexPath(for: cell), let visibleIndexPaths = tableView.indexPathsForVisibleRows, !visibleIndexPaths.contains(indexPath) {
+            cell.invalidateCache()
+        }
+    }
 }
