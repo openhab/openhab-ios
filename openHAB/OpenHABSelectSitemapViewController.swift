@@ -20,13 +20,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     var openHABUsername = ""
     var openHABPassword = ""
 
-    override init(style: UITableView.Style) {
-        super.init(style: style)
-
-        // Custom initialization
-
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABSelectSitemapViewController viewDidLoad", log: .viewCycle, type: .info)

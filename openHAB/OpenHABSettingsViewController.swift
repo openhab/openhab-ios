@@ -33,10 +33,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsIdleOff = false
     var settingsIconType: IconType = .png
 
-    override init(style: UITableView.Style) {
-        super.init(style: style)
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABSettingsViewController viewDidLoad", log: .viewCycle, type: .info)
