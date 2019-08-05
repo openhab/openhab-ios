@@ -70,5 +70,15 @@ class OpenHABUITests: XCTestCase {
         widgetTable.staticTexts["Astronomical Data"].tap()
         sleep(5)
         snapshot("6_AstronomicalData")
+
+        let hamburgerButton = app.navigationBars.buttons["Hamburger"]
+
+        hamburgerButton.tap()
+        sleep(1)
+        snapshot("7_Settings")
+
+   //     app.children(matching: .window).element(boundBy: 0).children(matching: .other).element.children(matching: .other).element(boundBy: 1).tap()
+
+//        app.tables["OpenHABViewControllerWidgetTableView"].tap()
     }
 }
