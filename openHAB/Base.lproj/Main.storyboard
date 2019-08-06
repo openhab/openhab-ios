@@ -144,6 +144,7 @@
                                                 </label>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PuF-sy-GZG" customClass="DynamicButton" customModule="DynamicButton">
                                                     <rect key="frame" x="325" y="5" width="30" height="34"/>
+                                                    <accessibility key="accessibilityConfiguration" label="up"/>
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="color" keyPath="strokeColor">
                                                             <color key="value" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -152,6 +153,7 @@
                                                 </button>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gIa-Hx-tGr" customClass="DynamicButton" customModule="DynamicButton">
                                                     <rect key="frame" x="237" y="5" width="30" height="34"/>
+                                                    <accessibility key="accessibilityConfiguration" label="down"/>
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="color" keyPath="strokeColor">
                                                             <color key="value" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -200,6 +202,7 @@
                                                 </button>
                                                 <button opaque="NO" tag="703" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OR4-bR-Ekg" customClass="DynamicButton" customModule="DynamicButton">
                                                     <rect key="frame" x="325" y="7" width="30" height="30"/>
+                                                    <accessibility key="accessibilityConfiguration" label="up"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="30" id="e9d-e3-sAe"/>
                                                         <constraint firstAttribute="height" constant="30" id="xxx-h0-TRp"/>
@@ -217,6 +220,7 @@
                                                 </label>
                                                 <button opaque="NO" tag="701" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vxc-Zw-Oyh" customClass="DynamicButton" customModule="DynamicButton">
                                                     <rect key="frame" x="249" y="7" width="30" height="30"/>
+                                                    <accessibility key="accessibilityConfiguration" label="down"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="30" id="6LY-s0-Idb"/>
                                                         <constraint firstAttribute="width" constant="30" id="pMB-mJ-lDb"/>
@@ -385,6 +389,7 @@
                                             <subviews>
                                                 <button opaque="NO" tag="603" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bnc-pN-4ms" customClass="DynamicButton" customModule="DynamicButton">
                                                     <rect key="frame" x="325" y="7" width="30" height="30"/>
+                                                    <accessibility key="accessibilityConfiguration" label="up"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="30" id="X1M-1P-C4k"/>
                                                         <constraint firstAttribute="height" constant="30" id="hd4-jY-xhn"/>
@@ -397,6 +402,7 @@
                                                 </button>
                                                 <button opaque="NO" tag="602" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="riU-tV-5Y6" customClass="DynamicButton" customModule="DynamicButton">
                                                     <rect key="frame" x="287" y="7" width="30" height="30"/>
+                                                    <accessibility key="accessibilityConfiguration" label="stop"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="30" id="M2m-p5-D0f"/>
                                                         <constraint firstAttribute="width" constant="30" id="Was-wR-0wt"/>
@@ -409,6 +415,7 @@
                                                 </button>
                                                 <button opaque="NO" tag="601" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PzY-Bs-9MZ" customClass="DynamicButton" customModule="DynamicButton">
                                                     <rect key="frame" x="249" y="7" width="30" height="30"/>
+                                                    <accessibility key="accessibilityConfiguration" label="down"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="30" id="LaN-EA-e8o"/>
                                                         <constraint firstAttribute="height" constant="30" id="iup-nQ-ZD5"/>
