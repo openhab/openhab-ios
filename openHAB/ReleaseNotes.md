@@ -15,7 +15,6 @@ Addressing known issue and bugs:
 * Search bar for items was added
 * Authentication with mTLS client certificates
 * Fixed handling push notifications
-* Automated generation of screenshots
 
 The excellent ObjectiveC code quality allowed the usage of the migration tool Swiftify for the body of the application. Still, internally a lot of changes were applied: 
 
@@ -34,6 +33,7 @@ The excellent ObjectiveC code quality allowed the usage of the migration tool Sw
 * URL Strings composition migrated to Endpoint 
 * Migration to logging framework os_log instead of print with typed access to UserDefaults.standard for string
 * Migrated to os_log for logging
+* Automated generation of screenshots
 
 A watchOS app is in the making and will be released soon. 
 
