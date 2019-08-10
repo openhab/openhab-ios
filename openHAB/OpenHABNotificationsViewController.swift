@@ -75,23 +75,25 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
             let operation = NetworkConnection()
-            operation.manager.request(notificationsRequest).responseJSON { (response) in
+            operation.manager.request(notificationsRequest)
+                .validate(statusCode: 200..<300)
+                .responseJSON { (response) in
 
                     switch response.result {
                     case .success:
                         if let data = response.data {
-                        do {
-                            let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
-                            for codingDatum in codingDatas {
-                                self.notifications.add(codingDatum.openHABNotification)
+                            do {
+                                let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
+                                for codingDatum in codingDatas {
+                                    self.notifications.add(codingDatum.openHABNotification)
+                                }
+                            } catch {
+                                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                             }
-                        } catch {
-                            os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                        }
 
-                        self.refreshControl?.endRefreshing()
-                        self.tableView.reloadData()
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            self.refreshControl?.endRefreshing()
+                            self.tableView.reloadData()
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
                         }
                     case .failure(let error):
                         UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -99,32 +101,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                         self.refreshControl?.endRefreshing()
                     }
             }
-
-//            let operation = OpenHABHTTPRequestOperation(request: notificationsRequest, delegate: nil)
-//
-//
-//            operation.setCompletionBlockWithSuccess({ operation, responseObject in
-//                if let response = responseObject as? Data {
-//                    do {
-//                        let codingDatas = try response.decoded(using: decoder) as [OpenHABNotification.CodingData]
-//                        for codingDatum in codingDatas {
-//                            self.notifications.add(codingDatum.openHABNotification)
-//                        }
-//                    } catch {
-//                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-//                    }
-//                }
-//
-//                self.refreshControl?.endRefreshing()
-//                self.tableView.reloadData()
-//                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-//            }, failure: { operation, error in
-//                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-//                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-//                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-//                self.refreshControl?.endRefreshing()
-//            })
-//            operation.start()
         }
     }
 

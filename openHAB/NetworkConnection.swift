@@ -47,7 +47,6 @@ class NetworkConnection {
 
             return (disposition, credential)
         }
-
     }
 
     func evaluateClientTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
