@@ -8,6 +8,42 @@
 import AFNetworking
 import os.log
 
+// https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
+// Transition from AFNetworking to Alamofire 5.0
+// SessionManager --> Session
+// serverTrustPolicyManager --> serverTrustManager
+// ServerTrustPolicyManager --> ServerTrustManager
+
+// SessionStateProvider
+// AFSecurityPolicy
+
+private struct Certificates {
+
+    static func getPersistensePath() -> String? {
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+        let documentsDirectory = paths[0]
+        let filePath = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates").absoluteString
+        return filePath
+    }
+
+    static func loadTrustedCertificates() {
+        if let unarchive = NSKeyedUnarchiver.unarchiveObject(withFile: self.getPersistensePath() ?? "") as? [AnyHashable: Any] {
+            trustedCertificates = unarchive
+        }
+    }
+
+    static func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
+        let certificateData = certificate as Data?
+        trustedCertificates[domain] = certificateData
+        self.saveTrustedCertificates()
+    }
+
+    static func saveTrustedCertificates() {
+        NSKeyedArchiver.archiveRootObject(trustedCertificates, toFile: self.getPersistensePath() ?? "")
+    }
+
+}
+
 class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
     static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
 

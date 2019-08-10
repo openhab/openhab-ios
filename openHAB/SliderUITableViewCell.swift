@@ -59,7 +59,10 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     func valueText(_ widgetValue: Double) -> String {
         let digits = max (-Decimal(widget.step).exponent, 0)
-        return String(format: "%.\(digits)f", widgetValue)
+        let numberFormatter = NumberFormatter()
+        numberFormatter.maximumFractionDigits = digits
+        numberFormatter.decimalSeparator  = "."
+        return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
     }
 
     override func displayWidget() {

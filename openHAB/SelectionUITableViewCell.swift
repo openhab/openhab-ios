@@ -31,6 +31,8 @@ class SelectionUITableViewCell: GenericUITableViewCell {
             if let widgetMapping = widget?.mappings[Int(selectedMapping)] {
                 customDetailTextLabel?.text = widgetMapping.label
             }
+        } else {
+            customDetailTextLabel?.text = ""
         }
 
     }

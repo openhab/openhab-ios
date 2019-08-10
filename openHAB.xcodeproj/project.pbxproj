@@ -49,6 +49,10 @@
 		DA15FF4C221DF7D800FF0FDA /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
 		DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
+		DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */; };
+		DA19E33522FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33422FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift */; };
+		DA19E33622FF4506002F8F2F /* AlamofireRememberingSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33422FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift */; };
+		DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA222EA1228A03C2002B1171 /* ImageDownloadUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */; };
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
@@ -250,6 +254,9 @@
 		DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataDecoded.swift; sourceTree = "<group>"; };
+		DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABFormatTests.swift; sourceTree = "<group>"; };
+		DA19E33422FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlamofireRememberingSecurityPolicy.swift; sourceTree = "<group>"; };
+		DA19E33722FF4594002F8F2F /* NetworkConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkConnection.swift; sourceTree = "<group>"; };
 		DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageDownloadUtil.swift; sourceTree = "<group>"; };
 		DA28C35F2251F07000AB409C /* OSLogHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogHelper.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -471,6 +478,7 @@
 			isa = PBXGroup;
 			children = (
 				DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */,
+				DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */,
 				DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */,
 				DAB0B65D228C92630053E69B /* OpenHABSecurityTests.swift */,
 				DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */,
@@ -657,9 +665,11 @@
 				DA5D0F80223E9991007ADDBD /* Endpoint.swift */,
 				A08FF1492233498600203EED /* ClientCertificateManager.swift */,
 				A0C40F1D222E272C00E29713 /* OpenHABHTTPRequestOperation.swift */,
+				DA19E33722FF4594002F8F2F /* NetworkConnection.swift */,
 				DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */,
 				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
 				DFE104111973FC7500D94943 /* AFRememberingSecurityPolicy.swift */,
+				DA19E33422FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift */,
 				DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */,
 				DF4B84011885A51000F34902 /* OpenHABAppDataDelegate.swift */,
 				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
@@ -1078,6 +1088,7 @@
 				DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */,
 				DAB0B65F228C92A30053E69B /* AFRememberingSecurityPolicy.swift in Sources */,
 				DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */,
+				DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */,
 				DAC9394B22AD651400C5F423 /* Sitemap.swift in Sources */,
 				DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */,
 				DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */,
@@ -1089,6 +1100,7 @@
 				DAC9394822AD615500C5F423 /* Item.swift in Sources */,
 				DA15FF4C221DF7D800FF0FDA /* StringExtension.swift in Sources */,
 				DA5D0F82223E9991007ADDBD /* Endpoint.swift in Sources */,
+				DA19E33622FF4506002F8F2F /* AlamofireRememberingSecurityPolicy.swift in Sources */,
 				DAC9394A22AD650900C5F423 /* UserDefaultsRepository.swift in Sources */,
 				DAB0B660228C995B0053E69B /* OpenHABHTTPRequestOperation.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */,
@@ -1103,6 +1115,7 @@
 				DA7E1E4A22302287002AEFD8 /* OpenHABSitemapPage.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				DFE104121973FC7500D94943 /* AFRememberingSecurityPolicy.swift in Sources */,
+				DA19E33522FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */,
@@ -1151,6 +1164,7 @@
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
+				DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */,

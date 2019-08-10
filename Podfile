@@ -16,6 +16,7 @@ target 'openHAB' do
     pod 'SideMenu', '~> 5.0'
     pod 'FlexColorPicker'
     pod 'DynamicButton', '~> 6.2'
+    pod 'Alamofire', '~> 4.0'
 end
 
 target 'openHABTestsSwift' do
@@ -23,4 +24,5 @@ target 'openHABTestsSwift' do
     pod 'GDataXML-HTML', '~> 1.3.0'
     pod 'AFNetworking', '~> 2.6.0'
     #pod 'AFNetworking', '~> 3.0'
+    pod 'Alamofire', '~> 4.0'
 end

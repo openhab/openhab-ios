@@ -866,6 +866,31 @@ extension OpenHABViewController: AFRememberingSecurityPolicyDelegate {
     }
 }
 
+// MARK: - AlamofireRememberingSecurityPolicyDelegate
+extension OpenHABViewController: AlamofireRememberingSecurityPolicyDelegate {
+    // delegate should ask user for a decision on what to do with invalid certificate
+    func evaluateServerTrust(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
+        DispatchQueue.main.async(execute: {
+            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            self.present(alertView, animated: true) {}
+        })
+    }
+
+    // certificate received from openHAB doesn't match our record, ask user for a decision
+    func evaluateCertificateMismatch(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
+        DispatchQueue.main.async(execute: {
+            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in  policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            self.present(alertView, animated: true) {}
+        })
+    }
+}
+
 // MARK: - ClientCertificateManagerDelegate
 extension OpenHABViewController: ClientCertificateManagerDelegate {
 
