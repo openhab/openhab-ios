@@ -14,21 +14,12 @@ import os.log
 // serverTrustPolicyManager --> serverTrustManager
 // ServerTrustPolicyManager --> ServerTrustManager
 
-// SessionStateProvider
-// AFSecurityPolicy
-
 class NetworkConnection {
 
     static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
 
     var manager: Alamofire.SessionManager!
     static let shared = NetworkConnection()
-
-    open class MyServerTrustPolicyManager: ServerTrustPolicyManager {
-        open override func serverTrustPolicy(forHost host: String) -> ServerTrustPolicy? {
-            return ServerTrustPolicy.disableEvaluation
-        }
-    }
 
     init() {
         manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate(), serverTrustPolicyManager: AlamofireRememberingSecurityPolicy(ignoreCertificates: true) )
