@@ -17,6 +17,24 @@ protocol AlamofireRememberingSecurityPolicyDelegate: NSObjectProtocol {
     func evaluateCertificateMismatch(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
 }
 
+func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
+    // Returns the leaf certificate from a SecTrust object (that is always the
+    // certificate at index 0).
+    var result: SecCertificate?
+
+    if let trust = trust {
+        if SecTrustGetCertificateCount(trust) > 0 {
+            result = SecTrustGetCertificateAtIndex(trust, 0)
+            return result
+        } else {
+            return nil
+        }
+    } else {
+        return nil
+    }
+
+}
+
 class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
     class func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
@@ -165,7 +183,7 @@ class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
             case .permitAlways:
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
-                AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                AlamofireRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
                 return true
             case .undecided:
                 return false

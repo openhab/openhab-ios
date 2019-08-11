@@ -9,6 +9,7 @@
 //
 
 import os.log
+import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
 

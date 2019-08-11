@@ -197,14 +197,14 @@ class OpenHABViewController: UIViewController {
                     var registrationRequest = URLRequest(url: registrationUrl)
                     os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
                     registrationRequest.setAuthCredentials(openHABUsername, openHABPassword)
-                    let registrationOperation = OpenHABHTTPRequestOperation(request: registrationRequest, delegate: self)
-                    registrationOperation.setCompletionBlockWithSuccess({ operation, responseObject in
-                        os_log("my.openHAB registration sent", log: .notifications, type: .info)
-                    }, failure: { operation, error in
-                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-
-                    })
-                    registrationOperation.start()
+                    NetworkConnection().manager.request(registrationRequest).responseJSON { (response) in
+                        switch response.result {
+                        case .success:
+                            os_log("my.openHAB registration sent", log: .notifications, type: .info)
+                        case .failure(let error):
+                            os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                        }
+                    }
                 }
             }
         }
@@ -752,27 +752,28 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
 
             pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
             pageRequest.timeoutInterval = 10.0
-            let versionPageOperation = OpenHABHTTPRequestOperation(request: pageRequest, delegate: self)
-            versionPageOperation.setCompletionBlockWithSuccess({ operation, responseObject in
-                os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
-                self.appData?.openHABVersion = 2
-                DispatchQueue.main.async {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                }
-                self.selectSitemap()
-            }, failure: { operation, error in
-                os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
-                self.appData?.openHABVersion = 1
-                DispatchQueue.main.async {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                }
-                os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                self.selectSitemap()
-            })
             DispatchQueue.main.async {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
-            versionPageOperation.start()
+            commandOperation = NetworkConnection().manager.request(pageRequest).responseJSON { (response) in
+                switch response.result {
+                case .success:
+                    os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
+                    self.appData?.openHABVersion = 2
+                    DispatchQueue.main.async {
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                    }
+                    self.selectSitemap()
+                case .failure(let error):
+                    os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
+                    self.appData?.openHABVersion = 1
+                    DispatchQueue.main.async {
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                    }
+                    os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    self.selectSitemap()
+                }
+            }
         }
     }
 
@@ -843,31 +844,6 @@ extension OpenHABViewController: ColorPickerUITableViewCellDelegate {
         if let colorPickerViewController = colorPickerViewController {
             navigationController?.pushViewController(colorPickerViewController, animated: true)
         }
-    }
-}
-
-// MARK: - AFRememberingSecurityPolicyDelegate
-extension OpenHABViewController: AFRememberingSecurityPolicyDelegate {
-    // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async(execute: {
-            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
-        })
-    }
-
-    // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async(execute: {
-            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in  policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
-        })
     }
 }
 
