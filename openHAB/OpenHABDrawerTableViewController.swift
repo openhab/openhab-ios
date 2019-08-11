@@ -41,8 +41,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
 
-            let decoder = JSONDecoder()
-
             let operation = NetworkConnection()
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
 

@@ -22,6 +22,7 @@ class NetworkConnection {
     static let shared = NetworkConnection()
 
     init() {
+
         manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate(), serverTrustPolicyManager: AlamofireRememberingSecurityPolicy(ignoreCertificates: true) )
 
         manager.delegate.sessionDidReceiveChallenge = { session, challenge in

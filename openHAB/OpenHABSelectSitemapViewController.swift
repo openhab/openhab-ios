@@ -60,9 +60,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                     case .success:
                         self.sitemaps = []
                         os_log("Sitemap response", log: .default, type: .info)
-
                         if let data = response.data {
-
                             // If we are talking to openHAB 1.X, talk XML
                             if self.appData?.openHABVersion == 1 {
                                 os_log("openHAB 1", log: .default, type: .info)
