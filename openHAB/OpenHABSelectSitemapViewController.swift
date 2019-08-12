@@ -53,7 +53,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                 let response = responseObject as? Data
                 os_log("Sitemap response", log: .default, type: .info)
                 self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
-                self.appData?.sitemaps = self.sitemaps
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false

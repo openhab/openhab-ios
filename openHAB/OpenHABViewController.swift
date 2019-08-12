@@ -517,12 +517,9 @@ class OpenHABViewController: UIViewController {
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
-
-                self.appData?.sitemaps = self.sitemaps
-
                 switch self.sitemaps.count {
                 case 2...:
-                    if self.defaultSitemap != "" {
+                    if self.defaultSitemap != "" { 
                         let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
                         if sitemapToOpen != nil {
                             self.pageUrl = sitemapToOpen?.homepageLink ?? ""
