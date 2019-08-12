@@ -519,7 +519,7 @@ class OpenHABViewController: UIViewController {
                 self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
                 switch self.sitemaps.count {
                 case 2...:
-                    if self.defaultSitemap != "" { 
+                    if self.defaultSitemap != "" {
                         let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
                         if sitemapToOpen != nil {
                             self.pageUrl = sitemapToOpen?.homepageLink ?? ""
