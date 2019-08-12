@@ -516,46 +516,8 @@ class OpenHABViewController: UIViewController {
             operation.setCompletionBlockWithSuccess({ operation, responseObject in
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                self.sitemaps = []
-                // If we are talking to openHAB 1.X, talk XML
-                if self.appData?.openHABVersion == 1 {
-                    if let response = response {
-                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
-                    }
-                    var doc: GDataXMLDocument?
-                    if let response = response {
-                        doc = try? GDataXMLDocument(data: response)
-                    }
-                    if doc == nil {
-                        return
-                    }
-                    if let name = doc?.rootElement().name() {
-                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                    }
-                    if doc?.rootElement().name() == "sitemaps" {
-                        for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                            if let element = element as? GDataXMLElement {
-                                #if canImport(GDataXMLElement)
-                                let sitemap = OpenHABSitemap(xml: element)
-                                self.sitemaps.append(sitemap)
-                                #endif
-                            }
-                        }
-                    }
-                } else {
-                    // Newer versions speak JSON!
-                    if let response = response {
-                        do {
-                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                            let codingData = try response.decoded() as [OpenHABSitemap.CodingData]
-                            for codingDatum in codingData {
-                                self.sitemaps.append(codingDatum.openHABSitemap)
-                            }
-                        } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-                        }
-                    }
-                }
+                self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
+
                 self.appData?.sitemaps = self.sitemaps
 
                 switch self.sitemaps.count {
