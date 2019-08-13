@@ -344,6 +344,11 @@ class OpenHABViewController: UIViewController {
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
             drawer?.delegate = self
+            drawer?.drawerTableType = .with
+        case "showSelectSitemap":
+            let dest = segue.destination as! OpenHABDrawerTableViewController
+            dest.drawerTableType = .without
+
         default: break
         }
     }
@@ -909,9 +914,9 @@ extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
             else {
                 return
         }
-
         drawer.openHABRootUrl = openHABRootUrl
         drawer.delegate = self
+        drawer.drawerTableType = .with
     }
 }
 

@@ -64,14 +64,28 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
     return sitemaps
 }
 
+enum DrawerTableType {
+    case with
+    case without
+}
+
 class OpenHABDrawerTableViewController: UITableViewController {
     var sitemaps: [OpenHABSitemap] = []
     @objc var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-    var cellCount: Int = 0
     var drawerItems: [OpenHABDrawerItem] = []
     weak var delegate: ModalHandler?
+    var drawerTableType: DrawerTableType!
+
+    init(drawerTableType: DrawerTableType?) {
+        self.drawerTableType = drawerTableType
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,7 +93,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems = []
         sitemaps = []
         loadSettings()
-        setStandardDrawerItems()
+        if drawerTableType == .with {
+            setStandardDrawerItems()
+        }
         os_log("OpenHABDrawerTableViewController did load", log: .viewCycle, type: .info)
     }
 
@@ -102,13 +118,17 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.name < $1.name }
                 self.drawerItems.removeAll()
-                self.setStandardDrawerItems()
+                if self.drawerTableType == .with {
+                    self.setStandardDrawerItems()
+                }
                 self.tableView.reloadData()
             }, failure: { operation, error in
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
                 self.drawerItems.removeAll()
-                self.setStandardDrawerItems()
+                if self.drawerTableType == .with {
+                    self.setStandardDrawerItems()
+                }
                 self.tableView.reloadData()
             })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -215,9 +235,18 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let prefs = UserDefaults.standard
             prefs.setValue(sitemap.name, forKey: "defaultSitemap")
             appData?.rootViewController?.pageUrl = ""
-            dismiss(animated: true) {
-                self.delegate?.modalDismissed(to: .root)
+            switch drawerTableType {
+            case .with?:
+                dismiss(animated: true) {
+                    self.delegate?.modalDismissed(to: .root)
+                }
+            case .without?:
+                appData?.rootViewController?.pageUrl = ""
+                navigationController?.popToRootViewController(animated: true)
+            case .none:
+                break
             }
+
         } else {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]
