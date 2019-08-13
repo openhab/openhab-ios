@@ -348,6 +348,7 @@ class OpenHABViewController: UIViewController {
         case "showSelectSitemap":
             let dest = segue.destination as! OpenHABDrawerTableViewController
             dest.drawerTableType = .without
+            dest.delegate = self
 
         default: break
         }
