@@ -9,7 +9,6 @@
 //
 
 import os.log
-import SDWebImage
 import UIKit
 
 class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate {
@@ -111,9 +110,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
         if indexPath.section == 1 && indexPath.row == 2 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
-            let imageCache = SDImageCache.shared
-            imageCache.clearMemory()
-            imageCache.clearDisk()
+//            let imageCache = SDImageCache.shared
+//            imageCache.clearMemory()
+//            imageCache.clearDisk()
         }
     }
 

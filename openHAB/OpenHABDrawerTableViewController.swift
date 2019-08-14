@@ -10,7 +10,6 @@
 
 import DynamicButton
 import os.log
-import SDWebImage
 import UIKit
 
 func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
@@ -187,18 +186,33 @@ class OpenHABDrawerTableViewController: UITableViewController {
         cell.customImageView.subviews.forEach { $0.removeFromSuperview() }
 
         if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
+            let imageView = UIImageView(frame: cell.customImageView.bounds)
+
             cell.customTextLabel?.text = sitemaps[indexPath.row].label
             if sitemaps[indexPath.row].icon != "" {
-                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url
+                if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url {
+                    var imageRequest = URLRequest(url: iconURL)
+                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
+                    imageRequest.timeoutInterval = 10.0
 
-                let imageView = UIImageView(frame: cell.customImageView.bounds)
-                imageView.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
-                cell.customImageView.addSubview(imageView)
+                    let operation = NetworkConnection()
+                    operation.manager.request(imageRequest)
+                        .validate(statusCode: 200..<300)
+                        .responseData { (response) in
+                            switch response.result {
+                            case .success:
+                                if let data = response.data {
+                                    imageView.image = UIImage(data: data)
+                                }
+                            case .failure:
+                                imageView.image = UIImage(named: "icon-76x76.png")
+                            }
+                    }
+                }
             } else {
-                let imageView = UIImageView(frame: cell.customImageView.bounds)
                 imageView.image = UIImage(named: "icon-76x76.png")
-                cell.customImageView.addSubview(imageView)
             }
+            cell.customImageView.addSubview(imageView)
         } else {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]

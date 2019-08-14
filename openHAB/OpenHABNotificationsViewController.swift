@@ -10,7 +10,6 @@
 
 import DynamicButton
 import os.log
-import SDWebImage
 import SideMenu
 import UIKit
 
@@ -133,8 +132,28 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
         }
 
-        let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url
-        cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
+        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
+                    var imageRequest = URLRequest(url: iconUrl)
+                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
+                    imageRequest.timeoutInterval = 10.0
+
+                    let operation = NetworkConnection()
+                    operation.manager.request(imageRequest)
+                        .validate(statusCode: 200..<300)
+                        .responseData { (response) in
+                            switch response.result {
+                            case .success:
+                                if let data = response.data {
+                                    cell?.imageView?.image = UIImage(data: data)
+                                }
+                            case .failure:
+                                cell?.imageView?.image = UIImage(named: "icon-76x76.png")
+                            }
+                    }
+            } else {
+                cell?.imageView?.image = UIImage(named: "icon-29x29.png")
+            }
+
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
         }

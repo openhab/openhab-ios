@@ -9,7 +9,6 @@
 //
 
 import os.log
-import SDWebImage
 import UIKit
 
 class OpenHABSelectSitemapViewController: UITableViewController {
@@ -133,16 +132,17 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             cell.textLabel?.text = sitemap.name
         }
 
-        let imageBase = appData?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@"
+        let imageBase = (appData?.openHABVersion == 1 ? "%@/images/%@.png" : "%@/icon/%@")
 
         if sitemap.icon != "" {
-            var iconUrlString: String?
-            iconUrlString = String(format: imageBase, openHABRootUrl, sitemap.icon )
-            os_log("icon url = %{PUBLIC}@", log: .default, type: .info, iconUrlString ?? "")
-            cell.imageView?.sd_setImage(with: URL(string: iconUrlString ?? ""), placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            if let iconUrl = URL(string: String(format: imageBase, openHABRootUrl, sitemap.icon )) {
+                os_log("icon url = %{PUBLIC}@", log: .default, type: .info, String(format: imageBase, openHABRootUrl, sitemap.icon) )
+                cell.imageView?.setImageWith(iconUrl, placeholderImage: UIImage(named: "blankicon.png"))
+            }
         } else {
-            let iconUrlString = String(format: imageBase, openHABRootUrl, "")
-            cell.imageView?.sd_setImage(with: URL(string: iconUrlString), placeholderImage: UIImage(named: "blankicon.png"), options: [])
+            if let iconUrl = URL(string: String(format: imageBase, openHABRootUrl, "")) {
+                cell.imageView?.setImageWith(iconUrl, placeholderImage: UIImage(named: "blankicon.png"))
+            }
         }
         return cell
     }
