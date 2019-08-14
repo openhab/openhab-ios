@@ -1,0 +1,6 @@
+# The Deliverfile allows you to store various App Store Connect metadata
+# For more information, check out the docs
+# https://docs.fastlane.tools/actions/deliver/
+  app_version("2.1.0")
+  copyright("#{Time.now.year} openHAB Foundation e.V.")
+  overwrite_screenshots("true")

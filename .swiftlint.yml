@@ -1,0 +1,16 @@
+opt_in_rules: 
+  - sorted_imports
+  - empty_count
+disabled_rules: # rule identifiers to exclude from running
+  - line_length
+  - unused_closure_parameter
+  - force_cast
+  - identifier_name
+  - type_body_length
+  - cyclomatic_complexity
+  - file_length
+  - function_body_length
+  - todo
+  - nesting
+excluded: 
+  - Pods

@@ -1,2 +1,9 @@
 Pods
 xcuserdata
+git-template
+.DS_Store
+
+# fastlane
+fastlane/README.md
+fastlane/report.xml
+fastlane/screenshots/
