@@ -6,6 +6,7 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
+import Alamofire
 import os.log
 import UIKit
 
@@ -21,6 +22,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
+    private var downloadRequest: Alamofire.Request?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -127,8 +129,12 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
         imageRequest.timeoutInterval = 10.0
 
-        let operation = NetworkConnection()
-        operation.manager.request(imageRequest)
+        if downloadRequest != nil {
+            downloadRequest?.cancel()
+            downloadRequest = nil
+        }
+
+        downloadRequest = NetworkConnection().manager.request(imageRequest)
             .validate(statusCode: 200..<300)
             .responseData { (response) in
 
