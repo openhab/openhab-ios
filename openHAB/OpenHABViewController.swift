@@ -344,6 +344,12 @@ class OpenHABViewController: UIViewController {
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
             drawer?.delegate = self
+            drawer?.drawerTableType = .with
+        case "showSelectSitemap":
+            let dest = segue.destination as! OpenHABDrawerTableViewController
+            dest.openHABRootUrl = openHABRootUrl
+            dest.drawerTableType = .without
+            dest.delegate = self
         default: break
         }
     }
@@ -520,9 +526,8 @@ class OpenHABViewController: UIViewController {
                 switch self.sitemaps.count {
                 case 2...:
                     if self.defaultSitemap != "" {
-                        let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
-                        if sitemapToOpen != nil {
-                            self.pageUrl = sitemapToOpen?.homepageLink ?? ""
+                        if let sitemapToOpen = self.sitemap(byName: self.defaultSitemap) {
+                            self.pageUrl = sitemapToOpen.homepageLink
                             self.loadPage(false)
                         } else {
                             self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
@@ -909,9 +914,9 @@ extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
             else {
                 return
         }
-
         drawer.openHABRootUrl = openHABRootUrl
         drawer.delegate = self
+        drawer.drawerTableType = .with
     }
 }
 

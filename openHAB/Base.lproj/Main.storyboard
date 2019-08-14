@@ -561,8 +561,8 @@
                     <navigationItem key="navigationItem" id="N7h-KT-EtL"/>
                     <connections>
                         <outlet property="widgetTableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
-                        <segue destination="1hm-c1-IPh" kind="show" identifier="showSelectSitemap" id="IN7-RI-eVs"/>
                         <segue destination="TS8-mI-318" kind="presentation" identifier="sideMenu" id="UQA-38-N3R"/>
+                        <segue destination="MPp-H6-Zce" kind="show" identifier="showSelectSitemap" id="t07-wP-hEy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -942,7 +942,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <segue destination="1hm-c1-IPh" kind="show" identifier="showSelectSitemap" id="9JR-Li-4ww"/>
+                                            <segue destination="MPp-H6-Zce" kind="show" identifier="showSelectSitemap" id="z72-H1-TTm"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="5Rk-xB-wOS">
@@ -1070,44 +1070,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Wmr-RH-twI" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1103" y="875"/>
-        </scene>
-        <!--Select Sitemap-->
-        <scene sceneID="n2e-ly-9YF">
-            <objects>
-                <tableViewController id="1hm-c1-IPh" userLabel="Select Sitemap" customClass="OpenHABSelectSitemapViewController" customModule="openHAB" sceneMemberID="viewController">
-                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="7vi-ca-TKH">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SelectSitemapCell" textLabel="rh0-BL-ReK" style="IBUITableViewCellStyleDefault" id="QgP-w1-LJm">
-                                <rect key="frame" x="0.0" y="22" width="375" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="QgP-w1-LJm" id="rr6-DC-9oo">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.666666666666664"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" id="rh0-BL-ReK">
-                                            <rect key="frame" x="16" y="0.0" width="343" height="43.666666666666664"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="1hm-c1-IPh" id="OoA-zY-VNv"/>
-                            <outlet property="delegate" destination="1hm-c1-IPh" id="6l8-md-BuP"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Select Sitemap" id="U61-XK-nUi"/>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="sRc-bl-lQm" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1976" y="875"/>
         </scene>
         <!--Info-->
         <scene sceneID="9mb-1s-2yq">
@@ -1450,6 +1412,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="IN7-RI-eVs"/>
+        <segue reference="t07-wP-hEy"/>
     </inferredMetricsTieBreakers>
 </document>
