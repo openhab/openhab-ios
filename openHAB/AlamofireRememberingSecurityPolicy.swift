@@ -7,17 +7,15 @@
 //  Copyright (c) 2014 Victor Belov. All rights reserved.
 //
 
-import AFNetworking
+import Alamofire
 import os.log
 
-protocol AFRememberingSecurityPolicyDelegate: NSObjectProtocol {
+protocol AlamofireRememberingSecurityPolicyDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
+    func evaluateServerTrust(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
+    func evaluateCertificateMismatch(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
 }
-
-var trustedCertificates: [AnyHashable: Any] = [:]
 
 func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
     // Returns the leaf certificate from a SecTrust object (that is always the
@@ -37,13 +35,13 @@ func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
 
 }
 
-class AFRememberingSecurityPolicy: AFSecurityPolicy {
+class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
     class func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
         self.loadTrustedCertificates()
         if trustedCertificates.isEmpty {
             os_log("No cert store, creating", log: .remoteAccess, type: .info)
-            trustedCertificates = [AnyHashable: Any]()
+            trustedCertificates = [:]
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             self.saveTrustedCertificates()
         } else {
@@ -76,20 +74,18 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         case permitAlways
     }
     var evaluateResult: EvaluateResult = .undecided
-    weak var delegate: AFRememberingSecurityPolicyDelegate?
+    weak var delegate: AlamofireRememberingSecurityPolicyDelegate?
+
+    var allowInvalidCertificates: Bool = false
 
     // Init an AFRememberingSecurityPolicy and set ignore certificates setting
     init(ignoreCertificates: Bool) {
-        super.init()
+        super.init(policies: [:])
         allowInvalidCertificates = ignoreCertificates
     }
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    init(pinningMode: AFSSLPinningMode) {
-        super.init()
     }
 
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
@@ -115,13 +111,15 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
 
     }
 
-    override func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {
+    override func serverTrustPolicy(forHost host: String) -> ServerTrustPolicy? {
+        return .customEvaluation(evaluateServerTrust)
+    }
+
+    func evaluateServerTrust(_ serverTrust: SecTrust, forDomain domain: String) -> Bool {
         // Evaluates trust received during SSL negotiation and checks it against known ones,
         // against policy setting to ignore certificate errors and so on.
         var evaluateResult: SecTrustResultType = .invalid
-        guard let serverTrust = serverTrust else {
-            return false
-        }
+
         SecTrustEvaluate(serverTrust, &evaluateResult)
         if evaluateResult == .unspecified || evaluateResult == .proceed || allowInvalidCertificates {
             // This means system thinks this is a legal/usable certificate, just permit the connection
@@ -132,7 +130,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         let certificateData = SecCertificateCopyData(certificate!)
         // If we have a certificate for this domain
         // Obtain certificate we have and compare it with the certificate presented by the server
-        if let previousCertificateData = AFRememberingSecurityPolicy.certificateData(forDomain: domain) {
+        if let previousCertificateData = AlamofireRememberingSecurityPolicy.certificateData(forDomain: domain) {
             if CFEqual(previousCertificateData, certificateData) {
                 // If certificate matched one in our store - permit this connection
                 return true
@@ -156,7 +154,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                     case .permitAlways:
                         // User decided to accept invalid certificate and remember decision
                         // Add certificate to storage
-                        AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                        AlamofireRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
                         return true
                     case .undecided:
                         // Something went wrong, abort connection
@@ -185,7 +183,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
             case .permitAlways:
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
-                AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                AlamofireRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
                 return true
             case .undecided:
                 return false

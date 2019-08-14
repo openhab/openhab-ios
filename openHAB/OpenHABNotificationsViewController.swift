@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import DynamicButton
 import os.log
 import SideMenu
 import UIKit
@@ -28,33 +29,31 @@ extension UIBarButtonItem {
     }
 }
 
-class OpenHABNotificationsViewController: UITableViewController {
+class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavigationControllerDelegate {
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
+
+    var hamburgerButton: DynamicButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         notifications = []
         tableView.tableFooterView = UIView()
         refreshControl = UIRefreshControl()
-        refreshControl?.backgroundColor = UIColor.groupTableViewBackground
-        //    self.refreshControl.tintColor = [UIColor whiteColor];
         refreshControl?.addTarget(self, action: #selector(OpenHABNotificationsViewController.handleRefresh(_:)), for: .valueChanged)
         if let refreshControl = refreshControl {
-            tableView.addSubview(refreshControl)
+            tableView.refreshControl = refreshControl
         }
-        if let refreshControl = refreshControl {
-            tableView.sendSubviewToBack(refreshControl)
-        }
-        let rightDrawerButton = UIBarButtonItem.menuButton(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), imageName: "hamburgerMenuIcon-50.png")
-        navigationItem.setRightBarButton (rightDrawerButton, animated: true)
-    }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        self.hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
+        hamburgerButton.setStyle(.hamburger, animated: true)
+        hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+        hamburgerButton.strokeColor = self.view.tintColor
+
+        let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
+        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -70,33 +69,37 @@ class OpenHABNotificationsViewController: UITableViewController {
         if let notificationsUrl = Endpoint.notification(prefsURL: prefs.string(forKey: "remoteUrl") ?? "").url {
             var notificationsRequest = URLRequest(url: notificationsUrl)
             notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
-            let operation = OpenHABHTTPRequestOperation(request: notificationsRequest, delegate: nil)
 
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
-                if let response = responseObject as? Data {
-                    do {
-                        let codingDatas = try decoder.decode([OpenHABNotification.CodingData].self, from: response)
-                        for codingDatum in codingDatas {
-                            self.notifications.add(codingDatum.openHABNotification)
-                        }
-                    } catch {
-                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                    }
-                }
+            let operation = NetworkConnection()
+            operation.manager.request(notificationsRequest)
+                .validate(statusCode: 200..<300)
+                .responseJSON { (response) in
 
-                self.refreshControl?.endRefreshing()
-                self.tableView.reloadData()
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            }, failure: { operation, error in
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                self.refreshControl?.endRefreshing()
-            })
-            operation.start()
+                    switch response.result {
+                    case .success:
+                        if let data = response.data {
+                            do {
+                                let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
+                                for codingDatum in codingDatas {
+                                    self.notifications.add(codingDatum.openHABNotification)
+                                }
+                            } catch {
+                                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                            }
+
+                            self.refreshControl?.endRefreshing()
+                            self.tableView.reloadData()
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        }
+                    case .failure(let error):
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                        self.refreshControl?.endRefreshing()
+                    }
+            }
         }
     }
 
@@ -107,10 +110,6 @@ class OpenHABNotificationsViewController: UITableViewController {
 
     @objc func rightDrawerButtonPress(_ sender: Any?) {
         present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
-    }
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -134,8 +133,27 @@ class OpenHABNotificationsViewController: UITableViewController {
         }
 
         if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
-            cell?.imageView?.setImageWith(iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"))
-        }
+                    var imageRequest = URLRequest(url: iconUrl)
+                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
+                    imageRequest.timeoutInterval = 10.0
+
+                    let operation = NetworkConnection()
+                    operation.manager.request(imageRequest)
+                        .validate(statusCode: 200..<300)
+                        .responseData { (response) in
+                            switch response.result {
+                            case .success:
+                                if let data = response.data {
+                                    cell?.imageView?.image = UIImage(data: data)
+                                }
+                            case .failure:
+                                cell?.imageView?.image = UIImage(named: "icon-76x76.png")
+                            }
+                    }
+            } else {
+                cell?.imageView?.image = UIImage(named: "icon-29x29.png")
+            }
+
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
         }

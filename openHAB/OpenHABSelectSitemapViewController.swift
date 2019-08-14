@@ -19,13 +19,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
     var openHABUsername = ""
     var openHABPassword = ""
 
-    override init(style: UITableView.Style) {
-        super.init(style: style)
-
-        // Custom initialization
-
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABSelectSitemapViewController viewDidLoad", log: .viewCycle, type: .info)
@@ -53,87 +46,77 @@ class OpenHABSelectSitemapViewController: UITableViewController {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
 
-            let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest as URLRequest, delegate: nil)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
-                let response = responseObject as? Data
-                self.sitemaps = []
-                os_log("Sitemap response", log: .default, type: .info)
+            let operation = NetworkConnection()
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-                // If we are talking to openHAB 1.X, talk XML
-                if self.appData?.openHABVersion == 1 {
-                    os_log("openHAB 1", log: .default, type: .info)
+            operation.manager.request(sitemapsRequest)
+                .validate(statusCode: 200..<300)
+                .responseJSON { (response) in
+                    switch response.result {
+                    case .success:
+                        self.sitemaps = []
+                        os_log("Sitemap response", log: .default, type: .info)
+                        if let data = response.data {
+                            // If we are talking to openHAB 1.X, talk XML
+                            if self.appData?.openHABVersion == 1 {
+                                os_log("openHAB 1", log: .default, type: .info)
 
-                    if let response = response {
-                        os_log("%{PUBLIC}@", log: .default, type: .info, String(data: response, encoding: .utf8) ?? "")
-                    }
-                    var doc: GDataXMLDocument?
-                    if let response = response {
-                        doc = try? GDataXMLDocument(data: response)
-                    }
-                    if doc == nil {
-                        return
-                    }
-                    if let name = doc?.rootElement().name() {
-                        os_log("%{PUBLIC}@", log: .default, type: .info, name)
-                    }
-                    if doc?.rootElement().name() == "sitemaps" {
-                        for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                            if let element = element as? GDataXMLElement {
-                                #if canImport(GDataXMLElement)
+                                os_log("%{PUBLIC}@", log: .default, type: .info, String(data: data, encoding: .utf8) ?? "")
+                                let doc: GDataXMLDocument? = try? GDataXMLDocument(data: data)
+                                if doc == nil {
+                                    return
+                                }
+                                if let name = doc?.rootElement().name() {
+                                    os_log("%{PUBLIC}@", log: .default, type: .info, name)
+                                }
+                                if doc?.rootElement().name() == "sitemaps" {
+                                    for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
+                                        if let element = element as? GDataXMLElement {
+                                            #if canImport(GDataXMLElement)
 
-                                let sitemap = OpenHABSitemap(xml: element)
-                                self.sitemaps.append(sitemap)
-                                #endif
-                            }
-                        }
-                    } else {
-                        return
-                    }
-                } else {
-                    // Newer versions speak JSON!
-                    let decoder = JSONDecoder()
-                    if let response = response {
-                        os_log("openHAB 2", log: .default, type: .info)
+                                            let sitemap = OpenHABSitemap(xml: element)
+                                            self.sitemaps.append(sitemap)
+                                            #endif
+                                        }
+                                    }
+                                } else {
+                                    return
+                                }
+                            } else {
+                                // Newer versions speak JSON!
+                                os_log("openHAB 2", log: .default, type: .info)
 
-                        do {
-                            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                            let sitemapsCodingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: response)
-                            for sitemapCodingDatum in sitemapsCodingData {
-                                if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
-                                    os_log("Sitemap %{PUBLIC}@", log: .default, type: .info, sitemapCodingDatum.label)
+                                do {
+                                    os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
+                                    let sitemapsCodingData = try data.decoded() as [OpenHABSitemap.CodingData]
+                                    for sitemapCodingDatum in sitemapsCodingData {
+                                        if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
+                                            os_log("Sitemap %{PUBLIC}@", log: .default, type: .info, sitemapCodingDatum.label)
 
-                                    self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
+                                            self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
+                                        }
+                                    }
+                                } catch {
+                                    os_log("Should not throw %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
                                 }
                             }
-                        } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
                         }
+                        self.appData?.sitemaps = self.sitemaps
+                        self.tableView.reloadData()
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                    case .failure(let error):
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                        self.refreshControl?.endRefreshing()
                     }
-                }
-                self.appData?.sitemaps = self.sitemaps
-                self.tableView.reloadData()
-            }, failure: { operation, error in
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %{PUBLIC}@", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-            })
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            operation.start()
+            }
         }
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // Return the number of rows in the section.
         return sitemaps.count
     }
 

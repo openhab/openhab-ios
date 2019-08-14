@@ -150,5 +150,14 @@ extension Endpoint {
         os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url?.absoluteString ?? "")
         return components?.url
     }
+}
 
+extension URL {
+    init(staticString string: StaticString) {
+        guard let url = URL(string: "\(string)") else {
+            preconditionFailure("Invalid static URL string: \(string)")
+        }
+
+        self = url
+    }
 }

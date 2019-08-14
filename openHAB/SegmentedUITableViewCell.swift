@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 import os.log
+import UIKit
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
 
@@ -39,7 +40,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
                 widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
         }
 
-        widgetSegmentControl?.selectedSegmentIndex = Int(widget.mappingIndex(byCommand: widget.item?.state))
+        widgetSegmentControl?.selectedSegmentIndex = Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1)
         widgetSegmentControl?.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
     }
 

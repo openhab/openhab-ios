@@ -14,7 +14,7 @@ class DrawerUITableViewCell: UITableViewCell {
     //var textLabel: UILabel?
 
     @IBOutlet weak var customTextLabel: UILabel!
-    @IBOutlet weak var customImageView: UIImageView!
+    @IBOutlet weak var customImageView: UIView!
 
     required init?(coder: NSCoder) {
         os_log("DrawerUITableViewCell initWithCoder", log: .viewCycle, type: .info)

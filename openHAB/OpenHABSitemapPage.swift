@@ -44,15 +44,15 @@ class OpenHABSitemapPage: NSObject {
     var pageId = ""
     var title = ""
     var link = ""
-    var leaf = ""
+    var leaf: Bool?
 
     init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title
         self.link = link
-        self.leaf = leaf ? "true" : "false"
-        var ws = [OpenHABWidget]()
+        self.leaf = leaf
+        var ws: [OpenHABWidget] = []
         // This could be expressed recursively but this does the job on 2 levels 
         for w1 in widgets {
             ws.append(w1)
@@ -109,7 +109,7 @@ class OpenHABSitemapPage: NSObject {
         self.pageId = pageId
         self.title = title
         self.link = link
-        self.leaf = leaf ? "true" : "false"
+        self.leaf = leaf
         self.widgets = expandedWidgets
         self.widgets.forEach {
             $0.sendCommand = { [weak self] (item, command) in
@@ -125,7 +125,7 @@ extension OpenHABSitemapPage {
         let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: self.pageId,
                                   title: self.title,
                                   link: self.link,
-                                  leaf: self.leaf == "true" ? true : false,
+                                  leaf: self.leaf ?? false,
                                   expandedWidgets: try self.widgets.filter(isIncluded))
         return filteredOpenHABSitemapPage
     }

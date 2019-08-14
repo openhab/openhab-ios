@@ -13,7 +13,6 @@ import Foundation
 
 class OpenHABDataObject: NSObject {
     var openHABRootUrl = ""
-    var sitemaps: [OpenHABSitemap] = []
     var openHABUsername = ""
     var openHABPassword = ""
     var rootViewController: OpenHABViewController?

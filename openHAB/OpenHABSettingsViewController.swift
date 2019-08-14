@@ -11,7 +11,7 @@
 import os.log
 import UIKit
 
-class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelegate, UITextFieldDelegate {
+class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate {
     @IBOutlet var settingsTableView: UITableView!
 
     @IBOutlet weak var demomodeSwitch: UISwitch!
@@ -31,10 +31,6 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     var settingsDemomode = false
     var settingsIdleOff = false
     var settingsIconType: IconType = .png
-
-    override init(style: UITableView.Style) {
-        super.init(style: style)
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -83,7 +79,7 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
     }
 
     @objc func demomodeSwitchChange(_ sender: Any?) {
-        if (demomodeSwitch?.isOn)! {
+        if demomodeSwitch!.isOn {
             os_log("Demo is ON", log: .viewCycle, type: .info)
             disableConnectionSettings()
         } else {
@@ -96,15 +92,15 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         var ret: Int
         switch section {
         case 0:
-            if (demomodeSwitch?.isOn)! {
+            if demomodeSwitch!.isOn {
                 ret = 1
             } else {
                 ret = 5
             }
         case 1:
-            ret = 7
+            ret = 8
         default:
-            ret = 7
+            ret = 8
         }
         return ret
     }
@@ -128,17 +124,15 @@ class OpenHABSettingsViewController: UITableViewController, OpenHABAppDataDelega
         settingsTableView.reloadData()
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         os_log("OpenHABSettingsViewController prepareForSegue", log: .viewCycle, type: .info)
 
         if segue.identifier == "showSelectSitemap" {
             os_log("OpenHABSettingsViewController showSelectSitemap", log: .viewCycle, type: .info)
-
+            let dest = segue.destination as! OpenHABDrawerTableViewController
+            dest.drawerTableType = .without
+            dest.openHABRootUrl = appData?.openHABRootUrl ?? ""
+            dest.delegate = appData?.rootViewController
             updateSettings()
             saveSettings()
         }

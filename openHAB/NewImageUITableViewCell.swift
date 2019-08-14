@@ -124,22 +124,25 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
 
         var imageRequest = URLRequest(url: url)
-
         imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
         imageRequest.timeoutInterval = 10.0
-        let imageOperation = OpenHABHTTPRequestOperation(request: imageRequest, delegate: self as? AFRememberingSecurityPolicyDelegate)
 
-        imageOperation.setCompletionBlockWithSuccess({ [weak self] (operation, responseObject) in
-            if let response = responseObject as? Data {
-                self?.mainImageView?.image = UIImage(data: response)
-                self?.widget?.image = UIImage(data: response)
-                self?.didLoad?()
-            }
+        let operation = NetworkConnection()
+        operation.manager.request(imageRequest)
+            .validate(statusCode: 200..<300)
+            .responseData { (response) in
 
-        }, failure: { operation, error in
-            os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
-        })
-        imageOperation.start()
+                switch response.result {
+                case .success:
+                    if let data = response.data {
+                        self.mainImageView?.image = UIImage(data: data)
+                        self.widget?.image = UIImage(data: data)
+                        self.didLoad?()
+                    }
+                case .failure(let error):
+                    os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+                }
+        }
     }
 
     @objc func refreshImage(_ timer: Timer?) {

@@ -12,6 +12,5 @@ import Foundation
 
 class OpenHABDrawerItem: NSObject {
     var label = ""
-    var icon = ""
     var tag = ""
 }

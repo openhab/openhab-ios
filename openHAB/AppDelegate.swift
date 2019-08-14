@@ -55,7 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         loadSettingsDefaults()
 
-        AFRememberingSecurityPolicy.initializeCertificatesStore()
+        AlamofireRememberingSecurityPolicy.initializeCertificatesStore()
 
         registerForPushNotifications()
 
@@ -87,6 +87,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Notification registration depends on iOS version
     // This is the setup for iOS >10 notifications
     func registerForPushNotifications() {
+        #if DEBUG
+        // do not request authorization if running UITest
+        if ProcessInfo.processInfo.environment["UITest"] != nil {
+            return
+        }
+        #endif
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
             guard let self = self else { return }
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
@@ -116,7 +123,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
 
         if url.isFileURL {
-            let clientCertificateManager = OpenHABHTTPRequestOperation.clientCertificateManager
+            let clientCertificateManager = NetworkConnection.clientCertificateManager
             clientCertificateManager.delegate = appData!.rootViewController!
             return clientCertificateManager.startImportClientCertificate(url: url)
         }

@@ -9,6 +9,7 @@
 //
 
 import os.log
+import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
 
@@ -45,7 +46,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     func adj(_ raw: Double) -> Double {
-        let valueAdjustedToStep = floor((raw - widget.minValue) / widget.step) + widget.minValue
+        let valueAdjustedToStep = floor((raw - widget.minValue) / widget.step) * widget.step + widget.minValue
         return min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
     }
 
@@ -59,7 +60,10 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     func valueText(_ widgetValue: Double) -> String {
         let digits = max (-Decimal(widget.step).exponent, 0)
-        return String(format: "%.\(digits)f", widgetValue)
+        let numberFormatter = NumberFormatter()
+        numberFormatter.maximumFractionDigits = digits
+        numberFormatter.decimalSeparator  = "."
+        return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
     }
 
     override func displayWidget() {
@@ -72,8 +76,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @objc func sliderDidEndSliding (_ sender: UISlider) {
-        let res = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
-        os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider?.value ?? 0.0, res)
-        widget.sendCommand("\(res)")
+        let res = adj(Double(widgetSlider!.value))
+        os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider!.value, res)
+        widget.sendCommand(valueText(res))
     }
 }
