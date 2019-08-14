@@ -349,7 +349,6 @@ class OpenHABViewController: UIViewController {
             let dest = segue.destination as! OpenHABDrawerTableViewController
             dest.drawerTableType = .without
             dest.delegate = self
-
         default: break
         }
     }
@@ -526,9 +525,8 @@ class OpenHABViewController: UIViewController {
                 switch self.sitemaps.count {
                 case 2...:
                     if self.defaultSitemap != "" {
-                        let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
-                        if sitemapToOpen != nil {
-                            self.pageUrl = sitemapToOpen?.homepageLink ?? ""
+                        if let sitemapToOpen = self.sitemap(byName: self.defaultSitemap){
+                            self.pageUrl = sitemapToOpen.homepageLink
                             self.loadPage(false)
                         } else {
                             self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
