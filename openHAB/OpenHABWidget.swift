@@ -180,11 +180,11 @@ class OpenHABWidget: NSObject, MKAnnotation {
         sendCommand(item, command)
     }
 
-    func mappingIndex(byCommand command: String?) -> Int {
+    func mappingIndex(byCommand command: String?) -> Int? {
         for mapping in mappings where mapping.command == command {
             return (mappings as NSArray).index(of: mapping)
         }
-        return NSNotFound
+        return nil
     }
 
     var coordinate: CLLocationCoordinate2D {

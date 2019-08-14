@@ -347,6 +347,12 @@ class OpenHABViewController: UIViewController {
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
             drawer?.delegate = self
+            drawer?.drawerTableType = .with
+        case "showSelectSitemap":
+            let dest = segue.destination as! OpenHABDrawerTableViewController
+            dest.openHABRootUrl = openHABRootUrl
+            dest.drawerTableType = .without
+            dest.delegate = self
         default: break
         }
     }
@@ -519,50 +525,8 @@ class OpenHABViewController: UIViewController {
                 .responseJSON { (response) in
                     switch response.result {
                     case .success:
-                        self.sitemaps = []
-                        os_log("Sitemap response", log: .default, type: .info)
-                        if let data = response.data {
-                            // If we are talking to openHAB 1.X, talk XML
-                            if self.appData?.openHABVersion == 1 {
-                                os_log("openHAB 1", log: .default, type: .info)
-                                os_log("%{PUBLIC}@", log: .default, type: .info, String(data: data, encoding: .utf8) ?? "")
-                                let doc: GDataXMLDocument? = try? GDataXMLDocument(data: data)
-                                if doc == nil {
-                                    return
-                                }
-                                if let name = doc?.rootElement().name() {
-                                    os_log("%{PUBLIC}@", log: .default, type: .info, name)
-                                }
-                                if doc?.rootElement().name() == "sitemaps" {
-                                    for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                                        if let element = element as? GDataXMLElement {
-                                            #if canImport(GDataXMLElement)
-                                            let sitemap = OpenHABSitemap(xml: element)
-                                            self.sitemaps.append(sitemap)
-                                            #endif
-                                        }
-                                    }
-                                } else {
-                                    return
-                                }
-                            } else {
-                                // Newer versions speak JSON!
-                                os_log("openHAB 2", log: .default, type: .info)
-                                do {
-                                    os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                                    let sitemapsCodingData = try data.decoded() as [OpenHABSitemap.CodingData]
-                                    for sitemapCodingDatum in sitemapsCodingData {
-                                        if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
-                                            os_log("Sitemap %{PUBLIC}@", log: .default, type: .info, sitemapCodingDatum.label)
-                                            self.sitemaps.append(sitemapCodingDatum.openHABSitemap)
-                                        }
-                                    }
-                                } catch {
-                                    os_log("Should not throw %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
-                                }
-                            }
-                        }
-                        self.appData?.sitemaps = self.sitemaps
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        self.sitemaps = deriveSitemaps(response.data, version: self.appData?.openHABVersion)
                         switch self.sitemaps.count {
                         case 2...:
                             if self.defaultSitemap != "" {
@@ -956,9 +920,9 @@ extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
             else {
                 return
         }
-
         drawer.openHABRootUrl = openHABRootUrl
         drawer.delegate = self
+        drawer.drawerTableType = .with
     }
 }
 
