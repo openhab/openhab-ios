@@ -13,7 +13,7 @@ class OpenHABSDWebImageDownloaderOperation: SDWebImageDownloaderOperation {
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
             let dns = challenge.protectionSpace.distinguishedNames
             if dns != nil {
-                let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns!)
+                let identity = NetworkConnection.clientCertificateManager.evaluateTrust(distinguishedNames: dns!)
                 if identity != nil {
                     let credential = URLCredential.init(identity: identity!, certificates: nil, persistence: URLCredential.Persistence.forSession)
                     let disposition = URLSession.AuthChallengeDisposition.useCredential

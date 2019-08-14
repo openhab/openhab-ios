@@ -105,36 +105,41 @@ class OpenHABDrawerTableViewController: UITableViewController {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
-            let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: nil)
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
-                let response = responseObject as? Data
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("Sitemap response", log: .viewCycle, type: .info)
 
-                self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
-
-                if self.sitemaps.last?.name == "_default" {
-                    self.sitemaps = Array(self.sitemaps.dropLast())
-                }
-
-                // Sort the sitemaps alphabetically.
-                self.sitemaps.sort { $0.name < $1.name }
-                self.drawerItems.removeAll()
-                if self.drawerTableType == .with {
-                    self.setStandardDrawerItems()
-                }
-                self.tableView.reloadData()
-            }, failure: { operation, error in
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                self.drawerItems.removeAll()
-                if self.drawerTableType == .with {
-                    self.setStandardDrawerItems()
-                }
-                self.tableView.reloadData()
-            })
+            let operation = NetworkConnection()
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            operation.start()
+
+            operation.manager.request(sitemapsRequest)
+                .validate(statusCode: 200..<300)
+                .responseJSON { (response) in
+                    switch response.result {
+                    case .success:
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        os_log("Sitemap response", log: .viewCycle, type: .info)
+
+                        self.sitemaps = deriveSitemaps(response.data, version: self.appData?.openHABVersion)
+
+                        if self.sitemaps.last?.name == "_default" {
+                            self.sitemaps = Array(self.sitemaps.dropLast())
+                        }
+
+                        // Sort the sitemaps alphabetically.
+                        self.sitemaps.sort { $0.name < $1.name }
+                        self.drawerItems.removeAll()
+                        if self.drawerTableType == .with {
+                            self.setStandardDrawerItems()
+                        }
+                        self.tableView.reloadData()
+                    case .failure(let error):
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                        self.drawerItems.removeAll()
+                        if self.drawerTableType == .with {
+                            self.setStandardDrawerItems()
+                        }
+                        self.tableView.reloadData()
+                    }
+            }
         }
     }
 

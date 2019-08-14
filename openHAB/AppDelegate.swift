@@ -55,7 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         loadSettingsDefaults()
 
-        AFRememberingSecurityPolicy.initializeCertificatesStore()
+        AlamofireRememberingSecurityPolicy.initializeCertificatesStore()
 
         registerForPushNotifications()
 
@@ -123,7 +123,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
 
         if url.isFileURL {
-            let clientCertificateManager = OpenHABHTTPRequestOperation.clientCertificateManager
+            let clientCertificateManager = NetworkConnection.clientCertificateManager
             clientCertificateManager.delegate = appData!.rootViewController!
             return clientCertificateManager.startImportClientCertificate(url: url)
         }
