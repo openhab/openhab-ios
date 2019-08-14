@@ -51,10 +51,8 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
                 os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                 let sitemapsCodingData = try response.decoded() as [OpenHABSitemap.CodingData]
                 for sitemapCodingDatum in sitemapsCodingData {
-                    if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
-                        os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-                        sitemaps.append(sitemapCodingDatum.openHABSitemap)
-                    }
+                    os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
+                    sitemaps.append(sitemapCodingDatum.openHABSitemap)
                 }
             } catch {
                 os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
@@ -114,6 +112,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
                 self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
+
+                if self.sitemaps.last?.name == "_default" {
+                    self.sitemaps = Array(self.sitemaps.dropLast())
+                }
 
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.name < $1.name }
