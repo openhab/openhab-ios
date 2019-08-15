@@ -21,6 +21,8 @@ class NetworkConnection {
     var manager: Alamofire.SessionManager!
     static let shared = NetworkConnection()
 
+    //let UIImageView.af_sharedImageDownloader = ImageDownloader(sessionManager: manager)
+
     init() {
 
         manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate(), serverTrustPolicyManager: AlamofireRememberingSecurityPolicy(ignoreCertificates: true) )
