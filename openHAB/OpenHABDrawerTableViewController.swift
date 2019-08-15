@@ -13,57 +13,6 @@ import os.log
 import SDWebImage
 import UIKit
 
-func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
-    var sitemaps = [OpenHABSitemap]()
-
-    // If we are talking to openHAB 1.X, talk XML
-    if version == 1 {
-        os_log("openHAB 1", log: .viewCycle, type: .info)
-
-        if let response = response {
-            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
-        }
-        let doc: GDataXMLDocument? = try? GDataXMLDocument(data: response)
-
-        if doc == nil {
-            return []
-        }
-        if let name = doc?.rootElement().name() {
-            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-        }
-        if doc?.rootElement().name() == "sitemaps" {
-            for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                if let element = element as? GDataXMLElement {
-                    #if canImport(GDataXMLElement)
-                    let sitemap = OpenHABSitemap(xml: element)
-                    sitemaps.append(sitemap)
-                    #endif
-                }
-            }
-        } else {
-            return []
-        }
-    } else {
-        // Newer versions speak JSON!
-        if let response = response {
-            os_log("openHAB 2", log: .viewCycle, type: .info)
-            do {
-                os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                let sitemapsCodingData = try response.decoded() as [OpenHABSitemap.CodingData]
-                for sitemapCodingDatum in sitemapsCodingData {
-                    if sitemapsCodingData.count != 1 && sitemapCodingDatum.name != "_default" {
-                        os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-                        sitemaps.append(sitemapCodingDatum.openHABSitemap)
-                    }
-                }
-            } catch {
-                os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-            }
-        }
-    }
-    return sitemaps
-}
-
 class OpenHABDrawerTableViewController: UITableViewController {
     var sitemaps: [OpenHABSitemap] = []
     @objc var openHABRootUrl = ""
@@ -97,10 +46,15 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
-                self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
+                let sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
 
-                // Sort the sitemaps alphabetically.
-                self.sitemaps.sort { $0.name < $1.name }
+                // Don't show the `_default` sitemap in the drawer if it's the only one.
+                if sitemaps.count == 1 && sitemaps.first!.name == "_default" {
+                  self.sitemaps = []
+                } else {
+                  self.sitemaps = sitemaps
+                }
+
                 self.drawerItems.removeAll()
                 self.setStandardDrawerItems()
                 self.tableView.reloadData()

@@ -26,6 +26,9 @@
 		1224F7D6228A8F1700750965 /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7D4228A8F1700750965 /* AppMessageService.swift */; };
 		1224F7D9228A8F4700750965 /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7D7228A8F4700750965 /* ComplicationController.swift */; };
 		1224F7DA228A8F4700750965 /* ButtonTableRowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F7D8228A8F4700750965 /* ButtonTableRowController.swift */; };
+		282872252305214400EC025E /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
+		282872262305218000EC025E /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
+		282872272305218F00EC025E /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
 		501B5ED14B755B49EB0E71A2 /* Pods_openHABTestsSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 088C84E08071B9006F23C001 /* Pods_openHABTestsSwift.framework */; };
@@ -74,7 +77,6 @@
 		DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
 		DAB2D1B922348152009C6276 /* OpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */; };
 		DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.swift */; };
-		DAB2D1BC22357A34009C6276 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */; };
 		DAB2D1BE22357A3F009C6276 /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
 		DAC019B322B0E19500A0ED7B /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */; };
@@ -100,7 +102,6 @@
 		DAC9395822B0209100C5F423 /* URLSessionPinningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395722B0209100C5F423 /* URLSessionPinningDelegate.swift */; };
 		DAC9395922B0273800C5F423 /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE41318832323008B26AC /* NSMutableURLRequest+Auth.swift */; };
 		DAC9395A22B045C200C5F423 /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
-		DAE2F97D2203A46F008A345E /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
 		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
@@ -1066,13 +1067,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAB2D1BC22357A34009C6276 /* OpenHABSitemapPage.swift in Sources */,
-				DAE2F97D2203A46F008A345E /* OpenHABSitemap.swift in Sources */,
+				282872252305214400EC025E /* DataDecoded.swift in Sources */,
 				DAB2D1B922348152009C6276 /* OpenHABWidget.swift in Sources */,
 				DAB0B65E228C92630053E69B /* OpenHABSecurityTests.swift in Sources */,
 				DAC9394C22AD659C00C5F423 /* AppConstants.swift in Sources */,
 				DAC9394922AD62F500C5F423 /* OpenHabService.swift in Sources */,
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
+				282872272305218F00EC025E /* OpenHABSitemapPage.swift in Sources */,
 				DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */,
 				DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */,
 				DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */,
@@ -1088,6 +1089,7 @@
 				DA28C363225292FF00AB409C /* OSLogHelper.swift in Sources */,
 				DAC9394822AD615500C5F423 /* Item.swift in Sources */,
 				DA15FF4C221DF7D800FF0FDA /* StringExtension.swift in Sources */,
+				282872262305218000EC025E /* OpenHABSitemap.swift in Sources */,
 				DA5D0F82223E9991007ADDBD /* Endpoint.swift in Sources */,
 				DAC9394A22AD650900C5F423 /* UserDefaultsRepository.swift in Sources */,
 				DAB0B660228C995B0053E69B /* OpenHABHTTPRequestOperation.swift in Sources */,

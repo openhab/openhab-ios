@@ -12,6 +12,7 @@
 //
 
 import Foundation
+import os.log
 
 // The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
 // Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
@@ -25,6 +26,48 @@ struct ValueOrFalse<T: Decodable>: Decodable {
             value = try container.decode(T.self)
         } else {
             value = nil
+        }
+    }
+}
+
+func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
+    guard let response = response else {
+        return []
+    }
+
+    if version == 1 {
+        // If we are talking to openHAB 1.X, talk XML
+        os_log("openHAB 1", log: .viewCycle, type: .info)
+
+        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
+
+        guard let doc = try? GDataXMLDocument(data: response) else {
+            return []
+        }
+
+        if let name = doc.rootElement().name() {
+            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
+        }
+
+        guard doc.rootElement().name() == "sitemaps" else {
+            return []
+        }
+
+        return doc.rootElement().elements(forName: "sitemap")
+            .compactMap { $0 as? GDataXMLElement }
+            .map { OpenHABSitemap(xml: $0) }
+            .sorted { $0.name < $1.name }
+    } else {
+        // Newer versions speak JSON!
+        os_log("openHAB 2", log: .viewCycle, type: .info)
+
+        do {
+            return (try response.decoded() as [OpenHABSitemap.CodingData])
+                .map { $0.openHABSitemap }
+                .sorted { $0.name < $1.name }
+        } catch {
+            os_log("Failed parsing sitemaps from JSON: %{public}@", log: .notifications, type: .error, error.localizedDescription)
+            return []
         }
     }
 }
@@ -112,7 +155,6 @@ extension OpenHABSitemap.CodingData {
         self.homepageLink = homepageLink
     }
 
-#if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
         super.init()
@@ -125,7 +167,7 @@ extension OpenHABSitemap.CodingData {
                                 homepageLink = childChild.stringValue() ?? ""
                             }
                             if childChild.name() == "leaf" {
-                                leaf = childChild.stringValue() ?? ""
+                                leaf = childChild.stringValue() == "true"
                             }
                         }
                     }
@@ -137,5 +179,4 @@ extension OpenHABSitemap.CodingData {
             }
         }
     }
-#endif
 }

@@ -13,7 +13,6 @@ import Foundation
 import os.log
 
 extension OpenHABSitemapPage {
-
     struct CodingData: Decodable {
         let pageId: String?
         let title: String?
