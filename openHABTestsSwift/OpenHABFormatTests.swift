@@ -35,7 +35,7 @@ class OpenHABFormatTests: XCTestCase {
     }
 
     func testXMLSitemapDecoder() {
-        let json = """
+        let xml = """
 <sitemaps><sitemap>
     <name>default</name>
     <label>Welcome Home</label>
@@ -47,7 +47,7 @@ class OpenHABFormatTests: XCTestCase {
 
         var sitemaps = [OpenHABSitemap]()
 
-        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: json) {
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: xml) {
             if doc?.rootElement().name() == "sitemaps" {
                 for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
                     if let element = element as? GDataXMLElement {
@@ -59,50 +59,6 @@ class OpenHABFormatTests: XCTestCase {
         }
         XCTAssert(sitemaps[0].homepageLink == "http://192.168.170.5:8080/rest/sitemaps/default/default", "JSON Sitemap properly parsed")
 
-    }
-
-    func testXMLSitemapPageDecoder() {
-        let json = """
-<sitemap>
-    <name>default</name>
-    <label>Križ 62a</label>
-    <link>http://192.168.0.249:8080/rest/sitemaps/default</link>
-    <homepage>
-        <id>default</id>
-        <title>Križ 62a</title>
-        <link>http://192.168..249:8080/rest/sitemaps/default/default</link>
-    <leaf>false</leaf>
-    <widget>
-        <widgetId>default_0</widgetId>
-        <type>Frame</type>
-        <label/>
-        <icon>frame</icon>
-        <widget>
-            <widgetId>default_0_0</widgetId>
-            <type>Text</type>
-            <label>Nadstropje [21.2 °C]</label>
-        <icon>attic</icon>
-        <valuecolor>#008000</valuecolor>
-        <item>
-            <type>NumberItem</type>
-            <name>Office_Temperature</name>
-            <state>21.20</state>
-            <link>http://192.168.0.249:8080/rest/items/Office_Temperature</link>
-        </item>
-""".data(using: .utf8)!
-
-        var sitemaps = [OpenHABSitemap]()
-
-        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: json) {
-            if doc?.rootElement().name() == "sitemaps" {
-                for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                    if let element = element as? GDataXMLElement {
-                        let sitemap = OpenHABSitemap(xml: element)
-                        sitemaps.append(sitemap)
-                    }
-                }
-            }
-        }
     }
 
     func testXMLItemDecoder() {
@@ -117,44 +73,44 @@ class OpenHABFormatTests: XCTestCase {
 
         var item: OpenHABItem
 
-        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: xml) {
-            if let rootElement = doc?.rootElement() {
-                item = OpenHABItem(xml: rootElement)
-                XCTAssert(item.name == "Office_Temperature", "XML Sitemap properly parsed")
-            }
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: xml), let rootElement = doc?.rootElement() {
+            item = OpenHABItem(xml: rootElement)
+            XCTAssert(item.name == "Office_Temperature", "XML Sitemap properly parsed")
+        } else {
+            XCTFail("Not able to parse XML Sitemap")
         }
     }
 
     func testsingleXMLWidgetDecoder() {
         var widget: OpenHABWidget
 
-        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: singleWidgetXML) {
-            if let rootElement = doc?.rootElement() {
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: singleWidgetXML), let rootElement = doc?.rootElement() {
                 widget = OpenHABWidget(xml: rootElement)
-                XCTAssert(widget.item?.name == "Lights", "XML single Widget properly parsed")
-            }
+                XCTAssert(widget.item?.name == "Lights", "Single XML Widget properly parsed")
+        } else {
+            XCTFail("Not able to parse single XML widget")
         }
     }
 
     func testnestedXMLWidgetDecoder() {
         var widget: OpenHABWidget
 
-        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: nestedWidgetXML) {
-            if let rootElement = doc?.rootElement() {
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: nestedWidgetXML), let rootElement = doc?.rootElement() {
                 widget = OpenHABWidget(xml: rootElement)
-                XCTAssert(widget.widgets[0].item?.state == "OFF", "XML nested Widget properly parsed")
-            }
+                XCTAssert(widget.widgets[0].item?.state == "OFF", "Nested XML Widget properly parsed")
+        } else {
+            XCTFail("Not able to parse nested XML widget")
         }
     }
 
     func testXMLPageDecoder() {
         var sitemapPage: OpenHABSitemapPage
 
-        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: homepageXML) {
-            if let rootElement = doc?.rootElement() {
-                sitemapPage = OpenHABSitemapPage(xml: rootElement)
-                XCTAssert(sitemapPage.widgets[0].widgets[0].item?.state == "OFF", "XML nested Widget properly parsed")
-            }
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: homepageXML), let rootElement = doc?.rootElement() {
+            sitemapPage = OpenHABSitemapPage(xml: rootElement)
+            XCTAssert(sitemapPage.widgets[0].widgets[0].item?.state == "OFF", "XML sitemap properly parsed")
+        } else {
+            XCTFail("Not able to parse XML sitemap page")
         }
     }
 
@@ -163,12 +119,15 @@ class OpenHABFormatTests: XCTestCase {
 
         guard let doc = try? GDataXMLDocument(data: fullxml) else { return }
 
-        if doc.rootElement().name() == "page" {
-            if let rootElement = doc.rootElement() {
-                currentPage = OpenHABSitemapPage(xml: rootElement)
-                XCTAssert(currentPage.widgets[0].widgets[0].item?.state == "OFF", "XML nested Widget properly parsed")
-
+        if doc.rootElement().name() == "sitemap", let rootElement = doc.rootElement() {
+            for child in rootElement.children() {
+                if let child = child as? GDataXMLElement, child.name() == "homepage" {
+                    currentPage = OpenHABSitemapPage(xml: child)
+                    XCTAssert(currentPage.widgets[0].widgets[0].item?.state == "OFF", "Full XML sitemap page properly parsed")
+                }
             }
+        } else {
+            XCTFail("Not able to parse full XML sitemap page ")
         }
     }
 

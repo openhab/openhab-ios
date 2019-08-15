@@ -409,13 +409,15 @@ class OpenHABViewController: UIViewController {
                 if self.appData?.openHABVersion == 1 {
                     guard let doc = try? GDataXMLDocument(data: response) else { return }
                     if let name = doc.rootElement().name() {
-                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                        os_log("XML sitemmap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
                     }
-                    if doc.rootElement().name() == "page" {
-                        if let rootElement = doc.rootElement() {
-                            self.currentPage = OpenHABSitemapPage(xml: rootElement)
-                            if self.isFiltering {
-                                self.filterContentForSearchText(self.search.searchBar.text)
+                    if doc.rootElement().name() == "sitemap", let rootElement = doc.rootElement() {
+                        for child in rootElement.children() {
+                            if let child = child as? GDataXMLElement, child.name() == "homepage" {
+                                self.currentPage = OpenHABSitemapPage(xml: rootElement)
+                                if self.isFiltering {
+                                    self.filterContentForSearchText(self.search.searchBar.text)
+                                }
                             }
                         }
                     } else {
