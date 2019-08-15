@@ -23,21 +23,16 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
         if let response = response {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
         }
-        let doc: GDataXMLDocument? = try? GDataXMLDocument(data: response)
-
-        if doc == nil {
-            return []
-        }
-        if let name = doc?.rootElement().name() {
-            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-        }
-        if doc?.rootElement().name() == "sitemaps" {
-            for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                if let element = element as? GDataXMLElement {
-                    #if canImport(GDataXMLElement)
-                    let sitemap = OpenHABSitemap(xml: element)
-                    sitemaps.append(sitemap)
-                    #endif
+        if let doc = try? GDataXMLDocument(data: response) {
+            if let name = doc.rootElement().name() {
+                os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
+            }
+            if doc.rootElement().name() == "sitemaps" {
+                for element in doc.rootElement().elements(forName: "sitemap") ?? [] {
+                    if let element = element as? GDataXMLElement {
+                        let sitemap = OpenHABSitemap(xml: element)
+                        sitemaps.append(sitemap)
+                    }
                 }
             }
         } else {
