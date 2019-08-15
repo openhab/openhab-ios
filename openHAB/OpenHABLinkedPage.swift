@@ -24,7 +24,6 @@ import Foundation
         case link
     }
 
-#if canImport(GDataXMLElement)
     @objc init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["title", "icon", "link"]
         super.init()
@@ -33,7 +32,7 @@ import Foundation
                 if !(child.name() == "id") {
                     if let name = child.name() {
                         if propertyNames.contains(name) {
-                            setValue(child.stringValue, forKey: child.name() ?? "")
+                            setValue(child.stringValue(), forKey: child.name() ?? "")
                         }
                     }
                 } else {
@@ -42,5 +41,4 @@ import Foundation
             }
         }
     }
-#endif
 }

@@ -68,7 +68,6 @@ class OpenHABSitemapPage: NSObject {
         }
     }
 
-#if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["pageId", "title", "link", "leaf"]
         super.init()
@@ -79,7 +78,7 @@ class OpenHABSitemapPage: NSObject {
                     if !(child.name() == "id") {
                         if let name = child.name() {
                             if propertyNames.contains(name) {
-                                setValue(child.stringValue, forKey: child.name() ?? "")
+                                setValue(child.stringValue(), forKey: child.name() ?? "")
                             }
                         }
                     } else {
@@ -95,7 +94,6 @@ class OpenHABSitemapPage: NSObject {
             }
         }
     }
-#endif
 
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item = item else { return }

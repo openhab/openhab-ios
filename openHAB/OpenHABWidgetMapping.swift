@@ -15,7 +15,6 @@ import Foundation
     @objc var command = ""
     @objc var label = ""
 
-#if canImport(GDataXMLElement)
     @objc init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["command", "label"]
         super.init()
@@ -29,5 +28,4 @@ import Foundation
             }
         }
     }
-#endif
 }

@@ -104,11 +104,25 @@ class OpenHABFormatTests: XCTestCase {
             }
         }
         XCTAssert(sitemaps[0].homepageLink == "http://192.168.170.5:8080/rest/sitemaps/default/default", "JSON Sitemap properly parsed")
-<<<<<<< HEAD
-
-    }
-=======
     }
 
->>>>>>> 2f62e0e... Typos
+    func testXMLItemDecoder() {
+        let xml = """
+<item>
+        <type>NumberItem</type>
+        <name>Office_Temperature</name>
+        <state>21.20</state>
+        <link>http://192.168.0.249:8080/rest/items/Office_Temperature</link>
+    </item>
+""".data(using: .utf8)!
+
+        var item: OpenHABItem
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: xml) {
+            if let rootElement = doc?.rootElement() {
+                item = OpenHABItem(xml: rootElement)
+                XCTAssert(item.name == "Office_Temperature", "JSON Sitemap properly parsed")
+            }
+        }
+    }
 }

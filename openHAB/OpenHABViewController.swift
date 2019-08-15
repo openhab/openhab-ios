@@ -404,32 +404,26 @@ class OpenHABViewController: UIViewController {
                 os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, self.atmosphereTrackingId)
             }
 
-            let response = responseObject as? Data
-            // If we are talking to openHAB 1.X, talk XML
-            if self.appData?.openHABVersion == 1 {
-                var doc: GDataXMLDocument?
-                if let response = response {
-                    doc = try? GDataXMLDocument(data: response)
-                }
-                if doc == nil {
-                    return
-                }
-                if let name = doc?.rootElement().name() {
-                    os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                }
-                if doc?.rootElement().name() == "page" {
-                    if let rootElement = doc?.rootElement() {
-                        #if canImport(GDataXMLElement)
-                        self.currentPage = OpenHABSitemapPage(xml: rootElement)
-                        #endif
+            if let response = responseObject as? Data {
+                // If we are talking to openHAB 1.X, talk XML
+                if self.appData?.openHABVersion == 1 {
+                    guard let doc = try? GDataXMLDocument(data: response) else { return }
+                    if let name = doc.rootElement().name() {
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                    }
+                    if doc.rootElement().name() == "page" {
+                        if let rootElement = doc.rootElement() {
+                            self.currentPage = OpenHABSitemapPage(xml: rootElement)
+                            if self.isFiltering {
+                                self.filterContentForSearchText(self.search.searchBar.text)
+                            }
+                        }
+                    } else {
+                        os_log("Unable to find page root element", log: .remoteAccess, type: .info)
+                        return
                     }
                 } else {
-                    os_log("Unable to find page root element", log: .remoteAccess, type: .info)
-                    return
-                }
-            } else {
-                // Newer versions talk JSON!
-                if let response = response {
+                    // Newer versions talk JSON!
                     os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
                     do {
                         // Self-executing closure
@@ -437,7 +431,7 @@ class OpenHABViewController: UIViewController {
                         let openHABSitemapPage: OpenHABSitemapPage = try {
                             let sitemapPageCodingData = try response.decoded() as OpenHABSitemapPage.CodingData
                             return sitemapPageCodingData.openHABSitemapPage
-                        }()
+                            }()
 
                         self.currentPage = openHABSitemapPage
                         if self.isFiltering {
@@ -456,54 +450,54 @@ class OpenHABViewController: UIViewController {
             self.refreshControl?.endRefreshing()
             self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
             self.loadPage(true)
-        }, failure: { [weak self] operation, error in
-            guard let self = self else { return }
+            }, failure: { [weak self] operation, error in
+                guard let self = self else { return }
 
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-            self.atmosphereTrackingId = ""
-            if (error as NSError?)?.code == -1001 && longPolling {
-                os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                self.loadPage(false)
-            } else if (error as NSError?)?.code == -999 {
-                os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
-            } else {
-                // Error
-                DispatchQueue.main.async {
-                    if (error as NSError?)?.code == -1012 {
-                        var config = SwiftMessages.Config()
-                        config.duration = .seconds(seconds: 5)
-                        config.presentationStyle = .bottom
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                self.atmosphereTrackingId = ""
+                if (error as NSError?)?.code == -1001 && longPolling {
+                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
+                    self.loadPage(false)
+                } else if (error as NSError?)?.code == -999 {
+                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
+                } else {
+                    // Error
+                    DispatchQueue.main.async {
+                        if (error as NSError?)?.code == -1012 {
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
 
-                        SwiftMessages.show(config: config) {
-                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                            let view = MessageView.viewFromNib(layout: .cardView)
-                            // ... configure the view
-                            view.configureTheme(.error)
-                            view.configureContent(title: "Error", body: "SSL Certificate Error")
-                            view.button?.setTitle("Dismiss", for: .normal)
-                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                            return view
-                        }
-                    } else {
-                        var config = SwiftMessages.Config()
-                        config.duration = .seconds(seconds: 5)
-                        config.presentationStyle = .bottom
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: "Error", body: "SSL Certificate Error")
+                                view.button?.setTitle("Dismiss", for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
+                        } else {
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
 
-                        SwiftMessages.show(config: config) {
-                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                            let view = MessageView.viewFromNib(layout: .cardView)
-                            // ... configure the view
-                            view.configureTheme(.error)
-                            view.configureContent(title: "Error", body: error.localizedDescription)
-                            view.button?.setTitle("Dismiss", for: .normal)
-                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                            return view
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: "Error", body: error.localizedDescription)
+                                view.button?.setTitle("Dismiss", for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
                         }
                     }
+                    os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                 }
-                os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-            }
         })
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
         currentPageOperation?.start()

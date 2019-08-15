@@ -55,7 +55,7 @@ extension OpenHABItem.CodingData {
             if let child = child as? GDataXMLElement {
                 if let name = child.name() {
                     if propertyNames.contains(name) {
-                        setValue(child.stringValue, forKey: child.name() ?? "")
+                        setValue(child.stringValue(), forKey: child.name() ?? "")
                     }
                 }
             }
