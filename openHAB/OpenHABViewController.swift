@@ -129,7 +129,7 @@ class OpenHABViewController: UIViewController {
         self.navigationItem.searchController = search
 
         search.obscuresBackgroundDuringPresentation = false
-        search.searchBar.placeholder = "Search OpenHAB items"
+        search.searchBar.placeholder = "Search openHAB items"
         definesPresentationContext = true
 
         setupSideMenu()
