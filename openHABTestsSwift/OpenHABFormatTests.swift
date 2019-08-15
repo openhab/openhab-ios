@@ -80,5 +80,5 @@ class OpenHABFormatTests: XCTestCase {
         }
         XCTAssert(sitemaps[0].homepageLink == "http://192.168.170.5:8080/rest/sitemaps/default/default", "JSON Sitemap properly parsed")
 
-
+    }
 }
