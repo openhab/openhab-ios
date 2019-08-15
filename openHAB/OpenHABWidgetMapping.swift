@@ -11,11 +11,11 @@
 
 import Foundation
 
-@objc class OpenHABWidgetMapping: NSObject, Decodable {
-    @objc var command = ""
-    @objc var label = ""
+@objcMembers class OpenHABWidgetMapping: NSObject, Decodable {
+    var command = ""
+    var label = ""
 
-    @objc init(xml xmlElement: GDataXMLElement?) {
+    init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["command", "label"]
         super.init()
         for child in (xmlElement?.children())! {

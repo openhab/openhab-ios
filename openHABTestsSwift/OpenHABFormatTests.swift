@@ -136,13 +136,38 @@ class OpenHABFormatTests: XCTestCase {
         }
     }
 
-    func testnextedXMLWidgetDecoder() {
+    func testnestedXMLWidgetDecoder() {
         var widget: OpenHABWidget
 
         if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: nestedWidgetXML) {
             if let rootElement = doc?.rootElement() {
                 widget = OpenHABWidget(xml: rootElement)
                 XCTAssert(widget.widgets[0].item?.state == "OFF", "XML nested Widget properly parsed")
+            }
+        }
+    }
+
+    func testXMLPageDecoder() {
+        var sitemapPage: OpenHABSitemapPage
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: homepageXML) {
+            if let rootElement = doc?.rootElement() {
+                sitemapPage = OpenHABSitemapPage(xml: rootElement)
+                XCTAssert(sitemapPage.widgets[0].widgets[0].item?.state == "OFF", "XML nested Widget properly parsed")
+            }
+        }
+    }
+
+    func testXMLFullParse() {
+        var currentPage: OpenHABSitemapPage
+
+        guard let doc = try? GDataXMLDocument(data: fullxml) else { return }
+
+        if doc.rootElement().name() == "page" {
+            if let rootElement = doc.rootElement() {
+                currentPage = OpenHABSitemapPage(xml: rootElement)
+                XCTAssert(currentPage.widgets[0].widgets[0].item?.state == "OFF", "XML nested Widget properly parsed")
+
             }
         }
     }
