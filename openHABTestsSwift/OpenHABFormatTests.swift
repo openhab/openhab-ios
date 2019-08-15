@@ -63,7 +63,32 @@ class OpenHABFormatTests: XCTestCase {
 
     func testXMLSitemapPageDecoder() {
         let json = """
-<sitemap><name>default</name><label>Križ 62a</label><link>http://192.168.0.249:8080/rest/sitemaps/default</link><homepage><id>default</id><title>Križ 62a</title><link>http://192.168.0.249:8080/rest/sitemaps/default/default</link><leaf>false</leaf><widget><widgetId>default_0</widgetId><type>Frame</type><label/><icon>frame</icon><widget><widgetId>default_0_0</widgetId><type>Text</type><label>Nadstropje [21.2 °C]</label><icon>attic</icon><valuecolor>#008000</valuecolor><item><type>NumberItem</type><name>Office_Temperature</name><state>21.20</state><link>http://192.168.0.249:8080/rest/items/Office_Temperature</link></item>
+<sitemap>
+    <name>default</name>
+    <label>Križ 62a</label>
+    <link>http://192.168.0.249:8080/rest/sitemaps/default</link>
+    <homepage>
+        <id>default</id>
+        <title>Križ 62a</title>
+        <link>http://192.168..249:8080/rest/sitemaps/default/default</link>
+    <leaf>false</leaf>
+    <widget>
+    <widgetId>default_0</widgetId>
+    <type>Frame</type>
+    <label/>
+    <icon>frame</icon>
+    <widget>
+        <widgetId>default_0_0</widgetId>
+        <type>Text</type>
+        <label>Nadstropje [21.2 °C]</label>
+    <icon>attic</icon>
+    <valuecolor>#008000</valuecolor>
+    <item>
+        <type>NumberItem</type>
+        <name>Office_Temperature</name>
+        <state>21.20</state>
+        <link>http://192.168.0.249:8080/rest/items/Office_Temperature</link>
+    </item>
 """.data(using: .utf8)!
 
         var sitemaps = [OpenHABSitemap]()
@@ -79,6 +104,6 @@ class OpenHABFormatTests: XCTestCase {
             }
         }
         XCTAssert(sitemaps[0].homepageLink == "http://192.168.170.5:8080/rest/sitemaps/default/default", "JSON Sitemap properly parsed")
-
+    }
 
 }
