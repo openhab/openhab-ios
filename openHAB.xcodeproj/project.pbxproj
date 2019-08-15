@@ -106,6 +106,7 @@
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAED514D2305BAC1003BCB31 /* OpenHABFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514C2305BAC1003BCB31 /* OpenHABFormatTests.swift */; };
+		DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514E2305CDE3003BCB31 /* XMLData.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
@@ -275,6 +276,7 @@
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DAED514C2305BAC1003BCB31 /* OpenHABFormatTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABFormatTests.swift; sourceTree = "<group>"; };
+		DAED514E2305CDE3003BCB31 /* XMLData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLData.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RollershutterUITableViewCell.swift; sourceTree = "<group>"; };
@@ -564,6 +566,7 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
+				DAED514E2305CDE3003BCB31 /* XMLData.swift */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				1224F793228A8AE400750965 /* openHABWatch */,
@@ -1093,6 +1096,7 @@
 				DAC9394A22AD650900C5F423 /* UserDefaultsRepository.swift in Sources */,
 				DAB0B660228C995B0053E69B /* OpenHABHTTPRequestOperation.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */,
+				DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

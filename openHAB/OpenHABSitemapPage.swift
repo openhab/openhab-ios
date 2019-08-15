@@ -69,7 +69,8 @@ class OpenHABSitemapPage: NSObject {
     }
 
     init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["pageId", "title", "link", "leaf"]
+        let propertyNamesString: Set =  ["pageId", "title", "link"]
+        let propertyNamesBool: Set = ["leaf"]
         super.init()
         widgets = [OpenHABWidget]()
         for child in (xmlElement?.children())! {
@@ -77,8 +78,11 @@ class OpenHABSitemapPage: NSObject {
                 if !(child.name() == "widget") {
                     if !(child.name() == "id") {
                         if let name = child.name() {
-                            if propertyNames.contains(name) {
-                                setValue(child.stringValue(), forKey: child.name() ?? "")
+                            if propertyNamesString.contains(name) {
+                                setValue(child.stringValue(), forKey: child.name() )
+                            }
+                            if propertyNamesBool.contains(name) {
+                                setValue(child.stringValue() == "true" ? true : false, forKey: child.name() )
                             }
                         }
                     } else {

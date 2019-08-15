@@ -73,22 +73,22 @@ class OpenHABFormatTests: XCTestCase {
         <link>http://192.168..249:8080/rest/sitemaps/default/default</link>
     <leaf>false</leaf>
     <widget>
-    <widgetId>default_0</widgetId>
-    <type>Frame</type>
-    <label/>
-    <icon>frame</icon>
-    <widget>
-        <widgetId>default_0_0</widgetId>
-        <type>Text</type>
-        <label>Nadstropje [21.2 °C]</label>
-    <icon>attic</icon>
-    <valuecolor>#008000</valuecolor>
-    <item>
-        <type>NumberItem</type>
-        <name>Office_Temperature</name>
-        <state>21.20</state>
-        <link>http://192.168.0.249:8080/rest/items/Office_Temperature</link>
-    </item>
+        <widgetId>default_0</widgetId>
+        <type>Frame</type>
+        <label/>
+        <icon>frame</icon>
+        <widget>
+            <widgetId>default_0_0</widgetId>
+            <type>Text</type>
+            <label>Nadstropje [21.2 °C]</label>
+        <icon>attic</icon>
+        <valuecolor>#008000</valuecolor>
+        <item>
+            <type>NumberItem</type>
+            <name>Office_Temperature</name>
+            <state>21.20</state>
+            <link>http://192.168.0.249:8080/rest/items/Office_Temperature</link>
+        </item>
 """.data(using: .utf8)!
 
         var sitemaps = [OpenHABSitemap]()
@@ -103,7 +103,6 @@ class OpenHABFormatTests: XCTestCase {
                 }
             }
         }
-        XCTAssert(sitemaps[0].homepageLink == "http://192.168.170.5:8080/rest/sitemaps/default/default", "JSON Sitemap properly parsed")
     }
 
     func testXMLItemDecoder() {
@@ -121,8 +120,31 @@ class OpenHABFormatTests: XCTestCase {
         if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: xml) {
             if let rootElement = doc?.rootElement() {
                 item = OpenHABItem(xml: rootElement)
-                XCTAssert(item.name == "Office_Temperature", "JSON Sitemap properly parsed")
+                XCTAssert(item.name == "Office_Temperature", "XML Sitemap properly parsed")
             }
         }
     }
+
+    func testsingleXMLWidgetDecoder() {
+        var widget: OpenHABWidget
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: singleWidgetXML) {
+            if let rootElement = doc?.rootElement() {
+                widget = OpenHABWidget(xml: rootElement)
+                XCTAssert(widget.item?.name == "Lights", "XML single Widget properly parsed")
+            }
+        }
+    }
+
+    func testnextedXMLWidgetDecoder() {
+        var widget: OpenHABWidget
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: nestedWidgetXML) {
+            if let rootElement = doc?.rootElement() {
+                widget = OpenHABWidget(xml: rootElement)
+                XCTAssert(widget.widgets[0].item?.state == "OFF", "XML nested Widget properly parsed")
+            }
+        }
+    }
+
 }
