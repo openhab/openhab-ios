@@ -77,7 +77,7 @@ extension OpenHABSitemap {
     struct HomePage: Decodable {
         let link: String
         let leaf: Bool
-        let timeout: ValueOrFalse<String>
+        let timeout: ValueOrFalse<String>?
         let widgets: [OpenHABWidget.CodingData]?
     }
 }
@@ -112,9 +112,9 @@ extension OpenHABSitemap.CodingData {
         self.homepageLink = homepageLink
     }
 
-#if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["name", "icon", "label", "link", "leaf"]
+        let propertyNamesString: Set = ["name", "icon", "label", "link"]
+        let propertyNamesBool: Set = ["leaf"]
         super.init()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
@@ -125,17 +125,19 @@ extension OpenHABSitemap.CodingData {
                                 homepageLink = childChild.stringValue() ?? ""
                             }
                             if childChild.name() == "leaf" {
-                                leaf = childChild.stringValue() ?? ""
+                                leaf = childChild.stringValue() == "true" ? true : false
                             }
                         }
                     }
                 } else if let name = child.name() {
-                    if propertyNames.contains(name) {
-                        setValue(child.stringValue, forKey: child.name() )
+                    if propertyNamesString.contains(name) {
+                        setValue(child.stringValue(), forKey: child.name() )
+                    }
+                    if propertyNamesBool.contains(name) {
+                        setValue(child.stringValue() == "true" ? true : false, forKey: child.name() )
                     }
                 }
             }
         }
     }
-#endif
 }

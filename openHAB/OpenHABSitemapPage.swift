@@ -38,13 +38,13 @@ extension OpenHABSitemapPage.CodingData {
     }
 }
 
-class OpenHABSitemapPage: NSObject {
+@objcMembers class OpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgets: [OpenHABWidget] = []
     var pageId = ""
     var title = ""
     var link = ""
-    var leaf: Bool?
+    var leaf = false
 
     init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
@@ -68,18 +68,21 @@ class OpenHABSitemapPage: NSObject {
         }
     }
 
-#if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["pageId", "title", "link", "leaf"]
+        let propertyNamesString: Set =  ["pageId", "title", "link"]
+        let propertyNamesBool: Set = ["leaf"]
         super.init()
-        widgets = [OpenHABWidget]()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
                 if !(child.name() == "widget") {
                     if !(child.name() == "id") {
                         if let name = child.name() {
-                            if propertyNames.contains(name) {
-                                setValue(child.stringValue, forKey: child.name() ?? "")
+                            let value = child.stringValue() ?? ""
+                            if propertyNamesString.contains(name) {
+                                setValue(value, forKey: name)
+                            }
+                            if propertyNamesBool.contains(name) {
+                                setValue(value == "true" ? true : false, forKey: name)
                             }
                         }
                     } else {
@@ -87,15 +90,25 @@ class OpenHABSitemapPage: NSObject {
                     }
                 } else {
                     let newWidget = OpenHABWidget(xml: child)
-                    newWidget.sendCommand = { [weak self] (item, command) in
-                        self?.sendCommand(item, commandToSend: command)
-                    }
                     widgets.append(newWidget)
                 }
             }
         }
+        var ws: [OpenHABWidget] = []
+        // This could be expressed recursively but this does the job on 2 levels
+        for w1 in widgets {
+            ws.append(w1)
+            for w2 in w1.widgets {
+                ws.append(w2)
+            }
+        }
+        self.widgets = ws
+        self.widgets.forEach {
+            $0.sendCommand = { [weak self] (item, command) in
+                self?.sendCommand(item, commandToSend: command)
+            }
+        }
     }
-#endif
 
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item = item else { return }
@@ -125,7 +138,7 @@ extension OpenHABSitemapPage {
         let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: self.pageId,
                                   title: self.title,
                                   link: self.link,
-                                  leaf: self.leaf ?? false,
+                                  leaf: self.leaf,
                                   expandedWidgets: try self.widgets.filter(isIncluded))
         return filteredOpenHABSitemapPage
     }

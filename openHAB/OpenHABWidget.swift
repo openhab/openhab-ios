@@ -49,7 +49,7 @@ extension OpenHABWidget.CodingData {
    }
 }
 
-class OpenHABWidget: NSObject, MKAnnotation {
+@objcMembers class OpenHABWidget: NSObject, MKAnnotation {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""
     var label = ""
@@ -118,11 +118,13 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.step = abs(self.step)
     }
 
-#if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text", "legend"]
+
+        let propertyNamesString: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "iconColor", "labelcolor", "valuecolor", "service", "state", "text"]
+        let propertyNamesDouble: Set = ["minValue", "maxValue", "step", "height"]
+        let propertyNamesBool: Set = ["isLeaf", "legend"]
+        let propertyNamesInt: Set = ["refresh"]
         super.init()
-        mappings = [OpenHABWidgetMapping]()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
                 if !(child.name() == "widget") {
@@ -135,16 +137,27 @@ class OpenHABWidget: NSObject, MKAnnotation {
                         linkedPage = OpenHABLinkedPage(xml: child)
                     } else {
                         if let name = child.name() {
-                            if propertyNames.contains(name) {
-                                setValue(child.stringValue, forKey: child.name() ?? "")
+                            let value = child.stringValue() ?? ""
+                            if propertyNamesString.contains(name) {
+                                setValue(value, forKey: name)
+                            }
+                            if propertyNamesBool.contains(name) {
+                                setValue(value == "true" ? true : false, forKey: name)
+                            }
+                            if propertyNamesInt.contains(name) {
+                                setValue(Int(value) ?? 0, forKey: name)
+                            }
+                            if propertyNamesDouble.contains(name) {
+                                setValue(Double(value) ?? 0, forKey: name)
                             }
                         }
                     }
+                } else {
+                    widgets.append(OpenHABWidget(xml: child))
                 }
             }
         }
     }
-#endif
 
     // Text prior to "["
     var labelText: String? {
@@ -163,7 +176,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
         return nil
     }
 
-    func sendCommand(_ command: Double) {
+    func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
 

@@ -59,6 +59,21 @@ class OpenHABTestsSwift: XCTestCase {
         }
     }
 
+    // Version 2.1 is without timeout
+    // Contributed by Tobi-1234 in #348
+    func testJSONShortSitemapDecoder() {
+        let json = """
+[{"name":"Haus","label":"HauptmenÃ¼","link":"http://192.xxxx:8080/rest/sitemaps/Haus","homepage":{"link":"http://192.xxx:8080/rest/sitemaps/Haus/Haus","leaf":false,"widgets":[]}},{"name":"_default","label":"Home","link":"http://192.Xxx:8080/rest/sitemaps/_default","homepage":{"link":"http://192.Xxxx:8080/rest/sitemaps/_default/_default","leaf":false,"widgets":[]}}]
+"""
+        let data = Data(json.utf8)
+        do {
+            let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: data)
+            XCTAssert(codingData[0].openHABSitemap.homepageLink == "http://192.xxx:8080/rest/sitemaps/Haus/Haus", "Sitemap properly parsed")
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
     func testJSONItem() {
         let json = """
         {

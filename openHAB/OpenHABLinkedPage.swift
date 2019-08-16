@@ -11,11 +11,11 @@
 
 import Foundation
 
-@objc class OpenHABLinkedPage: NSObject, Decodable {
+@objcMembers class OpenHABLinkedPage: NSObject, Decodable {
     var pageId = ""
-    @objc var title = ""
-    @objc var icon = ""
-    @objc var link = ""
+    var title = ""
+    var icon = ""
+    var link = ""
 
     private enum CodingKeys: String, CodingKey {
         case pageId = "id"
@@ -24,8 +24,7 @@ import Foundation
         case link
     }
 
-#if canImport(GDataXMLElement)
-    @objc init(xml xmlElement: GDataXMLElement?) {
+    init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["title", "icon", "link"]
         super.init()
         for child in (xmlElement?.children())! {
@@ -33,7 +32,7 @@ import Foundation
                 if !(child.name() == "id") {
                     if let name = child.name() {
                         if propertyNames.contains(name) {
-                            setValue(child.stringValue, forKey: child.name() ?? "")
+                            setValue(child.stringValue(), forKey: child.name() ?? "")
                         }
                     }
                 } else {
@@ -42,5 +41,4 @@ import Foundation
             }
         }
     }
-#endif
 }

@@ -30,8 +30,7 @@ extension OpenHABItem.CodingData {
     }
 }
 
-@objcMembers
-@objc final class OpenHABItem: NSObject {
+@objcMembers final class OpenHABItem: NSObject {
     var type = ""
     var groupType = ""
     var name = ""
@@ -48,7 +47,6 @@ extension OpenHABItem.CodingData {
         self.groupType = groupType ?? ""
     }
 
-    #if canImport(GDataXMLElement)
     init(xml xmlElement: GDataXMLElement?) {
         let propertyNames: Set = ["name", "type", "groupType", "state", "link" ]
         super.init()
@@ -56,13 +54,12 @@ extension OpenHABItem.CodingData {
             if let child = child as? GDataXMLElement {
                 if let name = child.name() {
                     if propertyNames.contains(name) {
-                        setValue(child.stringValue, forKey: child.name() ?? "")
+                        setValue(child.stringValue(), forKey: child.name() ?? "")
                     }
                 }
             }
         }
     }
-    #endif
 
     func stateAsDouble() -> Double {
         return state.numberValue?.doubleValue ?? 0
