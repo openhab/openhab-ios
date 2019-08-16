@@ -407,17 +407,16 @@ class OpenHABViewController: UIViewController {
             if let response = responseObject as? Data {
                 // If we are talking to openHAB 1.X, talk XML
                 if self.appData?.openHABVersion == 1 {
+                    let str = String(decoding: response, as: UTF8.self)
+                    os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+
                     guard let doc = try? GDataXMLDocument(data: response) else { return }
                     if let name = doc.rootElement().name() {
                         os_log("XML sitemmap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
                     }
                     openHABSitemapPage = {
-                        if doc.rootElement().name() == "sitemap", let rootElement = doc.rootElement() {
-                            for child in rootElement.children() {
-                                if let child = child as? GDataXMLElement, child.name() == "homepage" {
-                                    return OpenHABSitemapPage(xml: rootElement)
-                                }
-                            }
+                        if doc.rootElement().name() == "page", let rootElement = doc.rootElement() {
+                            return OpenHABSitemapPage(xml: rootElement)
                         }
                         return nil
                     }()

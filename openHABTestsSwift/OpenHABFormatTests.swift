@@ -131,4 +131,19 @@ class OpenHABFormatTests: XCTestCase {
         }
     }
 
+    func testXMLFullSitemapParse() {
+        var currentPage: OpenHABSitemapPage
+
+        guard let doc = try? GDataXMLDocument(data: fullsitemapXML) else { return }
+
+        if doc.rootElement().name() == "page", let rootElement = doc.rootElement() {
+
+            currentPage = OpenHABSitemapPage(xml: rootElement)
+            XCTAssert(currentPage.widgets[0].widgets[0].item?.state == "OFF", "Full XML sitemap page properly parsed")
+
+        } else {
+            XCTFail("Not able to parse full XML sitemap page ")
+        }
+    }
+
 }
