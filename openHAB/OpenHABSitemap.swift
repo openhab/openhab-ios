@@ -77,7 +77,7 @@ extension OpenHABSitemap {
     struct HomePage: Decodable {
         let link: String
         let leaf: Bool
-        let timeout: ValueOrFalse<String>
+        let timeout: ValueOrFalse<String>?
         let widgets: [OpenHABWidget.CodingData]?
     }
 }
