@@ -103,6 +103,28 @@ class OpenHABFormatTests: XCTestCase {
         }
     }
 
+    func testshortUrlXMLWidgetDecoder() {
+        var widget: OpenHABWidget
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: shorturlwidgetXML), let rootElement = doc?.rootElement() {
+            widget = OpenHABWidget(xml: rootElement)
+            XCTAssert(widget.url == "http://openhab:8080/proxy?sitemap=default.sitemap", "Sbort URL XML Widget properly parsed")
+        } else {
+            XCTFail("Not able to parse short XML widget with url")
+        }
+    }
+
+    func testUrlXMLWidgetDecoder() {
+        var widget: OpenHABWidget
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: urlwidgetXML), let rootElement = doc?.rootElement() {
+            widget = OpenHABWidget(xml: rootElement)
+            XCTAssert(widget.url == "http://openhab:8080/proxy?sitemap=default.sitemap&widgetId=01000001", "URL Widget properly parsed")
+        } else {
+            XCTFail("Not able to parse XML widget with url")
+        }
+    }
+
     func testXMLPageDecoder() {
         var sitemapPage: OpenHABSitemapPage
 
