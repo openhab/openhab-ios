@@ -14,6 +14,12 @@ class OpenHABFormatTests: XCTestCase {
         super.setUp()
     }
 
+    func testXMLParser() {
+        let xmlparser = XMLParser(data: singleWidgetXML)
+
+        NSXMLD
+    }
+
     func testValueToText() {
         func valueText(_ widgetValue: Double, step: Double) -> String {
             let digits = max (-Decimal(step).exponent, 0)
