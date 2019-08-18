@@ -56,6 +56,28 @@ let nestedWidgetXML = """
 </widget>
 """.data(using: .utf8)
 
+let urlwidgetXML = """
+<widget>
+    <widgetId>0100_0_0_1</widgetId>
+    <type>Webview</type>
+    <label/>
+    <icon>webview</icon>
+    <height>4</height>
+    <url>http://openhab:8080/proxy?sitemap=default.sitemap&widgetId=01000001</url>
+</widget>
+""".data(using: .utf8)
+
+let shorturlwidgetXML = """
+<widget>
+    <widgetId>0100_0_0_1</widgetId>
+    <type>Webview</type>
+    <label/>
+    <icon>webview</icon>
+    <height>4</height>
+    <url>http://openhab:8080/proxy?sitemap=default.sitemap</url>
+</widget>
+""".data(using: .utf8)
+
 let homepageXML = """
 <homepage>
 <id>Home</id>

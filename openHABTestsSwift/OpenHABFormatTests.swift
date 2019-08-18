@@ -6,6 +6,7 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
+import Foundation
 import XCTest
 
 class OpenHABFormatTests: XCTestCase {
@@ -100,6 +101,28 @@ class OpenHABFormatTests: XCTestCase {
                 XCTAssert(widget.widgets[0].item?.state == "OFF", "Nested XML Widget properly parsed")
         } else {
             XCTFail("Not able to parse nested XML widget")
+        }
+    }
+
+    func testshortUrlXMLWidgetDecoder() {
+        var widget: OpenHABWidget
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: shorturlwidgetXML), let rootElement = doc?.rootElement() {
+            widget = OpenHABWidget(xml: rootElement)
+            XCTAssert(widget.url == "http://openhab:8080/proxy?sitemap=default.sitemap", "Nested XML Widget properly parsed")
+        } else {
+            XCTFail("Not able to parse XML widget with url")
+        }
+    }
+
+    func testUrlXMLWidgetDecoder() {
+        var widget: OpenHABWidget
+
+        if let doc: GDataXMLDocument? = try? GDataXMLDocument(data: urlwidgetXML), let rootElement = doc?.rootElement() {
+            widget = OpenHABWidget(xml: rootElement)
+            XCTAssert(widget.url == "http://openhab:8080/proxy?sitemap=default.sitemap&widgetId=01000001", "Nested XML Widget properly parsed")
+        } else {
+            XCTFail("Not able to parse XML widget with url")
         }
     }
 
