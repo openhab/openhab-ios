@@ -23,6 +23,7 @@ platform :ios do
 
   desc "Build beta"
   lane :beta do
+    itc_team_id "118532141"
     ensure_git_status_clean
     increment_build_number(xcodeproj: "openHAB.xcodeproj")
     commit_version_bump(xcodeproj: "openHAB.xcodeproj")
