@@ -78,18 +78,21 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     var evaluateResult: EvaluateResult = .undecided
     weak var delegate: AFRememberingSecurityPolicyDelegate?
 
-    // Init an AFRememberingSecurityPolicy and set ignore certificates setting
-    init(ignoreCertificates: Bool) {
-        super.init()
-        allowInvalidCertificates = ignoreCertificates
-    }
-
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    init(pinningMode: AFSSLPinningMode) {
+    override init() {
         super.init()
+
+        let prefs = UserDefaults.standard
+        let ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
+
+        if ignoreSSLCertificate {
+            os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
+            self.allowInvalidCertificates = true
+            self.validatesDomainName = false
+        }
     }
 
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
@@ -193,5 +196,42 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         }
         // We have no way of handling it so no access!
         return false
+    }
+
+    func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
+        let dns = challenge.protectionSpace.distinguishedNames
+        if let dns = dns {
+            let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+            if let identity = identity {
+                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                challenge.sender!.use(credential, for: challenge)
+                return
+            }
+        }
+        // No client certificate available
+        challenge.sender!.cancel(challenge)
+    }
+
+    func handleAuthenticationChallenge(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+	if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+	    if self.evaluateServerTrust(challenge.protectionSpace.serverTrust!, forDomain: challenge.protectionSpace.host) {
+		let credential = URLCredential.init(trust: challenge.protectionSpace.serverTrust!)
+		return (URLSession.AuthChallengeDisposition.useCredential, credential)
+	    } else {
+		return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+	    }
+	} else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
+	    let dns = challenge.protectionSpace.distinguishedNames
+	    if let dns = dns {
+		let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+		if let identity = identity {
+		    let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+		    return (URLSession.AuthChallengeDisposition.useCredential, credential)
+		}
+	    }
+	    // No client certificate available
+	    return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+	}
+	return (URLSession.AuthChallengeDisposition.performDefaultHandling, nil)
     }
 }
