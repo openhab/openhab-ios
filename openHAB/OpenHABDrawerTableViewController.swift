@@ -108,7 +108,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
                 self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
 
-                if self.sitemaps.last?.name == "_default" {
+                if self.sitemaps.count > 1 && self.sitemaps.last?.name == "_default" {
                     self.sitemaps = Array(self.sitemaps.dropLast())
                 }
 
