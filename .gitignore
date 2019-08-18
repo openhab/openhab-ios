@@ -7,3 +7,6 @@ git-template
 fastlane/README.md
 fastlane/report.xml
 fastlane/screenshots/
+
+openHAB.app.dSYM.zip
+openHAB.ipa
