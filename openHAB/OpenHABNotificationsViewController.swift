@@ -75,7 +75,8 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+            operation.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
+                guard let self = self else { return }
                 if let response = responseObject as? Data {
                     do {
                         let codingDatas = try response.decoded(using: decoder) as [OpenHABNotification.CodingData]

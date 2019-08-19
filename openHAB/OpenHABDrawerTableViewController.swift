@@ -101,7 +101,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
             let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: nil)
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+            operation.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
+                guard let self = self else { return }
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("Sitemap response", log: .viewCycle, type: .info)

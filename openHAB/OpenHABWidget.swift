@@ -120,8 +120,8 @@ extension OpenHABWidget.CodingData {
 
     init(xml xmlElement: GDataXMLElement?) {
 
-        let propertyNamesString: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "iconColor", "labelcolor", "valuecolor", "service", "state", "text"]
-        let propertyNamesDouble: Set = ["minValue", "maxValue", "step", "height"]
+        let propertyNamesString: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "iconColor", "labelcolor", "valuecolor", "service", "state", "text", "height"]
+        let propertyNamesDouble: Set = ["minValue", "maxValue", "step"]
         let propertyNamesBool: Set = ["isLeaf", "legend"]
         let propertyNamesInt: Set = ["refresh"]
         super.init()
@@ -148,7 +148,7 @@ extension OpenHABWidget.CodingData {
                                 setValue(Int(value) ?? 0, forKey: name)
                             }
                             if propertyNamesDouble.contains(name) {
-                                setValue(Double(value) ?? 0, forKey: name)
+                                setValue(Double(value) ?? 0.0, forKey: name)
                             }
                         }
                     }
