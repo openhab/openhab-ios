@@ -1045,8 +1045,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         // Explictly set your cell's layout margins
         cell.layoutMargins = .zero
 
-        guard let videoCell = (cell as? VideoUITableViewCell) else { return }
-        videoCell.playerView.player?.play()
+        (cell as? VideoUITableViewCell)?.play()
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

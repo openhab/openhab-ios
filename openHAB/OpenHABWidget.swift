@@ -34,6 +34,7 @@ extension OpenHABWidget {
         let state: String?
         let text: String?
         let legend: Bool?
+        let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
         let linkedPage: OpenHABLinkedPage?
@@ -45,7 +46,7 @@ extension OpenHABWidget {
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = self.widgets.map { $0.openHABWidget }
-        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, encoding: self.encoding, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
    }
 }
 
@@ -70,6 +71,7 @@ extension OpenHABWidget.CodingData {
     var state = ""
     var text = ""
     var legend = false
+    var encoding = ""
     var item: OpenHABItem?
     var linkedPage: OpenHABLinkedPage?
     var mappings: [OpenHABWidgetMapping] = []
@@ -78,7 +80,7 @@ extension OpenHABWidget.CodingData {
 
     // This is an ugly initializer
 
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let d = with else { return ""}
@@ -108,6 +110,7 @@ extension OpenHABWidget.CodingData {
         self.state = state ?? ""
         self.text = text ?? ""
         self.legend = legend ?? false
+        self.encoding = encoding ?? ""
         self.item = item
         self.linkedPage = linkedPage
         self.mappings = mappings
@@ -120,7 +123,7 @@ extension OpenHABWidget.CodingData {
 
     init(xml xmlElement: GDataXMLElement?) {
 
-        let propertyNamesString: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "iconColor", "labelcolor", "valuecolor", "service", "state", "text", "height"]
+        let propertyNamesString: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "iconColor", "labelcolor", "valuecolor", "service", "state", "text", "height", "legend"]
         let propertyNamesDouble: Set = ["minValue", "maxValue", "step"]
         let propertyNamesBool: Set = ["isLeaf", "legend"]
         let propertyNamesInt: Set = ["refresh"]
