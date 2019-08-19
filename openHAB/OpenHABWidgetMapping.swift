@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Fuzi
 
 @objcMembers class OpenHABWidgetMapping: NSObject, Decodable {
     var command = ""
@@ -25,6 +26,18 @@ import Foundation
                         setValue(child.stringValue(), forKey: child.name() ?? "")
                     }
                 }
+            }
+        }
+    }
+
+    init(xml xmlElement: XMLElement) {
+        super.init()
+        for child in xmlElement.children {
+            switch child.tag {
+            case "command": self.command = child.stringValue
+            case "label": self.label = child.stringValue
+            default:
+                break
             }
         }
     }

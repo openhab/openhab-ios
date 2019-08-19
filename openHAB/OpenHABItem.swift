@@ -9,6 +9,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 import CoreLocation
+import Fuzi
 import os.log
 import UIKit
 
@@ -57,6 +58,21 @@ extension OpenHABItem.CodingData {
                         setValue(child.stringValue(), forKey: child.name() ?? "")
                     }
                 }
+            }
+        }
+    }
+
+    init(xml xmlElement: XMLElement) {
+        super.init()
+        for child in xmlElement.children {
+            switch child.tag {
+            case "name": self.name = child.stringValue
+            case "type": self.type = child.stringValue
+            case "groupType": self.groupType = child.stringValue
+            case "state": self.state = child.stringValue
+            case "link": self.link = child.stringValue
+            default:
+                break
             }
         }
     }

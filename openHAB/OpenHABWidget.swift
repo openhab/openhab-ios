@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Fuzi
 import MapKit
 import os.log
 
@@ -155,6 +156,47 @@ extension OpenHABWidget.CodingData {
                 } else {
                     widgets.append(OpenHABWidget(xml: child))
                 }
+            }
+        }
+    }
+
+    init(xml xmlElement: XMLElement) {
+        super.init()
+        for child in xmlElement.children {
+            switch child.tag {
+            case "widgetId": self.widgetId = child.stringValue
+            case "label": self.label = child.stringValue
+            case "type": self.type = child.stringValue
+            case "icon": self.icon = child.stringValue
+            case "url": self.url = child.stringValue
+            case "period": self.period = child.stringValue
+            case "iconColor": self.iconColor = child.stringValue
+            case "labelcolor": self.labelcolor = child.stringValue
+            case "valuecolor": self.valuecolor = child.stringValue
+            case "service": self.service = child.stringValue
+            case "state": self.state = child.stringValue
+            case "text": self.text = child.stringValue
+            case "height": self.height = child.stringValue
+
+            case "minValue": self.minValue = Double(child.stringValue) ?? 0.0
+            case "maxValue": self.maxValue = Double(child.stringValue) ?? 0.0
+            case "step": self.step = Double(child.stringValue) ?? 0.0
+
+            case "isLeaf": self.isLeaf = child.stringValue == "true" ? true : false
+            case "legend": self.legend = child.stringValue == "true" ? true : false
+
+            case "refresh": self.refresh = Int(child.stringValue) ?? 0
+
+            case "widget":  widgets.append(OpenHABWidget(xml: child))
+            case "item":
+                item = OpenHABItem(xml: child)
+            case "mapping":
+                let mapping = OpenHABWidgetMapping(xml: child)
+                mappings.append(mapping)
+            case "linkedPage":
+                linkedPage = OpenHABLinkedPage(xml: child)
+            default:
+                break
             }
         }
     }

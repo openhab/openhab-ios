@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Fuzi
 import os.log
 
 extension OpenHABSitemapPage {
@@ -69,9 +70,9 @@ extension OpenHABSitemapPage.CodingData {
     }
 
     init(xml xmlElement: GDataXMLElement?) {
+        super.init()
         let propertyNamesString: Set =  ["pageId", "title", "link"]
         let propertyNamesBool: Set = ["leaf"]
-        super.init()
         for child in (xmlElement?.children())! {
             if let child = child as? GDataXMLElement {
                 if !(child.name() == "widget") {
@@ -94,6 +95,36 @@ extension OpenHABSitemapPage.CodingData {
                 }
             }
         }
+        var ws: [OpenHABWidget] = []
+        // This could be expressed recursively but this does the job on 2 levels
+        for w1 in widgets {
+            ws.append(w1)
+            for w2 in w1.widgets {
+                ws.append(w2)
+            }
+        }
+        self.widgets = ws
+        self.widgets.forEach {
+            $0.sendCommand = { [weak self] (item, command) in
+                self?.sendCommand(item, commandToSend: command)
+            }
+        }
+    }
+
+    init(xml xmlElement: XMLElement) {
+        super.init()
+        for child in xmlElement.children {
+            switch child.tag {
+            case "widget":
+                widgets.append(OpenHABWidget(xml: child))
+            case "id": self.pageId = child.stringValue
+            case "title": self.title = child.stringValue
+            case "link": self.link = child.stringValue
+            case "leaf": self.leaf = child.stringValue == "true" ? true : false
+            default: break
+            }
+        }
+
         var ws: [OpenHABWidget] = []
         // This could be expressed recursively but this does the job on 2 levels
         for w1 in widgets {

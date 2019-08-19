@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Fuzi
 
 @objcMembers class OpenHABLinkedPage: NSObject, Decodable {
     var pageId = ""
@@ -38,6 +39,20 @@ import Foundation
                 } else {
                     pageId = child.stringValue() ?? ""
                 }
+            }
+        }
+    }
+
+    init(xml xmlElement: XMLElement) {
+        super.init()
+        for child in xmlElement.children {
+            switch child.tag {
+            case "title": self.title = child.stringValue
+            case "icon": self.icon = child.stringValue
+            case "link": self.link = child.stringValue
+            case "id": self.pageId = child.stringValue
+            default:
+                break
             }
         }
     }
