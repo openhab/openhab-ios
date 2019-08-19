@@ -13,9 +13,11 @@ class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
 
     init(request: URLRequest, delegate: AFRememberingSecurityPolicyDelegate?) {
         super.init(request: request)
-        super.setWillSendRequestForAuthenticationChallenge { (connection: NSURLConnection, challenge: URLAuthenticationChallenge) in
-			let policy = self.securityPolicy as! AFRememberingSecurityPolicy
-			let result = policy.handleAuthenticationChallenge(challenge: challenge)
+        super.setWillSendRequestForAuthenticationChallenge { [weak self] (connection: NSURLConnection, challenge: URLAuthenticationChallenge) in
+            guard let self = self else { return }
+
+            let policy = self.securityPolicy as! AFRememberingSecurityPolicy
+            let result = policy.handleAuthenticationChallenge(challenge: challenge)
             switch result.0 {
             case .useCredential:
                 challenge.sender!.use(result.1!, for: challenge)
@@ -24,15 +26,15 @@ class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
             case .rejectProtectionSpace:
                 break
             default:
-				if challenge.previousFailureCount == 0 {
-					if self.credential != nil {
-						challenge.sender!.use(self.credential!, for: challenge)
-					} else {
-						challenge.sender!.continueWithoutCredential(for: challenge)
-					}
-				} else {
-					challenge.sender!.continueWithoutCredential(for: challenge)
-				}
+                if challenge.previousFailureCount == 0 {
+                    if self.credential != nil {
+                        challenge.sender!.use(self.credential!, for: challenge)
+                    } else {
+                        challenge.sender!.continueWithoutCredential(for: challenge)
+                    }
+                } else {
+                    challenge.sender!.continueWithoutCredential(for: challenge)
+                }
             }
         }
 
