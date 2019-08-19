@@ -394,7 +394,9 @@ class OpenHABViewController: UIViewController {
 
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
-        commandOperation = NetworkConnection().manager.request(pageRequest).responseJSON { (response) in
+        commandOperation = NetworkConnection().manager.request(pageRequest).responseJSON { [weak self] (response) in
+            guard let self = self else { return }
+
             switch response.result {
             case .success:
                 os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
