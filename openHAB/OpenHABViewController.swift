@@ -78,8 +78,8 @@ class OpenHABViewController: UIViewController {
             commandOperation = OpenHABHTTPRequestOperation(request: commandRequest, delegate: self)
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
                 os_log("Command sent!", log: .remoteAccess, type: .info)
-            }, failure: { operation, error in
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                }, failure: { operation, error in
+                    os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
             if let link = item?.link {
@@ -510,7 +510,8 @@ class OpenHABViewController: UIViewController {
             sitemapsRequest.timeoutInterval = 10.0
             let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: self)
 
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+            operation.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
+                guard let self = self else { return }
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
