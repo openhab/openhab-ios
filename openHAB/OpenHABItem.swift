@@ -31,7 +31,7 @@ extension OpenHABItem.CodingData {
     }
 }
 
-@objcMembers final class OpenHABItem: NSObject {
+final class OpenHABItem: NSObject {
     var type = ""
     var groupType = ""
     var name = ""

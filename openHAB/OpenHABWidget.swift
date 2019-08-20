@@ -50,7 +50,7 @@ extension OpenHABWidget.CodingData {
    }
 }
 
-@objcMembers class OpenHABWidget: NSObject, MKAnnotation {
+class OpenHABWidget: NSObject, MKAnnotation {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""
     var label = ""
@@ -146,14 +146,10 @@ extension OpenHABWidget.CodingData {
             // Int
             case "refresh": self.refresh = Int(child.stringValue) ?? 0
             // Embedded 
-            case "widget":  widgets.append(OpenHABWidget(xml: child))
-            case "item":
-                item = OpenHABItem(xml: child)
-            case "mapping":
-                let mapping = OpenHABWidgetMapping(xml: child)
-                mappings.append(mapping)
-            case "linkedPage":
-                linkedPage = OpenHABLinkedPage(xml: child)
+            case "widget": widgets.append(OpenHABWidget(xml: child))
+            case "item": item = OpenHABItem(xml: child)
+            case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
+            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
             default:
                 break
             }

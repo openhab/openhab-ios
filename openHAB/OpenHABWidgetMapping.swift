@@ -12,7 +12,7 @@
 import Foundation
 import Fuzi
 
-@objcMembers class OpenHABWidgetMapping: NSObject, Decodable {
+class OpenHABWidgetMapping: NSObject, Decodable {
     var command = ""
     var label = ""
 

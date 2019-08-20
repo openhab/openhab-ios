@@ -98,4 +98,45 @@ class OpenHABNewXMLParserTests: XCTestCase {
         }
     }
 
+    func testXMLPageDecoder() {
+        var sitemapPage: OpenHABSitemapPage
+        do {
+            let document = try XMLDocument(data: homepageXML!)
+            if let root = document.root {
+                sitemapPage = OpenHABSitemapPage(xml: root)
+                XCTAssert(sitemapPage.widgets[0].widgets[0].item?.state == "OFF", "XML sitemap properly parsed")
+            }
+        } catch {
+            XCTFail("Not able to parse XML sitemap page")
+        }
+    }
+
+    func testXMLFullParse() {
+        var currentPage: OpenHABSitemapPage
+        do {
+            let document = try XMLDocument(data: fullxml!)
+            if let rootElement = document.root, rootElement.tag == "sitemap" {
+                for child in rootElement.children where child.tag == "homepage" {
+                    currentPage = OpenHABSitemapPage(xml: child)
+                    XCTAssert(currentPage.widgets[0].widgets[0].item?.state == "OFF", "Full XML sitemap page properly parsed")
+                }
+            }
+        } catch {
+            XCTFail("Not able to parse full XML sitemap page ")
+        }
+    }
+
+    func testXMLFullSitemapParse() {
+        var currentPage: OpenHABSitemapPage
+        do {
+            let document = try XMLDocument(data: fullsitemapXML!)
+            if let rootElement = document.root, rootElement.tag == "page" {
+                currentPage = OpenHABSitemapPage(xml: rootElement)
+                XCTAssert(currentPage.widgets[0].widgets[0].item?.state == "OFF", "Full XML sitemap page properly parsed")
+            }
+        } catch {
+            XCTFail("Not able to parse full XML sitemap page ")
+        }
+    }
+
 }

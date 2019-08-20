@@ -96,7 +96,7 @@ extension OpenHABSitemap.CodingData {
     }
 }
 
-@objcMembers final class OpenHABSitemap: NSObject {
+final class OpenHABSitemap: NSObject {
     var name = ""
     var icon = ""
     var label = ""

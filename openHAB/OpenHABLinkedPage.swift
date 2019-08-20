@@ -12,7 +12,7 @@
 import Foundation
 import Fuzi
 
-@objcMembers class OpenHABLinkedPage: NSObject, Decodable {
+class OpenHABLinkedPage: NSObject, Decodable {
     var pageId = ""
     var title = ""
     var icon = ""

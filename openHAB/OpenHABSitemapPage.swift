@@ -39,7 +39,7 @@ extension OpenHABSitemapPage.CodingData {
     }
 }
 
-@objcMembers class OpenHABSitemapPage: NSObject {
+class OpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgets: [OpenHABWidget] = []
     var pageId = ""
