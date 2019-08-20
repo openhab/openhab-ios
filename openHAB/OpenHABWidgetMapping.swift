@@ -16,20 +16,6 @@ import Fuzi
     var command = ""
     var label = ""
 
-    init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["command", "label"]
-        super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if let name = child.name() {
-                    if propertyNames.contains(name) {
-                        setValue(child.stringValue(), forKey: child.name() ?? "")
-                    }
-                }
-            }
-        }
-    }
-
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {

@@ -11,6 +11,7 @@
 import AVFoundation
 import AVKit
 import DynamicButton
+import Fuzi
 import os.log
 import SDWebImage
 import SDWebImageSVGCoder
@@ -410,16 +411,13 @@ class OpenHABViewController: UIViewController {
                     let str = String(decoding: response, as: UTF8.self)
                     os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
-                    guard let doc = try? GDataXMLDocument(data: response) else { return }
-                    if let name = doc.rootElement().name() {
+                    guard let doc = try? XMLDocument(data: response) else { return }
+                    if let rootElement = doc.root, let name = rootElement.tag {
                         os_log("XML sitemmap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                    }
-                    openHABSitemapPage = {
-                        if doc.rootElement().name() == "page", let rootElement = doc.rootElement() {
-                            return OpenHABSitemapPage(xml: rootElement)
+                        if name == "page" {
+                            openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                         }
-                        return nil
-                    }()
+                    }
                 } else {
                     // Newer versions talk JSON!
                     os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)

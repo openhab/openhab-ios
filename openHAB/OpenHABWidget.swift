@@ -119,47 +119,6 @@ extension OpenHABWidget.CodingData {
         self.step = abs(self.step)
     }
 
-    init(xml xmlElement: GDataXMLElement?) {
-
-        let propertyNamesString: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "iconColor", "labelcolor", "valuecolor", "service", "state", "text", "height"]
-        let propertyNamesDouble: Set = ["minValue", "maxValue", "step"]
-        let propertyNamesBool: Set = ["isLeaf", "legend"]
-        let propertyNamesInt: Set = ["refresh"]
-        super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if !(child.name() == "widget") {
-                    if child.name() == "item" {
-                        item = OpenHABItem(xml: child)
-                    } else if child.name() == "mapping" {
-                        let mapping = OpenHABWidgetMapping(xml: child)
-                        mappings.append(mapping)
-                    } else if child.name() == "linkedPage" {
-                        linkedPage = OpenHABLinkedPage(xml: child)
-                    } else {
-                        if let name = child.name() {
-                            let value = child.stringValue() ?? ""
-                            if propertyNamesString.contains(name) {
-                                setValue(value, forKey: name)
-                            }
-                            if propertyNamesBool.contains(name) {
-                                setValue(value == "true" ? true : false, forKey: name)
-                            }
-                            if propertyNamesInt.contains(name) {
-                                setValue(Int(value) ?? 0, forKey: name)
-                            }
-                            if propertyNamesDouble.contains(name) {
-                                setValue(Double(value) ?? 0.0, forKey: name)
-                            }
-                        }
-                    }
-                } else {
-                    widgets.append(OpenHABWidget(xml: child))
-                }
-            }
-        }
-    }
-
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -177,16 +136,16 @@ extension OpenHABWidget.CodingData {
             case "state": self.state = child.stringValue
             case "text": self.text = child.stringValue
             case "height": self.height = child.stringValue
-
+            // Double
             case "minValue": self.minValue = Double(child.stringValue) ?? 0.0
             case "maxValue": self.maxValue = Double(child.stringValue) ?? 0.0
             case "step": self.step = Double(child.stringValue) ?? 0.0
-
+            // Bool
             case "isLeaf": self.isLeaf = child.stringValue == "true" ? true : false
             case "legend": self.legend = child.stringValue == "true" ? true : false
-
+            // Int
             case "refresh": self.refresh = Int(child.stringValue) ?? 0
-
+            // Embedded 
             case "widget":  widgets.append(OpenHABWidget(xml: child))
             case "item":
                 item = OpenHABItem(xml: child)

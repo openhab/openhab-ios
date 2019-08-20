@@ -25,24 +25,6 @@ import Fuzi
         case link
     }
 
-    init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["title", "icon", "link"]
-        super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if !(child.name() == "id") {
-                    if let name = child.name() {
-                        if propertyNames.contains(name) {
-                            setValue(child.stringValue(), forKey: child.name() ?? "")
-                        }
-                    }
-                } else {
-                    pageId = child.stringValue() ?? ""
-                }
-            }
-        }
-    }
-
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {

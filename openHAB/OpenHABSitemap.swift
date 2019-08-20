@@ -113,35 +113,6 @@ extension OpenHABSitemap.CodingData {
         self.homepageLink = homepageLink
     }
 
-    init(xml xmlElement: GDataXMLElement?) {
-        let propertyNamesString: Set = ["name", "icon", "label", "link"]
-        let propertyNamesBool: Set = ["leaf"]
-        super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if child.name() == "homepage" {
-                    for childChild in (child.children())! {
-                        if let childChild = childChild as? GDataXMLElement {
-                            if childChild.name() == "link" {
-                                homepageLink = childChild.stringValue() ?? ""
-                            }
-                            if childChild.name() == "leaf" {
-                                leaf = childChild.stringValue() == "true" ? true : false
-                            }
-                        }
-                    }
-                } else if let name = child.name() {
-                    if propertyNamesString.contains(name) {
-                        setValue(child.stringValue(), forKey: child.name() )
-                    }
-                    if propertyNamesBool.contains(name) {
-                        setValue(child.stringValue() == "true" ? true : false, forKey: child.name() )
-                    }
-                }
-            }
-        }
-    }
-
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -154,8 +125,8 @@ extension OpenHABSitemap.CodingData {
             case "homepage":
                 for child2 in child.children {
                     switch child2.tag {
-                    case "link": self.homepageLink = child.stringValue
-                    case "leaf": self.leaf = child.stringValue == "true" ? true : false
+                    case "link": self.homepageLink = child2.stringValue
+                    case "leaf": self.leaf = child2.stringValue == "true" ? true : false
                     default: break
                     }
                 }
