@@ -37,7 +37,7 @@ platform :ios do
         distribute_external: true,
         notify_external_testers: true,
         changelog: changelog,
-	groups: ["Beta Testers"]
+	      groups: ["Beta Testers"]
     )
   end
 end

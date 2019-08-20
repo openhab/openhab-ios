@@ -49,7 +49,7 @@ extension OpenHABNotification.CodingData {
 
 }
 
-@objcMembers class OpenHABNotification: NSObject {
+class OpenHABNotification: NSObject {
     var message = ""
     var created: Date?
     var icon = ""

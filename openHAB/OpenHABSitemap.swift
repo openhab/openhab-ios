@@ -12,6 +12,7 @@
 //
 
 import Foundation
+import Fuzi
 
 // The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
 // Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
@@ -95,7 +96,7 @@ extension OpenHABSitemap.CodingData {
     }
 }
 
-@objcMembers final class OpenHABSitemap: NSObject {
+final class OpenHABSitemap: NSObject {
     var name = ""
     var icon = ""
     var label = ""
@@ -112,31 +113,24 @@ extension OpenHABSitemap.CodingData {
         self.homepageLink = homepageLink
     }
 
-    init(xml xmlElement: GDataXMLElement?) {
-        let propertyNamesString: Set = ["name", "icon", "label", "link"]
-        let propertyNamesBool: Set = ["leaf"]
+    init(xml xmlElement: XMLElement) {
         super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if child.name() == "homepage" {
-                    for childChild in (child.children())! {
-                        if let childChild = childChild as? GDataXMLElement {
-                            if childChild.name() == "link" {
-                                homepageLink = childChild.stringValue() ?? ""
-                            }
-                            if childChild.name() == "leaf" {
-                                leaf = childChild.stringValue() == "true" ? true : false
-                            }
-                        }
-                    }
-                } else if let name = child.name() {
-                    if propertyNamesString.contains(name) {
-                        setValue(child.stringValue(), forKey: child.name() )
-                    }
-                    if propertyNamesBool.contains(name) {
-                        setValue(child.stringValue() == "true" ? true : false, forKey: child.name() )
+        for child in xmlElement.children {
+            switch child.tag {
+            case "name": self.name = child.stringValue
+            case "icon": self.icon = child.stringValue
+            case "label": self.label = child.stringValue
+            case "link": self.link = child.stringValue
+            case "leaf": self.leaf = child.stringValue == "true" ? true : false
+            case "homepage":
+                for child2 in child.children {
+                    switch child2.tag {
+                    case "link": self.homepageLink = child2.stringValue
+                    case "leaf": self.leaf = child2.stringValue == "true" ? true : false
+                    default: break
                     }
                 }
+            default: break
             }
         }
     }
