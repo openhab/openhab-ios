@@ -9,6 +9,7 @@
 //
 
 import DynamicButton
+import Fuzi
 import os.log
 import UIKit
 
@@ -22,21 +23,14 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
         if let response = response {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
         }
-        let doc: GDataXMLDocument? = try? GDataXMLDocument(data: response)
-
-        if doc == nil {
-            return []
-        }
-        if let name = doc?.rootElement().name() {
+        if let data = response,
+            let doc = try? XMLDocument(data: data),
+            let name = doc.root?.tag {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-        }
-        if doc?.rootElement().name() == "sitemaps" {
-            for element in doc?.rootElement().elements(forName: "sitemap") ?? [] {
-                if let element = element as? GDataXMLElement {
-                    #if canImport(GDataXMLElement)
+            if name == "sitemaps" {
+                for element in doc.root?.children(tag: "sitemap") ?? [] {
                     let sitemap = OpenHABSitemap(xml: element)
                     sitemaps.append(sitemap)
-                    #endif
                 }
             }
         } else {
@@ -106,6 +100,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             sitemapsRequest.timeoutInterval = 10.0
 
             let operation = NetworkConnection()
+
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
             operation.manager.request(sitemapsRequest)

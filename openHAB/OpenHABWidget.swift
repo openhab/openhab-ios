@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Fuzi
 import MapKit
 import os.log
 
@@ -34,6 +35,7 @@ extension OpenHABWidget {
         let state: String?
         let text: String?
         let legend: Bool?
+        let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
         let linkedPage: OpenHABLinkedPage?
@@ -45,7 +47,7 @@ extension OpenHABWidget {
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = self.widgets.map { $0.openHABWidget }
-        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, encoding: self.encoding, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
    }
 }
 
@@ -70,6 +72,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var state = ""
     var text = ""
     var legend = false
+    var encoding = ""
     var item: OpenHABItem?
     var linkedPage: OpenHABLinkedPage?
     var mappings: [OpenHABWidgetMapping] = []
@@ -78,7 +81,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
 
     // This is an ugly initializer
 
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let d = with else { return ""}
@@ -108,6 +111,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.state = state ?? ""
         self.text = text ?? ""
         self.legend = legend ?? false
+        self.encoding = encoding ?? ""
         self.item = item
         self.linkedPage = linkedPage
         self.mappings = mappings
@@ -118,33 +122,44 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.step = abs(self.step)
     }
 
-#if canImport(GDataXMLElement)
-    init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["widgetId", "label", "type", "icon", "type", "url", "period", "minValue", "maxValue", "step", "refresh", "height", "isLeaf", "iconColor", "labelcolor", "valuecolor", "service", "state", "text", "legend"]
+    init(xml xmlElement: XMLElement) {
         super.init()
-        mappings = [OpenHABWidgetMapping]()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if !(child.name() == "widget") {
-                    if child.name() == "item" {
-                        item = OpenHABItem(xml: child)
-                    } else if child.name() == "mapping" {
-                        let mapping = OpenHABWidgetMapping(xml: child)
-                        mappings.append(mapping)
-                    } else if child.name() == "linkedPage" {
-                        linkedPage = OpenHABLinkedPage(xml: child)
-                    } else {
-                        if let name = child.name() {
-                            if propertyNames.contains(name) {
-                                setValue(child.stringValue, forKey: child.name() ?? "")
-                            }
-                        }
-                    }
-                }
+        for child in xmlElement.children {
+            switch child.tag {
+            case "widgetId": self.widgetId = child.stringValue
+            case "label": self.label = child.stringValue
+            case "type": self.type = child.stringValue
+            case "icon": self.icon = child.stringValue
+            case "url": self.url = child.stringValue
+            case "period": self.period = child.stringValue
+            case "iconColor": self.iconColor = child.stringValue
+            case "labelcolor": self.labelcolor = child.stringValue
+            case "valuecolor": self.valuecolor = child.stringValue
+            case "service": self.service = child.stringValue
+            case "state": self.state = child.stringValue
+            case "text": self.text = child.stringValue
+            case "height": self.height = child.stringValue
+            case "encoding": self.encoding = child.stringValue
+            // Double
+            case "minValue": self.minValue = Double(child.stringValue) ?? 0.0
+            case "maxValue": self.maxValue = Double(child.stringValue) ?? 0.0
+            case "step": self.step = Double(child.stringValue) ?? 0.0
+            // Bool
+            case "isLeaf": self.isLeaf = child.stringValue == "true" ? true : false
+            case "legend": self.legend = child.stringValue == "true" ? true : false
+            // Int
+            case "refresh": self.refresh = Int(child.stringValue) ?? 0
+            // Embedded 
+            case "widget": widgets.append(OpenHABWidget(xml: child))
+            case "item": item = OpenHABItem(xml: child)
+            case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
+            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
+            default:
+                break
+
             }
         }
     }
-#endif
 
     // Text prior to "["
     var labelText: String? {
@@ -163,7 +178,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
         return nil
     }
 
-    func sendCommand(_ command: Double) {
+    func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
 

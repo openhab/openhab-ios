@@ -10,24 +10,21 @@
 //
 
 import Foundation
+import Fuzi
 
-@objc class OpenHABWidgetMapping: NSObject, Decodable {
-    @objc var command = ""
-    @objc var label = ""
+class OpenHABWidgetMapping: NSObject, Decodable {
+    var command = ""
+    var label = ""
 
-#if canImport(GDataXMLElement)
-    @objc init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["command", "label"]
+    init(xml xmlElement: XMLElement) {
         super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if let name = child.name() {
-                    if propertyNames.contains(name) {
-                        setValue(child.stringValue, forKey: child.name() ?? "")
-                    }
-                }
+        for child in xmlElement.children {
+            switch child.tag {
+            case "command": self.command = child.stringValue
+            case "label": self.label = child.stringValue
+            default:
+                break
             }
         }
     }
-#endif
 }

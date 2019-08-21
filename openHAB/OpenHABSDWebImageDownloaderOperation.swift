@@ -10,6 +10,7 @@ import SDWebImage
 
 class OpenHABSDWebImageDownloaderOperation: SDWebImageDownloaderOperation {
     override func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+<<<<<<< HEAD
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
             let dns = challenge.protectionSpace.distinguishedNames
             if dns != nil {
@@ -28,5 +29,16 @@ class OpenHABSDWebImageDownloaderOperation: SDWebImageDownloaderOperation {
 
         // Not a client certificate request to run the default handler
         super.urlSession(session, task: task, didReceive: challenge, completionHandler: completionHandler)
+=======
+        let policy = AFRememberingSecurityPolicy()
+        let result = policy.handleAuthenticationChallenge(challenge: challenge)
+	switch result.0 {
+	case .useCredential:
+	    completionHandler(result.0, result.1)
+	default:
+	    // Not a client certificate request to run the default handler
+	    super.urlSession(session, task: task, didReceive: challenge, completionHandler: completionHandler)
+	}
+>>>>>>> master
     }
 }

@@ -81,6 +81,7 @@
 		DAB2D1BC22357A34009C6276 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */; };
 		DAB2D1BE22357A3F009C6276 /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
+		DAB9C7B1230B323000A7DB6E /* OpenHABNewXMLParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9C7B0230B323000A7DB6E /* OpenHABNewXMLParserTests.swift */; };
 		DAC019B322B0E19500A0ED7B /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */; };
 		DAC019B422B0EE4000A0ED7B /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */; };
 		DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395722B0209100C5F423 /* URLSessionPinningDelegate.swift */; };
@@ -109,6 +110,8 @@
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
+		DAED514D2305BAC1003BCB31 /* OpenHABFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514C2305BAC1003BCB31 /* OpenHABFormatTests.swift */; };
+		DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514E2305CDE3003BCB31 /* XMLData.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
@@ -270,6 +273,42 @@
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
 		DAB0B65D228C92630053E69B /* OpenHABSecurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSecurityTests.swift; sourceTree = "<group>"; };
+		DAB9C6A4230B2D1E00A7DB6E /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
+		DAB9C6A5230B2D1E00A7DB6E /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
+		DAB9C6A6230B2D1E00A7DB6E /* Deliverfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Deliverfile; sourceTree = "<group>"; };
+		DAB9C6A7230B2D1E00A7DB6E /* Fastfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Fastfile; sourceTree = "<group>"; };
+		DAB9C6A8230B2D1E00A7DB6E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		DAB9C6AB230B2D1E00A7DB6E /* privacy_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = privacy_url.txt; sourceTree = "<group>"; };
+		DAB9C6AC230B2D1E00A7DB6E /* subtitle.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = subtitle.txt; sourceTree = "<group>"; };
+		DAB9C6AD230B2D1E00A7DB6E /* support_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = support_url.txt; sourceTree = "<group>"; };
+		DAB9C6AE230B2D1E00A7DB6E /* keywords.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
+		DAB9C6AF230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = apple_tv_privacy_policy.txt; sourceTree = "<group>"; };
+		DAB9C6B0230B2D1E00A7DB6E /* promotional_text.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = promotional_text.txt; sourceTree = "<group>"; };
+		DAB9C6B1230B2D1E00A7DB6E /* release_notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
+		DAB9C6B2230B2D1E00A7DB6E /* name.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = name.txt; sourceTree = "<group>"; };
+		DAB9C6B3230B2D1E00A7DB6E /* marketing_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = marketing_url.txt; sourceTree = "<group>"; };
+		DAB9C6B4230B2D1E00A7DB6E /* description.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
+		DAB9C6B5230B2D1E00A7DB6E /* copyright.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = copyright.txt; sourceTree = "<group>"; };
+		DAB9C6B6230B2D1E00A7DB6E /* app_icon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = app_icon.jpg; sourceTree = "<group>"; };
+		DAB9C6B7230B2D1E00A7DB6E /* secondary_first_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_first_sub_category.txt; sourceTree = "<group>"; };
+		DAB9C6B8230B2D1E00A7DB6E /* secondary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_category.txt; sourceTree = "<group>"; };
+		DAB9C6B9230B2D1E00A7DB6E /* secondary_second_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_second_sub_category.txt; sourceTree = "<group>"; };
+		DAB9C6BA230B2D1E00A7DB6E /* primary_second_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_second_sub_category.txt; sourceTree = "<group>"; };
+		DAB9C6BB230B2D1E00A7DB6E /* primary_first_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_first_sub_category.txt; sourceTree = "<group>"; };
+		DAB9C6BD230B2D1E00A7DB6E /* privacy_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = privacy_url.txt; sourceTree = "<group>"; };
+		DAB9C6BE230B2D1E00A7DB6E /* subtitle.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = subtitle.txt; sourceTree = "<group>"; };
+		DAB9C6BF230B2D1E00A7DB6E /* support_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = support_url.txt; sourceTree = "<group>"; };
+		DAB9C6C0230B2D1E00A7DB6E /* keywords.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
+		DAB9C6C1230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = apple_tv_privacy_policy.txt; sourceTree = "<group>"; };
+		DAB9C6C2230B2D1E00A7DB6E /* promotional_text.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = promotional_text.txt; sourceTree = "<group>"; };
+		DAB9C6C3230B2D1E00A7DB6E /* release_notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
+		DAB9C6C4230B2D1E00A7DB6E /* name.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = name.txt; sourceTree = "<group>"; };
+		DAB9C6C5230B2D1E00A7DB6E /* marketing_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = marketing_url.txt; sourceTree = "<group>"; };
+		DAB9C6C6230B2D1E00A7DB6E /* description.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
+		DAB9C6C7230B2D1E00A7DB6E /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
+		DAB9C6C8230B2D1E00A7DB6E /* report.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = report.xml; sourceTree = "<group>"; };
+		DAB9C6C9230B2D1E00A7DB6E /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
+		DAB9C7B0230B323000A7DB6E /* OpenHABNewXMLParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNewXMLParserTests.swift; sourceTree = "<group>"; };
 		DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
@@ -280,6 +319,8 @@
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
+		DAED514C2305BAC1003BCB31 /* OpenHABFormatTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABFormatTests.swift; sourceTree = "<group>"; };
+		DAED514E2305CDE3003BCB31 /* XMLData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLData.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RollershutterUITableViewCell.swift; sourceTree = "<group>"; };
@@ -476,12 +517,81 @@
 			children = (
 				DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */,
 				DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */,
+				DAED514C2305BAC1003BCB31 /* OpenHABFormatTests.swift */,
 				DA2DC23121F2736C00830730 /* OpenHABTestsSwift.swift */,
 				DAB0B65D228C92630053E69B /* OpenHABSecurityTests.swift */,
 				DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */,
+				DAB9C7B0230B323000A7DB6E /* OpenHABNewXMLParserTests.swift */,
+				DAED514E2305CDE3003BCB31 /* XMLData.swift */,
 				DA2DC23321F2736C00830730 /* Info.plist */,
 			);
 			path = openHABTestsSwift;
+			sourceTree = "<group>";
+		};
+		DAB9C6A3230B2D1E00A7DB6E /* fastlane */ = {
+			isa = PBXGroup;
+			children = (
+				DAB9C6A4230B2D1E00A7DB6E /* Appfile */,
+				DAB9C6A5230B2D1E00A7DB6E /* SnapshotHelper.swift */,
+				DAB9C6A6230B2D1E00A7DB6E /* Deliverfile */,
+				DAB9C6A7230B2D1E00A7DB6E /* Fastfile */,
+				DAB9C6A8230B2D1E00A7DB6E /* README.md */,
+				DAB9C6A9230B2D1E00A7DB6E /* metadata */,
+				DAB9C6C8230B2D1E00A7DB6E /* report.xml */,
+				DAB9C6C9230B2D1E00A7DB6E /* Snapfile */,
+			);
+			path = fastlane;
+			sourceTree = "<group>";
+		};
+		DAB9C6A9230B2D1E00A7DB6E /* metadata */ = {
+			isa = PBXGroup;
+			children = (
+				DAB9C6AA230B2D1E00A7DB6E /* de-DE */,
+				DAB9C6B5230B2D1E00A7DB6E /* copyright.txt */,
+				DAB9C6B6230B2D1E00A7DB6E /* app_icon.jpg */,
+				DAB9C6B7230B2D1E00A7DB6E /* secondary_first_sub_category.txt */,
+				DAB9C6B8230B2D1E00A7DB6E /* secondary_category.txt */,
+				DAB9C6B9230B2D1E00A7DB6E /* secondary_second_sub_category.txt */,
+				DAB9C6BA230B2D1E00A7DB6E /* primary_second_sub_category.txt */,
+				DAB9C6BB230B2D1E00A7DB6E /* primary_first_sub_category.txt */,
+				DAB9C6BC230B2D1E00A7DB6E /* en-US */,
+				DAB9C6C7230B2D1E00A7DB6E /* primary_category.txt */,
+			);
+			path = metadata;
+			sourceTree = "<group>";
+		};
+		DAB9C6AA230B2D1E00A7DB6E /* de-DE */ = {
+			isa = PBXGroup;
+			children = (
+				DAB9C6AB230B2D1E00A7DB6E /* privacy_url.txt */,
+				DAB9C6AC230B2D1E00A7DB6E /* subtitle.txt */,
+				DAB9C6AD230B2D1E00A7DB6E /* support_url.txt */,
+				DAB9C6AE230B2D1E00A7DB6E /* keywords.txt */,
+				DAB9C6AF230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */,
+				DAB9C6B0230B2D1E00A7DB6E /* promotional_text.txt */,
+				DAB9C6B1230B2D1E00A7DB6E /* release_notes.txt */,
+				DAB9C6B2230B2D1E00A7DB6E /* name.txt */,
+				DAB9C6B3230B2D1E00A7DB6E /* marketing_url.txt */,
+				DAB9C6B4230B2D1E00A7DB6E /* description.txt */,
+			);
+			path = "de-DE";
+			sourceTree = "<group>";
+		};
+		DAB9C6BC230B2D1E00A7DB6E /* en-US */ = {
+			isa = PBXGroup;
+			children = (
+				DAB9C6BD230B2D1E00A7DB6E /* privacy_url.txt */,
+				DAB9C6BE230B2D1E00A7DB6E /* subtitle.txt */,
+				DAB9C6BF230B2D1E00A7DB6E /* support_url.txt */,
+				DAB9C6C0230B2D1E00A7DB6E /* keywords.txt */,
+				DAB9C6C1230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */,
+				DAB9C6C2230B2D1E00A7DB6E /* promotional_text.txt */,
+				DAB9C6C3230B2D1E00A7DB6E /* release_notes.txt */,
+				DAB9C6C4230B2D1E00A7DB6E /* name.txt */,
+				DAB9C6C5230B2D1E00A7DB6E /* marketing_url.txt */,
+				DAB9C6C6230B2D1E00A7DB6E /* description.txt */,
+			);
+			path = "en-US";
 			sourceTree = "<group>";
 		};
 		DF05FF13189658FD00FF2F9B /* icons */ = {
@@ -568,6 +678,7 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
+				DAB9C6A3230B2D1E00A7DB6E /* fastlane */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				1224F793228A8AE400750965 /* openHABWatch */,
@@ -1078,9 +1189,11 @@
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
 				DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */,
 				DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */,
+				DAB9C7B1230B323000A7DB6E /* OpenHABNewXMLParserTests.swift in Sources */,
 				DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */,
 				DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */,
+				DAED514D2305BAC1003BCB31 /* OpenHABFormatTests.swift in Sources */,
 				DAC9394B22AD651400C5F423 /* Sitemap.swift in Sources */,
 				DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */,
 				DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */,
@@ -1096,6 +1209,7 @@
 				DA19E33622FF4506002F8F2F /* AlamofireRememberingSecurityPolicy.swift in Sources */,
 				DAC9394A22AD650900C5F423 /* UserDefaultsRepository.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */,
+				DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1622,6 +1736,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -1645,6 +1760,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "openHAB-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -1659,6 +1775,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -1681,6 +1798,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "openHAB-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

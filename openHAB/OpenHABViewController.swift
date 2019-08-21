@@ -12,6 +12,7 @@ import Alamofire
 import AVFoundation
 import AVKit
 import DynamicButton
+import Fuzi
 import os.log
 import SideMenu
 import SVGKit
@@ -131,7 +132,7 @@ class OpenHABViewController: UIViewController {
         self.navigationItem.searchController = search
 
         search.obscuresBackgroundDuringPresentation = false
-        search.searchBar.placeholder = "Search OpenHAB items"
+        search.searchBar.placeholder = "Search openHAB items"
         definesPresentationContext = true
 
         setupSideMenu()
@@ -406,26 +407,19 @@ class OpenHABViewController: UIViewController {
                 if !self.atmosphereTrackingId.isEmpty {
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, self.atmosphereTrackingId)
                 }
-
+                var openHABSitemapPage: OpenHABSitemapPage?
                 if let data = response.data {
                     // If we are talking to openHAB 1.X, talk XML
                     if self.appData?.openHABVersion == 1 {
-                        let doc: GDataXMLDocument? = try? GDataXMLDocument(data: data)
-                        if doc == nil {
-                            return
-                        }
-                        if let name = doc?.rootElement().name() {
-                            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                        }
-                        if doc?.rootElement().name() == "page" {
-                            if let rootElement = doc?.rootElement() {
-                                #if canImport(GDataXMLElement)
-                                self.currentPage = OpenHABSitemapPage(xml: rootElement)
-                                #endif
+                        let str = String(decoding: data, as: UTF8.self)
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+
+                        guard let doc = try? XMLDocument(data: data) else { return }
+                        if let rootElement = doc.root, let name = rootElement.tag {
+                            os_log("XML sitemmap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                            if name == "page" {
+                                openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                             }
-                        } else {
-                            os_log("Unable to find page root element", log: .remoteAccess, type: .info)
-                            return
                         }
                     } else {
                         // Newer versions talk JSON!
@@ -433,20 +427,20 @@ class OpenHABViewController: UIViewController {
                         do {
                             // Self-executing closure
                             // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                            let openHABSitemapPage: OpenHABSitemapPage = try {
+                            openHABSitemapPage = try {
                                 let sitemapPageCodingData = try data.decoded() as OpenHABSitemapPage.CodingData
                                 return sitemapPageCodingData.openHABSitemapPage
                                 }()
-
-                            self.currentPage = openHABSitemapPage
-                            if self.isFiltering {
-                                self.filterContentForSearchText(self.search.searchBar.text)
-                            }
                         } catch {
                             os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                         }
-
                     }
+                }
+                self.currentPage = openHABSitemapPage
+                if self.isFiltering {
+                    self.filterContentForSearchText(self.search.searchBar.text)
+                }
+
                     self.currentPage?.sendCommand = { [weak self] (item, command) in
                         self?.sendCommand(item, commandToSend: command)
                     }
@@ -455,10 +449,10 @@ class OpenHABViewController: UIViewController {
                     self.refreshControl?.endRefreshing()
                     self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
                     self.loadPage(true)
-                }
             case .failure(let error):
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+
                 self.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001 && longPolling {
                     os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
@@ -504,6 +498,7 @@ class OpenHABViewController: UIViewController {
                 }
             }
         }
+
         os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
     }
 
@@ -529,9 +524,8 @@ class OpenHABViewController: UIViewController {
                         switch self.sitemaps.count {
                         case 2...:
                             if self.defaultSitemap != "" {
-                                let sitemapToOpen: OpenHABSitemap? = self.sitemap(byName: self.defaultSitemap)
-                                if sitemapToOpen != nil {
-                                    self.pageUrl = sitemapToOpen?.homepageLink ?? ""
+                                if let sitemapToOpen = self.sitemap(byName: self.defaultSitemap) {
+                                    self.pageUrl = sitemapToOpen.homepageLink
                                     self.loadPage(false)
                                 } else {
                                     self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
@@ -1073,8 +1067,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         // Explictly set your cell's layout margins
         cell.layoutMargins = .zero
 
-        guard let videoCell = (cell as? VideoUITableViewCell) else { return }
-        videoCell.playerView.player?.play()
+        (cell as? VideoUITableViewCell)?.play()
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

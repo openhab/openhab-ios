@@ -5,6 +5,8 @@
 //  Created by David O'Neill on 03/09/19.
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
+import Foundation
+
 var trustedCertificates: [AnyHashable: Any] = [:]
 
 private struct Certificates {

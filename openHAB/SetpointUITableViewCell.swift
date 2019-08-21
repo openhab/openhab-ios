@@ -48,7 +48,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
 
         if let item = widget.item {
             if item.state == "Uninitialized" {
-                widget.sendCommand(widget.minValue)
+                widget.sendCommandDouble(widget.minValue)
             } else {
                 if !isIntStep {
                     var newValue = item.stateAsDouble() - widget.step
@@ -68,7 +68,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
 
         if let item = widget.item {
             if item.state == "Uninitialized" {
-                widget.sendCommand(widget.minValue)
+                widget.sendCommandDouble(widget.minValue)
             } else {
                 if !isIntStep {
                     var newValue = item.stateAsDouble() + widget.step

@@ -192,4 +192,43 @@ class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
         // We have no way of handling it so no access!
         return false
     }
+
+//    func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
+//        let dns = challenge.protectionSpace.distinguishedNames
+//        if let dns = dns {
+//            let identity = NetworkConnection().clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+//            if let identity = identity {
+//                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+//                challenge.sender!.use(credential, for: challenge)
+//                return
+//            }
+//        }
+//        // No client certificate available
+//        challenge.sender!.cancel(challenge)
+//    }
+
+    func handleAuthenticationChallenge(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        //TODO
+//        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+//            if self.evaluateServerTrust(challenge.protectionSpace.serverTrust!, forDomain: challenge.protectionSpace.host) {
+//                let credential = URLCredential.init(trust: challenge.protectionSpace.serverTrust!)
+//                return (URLSession.AuthChallengeDisposition.useCredential, credential)
+//            } else {
+//                return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+//            }
+//        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
+//            let dns = challenge.protectionSpace.distinguishedNames
+//            if let dns = dns {
+//                let identity = NetworkConnection().clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+//                if let identity = identity {
+//                    let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+//                    return (URLSession.AuthChallengeDisposition.useCredential, credential)
+//                }
+//            }
+//            // No client certificate available
+//            return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+//        }
+        return (URLSession.AuthChallengeDisposition.performDefaultHandling, nil)
+    }
+
 }
