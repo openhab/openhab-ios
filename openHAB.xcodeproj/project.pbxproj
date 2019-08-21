@@ -38,8 +38,6 @@
 		9394102622CB5CDB00EB4255 /* Collection+SafeAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */; };
 		A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */; };
 		A08FF14A2233498700203EED /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
-		A0C40F1E222E272C00E29713 /* OpenHABHTTPRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C40F1D222E272C00E29713 /* OpenHABHTTPRequestOperation.swift */; };
-		A0CA7D9722A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CA7D9622A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift */; };
 		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		A3F4C3A71A49A6AC0019A09F /* launchImage.png in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A61A49A6AC0019A09F /* launchImage.png */; };
@@ -53,7 +51,7 @@
 		DA19E33522FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33422FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift */; };
 		DA19E33622FF4506002F8F2F /* AlamofireRememberingSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33422FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift */; };
 		DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
-		DA222EA1228A03C2002B1171 /* ImageDownloadUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */; };
+		DA1C2E49230DB61A00FACFB0 /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA28C363225292FF00AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
@@ -242,11 +240,8 @@
 		9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+SafeAccess.swift"; sourceTree = "<group>"; };
 		965E6C0728A41A0442B5E59C /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		97512493BF42657D31F36571 /* Pods-openHABTestsSwift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABTestsSwift.debug.xcconfig"; path = "Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift.debug.xcconfig"; sourceTree = "<group>"; };
-		9D18471F9683BC95AB168CBE /* openHAB-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "openHAB-Bridging-Header.h"; sourceTree = "<group>"; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A08FF1492233498600203EED /* ClientCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientCertificateManager.swift; sourceTree = "<group>"; };
-		A0C40F1D222E272C00E29713 /* OpenHABHTTPRequestOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABHTTPRequestOperation.swift; sourceTree = "<group>"; };
-		A0CA7D9622A60EC4009E91BF /* OpenHABSDWebImageDownloaderOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSDWebImageDownloaderOperation.swift; sourceTree = "<group>"; };
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		A3F4C3A61A49A6AC0019A09F /* launchImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchImage.png; sourceTree = "<group>"; };
@@ -258,7 +253,39 @@
 		DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABFormatTests.swift; sourceTree = "<group>"; };
 		DA19E33422FF2233002F8F2F /* AlamofireRememberingSecurityPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlamofireRememberingSecurityPolicy.swift; sourceTree = "<group>"; };
 		DA19E33722FF4594002F8F2F /* NetworkConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkConnection.swift; sourceTree = "<group>"; };
-		DA222EA0228A03C1002B1171 /* ImageDownloadUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageDownloadUtil.swift; sourceTree = "<group>"; };
+		DA1C2E4B230DC28F00FACFB0 /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
+		DA1C2E4C230DC28F00FACFB0 /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
+		DA1C2E4D230DC28F00FACFB0 /* Deliverfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Deliverfile; sourceTree = "<group>"; };
+		DA1C2E4E230DC28F00FACFB0 /* Fastfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Fastfile; sourceTree = "<group>"; };
+		DA1C2E51230DC28F00FACFB0 /* privacy_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = privacy_url.txt; sourceTree = "<group>"; };
+		DA1C2E52230DC28F00FACFB0 /* subtitle.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = subtitle.txt; sourceTree = "<group>"; };
+		DA1C2E53230DC28F00FACFB0 /* support_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = support_url.txt; sourceTree = "<group>"; };
+		DA1C2E54230DC28F00FACFB0 /* keywords.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
+		DA1C2E55230DC28F00FACFB0 /* apple_tv_privacy_policy.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = apple_tv_privacy_policy.txt; sourceTree = "<group>"; };
+		DA1C2E56230DC28F00FACFB0 /* promotional_text.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = promotional_text.txt; sourceTree = "<group>"; };
+		DA1C2E57230DC28F00FACFB0 /* release_notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
+		DA1C2E58230DC28F00FACFB0 /* name.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = name.txt; sourceTree = "<group>"; };
+		DA1C2E59230DC28F00FACFB0 /* marketing_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = marketing_url.txt; sourceTree = "<group>"; };
+		DA1C2E5A230DC28F00FACFB0 /* description.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
+		DA1C2E5B230DC28F00FACFB0 /* copyright.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = copyright.txt; sourceTree = "<group>"; };
+		DA1C2E5C230DC28F00FACFB0 /* app_icon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = app_icon.jpg; sourceTree = "<group>"; };
+		DA1C2E5D230DC28F00FACFB0 /* secondary_first_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_first_sub_category.txt; sourceTree = "<group>"; };
+		DA1C2E5E230DC28F00FACFB0 /* secondary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_category.txt; sourceTree = "<group>"; };
+		DA1C2E5F230DC28F00FACFB0 /* secondary_second_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_second_sub_category.txt; sourceTree = "<group>"; };
+		DA1C2E60230DC28F00FACFB0 /* primary_second_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_second_sub_category.txt; sourceTree = "<group>"; };
+		DA1C2E61230DC28F00FACFB0 /* primary_first_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_first_sub_category.txt; sourceTree = "<group>"; };
+		DA1C2E63230DC28F00FACFB0 /* privacy_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = privacy_url.txt; sourceTree = "<group>"; };
+		DA1C2E64230DC28F00FACFB0 /* subtitle.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = subtitle.txt; sourceTree = "<group>"; };
+		DA1C2E65230DC28F00FACFB0 /* support_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = support_url.txt; sourceTree = "<group>"; };
+		DA1C2E66230DC28F00FACFB0 /* keywords.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
+		DA1C2E67230DC28F00FACFB0 /* apple_tv_privacy_policy.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = apple_tv_privacy_policy.txt; sourceTree = "<group>"; };
+		DA1C2E68230DC28F00FACFB0 /* promotional_text.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = promotional_text.txt; sourceTree = "<group>"; };
+		DA1C2E69230DC28F00FACFB0 /* release_notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
+		DA1C2E6A230DC28F00FACFB0 /* name.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = name.txt; sourceTree = "<group>"; };
+		DA1C2E6B230DC28F00FACFB0 /* marketing_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = marketing_url.txt; sourceTree = "<group>"; };
+		DA1C2E6C230DC28F00FACFB0 /* description.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
+		DA1C2E6D230DC28F00FACFB0 /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
+		DA1C2E6E230DC28F00FACFB0 /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
 		DA28C35F2251F07000AB409C /* OSLogHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogHelper.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -273,48 +300,12 @@
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
 		DAB0B65D228C92630053E69B /* OpenHABSecurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSecurityTests.swift; sourceTree = "<group>"; };
-		DAB9C6A4230B2D1E00A7DB6E /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
-		DAB9C6A5230B2D1E00A7DB6E /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
-		DAB9C6A6230B2D1E00A7DB6E /* Deliverfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Deliverfile; sourceTree = "<group>"; };
-		DAB9C6A7230B2D1E00A7DB6E /* Fastfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Fastfile; sourceTree = "<group>"; };
-		DAB9C6A8230B2D1E00A7DB6E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		DAB9C6AB230B2D1E00A7DB6E /* privacy_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = privacy_url.txt; sourceTree = "<group>"; };
-		DAB9C6AC230B2D1E00A7DB6E /* subtitle.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = subtitle.txt; sourceTree = "<group>"; };
-		DAB9C6AD230B2D1E00A7DB6E /* support_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = support_url.txt; sourceTree = "<group>"; };
-		DAB9C6AE230B2D1E00A7DB6E /* keywords.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
-		DAB9C6AF230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = apple_tv_privacy_policy.txt; sourceTree = "<group>"; };
-		DAB9C6B0230B2D1E00A7DB6E /* promotional_text.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = promotional_text.txt; sourceTree = "<group>"; };
-		DAB9C6B1230B2D1E00A7DB6E /* release_notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
-		DAB9C6B2230B2D1E00A7DB6E /* name.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = name.txt; sourceTree = "<group>"; };
-		DAB9C6B3230B2D1E00A7DB6E /* marketing_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = marketing_url.txt; sourceTree = "<group>"; };
-		DAB9C6B4230B2D1E00A7DB6E /* description.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
-		DAB9C6B5230B2D1E00A7DB6E /* copyright.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = copyright.txt; sourceTree = "<group>"; };
-		DAB9C6B6230B2D1E00A7DB6E /* app_icon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = app_icon.jpg; sourceTree = "<group>"; };
-		DAB9C6B7230B2D1E00A7DB6E /* secondary_first_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_first_sub_category.txt; sourceTree = "<group>"; };
-		DAB9C6B8230B2D1E00A7DB6E /* secondary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_category.txt; sourceTree = "<group>"; };
-		DAB9C6B9230B2D1E00A7DB6E /* secondary_second_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secondary_second_sub_category.txt; sourceTree = "<group>"; };
-		DAB9C6BA230B2D1E00A7DB6E /* primary_second_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_second_sub_category.txt; sourceTree = "<group>"; };
-		DAB9C6BB230B2D1E00A7DB6E /* primary_first_sub_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_first_sub_category.txt; sourceTree = "<group>"; };
-		DAB9C6BD230B2D1E00A7DB6E /* privacy_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = privacy_url.txt; sourceTree = "<group>"; };
-		DAB9C6BE230B2D1E00A7DB6E /* subtitle.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = subtitle.txt; sourceTree = "<group>"; };
-		DAB9C6BF230B2D1E00A7DB6E /* support_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = support_url.txt; sourceTree = "<group>"; };
-		DAB9C6C0230B2D1E00A7DB6E /* keywords.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
-		DAB9C6C1230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = apple_tv_privacy_policy.txt; sourceTree = "<group>"; };
-		DAB9C6C2230B2D1E00A7DB6E /* promotional_text.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = promotional_text.txt; sourceTree = "<group>"; };
-		DAB9C6C3230B2D1E00A7DB6E /* release_notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
-		DAB9C6C4230B2D1E00A7DB6E /* name.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = name.txt; sourceTree = "<group>"; };
-		DAB9C6C5230B2D1E00A7DB6E /* marketing_url.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = marketing_url.txt; sourceTree = "<group>"; };
-		DAB9C6C6230B2D1E00A7DB6E /* description.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
-		DAB9C6C7230B2D1E00A7DB6E /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
-		DAB9C6C8230B2D1E00A7DB6E /* report.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = report.xml; sourceTree = "<group>"; };
-		DAB9C6C9230B2D1E00A7DB6E /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
 		DAB9C7B0230B323000A7DB6E /* OpenHABNewXMLParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNewXMLParserTests.swift; sourceTree = "<group>"; };
 		DAC019B222B0E19500A0ED7B /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
 		DAC9395722B0209100C5F423 /* URLSessionPinningDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionPinningDelegate.swift; sourceTree = "<group>"; };
 		DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSObjectExtension.swift; sourceTree = "<group>"; };
-		DAE2F97E220426AE008A345E /* openHABTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "openHABTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSelectionTableViewControllerDelegate.swift; sourceTree = "<group>"; };
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
@@ -512,6 +503,70 @@
 			path = openHABUITests;
 			sourceTree = "<group>";
 		};
+		DA1C2E4A230DC28F00FACFB0 /* fastlane */ = {
+			isa = PBXGroup;
+			children = (
+				DA1C2E4B230DC28F00FACFB0 /* Appfile */,
+				DA1C2E4C230DC28F00FACFB0 /* SnapshotHelper.swift */,
+				DA1C2E4D230DC28F00FACFB0 /* Deliverfile */,
+				DA1C2E4E230DC28F00FACFB0 /* Fastfile */,
+				DA1C2E4F230DC28F00FACFB0 /* metadata */,
+				DA1C2E6E230DC28F00FACFB0 /* Snapfile */,
+			);
+			path = fastlane;
+			sourceTree = "<group>";
+		};
+		DA1C2E4F230DC28F00FACFB0 /* metadata */ = {
+			isa = PBXGroup;
+			children = (
+				DA1C2E50230DC28F00FACFB0 /* de-DE */,
+				DA1C2E5B230DC28F00FACFB0 /* copyright.txt */,
+				DA1C2E5C230DC28F00FACFB0 /* app_icon.jpg */,
+				DA1C2E5D230DC28F00FACFB0 /* secondary_first_sub_category.txt */,
+				DA1C2E5E230DC28F00FACFB0 /* secondary_category.txt */,
+				DA1C2E5F230DC28F00FACFB0 /* secondary_second_sub_category.txt */,
+				DA1C2E60230DC28F00FACFB0 /* primary_second_sub_category.txt */,
+				DA1C2E61230DC28F00FACFB0 /* primary_first_sub_category.txt */,
+				DA1C2E62230DC28F00FACFB0 /* en-US */,
+				DA1C2E6D230DC28F00FACFB0 /* primary_category.txt */,
+			);
+			path = metadata;
+			sourceTree = "<group>";
+		};
+		DA1C2E50230DC28F00FACFB0 /* de-DE */ = {
+			isa = PBXGroup;
+			children = (
+				DA1C2E51230DC28F00FACFB0 /* privacy_url.txt */,
+				DA1C2E52230DC28F00FACFB0 /* subtitle.txt */,
+				DA1C2E53230DC28F00FACFB0 /* support_url.txt */,
+				DA1C2E54230DC28F00FACFB0 /* keywords.txt */,
+				DA1C2E55230DC28F00FACFB0 /* apple_tv_privacy_policy.txt */,
+				DA1C2E56230DC28F00FACFB0 /* promotional_text.txt */,
+				DA1C2E57230DC28F00FACFB0 /* release_notes.txt */,
+				DA1C2E58230DC28F00FACFB0 /* name.txt */,
+				DA1C2E59230DC28F00FACFB0 /* marketing_url.txt */,
+				DA1C2E5A230DC28F00FACFB0 /* description.txt */,
+			);
+			path = "de-DE";
+			sourceTree = "<group>";
+		};
+		DA1C2E62230DC28F00FACFB0 /* en-US */ = {
+			isa = PBXGroup;
+			children = (
+				DA1C2E63230DC28F00FACFB0 /* privacy_url.txt */,
+				DA1C2E64230DC28F00FACFB0 /* subtitle.txt */,
+				DA1C2E65230DC28F00FACFB0 /* support_url.txt */,
+				DA1C2E66230DC28F00FACFB0 /* keywords.txt */,
+				DA1C2E67230DC28F00FACFB0 /* apple_tv_privacy_policy.txt */,
+				DA1C2E68230DC28F00FACFB0 /* promotional_text.txt */,
+				DA1C2E69230DC28F00FACFB0 /* release_notes.txt */,
+				DA1C2E6A230DC28F00FACFB0 /* name.txt */,
+				DA1C2E6B230DC28F00FACFB0 /* marketing_url.txt */,
+				DA1C2E6C230DC28F00FACFB0 /* description.txt */,
+			);
+			path = "en-US";
+			sourceTree = "<group>";
+		};
 		DA2DC23021F2736C00830730 /* openHABTestsSwift */ = {
 			isa = PBXGroup;
 			children = (
@@ -526,72 +581,6 @@
 				DA2DC23321F2736C00830730 /* Info.plist */,
 			);
 			path = openHABTestsSwift;
-			sourceTree = "<group>";
-		};
-		DAB9C6A3230B2D1E00A7DB6E /* fastlane */ = {
-			isa = PBXGroup;
-			children = (
-				DAB9C6A4230B2D1E00A7DB6E /* Appfile */,
-				DAB9C6A5230B2D1E00A7DB6E /* SnapshotHelper.swift */,
-				DAB9C6A6230B2D1E00A7DB6E /* Deliverfile */,
-				DAB9C6A7230B2D1E00A7DB6E /* Fastfile */,
-				DAB9C6A8230B2D1E00A7DB6E /* README.md */,
-				DAB9C6A9230B2D1E00A7DB6E /* metadata */,
-				DAB9C6C8230B2D1E00A7DB6E /* report.xml */,
-				DAB9C6C9230B2D1E00A7DB6E /* Snapfile */,
-			);
-			path = fastlane;
-			sourceTree = "<group>";
-		};
-		DAB9C6A9230B2D1E00A7DB6E /* metadata */ = {
-			isa = PBXGroup;
-			children = (
-				DAB9C6AA230B2D1E00A7DB6E /* de-DE */,
-				DAB9C6B5230B2D1E00A7DB6E /* copyright.txt */,
-				DAB9C6B6230B2D1E00A7DB6E /* app_icon.jpg */,
-				DAB9C6B7230B2D1E00A7DB6E /* secondary_first_sub_category.txt */,
-				DAB9C6B8230B2D1E00A7DB6E /* secondary_category.txt */,
-				DAB9C6B9230B2D1E00A7DB6E /* secondary_second_sub_category.txt */,
-				DAB9C6BA230B2D1E00A7DB6E /* primary_second_sub_category.txt */,
-				DAB9C6BB230B2D1E00A7DB6E /* primary_first_sub_category.txt */,
-				DAB9C6BC230B2D1E00A7DB6E /* en-US */,
-				DAB9C6C7230B2D1E00A7DB6E /* primary_category.txt */,
-			);
-			path = metadata;
-			sourceTree = "<group>";
-		};
-		DAB9C6AA230B2D1E00A7DB6E /* de-DE */ = {
-			isa = PBXGroup;
-			children = (
-				DAB9C6AB230B2D1E00A7DB6E /* privacy_url.txt */,
-				DAB9C6AC230B2D1E00A7DB6E /* subtitle.txt */,
-				DAB9C6AD230B2D1E00A7DB6E /* support_url.txt */,
-				DAB9C6AE230B2D1E00A7DB6E /* keywords.txt */,
-				DAB9C6AF230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */,
-				DAB9C6B0230B2D1E00A7DB6E /* promotional_text.txt */,
-				DAB9C6B1230B2D1E00A7DB6E /* release_notes.txt */,
-				DAB9C6B2230B2D1E00A7DB6E /* name.txt */,
-				DAB9C6B3230B2D1E00A7DB6E /* marketing_url.txt */,
-				DAB9C6B4230B2D1E00A7DB6E /* description.txt */,
-			);
-			path = "de-DE";
-			sourceTree = "<group>";
-		};
-		DAB9C6BC230B2D1E00A7DB6E /* en-US */ = {
-			isa = PBXGroup;
-			children = (
-				DAB9C6BD230B2D1E00A7DB6E /* privacy_url.txt */,
-				DAB9C6BE230B2D1E00A7DB6E /* subtitle.txt */,
-				DAB9C6BF230B2D1E00A7DB6E /* support_url.txt */,
-				DAB9C6C0230B2D1E00A7DB6E /* keywords.txt */,
-				DAB9C6C1230B2D1E00A7DB6E /* apple_tv_privacy_policy.txt */,
-				DAB9C6C2230B2D1E00A7DB6E /* promotional_text.txt */,
-				DAB9C6C3230B2D1E00A7DB6E /* release_notes.txt */,
-				DAB9C6C4230B2D1E00A7DB6E /* name.txt */,
-				DAB9C6C5230B2D1E00A7DB6E /* marketing_url.txt */,
-				DAB9C6C6230B2D1E00A7DB6E /* description.txt */,
-			);
-			path = "en-US";
 			sourceTree = "<group>";
 		};
 		DF05FF13189658FD00FF2F9B /* icons */ = {
@@ -678,7 +667,6 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
-				DAB9C6A3230B2D1E00A7DB6E /* fastlane */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				1224F793228A8AE400750965 /* openHABWatch */,
@@ -686,9 +674,8 @@
 				933D7F0522E7015000621A03 /* openHABUITests */,
 				DFB2622818830A3600D3244D /* Products */,
 				DFB2622918830A3600D3244D /* Frameworks */,
-				9D18471F9683BC95AB168CBE /* openHAB-Bridging-Header.h */,
-				DAE2F97E220426AE008A345E /* openHABTests-Bridging-Header.h */,
 				4CB71842E56AD59CF6A07897 /* Pods */,
+				DA1C2E4A230DC28F00FACFB0 /* fastlane */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1194,6 +1181,7 @@
 				DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */,
 				DAED514D2305BAC1003BCB31 /* OpenHABFormatTests.swift in Sources */,
+				DA1C2E49230DB61A00FACFB0 /* NetworkConnection.swift in Sources */,
 				DAC9394B22AD651400C5F423 /* Sitemap.swift in Sources */,
 				DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */,
 				DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */,
@@ -1359,7 +1347,9 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 5.2;
@@ -1398,7 +1388,9 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 5.2;
@@ -1503,7 +1495,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openHABUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = openHAB;
@@ -1538,7 +1532,9 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openHABUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = openHAB;
@@ -1575,8 +1571,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "openHABTests-Bridging-Header.h";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
@@ -1614,8 +1612,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "openHABTests-Bridging-Header.h";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHAB.app/openHAB";
@@ -1757,8 +1757,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "openHAB-Bridging-Header.h";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
@@ -1796,7 +1798,9 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "openHAB-Bridging-Header.h";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;

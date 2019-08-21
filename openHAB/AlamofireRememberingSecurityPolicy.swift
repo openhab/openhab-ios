@@ -1,11 +1,10 @@
 //  Converted to Swift 4 by Swiftify v4.2.28153 - https://objectivec2swift.com/
 //
-//  AFRememberingSecurityPolicy.swift
+//  AlamofireRememberingSecurityPolicy.swift
 //  openHAB
 //
-//  Created by Victor Belov on 14/07/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
-//
+//  Created by Tim Müller-Seydlitz on 10/08/19.
+//  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import Alamofire
 import os.log
@@ -75,17 +74,23 @@ class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
     }
     var evaluateResult: EvaluateResult = .undecided
     weak var delegate: AlamofireRememberingSecurityPolicyDelegate?
-
     var allowInvalidCertificates: Bool = false
-
-    // Init an AFRememberingSecurityPolicy and set ignore certificates setting
-    init(ignoreCertificates: Bool) {
-        super.init(policies: [:])
-        allowInvalidCertificates = ignoreCertificates
-    }
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override init(policies: [String: ServerTrustPolicy]) {
+
+        super.init(policies: policies)
+
+        let prefs = UserDefaults.standard
+        let ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
+
+        if ignoreSSLCertificate {
+            os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
+            self.allowInvalidCertificates = true
+        }
     }
 
     class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
@@ -193,41 +198,40 @@ class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
         return false
     }
 
-//    func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
-//        let dns = challenge.protectionSpace.distinguishedNames
-//        if let dns = dns {
-//            let identity = NetworkConnection().clientCertificateManager.evaluateTrust(distinguishedNames: dns)
-//            if let identity = identity {
-//                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
-//                challenge.sender!.use(credential, for: challenge)
-//                return
-//            }
-//        }
-//        // No client certificate available
-//        challenge.sender!.cancel(challenge)
-//    }
+    func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
+        let dns = challenge.protectionSpace.distinguishedNames
+        if let dns = dns {
+            let identity = NetworkConnection.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+            if let identity = identity {
+                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                challenge.sender!.use(credential, for: challenge)
+                return
+            }
+        }
+        // No client certificate available
+        challenge.sender!.cancel(challenge)
+    }
 
     func handleAuthenticationChallenge(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        //TODO
-//        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-//            if self.evaluateServerTrust(challenge.protectionSpace.serverTrust!, forDomain: challenge.protectionSpace.host) {
-//                let credential = URLCredential.init(trust: challenge.protectionSpace.serverTrust!)
-//                return (URLSession.AuthChallengeDisposition.useCredential, credential)
-//            } else {
-//                return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
-//            }
-//        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
-//            let dns = challenge.protectionSpace.distinguishedNames
-//            if let dns = dns {
-//                let identity = NetworkConnection().clientCertificateManager.evaluateTrust(distinguishedNames: dns)
-//                if let identity = identity {
-//                    let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
-//                    return (URLSession.AuthChallengeDisposition.useCredential, credential)
-//                }
-//            }
-//            // No client certificate available
-//            return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
-//        }
+        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+            if evaluateServerTrust(challenge.protectionSpace.serverTrust!, forDomain: challenge.protectionSpace.host) {
+                let credential = URLCredential.init(trust: challenge.protectionSpace.serverTrust!)
+                return (URLSession.AuthChallengeDisposition.useCredential, credential)
+            } else {
+                return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+            }
+        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
+            let dns = challenge.protectionSpace.distinguishedNames
+            if let dns = dns {
+                let identity = NetworkConnection.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+                if let identity = identity {
+                    let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                    return (URLSession.AuthChallengeDisposition.useCredential, credential)
+                }
+            }
+            // No client certificate available
+            return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+        }
         return (URLSession.AuthChallengeDisposition.performDefaultHandling, nil)
     }
 

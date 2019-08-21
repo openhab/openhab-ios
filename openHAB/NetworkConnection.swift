@@ -13,7 +13,6 @@ import os.log
 // SessionManager --> Session
 // serverTrustPolicyManager --> serverTrustManager
 // ServerTrustPolicyManager --> ServerTrustManager
-
 class NetworkConnection {
 
     static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
@@ -25,7 +24,7 @@ class NetworkConnection {
 
     init() {
 
-        manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate(), serverTrustPolicyManager: AlamofireRememberingSecurityPolicy(ignoreCertificates: true) )
+        manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate(), serverTrustPolicyManager: AlamofireRememberingSecurityPolicy(policies: [:]))
 
         manager.delegate.sessionDidReceiveChallenge = { session, challenge in
             var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
