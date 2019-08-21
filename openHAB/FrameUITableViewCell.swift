@@ -27,6 +27,8 @@ class FrameUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
+        textLabel?.textColor = .darkGray
+        textLabel?.font = .preferredFont(forTextStyle: .callout)
         textLabel?.text = widget.label.uppercased()
         contentView.sizeToFit()
     }
