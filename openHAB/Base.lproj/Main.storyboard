@@ -32,10 +32,10 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="34.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zzz-NN-iJq">
-                                                    <rect key="frame" x="20" y="17.333333333333332" width="335" height="0.0"/>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                    <color key="textColor" red="0.33333333333333331" green="0.33333333333333331" blue="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SECTION" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zzz-NN-iJq">
+                                                    <rect key="frame" x="20" y="8.3333333333333357" width="335" height="18"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
+                                                    <color key="textColor" red="0.42764812707901001" green="0.42712444067001343" blue="0.44706183671951294" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
@@ -78,6 +78,7 @@
                                                 <constraint firstItem="fxA-Sy-xY6" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Mof-kg-dHH" secondAttribute="trailing" priority="750" constant="8" id="kaT-ry-lzx"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" red="0.42764812707901001" green="0.42712444067001343" blue="0.44706183671951294" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <connections>
                                             <outlet property="customDetailTextLabel" destination="fxA-Sy-xY6" id="51C-F1-oXe"/>
                                             <outlet property="customDetailTextLabelConstraint" destination="PCL-mu-bbI" id="bzI-Go-BsT"/>
