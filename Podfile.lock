@@ -1,25 +1,5 @@
 PODS:
-  - AFNetworking (2.6.3):
-    - AFNetworking/NSURLConnection (= 2.6.3)
-    - AFNetworking/NSURLSession (= 2.6.3)
-    - AFNetworking/Reachability (= 2.6.3)
-    - AFNetworking/Security (= 2.6.3)
-    - AFNetworking/Serialization (= 2.6.3)
-    - AFNetworking/UIKit (= 2.6.3)
-  - AFNetworking/NSURLConnection (2.6.3):
-    - AFNetworking/Reachability
-    - AFNetworking/Security
-    - AFNetworking/Serialization
-  - AFNetworking/NSURLSession (2.6.3):
-    - AFNetworking/Reachability
-    - AFNetworking/Security
-    - AFNetworking/Serialization
-  - AFNetworking/Reachability (2.6.3)
-  - AFNetworking/Security (2.6.3)
-  - AFNetworking/Serialization (2.6.3)
-  - AFNetworking/UIKit (2.6.3):
-    - AFNetworking/NSURLConnection
-    - AFNetworking/NSURLSession
+  - Alamofire (4.8.2)
   - CocoaLumberjack (3.5.3):
     - CocoaLumberjack/Core (= 3.5.3)
   - CocoaLumberjack/Core (3.5.3)
@@ -105,7 +85,7 @@ PODS:
   - SwiftMessages/App (7.0.0)
 
 DEPENDENCIES:
-  - AFNetworking (~> 2.6.0)
+  - Alamofire (~> 4.0)
   - Crashlytics (~> 3.9.3)
   - DynamicButton (~> 6.2)
   - Fabric (~> 1.7.2)
@@ -115,11 +95,12 @@ DEPENDENCIES:
   - SDWebImage (~> 5.0)
   - SDWebImageSVGCoder
   - SideMenu (~> 5.0)
+  - SVGKit
   - SwiftMessages
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
-    - AFNetworking
+    - Alamofire
     - CocoaLumberjack
     - Crashlytics
     - DynamicButton
@@ -144,7 +125,7 @@ SPEC REPOS:
     - SwiftMessages
 
 SPEC CHECKSUMS:
-  AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
+  Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   DynamicButton: 99858ce823ceed7263a4eed43bd3870e72723cb2
@@ -168,6 +149,6 @@ SPEC CHECKSUMS:
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   SwiftMessages: a952f7a9103d9aeab93730a2861d2d8fcdd8758f
 
-PODFILE CHECKSUM: 3dd29a661bef723ef9b80b78d8fde7a00e32ebe8
+PODFILE CHECKSUM: 4d9f9d2b03c841d3cda963d32040509bbe3dca1f
 
 COCOAPODS: 1.7.1

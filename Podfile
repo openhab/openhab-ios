@@ -4,8 +4,7 @@ platform :ios, '11.0'
 use_frameworks!
 
 target 'openHAB' do
-    #pod 'AFNetworking', '~> 3.0'
-    pod 'AFNetworking', '~> 2.6.0'
+    pod 'SVGKit'
     pod 'SDWebImage', '~> 5.0' , :modular_headers => true
     pod 'SDWebImageSVGCoder'
     pod 'Firebase/Core'
@@ -15,12 +14,12 @@ target 'openHAB' do
     pod 'SideMenu', '~> 5.0'
     pod 'FlexColorPicker'
     pod 'DynamicButton', '~> 6.2'
+    pod 'Alamofire', '~> 4.0'
     pod 'Fuzi', '~> 3.1'
 end
 
 target 'openHABTestsSwift' do
     inherit! :search_paths
-    #pod 'GDataXML-HTML', '~> 1.3.0'
-    pod 'AFNetworking', '~> 2.6.0'
+    pod 'Alamofire', '~> 4.0'
     pod 'Fuzi', '~> 3.1'
 end

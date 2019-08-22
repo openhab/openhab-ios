@@ -13,7 +13,7 @@ class SelectionUITableViewCell: GenericUITableViewCell {
     //@IBOutlet weak var customTextLabel: UILabel!
     //@IBOutlet weak var customDetailTextLabel: UILabel!
 
-    @objc override var widget: OpenHABWidget! {
+    override var widget: OpenHABWidget! {
         get {
             return super.widget
         }

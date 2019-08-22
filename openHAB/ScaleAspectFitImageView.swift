@@ -6,7 +6,7 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 public class ScaleAspectFitImageView: UIImageView {
     private var aspectRatioConstraint: NSLayoutConstraint?

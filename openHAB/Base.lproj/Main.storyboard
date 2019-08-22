@@ -34,8 +34,8 @@
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zzz-NN-iJq">
                                                     <rect key="frame" x="20" y="17.333333333333332" width="335" height="0.0"/>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                    <color key="textColor" red="0.33333333333333331" green="0.33333333333333331" blue="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleCaption2"/>
+                                                    <color key="textColor" red="1" green="0.11276199689999999" blue="0.28642880009999999" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
@@ -78,6 +78,7 @@
                                                 <constraint firstItem="fxA-Sy-xY6" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Mof-kg-dHH" secondAttribute="trailing" priority="750" constant="8" id="kaT-ry-lzx"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" red="0.42764812707901001" green="0.42712444067001343" blue="0.44706183671951294" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         <connections>
                                             <outlet property="customDetailTextLabel" destination="fxA-Sy-xY6" id="51C-F1-oXe"/>
                                             <outlet property="customDetailTextLabelConstraint" destination="PCL-mu-bbI" id="bzI-Go-BsT"/>
@@ -312,13 +313,13 @@
                                             <rect key="frame" x="0.0" y="0.0" width="342" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="700" text="Choice blabla blabla blabla" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hd9-I4-GIr">
-                                                    <rect key="frame" x="61.999999999999986" y="11.666666666666666" width="144.66666666666663" height="20.333333333333336"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="700" text="Choice" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hd9-I4-GIr">
+                                                    <rect key="frame" x="62" y="11.666666666666666" width="53.666666666666657" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="right" verticalHuggingPriority="251" horizontalCompressionResistancePriority="800" text="Selectedd dllldld" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Adh-o9-6Qx">
-                                                    <rect key="frame" x="214.66666666666666" y="11.666666666666666" width="127.33333333333334" height="20.333333333333336"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="right" verticalHuggingPriority="251" horizontalCompressionResistancePriority="800" text="Selected" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Adh-o9-6Qx">
+                                                    <rect key="frame" x="123.66666666666667" y="11.666666666666666" width="218.33333333333331" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -1412,6 +1413,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="t07-wP-hEy"/>
+        <segue reference="z72-H1-TTm"/>
     </inferredMetricsTieBreakers>
 </document>

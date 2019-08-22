@@ -33,4 +33,5 @@ class OpenHABFormatTests: XCTestCase {
         XCTAssertEqual(valueTextWithoutFormatter(1000.0, step: 5.23), "1000.00")
 
     }
+
 }

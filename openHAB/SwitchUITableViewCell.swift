@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 import os.log
+import UIKit
 
 fileprivate extension Selector {
     static let switchChange = #selector(SwitchUITableViewCell.switchChange)
@@ -40,7 +41,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
             state = (widget.item?.state) ?? ""
         }
         self.customDetailTextLabel?.text = widget.labelValue ?? ""
-        widgetSwitch?.isOn = state == "ON" ? true : false
+        widgetSwitch?.isOn = (state == "ON" ? true : false)
         widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
         super.displayWidget()
     }

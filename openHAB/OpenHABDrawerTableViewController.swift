@@ -11,7 +11,6 @@
 import DynamicButton
 import Fuzi
 import os.log
-import SDWebImage
 import UIKit
 
 func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
@@ -99,37 +98,42 @@ class OpenHABDrawerTableViewController: UITableViewController {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
-            let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: nil)
-            operation.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
-                guard let self = self else { return }
-                let response = responseObject as? Data
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("Sitemap response", log: .viewCycle, type: .info)
 
-                self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
+            let operation = NetworkConnection()
 
-                if self.sitemaps.count > 1 && self.sitemaps.last?.name == "_default" {
-                    self.sitemaps = Array(self.sitemaps.dropLast())
-                }
-
-                // Sort the sitemaps alphabetically.
-                self.sitemaps.sort { $0.name < $1.name }
-                self.drawerItems.removeAll()
-                if self.drawerTableType == .with {
-                    self.setStandardDrawerItems()
-                }
-                self.tableView.reloadData()
-            }, failure: { operation, error in
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                self.drawerItems.removeAll()
-                if self.drawerTableType == .with {
-                    self.setStandardDrawerItems()
-                }
-                self.tableView.reloadData()
-            })
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            operation.start()
+
+            operation.manager.request(sitemapsRequest)
+                .validate(statusCode: 200..<300)
+                .responseJSON { (response) in
+                    switch response.result {
+                    case .success:
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        os_log("Sitemap response", log: .viewCycle, type: .info)
+
+                        self.sitemaps = deriveSitemaps(response.data, version: self.appData?.openHABVersion)
+
+                        if self.sitemaps.last?.name == "_default" {
+                            self.sitemaps = Array(self.sitemaps.dropLast())
+                        }
+
+                        // Sort the sitemaps alphabetically.
+                        self.sitemaps.sort { $0.name < $1.name }
+                        self.drawerItems.removeAll()
+                        if self.drawerTableType == .with {
+                            self.setStandardDrawerItems()
+                        }
+                        self.tableView.reloadData()
+                    case .failure(let error):
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                        self.drawerItems.removeAll()
+                        if self.drawerTableType == .with {
+                            self.setStandardDrawerItems()
+                        }
+                        self.tableView.reloadData()
+                    }
+            }
         }
     }
 
@@ -177,18 +181,33 @@ class OpenHABDrawerTableViewController: UITableViewController {
         cell.customImageView.subviews.forEach { $0.removeFromSuperview() }
 
         if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
+            let imageView = UIImageView(frame: cell.customImageView.bounds)
+
             cell.customTextLabel?.text = sitemaps[indexPath.row].label
             if sitemaps[indexPath.row].icon != "" {
-                let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url
+                if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url {
+                    var imageRequest = URLRequest(url: iconURL)
+                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
+                    imageRequest.timeoutInterval = 10.0
 
-                let imageView = UIImageView(frame: cell.customImageView.bounds)
-                imageView.sd_setImage(with: iconURL, placeholderImage: UIImage(named: "icon-76x76.png"), options: .imageOptionsIgnoreInvalidCertIfDefined)
-                cell.customImageView.addSubview(imageView)
+                    let operation = NetworkConnection()
+                    operation.manager.request(imageRequest)
+                        .validate(statusCode: 200..<300)
+                        .responseData { (response) in
+                            switch response.result {
+                            case .success:
+                                if let data = response.data {
+                                    imageView.image = UIImage(data: data)
+                                }
+                            case .failure:
+                                imageView.image = UIImage(named: "icon-76x76.png")
+                            }
+                    }
+                }
             } else {
-                let imageView = UIImageView(frame: cell.customImageView.bounds)
                 imageView.image = UIImage(named: "icon-76x76.png")
-                cell.customImageView.addSubview(imageView)
             }
+            cell.customImageView.addSubview(imageView)
         } else {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]

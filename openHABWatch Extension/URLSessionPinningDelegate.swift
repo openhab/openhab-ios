@@ -48,7 +48,7 @@ extension Certificate {
 
 class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
 
-    static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+    var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
 
     func urlSession(_ session: URLSession,
                     didReceive challenge: URLAuthenticationChallenge,
@@ -102,7 +102,7 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
     func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
         let dns = challenge.protectionSpace.distinguishedNames
         if let dns = dns {
-            let identity = CertificatePinningURLSessionDelegate.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+            let identity = clientCertificateManager.evaluateTrust(distinguishedNames: dns)
             if let identity = identity {
                 let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
                 challenge.sender!.use(credential, for: challenge)

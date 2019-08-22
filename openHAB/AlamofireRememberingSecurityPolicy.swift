@@ -1,23 +1,20 @@
 //  Converted to Swift 4 by Swiftify v4.2.28153 - https://objectivec2swift.com/
 //
-//  AFRememberingSecurityPolicy.swift
+//  AlamofireRememberingSecurityPolicy.swift
 //  openHAB
 //
-//  Created by Victor Belov on 14/07/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
-//
+//  Created by Tim Müller-Seydlitz on 10/08/19.
+//  Copyright (c) 2019 David O'Neill. All rights reserved.
 
-import AFNetworking
+import Alamofire
 import os.log
 
-protocol AFRememberingSecurityPolicyDelegate: NSObjectProtocol {
+protocol AlamofireRememberingSecurityPolicyDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
+    func evaluateServerTrust(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
+    func evaluateCertificateMismatch(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
 }
-
-var trustedCertificates: [AnyHashable: Any] = [:]
 
 func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
     // Returns the leaf certificate from a SecTrust object (that is always the
@@ -37,7 +34,7 @@ func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
 
 }
 
-class AFRememberingSecurityPolicy: AFSecurityPolicy {
+class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
     class func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
         self.loadTrustedCertificates()
@@ -76,14 +73,16 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         case permitAlways
     }
     var evaluateResult: EvaluateResult = .undecided
-    weak var delegate: AFRememberingSecurityPolicyDelegate?
+    weak var delegate: AlamofireRememberingSecurityPolicyDelegate?
+    var allowInvalidCertificates: Bool = false
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override init() {
-        super.init()
+    override init(policies: [String: ServerTrustPolicy]) {
+
+        super.init(policies: policies)
 
         let prefs = UserDefaults.standard
         let ignoreSSLCertificate = prefs.bool(forKey: "ignoreSSL")
@@ -91,7 +90,6 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         if ignoreSSLCertificate {
             os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
             self.allowInvalidCertificates = true
-            self.validatesDomainName = false
         }
     }
 
@@ -118,13 +116,15 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
 
     }
 
-    override func evaluateServerTrust(_ serverTrust: SecTrust?, forDomain domain: String?) -> Bool {
+    override func serverTrustPolicy(forHost host: String) -> ServerTrustPolicy? {
+        return .customEvaluation(evaluateServerTrust)
+    }
+
+    func evaluateServerTrust(_ serverTrust: SecTrust, forDomain domain: String) -> Bool {
         // Evaluates trust received during SSL negotiation and checks it against known ones,
         // against policy setting to ignore certificate errors and so on.
         var evaluateResult: SecTrustResultType = .invalid
-        guard let serverTrust = serverTrust else {
-            return false
-        }
+
         SecTrustEvaluate(serverTrust, &evaluateResult)
         if evaluateResult == .unspecified || evaluateResult == .proceed || allowInvalidCertificates {
             // This means system thinks this is a legal/usable certificate, just permit the connection
@@ -135,7 +135,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         let certificateData = SecCertificateCopyData(certificate!)
         // If we have a certificate for this domain
         // Obtain certificate we have and compare it with the certificate presented by the server
-        if let previousCertificateData = AFRememberingSecurityPolicy.certificateData(forDomain: domain) {
+        if let previousCertificateData = AlamofireRememberingSecurityPolicy.certificateData(forDomain: domain) {
             if CFEqual(previousCertificateData, certificateData) {
                 // If certificate matched one in our store - permit this connection
                 return true
@@ -159,7 +159,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
                     case .permitAlways:
                         // User decided to accept invalid certificate and remember decision
                         // Add certificate to storage
-                        AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                        AlamofireRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
                         return true
                     case .undecided:
                         // Something went wrong, abort connection
@@ -188,7 +188,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
             case .permitAlways:
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
-                AFRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
+                AlamofireRememberingSecurityPolicy.storeCertificateData(certificateData, forDomain: domain)
                 return true
             case .undecided:
                 return false
@@ -201,7 +201,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     func evaluateClientTrust(challenge: URLAuthenticationChallenge) {
         let dns = challenge.protectionSpace.distinguishedNames
         if let dns = dns {
-            let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+            let identity = NetworkConnection.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
             if let identity = identity {
                 let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
                 challenge.sender!.use(credential, for: challenge)
@@ -213,25 +213,26 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     }
 
     func handleAuthenticationChallenge(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-	if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-	    if self.evaluateServerTrust(challenge.protectionSpace.serverTrust!, forDomain: challenge.protectionSpace.host) {
-		let credential = URLCredential.init(trust: challenge.protectionSpace.serverTrust!)
-		return (URLSession.AuthChallengeDisposition.useCredential, credential)
-	    } else {
-		return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
-	    }
-	} else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
-	    let dns = challenge.protectionSpace.distinguishedNames
-	    if let dns = dns {
-		let identity = OpenHABHTTPRequestOperation.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
-		if let identity = identity {
-		    let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
-		    return (URLSession.AuthChallengeDisposition.useCredential, credential)
-		}
-	    }
-	    // No client certificate available
-	    return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
-	}
-	return (URLSession.AuthChallengeDisposition.performDefaultHandling, nil)
+        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+            if evaluateServerTrust(challenge.protectionSpace.serverTrust!, forDomain: challenge.protectionSpace.host) {
+                let credential = URLCredential.init(trust: challenge.protectionSpace.serverTrust!)
+                return (URLSession.AuthChallengeDisposition.useCredential, credential)
+            } else {
+                return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+            }
+        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
+            let dns = challenge.protectionSpace.distinguishedNames
+            if let dns = dns {
+                let identity = NetworkConnection.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
+                if let identity = identity {
+                    let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                    return (URLSession.AuthChallengeDisposition.useCredential, credential)
+                }
+            }
+            // No client certificate available
+            return (URLSession.AuthChallengeDisposition.cancelAuthenticationChallenge, nil)
+        }
+        return (URLSession.AuthChallengeDisposition.performDefaultHandling, nil)
     }
+
 }
