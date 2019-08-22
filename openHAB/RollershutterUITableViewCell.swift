@@ -25,6 +25,8 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     @IBOutlet weak var stopButton: DynamicButton!
     @IBOutlet weak var upButton: DynamicButton!
 
+    @IBOutlet weak var customDetailText: UILabel!
+
     override func initialize() {
         selectionStyle = .none
         separatorInset = .zero
@@ -45,7 +47,8 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
 
     override func displayWidget() {
         customTextLabel?.text = widget.labelText
-
+        customDetailText?.text = widget.labelValue ?? ""
+        
         upButton?.setStyle(.caretUp, animated: true)
         stopButton?.setStyle(.stop, animated: true)
         downButton?.setStyle(.caretDown, animated: true)
