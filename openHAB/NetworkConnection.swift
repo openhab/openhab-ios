@@ -1,5 +1,5 @@
 //
-//  BetworkConnection.swift
+//  NetworkConnection.swift
 //  openHAB
 //
 //  Created by Tim Müller-Seydlitz on 10/08/19.
@@ -15,26 +15,36 @@ import os.log
 // ServerTrustPolicyManager --> ServerTrustManager
 class NetworkConnection {
 
-    static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+    var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+    var serverCertificateManager: ServerCertificateManager!
 
     var manager: Alamofire.SessionManager!
-    static let shared = NetworkConnection()
+    static var shared: NetworkConnection!
 
     //let UIImageView.af_sharedImageDownloader = ImageDownloader(sessionManager: manager)
 
-    init() {
+    class func initialize(ignoreSSL: Bool) {
+        shared = NetworkConnection(ignoreSSL: ignoreSSL)
+    }
 
-        manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate(), serverTrustPolicyManager: AlamofireRememberingSecurityPolicy(policies: [:]))
+    init(ignoreSSL: Bool) {
+        serverCertificateManager = ServerCertificateManager(ignoreCertificates: ignoreSSL)
 
-        manager.delegate.sessionDidReceiveChallenge = { session, challenge in
+        serverCertificateManager.initializeCertificatesStore()
+
+        manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate())
+        manager.startRequestsImmediately = false
+
+        manager.delegate.sessionDidReceiveChallenge = { [weak self] session, challenge in
+            guard let self = self else { return (.performDefaultHandling, nil) }
+
             var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
             var credential: URLCredential?
 
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-                disposition = URLSession.AuthChallengeDisposition.useCredential
-                credential = URLCredential(trust: challenge.protectionSpace.serverTrust!)
+                (disposition, credential) = self.serverCertificateManager.evaluateTrust(challenge: challenge)
             } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
-                (disposition, credential) = self.evaluateClientTrust(challenge: challenge)
+                (disposition, credential) = self.clientCertificateManager.evaluateTrust(challenge: challenge)
             } else {
                 if challenge.previousFailureCount > 0 {
                     disposition = .cancelAuthenticationChallenge
@@ -51,15 +61,8 @@ class NetworkConnection {
         }
     }
 
-    func evaluateClientTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        let dns = challenge.protectionSpace.distinguishedNames
-        if let dns = dns {
-            let identity = NetworkConnection.clientCertificateManager.evaluateTrust(distinguishedNames: dns)
-            if let identity = identity {
-                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
-                return (.useCredential, credential)
-            }
-        }
-        return (.cancelAuthenticationChallenge, nil)
+    func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
+        serverCertificateManager.delegate = serverDelegate
+        clientCertificateManager.delegate = clientDelegate
     }
 }

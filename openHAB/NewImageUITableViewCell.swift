@@ -134,7 +134,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             downloadRequest = nil
         }
 
-        downloadRequest = NetworkConnection().manager.request(imageRequest)
+        downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
             .validate(statusCode: 200..<300)
             .responseData { (response) in
 
@@ -149,6 +149,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                     os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
                 }
         }
+        downloadRequest?.resume()
     }
 
     @objc func refreshImage(_ timer: Timer?) {

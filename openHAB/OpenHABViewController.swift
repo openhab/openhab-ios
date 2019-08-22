@@ -81,7 +81,7 @@ class OpenHABViewController: UIViewController {
                 os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
                 os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
             }
-            commandOperation = NetworkConnection().manager.request(commandRequest).responseJSON { (response) in
+            commandOperation = NetworkConnection.shared.manager.request(commandRequest).responseJSON { (response) in
                 switch response.result {
                 case .success:
                     os_log("Command sent!", log: .remoteAccess, type: .info)
@@ -90,6 +90,7 @@ class OpenHABViewController: UIViewController {
 
                 }
             }
+            commandOperation?.resume()
         }
     }
 
@@ -197,7 +198,7 @@ class OpenHABViewController: UIViewController {
                     var registrationRequest = URLRequest(url: registrationUrl)
                     os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
                     registrationRequest.setAuthCredentials(openHABUsername, openHABPassword)
-                    NetworkConnection().manager.request(registrationRequest).responseJSON { (response) in
+                    let registrationOperation = NetworkConnection.shared.manager.request(registrationRequest).responseJSON { (response) in
                         switch response.result {
                         case .success:
                             os_log("my.openHAB registration sent", log: .notifications, type: .info)
@@ -205,6 +206,7 @@ class OpenHABViewController: UIViewController {
                             os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                         }
                     }
+                    registrationOperation.resume()
                 }
             }
         }
@@ -229,6 +231,7 @@ class OpenHABViewController: UIViewController {
         if pageUrl == "" {
             // Set self as root view controller
             appData?.rootViewController = self
+            NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
             // Add self as observer for APS registration
             NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
             if currentPage != nil {
@@ -395,7 +398,7 @@ class OpenHABViewController: UIViewController {
 
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
-        commandOperation = NetworkConnection().manager.request(pageRequest).responseJSON { [weak self] (response) in
+        currentPageOperation = NetworkConnection.shared.manager.request(pageRequest).responseJSON { [weak self] (response) in
             guard let self = self else { return }
 
             switch response.result {
@@ -498,6 +501,8 @@ class OpenHABViewController: UIViewController {
                 }
             }
         }
+        currentPageOperation?.resume()
+
         os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
     }
 
@@ -509,11 +514,10 @@ class OpenHABViewController: UIViewController {
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
 
-            let operation = NetworkConnection()
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             os_log("Firing request", log: .viewCycle, type: .info)
 
-            operation.manager.request(sitemapsRequest)
+            let sitemapsOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
                 .validate(statusCode: 200..<300)
                 .responseJSON { (response) in
                     switch response.result {
@@ -592,6 +596,7 @@ class OpenHABViewController: UIViewController {
                         UIApplication.shared.isNetworkActivityIndicatorVisible = true
                     }
             }
+            sitemapsOperation.resume()
         }
     }
 
@@ -711,7 +716,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             DispatchQueue.main.async {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
-            commandOperation = NetworkConnection().manager.request(pageRequest).responseJSON { (response) in
+            commandOperation = NetworkConnection.shared.manager.request(pageRequest).responseJSON { (response) in
                 switch response.result {
                 case .success:
                     os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
@@ -730,6 +735,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                     self.selectSitemap()
                 }
             }
+            commandOperation?.resume()
         }
     }
 
@@ -803,10 +809,10 @@ extension OpenHABViewController: ColorPickerUITableViewCellDelegate {
     }
 }
 
-// MARK: - AlamofireRememberingSecurityPolicyDelegate
-extension OpenHABViewController: AlamofireRememberingSecurityPolicyDelegate {
+// MARK: - ServerCertificateManagerDelegate
+extension OpenHABViewController: ServerCertificateManagerDelegate {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
+    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async(execute: {
             let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
             alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
@@ -817,7 +823,7 @@ extension OpenHABViewController: AlamofireRememberingSecurityPolicyDelegate {
     }
 
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: AlamofireRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?) {
+    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async(execute: {
             let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
             alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in  policy?.evaluateResult = .deny })
@@ -1012,8 +1018,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.setAuthCredentials(openHABUsername, openHABPassword)
                 imageRequest.timeoutInterval = 10.0
-                let operation = NetworkConnection()
-                operation.manager.request(imageRequest)
+                let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
                     .validate(statusCode: 200..<300)
                     .responseData { (response) in
                         switch response.result {
@@ -1031,6 +1036,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                             cell.imageView?.image = UIImage(named: "blankicon.png")
                         }
                 }
+                imageOperation.resume()
             }
         }
 

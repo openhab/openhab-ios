@@ -99,11 +99,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
 
-            let operation = NetworkConnection()
-
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-            operation.manager.request(sitemapsRequest)
+            let sitemapOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
                 .validate(statusCode: 200..<300)
                 .responseJSON { (response) in
                     switch response.result {
@@ -134,6 +132,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                         self.tableView.reloadData()
                     }
             }
+            sitemapOperation.resume()
         }
     }
 
@@ -190,8 +189,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
                     imageRequest.timeoutInterval = 10.0
 
-                    let operation = NetworkConnection()
-                    operation.manager.request(imageRequest)
+                    let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
                         .validate(statusCode: 200..<300)
                         .responseData { (response) in
                             switch response.result {
@@ -203,6 +201,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                                 imageView.image = UIImage(named: "icon-76x76.png")
                             }
                     }
+                    imageOperation.resume()
                 }
             } else {
                 imageView.image = UIImage(named: "icon-76x76.png")
