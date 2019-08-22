@@ -140,3 +140,9 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         loadImage()
     }
 }
+
+extension NewImageUITableViewCell: GenericCellCacheProtocol {
+    func invalidateCache() {
+        refreshTimer?.invalidate()
+    }
+}

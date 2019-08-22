@@ -445,54 +445,54 @@ class OpenHABViewController: UIViewController {
             self.refreshControl?.endRefreshing()
             self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
             self.loadPage(true)
-            }, failure: { [weak self] operation, error in
-                guard let self = self else { return }
+        }, failure: { [weak self] operation, error in
+            guard let self = self else { return }
 
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                self.atmosphereTrackingId = ""
-                if (error as NSError?)?.code == -1001 && longPolling {
-                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                    self.loadPage(false)
-                } else if (error as NSError?)?.code == -999 {
-                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
-                } else {
-                    // Error
-                    DispatchQueue.main.async {
-                        if (error as NSError?)?.code == -1012 {
-                            var config = SwiftMessages.Config()
-                            config.duration = .seconds(seconds: 5)
-                            config.presentationStyle = .bottom
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+            self.atmosphereTrackingId = ""
+            if (error as NSError?)?.code == -1001 && longPolling {
+                os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
+                self.loadPage(false)
+            } else if (error as NSError?)?.code == -999 {
+                os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
+            } else {
+                // Error
+                DispatchQueue.main.async {
+                    if (error as NSError?)?.code == -1012 {
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
 
-                            SwiftMessages.show(config: config) {
-                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                let view = MessageView.viewFromNib(layout: .cardView)
-                                // ... configure the view
-                                view.configureTheme(.error)
-                                view.configureContent(title: "Error", body: "SSL Certificate Error")
-                                view.button?.setTitle("Dismiss", for: .normal)
-                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                return view
-                            }
-                        } else {
-                            var config = SwiftMessages.Config()
-                            config.duration = .seconds(seconds: 5)
-                            config.presentationStyle = .bottom
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            // ... configure the view
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: "SSL Certificate Error")
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
+                        }
+                    } else {
+                        var config = SwiftMessages.Config()
+                        config.duration = .seconds(seconds: 5)
+                        config.presentationStyle = .bottom
 
-                            SwiftMessages.show(config: config) {
-                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                let view = MessageView.viewFromNib(layout: .cardView)
-                                // ... configure the view
-                                view.configureTheme(.error)
-                                view.configureContent(title: "Error", body: error.localizedDescription)
-                                view.button?.setTitle("Dismiss", for: .normal)
-                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                return view
-                            }
+                        SwiftMessages.show(config: config) {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                            let view = MessageView.viewFromNib(layout: .cardView)
+                            // ... configure the view
+                            view.configureTheme(.error)
+                            view.configureContent(title: "Error", body: error.localizedDescription)
+                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                            return view
                         }
                     }
-                    os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                 }
+                os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+            }
         })
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
         currentPageOperation?.start()
@@ -1076,9 +1076,11 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // invalidate cache only if the cell is not visible
-        if let cell = cell as? GenericCellCacheProtocol, let indexPath = tableView.indexPath(for: cell), let visibleIndexPaths = tableView.indexPathsForVisibleRows, !visibleIndexPaths.contains(indexPath) {
-            cell.invalidateCache()
+        if let cell = cell as? GenericCellCacheProtocol {
+            // invalidate cache only if the cell is not visible or the datasource is empty (eg. sitemap change)
+            if tableView.indexPathsForVisibleRows == nil || !tableView.indexPathsForVisibleRows!.contains(indexPath) || currentPage == nil || currentPage!.widgets.isEmpty {
+                cell.invalidateCache()
+            }
         }
     }
 }
