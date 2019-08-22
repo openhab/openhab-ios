@@ -11,6 +11,7 @@
 import AVFoundation
 import AVKit
 import DynamicButton
+import Fuzi
 import os.log
 import SDWebImage
 import SDWebImageSVGCoder
@@ -78,8 +79,8 @@ class OpenHABViewController: UIViewController {
             commandOperation = OpenHABHTTPRequestOperation(request: commandRequest, delegate: self)
             commandOperation?.setCompletionBlockWithSuccess({ operation, responseObject in
                 os_log("Command sent!", log: .remoteAccess, type: .info)
-            }, failure: { operation, error in
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
+                }, failure: { operation, error in
+                    os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
             })
             os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
             if let link = item?.link {
@@ -410,16 +411,13 @@ class OpenHABViewController: UIViewController {
                     let str = String(decoding: response, as: UTF8.self)
                     os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
-                    guard let doc = try? GDataXMLDocument(data: response) else { return }
-                    if let name = doc.rootElement().name() {
+                    guard let doc = try? XMLDocument(data: response) else { return }
+                    if let rootElement = doc.root, let name = rootElement.tag {
                         os_log("XML sitemmap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                    }
-                    openHABSitemapPage = {
-                        if doc.rootElement().name() == "page", let rootElement = doc.rootElement() {
-                            return OpenHABSitemapPage(xml: rootElement)
+                        if name == "page" {
+                            openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                         }
-                        return nil
-                    }()
+                    }
                 } else {
                     // Newer versions talk JSON!
                     os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
@@ -510,7 +508,8 @@ class OpenHABViewController: UIViewController {
             sitemapsRequest.timeoutInterval = 10.0
             let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: self)
 
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+            operation.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
+                guard let self = self else { return }
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.sitemaps = deriveSitemaps(response, version: self.appData?.openHABVersion)
@@ -1044,8 +1043,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         // Explictly set your cell's layout margins
         cell.layoutMargins = .zero
 
-        guard let videoCell = (cell as? VideoUITableViewCell) else { return }
-        videoCell.playerView.player?.play()
+        (cell as? VideoUITableViewCell)?.play()
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

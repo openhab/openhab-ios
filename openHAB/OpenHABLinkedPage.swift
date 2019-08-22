@@ -10,8 +10,9 @@
 //
 
 import Foundation
+import Fuzi
 
-@objcMembers class OpenHABLinkedPage: NSObject, Decodable {
+class OpenHABLinkedPage: NSObject, Decodable {
     var pageId = ""
     var title = ""
     var icon = ""
@@ -24,20 +25,16 @@ import Foundation
         case link
     }
 
-    init(xml xmlElement: GDataXMLElement?) {
-        let propertyNames: Set = ["title", "icon", "link"]
+    init(xml xmlElement: XMLElement) {
         super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if !(child.name() == "id") {
-                    if let name = child.name() {
-                        if propertyNames.contains(name) {
-                            setValue(child.stringValue(), forKey: child.name() ?? "")
-                        }
-                    }
-                } else {
-                    pageId = child.stringValue() ?? ""
-                }
+        for child in xmlElement.children {
+            switch child.tag {
+            case "title": self.title = child.stringValue
+            case "icon": self.icon = child.stringValue
+            case "link": self.link = child.stringValue
+            case "id": self.pageId = child.stringValue
+            default:
+                break
             }
         }
     }

@@ -9,6 +9,7 @@
 //
 
 import DynamicButton
+import Fuzi
 import os.log
 import SDWebImage
 import UIKit
@@ -23,16 +24,14 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
         if let response = response {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
         }
-        if let doc = try? GDataXMLDocument(data: response) {
-            if let name = doc.rootElement().name() {
-                os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-            }
-            if doc.rootElement().name() == "sitemaps" {
-                for element in doc.rootElement().elements(forName: "sitemap") ?? [] {
-                    if let element = element as? GDataXMLElement {
-                        let sitemap = OpenHABSitemap(xml: element)
-                        sitemaps.append(sitemap)
-                    }
+        if let data = response,
+            let doc = try? XMLDocument(data: data),
+            let name = doc.root?.tag {
+            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
+            if name == "sitemaps" {
+                for element in doc.root?.children(tag: "sitemap") ?? [] {
+                    let sitemap = OpenHABSitemap(xml: element)
+                    sitemaps.append(sitemap)
                 }
             }
         } else {
@@ -101,7 +100,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
             sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
             let operation = OpenHABHTTPRequestOperation(request: sitemapsRequest, delegate: nil)
-            operation.setCompletionBlockWithSuccess({ operation, responseObject in
+            operation.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
+                guard let self = self else { return }
                 let response = responseObject as? Data
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("Sitemap response", log: .viewCycle, type: .info)

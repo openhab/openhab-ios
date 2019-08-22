@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Fuzi
 import os.log
 
 extension OpenHABSitemapPage {
@@ -38,7 +39,7 @@ extension OpenHABSitemapPage.CodingData {
     }
 }
 
-@objcMembers class OpenHABSitemapPage: NSObject {
+class OpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgets: [OpenHABWidget] = []
     var pageId = ""
@@ -68,32 +69,20 @@ extension OpenHABSitemapPage.CodingData {
         }
     }
 
-    init(xml xmlElement: GDataXMLElement?) {
-        let propertyNamesString: Set =  ["pageId", "title", "link"]
-        let propertyNamesBool: Set = ["leaf"]
+    init(xml xmlElement: XMLElement) {
         super.init()
-        for child in (xmlElement?.children())! {
-            if let child = child as? GDataXMLElement {
-                if !(child.name() == "widget") {
-                    if !(child.name() == "id") {
-                        if let name = child.name() {
-                            let value = child.stringValue() ?? ""
-                            if propertyNamesString.contains(name) {
-                                setValue(value, forKey: name)
-                            }
-                            if propertyNamesBool.contains(name) {
-                                setValue(value == "true" ? true : false, forKey: name)
-                            }
-                        }
-                    } else {
-                        pageId = child.stringValue() ?? ""
-                    }
-                } else {
-                    let newWidget = OpenHABWidget(xml: child)
-                    widgets.append(newWidget)
-                }
+        for child in xmlElement.children {
+            switch child.tag {
+            case "widget":
+                widgets.append(OpenHABWidget(xml: child))
+            case "id": self.pageId = child.stringValue
+            case "title": self.title = child.stringValue
+            case "link": self.link = child.stringValue
+            case "leaf": self.leaf = child.stringValue == "true" ? true : false
+            default: break
             }
         }
+
         var ws: [OpenHABWidget] = []
         // This could be expressed recursively but this does the job on 2 levels
         for w1 in widgets {
