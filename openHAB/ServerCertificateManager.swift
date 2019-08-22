@@ -17,7 +17,7 @@ protocol ServerCertificateManagerDelegate: NSObjectProtocol {
 }
 
 class ServerCertificateManager {
-    var trustedCertificates: [String?: Any] = [:]
+    var trustedCertificates: [String: Any] = [:]
 
     func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
@@ -66,13 +66,13 @@ class ServerCertificateManager {
         allowInvalidCertificates = ignoreCertificates
     }
 
-    func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
+    func storeCertificateData(_ certificate: CFData?, forDomain domain: String) {
         let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
         self.saveTrustedCertificates()
     }
 
-    func certificateData(forDomain domain: String?) -> CFData? {
+    func certificateData(forDomain domain: String) -> CFData? {
         guard let certificateData = trustedCertificates[domain] as? Data else { return nil  }
         return certificateData as CFData
     }
@@ -80,7 +80,7 @@ class ServerCertificateManager {
     func loadTrustedCertificates() {
         do {
             let rawdata = try Data(contentsOf: URL( string: self.getPersistensePath() ?? "" )!)
-            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String?: Any] {
+            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String: Any] {
                 trustedCertificates = unarchive
             }
         } catch {
