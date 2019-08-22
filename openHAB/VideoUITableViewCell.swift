@@ -109,6 +109,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         bringSubviewToFront(activityIndicator)
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
+        stopPlayback(andResetUrl: false)
 
         guard let url = url else {
             stopPlayback()
@@ -180,12 +181,15 @@ class VideoUITableViewCell: GenericUITableViewCell {
         aspectRatioConstraint = constraint
     }
 
-    @objc private func stopPlayback() {
-        url = nil
+    @objc private func stopPlayback(andResetUrl reset: Bool = true) {
+        if reset {
+            url = nil
+        }
         playerObserver = nil
         playerView?.playerLayer.player = nil
         mjpegRequest?.cancel()
         mjpegRequest = nil
+        self.mainImageView?.image = nil
     }
 }
 
@@ -197,7 +201,9 @@ extension VideoUITableViewCell: URLSessionDataDelegate {
                     let aspectRatio = image.size.width / image.size.height
                     self.activityIndicator.isHidden = true
                     self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                    self.didLoad?()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01, execute: {
+                        self.didLoad?()
+                    })
                 }
                 self.mainImageView?.image = image
             }
