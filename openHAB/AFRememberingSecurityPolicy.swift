@@ -17,7 +17,7 @@ protocol AFRememberingSecurityPolicyDelegate: NSObjectProtocol {
     func evaluateCertificateMismatch(_ policy: AFRememberingSecurityPolicy?, summary certificateSummary: String?, forDomain domain: String?)
 }
 
-var trustedCertificates: [AnyHashable: Any] = [:]
+var trustedCertificates: [String: Any] = [:]
 
 func SecTrustGetLeafCertificate(trust: SecTrust?) -> SecCertificate? {
     // Returns the leaf certificate from a SecTrust object (that is always the
@@ -95,13 +95,13 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         }
     }
 
-    class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
+    class func storeCertificateData(_ certificate: CFData?, forDomain domain: String) {
         let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
         self.saveTrustedCertificates()
     }
 
-    class func certificateData(forDomain domain: String?) -> CFData? {
+    class func certificateData(forDomain domain: String) -> CFData? {
         guard let certificateData = trustedCertificates[domain] as? Data else { return nil  }
         return certificateData as CFData
     }
@@ -109,7 +109,7 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
     class func loadTrustedCertificates() {
         do {
             let rawdata = try Data(contentsOf: URL( string: self.getPersistensePath() ?? "" )!)
-            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [AnyHashable: Any] {
+            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String: Any] {
                 trustedCertificates = unarchive
             }
         } catch {
@@ -123,6 +123,9 @@ class AFRememberingSecurityPolicy: AFSecurityPolicy {
         // against policy setting to ignore certificate errors and so on.
         var evaluateResult: SecTrustResultType = .invalid
         guard let serverTrust = serverTrust else {
+            return false
+        }
+        guard let domain = domain else {
             return false
         }
         SecTrustEvaluate(serverTrust, &evaluateResult)
