@@ -492,13 +492,12 @@ class OpenHABViewController: UIViewController {
                                 view.buttonTapHandler = { _ in SwiftMessages.hide() }
                                 return view
                             }
+
                         }
                     }
-                    os_log("Request failed: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                 }
             }
         }
-
         os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
     }
 
@@ -1100,9 +1099,11 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // invalidate cache only if the cell is not visible
-        if let cell = cell as? GenericCellCacheProtocol, let indexPath = tableView.indexPath(for: cell), let visibleIndexPaths = tableView.indexPathsForVisibleRows, !visibleIndexPaths.contains(indexPath) {
-            cell.invalidateCache()
+        if let cell = cell as? GenericCellCacheProtocol {
+            // invalidate cache only if the cell is not visible or the datasource is empty (eg. sitemap change)
+            if tableView.indexPathsForVisibleRows == nil || !tableView.indexPathsForVisibleRows!.contains(indexPath) || currentPage == nil || currentPage!.widgets.isEmpty {
+                cell.invalidateCache()
+            }
         }
     }
 }
