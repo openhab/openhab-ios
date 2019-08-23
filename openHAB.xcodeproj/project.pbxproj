@@ -36,6 +36,8 @@
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
 		938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */; };
 		9394102622CB5CDB00EB4255 /* Collection+SafeAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */; };
+		A02486FA23107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */; };
+		A02486FE23107C4000B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */; };
 		A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */; };
 		A08FF14A2233498700203EED /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
 		A0F48313230C80880033E6E7 /* ServerCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */; };
@@ -234,6 +236,7 @@
 		9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+SafeAccess.swift"; sourceTree = "<group>"; };
 		965E6C0728A41A0442B5E59C /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		97512493BF42657D31F36571 /* Pods-openHABTestsSwift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABTestsSwift.debug.xcconfig"; path = "Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift.debug.xcconfig"; sourceTree = "<group>"; };
+		A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableURLRequest+Auth.swift"; sourceTree = "<group>"; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A08FF1492233498600203EED /* ClientCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientCertificateManager.swift; sourceTree = "<group>"; };
 		A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCertificateManager.swift; sourceTree = "<group>"; };
@@ -747,6 +750,7 @@
 		DFDEE3FF18832293008B26AC /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */,
 				A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */,
 				DA4A1A63223D57AD005F530F /* ColorUtil.swift */,
 				DA5D0F80223E9991007ADDBD /* Endpoint.swift */,
@@ -1130,6 +1134,7 @@
 				1224F7D6228A8F1700750965 /* AppMessageService.swift in Sources */,
 				DAC9395A22B045C200C5F423 /* ClientCertificateManager.swift in Sources */,
 				1224F7A6228A8AE500750965 /* ExtensionDelegate.swift in Sources */,
+				A02486FA23107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */,
 				1224F7B9228A8DE200750965 /* PrefsInterfaceController.swift in Sources */,
 				1224F7C6228A8EB600750965 /* AppState.swift in Sources */,
 				1224F7A4228A8AE500750965 /* InterfaceController.swift in Sources */,
@@ -1164,6 +1169,7 @@
 				DAC9394922AD62F500C5F423 /* OpenHabService.swift in Sources */,
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
 				DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */,
+				A02486FE23107C4000B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */,
 				DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */,
 				DAB9C7B1230B323000A7DB6E /* OpenHABNewXMLParserTests.swift in Sources */,
 				DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */,
