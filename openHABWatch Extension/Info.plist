@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>2.1.9</string>
 	<key>CFBundleVersion</key>
-	<string>42</string>
+	<string>43</string>
 	<key>CLKComplicationPrincipalClass</key>
 	<string>ComplicationController</string>
 	<key>CLKComplicationSupportedFamilies</key>
