@@ -55,7 +55,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         loadSettingsDefaults()
 
-        AlamofireRememberingSecurityPolicy.initializeCertificatesStore()
+        let prefs = UserDefaults.standard
+        let ignoreSSL = prefs.bool(forKey: "ignoreSSL")
+        NetworkConnection.initialize(ignoreSSL: ignoreSSL)
 
         registerForPushNotifications()
 
@@ -123,8 +125,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
 
         if url.isFileURL {
-            let clientCertificateManager = NetworkConnection.clientCertificateManager
-            clientCertificateManager.delegate = appData!.rootViewController!
+            let clientCertificateManager = NetworkConnection.shared.clientCertificateManager
             return clientCertificateManager.startImportClientCertificate(url: url)
         }
 

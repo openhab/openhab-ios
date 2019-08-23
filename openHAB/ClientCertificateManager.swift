@@ -195,4 +195,15 @@ class ClientCertificateManager {
         return status
     }
 
+    func evaluateTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        let dns = challenge.protectionSpace.distinguishedNames
+        if let dns = dns {
+            let identity = self.evaluateTrust(distinguishedNames: dns)
+            if let identity = identity {
+                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                return (.useCredential, credential)
+            }
+        }
+        return (.cancelAuthenticationChallenge, nil)
+    }
 }

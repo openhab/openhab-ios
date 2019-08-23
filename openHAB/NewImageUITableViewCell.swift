@@ -126,7 +126,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
 
         var imageRequest = URLRequest(url: url)
-        imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
         imageRequest.timeoutInterval = 10.0
 
         if downloadRequest != nil {
@@ -134,7 +133,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             downloadRequest = nil
         }
 
-        downloadRequest = NetworkConnection().manager.request(imageRequest)
+        downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
             .validate(statusCode: 200..<300)
             .responseData { (response) in
 
@@ -149,6 +148,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                     os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
                 }
         }
+        downloadRequest?.resume()
     }
 
     @objc func refreshImage(_ timer: Timer?) {

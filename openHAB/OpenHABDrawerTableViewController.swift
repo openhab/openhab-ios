@@ -96,14 +96,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
-            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
-
-            let operation = NetworkConnection()
 
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-            operation.manager.request(sitemapsRequest)
+            let sitemapOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
                 .validate(statusCode: 200..<300)
                 .responseJSON { (response) in
                     switch response.result {
@@ -134,6 +131,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                         self.tableView.reloadData()
                     }
             }
+            sitemapOperation.resume()
         }
     }
 
@@ -187,11 +185,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
             if sitemaps[indexPath.row].icon != "" {
                 if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url {
                     var imageRequest = URLRequest(url: iconURL)
-                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
                     imageRequest.timeoutInterval = 10.0
 
-                    let operation = NetworkConnection()
-                    operation.manager.request(imageRequest)
+                    let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
                         .validate(statusCode: 200..<300)
                         .responseData { (response) in
                             switch response.result {
@@ -203,6 +199,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                                 imageView.image = UIImage(named: "icon-76x76.png")
                             }
                     }
+                    imageOperation.resume()
                 }
             } else {
                 imageView.image = UIImage(named: "icon-76x76.png")

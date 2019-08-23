@@ -44,15 +44,13 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
-            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
 
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
-            let operation = NetworkConnection()
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-            operation.manager.request(sitemapsRequest)
+            let sitemapsOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
                 .validate(statusCode: 200..<300)
                 .responseJSON { (response) in
                     switch response.result {
@@ -113,6 +111,7 @@ class OpenHABSelectSitemapViewController: UITableViewController {
                         self.refreshControl?.endRefreshing()
                     }
             }
+            sitemapsOperation.resume()
         }
     }
 

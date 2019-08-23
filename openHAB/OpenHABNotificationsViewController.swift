@@ -67,14 +67,12 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
         if let notificationsUrl = Endpoint.notification(prefsURL: prefs.string(forKey: "remoteUrl") ?? "").url {
-            var notificationsRequest = URLRequest(url: notificationsUrl)
-            notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            let notificationsRequest = URLRequest(url: notificationsUrl)
 
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
-            let operation = NetworkConnection()
-            operation.manager.request(notificationsRequest)
+            let notificationOperation = NetworkConnection.shared.manager.request(notificationsRequest)
                 .validate(statusCode: 200..<300)
                 .responseJSON { (response) in
 
@@ -100,6 +98,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                         self.refreshControl?.endRefreshing()
                     }
             }
+            notificationOperation.resume()
         }
     }
 
@@ -134,11 +133,9 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
         if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
                     var imageRequest = URLRequest(url: iconUrl)
-                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
                     imageRequest.timeoutInterval = 10.0
 
-                    let operation = NetworkConnection()
-                    operation.manager.request(imageRequest)
+                    let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
                         .validate(statusCode: 200..<300)
                         .responseData { (response) in
                             switch response.result {
@@ -150,6 +147,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                                 cell?.imageView?.image = UIImage(named: "icon-76x76.png")
                             }
                     }
+                    imageOperation.resume()
             } else {
                 cell?.imageView?.image = UIImage(named: "icon-29x29.png")
             }

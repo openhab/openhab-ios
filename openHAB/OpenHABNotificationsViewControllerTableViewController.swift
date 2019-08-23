@@ -59,7 +59,6 @@ class OpenHABNotificationsViewController: UITableViewController {
         if let notificationsUrl = notificationsUrl {
             notificationsRequest = NSMutableURLRequest(url: notificationsUrl)
         }
-        notificationsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
         var operation: OpenHABHTTPRequestOperation?
         if let notificationsRequest = notificationsRequest {
             operation = OpenHABHTTPRequestOperation(request: notificationsRequest as URLRequest)

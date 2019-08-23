@@ -156,7 +156,6 @@ class VideoUITableViewCell: GenericUITableViewCell {
         session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
 
         var streamRequest = URLRequest(url: url)
-        streamRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
         streamRequest.timeoutInterval = 10.0
 
         mjpegRequest = session.dataTask(with: streamRequest)
