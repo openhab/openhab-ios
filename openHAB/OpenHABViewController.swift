@@ -70,7 +70,6 @@ class OpenHABViewController: UIViewController {
 
             commandRequest.httpMethod = "POST"
             commandRequest.httpBody = command?.data(using: .utf8)
-            commandRequest.setAuthCredentials(openHABUsername, openHABPassword)
             commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
             if commandOperation != nil {
                 commandOperation?.cancel()
@@ -195,9 +194,8 @@ class OpenHABViewController: UIViewController {
             if deviceId != "" && deviceToken != "" && deviceName != "" {
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 if let registrationUrl = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-                    var registrationRequest = URLRequest(url: registrationUrl)
+                    let registrationRequest = URLRequest(url: registrationUrl)
                     os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
-                    registrationRequest.setAuthCredentials(openHABUsername, openHABPassword)
                     let registrationOperation = NetworkConnection.shared.manager.request(registrationRequest).responseJSON { (response) in
                         switch response.result {
                         case .success:
@@ -374,7 +372,6 @@ class OpenHABViewController: UIViewController {
         guard let pageToLoadUrl = URL(string: pageUrl) else { return }
         var pageRequest = URLRequest(url: pageToLoadUrl)
 
-        pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
         // We accept XML only if openHAB is 1.X
         if appData?.openHABVersion == 1 {
             pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
@@ -511,7 +508,6 @@ class OpenHABViewController: UIViewController {
 
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
-            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
 
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -711,7 +707,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
         if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             var pageRequest = URLRequest(url: pageToLoadUrl)
 
-            pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
             pageRequest.timeoutInterval = 10.0
             DispatchQueue.main.async {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -1016,7 +1011,6 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                                      value: widget?.item?.state ?? "",
                                      iconType: iconType).url {
                 var imageRequest = URLRequest(url: urlc)
-                imageRequest.setAuthCredentials(openHABUsername, openHABPassword)
                 imageRequest.timeoutInterval = 10.0
                 let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
                     .validate(statusCode: 200..<300)

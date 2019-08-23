@@ -59,6 +59,28 @@ class NetworkConnection {
 
             return (disposition, credential)
         }
+
+        manager.delegate.taskDidReceiveChallenge = { session, task, challenge in
+            var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+            var credential: URLCredential?
+
+            if challenge.previousFailureCount > 0 {
+                disposition = .cancelAuthenticationChallenge
+            } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic {
+                let prefs = UserDefaults.standard
+                let remoteURL = URL(string: prefs.string(forKey: "remoteUrl") ?? "")
+                let localURL = URL(string: prefs.string(forKey: "localURL") ?? "")
+
+                if challenge.protectionSpace.host == remoteURL?.host || challenge.protectionSpace.host == localURL?.host {
+                    let openHABUsername = prefs.string(forKey: "username") ?? ""
+                    let openHABPassword = prefs.string(forKey: "password") ?? ""
+                    credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
+                    disposition = .useCredential
+                    os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+                }
+            }
+            return (disposition, credential)
+        }
     }
 
     func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {

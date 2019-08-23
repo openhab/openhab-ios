@@ -126,7 +126,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
 
         var imageRequest = URLRequest(url: url)
-        imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
         imageRequest.timeoutInterval = 10.0
 
         if downloadRequest != nil {

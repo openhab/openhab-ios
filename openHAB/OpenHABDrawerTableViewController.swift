@@ -96,7 +96,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
-            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             sitemapsRequest.timeoutInterval = 10.0
 
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -186,7 +185,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
             if sitemaps[indexPath.row].icon != "" {
                 if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url {
                     var imageRequest = URLRequest(url: iconURL)
-                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
                     imageRequest.timeoutInterval = 10.0
 
                     let imageOperation = NetworkConnection.shared.manager.request(imageRequest)

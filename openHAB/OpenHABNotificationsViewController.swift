@@ -67,8 +67,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
         if let notificationsUrl = Endpoint.notification(prefsURL: prefs.string(forKey: "remoteUrl") ?? "").url {
-            var notificationsRequest = URLRequest(url: notificationsUrl)
-            notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            let notificationsRequest = URLRequest(url: notificationsUrl)
 
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
@@ -134,7 +133,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
         if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
                     var imageRequest = URLRequest(url: iconUrl)
-                    imageRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
                     imageRequest.timeoutInterval = 10.0
 
                     let imageOperation = NetworkConnection.shared.manager.request(imageRequest)

@@ -44,7 +44,6 @@ class OpenHABSelectSitemapViewController: UITableViewController {
 
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
-            sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
 
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
