@@ -72,14 +72,15 @@ final class OpenHABItem: NSObject {
     }
 
     func stateAsUIColor() -> UIColor? {
+
         if state == "Uninitialized" {
             return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         } else {
             let values = state.components(separatedBy: ",")
             if values.count == 3 {
-                let hue = CGFloat((Float(values[0]) ?? 0.0)/360)
-                let saturation = CGFloat((Float(values[1]) ?? 0.0)/100)
-                let brightness = CGFloat((Float(values[2]) ?? 0.0)/100)
+                let hue = CGFloat(state: values[0])
+                let saturation = CGFloat(state: values[1])
+                let brightness = CGFloat(state: values[2])
                 os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
@@ -100,5 +101,15 @@ final class OpenHABItem: NSObject {
             }
         }
         return nil
+    }
+}
+
+extension CGFloat {
+    init(state string: String) {
+        if let number = NumberFormatter().number(from: string) {
+            self.init(number.floatValue/360)
+        } else {
+            self.init(0)
+        }
     }
 }
