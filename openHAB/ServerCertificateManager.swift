@@ -86,7 +86,6 @@ class ServerCertificateManager {
         } catch {
             os_log("Could not load trusted certificates", log: .default)
         }
-
     }
 
     func evaluateTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {

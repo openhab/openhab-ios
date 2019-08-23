@@ -21,8 +21,6 @@ class NetworkConnection {
     var manager: Alamofire.SessionManager!
     static var shared: NetworkConnection!
 
-    //let UIImageView.af_sharedImageDownloader = ImageDownloader(sessionManager: manager)
-
     class func initialize(ignoreSSL: Bool) {
         shared = NetworkConnection(ignoreSSL: ignoreSSL)
     }
