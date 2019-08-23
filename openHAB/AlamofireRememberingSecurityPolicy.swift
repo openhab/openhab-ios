@@ -93,13 +93,13 @@ class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
         }
     }
 
-    class func storeCertificateData(_ certificate: CFData?, forDomain domain: String?) {
+    class func storeCertificateData(_ certificate: CFData?, forDomain domain: String) {
         let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
         self.saveTrustedCertificates()
     }
 
-    class func certificateData(forDomain domain: String?) -> CFData? {
+    class func certificateData(forDomain domain: String) -> CFData? {
         guard let certificateData = trustedCertificates[domain] as? Data else { return nil  }
         return certificateData as CFData
     }
@@ -107,7 +107,7 @@ class AlamofireRememberingSecurityPolicy: ServerTrustPolicyManager {
     class func loadTrustedCertificates() {
         do {
             let rawdata = try Data(contentsOf: URL( string: self.getPersistensePath() ?? "" )!)
-            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [AnyHashable: Any] {
+            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String: Any] {
                 trustedCertificates = unarchive
             }
         } catch {

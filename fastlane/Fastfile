@@ -28,6 +28,10 @@ platform :ios do
         multi_line_end_keyword: "END"
     )
     ensure_git_status_clean
+    increment_version_number(
+        bump_type: "patch",
+        xcodeproj: "openHAB.xcodeproj"
+    )
     increment_build_number(xcodeproj: "openHAB.xcodeproj")
     commit_version_bump(xcodeproj: "openHAB.xcodeproj")
     add_git_tag
@@ -37,7 +41,7 @@ platform :ios do
         distribute_external: true,
         notify_external_testers: true,
         changelog: changelog,
-	      groups: ["Beta Testers"]
+        groups: ["Beta Testers"]
     )
   end
 end

@@ -1736,7 +1736,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 40;
+				CURRENT_PROJECT_VERSION = 43;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -1752,7 +1752,7 @@
 					"@loader_path/../../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG";
+				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG -Xfrontend -warn-long-expression-type-checking=400 -Xfrontend -warn-long-function-bodies=400";
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1777,7 +1777,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 40;
+				CURRENT_PROJECT_VERSION = 43;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
