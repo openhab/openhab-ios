@@ -78,9 +78,9 @@ final class OpenHABItem: NSObject {
         } else {
             let values = state.components(separatedBy: ",")
             if values.count == 3 {
-                let hue = CGFloat(state: values[0])
-                let saturation = CGFloat(state: values[1])
-                let brightness = CGFloat(state: values[2])
+                let hue = CGFloat(state: values[0], divisor: 360)
+                let saturation = CGFloat(state: values[1], divisor: 100)
+                let brightness = CGFloat(state: values[2], divisor: 100)
                 os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
@@ -105,9 +105,9 @@ final class OpenHABItem: NSObject {
 }
 
 extension CGFloat {
-    init(state string: String) {
+    init(state string: String, divisor: Float) {
         if let number = NumberFormatter().number(from: string) {
-            self.init(number.floatValue/360)
+            self.init(number.floatValue/divisor)
         } else {
             self.init(0)
         }
