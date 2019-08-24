@@ -7,6 +7,7 @@
 //
 
 import Foundation
+// swiftlint:disable line_length
 
 let singleWidgetXML = """
 <widget>

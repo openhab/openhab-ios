@@ -152,6 +152,8 @@ class VideoUITableViewCell: GenericUITableViewCell {
 
         bringSubviewToFront(mainImageView)
 
+        #warning("Verify transfer to Alamofire")
+
         session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
 
         var streamRequest = URLRequest(url: url)

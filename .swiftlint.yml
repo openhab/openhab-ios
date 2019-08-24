@@ -7,15 +7,33 @@ opt_in_rules:
   - implicit_return
   - multiline_function_chains
 disabled_rules: # rule identifiers to exclude from running
-  - line_length
-#  - unused_closure_parameter
   - force_cast
   - identifier_name
-  - type_body_length
-  - cyclomatic_complexity
-  - file_length
-  - function_body_length
   - todo
   - nesting
 excluded: 
   - Pods
+
+function_body_length:
+    warning: 300
+    error: 500
+
+type_body_length:
+    warning: 450
+    error: 500
+
+file_length:
+    warning: 1000
+    error: 1500
+    ignore_comment_only_lines: true
+
+cyclomatic_complexity:
+    warning: 30
+    error: 45
+
+line_length:
+    warning: 250
+    error: 500
+    ignores_function_declarations: true
+    ignores_comments: true
+    ignores_urls: true
