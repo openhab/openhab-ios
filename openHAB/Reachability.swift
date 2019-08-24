@@ -81,7 +81,7 @@ public class Reachability {
     public var allowsCellularConnection: Bool
 
     // The notification center on which "reachability changed" events are being posted
-    public var notificationCenter: NotificationCenter = NotificationCenter.default
+    public var notificationCenter = NotificationCenter.default
 
     @available(*, deprecated, renamed: "connection.description")
     public var currentReachabilityString: String {

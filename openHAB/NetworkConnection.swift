@@ -15,7 +15,7 @@ import os.log
 // ServerTrustPolicyManager --> ServerTrustManager
 class NetworkConnection {
 
-    var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+    var clientCertificateManager = ClientCertificateManager()
     var serverCertificateManager: ServerCertificateManager!
 
     var manager: Alamofire.SessionManager!
@@ -39,11 +39,12 @@ class NetworkConnection {
             var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
             var credential: URLCredential?
 
-            if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+            switch challenge.protectionSpace.authenticationMethod {
+            case NSURLAuthenticationMethodServerTrust:
                 (disposition, credential) = self.serverCertificateManager.evaluateTrust(challenge: challenge)
-            } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
+            case NSURLAuthenticationMethodClientCertificate:
                 (disposition, credential) = self.clientCertificateManager.evaluateTrust(challenge: challenge)
-            } else {
+            default:
                 if challenge.previousFailureCount > 0 {
                     disposition = .cancelAuthenticationChallenge
                 } else {

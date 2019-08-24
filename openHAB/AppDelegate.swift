@@ -96,7 +96,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         #endif
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
             guard let self = self else { return }
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
@@ -135,7 +135,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 
-        let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)}) //try "%02.2hhx",
+        let deviceTokenString = deviceToken.reduce("") {$0 + String(format: "%02X", $1)} //try "%02.2hhx",
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
