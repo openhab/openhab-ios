@@ -29,10 +29,10 @@ class OpenHABLinkedPage: NSObject, Decodable {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "title": self.title = child.stringValue
-            case "icon": self.icon = child.stringValue
-            case "link": self.link = child.stringValue
-            case "id": self.pageId = child.stringValue
+            case "title": title = child.stringValue
+            case "icon": icon = child.stringValue
+            case "link": link = child.stringValue
+            case "id": pageId = child.stringValue
             default:
                 break
             }

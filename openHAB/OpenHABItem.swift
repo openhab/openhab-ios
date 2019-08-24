@@ -52,11 +52,11 @@ final class OpenHABItem: NSObject {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "name": self.name = child.stringValue
-            case "type": self.type = child.stringValue
-            case "groupType": self.groupType = child.stringValue
-            case "state": self.state = child.stringValue
-            case "link": self.link = child.stringValue
+            case "name": name = child.stringValue
+            case "type": type = child.stringValue
+            case "groupType": groupType = child.stringValue
+            case "state": state = child.stringValue
+            case "link": link = child.stringValue
             default:
                 break
             }

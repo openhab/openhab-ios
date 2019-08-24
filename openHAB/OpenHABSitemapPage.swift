@@ -73,12 +73,11 @@ class OpenHABSitemapPage: NSObject {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "widget":
-                widgets.append(OpenHABWidget(xml: child))
-            case "id": self.pageId = child.stringValue
-            case "title": self.title = child.stringValue
-            case "link": self.link = child.stringValue
-            case "leaf": self.leaf = child.stringValue == "true" ? true : false
+            case "widget": widgets.append(OpenHABWidget(xml: child))
+            case "id": pageId = child.stringValue
+            case "title": title = child.stringValue
+            case "link": link = child.stringValue
+            case "leaf": leaf = child.stringValue == "true" ? true : false
             default: break
             }
         }
@@ -91,8 +90,8 @@ class OpenHABSitemapPage: NSObject {
                 ws.append(w2)
             }
         }
-        self.widgets = ws
-        self.widgets.forEach {
+        widgets = ws
+        widgets.forEach {
             $0.sendCommand = { [weak self] (item, command) in
                 self?.sendCommand(item, commandToSend: command)
             }
