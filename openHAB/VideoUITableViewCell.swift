@@ -119,7 +119,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         if widget.encoding.lowercased() != VideoEncoding.mjpeg.rawValue {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
-            playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] (playerItem, change) in
+            playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] (playerItem, _) in
                 switch playerItem.status {
                 case .failed:
                     os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)

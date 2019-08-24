@@ -13,7 +13,7 @@ class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
 
     init(request: URLRequest, delegate: AFRememberingSecurityPolicyDelegate?) {
         super.init(request: request)
-        super.setWillSendRequestForAuthenticationChallenge { [weak self] (connection: NSURLConnection, challenge: URLAuthenticationChallenge) in
+        super.setWillSendRequestForAuthenticationChallenge { [weak self] (_, challenge: URLAuthenticationChallenge) in
             guard let self = self else { return }
 
             let policy = self.securityPolicy as! AFRememberingSecurityPolicy

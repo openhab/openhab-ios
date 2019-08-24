@@ -28,7 +28,8 @@ extension Certificate {
                     return nil
             }
             return Certificate(certificate: cert, data: data)
-        }.compactMap {$0}
+        }
+        .compactMap {$0}
     }
 
     func validate(against certData: Data, using secTrust: SecTrust) -> Bool {

@@ -71,9 +71,6 @@ PODS:
     - nanopb/encode (= 0.3.901)
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
-  - SDWebImage (5.1.0):
-    - SDWebImage/Core (= 5.1.0)
-  - SDWebImage/Core (5.1.0)
   - SideMenu (5.0.3)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
@@ -89,7 +86,6 @@ DEPENDENCIES:
   - Firebase/Core
   - FlexColorPicker
   - Fuzi (~> 3.1)
-  - SDWebImage (~> 5.0)
   - SideMenu (~> 5.0)
   - SVGKit
   - SwiftMessages
@@ -114,7 +110,6 @@ SPEC REPOS:
     - GoogleDataTransportCCTSupport
     - GoogleUtilities
     - nanopb
-    - SDWebImage
     - SideMenu
     - SVGKit
     - SwiftMessages
@@ -138,11 +133,10 @@ SPEC CHECKSUMS:
   GoogleDataTransportCCTSupport: 6b545f7149111180763dc18c6f372c963de4a310
   GoogleUtilities: e7dc37039b19df7fe543479d3e4a02ac8d11bb69
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
-  SDWebImage: fb387001955223213dde14bc08c8b73f371f8d8f
   SideMenu: 1dcaabce84538c53325c287f7fe62999379a641c
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   SwiftMessages: a952f7a9103d9aeab93730a2861d2d8fcdd8758f
 
-PODFILE CHECKSUM: 089ff65aecd10c61d7ce32da132bad9a4cc37dec
+PODFILE CHECKSUM: 5b81b5b327175f3856199ad9c1a26fff7e7d4131
 
 COCOAPODS: 1.7.1

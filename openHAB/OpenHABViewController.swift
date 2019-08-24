@@ -682,7 +682,7 @@ class OpenHABViewController: UIViewController {
         guard let searchText = searchText else { return }
 
         filteredPage = currentPage?.filter {
-            return $0.label.lowercased().contains(searchText.lowercased()) && $0.type != "Frame"
+            $0.label.lowercased().contains(searchText.lowercased()) && $0.type != "Frame"
         }
         filteredPage?.sendCommand = { [weak self] (item, command) in
             self?.sendCommand(item, commandToSend: command)
@@ -836,10 +836,10 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
         DispatchQueue.main.async {
             let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+            let okay = UIAlertAction(title: "Okay", style: .default) { (_: UIAlertAction) in
                 clientCertificateManager!.clientCertificateAccepted(password: nil)
             }
-            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (_: UIAlertAction) in
                 clientCertificateManager!.clientCertificateRejected()
             }
             alertController.addAction(okay)
@@ -852,12 +852,12 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
         DispatchQueue.main.async {
             let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
+            let okay = UIAlertAction(title: "Okay", style: .default) { (_: UIAlertAction) in
                 let txtField = alertController.textFields?.first
                 let password = txtField?.text
                 clientCertificateManager!.clientCertificateAccepted(password: password)
             }
-            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (action: UIAlertAction) in
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (_: UIAlertAction) in
                 clientCertificateManager!.clientCertificateRejected()
             }
             alertController.addTextField { (textField) in

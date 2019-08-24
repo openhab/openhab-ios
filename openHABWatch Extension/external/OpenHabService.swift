@@ -32,7 +32,7 @@ class OpenHabService {
             configuration: URLSessionConfiguration.ephemeral,
             delegate: CertificatePinningURLSessionDelegate(),
             delegateQueue: nil)
-        let task = session.dataTask(with: request) { (data, response, error) -> Void in
+        let task = session.dataTask(with: request) { (data, _, error) -> Void in
 
             guard error == nil else {
                 resultHandler(Sitemap.init(frames: []), "Can't read the sitemap from '\(requestUrl)'. Message is '\(String(describing: error))'")

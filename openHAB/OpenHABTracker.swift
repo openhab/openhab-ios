@@ -59,13 +59,16 @@ class OpenHABTracker: NSObject {
                         startDiscovery()
                     } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                        URLSession.shared.dataTask(with: request) { data, response, error -> Void in
+                        #warning("Validate whether this should be switched to Alamofire")
+
+                        URLSession.shared.dataTask(with: request) { _, _, error -> Void in
                             if error == nil {
                                 self.trackedLocalUrl()
                             } else {
                                 self.trackedRemoteUrl()
                             }
-                        }.resume()
+                        }
+                        .resume()
                     }
                 }
             }
