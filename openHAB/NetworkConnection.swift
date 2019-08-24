@@ -15,7 +15,7 @@ import os.log
 // ServerTrustPolicyManager --> ServerTrustManager
 class NetworkConnection {
 
-    var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+    var clientCertificateManager = ClientCertificateManager()
     var serverCertificateManager: ServerCertificateManager!
 
     var manager: Alamofire.SessionManager!

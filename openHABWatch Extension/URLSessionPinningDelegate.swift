@@ -21,14 +21,14 @@ struct Certificate {
 extension Certificate {
     static func localCertificates(with names: [String] = ["CertificateRenewed", "Certificate"],
                                   from bundle: Bundle = .main) -> [Certificate] {
-        return names.lazy.map({
+        return names.lazy.map {
             guard let file = bundle.url(forResource: $0, withExtension: "cer"),
                 let data = try? Data(contentsOf: file),
                 let cert = SecCertificateCreateWithData(nil, data as CFData) else {
                     return nil
             }
             return Certificate(certificate: cert, data: data)
-        }).compactMap({$0})
+        }.compactMap {$0}
     }
 
     func validate(against certData: Data, using secTrust: SecTrust) -> Bool {
@@ -48,7 +48,7 @@ extension Certificate {
 
 class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
 
-    var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+    var clientCertificateManager = ClientCertificateManager()
 
     func urlSession(_ session: URLSession,
                     didReceive challenge: URLAuthenticationChallenge,

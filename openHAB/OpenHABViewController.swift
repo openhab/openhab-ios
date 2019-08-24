@@ -808,24 +808,24 @@ extension OpenHABViewController: ColorPickerUITableViewCellDelegate {
 extension OpenHABViewController: ServerCertificateManagerDelegate {
     // delegate should ask user for a decision on what to do with invalid certificate
     func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
             let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
             alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
             alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
             alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
             self.present(alertView, animated: true) {}
-        })
+        }
     }
 
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
             let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
             alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in  policy?.evaluateResult = .deny })
             alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in  policy?.evaluateResult = .permitOnce })
             alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
             self.present(alertView, animated: true) {}
-        })
+        }
     }
 }
 
@@ -834,7 +834,7 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
 
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
             let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
             let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
                 clientCertificateManager!.clientCertificateAccepted(password: nil)
@@ -845,12 +845,12 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
             alertController.addAction(okay)
             alertController.addAction(cancel)
             self.present(alertController, animated: true, completion: nil)
-        })
+        }
     }
 
     // delegate should ask user for the export password used to decode the PKCS#12
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
             let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
             let okay = UIAlertAction(title: "Okay", style: .default) { (action: UIAlertAction) in
                 let txtField = alertController.textFields?.first
@@ -867,17 +867,17 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
             alertController.addAction(okay)
             alertController.addAction(cancel)
             self.present(alertController, animated: true, completion: nil)
-        })
+        }
     }
 
     // delegate should alert the user that an error occured importing the certificate
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
             let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
             let okay = UIAlertAction(title: "Okay", style: .default)
             alertController.addAction(okay)
             self.present(alertController, animated: true, completion: nil)
-        })
+        }
     }
 }
 
@@ -1022,8 +1022,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                                 case .png :
                                     cell.imageView?.image = UIImage(data: data)
                                 case .svg:
-                                    let receivedIcon: SVGKImage = SVGKImage(data: data)
-                                    cell.imageView?.image = receivedIcon.uiImage
+                                    cell.imageView?.image = SVGKImage(data: data).uiImage
                                 }
                             }
                         case .failure:

@@ -9,7 +9,7 @@ import AFNetworking
 import os.log
 
 class OpenHABHTTPRequestOperation: AFHTTPRequestOperation {
-    static var clientCertificateManager: ClientCertificateManager = ClientCertificateManager()
+    static var clientCertificateManager = ClientCertificateManager()
 
     init(request: URLRequest, delegate: AFRememberingSecurityPolicyDelegate?) {
         super.init(request: request)

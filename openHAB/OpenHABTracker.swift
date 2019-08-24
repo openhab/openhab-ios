@@ -59,13 +59,13 @@ class OpenHABTracker: NSObject {
                         startDiscovery()
                     } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                        URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
+                        URLSession.shared.dataTask(with: request) { data, response, error -> Void in
                             if error == nil {
                                 self.trackedLocalUrl()
                             } else {
                                 self.trackedRemoteUrl()
                             }
-                        }).resume()
+                        }.resume()
                     }
                 }
             }

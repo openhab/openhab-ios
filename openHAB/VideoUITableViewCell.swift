@@ -119,7 +119,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         if widget.encoding.lowercased() != VideoEncoding.mjpeg.rawValue {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
-            playerObserver = playerItem.observe(\.status, options: [.new, .old], changeHandler: { [weak self] (playerItem, change) in
+            playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] (playerItem, change) in
                 switch playerItem.status {
                 case .failed:
                     os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
@@ -135,8 +135,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
                     self?.updateAspectRatio(forView: self?.playerView, aspectRatio: aspectRatio)
                     self?.didLoad?()
                 }
-            })
-
+            }
             playerView?.playerLayer.player = AVPlayer(playerItem: playerItem)
         }
     }
@@ -200,9 +199,9 @@ extension VideoUITableViewCell: URLSessionDataDelegate {
                     let aspectRatio = image.size.width / image.size.height
                     self.activityIndicator.isHidden = true
                     self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01, execute: {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
                         self.didLoad?()
-                    })
+                    }
                 }
                 self.mainImageView?.image = image
             }

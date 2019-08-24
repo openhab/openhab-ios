@@ -1,6 +1,9 @@
 opt_in_rules: 
   - sorted_imports
   - empty_count
+  - redundant_type_annotation
+  - trailing_closure
+  - unused_import
 disabled_rules: # rule identifiers to exclude from running
   - line_length
   - unused_closure_parameter
