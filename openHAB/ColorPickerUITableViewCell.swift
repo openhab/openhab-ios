@@ -15,20 +15,13 @@ import os.log
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?)
 }
 
-fileprivate extension Selector {
-    static let upButtonPressed = #selector(ColorPickerUITableViewCell.upButtonPressed)
-    static let downButtonPressed = #selector(ColorPickerUITableViewCell.downButtonPressed)
-}
-
 class ColorPickerUITableViewCell: GenericUITableViewCell {
+
+    @objc weak var delegate: ColorPickerUITableViewCellDelegate?
+
     @IBOutlet weak var upButton: DynamicButton!
     @IBOutlet weak var colorButton: UICircleButton!
     @IBOutlet weak var downButton: DynamicButton!
-
-    @IBAction func colorButtonPressed(_ sender: Any) {
-        delegate?.didPressColorButton(self)
-    }
-    @objc weak var delegate: ColorPickerUITableViewCellDelegate?
 
     required init?(coder: NSCoder) {
         os_log("ColorPickerUITableViewCell initWithCoder", log: OSLog.viewCycle, type: .info)
@@ -44,6 +37,10 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
 
         selectionStyle = .none
         separatorInset = .zero
+    }
+
+    @IBAction func colorButtonPressed(_ sender: Any) {
+        delegate?.didPressColorButton(self)
     }
 
     override func displayWidget() {
@@ -69,4 +66,9 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         os_log("OFF button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("OFF")
     }
+}
+
+fileprivate extension Selector {
+    static let upButtonPressed = #selector(ColorPickerUITableViewCell.upButtonPressed)
+    static let downButtonPressed = #selector(ColorPickerUITableViewCell.downButtonPressed)
 }

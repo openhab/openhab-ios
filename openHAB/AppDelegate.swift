@@ -22,10 +22,10 @@ var player: AVAudioPlayer?
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    static var appDelegate: AppDelegate!
+
     var window: UIWindow?
     var appData: OpenHABDataObject?
-
-    static var appDelegate: AppDelegate!
 
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {

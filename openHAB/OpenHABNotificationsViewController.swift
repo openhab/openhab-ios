@@ -13,29 +13,18 @@ import os.log
 import SideMenu
 import UIKit
 
-extension UIBarButtonItem {
-
-    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: imageName), for: .normal)
-        button.addTarget(target, action: action, for: .touchUpInside)
-
-        let menuBarItem = UIBarButtonItem(customView: button)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
-
-        return menuBarItem
-    }
-}
-
 class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavigationControllerDelegate {
+    static let tableViewCellIdentifier = "NotificationCell"
+
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-
     var hamburgerButton: DynamicButton!
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -116,8 +105,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         return notifications.count
     }
 
-    static let tableViewCellIdentifier = "NotificationCell"
-
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OpenHABNotificationsViewController.tableViewCellIdentifier) as? NotificationTableViewCell
         guard let notification = notifications[indexPath.row] as? OpenHABNotification else { return UITableViewCell() }
@@ -178,8 +165,20 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
     }
+}
 
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+extension UIBarButtonItem {
+
+    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: imageName), for: .normal)
+        button.addTarget(target, action: action, for: .touchUpInside)
+
+        let menuBarItem = UIBarButtonItem(customView: button)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
+
+        return menuBarItem
     }
 }

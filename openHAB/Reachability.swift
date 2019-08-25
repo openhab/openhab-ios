@@ -25,7 +25,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-// swiftlint:disable identifier_name
+// swiftlint:disable identifier_name file_types_order type_contents_order
 
 import Foundation
 import SystemConfiguration

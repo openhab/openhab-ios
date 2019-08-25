@@ -12,9 +12,9 @@ import os.log
 import WebKit
 
 class WebUITableViewCell: GenericUITableViewCell {
-    @IBOutlet weak var widgetWebView: WKWebView!
-
     private var url: URL?
+
+    @IBOutlet weak var widgetWebView: WKWebView!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)

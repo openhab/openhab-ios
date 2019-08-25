@@ -30,6 +30,46 @@ struct ValueOrFalse<T: Decodable>: Decodable {
     }
 }
 
+final class OpenHABSitemap: NSObject {
+    var name = ""
+    var icon = ""
+    var label = ""
+    var link = ""
+    var leaf: Bool?
+    var homepageLink = ""
+
+    init(name: String, icon: String, label: String, link: String, leaf: Bool, homepageLink: String) {
+        self.name = name
+        self.icon = icon
+        self.label = label
+        self.link = link
+        self.leaf = leaf
+        self.homepageLink = homepageLink
+    }
+
+    init(xml xmlElement: XMLElement) {
+        super.init()
+        for child in xmlElement.children {
+            switch child.tag {
+            case "name": name = child.stringValue
+            case "icon": icon = child.stringValue
+            case "label": label = child.stringValue
+            case "link": link = child.stringValue
+            case "leaf": leaf = child.stringValue == "true" ? true : false
+            case "homepage":
+                for child2 in child.children {
+                    switch child2.tag {
+                    case "link": homepageLink = child2.stringValue
+                    case "leaf": leaf = child2.stringValue == "true" ? true : false
+                    default: break
+                    }
+                }
+            default: break
+            }
+        }
+    }
+}
+
 extension OpenHABSitemap {
 
     struct CodingData: Decodable {
@@ -93,45 +133,5 @@ extension OpenHABSitemap.CodingData {
             leaf: self.page.leaf,
             homepageLink: self.page.link
         )
-    }
-}
-
-final class OpenHABSitemap: NSObject {
-    var name = ""
-    var icon = ""
-    var label = ""
-    var link = ""
-    var leaf: Bool?
-    var homepageLink = ""
-
-    init(name: String, icon: String, label: String, link: String, leaf: Bool, homepageLink: String) {
-        self.name = name
-        self.icon = icon
-        self.label = label
-        self.link = link
-        self.leaf = leaf
-        self.homepageLink = homepageLink
-    }
-
-    init(xml xmlElement: XMLElement) {
-        super.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "name": name = child.stringValue
-            case "icon": icon = child.stringValue
-            case "label": label = child.stringValue
-            case "link": link = child.stringValue
-            case "leaf": leaf = child.stringValue == "true" ? true : false
-            case "homepage":
-                for child2 in child.children {
-                    switch child2.tag {
-                    case "link": homepageLink = child2.stringValue
-                    case "leaf": leaf = child2.stringValue == "true" ? true : false
-                    default: break
-                    }
-                }
-            default: break
-            }
-        }
     }
 }

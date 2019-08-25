@@ -10,10 +10,6 @@
 import os.log
 import UIKit
 
-fileprivate extension Selector {
-    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
-}
-
 class SwitchUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet var widgetSwitch: UISwitch!
@@ -56,4 +52,8 @@ class SwitchUITableViewCell: GenericUITableViewCell {
             widget.sendCommand("OFF")
         }
     }
+}
+
+fileprivate extension Selector {
+    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
 }

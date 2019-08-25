@@ -15,6 +15,23 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet weak var widgetSlider: UISlider!
 
+    @IBOutlet weak var customDetailText: UILabel!
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.initiliaze()
+    }
+
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        self.initiliaze()
+    }
+
+    private func initiliaze() {
+        selectionStyle = .none
+        separatorInset = .zero
+    }
+
     @IBAction func sliderValueChanged(_ sender: Any) {
         let widgetValue = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
         customDetailText?.text = valueText(widgetValue)
@@ -26,23 +43,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBAction func sliderTouchOutside(_ sender: Any) {
         sliderDidEndSliding(widgetSlider)
-    }
-
-    @IBOutlet weak var customDetailText: UILabel!
-
-    private func initiliaze() {
-        selectionStyle = .none
-        separatorInset = .zero
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        self.initiliaze()
-    }
-
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.initiliaze()
     }
 
     func adj(_ raw: Double) -> Double {

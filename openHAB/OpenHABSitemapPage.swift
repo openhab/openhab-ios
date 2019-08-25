@@ -13,32 +13,6 @@ import Foundation
 import Fuzi
 import os.log
 
-extension OpenHABSitemapPage {
-
-    struct CodingData: Decodable {
-        let pageId: String?
-        let title: String?
-        let link: String?
-        let leaf: Bool?
-        let widgets: [OpenHABWidget.CodingData]?
-
-        private enum CodingKeys: String, CodingKey {
-            case pageId = "id"
-            case title
-            case link
-            case leaf
-            case widgets
-        }
-    }
-}
-
-extension OpenHABSitemapPage.CodingData {
-    var openHABSitemapPage: OpenHABSitemapPage {
-        let mappedWidgets = self.widgets?.map { $0.openHABWidget } ?? []
-        return OpenHABSitemapPage(pageId: self.pageId ?? "", title: self.title ?? "", link: self.link ?? "", leaf: self.leaf ?? false, widgets: mappedWidgets)
-    }
-}
-
 class OpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgets: [OpenHABWidget] = []
@@ -97,13 +71,6 @@ class OpenHABSitemapPage: NSObject {
         }
     }
 
-    private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        guard let item = item else { return }
-
-        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", item.name)
-        sendCommand?(item, command)
-    }
-
     init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
@@ -118,6 +85,13 @@ class OpenHABSitemapPage: NSObject {
 
         }
     }
+
+    private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
+        guard let item = item else { return }
+
+        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", item.name)
+        sendCommand?(item, command)
+    }
 }
 
 extension OpenHABSitemapPage {
@@ -128,5 +102,31 @@ extension OpenHABSitemapPage {
                                   leaf: self.leaf,
                                   expandedWidgets: try self.widgets.filter(isIncluded))
         return filteredOpenHABSitemapPage
+    }
+}
+
+extension OpenHABSitemapPage {
+
+    struct CodingData: Decodable {
+        let pageId: String?
+        let title: String?
+        let link: String?
+        let leaf: Bool?
+        let widgets: [OpenHABWidget.CodingData]?
+
+        private enum CodingKeys: String, CodingKey {
+            case pageId = "id"
+            case title
+            case link
+            case leaf
+            case widgets
+        }
+    }
+}
+
+extension OpenHABSitemapPage.CodingData {
+    var openHABSitemapPage: OpenHABSitemapPage {
+        let mappedWidgets = self.widgets?.map { $0.openHABWidget } ?? []
+        return OpenHABSitemapPage(pageId: self.pageId ?? "", title: self.title ?? "", link: self.link ?? "", leaf: self.leaf ?? false, widgets: mappedWidgets)
     }
 }

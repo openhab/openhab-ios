@@ -11,6 +11,9 @@ opt_in_rules:
   - attributes 
   - closure_end_indentation
   - closure_spacing
+  - reduce_boolean
+  - file_types_order
+  - type_contents_order
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo

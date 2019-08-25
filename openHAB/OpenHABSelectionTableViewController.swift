@@ -13,9 +13,15 @@ import UIKit
 
 @objc
 class OpenHABSelectionTableViewController: UITableViewController {
+    static let tableViewCellIdentifier = "SelectionCell"
+
     @objc var mappings: [AnyHashable] = []
     @objc weak var delegate: OpenHABSelectionTableViewControllerDelegate?
     @objc var selectionItem: OpenHABItem?
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,8 +40,6 @@ class OpenHABSelectionTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return mappings.count
     }
-
-    static let tableViewCellIdentifier = "SelectionCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier, for: indexPath)
@@ -57,9 +61,5 @@ class OpenHABSelectionTableViewController: UITableViewController {
             delegate?.didSelectWidgetMapping(indexPath.row)
         }
         navigationController?.popViewController(animated: true)
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
     }
 }

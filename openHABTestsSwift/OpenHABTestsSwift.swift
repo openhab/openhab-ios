@@ -421,7 +421,8 @@ class OpenHABTestsSwift: XCTestCase {
         XCTAssert(urlc == URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }
 
-    let jsonInputForGroup = """
+    func testParsingforRollerShutter() {
+        let jsonInputForGroup = """
 {
     "id": "watch",
     "title": "Watch",
@@ -456,8 +457,6 @@ class OpenHABTestsSwift: XCTestCase {
     ]
 }
 """
-    func testParsingforRollerShutter() {
-
         let data = Data(jsonInputForGroup.utf8)
         do {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: data)

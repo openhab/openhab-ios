@@ -13,24 +13,6 @@ import Fuzi
 import os.log
 import UIKit
 
-extension OpenHABItem {
-
-    struct CodingData: Decodable {
-        let type: String
-        let groupType: String?
-        let name: String
-        let link: String
-        let state: String
-        let label: String?
-    }
-}
-
-extension OpenHABItem.CodingData {
-    var openHABItem: OpenHABItem {
-        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link, label: self.label, groupType: self.groupType)
-    }
-}
-
 final class OpenHABItem: NSObject {
     var type = ""
     var groupType = ""
@@ -101,6 +83,24 @@ final class OpenHABItem: NSObject {
             }
         }
         return nil
+    }
+}
+
+extension OpenHABItem {
+
+    struct CodingData: Decodable {
+        let type: String
+        let groupType: String?
+        let name: String
+        let link: String
+        let state: String
+        let label: String?
+    }
+}
+
+extension OpenHABItem.CodingData {
+    var openHABItem: OpenHABItem {
+        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link, label: self.label, groupType: self.groupType)
     }
 }
 

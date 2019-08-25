@@ -11,14 +11,6 @@
 import DynamicButton
 import os.log
 
-// inspired by: Selectors in swift: A better approach using extensions
-// https://medium.com/@abhimuralidharan/selectors-in-swift-a-better-approach-using-extensions-aa6b0416e850
-fileprivate extension Selector {
-    static let upButtonPressed = #selector(RollershutterUITableViewCell.upButtonPressed)
-    static let stopButtonPressed = #selector(RollershutterUITableViewCell.stopButtonPressed)
-    static let downButtonPressed = #selector(RollershutterUITableViewCell.downButtonPressed)
-}
-
 class RollershutterUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet weak var downButton: DynamicButton!
@@ -76,4 +68,12 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         os_log("down button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("DOWN")
     }
+}
+
+// inspired by: Selectors in swift: A better approach using extensions
+// https://medium.com/@abhimuralidharan/selectors-in-swift-a-better-approach-using-extensions-aa6b0416e850
+fileprivate extension Selector {
+    static let upButtonPressed = #selector(RollershutterUITableViewCell.upButtonPressed)
+    static let stopButtonPressed = #selector(RollershutterUITableViewCell.stopButtonPressed)
+    static let downButtonPressed = #selector(RollershutterUITableViewCell.downButtonPressed)
 }

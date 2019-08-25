@@ -9,7 +9,13 @@ import os.log
 import UIKit
 
 class OpenHABClientCertificatesViewController: UITableViewController {
+    static let tableViewCellIdentifier = "ClientCertificatesCell"
+
     var clientCertificates: [SecIdentity] = []
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,8 +36,6 @@ class OpenHABClientCertificatesViewController: UITableViewController {
         return NetworkConnection.shared.clientCertificateManager.clientIdentities.count
     }
 
-    static let tableViewCellIdentifier = "ClientCertificatesCell"
-
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABClientCertificatesViewController.tableViewCellIdentifier, for: indexPath)
         cell.textLabel?.text = NetworkConnection.shared.clientCertificateManager.getIdentityName(index: indexPath.row)
@@ -45,9 +49,5 @@ class OpenHABClientCertificatesViewController: UITableViewController {
                 tableView.deleteRows(at: [indexPath], with: .fade)
             }
         }
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
     }
 }
