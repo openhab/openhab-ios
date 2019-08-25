@@ -14,6 +14,7 @@ class MapViewTableViewCell: GenericUITableViewCell {
     private var mapView: MKMapView!
 
     override var widget: OpenHABWidget! {
+
         get {
             return super.widget
         }
