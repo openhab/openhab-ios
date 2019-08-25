@@ -36,13 +36,13 @@ extension Certificate {
         let certArray = [certificate] as CFArray
         SecTrustSetAnchorCertificates(secTrust, certArray)
 
-        //validates a certificate by verifying its signature plus the signatures of
+        // validates a certificate by verifying its signature plus the signatures of
         // the certificates in its certificate chain, up to the anchor certificate
         var result = SecTrustResultType.invalid
         SecTrustEvaluate(secTrust, &result)
         let isValid = (result == .unspecified || result == .proceed)
 
-        //Validate host certificate against pinned certificate.
+        // Validate host certificate against pinned certificate.
         return isValid && certData == self.data
     }
 }
@@ -64,7 +64,7 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
                 return
             }
 
-            //Set policy to validate domain
+            // Set policy to validate domain
             let policy = SecPolicyCreateSSL(true, "yourdomain.com" as CFString)
             let policies = NSArray(object: policy)
             SecTrustSetPolicies(serverTrust, policies)

@@ -36,7 +36,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         self.customTextLabel?.text = widget.labelText
         var state = widget.state
-        //if state is nil or empty using the item state ( OH 1.x compatability )
+        // if state is nil or empty using the item state ( OH 1.x compatability )
         if state.isEmpty {
             state = (widget.item?.state) ?? ""
         }

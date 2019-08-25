@@ -25,6 +25,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+// swiftlint:disable identifier_name
+
 import Foundation
 import SystemConfiguration
 

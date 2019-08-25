@@ -19,8 +19,8 @@ import SVGKit
 import SwiftMessages
 import UIKit
 
-private let OpenHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
-private let OpenHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
+private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
+private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
 enum TargetController {
     case root
@@ -162,9 +162,9 @@ class OpenHABViewController: UIViewController {
     }
 
     func registerTableViewCells() {
-        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier)
+        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: openHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
-        widgetTableView.register(NewImageUITableViewCell.self, forCellReuseIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier)
+        widgetTableView.register(NewImageUITableViewCell.self, forCellReuseIdentifier: openHABViewControllerImageViewCellReuseIdentifier)
         widgetTableView.register(cellType: VideoUITableViewCell.self)
     }
 
@@ -368,7 +368,7 @@ class OpenHABViewController: UIViewController {
         if !longPolling {
             _ = pageNetworkStatusChanged()
         }
-        //let pageToLoadUrl = URL(string: pageUrl)
+        // let pageToLoadUrl = URL(string: pageUrl)
         guard let pageToLoadUrl = URL(string: pageUrl) else { return }
         var pageRequest = URLRequest(url: pageToLoadUrl)
 
@@ -969,7 +969,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Switch":
             if widget?.mappings.count ?? 0 > 0 {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-                //RollershutterItem changed to Rollershutter in later builds of OH2
+                // RollershutterItem changed to Rollershutter in later builds of OH2
             } else if widget?.item?.type == "RollershutterItem" || widget?.item?.type == "Rollershutter" || (widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter") {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
             } else {
@@ -985,7 +985,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case "Image", "Chart":
-            cell = tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
+            cell = tableView.dequeueReusableCell(withIdentifier: openHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
                 self?.updateWidgetTableView()
             }
@@ -997,7 +997,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Webview":
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case "Mapview":
-            cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
+            cell = (tableView.dequeueReusableCell(withIdentifier: openHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
         default:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }

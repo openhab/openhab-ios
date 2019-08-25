@@ -6,8 +6,6 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
-//import Foundation
-
 // See https://developer.apple.com/documentation/avfoundation/avplayerlayer
 // A convenient way of using AVPlayerLayer as the backing layer for a UIView
 

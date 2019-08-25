@@ -8,7 +8,6 @@ opt_in_rules:
   - multiline_function_chains
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
-  - identifier_name
   - todo
   - nesting
 excluded: 
@@ -37,3 +36,31 @@ line_length:
     ignores_function_declarations: true
     ignores_comments: true
     ignores_urls: true
+
+identifier_name:
+  allowed_symbols: "_"
+  min_length: 2
+  max_length: 
+    warning: 90
+    error: 1000
+  excluded:
+    - id
+    - i
+    - v
+
+custom_rules:
+  comments_space: # From https://github.com/brandenr/swiftlintconfig
+    name: "Space After Comment"
+    regex: '(^ *//\w+)'
+    message: "There should be a space after //"
+    severity: warning
+  explicit_failure_calls:
+      name: “Avoid asserting ‘false’”
+      regex: ‘((assert|precondition)\(false)’
+      message: “Use assertionFailure() or preconditionFailure() instead.”
+      severity: warning
+  multiple_empty_lines:
+     name: "Multiple Empty Lines"
+     regex: '((?:\s*\n){3,})'
+     message: "There are too many line breaks"
+     severity: error
