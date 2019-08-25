@@ -59,7 +59,7 @@ class OpenHABTracker: NSObject {
                         startDiscovery()
                     } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                        #warning("Validate whether this should be switched to Alamofire")
+                        #warning("Verify whether this could be switched to Alamofire")
 
                         URLSession.shared.dataTask(with: request) { _, _, error -> Void in
                             if error == nil {

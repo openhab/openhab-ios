@@ -46,7 +46,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
 
-        //init Firebase crash reporting
+        // init Firebase crash reporting
         FirebaseApp.configure()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
@@ -154,7 +154,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
     // version without completionHandler is deprecated
-    //func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         os_log("didReceiveRemoteNotification", log: .notifications, type: .info)
 
         if application.applicationState == .active {

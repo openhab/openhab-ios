@@ -152,7 +152,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
 
         bringSubviewToFront(mainImageView)
 
-        #warning("Verify transfer to Alamofire")
+        #warning("Verify whether this could be switched to Alamofire")
 
         session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
 

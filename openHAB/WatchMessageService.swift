@@ -18,7 +18,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // This method gets called when the watch requests the localUrl
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
 
-        //TODO Use RemoteUrl, TOO
+        // TODO Use RemoteUrl, TOO
         if message["requestLocalUrl"] != nil {
             let prefs = UserDefaults.standard
             replyHandler(["baseUri": prefs.string(forKey: "localUrl") ?? ""])
