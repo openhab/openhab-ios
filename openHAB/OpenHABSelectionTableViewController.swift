@@ -11,6 +11,7 @@
 import os.log
 import UIKit
 
+
 @objc
 class OpenHABSelectionTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "SelectionCell"

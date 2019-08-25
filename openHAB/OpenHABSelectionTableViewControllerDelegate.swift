@@ -7,6 +7,6 @@
 //
 
 import Foundation
-@objc public protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
+public protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
     func didSelectWidgetMapping(_ selectedMapping: Int)
 }

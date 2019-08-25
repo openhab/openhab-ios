@@ -65,7 +65,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "DrawerCell"
 
     var sitemaps: [OpenHABSitemap] = []
-    @objc var openHABRootUrl = ""
+    var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
     var drawerItems: [OpenHABDrawerItem] = []

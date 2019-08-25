@@ -13,7 +13,8 @@ import MapKit
 class MapViewTableViewCell: GenericUITableViewCell {
     private var mapView: MKMapView!
 
-    @objc override var widget: OpenHABWidget! {
+    override var widget: OpenHABWidget! {
+
         get {
             return super.widget
         }

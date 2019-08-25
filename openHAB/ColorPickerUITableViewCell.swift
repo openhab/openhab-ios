@@ -11,13 +11,13 @@
 import DynamicButton
 import os.log
 
-@objc protocol ColorPickerUITableViewCellDelegate: NSObjectProtocol {
+protocol ColorPickerUITableViewCellDelegate: NSObjectProtocol {
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?)
 }
 
 class ColorPickerUITableViewCell: GenericUITableViewCell {
 
-    @objc weak var delegate: ColorPickerUITableViewCellDelegate?
+    weak var delegate: ColorPickerUITableViewCellDelegate?
 
     @IBOutlet weak var upButton: DynamicButton!
     @IBOutlet weak var colorButton: UICircleButton!
