@@ -13,7 +13,8 @@ import os.log
 import UIKit
 
 class ColorPickerViewController: DefaultColorPickerViewController {
-    @objc var widget: OpenHABWidget?
+    var widget: OpenHABWidget?
+    let tapMaxDelay: Double = 0.3
 
     required init?(coder: NSCoder) {
         os_log("ColorPickerViewController initWithCoder", log: .viewCycle, type: .info)
@@ -24,10 +25,10 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         os_log("ColorPickerViewController viewDidLoad", log: .viewCycle, type: .info)
 
         if let color = widget?.item?.stateAsUIColor() {
-          self.selectedColor = color
+            selectedColor = color
         }
 
-        self.delegate = self
+        delegate = self
 
         super.viewDidLoad()
     }
@@ -52,10 +53,10 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
 extension ColorPickerViewController: ColorPickerDelegate {
     func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: ColorControl) {
-        self.sendColorUpdate(color: selectedColor)
+        sendColorUpdate(color: selectedColor)
     }
 
     func colorPicker(_ colorPicker: ColorPickerController, confirmedColor: UIColor, usingControl: ColorControl) {
-        self.sendColorUpdate(color: confirmedColor)
+        sendColorUpdate(color: confirmedColor)
     }
 }

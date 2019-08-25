@@ -135,14 +135,13 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
             .validate(statusCode: 200..<300)
-            .responseData { (response) in
-
+            .responseData { [weak self] (response) in
                 switch response.result {
                 case .success:
                     if let data = response.data {
-                        self.mainImageView?.image = UIImage(data: data)
-                        self.widget?.image = UIImage(data: data)
-                        self.didLoad?()
+                        self?.mainImageView?.image = UIImage(data: data)
+                        self?.widget?.image = UIImage(data: data)
+                        self?.didLoad?()
                     }
                 case .failure(let error):
                     os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)

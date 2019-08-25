@@ -141,7 +141,6 @@ class OpenHABWidget: NSObject, MKAnnotation {
             case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
             default:
                 break
-
             }
         }
     }

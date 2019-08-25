@@ -17,9 +17,11 @@ opt_in_rules:
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
-  - nesting
 excluded: 
   - Pods
+
+nesting: 
+    type_level: 2
 
 function_body_length:
     warning: 300
@@ -35,7 +37,8 @@ file_length:
     ignore_comment_only_lines: true
 
 cyclomatic_complexity:
-    warning: 30
+    ignores_case_statements: true
+    warning: 18
     error: 45
 
 line_length:

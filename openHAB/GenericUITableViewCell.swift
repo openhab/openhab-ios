@@ -17,7 +17,7 @@ protocol GenericCellCacheProtocol: UITableViewCell {
 class GenericUITableViewCell: UITableViewCell {
 
     private var _widget: OpenHABWidget!
-    @objc var widget: OpenHABWidget! {
+    var widget: OpenHABWidget! {
         get {
             return _widget
         }
@@ -70,10 +70,6 @@ class GenericUITableViewCell: UITableViewCell {
         separatorInset = .zero
     }
 
-    /*
-     * This setter must be called via `super.widget`
-     * when it gets overriden inside a subclass.
-     */
     // This is to fix possible different sizes of user icons - we fix size and position of UITableViewCell icons
     override func layoutSubviews() {
         super.layoutSubviews()
