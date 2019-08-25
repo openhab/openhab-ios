@@ -360,16 +360,24 @@
                                                     <color key="tintColor" red="0.0" green="0.47843137254901957" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </segmentedControl>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Switch Room Blabblalalsls" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dGQ-sz-j4J">
-                                                    <rect key="frame" x="62" y="11.666666666666666" width="162" height="20.333333333333336"/>
+                                                    <rect key="frame" x="62" y="11.666666666666666" width="112" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gmV-1W-jWJ">
+                                                    <rect key="frame" x="182" y="11.333333333333336" width="42" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <color key="textColor" red="0.66667133569717407" green="0.66665846109390259" blue="0.66666716337203979" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="dGQ-sz-j4J" secondAttribute="trailing" constant="8" id="21I-9b-hQv"/>
                                                 <constraint firstItem="dGQ-sz-j4J" firstAttribute="centerY" secondItem="bbE-Hw-4gl" secondAttribute="centerY" id="GRd-gd-6L4"/>
+                                                <constraint firstItem="gmV-1W-jWJ" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="dGQ-sz-j4J" secondAttribute="trailing" constant="8" id="IhD-PT-gaH"/>
                                                 <constraint firstItem="dGQ-sz-j4J" firstAttribute="leading" secondItem="bbE-Hw-4gl" secondAttribute="leading" constant="62" id="UTE-PO-DoV"/>
+                                                <constraint firstItem="QBf-tO-eE0" firstAttribute="leading" secondItem="gmV-1W-jWJ" secondAttribute="trailing" constant="8" id="Vw3-8s-fis"/>
                                                 <constraint firstAttribute="trailing" secondItem="QBf-tO-eE0" secondAttribute="trailing" constant="20" id="ZvK-a2-hS8"/>
+                                                <constraint firstItem="gmV-1W-jWJ" firstAttribute="centerY" secondItem="bbE-Hw-4gl" secondAttribute="centerY" id="ckw-Jj-pMQ"/>
                                                 <constraint firstAttribute="centerY" secondItem="QBf-tO-eE0" secondAttribute="centerY" id="yzX-TK-6OX"/>
                                             </constraints>
                                         </tableViewCellContentView>
@@ -377,6 +385,7 @@
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
                                         <connections>
+                                            <outlet property="customDetailTextLabel" destination="gmV-1W-jWJ" id="Vsf-qh-Ckw"/>
                                             <outlet property="customTextLabel" destination="dGQ-sz-j4J" id="PBo-Lj-28S"/>
                                             <outlet property="widgetSegmentControl" destination="QBf-tO-eE0" id="SaO-tM-Eh5"/>
                                         </connections>
@@ -428,15 +437,12 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </button>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Rollo" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f5k-P9-Jll">
-                                                    <rect key="frame" x="62" y="10.666666666666666" width="179" height="22.333333333333336"/>
+                                                    <rect key="frame" x="62" y="11.666666666666666" width="37.666666666666657" height="20.333333333333336"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" misplaced="YES" text="100 %" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IAR-ZJ-192">
-                                                    <rect key="frame" x="194" y="12" width="47" height="21"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" constant="47" id="azF-O3-IcZ"/>
-                                                    </constraints>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="100 %" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IAR-ZJ-192">
+                                                    <rect key="frame" x="194" y="11.666666666666664" width="47" height="21"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.66666666669999997" green="0.66666666669999997" blue="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -445,14 +451,12 @@
                                             <constraints>
                                                 <constraint firstItem="f5k-P9-Jll" firstAttribute="leading" secondItem="ITS-rT-SZ9" secondAttribute="leading" constant="62" id="4DG-An-kJa"/>
                                                 <constraint firstItem="PzY-Bs-9MZ" firstAttribute="centerY" secondItem="ITS-rT-SZ9" secondAttribute="centerY" id="AW6-Ap-0Vf"/>
-                                                <constraint firstItem="IAR-ZJ-192" firstAttribute="centerY" secondItem="PzY-Bs-9MZ" secondAttribute="centerY" id="CtH-ci-aHh"/>
                                                 <constraint firstItem="f5k-P9-Jll" firstAttribute="centerY" secondItem="ITS-rT-SZ9" secondAttribute="centerY" id="Ed9-U3-wh5"/>
+                                                <constraint firstItem="IAR-ZJ-192" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="f5k-P9-Jll" secondAttribute="trailing" constant="8" id="KHL-Ig-hPL"/>
                                                 <constraint firstItem="bnc-pN-4ms" firstAttribute="centerY" secondItem="ITS-rT-SZ9" secondAttribute="centerY" id="W2W-TL-cwJ"/>
-                                                <constraint firstItem="PzY-Bs-9MZ" firstAttribute="leading" secondItem="f5k-P9-Jll" secondAttribute="trailing" constant="8" id="XJe-Oh-ee0"/>
                                                 <constraint firstAttribute="trailing" secondItem="bnc-pN-4ms" secondAttribute="trailing" constant="20" id="arU-8v-f2j"/>
                                                 <constraint firstItem="bnc-pN-4ms" firstAttribute="leading" secondItem="riU-tV-5Y6" secondAttribute="trailing" constant="8" id="gQG-Fy-b58"/>
                                                 <constraint firstItem="IAR-ZJ-192" firstAttribute="firstBaseline" secondItem="f5k-P9-Jll" secondAttribute="firstBaseline" id="hcC-6M-S2a"/>
-                                                <constraint firstItem="IAR-ZJ-192" firstAttribute="bottom" secondItem="ITS-rT-SZ9" secondAttribute="bottomMargin" id="hf9-O0-Brt"/>
                                                 <constraint firstItem="riU-tV-5Y6" firstAttribute="leading" secondItem="PzY-Bs-9MZ" secondAttribute="trailing" constant="8" id="i4H-Bc-lv7"/>
                                                 <constraint firstItem="riU-tV-5Y6" firstAttribute="centerY" secondItem="ITS-rT-SZ9" secondAttribute="centerY" id="poT-as-m6f"/>
                                                 <constraint firstItem="PzY-Bs-9MZ" firstAttribute="leading" secondItem="IAR-ZJ-192" secondAttribute="trailing" constant="8" symbolic="YES" id="rcw-b3-uug"/>
@@ -1427,6 +1431,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="z72-H1-TTm"/>
+        <segue reference="t07-wP-hEy"/>
     </inferredMetricsTieBreakers>
 </document>
