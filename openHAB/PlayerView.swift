@@ -6,8 +6,6 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
-//import Foundation
-
 // See https://developer.apple.com/documentation/avfoundation/avplayerlayer
 // A convenient way of using AVPlayerLayer as the backing layer for a UIView
 
@@ -15,6 +13,12 @@ import AVFoundation
 import AVKit
 
 class PlayerView: UIView {
+
+    // Override UIView property
+    override static var layerClass: AnyClass {
+        return AVPlayerLayer.self
+    }
+
     var player: AVPlayer? {
         get {
             return playerLayer.player
@@ -26,10 +30,5 @@ class PlayerView: UIView {
 
     var playerLayer: AVPlayerLayer {
         return layer as! AVPlayerLayer
-    }
-
-    // Override UIView property
-    override static var layerClass: AnyClass {
-        return AVPlayerLayer.self
     }
 }

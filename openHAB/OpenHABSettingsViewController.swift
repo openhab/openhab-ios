@@ -12,8 +12,20 @@ import os.log
 import UIKit
 
 class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate {
-    @IBOutlet var settingsTableView: UITableView!
+    var settingsLocalUrl = ""
+    var settingsRemoteUrl = ""
+    var settingsUsername = ""
+    var settingsPassword = ""
+    var settingsIgnoreSSL = false
+    var settingsDemomode = false
+    var settingsIdleOff = false
+    var settingsIconType: IconType = .png
 
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
+
+    @IBOutlet var settingsTableView: UITableView!
     @IBOutlet weak var demomodeSwitch: UISwitch!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var usernameTextField: UITextField!
@@ -23,14 +35,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet weak var ignoreSSLSwitch: UISwitch!
     @IBOutlet weak var iconSegmentedControl: UISegmentedControl!
 
-    var settingsLocalUrl = ""
-    var settingsRemoteUrl = ""
-    var settingsUsername = ""
-    var settingsPassword = ""
-    var settingsIgnoreSSL = false
-    var settingsDemomode = false
-    var settingsIdleOff = false
-    var settingsIconType: IconType = .png
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,13 +69,14 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         return false
     }
 
-    @objc func cancelButtonPressed(_ sender: Any?) {
+    @objc
+    func cancelButtonPressed(_ sender: Any?) {
         navigationController?.popViewController(animated: true)
         os_log("Cancel button pressed", log: .viewCycle, type: .info)
-
     }
 
-    @objc func saveButtonPressed(_ sender: Any?) {
+    @objc
+    func saveButtonPressed(_ sender: Any?) {
         // TODO: Make a check if any of the preferences has changed
         os_log("Save button pressed", log: .viewCycle, type: .info)
 
@@ -78,7 +86,8 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         navigationController?.popToRootViewController(animated: true)
     }
 
-    @objc func demomodeSwitchChange(_ sender: Any?) {
+    @objc
+    func demomodeSwitchChange(_ sender: Any?) {
         if demomodeSwitch!.isOn {
             os_log("Demo is ON", log: .viewCycle, type: .info)
             disableConnectionSettings()
@@ -110,9 +119,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
         if indexPath.section == 1 && indexPath.row == 2 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
-//            let imageCache = SDImageCache.shared
-//            imageCache.clearMemory()
-//            imageCache.clearDisk()
         }
     }
 
@@ -194,10 +200,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         sendSettingsToWatch()
     }
 
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
-    }
-
     func sendSettingsToWatch() {
         let prefs = UserDefaults.standard
 
@@ -210,7 +212,4 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
             ignoreSSL: prefs.bool(forKey: "ignoreSSL"))
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
 }

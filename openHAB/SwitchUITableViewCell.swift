@@ -10,10 +10,6 @@
 import os.log
 import UIKit
 
-fileprivate extension Selector {
-    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
-}
-
 class SwitchUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet var widgetSwitch: UISwitch!
@@ -36,7 +32,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         self.customTextLabel?.text = widget.labelText
         var state = widget.state
-        //if state is nil or empty using the item state ( OH 1.x compatability )
+        // if state is nil or empty using the item state ( OH 1.x compatability )
         if state.isEmpty {
             state = (widget.item?.state) ?? ""
         }
@@ -46,7 +42,8 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         super.displayWidget()
     }
 
-    @objc func switchChange() {
+    @objc
+    func switchChange() {
         if (widgetSwitch?.isOn)! {
             os_log("Switch to ON", log: .viewCycle, type: .info)
             widget.sendCommand("ON")
@@ -55,4 +52,8 @@ class SwitchUITableViewCell: GenericUITableViewCell {
             widget.sendCommand("OFF")
         }
     }
+}
+
+fileprivate extension Selector {
+    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
 }

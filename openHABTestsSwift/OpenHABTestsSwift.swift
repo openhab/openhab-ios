@@ -185,7 +185,7 @@ class OpenHABTestsSwift: XCTestCase {
 
     func testHexString() {
         let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
-        let hexWithReduce = iPhoneData.reduce("") {$0 + String(format: "%02X", $1)}
+        let hexWithReduce = iPhoneData.reduce("") { $0 + String(format: "%02X", $1) }
         XCTAssert (hexWithReduce == "54696D206950686F6E65", "hex properly calculated with reduce")
     }
 
@@ -421,7 +421,8 @@ class OpenHABTestsSwift: XCTestCase {
         XCTAssert(urlc == URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }
 
-    let jsonInputForGroup = """
+    func testParsingforRollerShutter() {
+        let jsonInputForGroup = """
 {
     "id": "watch",
     "title": "Watch",
@@ -456,8 +457,6 @@ class OpenHABTestsSwift: XCTestCase {
     ]
 }
 """
-    func testParsingforRollerShutter() {
-
         let data = Data(jsonInputForGroup.utf8)
         do {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: data)

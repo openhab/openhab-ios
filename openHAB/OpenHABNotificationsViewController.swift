@@ -13,29 +13,18 @@ import os.log
 import SideMenu
 import UIKit
 
-extension UIBarButtonItem {
-
-    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: imageName), for: .normal)
-        button.addTarget(target, action: action, for: .touchUpInside)
-
-        let menuBarItem = UIBarButtonItem(customView: button)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
-
-        return menuBarItem
-    }
-}
-
 class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavigationControllerDelegate {
+    static let tableViewCellIdentifier = "NotificationCell"
+
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-
     var hamburgerButton: DynamicButton!
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,7 +64,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             let notificationOperation = NetworkConnection.shared.manager.request(notificationsRequest)
                 .validate(statusCode: 200..<300)
                 .responseJSON { (response) in
-
                     switch response.result {
                     case .success:
                         if let data = response.data {
@@ -97,25 +85,25 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                         os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                         self.refreshControl?.endRefreshing()
                     }
-            }
+                }
             notificationOperation.resume()
         }
     }
 
-    @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
+    @objc
+    func handleRefresh(_ refreshControl: UIRefreshControl?) {
         os_log("Refresh pulled", log: .default, type: .info)
         loadNotifications()
     }
 
-    @objc func rightDrawerButtonPress(_ sender: Any?) {
+    @objc
+    func rightDrawerButtonPress(_ sender: Any?) {
         present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return notifications.count
     }
-
-    static let tableViewCellIdentifier = "NotificationCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OpenHABNotificationsViewController.tableViewCellIdentifier) as? NotificationTableViewCell
@@ -146,7 +134,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                             case .failure:
                                 cell?.imageView?.image = UIImage(named: "icon-76x76.png")
                             }
-                    }
+                        }
                     imageOperation.resume()
             } else {
                 cell?.imageView?.image = UIImage(named: "icon-29x29.png")
@@ -177,8 +165,20 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
     }
+}
 
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+extension UIBarButtonItem {
+
+    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: imageName), for: .normal)
+        button.addTarget(target, action: action, for: .touchUpInside)
+
+        let menuBarItem = UIBarButtonItem(customView: button)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
+
+        return menuBarItem
     }
 }

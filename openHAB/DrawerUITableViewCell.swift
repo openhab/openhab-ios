@@ -11,7 +11,6 @@ import os.log
 import UIKit
 
 class DrawerUITableViewCell: UITableViewCell {
-    //var textLabel: UILabel?
 
     @IBOutlet weak var customTextLabel: UILabel!
     @IBOutlet weak var customImageView: UIView!

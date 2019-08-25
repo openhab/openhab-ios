@@ -27,7 +27,7 @@ class OpenHabService {
         guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
         var request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
         request.setAuthCredentials(Preferences.username, Preferences.password)
-        //let session = URLSession.shared
+        // let session = URLSession.shared
         let session = URLSession(
             configuration: URLSessionConfiguration.ephemeral,
             delegate: CertificatePinningURLSessionDelegate(),

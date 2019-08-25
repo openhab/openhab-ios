@@ -21,14 +21,6 @@ protocol OpenHABTrackerExtendedDelegate: OpenHABTrackerDelegate {
     func openHABTrackingNetworkChange(_ networkStatus: Reachability.Connection)
 }
 
-extension NSData {
-    func castToCPointer<T>() -> T {
-        let mem = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout<T.Type>.size)
-        self.getBytes(mem, length: MemoryLayout<T.Type>.size)
-        return mem.move()
-    }
-}
-
 class OpenHABTracker: NSObject {
     var oldReachabilityStatus: Reachability.Connection?
 
@@ -38,6 +30,21 @@ class OpenHABTracker: NSObject {
     var openHABRemoteUrl = ""
     var netService: NetService?
     var reach: Reachability?
+
+    override init() {
+        super.init()
+        let prefs = UserDefaults.standard
+        openHABDemoMode = prefs.bool(forKey: "demomode")
+        openHABLocalUrl = prefs.string(forKey: "localUrl") ?? ""
+        openHABRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
+
+        #if DEBUG
+        // always activate demo mode for UITest
+        if ProcessInfo.processInfo.environment["UITest"] != nil {
+            openHABDemoMode = true
+        }
+        #endif
+    }
 
     func start() {
         // Check if any network is available
@@ -59,7 +66,7 @@ class OpenHABTracker: NSObject {
                         startDiscovery()
                     } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                        #warning("Validate whether this should be switched to Alamofire")
+                        #warning("Verify whether this could be switched to Alamofire")
 
                         URLSession.shared.dataTask(with: request) { _, _, error -> Void in
                             if error == nil {
@@ -88,21 +95,6 @@ class OpenHABTracker: NSObject {
         }
     }
 
-    override init() {
-        super.init()
-        let prefs = UserDefaults.standard
-        openHABDemoMode = prefs.bool(forKey: "demomode")
-        openHABLocalUrl = prefs.string(forKey: "localUrl") ?? ""
-        openHABRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
-
-        #if DEBUG
-        // always activate demo mode for UITest
-        if ProcessInfo.processInfo.environment["UITest"] != nil {
-            openHABDemoMode = true
-        }
-        #endif
-    }
-
     func trackedLocalUrl() {
         delegate?.openHABTrackingProgress("Connecting to local URL")
         let openHABUrl = normalizeUrl(openHABLocalUrl)
@@ -112,7 +104,7 @@ class OpenHABTracker: NSObject {
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(openHABRemoteUrl)
         if (openHABUrl?.count ?? 0) > 0 {
-            //delegate?.openHABTrackingProgress("Connecting to remote URL")
+            // delegate?.openHABTrackingProgress("Connecting to remote URL")
             trackedUrl(URL(string: openHABUrl!))
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
@@ -136,7 +128,8 @@ class OpenHABTracker: NSObject {
         delegate?.openHABTracked(trackedUrl)
     }
 
-    @objc func reachabilityChanged(_ notification: Notification?) {
+    @objc
+    func reachabilityChanged(_ notification: Notification?) {
         if let changedReach = notification?.object as? Reachability {
             let nStatus = changedReach.connection
             if nStatus != oldReachabilityStatus {
@@ -236,5 +229,13 @@ extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
     func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
         os_log("OpenHABTracker discovery didn't resolve openHAB", log: .default, type: .info)
         trackedRemoteUrl()
+    }
+}
+
+extension NSData {
+    func castToCPointer<T>() -> T {
+        let mem = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout<T.Type>.size)
+        self.getBytes(mem, length: MemoryLayout<T.Type>.size)
+        return mem.move()
     }
 }

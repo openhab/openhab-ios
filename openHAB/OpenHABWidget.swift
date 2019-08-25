@@ -14,43 +14,6 @@ import Fuzi
 import MapKit
 import os.log
 
-extension OpenHABWidget {
-    struct CodingData: Decodable {
-        let widgetId: String
-        let label: String
-        let type: String
-        let icon: String
-        let url: String?
-        let period: String?
-        let minValue: Double?
-        let maxValue: Double?
-        let step: Double?
-        let refresh: Int?
-        let height: Double?
-        let isLeaf: Bool?
-        let iconColor: String?
-        let labelcolor: String?
-        let valuecolor: String?
-        let service: String?
-        let state: String?
-        let text: String?
-        let legend: Bool?
-        let encoding: String?
-        let groupType: String?
-        let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABLinkedPage?
-        let mappings: [OpenHABWidgetMapping]
-        let widgets: [OpenHABWidget.CodingData]
-    }
-}
-
-// swiftlint:disable line_length
-extension OpenHABWidget.CodingData {
-    var openHABWidget: OpenHABWidget {
-        let mappedWidgets = self.widgets.map { $0.openHABWidget }
-        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, encoding: self.encoding, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
-   }
-}
 // swiftlint:enable line_length
 
 class OpenHABWidget: NSObject, MKAnnotation {
@@ -81,13 +44,33 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var image: UIImage?
     var widgets: [OpenHABWidget] = []
 
-    // This is an ugly initializer
+    // Text prior to "["
+    var labelText: String? {
+        let array = label.components(separatedBy: "[")
+        return array[0].trimmingCharacters(in: .whitespaces)
+    }
 
+    // Text after "["
+    var labelValue: String? {
+        let array = label.components(separatedBy: "[")
+        if array.count > 1 {
+            var characterSet = CharacterSet.whitespaces
+            characterSet.insert(charactersIn: "]")
+            return array[1].trimmingCharacters(in: characterSet)
+        }
+        return nil
+    }
+
+    var coordinate: CLLocationCoordinate2D {
+        return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
+    }
+
+    // This is an ugly initializer
     init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
-            guard let d = with else { return ""}
-            return String(format: "%.1f", d)
+            guard let double = with else { return "" }
+            return String(format: "%.1f", double)
         }
         self.widgetId = widgetId
         self.label = label
@@ -163,23 +146,6 @@ class OpenHABWidget: NSObject, MKAnnotation {
         }
     }
 
-    // Text prior to "["
-    var labelText: String? {
-        let array = label.components(separatedBy: "[")
-        return array[0].trimmingCharacters(in: .whitespaces)
-    }
-
-    // Text after "["
-    var labelValue: String? {
-        let array = label.components(separatedBy: "[")
-        if array.count > 1 {
-            var characterSet = CharacterSet.whitespaces
-            characterSet.insert(charactersIn: "]")
-            return array[1].trimmingCharacters(in: characterSet)
-        }
-        return nil
-    }
-
     func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
@@ -202,9 +168,42 @@ class OpenHABWidget: NSObject, MKAnnotation {
         }
         return nil
     }
+}
 
-    var coordinate: CLLocationCoordinate2D {
-        return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
+extension OpenHABWidget {
+    struct CodingData: Decodable {
+        let widgetId: String
+        let label: String
+        let type: String
+        let icon: String
+        let url: String?
+        let period: String?
+        let minValue: Double?
+        let maxValue: Double?
+        let step: Double?
+        let refresh: Int?
+        let height: Double?
+        let isLeaf: Bool?
+        let iconColor: String?
+        let labelcolor: String?
+        let valuecolor: String?
+        let service: String?
+        let state: String?
+        let text: String?
+        let legend: Bool?
+        let encoding: String?
+        let groupType: String?
+        let item: OpenHABItem.CodingData?
+        let linkedPage: OpenHABLinkedPage?
+        let mappings: [OpenHABWidgetMapping]
+        let widgets: [OpenHABWidget.CodingData]
     }
+}
 
+// swiftlint:disable line_length
+extension OpenHABWidget.CodingData {
+    var openHABWidget: OpenHABWidget {
+        let mappedWidgets = self.widgets.map { $0.openHABWidget }
+        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, encoding: self.encoding, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
+    }
 }

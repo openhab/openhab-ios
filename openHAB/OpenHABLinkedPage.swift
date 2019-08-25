@@ -13,17 +13,17 @@ import Foundation
 import Fuzi
 
 class OpenHABLinkedPage: NSObject, Decodable {
-    var pageId = ""
-    var title = ""
-    var icon = ""
-    var link = ""
-
     private enum CodingKeys: String, CodingKey {
         case pageId = "id"
         case title
         case icon
         case link
     }
+
+    var pageId = ""
+    var title = ""
+    var icon = ""
+    var link = ""
 
     init(xml xmlElement: XMLElement) {
         super.init()

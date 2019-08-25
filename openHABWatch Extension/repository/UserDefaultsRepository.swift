@@ -14,20 +14,13 @@ let defaultValues = ["username": "test", "password": "test", "sitemapName": "wat
 struct Preferences {
 
     static private let defaults = UserDefaults.shared
-    static func readActiveUrl() -> String {
-
-        if Preferences.remoteUrl != "" {
-            return Preferences.remoteUrl
-        }
-        return Preferences.localUrl
-    }
 
     static var localUrl: String {
         get {
-            guard let localUrl = defaults.string(forKey: #function) else { return ""}
+            guard let localUrl = defaults.string(forKey: #function) else { return "" }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
                 in: CharacterSet.whitespacesAndNewlines)
-            if !validateUrl(trimmedUri) { return ""}
+            if !validateUrl(trimmedUri) { return "" }
             return trimmedUri
         }
         set { defaults.setValue(newValue, forKey: #function) }
@@ -38,7 +31,7 @@ struct Preferences {
             guard let localUrl = defaults.string(forKey: #function) else { return "https://openhab.org:8444" }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
                 in: CharacterSet.whitespacesAndNewlines)
-            if !validateUrl(trimmedUri) { return ""}
+            if !validateUrl(trimmedUri) { return "" }
             return trimmedUri
        }
         set { defaults.setValue(newValue, forKey: #function) }
@@ -78,6 +71,14 @@ struct Preferences {
         set { defaults.set(
             try? NSKeyedArchiver.archivedData(withRootObject: newValue, requiringSecureCoding: true) ,
             forKey: #function) }
+    }
+
+    static func readActiveUrl() -> String {
+
+        if Preferences.remoteUrl != "" {
+            return Preferences.remoteUrl
+        }
+        return Preferences.localUrl
     }
 
     fileprivate static func validateUrl(_ stringURL: String) -> Bool {

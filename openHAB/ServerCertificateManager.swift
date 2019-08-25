@@ -17,7 +17,23 @@ protocol ServerCertificateManagerDelegate: NSObjectProtocol {
 }
 
 class ServerCertificateManager {
+    // Handle the different responses of the user
+    // Ideal for transfer to Result type of swift 5.0
+    enum EvaluateResult {
+        case undecided
+        case deny
+        case permitOnce
+        case permitAlways
+    }
+    var evaluateResult: EvaluateResult = .undecided
+    weak var delegate: ServerCertificateManagerDelegate?
+    var allowInvalidCertificates: Bool = false
     var trustedCertificates: [String: Any] = [:]
+
+    // Init a ServerCertificateManager and set ignore certificates setting
+    init(ignoreCertificates: Bool) {
+        allowInvalidCertificates = ignoreCertificates
+    }
 
     func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
@@ -48,24 +64,6 @@ class ServerCertificateManager {
         }
     }
 
-    // Handle the different responses of the user
-    // Ideal for transfer to Result type of swift 5.0
-    enum EvaluateResult {
-        case undecided
-        case deny
-        case permitOnce
-        case permitAlways
-    }
-    var evaluateResult: EvaluateResult = .undecided
-    weak var delegate: ServerCertificateManagerDelegate?
-
-    var allowInvalidCertificates: Bool = false
-
-    // Init a ServerCertificateManager and set ignore certificates setting
-    init(ignoreCertificates: Bool) {
-        allowInvalidCertificates = ignoreCertificates
-    }
-
     func storeCertificateData(_ certificate: CFData?, forDomain domain: String) {
         let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
@@ -73,7 +71,7 @@ class ServerCertificateManager {
     }
 
     func certificateData(forDomain domain: String) -> CFData? {
-        guard let certificateData = trustedCertificates[domain] as? Data else { return nil  }
+        guard let certificateData = trustedCertificates[domain] as? Data else { return nil }
         return certificateData as CFData
     }
 

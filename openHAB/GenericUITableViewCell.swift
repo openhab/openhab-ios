@@ -16,22 +16,6 @@ protocol GenericCellCacheProtocol: UITableViewCell {
 
 class GenericUITableViewCell: UITableViewCell {
 
-    @objc func displayWidget() {
-        customTextLabel?.text = widget?.labelText
-        customDetailTextLabel?.text = widget?.labelValue ?? ""
-        customDetailTextLabel?.sizeToFit()
-
-        if customDetailTextLabel != nil, customDetailTextLabelConstraint != nil {
-            if accessoryType == .none {
-                // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
-                customDetailTextLabelConstraint.constant = 20.0
-            } else {
-                // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-                customDetailTextLabelConstraint.constant = 0.0
-            }
-        }
-    }
-
     private var _widget: OpenHABWidget!
     @objc var widget: OpenHABWidget! {
         get {
@@ -71,11 +55,6 @@ class GenericUITableViewCell: UITableViewCell {
     @IBOutlet weak var customDetailTextLabel: UILabel!
     @IBOutlet weak var customDetailTextLabelConstraint: NSLayoutConstraint!
 
-    func initialize() {
-        selectionStyle = .none
-        separatorInset = .zero
-    }
-
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         initialize()
@@ -86,10 +65,9 @@ class GenericUITableViewCell: UITableViewCell {
         initialize()
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    func initialize() {
+        selectionStyle = .none
+        separatorInset = .zero
     }
 
     /*
@@ -100,6 +78,28 @@ class GenericUITableViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         imageView?.frame = CGRect(x: 13, y: 5, width: 32, height: 32)
+    }
+
+    @objc
+    func displayWidget() {
+        customTextLabel?.text = widget?.labelText
+        customDetailTextLabel?.text = widget?.labelValue ?? ""
+        customDetailTextLabel?.sizeToFit()
+
+        if customDetailTextLabel != nil, customDetailTextLabelConstraint != nil {
+            if accessoryType == .none {
+                // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
+                customDetailTextLabelConstraint.constant = 20.0
+            } else {
+                // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
+                customDetailTextLabelConstraint.constant = 0.0
+            }
+        }
+    }
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+
+        // Configure the view for the selected state
     }
 
 }

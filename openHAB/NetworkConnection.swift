@@ -15,15 +15,11 @@ import os.log
 // ServerTrustPolicyManager --> ServerTrustManager
 class NetworkConnection {
 
-    var clientCertificateManager = ClientCertificateManager()
-    var serverCertificateManager: ServerCertificateManager!
-
-    var manager: Alamofire.SessionManager!
     static var shared: NetworkConnection!
 
-    class func initialize(ignoreSSL: Bool) {
-        shared = NetworkConnection(ignoreSSL: ignoreSSL)
-    }
+    var clientCertificateManager = ClientCertificateManager()
+    var serverCertificateManager: ServerCertificateManager!
+    var manager: Alamofire.SessionManager!
 
     init(ignoreSSL: Bool) {
         serverCertificateManager = ServerCertificateManager(ignoreCertificates: ignoreSSL)
@@ -80,6 +76,10 @@ class NetworkConnection {
             }
             return (disposition, credential)
         }
+    }
+
+    class func initialize(ignoreSSL: Bool) {
+        shared = NetworkConnection(ignoreSSL: ignoreSSL)
     }
 
     func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {

@@ -61,6 +61,9 @@ enum DrawerTableType {
 }
 
 class OpenHABDrawerTableViewController: UITableViewController {
+
+    static let tableViewCellIdentifier = "DrawerCell"
+
     var sitemaps: [OpenHABSitemap] = []
     @objc var openHABRootUrl = ""
     var openHABUsername = ""
@@ -68,6 +71,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
     var drawerItems: [OpenHABDrawerItem] = []
     weak var delegate: ModalHandler?
     var drawerTableType: DrawerTableType!
+
+    // App wide data access
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
 
     init(drawerTableType: DrawerTableType?) {
         self.drawerTableType = drawerTableType
@@ -130,26 +138,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
                         }
                         self.tableView.reloadData()
                     }
-            }
+                }
             sitemapOperation.resume()
         }
-    }
-
-    private func setStandardDrawerItems() {
-        // check if we are using my.openHAB, add notifications menu item then
-        let prefs = UserDefaults.standard
-        // Actually this should better test whether the host of the remoteUrl is on openhab.org
-        if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false && !prefs.bool(forKey: "demomode") {
-            let notificationsItem = OpenHABDrawerItem()
-            notificationsItem.label = "Notifications"
-            notificationsItem.tag = "notifications"
-            drawerItems.append(notificationsItem)
-        }
-        // Settings always go last
-        let settingsItem = OpenHABDrawerItem()
-        settingsItem.label = "Settings"
-        settingsItem.tag = "settings"
-        drawerItems.append(settingsItem)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -170,8 +161,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return sitemaps.count + drawerItems.count
     }
-
-    static let tableViewCellIdentifier = "DrawerCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell)!
@@ -198,7 +187,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                             case .failure:
                                 imageView.image = UIImage(named: "icon-76x76.png")
                             }
-                    }
+                        }
                     imageOperation.resume()
                 }
             } else {
@@ -276,15 +265,26 @@ class OpenHABDrawerTableViewController: UITableViewController {
         }
     }
 
+    private func setStandardDrawerItems() {
+        // check if we are using my.openHAB, add notifications menu item then
+        let prefs = UserDefaults.standard
+        // Actually this should better test whether the host of the remoteUrl is on openhab.org
+        if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false && !prefs.bool(forKey: "demomode") {
+            let notificationsItem = OpenHABDrawerItem()
+            notificationsItem.label = "Notifications"
+            notificationsItem.tag = "notifications"
+            drawerItems.append(notificationsItem)
+        }
+        // Settings always go last
+        let settingsItem = OpenHABDrawerItem()
+        settingsItem.label = "Settings"
+        settingsItem.tag = "settings"
+        drawerItems.append(settingsItem)
+    }
+
     func loadSettings() {
         let prefs = UserDefaults.standard
         openHABUsername = prefs.string(forKey: "username") ?? ""
         openHABPassword = prefs.string(forKey: "password") ?? ""
     }
-
-    // App wide data access
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
-    }
-
 }

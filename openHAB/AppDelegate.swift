@@ -22,10 +22,10 @@ var player: AVAudioPlayer?
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    static var appDelegate: AppDelegate!
+
     var window: UIWindow?
     var appData: OpenHABDataObject?
-
-    static var appDelegate: AppDelegate!
 
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
@@ -46,7 +46,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
 
-        //init Firebase crash reporting
+        // init Firebase crash reporting
         FirebaseApp.configure()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
@@ -135,7 +135,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 
-        let deviceTokenString = deviceToken.reduce("") {$0 + String(format: "%02X", $1)} //try "%02.2hhx",
+        let deviceTokenString = deviceToken.reduce("") { $0 + String(format: "%02X", $1) } //try "%02.2hhx",
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
@@ -154,7 +154,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
     // version without completionHandler is deprecated
-    //func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         os_log("didReceiveRemoteNotification", log: .notifications, type: .info)
 
         if application.applicationState == .active {

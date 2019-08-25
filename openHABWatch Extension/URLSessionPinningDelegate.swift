@@ -18,35 +18,6 @@ struct Certificate {
     let data: Data
 }
 
-extension Certificate {
-    static func localCertificates(with names: [String] = ["CertificateRenewed", "Certificate"],
-                                  from bundle: Bundle = .main) -> [Certificate] {
-        return names.lazy.map {
-            guard let file = bundle.url(forResource: $0, withExtension: "cer"),
-                let data = try? Data(contentsOf: file),
-                let cert = SecCertificateCreateWithData(nil, data as CFData) else {
-                    return nil
-            }
-            return Certificate(certificate: cert, data: data)
-        }
-        .compactMap {$0}
-    }
-
-    func validate(against certData: Data, using secTrust: SecTrust) -> Bool {
-        let certArray = [certificate] as CFArray
-        SecTrustSetAnchorCertificates(secTrust, certArray)
-
-        //validates a certificate by verifying its signature plus the signatures of
-        // the certificates in its certificate chain, up to the anchor certificate
-        var result = SecTrustResultType.invalid
-        SecTrustEvaluate(secTrust, &result)
-        let isValid = (result == .unspecified || result == .proceed)
-
-        //Validate host certificate against pinned certificate.
-        return isValid && certData == self.data
-    }
-}
-
 class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
 
     var clientCertificateManager = ClientCertificateManager()
@@ -64,7 +35,7 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
                 return
             }
 
-            //Set policy to validate domain
+            // Set policy to validate domain
             let policy = SecPolicyCreateSSL(true, "yourdomain.com" as CFString)
             let policies = NSArray(object: policy)
             SecTrustSetPolicies(serverTrust, policies)
@@ -112,5 +83,34 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
         }
         // No client certificate available
         challenge.sender!.cancel(challenge)
+    }
+}
+
+extension Certificate {
+    static func localCertificates(with names: [String] = ["CertificateRenewed", "Certificate"],
+                                  from bundle: Bundle = .main) -> [Certificate] {
+        return names.lazy.map {
+            guard let file = bundle.url(forResource: $0, withExtension: "cer"),
+                let data = try? Data(contentsOf: file),
+                let cert = SecCertificateCreateWithData(nil, data as CFData) else {
+                    return nil
+            }
+            return Certificate(certificate: cert, data: data)
+        }
+        .compactMap { $0 }
+    }
+
+    func validate(against certData: Data, using secTrust: SecTrust) -> Bool {
+        let certArray = [certificate] as CFArray
+        SecTrustSetAnchorCertificates(secTrust, certArray)
+
+        // validates a certificate by verifying its signature plus the signatures of
+        // the certificates in its certificate chain, up to the anchor certificate
+        var result = SecTrustResultType.invalid
+        SecTrustEvaluate(secTrust, &result)
+        let isValid = (result == .unspecified || result == .proceed)
+
+        // Validate host certificate against pinned certificate.
+        return isValid && certData == self.data
     }
 }
