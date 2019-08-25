@@ -31,7 +31,9 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        self.customTextLabel?.text = widget.labelText
+        customTextLabel?.text = widget.labelText
+        customDetailTextLabel?.text = widget.labelValue ?? ""
+
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
         widgetSegmentControl?.removeAllSegments()
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
