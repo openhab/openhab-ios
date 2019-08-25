@@ -43,7 +43,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         super.displayWidget()
     }
 
-    @objc func decreaseValue(_ sender: Any?) {
+    @objc
+    func decreaseValue(_ sender: Any?) {
         os_log("down button pressed", log: .viewCycle, type: .info)
 
         if let item = widget.item {
@@ -63,7 +64,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         }
     }
 
-    @objc func increaseValue(_ sender: Any?) {
+    @objc
+    func increaseValue(_ sender: Any?) {
         os_log("up button pressed", log: .viewCycle, type: .info)
 
         if let item = widget.item {

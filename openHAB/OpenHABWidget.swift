@@ -86,7 +86,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
-            guard let double = with else { return ""}
+            guard let double = with else { return "" }
             return String(format: "%.1f", double)
         }
         self.widgetId = widgetId

@@ -27,7 +27,7 @@ enum TargetController {
     case settings
     case notifications
 }
-protocol ModalHandler: class {
+protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
@@ -168,13 +168,15 @@ class OpenHABViewController: UIViewController {
         widgetTableView.register(cellType: VideoUITableViewCell.self)
     }
 
-    @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
+    @objc
+    func handleRefresh(_ refreshControl: UIRefreshControl?) {
         loadPage(false)
         widgetTableView.reloadData()
         widgetTableView.layoutIfNeeded()
     }
 
-    @objc func handleApsRegistration(_ note: Notification?) {
+    @objc
+    func handleApsRegistration(_ note: Notification?) {
         os_log("handleApsRegistration", log: .notifications, type: .info)
         let theData = note?.userInfo
         if theData != nil {
@@ -185,7 +187,8 @@ class OpenHABViewController: UIViewController {
         }
     }
 
-    @objc func rightDrawerButtonPress(_ sender: Any?) {
+    @objc
+    func rightDrawerButtonPress(_ sender: Any?) {
         performSegue(withIdentifier: "sideMenu", sender: nil)
     }
 
@@ -264,7 +267,7 @@ class OpenHABViewController: UIViewController {
         if #available(iOS 13.0, *) {
             // do nothing
         } else {
-            if animated, !search.isActive, !search.isEditing, navigationController.map({$0.viewControllers.last != self}) ?? false,
+            if animated, !search.isActive, !search.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
                 let searchBarSuperview = search.searchBar.superview,
                 let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
                     $0.firstAttribute == .height
@@ -281,7 +284,8 @@ class OpenHABViewController: UIViewController {
         }
     }
 
-    @objc func didEnterBackground(_ notification: Notification?) {
+    @objc
+    func didEnterBackground(_ notification: Notification?) {
         os_log("OpenHABViewController didEnterBackground", log: .viewCycle, type: .info)
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
@@ -290,7 +294,8 @@ class OpenHABViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = false
     }
 
-    @objc func didBecomeActive(_ notification: Notification?) {
+    @objc
+    func didBecomeActive(_ notification: Notification?) {
         os_log("OpenHABViewController didBecomeActive", log: .viewCycle, type: .info)
         // re disable idle off timer
         if idleOff {
@@ -591,7 +596,7 @@ class OpenHABViewController: UIViewController {
                         }
                         UIApplication.shared.isNetworkActivityIndicatorVisible = true
                     }
-            }
+                }
             sitemapsOperation.resume()
         }
     }
@@ -1028,7 +1033,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                         case .failure:
                             cell.imageView?.image = UIImage(named: "blankicon.png")
                         }
-                }
+                    }
                 imageOperation.resume()
             }
         }

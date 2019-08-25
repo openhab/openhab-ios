@@ -75,7 +75,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             let notificationOperation = NetworkConnection.shared.manager.request(notificationsRequest)
                 .validate(statusCode: 200..<300)
                 .responseJSON { (response) in
-
                     switch response.result {
                     case .success:
                         if let data = response.data {
@@ -97,17 +96,19 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                         os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                         self.refreshControl?.endRefreshing()
                     }
-            }
+                }
             notificationOperation.resume()
         }
     }
 
-    @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
+    @objc
+    func handleRefresh(_ refreshControl: UIRefreshControl?) {
         os_log("Refresh pulled", log: .default, type: .info)
         loadNotifications()
     }
 
-    @objc func rightDrawerButtonPress(_ sender: Any?) {
+    @objc
+    func rightDrawerButtonPress(_ sender: Any?) {
         present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
     }
 
@@ -146,7 +147,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                             case .failure:
                                 cell?.imageView?.image = UIImage(named: "icon-76x76.png")
                             }
-                    }
+                        }
                     imageOperation.resume()
             } else {
                 cell?.imageView?.image = UIImage(named: "icon-29x29.png")

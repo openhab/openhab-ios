@@ -73,7 +73,7 @@ class ServerCertificateManager {
     }
 
     func certificateData(forDomain domain: String) -> CFData? {
-        guard let certificateData = trustedCertificates[domain] as? Data else { return nil  }
+        guard let certificateData = trustedCertificates[domain] as? Data else { return nil }
         return certificateData as CFData
     }
 

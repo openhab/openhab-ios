@@ -11,7 +11,8 @@
 import os.log
 import UIKit
 
-@objc class OpenHABSelectionTableViewController: UITableViewController {
+@objc
+class OpenHABSelectionTableViewController: UITableViewController {
     @objc var mappings: [AnyHashable] = []
     @objc weak var delegate: OpenHABSelectionTableViewControllerDelegate?
     @objc var selectionItem: OpenHABItem?

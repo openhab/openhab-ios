@@ -24,10 +24,10 @@ struct Preferences {
 
     static var localUrl: String {
         get {
-            guard let localUrl = defaults.string(forKey: #function) else { return ""}
+            guard let localUrl = defaults.string(forKey: #function) else { return "" }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
                 in: CharacterSet.whitespacesAndNewlines)
-            if !validateUrl(trimmedUri) { return ""}
+            if !validateUrl(trimmedUri) { return "" }
             return trimmedUri
         }
         set { defaults.setValue(newValue, forKey: #function) }
@@ -38,7 +38,7 @@ struct Preferences {
             guard let localUrl = defaults.string(forKey: #function) else { return "https://openhab.org:8444" }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
                 in: CharacterSet.whitespacesAndNewlines)
-            if !validateUrl(trimmedUri) { return ""}
+            if !validateUrl(trimmedUri) { return "" }
             return trimmedUri
        }
         set { defaults.setValue(newValue, forKey: #function) }

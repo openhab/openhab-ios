@@ -76,7 +76,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
         customDetailText?.text = valueText(widgetValue)
     }
 
-    @objc func sliderDidEndSliding (_ sender: UISlider) {
+    @objc
+    func sliderDidEndSliding (_ sender: UISlider) {
         let res = adj(Double(widgetSlider!.value))
         os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider!.value, res)
         widget.sendCommand(valueText(res))

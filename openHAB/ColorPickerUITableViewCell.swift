@@ -58,12 +58,14 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         upButton?.highlightStokeColor =  Colors.hightlightStrokeColor
     }
 
-    @objc func upButtonPressed() {
+    @objc
+    func upButtonPressed() {
         os_log("ON button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("ON")
     }
 
-    @objc func downButtonPressed() {
+    @objc
+    func downButtonPressed() {
         os_log("OFF button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("OFF")
     }

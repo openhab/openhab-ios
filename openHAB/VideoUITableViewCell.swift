@@ -181,7 +181,8 @@ class VideoUITableViewCell: GenericUITableViewCell {
         aspectRatioConstraint = constraint
     }
 
-    @objc private func stopPlayback(andResetUrl reset: Bool = true) {
+    @objc
+    private func stopPlayback(andResetUrl reset: Bool = true) {
         if reset {
             url = nil
         }

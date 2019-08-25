@@ -6,6 +6,11 @@ opt_in_rules:
   - unused_import
   - implicit_return
   - multiline_function_chains
+  - anyobject_protocol
+  - array_init
+  - attributes 
+  - closure_end_indentation
+  - closure_spacing
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo

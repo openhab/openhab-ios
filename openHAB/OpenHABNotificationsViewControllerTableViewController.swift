@@ -91,12 +91,14 @@ class OpenHABNotificationsViewController: UITableViewController {
         operation?.start()
     }
 
-    @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
+    @objc
+    func handleRefresh(_ refreshControl: UIRefreshControl?) {
         print("Refresh pulled")
         loadNotifications()
     }
 
-    @objc func rightDrawerButtonPress(_ sender: Any?) {
+    @objc
+    func rightDrawerButtonPress(_ sender: Any?) {
         mm_drawerController.toggle(MMDrawerSide.right, animated: true, completion: nil)
     }
 

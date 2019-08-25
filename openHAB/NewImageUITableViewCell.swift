@@ -147,11 +147,12 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                 case .failure(let error):
                     os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
                 }
-        }
+            }
         downloadRequest?.resume()
     }
 
-    @objc func refreshImage(_ timer: Timer?) {
+    @objc
+    func refreshImage(_ timer: Timer?) {
         os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
         loadImage()
     }

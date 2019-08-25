@@ -62,13 +62,15 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         return false
     }
 
-    @objc func cancelButtonPressed(_ sender: Any?) {
+    @objc
+    func cancelButtonPressed(_ sender: Any?) {
         navigationController?.popViewController(animated: true)
         os_log("Cancel button pressed", log: .viewCycle, type: .info)
 
     }
 
-    @objc func saveButtonPressed(_ sender: Any?) {
+    @objc
+    func saveButtonPressed(_ sender: Any?) {
         // TODO: Make a check if any of the preferences has changed
         os_log("Save button pressed", log: .viewCycle, type: .info)
 
@@ -78,7 +80,8 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         navigationController?.popToRootViewController(animated: true)
     }
 
-    @objc func demomodeSwitchChange(_ sender: Any?) {
+    @objc
+    func demomodeSwitchChange(_ sender: Any?) {
         if demomodeSwitch!.isOn {
             os_log("Demo is ON", log: .viewCycle, type: .info)
             disableConnectionSettings()

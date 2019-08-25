@@ -136,7 +136,8 @@ class OpenHABTracker: NSObject {
         delegate?.openHABTracked(trackedUrl)
     }
 
-    @objc func reachabilityChanged(_ notification: Notification?) {
+    @objc
+    func reachabilityChanged(_ notification: Notification?) {
         if let changedReach = notification?.object as? Reachability {
             let nStatus = changedReach.connection
             if nStatus != oldReachabilityStatus {

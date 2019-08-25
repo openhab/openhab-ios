@@ -130,7 +130,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                         }
                         self.tableView.reloadData()
                     }
-            }
+                }
             sitemapOperation.resume()
         }
     }
@@ -198,7 +198,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                             case .failure:
                                 imageView.image = UIImage(named: "icon-76x76.png")
                             }
-                    }
+                        }
                     imageOperation.resume()
                 }
             } else {

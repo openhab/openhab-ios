@@ -13,7 +13,8 @@ import UIKit
 
 private var kNSCBAlertWrapper = 0
 extension UIAlertView {
-    @objc func show(withCompletion completion: @escaping (_ alertView: UIAlertView?, _ buttonIndex: Int) -> Void) {
+    @objc
+    func show(withCompletion completion: @escaping (_ alertView: UIAlertView?, _ buttonIndex: Int) -> Void) {
         let alertWrapper = NSCBAlertWrapper()
         alertWrapper.completionBlock = completion
         delegate = alertWrapper as AnyObject

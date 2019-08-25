@@ -59,17 +59,20 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         stopButton?.highlightStokeColor =  Colors.hightlightStrokeColor
     }
 
-    @objc func upButtonPressed() {
+    @objc
+    func upButtonPressed() {
         os_log("up button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("UP")
     }
 
-    @objc func stopButtonPressed() {
+    @objc
+    func stopButtonPressed() {
         os_log("stop button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("STOP")
     }
 
-    @objc func downButtonPressed() {
+    @objc
+    func downButtonPressed() {
         os_log("down button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("DOWN")
     }

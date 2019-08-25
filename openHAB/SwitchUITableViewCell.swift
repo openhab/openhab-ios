@@ -46,7 +46,8 @@ class SwitchUITableViewCell: GenericUITableViewCell {
         super.displayWidget()
     }
 
-    @objc func switchChange() {
+    @objc
+    func switchChange() {
         if (widgetSwitch?.isOn)! {
             os_log("Switch to ON", log: .viewCycle, type: .info)
             widget.sendCommand("ON")
