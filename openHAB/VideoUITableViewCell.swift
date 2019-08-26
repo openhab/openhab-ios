@@ -175,10 +175,8 @@ class VideoUITableViewCell: GenericUITableViewCell {
                             self?.mainImageView?.image = image
                         }
                     }
-
                     imageData = Data()
                 }
-
                 imageData.append(chunkData)
             }
         mjpegRequest?.resume()
