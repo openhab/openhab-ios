@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import Alamofire
 import AVFoundation
 import AVKit
 import os.log
@@ -17,6 +18,8 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell {
+
+    private let activityIndicator = UIActivityIndicatorView(style: .gray)
 
     var didLoad: (() -> Void)?
 
@@ -28,12 +31,10 @@ class VideoUITableViewCell: GenericUITableViewCell {
     }
     private var playerView: PlayerView!
     private var mainImageView: UIImageView!
-    private let activityIndicator = UIActivityIndicatorView(style: .gray)
     private var playerObserver: NSKeyValueObservation?
     private var aspectRatioConstraint: NSLayoutConstraint?
-    private var mjpegRequest: URLSessionDataTask?
+    private var mjpegRequest: Alamofire.Request?
     private var session: URLSession!
-    private var imageData = Data()
     private var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
     }
@@ -152,14 +153,34 @@ class VideoUITableViewCell: GenericUITableViewCell {
 
         bringSubviewToFront(mainImageView)
 
-        #warning("Verify whether this could be switched to Alamofire")
-
-        session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
-
         var streamRequest = URLRequest(url: url)
         streamRequest.timeoutInterval = 10.0
 
-        mjpegRequest = session.dataTask(with: streamRequest)
+        let streamImageInitialBytePattern = Data([255, 216])
+        var imageData = Data()
+        mjpegRequest = NetworkConnection.shared.manager.request(streamRequest)
+            .validate(statusCode: 200..<300)
+            .stream { [weak self] (chunkData) in
+                if chunkData.starts(with: streamImageInitialBytePattern) {
+                    if let image = UIImage(data: imageData) {
+                        DispatchQueue.main.async {
+                            if self?.mainImageView?.image == nil {
+                                let aspectRatio = image.size.width / image.size.height
+                                self?.activityIndicator.isHidden = true
+                                self?.updateAspectRatio(forView: self?.mainImageView, aspectRatio: aspectRatio)
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                    self?.didLoad?()
+                                }
+                            }
+                            self?.mainImageView?.image = image
+                        }
+                    }
+
+                    imageData = Data()
+                }
+
+                imageData.append(chunkData)
+            }
         mjpegRequest?.resume()
     }
 
@@ -191,30 +212,6 @@ class VideoUITableViewCell: GenericUITableViewCell {
         mjpegRequest?.cancel()
         mjpegRequest = nil
         self.mainImageView?.image = nil
-    }
-}
-
-extension VideoUITableViewCell: URLSessionDataDelegate {
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        if !imageData.isEmpty, let image = UIImage(data: imageData) {
-            DispatchQueue.main.async {
-                if self.mainImageView?.image == nil {
-                    let aspectRatio = image.size.width / image.size.height
-                    self.activityIndicator.isHidden = true
-                    self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                        self.didLoad?()
-                    }
-                }
-                self.mainImageView?.image = image
-            }
-            imageData = Data()
-        }
-        completionHandler(.allow)
-    }
-
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        imageData.append(data)
     }
 }
 
