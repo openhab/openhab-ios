@@ -61,10 +61,11 @@ class NetworkConnection {
 
             if challenge.previousFailureCount > 0 {
                 disposition = .cancelAuthenticationChallenge
-            } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic {
+            } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
+                challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
                 let prefs = UserDefaults.standard
                 let remoteURL = URL(string: prefs.string(forKey: "remoteUrl") ?? "")
-                let localURL = URL(string: prefs.string(forKey: "localURL") ?? "")
+                let localURL = URL(string: prefs.string(forKey: "localUrl") ?? "")
 
                 if challenge.protectionSpace.host == remoteURL?.host || challenge.protectionSpace.host == localURL?.host {
                     let openHABUsername = prefs.string(forKey: "username") ?? ""
