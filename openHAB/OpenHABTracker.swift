@@ -33,10 +33,9 @@ class OpenHABTracker: NSObject {
 
     override init() {
         super.init()
-        let prefs = UserDefaults.standard
-        openHABDemoMode = prefs.bool(forKey: "demomode")
-        openHABLocalUrl = prefs.string(forKey: "localUrl") ?? ""
-        openHABRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
+        openHABDemoMode = Preferences.demomode
+        openHABLocalUrl = Preferences.localUrl
+        openHABRemoteUrl = Preferences.remoteUrl
 
         #if DEBUG
         // always activate demo mode for UITest

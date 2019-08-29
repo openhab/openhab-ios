@@ -280,7 +280,8 @@ class OpenHABViewController: UIViewController {
     }
 
     func doRegisterAps() {
-        if let prefsURL = UserDefaults.standard.string(forKey: "remoteUrl"), prefsURL.contains("openhab.org") {
+        let prefsURL = Preferences.remoteUrl
+        if prefsURL.contains("openhab.org") {
             if deviceId != "" && deviceToken != "" && deviceName != "" {
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 if let registrationUrl = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
@@ -583,12 +584,11 @@ class OpenHABViewController: UIViewController {
 
     // load app settings
     func loadSettings() {
-        let prefs = UserDefaults.standard
-        openHABUsername = prefs.string(forKey: "username") ?? ""
-        openHABPassword = prefs.string(forKey: "password") ?? ""
-        defaultSitemap = prefs.string(forKey: "defaultSitemap") ?? ""
-        idleOff = prefs.bool(forKey: "idleOff")
-        let rawIconType = prefs.integer(forKey: "iconType")
+        openHABUsername = Preferences.username
+        openHABPassword = Preferences.password
+        defaultSitemap = Preferences.defaultSitemap
+        idleOff = Preferences.idleOff
+        let rawIconType = Preferences.iconType
         iconType = IconType(rawValue: rawIconType) ?? .png
 
         appData?.openHABUsername = openHABUsername

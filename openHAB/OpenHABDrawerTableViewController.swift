@@ -234,8 +234,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         // First sitemaps
         if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
             let sitemap = sitemaps[indexPath.row]
-            let prefs = UserDefaults.standard
-            prefs.setValue(sitemap.name, forKey: "defaultSitemap")
+            Preferences.defaultSitemap = sitemap.name
             appData?.rootViewController?.pageUrl = ""
             switch drawerTableType {
             case .with?:
@@ -267,9 +266,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     private func setStandardDrawerItems() {
         // check if we are using my.openHAB, add notifications menu item then
-        let prefs = UserDefaults.standard
         // Actually this should better test whether the host of the remoteUrl is on openhab.org
-        if prefs.string(forKey: "remoteUrl")?.contains("openhab.org") ?? false && !prefs.bool(forKey: "demomode") {
+        if Preferences.remoteUrl.contains("openhab.org") && !Preferences.demomode {
             let notificationsItem = OpenHABDrawerItem()
             notificationsItem.label = "Notifications"
             notificationsItem.tag = "notifications"
@@ -283,8 +281,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     func loadSettings() {
-        let prefs = UserDefaults.standard
-        openHABUsername = prefs.string(forKey: "username") ?? ""
-        openHABPassword = prefs.string(forKey: "password") ?? ""
+        openHABUsername = Preferences.username
+        openHABPassword = Preferences.password
     }
 }
