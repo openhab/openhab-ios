@@ -27,14 +27,7 @@ class OpenHABSitemapPage: NSObject {
         self.title = title
         self.link = link
         self.leaf = leaf
-        self.widgets = []
-        // This could be expressed recursively but this does the job on 2 levels
-        for widgetsLevel1 in widgets {
-            self.widgets.append(widgetsLevel1)
-            for widgetsLevel2 in widgetsLevel1.widgets {
-                self.widgets.append(widgetsLevel2)
-            }
-        }
+        self.widgets.flatten(widgets)
         self.widgets.forEach {
             $0.sendCommand = { [weak self] (item, command) in
                 self?.sendCommand(item, commandToSend: command)
@@ -54,16 +47,7 @@ class OpenHABSitemapPage: NSObject {
             default: break
             }
         }
-
-        var ws: [OpenHABWidget] = []
-        // This could be expressed recursively but this does the job on 2 levels
-        for w1 in widgets {
-            ws.append(w1)
-            for w2 in w1.widgets {
-                ws.append(w2)
-            }
-        }
-        widgets = ws
+        self.widgets.flatten(widgets)
         widgets.forEach {
             $0.sendCommand = { [weak self] (item, command) in
                 self?.sendCommand(item, commandToSend: command)

@@ -14,8 +14,6 @@ import Fuzi
 import MapKit
 import os.log
 
-// swiftlint:enable line_length
-
 class OpenHABWidget: NSObject, MKAnnotation {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""
@@ -204,5 +202,15 @@ extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = self.widgets.map { $0.openHABWidget }
         return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, encoding: self.encoding, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
+    }
+}
+
+//  Recursive parsing of nested widget structure
+extension Array where Element == OpenHABWidget {
+    mutating func flatten(_ widgets: [Element]) {
+        for widget in widgets {
+            self.append(widget)
+            self.flatten(widget.widgets)
+        }
     }
 }
