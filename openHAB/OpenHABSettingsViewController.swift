@@ -161,15 +161,14 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     func loadSettings() {
-        let prefs = UserDefaults.standard
-        settingsLocalUrl = prefs.string(forKey: "localUrl") ?? ""
-        settingsRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
-        settingsUsername = prefs.string(forKey: "username") ?? ""
-        settingsPassword = prefs.string(forKey: "password") ?? ""
-        settingsIgnoreSSL = prefs.bool(forKey: "ignoreSSL")
-        settingsDemomode = prefs.bool(forKey: "demomode")
-        settingsIdleOff = prefs.bool(forKey: "idleOff")
-        let rawSettingsIconType = prefs.integer(forKey: "iconType")
+        settingsLocalUrl = Preferences.localUrl
+        settingsRemoteUrl = Preferences.remoteUrl
+        settingsUsername = Preferences.username
+        settingsPassword = Preferences.password
+        settingsIgnoreSSL = Preferences.ignoreSSL
+        settingsDemomode = Preferences.demomode
+        settingsIdleOff = Preferences.idleOff
+        let rawSettingsIconType = Preferences.iconType
         settingsIconType = IconType(rawValue: rawSettingsIconType) ?? .png
 
         sendSettingsToWatch()
@@ -187,29 +186,26 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     func saveSettings() {
-        let prefs = UserDefaults.standard
-        prefs.setValue(settingsLocalUrl, forKey: "localUrl")
-        prefs.setValue(settingsRemoteUrl, forKey: "remoteUrl")
-        prefs.setValue(settingsUsername, forKey: "username")
-        prefs.setValue(settingsPassword, forKey: "password")
-        prefs.set(settingsIgnoreSSL, forKey: "ignoreSSL")
-        prefs.set(settingsDemomode, forKey: "demomode")
-        prefs.set(settingsIdleOff, forKey: "idleOff")
-        prefs.set(settingsIconType.rawValue, forKey: "iconType")
+        Preferences.localUrl = settingsLocalUrl
+        Preferences.remoteUrl = settingsRemoteUrl
+        Preferences.username = settingsUsername
+        Preferences.password = settingsPassword
+        Preferences.ignoreSSL = settingsIgnoreSSL
+        Preferences.demomode = settingsDemomode
+        Preferences.idleOff = settingsIdleOff
+        Preferences.iconType = settingsIconType.rawValue
 
         sendSettingsToWatch()
     }
 
     func sendSettingsToWatch() {
-        let prefs = UserDefaults.standard
-
         WatchService.singleton.sendToWatch(
-            prefs.string(forKey: "localUrl") ?? "",
-            remoteUrl: prefs.string(forKey: "remoteUrl") ?? "",
-            username: prefs.string(forKey: "username") ?? "",
-            password: prefs.string(forKey: "password") ?? "",
+            Preferences.localUrl,
+            remoteUrl: Preferences.remoteUrl,
+            username: Preferences.username,
+            password: Preferences.password,
             sitemapName: "watch",
-            ignoreSSL: prefs.bool(forKey: "ignoreSSL"))
+            ignoreSSL: Preferences.ignoreSSL)
     }
 
 }

@@ -55,9 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         loadSettingsDefaults()
 
-        let prefs = UserDefaults.standard
-        let ignoreSSL = prefs.bool(forKey: "ignoreSSL")
-        NetworkConnection.initialize(ignoreSSL: ignoreSSL)
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL)
 
         registerForPushNotifications()
 
@@ -223,7 +221,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func loadSettingsDefaults() {
         let prefs = UserDefaults.standard
-        if prefs.object(forKey: "localUrl") == nil {
+        if  prefs.object(forKey: "localUrl") == nil {
             prefs.setValue("", forKey: "localUrl")
         }
         if prefs.object(forKey: "remoteUrl") == nil {

@@ -20,8 +20,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         // TODO Use RemoteUrl, TOO
         if message["requestLocalUrl"] != nil {
-            let prefs = UserDefaults.standard
-            replyHandler(["baseUri": prefs.string(forKey: "localUrl") ?? ""])
+            replyHandler(["baseUri": Preferences.localUrl])
         }
     }
 

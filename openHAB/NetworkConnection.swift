@@ -63,13 +63,12 @@ class NetworkConnection {
                 disposition = .cancelAuthenticationChallenge
             } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
                 challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
-                let prefs = UserDefaults.standard
-                let remoteURL = URL(string: prefs.string(forKey: "remoteUrl") ?? "")
-                let localURL = URL(string: prefs.string(forKey: "localUrl") ?? "")
+                let remoteURL = URL(string: Preferences.remoteUrl)
+                let localURL = URL(string: Preferences.localUrl)
 
                 if challenge.protectionSpace.host == remoteURL?.host || challenge.protectionSpace.host == localURL?.host {
-                    let openHABUsername = prefs.string(forKey: "username") ?? ""
-                    let openHABPassword = prefs.string(forKey: "password") ?? ""
+                    let openHABUsername = Preferences.username
+                    let openHABPassword = Preferences.password
                     credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
                     disposition = .useCredential
                     os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)

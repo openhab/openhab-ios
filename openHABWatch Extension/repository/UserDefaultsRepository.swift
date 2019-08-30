@@ -7,13 +7,13 @@
 import os.log
 import UIKit
 
-let defaultValues = ["username": "test", "password": "test", "sitemapName": "watch"]
+let defaultValues = ["username": "test", "password": "test", "sitemapName": "watch", "defaultSitemap": "demo"]
 
 // Convenient access to UserDefaults
 // Much shorter but to be reworked when Property Wrappers are available
 struct Preferences {
 
-    static private let defaults = UserDefaults.shared
+    static private let defaults = UserDefaults.standard
 
     static var localUrl: String {
         get {
@@ -60,18 +60,39 @@ struct Preferences {
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static var sitemap: Sitemap {
-        get {
-            guard
-                let sitemap = defaults.object(forKey: #function) as! Data?,
-                let sitemapValue = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Sitemap.self, from: sitemap) else {
-                    return Sitemap.init(frames: [])
-            }
-            return sitemapValue }
-        set { defaults.set(
-            try? NSKeyedArchiver.archivedData(withRootObject: newValue, requiringSecureCoding: true) ,
-            forKey: #function) }
+    static var demomode: Bool {
+        get { return defaults.bool(forKey: #function) }
+        set { defaults.setValue(newValue, forKey: #function) }
     }
+
+    static var idleOff: Bool {
+        get { return defaults.bool(forKey: #function) }
+        set { defaults.setValue(newValue, forKey: #function) }
+    }
+
+    static var iconType: Int {
+        get { return defaults.integer(forKey: #function) }
+        set { defaults.setValue(newValue, forKey: #function) }
+    }
+
+    static var defaultSitemap: String {
+        get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
+            return string }
+        set { defaults.setValue(newValue, forKey: #function) }
+    }
+
+//    static var sitemap: Sitemap {
+//        get {
+//            guard
+//                let sitemap = defaults.object(forKey: #function) as! Data?,
+//                let sitemapValue = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Sitemap.self, from: sitemap) else {
+//                    return Sitemap.init(frames: [])
+//            }
+//            return sitemapValue }
+//        set { defaults.set(
+//            try? NSKeyedArchiver.archivedData(withRootObject: newValue, requiringSecureCoding: true) ,
+//            forKey: #function) }
+//    }
 
     static func readActiveUrl() -> String {
 

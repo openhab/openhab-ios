@@ -52,10 +52,9 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
     }
 
     func loadNotifications() {
-        let prefs = UserDefaults.standard
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
-        if let notificationsUrl = Endpoint.notification(prefsURL: prefs.string(forKey: "remoteUrl") ?? "").url {
+        if let notificationsUrl = Endpoint.notification(prefsURL: Preferences.remoteUrl).url {
             let notificationsRequest = URLRequest(url: notificationsUrl)
 
             let decoder = JSONDecoder()
@@ -157,13 +156,8 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
     }
 
     func loadSettings() {
-        let prefs = UserDefaults.standard
-        openHABUsername = prefs.string(forKey: "username") ?? ""
-        openHABPassword = prefs.string(forKey: "password") ?? ""
-        //    self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
-        //    self.idleOff = [prefs boolForKey:@"idleOff"];
-        appData?.openHABUsername = openHABUsername
-        appData?.openHABPassword = openHABPassword
+        appData?.openHABUsername = Preferences.username
+        appData?.openHABPassword = Preferences.password
     }
 }
 

@@ -36,10 +36,7 @@ class WebUITableViewCell: GenericUITableViewCell {
             return
         }
 
-        let prefs = UserDefaults.standard
-        let openHABUsername = prefs.string(forKey: "username")
-        let openHABPassword = prefs.string(forKey: "password")
-        let authStr = "\(openHABUsername ?? ""):\(openHABPassword ?? "")"
+        let authStr = "\(Preferences.username):\(Preferences.password)"
 
         guard let loginData = authStr.data(using: String.Encoding.utf8) else {
             return
