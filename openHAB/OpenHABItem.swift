@@ -106,7 +106,9 @@ extension OpenHABItem.CodingData {
 
 extension CGFloat {
     init(state string: String, divisor: Float) {
-        if let number = NumberFormatter().number(from: string) {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.locale = Locale(identifier: "EN")
+        if let number = numberFormatter.number(from: string) {
             self.init(number.floatValue/divisor)
         } else {
             self.init(0)
