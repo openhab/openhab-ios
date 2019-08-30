@@ -21,7 +21,6 @@ class OpenHABUserDefaultsTests: XCTestCase {
         XCTAssertEqual(Preferences.username, UserDefaults.standard.string(forKey: "username"))
         XCTAssertEqual(Preferences.password, UserDefaults.standard.string(forKey: "password"))
         XCTAssertEqual(Preferences.ignoreSSL, UserDefaults.standard.bool(forKey: "ignoreSSL"))
-
       //  XCTAssertEqual(Preferences.sitemapName, UserDefaults.standard.string(forKey: "sitemapName"))
         XCTAssertEqual(Preferences.demomode, UserDefaults.standard.bool(forKey: "demomode"))
         XCTAssertEqual(Preferences.idleOff, UserDefaults.standard.bool(forKey: "idleOff"))
