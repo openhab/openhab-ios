@@ -399,12 +399,12 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="43.666666666666664"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <button opaque="NO" tag="603" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bnc-pN-4ms" customClass="DynamicButton" customModule="DynamicButton">
-                                                    <rect key="frame" x="325" y="7" width="30" height="30"/>
-                                                    <accessibility key="accessibilityConfiguration" label="up"/>
+                                                <button opaque="NO" tag="601" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PzY-Bs-9MZ" customClass="DynamicButton" customModule="DynamicButton">
+                                                    <rect key="frame" x="249" y="7" width="30" height="30"/>
+                                                    <accessibility key="accessibilityConfiguration" label="down"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="30" id="X1M-1P-C4k"/>
-                                                        <constraint firstAttribute="height" constant="30" id="hd4-jY-xhn"/>
+                                                        <constraint firstAttribute="width" constant="30" id="LaN-EA-e8o"/>
+                                                        <constraint firstAttribute="height" constant="30" id="iup-nQ-ZD5"/>
                                                     </constraints>
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="color" keyPath="strokeColor">
@@ -425,12 +425,12 @@
                                                         </userDefinedRuntimeAttribute>
                                                     </userDefinedRuntimeAttributes>
                                                 </button>
-                                                <button opaque="NO" tag="601" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PzY-Bs-9MZ" customClass="DynamicButton" customModule="DynamicButton">
-                                                    <rect key="frame" x="249" y="7" width="30" height="30"/>
-                                                    <accessibility key="accessibilityConfiguration" label="down"/>
+                                                <button opaque="NO" tag="603" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bnc-pN-4ms" customClass="DynamicButton" customModule="DynamicButton">
+                                                    <rect key="frame" x="325" y="7" width="30" height="30"/>
+                                                    <accessibility key="accessibilityConfiguration" label="up"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="30" id="LaN-EA-e8o"/>
-                                                        <constraint firstAttribute="height" constant="30" id="iup-nQ-ZD5"/>
+                                                        <constraint firstAttribute="width" constant="30" id="X1M-1P-C4k"/>
+                                                        <constraint firstAttribute="height" constant="30" id="hd4-jY-xhn"/>
                                                     </constraints>
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="color" keyPath="strokeColor">
@@ -470,9 +470,9 @@
                                         <connections>
                                             <outlet property="customDetailText" destination="IAR-ZJ-192" id="bnV-nG-NXo"/>
                                             <outlet property="customTextLabel" destination="f5k-P9-Jll" id="okZ-3j-zJn"/>
-                                            <outlet property="downButton" destination="PzY-Bs-9MZ" id="OtX-qU-GU7"/>
+                                            <outlet property="downButton" destination="bnc-pN-4ms" id="MKT-Lr-bkO"/>
                                             <outlet property="stopButton" destination="riU-tV-5Y6" id="Hj0-xA-dIV"/>
-                                            <outlet property="upButton" destination="bnc-pN-4ms" id="M4O-f0-D58"/>
+                                            <outlet property="upButton" destination="PzY-Bs-9MZ" id="3ms-J5-Frr"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ChartUITableViewCell" rowHeight="44" id="o5c-ql-8Ao" customClass="NewImageTableViewCell" customModule="openHAB" customModuleProvider="target">
