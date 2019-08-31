@@ -287,7 +287,7 @@ class OpenHABViewController: UIViewController {
                 if let registrationUrl = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
                     let registrationRequest = URLRequest(url: registrationUrl)
                     os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
-                    let registrationOperation = NetworkConnection.shared.manager.request(registrationRequest).responseJSON { (response) in
+                    let registrationOperation = NetworkConnection.shared.manager.request(registrationRequest).responseData { (response) in
                         switch response.result {
                         case .success:
                             os_log("my.openHAB registration sent", log: .notifications, type: .info)
@@ -381,7 +381,7 @@ class OpenHABViewController: UIViewController {
 
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
-        currentPageOperation = NetworkConnection.shared.manager.request(pageRequest).responseJSON { [weak self] (response) in
+        currentPageOperation = NetworkConnection.shared.manager.request(pageRequest).responseData { [weak self] (response) in
             guard let self = self else { return }
 
             switch response.result {
@@ -394,7 +394,7 @@ class OpenHABViewController: UIViewController {
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, self.atmosphereTrackingId)
                 }
                 var openHABSitemapPage: OpenHABSitemapPage?
-                if let data = response.data {
+                if let data = response.result.value {
                     // If we are talking to openHAB 1.X, talk XML
                     if self.appData?.openHABVersion == 1 {
                         let str = String(decoding: data, as: UTF8.self)
@@ -501,11 +501,11 @@ class OpenHABViewController: UIViewController {
 
             let sitemapsOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
                 .validate(statusCode: 200..<300)
-                .responseJSON { (response) in
+                .responseData { (response) in
                     switch response.result {
                     case .success:
                         UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                        self.sitemaps = deriveSitemaps(response.data, version: self.appData?.openHABVersion)
+                        self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
                         switch self.sitemaps.count {
                         case 2...:
                             if self.defaultSitemap != "" {
@@ -658,7 +658,7 @@ class OpenHABViewController: UIViewController {
                 os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
                 os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
             }
-            commandOperation = NetworkConnection.shared.manager.request(commandRequest).responseJSON { (response) in
+            commandOperation = NetworkConnection.shared.manager.request(commandRequest).responseData { (response) in
                 switch response.result {
                 case .success:
                     os_log("Command sent!", log: .remoteAccess, type: .info)
@@ -696,7 +696,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             DispatchQueue.main.async {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
-            commandOperation = NetworkConnection.shared.manager.request(pageRequest).responseJSON { (response) in
+            commandOperation = NetworkConnection.shared.manager.request(pageRequest).responseData { (response) in
                 switch response.result {
                 case .success:
                     os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
