@@ -62,10 +62,10 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
             let notificationOperation = NetworkConnection.shared.manager.request(notificationsRequest)
                 .validate(statusCode: 200..<300)
-                .responseJSON { (response) in
+                .responseData { (response) in
                     switch response.result {
                     case .success:
-                        if let data = response.data {
+                        if let data = response.result.value {
                             do {
                                 let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
                                 for codingDatum in codingDatas {
