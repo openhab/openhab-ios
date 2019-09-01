@@ -13,6 +13,7 @@ import AVFoundation
 import AVKit
 import DynamicButton
 import Fuzi
+import Kingfisher
 import os.log
 import SideMenu
 import SVGKit
@@ -997,24 +998,58 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                                      iconType: iconType).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
-                let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
-                    .validate(statusCode: 200..<300)
-                    .responseData { (response) in
-                        switch response.result {
-                        case .success:
-                            if let data = response.data {
-                                switch self.iconType {
-                                case .png :
-                                    cell.imageView?.image = UIImage(data: data)
-                                case .svg:
-                                    cell.imageView?.image = SVGKImage(data: data).uiImage
-                                }
-                            }
-                        case .failure:
-                            cell.imageView?.image = UIImage(named: "blankicon.png")
-                        }
+
+                let reportingClosure: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = {
+                    result in
+                    switch result {
+                    case .success(let value):
+                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
+                    case .failure (let error):
+                        os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
                     }
-                imageOperation.resume()
+                }
+                switch self.iconType {
+                case .png :
+                    cell.imageView?.kf.setImage (with: urlc,
+                                                placeholder: UIImage(named: "blankicon.png"),
+                                                options: [],
+                                                completionHandler: reportingClosure)
+                case .svg:
+                    cell.imageView?.kf.setImage(with: urlc,
+                                                placeholder: UIImage(named: "blankicon.png"),
+                                                options: [.processor(SVGProcessor())],
+                                                completionHandler: reportingClosure)
+                }
+//                let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
+//                    .validate(statusCode: 200..<300)
+//                    .responseData { (response) in
+//                        switch response.result {
+//                        case .success:
+//                            if let data = response.data {
+//                                 cell.imageView?.kf.setImage(with: RawImageDataProvider(data: data, cacheKey: urlc.absoluteString ),
+//                                                             placeholder: UIImage(named: "blankicon.png"),
+//                                                             options: [])
+//                                 {
+//                                    result in
+//                                    switch result {
+//                                    case .success(let value):
+//                                        print("Task done for: \(value.source.url?.absoluteString ?? "")")
+//                                    case .failure(let error):
+//                                        print("Job failed: \(error.localizedDescription)")
+//                                    }
+//                                }
+////                                switch self.iconType {
+////                                case .png :
+////                                    cell.imageView?.image = UIImage(data: data)
+////                                case .svg:
+////                                    cell.imageView?.image = SVGKImage(data: data).uiImage
+////                                }
+//                            }
+//                        case .failure:
+//                            cell.imageView?.image = UIImage(named: "blankicon.png")
+//                        }
+//                    }
+//                imageOperation.resume()
             }
         }
 
@@ -1088,6 +1123,24 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             if tableView.indexPathsForVisibleRows == nil || !tableView.indexPathsForVisibleRows!.contains(indexPath) || currentPage == nil || currentPage!.widgets.isEmpty {
                 cell.invalidateCache()
             }
+        }
+    }
+}
+
+struct SVGProcessor: ImageProcessor {
+
+    // `identifier` should be the same for processors with the same properties/functionality
+    // It will be used when storing and retrieving the image to/from cache.
+    let identifier = "org.openhab.svgprocessor"
+
+    // Convert input data/image to target image and return it.
+    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> Image? {
+        switch item {
+        case .image(let image):
+            print("already an image")
+            return image
+        case .data(let data):
+            return SVGKImage(data: data).uiImage
         }
     }
 }

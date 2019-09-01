@@ -15,6 +15,7 @@ target 'openHAB' do
     pod 'DynamicButton', '~> 6.2'
     pod 'Alamofire', '~> 4.0'
     pod 'Fuzi', '~> 3.1'
+    pod 'Kingfisher', '~> 5.0'
 end
 
 target 'openHABTestsSwift' do
