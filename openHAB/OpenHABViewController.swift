@@ -20,9 +20,6 @@ import SVGKit
 import SwiftMessages
 import UIKit
 
-private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
-private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
-
 enum TargetController {
     case root
     case settings
@@ -31,6 +28,27 @@ enum TargetController {
 protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
+
+struct SVGProcessor: ImageProcessor {
+
+    // `identifier` should be the same for processors with the same properties/functionality
+    // It will be used when storing and retrieving the image to/from cache.
+    let identifier = "org.openhab.svgprocessor"
+
+    // Convert input data/image to target image and return it.
+    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> Image? {
+        switch item {
+        case .image(let image):
+            print("already an image")
+            return image
+        case .data(let data):
+            return SVGKImage(data: data).uiImage
+        }
+    }
+}
+
+private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
+private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
 class OpenHABViewController: UIViewController {
 
@@ -172,6 +190,8 @@ class OpenHABViewController: UIViewController {
                 restart()
             }
         }
+        ImageDownloader.default.authenticationChallengeResponder = self
+
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -1020,36 +1040,6 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                                                 options: [.processor(SVGProcessor())],
                                                 completionHandler: reportingClosure)
                 }
-//                let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
-//                    .validate(statusCode: 200..<300)
-//                    .responseData { (response) in
-//                        switch response.result {
-//                        case .success:
-//                            if let data = response.data {
-//                                 cell.imageView?.kf.setImage(with: RawImageDataProvider(data: data, cacheKey: urlc.absoluteString ),
-//                                                             placeholder: UIImage(named: "blankicon.png"),
-//                                                             options: [])
-//                                 {
-//                                    result in
-//                                    switch result {
-//                                    case .success(let value):
-//                                        print("Task done for: \(value.source.url?.absoluteString ?? "")")
-//                                    case .failure(let error):
-//                                        print("Job failed: \(error.localizedDescription)")
-//                                    }
-//                                }
-////                                switch self.iconType {
-////                                case .png :
-////                                    cell.imageView?.image = UIImage(data: data)
-////                                case .svg:
-////                                    cell.imageView?.image = SVGKImage(data: data).uiImage
-////                                }
-//                            }
-//                        case .failure:
-//                            cell.imageView?.image = UIImage(named: "blankicon.png")
-//                        }
-//                    }
-//                imageOperation.resume()
             }
         }
 
@@ -1127,20 +1117,60 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-struct SVGProcessor: ImageProcessor {
+extension OpenHABViewController: AuthenticationChallengeResponsable {
 
-    // `identifier` should be the same for processors with the same properties/functionality
-    // It will be used when storing and retrieving the image to/from cache.
-    let identifier = "org.openhab.svgprocessor"
+    // sessionDelegate.onReceiveSessionTaskChallenge
+    func downloader(
+        _ downloader: ImageDownloader,
+        task: URLSessionTask,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+        var credential: URLCredential?
 
-    // Convert input data/image to target image and return it.
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> Image? {
-        switch item {
-        case .image(let image):
-            print("already an image")
-            return image
-        case .data(let data):
-            return SVGKImage(data: data).uiImage
+        if challenge.previousFailureCount > 0 {
+            disposition = .cancelAuthenticationChallenge
+        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
+            challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
+            let remoteURL = URL(string: Preferences.remoteUrl)
+            let localURL = URL(string: Preferences.localUrl)
+
+            if challenge.protectionSpace.host == remoteURL?.host || challenge.protectionSpace.host == localURL?.host {
+                let openHABUsername = Preferences.username
+                let openHABPassword = Preferences.password
+                credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
+                disposition = .useCredential
+                os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+            }
         }
+        completionHandler (disposition, credential)
+    }
+
+    // sessionDelegate.onReceiveSessionChallenge
+
+    func downloader(
+        _ downloader: ImageDownloader,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+        var credential: URLCredential?
+
+        switch challenge.protectionSpace.authenticationMethod {
+        case NSURLAuthenticationMethodServerTrust:
+            (disposition, credential) = NetworkConnection.shared.serverCertificateManager.evaluateTrust(challenge: challenge)
+        case NSURLAuthenticationMethodClientCertificate:
+            (disposition, credential) = NetworkConnection.shared.clientCertificateManager.evaluateTrust(challenge: challenge)
+        default:
+            if challenge.previousFailureCount > 0 {
+                disposition = .cancelAuthenticationChallenge
+            } else {
+                credential = NetworkConnection.shared.manager.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
+
+                if credential != nil {
+                    disposition = .useCredential
+                }
+            }
+        }
+        completionHandler (disposition, credential)
     }
 }
