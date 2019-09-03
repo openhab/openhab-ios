@@ -20,6 +20,7 @@ class NetworkConnection {
     var clientCertificateManager = ClientCertificateManager()
     var serverCertificateManager: ServerCertificateManager!
     var manager: Alamofire.SessionManager!
+    var rootUrl: URL?
 
     init(ignoreSSL: Bool) {
         serverCertificateManager = ServerCertificateManager(ignoreCertificates: ignoreSSL)
@@ -63,12 +64,10 @@ class NetworkConnection {
                 disposition = .cancelAuthenticationChallenge
             } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
                 challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
-                let remoteURL = URL(string: Preferences.remoteUrl)
-                let localURL = URL(string: Preferences.localUrl)
-
-                if challenge.protectionSpace.host == remoteURL?.host || challenge.protectionSpace.host == localURL?.host {
-                    let openHABUsername = Preferences.username
-                    let openHABPassword = Preferences.password
+                if challenge.protectionSpace.host == self.rootUrl?.host {
+                    let prefs = UserDefaults.standard
+                    let openHABUsername = prefs.string(forKey: "username") ?? ""
+                    let openHABPassword = prefs.string(forKey: "password") ?? ""
                     credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
                     disposition = .useCredential
                     os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
@@ -85,5 +84,9 @@ class NetworkConnection {
     func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
         serverCertificateManager.delegate = serverDelegate
         clientCertificateManager.delegate = clientDelegate
+    }
+
+    func setRootUrl(_ url: String?) {
+        self.rootUrl = URL(string: url ?? "")
     }
 }
