@@ -65,9 +65,8 @@ class NetworkConnection {
             } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
                 challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
                 if challenge.protectionSpace.host == self.rootUrl?.host {
-                    let prefs = UserDefaults.standard
-                    let openHABUsername = prefs.string(forKey: "username") ?? ""
-                    let openHABPassword = prefs.string(forKey: "password") ?? ""
+                    let openHABUsername = Preferences.username
+                    let openHABPassword = Preferences.password
                     credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
                     disposition = .useCredential
                     os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
