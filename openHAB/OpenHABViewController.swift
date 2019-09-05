@@ -688,6 +688,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
         }
         openHABRootUrl = openHABUrl == nil ? "" : "\(openHABUrl!)"
         appData?.openHABRootUrl = openHABRootUrl
+        NetworkConnection.shared.setRootUrl(openHABRootUrl)
 
         if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             var pageRequest = URLRequest(url: pageToLoadUrl)
