@@ -1020,7 +1020,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
 
-                let reportingClosure: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = {
+                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = {
                     result in
                     switch result {
                     case .success(let value):
@@ -1034,12 +1034,12 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                     cell.imageView?.kf.setImage (with: urlc,
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 options: [],
-                                                completionHandler: reportingClosure)
+                                                completionHandler: reportOnResults)
                 case .svg:
                     cell.imageView?.kf.setImage(with: urlc,
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 options: [.processor(SVGProcessor())],
-                                                completionHandler: reportingClosure)
+                                                completionHandler: reportOnResults)
                 }
             }
         }
@@ -1126,52 +1126,18 @@ extension OpenHABViewController: AuthenticationChallengeResponsable {
         task: URLSessionTask,
         didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-        var credential: URLCredential?
 
-        if challenge.previousFailureCount > 0 {
-            disposition = .cancelAuthenticationChallenge
-        } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
-            challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
-            let remoteURL = URL(string: Preferences.remoteUrl)
-            let localURL = URL(string: Preferences.localUrl)
-
-            if challenge.protectionSpace.host == remoteURL?.host || challenge.protectionSpace.host == localURL?.host {
-                let openHABUsername = Preferences.username
-                let openHABPassword = Preferences.password
-                credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
-                disposition = .useCredential
-                os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
-            }
-        }
+        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(), task, challenge)
         completionHandler (disposition, credential)
     }
 
     // sessionDelegate.onReceiveSessionChallenge
-
     func downloader(
         _ downloader: ImageDownloader,
         didReceive challenge: URLAuthenticationChallenge,
         completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-        var credential: URLCredential?
 
-        switch challenge.protectionSpace.authenticationMethod {
-        case NSURLAuthenticationMethodServerTrust:
-            (disposition, credential) = NetworkConnection.shared.serverCertificateManager.evaluateTrust(challenge: challenge)
-        case NSURLAuthenticationMethodClientCertificate:
-            (disposition, credential) = NetworkConnection.shared.clientCertificateManager.evaluateTrust(challenge: challenge)
-        default:
-            if challenge.previousFailureCount > 0 {
-                disposition = .cancelAuthenticationChallenge
-            } else {
-                credential = NetworkConnection.shared.manager.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
-
-                if credential != nil {
-                    disposition = .useCredential
-                }
-            }
-        }
+        let (disposition, credential) = onReceiveSessionChallenge(URLSession(), challenge)
         completionHandler (disposition, credential)
     }
 }
