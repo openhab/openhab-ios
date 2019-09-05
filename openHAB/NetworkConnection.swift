@@ -13,6 +13,49 @@ import os.log
 // SessionManager --> Session
 // serverTrustPolicyManager --> serverTrustManager
 // ServerTrustPolicyManager --> ServerTrustManager
+let onReceiveSessionTaskChallenge = { (session: URLSession, task: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
+
+    var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+    var credential: URLCredential?
+
+    if challenge.previousFailureCount > 0 {
+        return (.cancelAuthenticationChallenge, credential)
+    } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
+        challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
+        if challenge.protectionSpace.host == NetworkConnection.shared.rootUrl?.host {
+            let openHABUsername = Preferences.username
+            let openHABPassword = Preferences.password
+            credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
+            disposition = .useCredential
+            os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+        }
+    }
+    return (disposition, credential)
+}
+
+let onReceiveSessionChallenge = { (session: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
+
+    var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+    var credential: URLCredential?
+
+    switch challenge.protectionSpace.authenticationMethod {
+    case NSURLAuthenticationMethodServerTrust:
+        return NetworkConnection.shared.serverCertificateManager.evaluateTrust(challenge: challenge)
+    case NSURLAuthenticationMethodClientCertificate:
+        return NetworkConnection.shared.clientCertificateManager.evaluateTrust(challenge: challenge)
+    default:
+        if challenge.previousFailureCount > 0 {
+            disposition = .cancelAuthenticationChallenge
+        } else {
+            credential = NetworkConnection.shared.manager.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
+            if credential != nil {
+                disposition = .useCredential
+            }
+        }
+        return (disposition, credential)
+    }
+}
+
 class NetworkConnection {
 
     static var shared: NetworkConnection!
@@ -24,56 +67,11 @@ class NetworkConnection {
 
     init(ignoreSSL: Bool) {
         serverCertificateManager = ServerCertificateManager(ignoreCertificates: ignoreSSL)
-
         serverCertificateManager.initializeCertificatesStore()
-
         manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate())
         manager.startRequestsImmediately = false
-
-        manager.delegate.sessionDidReceiveChallenge = { [weak self] session, challenge in
-            guard let self = self else { return (.performDefaultHandling, nil) }
-
-            var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-            var credential: URLCredential?
-
-            switch challenge.protectionSpace.authenticationMethod {
-            case NSURLAuthenticationMethodServerTrust:
-                (disposition, credential) = self.serverCertificateManager.evaluateTrust(challenge: challenge)
-            case NSURLAuthenticationMethodClientCertificate:
-                (disposition, credential) = self.clientCertificateManager.evaluateTrust(challenge: challenge)
-            default:
-                if challenge.previousFailureCount > 0 {
-                    disposition = .cancelAuthenticationChallenge
-                } else {
-                    credential = self.manager.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
-
-                    if credential != nil {
-                        disposition = .useCredential
-                    }
-                }
-            }
-
-            return (disposition, credential)
-        }
-
-        manager.delegate.taskDidReceiveChallenge = { session, task, challenge in
-            var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-            var credential: URLCredential?
-
-            if challenge.previousFailureCount > 0 {
-                disposition = .cancelAuthenticationChallenge
-            } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
-                challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
-                if challenge.protectionSpace.host == self.rootUrl?.host {
-                    let openHABUsername = Preferences.username
-                    let openHABPassword = Preferences.password
-                    credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
-                    disposition = .useCredential
-                    os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
-                }
-            }
-            return (disposition, credential)
-        }
+        manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
+        manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
     }
 
     class func initialize(ignoreSSL: Bool) {

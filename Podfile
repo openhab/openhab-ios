@@ -5,7 +5,6 @@ use_frameworks!
 
 target 'openHAB' do
     pod 'SVGKit'
-    #pod 'SDWebImage', '~> 5.0' , :modular_headers => true
     pod 'Firebase/Core'
     pod 'Fabric', '~> 1.7.2'
     pod 'Crashlytics', '~> 3.9.3'
@@ -15,6 +14,7 @@ target 'openHAB' do
     pod 'DynamicButton', '~> 6.2'
     pod 'Alamofire', '~> 4.0'
     pod 'Fuzi', '~> 3.1'
+    pod 'Kingfisher', '~> 5.0'
 end
 
 target 'openHABTestsSwift' do

@@ -13,14 +13,12 @@ import AVFoundation
 import AVKit
 import DynamicButton
 import Fuzi
+import Kingfisher
 import os.log
 import SideMenu
 import SVGKit
 import SwiftMessages
 import UIKit
-
-private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
-private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
 enum TargetController {
     case root
@@ -30,6 +28,27 @@ enum TargetController {
 protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
+
+struct SVGProcessor: ImageProcessor {
+
+    // `identifier` should be the same for processors with the same properties/functionality
+    // It will be used when storing and retrieving the image to/from cache.
+    let identifier = "org.openhab.svgprocessor"
+
+    // Convert input data/image to target image and return it.
+    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> Image? {
+        switch item {
+        case .image(let image):
+            print("already an image")
+            return image
+        case .data(let data):
+            return SVGKImage(data: data).uiImage
+        }
+    }
+}
+
+private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
+private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
 class OpenHABViewController: UIViewController {
 
@@ -171,6 +190,8 @@ class OpenHABViewController: UIViewController {
                 restart()
             }
         }
+        ImageDownloader.default.authenticationChallengeResponder = self
+
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -998,24 +1019,28 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                                      iconType: iconType).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
-                let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
-                    .validate(statusCode: 200..<300)
-                    .responseData { (response) in
-                        switch response.result {
-                        case .success:
-                            if let data = response.data {
-                                switch self.iconType {
-                                case .png :
-                                    cell.imageView?.image = UIImage(data: data)
-                                case .svg:
-                                    cell.imageView?.image = SVGKImage(data: data).uiImage
-                                }
-                            }
-                        case .failure:
-                            cell.imageView?.image = UIImage(named: "blankicon.png")
-                        }
+
+                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = {
+                    result in
+                    switch result {
+                    case .success(let value):
+                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
+                    case .failure (let error):
+                        os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
                     }
-                imageOperation.resume()
+                }
+                switch self.iconType {
+                case .png :
+                    cell.imageView?.kf.setImage (with: urlc,
+                                                placeholder: UIImage(named: "blankicon.png"),
+                                                options: [],
+                                                completionHandler: reportOnResults)
+                case .svg:
+                    cell.imageView?.kf.setImage(with: urlc,
+                                                placeholder: UIImage(named: "blankicon.png"),
+                                                options: [.processor(SVGProcessor())],
+                                                completionHandler: reportOnResults)
+                }
             }
         }
 
@@ -1090,5 +1115,29 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.invalidateCache()
             }
         }
+    }
+}
+
+extension OpenHABViewController: AuthenticationChallengeResponsable {
+
+    // sessionDelegate.onReceiveSessionTaskChallenge
+    func downloader(
+        _ downloader: ImageDownloader,
+        task: URLSessionTask,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+
+        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(), task, challenge)
+        completionHandler (disposition, credential)
+    }
+
+    // sessionDelegate.onReceiveSessionChallenge
+    func downloader(
+        _ downloader: ImageDownloader,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+
+        let (disposition, credential) = onReceiveSessionChallenge(URLSession(), challenge)
+        completionHandler (disposition, credential)
     }
 }

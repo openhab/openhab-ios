@@ -66,6 +66,7 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (6.2.5):
     - GoogleUtilities/Logger
+  - Kingfisher (5.7.1)
   - nanopb (0.3.901):
     - nanopb/decode (= 0.3.901)
     - nanopb/encode (= 0.3.901)
@@ -86,6 +87,7 @@ DEPENDENCIES:
   - Firebase/Core
   - FlexColorPicker
   - Fuzi (~> 3.1)
+  - Kingfisher (~> 5.0)
   - SideMenu (~> 5.0)
   - SVGKit
   - SwiftMessages
@@ -109,6 +111,7 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleDataTransportCCTSupport
     - GoogleUtilities
+    - Kingfisher
     - nanopb
     - SideMenu
     - SVGKit
@@ -132,11 +135,12 @@ SPEC CHECKSUMS:
   GoogleDataTransport: 9c3d63ed82f882a9a74d4be67dd7ad01bf046102
   GoogleDataTransportCCTSupport: 6b545f7149111180763dc18c6f372c963de4a310
   GoogleUtilities: e7dc37039b19df7fe543479d3e4a02ac8d11bb69
+  Kingfisher: 176d377ad339113c99ad4980cbae687f807e20fe
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   SideMenu: 1dcaabce84538c53325c287f7fe62999379a641c
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   SwiftMessages: a952f7a9103d9aeab93730a2861d2d8fcdd8758f
 
-PODFILE CHECKSUM: 5b81b5b327175f3856199ad9c1a26fff7e7d4131
+PODFILE CHECKSUM: 64ab3f7ca9df197e52372b97b020f241d2ce13f0
 
 COCOAPODS: 1.7.1

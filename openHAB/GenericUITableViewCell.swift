@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import Kingfisher
 import UIKit
 
 protocol GenericCellCacheProtocol: UITableViewCell {
@@ -76,7 +77,6 @@ class GenericUITableViewCell: UITableViewCell {
         imageView?.frame = CGRect(x: 13, y: 5, width: 32, height: 32)
     }
 
-    @objc
     func displayWidget() {
         customTextLabel?.text = widget?.labelText
         customDetailTextLabel?.text = widget?.labelValue ?? ""
@@ -92,10 +92,15 @@ class GenericUITableViewCell: UITableViewCell {
             }
         }
     }
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
+    }
 
-        // Configure the view for the selected state
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView?.kf.cancelDownloadTask()
+        imageView?.image = nil
     }
 
 }
