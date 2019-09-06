@@ -261,3 +261,19 @@ http://localhost:8080/rest/sitemaps/settings/settings
 </sitemap>
 </sitemaps>
 """.data(using: .utf8)
+
+let failurePage = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<page>
+    <id>message</id>
+    <title>Gateway message</title>
+    <link>https://MyArvio.com.au:8444/rest/sitemaps/message/message</link>
+    <leaf>true</leaf>
+    <widget>
+        <widgetId>message_0</widgetId>
+        <type>Text</type>
+        <label>Invalid login attempt, no connection details are provided</label>
+        <icon>text</icon>
+    </widget>
+</page>
+""".data(using: .utf8)

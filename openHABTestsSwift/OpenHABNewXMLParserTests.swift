@@ -155,5 +155,4 @@ class OpenHABNewXMLParserTests: XCTestCase {
             XCTFail("Not able to parse full XML sitemap page ")
         }
     }
-
 }

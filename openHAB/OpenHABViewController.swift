@@ -42,7 +42,11 @@ struct SVGProcessor: ImageProcessor {
             print("already an image")
             return image
         case .data(let data):
-            return SVGKImage(data: data).uiImage
+            if let image = SVGKImage(data: data) {
+                return image.uiImage
+            } else {
+                return nil
+            }
         }
     }
 }
@@ -382,7 +386,10 @@ class OpenHABViewController: UIViewController {
         // We accept XML only if openHAB is 1.X
         if appData?.openHABVersion == 1 {
             pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
+            #warning("Workaround")
+            pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
         }
+
         pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
         if longPolling {
             os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
@@ -519,6 +526,10 @@ class OpenHABViewController: UIViewController {
 
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
             os_log("Firing request", log: .viewCycle, type: .info)
+
+            if appData?.openHABVersion == 1 {
+                sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            }
 
             let sitemapsOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
                 .validate(statusCode: 200..<300)
@@ -679,6 +690,12 @@ class OpenHABViewController: UIViewController {
                 os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
                 os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
             }
+
+            if appData?.openHABVersion == 1 {
+                #warning("Workaround")
+                commandRequest.setAuthCredentials(openHABUsername, openHABPassword)
+            }
+
             commandOperation = NetworkConnection.shared.manager.request(commandRequest).responseData { (response) in
                 switch response.result {
                 case .success:
@@ -718,25 +735,33 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             DispatchQueue.main.async {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
-            commandOperation = NetworkConnection.shared.manager.request(pageRequest).responseData { (response) in
-                switch response.result {
-                case .success:
-                    os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
-                    self.appData?.openHABVersion = 2
-                    DispatchQueue.main.async {
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    }
-                    self.selectSitemap()
-                case .failure(let error):
-                    os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
-                    self.appData?.openHABVersion = 1
-                    DispatchQueue.main.async {
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    }
-                    os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                    self.selectSitemap()
-                }
+
+            #warning("Workaround")
+            if appData?.openHABVersion == 1 {
+                pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
             }
+
+            commandOperation = NetworkConnection.shared.manager.request(pageRequest)
+                .validate(statusCode: 200..<300)
+                .responseData { (response) in
+                    switch response.result {
+                    case .success:
+                        os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
+                        self.appData?.openHABVersion = 2
+                        DispatchQueue.main.async {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        }
+                        self.selectSitemap()
+                    case .failure(let error):
+                        os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
+                        self.appData?.openHABVersion = 1
+                        DispatchQueue.main.async {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        }
+                        os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                        self.selectSitemap()
+                    }
+                }
             commandOperation?.resume()
         }
     }
