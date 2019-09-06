@@ -54,12 +54,12 @@ final class OpenHABSitemap: NSObject {
             case "name": name = child.stringValue
             case "icon": icon = child.stringValue
             case "label": label = child.stringValue
-            case "link": link = child.stringValue
+            case "link": link = child.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
             case "leaf": leaf = child.stringValue == "true" ? true : false
             case "homepage":
                 for child2 in child.children {
                     switch child2.tag {
-                    case "link": homepageLink = child2.stringValue
+                    case "link": homepageLink = child2.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
                     case "leaf": leaf = child2.stringValue == "true" ? true : false
                     default: break
                     }

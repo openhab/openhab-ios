@@ -139,4 +139,21 @@ class OpenHABNewXMLParserTests: XCTestCase {
         }
     }
 
+    func testXMLFullSitemapPageParse() {
+        var sitemaps = [OpenHABSitemap]()
+
+        do {
+            let document = try XMLDocument(data: userprovidedXML!)
+            if let rootElement = document.root, rootElement.tag == "sitemaps" {
+                for element in rootElement.children(tag: "sitemap") {
+                    let sitemap = OpenHABSitemap(xml: element)
+                    sitemaps.append(sitemap)
+                }
+                XCTAssert(sitemaps[0].homepageLink == "http://localhost:8080/rest/sitemaps/devices/devices", "Full XML sitemap list properly parsed")
+            }
+        } catch {
+            XCTFail("Not able to parse full XML sitemap page ")
+        }
+    }
+
 }
