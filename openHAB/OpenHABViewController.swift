@@ -310,7 +310,11 @@ class OpenHABViewController: UIViewController {
             if deviceId != "" && deviceToken != "" && deviceName != "" {
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 if let registrationUrl = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-                    let registrationRequest = URLRequest(url: registrationUrl)
+                    var registrationRequest = URLRequest(url: registrationUrl)
+                    #warning("Workaround for authentication")
+                    if appData?.openHABVersion == 1 {
+                        registrationRequest.setAuthCredentials(openHABUsername, openHABPassword)
+                    }
                     os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
                     let registrationOperation = NetworkConnection.shared.manager.request(registrationRequest).responseData { (response) in
                         switch response.result {
@@ -386,7 +390,7 @@ class OpenHABViewController: UIViewController {
         // We accept XML only if openHAB is 1.X
         if appData?.openHABVersion == 1 {
             pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
-            #warning("Workaround")
+            #warning("Workaround for authentication")
             pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
         }
 
@@ -430,7 +434,7 @@ class OpenHABViewController: UIViewController {
 
                         guard let doc = try? XMLDocument(data: data) else { return }
                         if let rootElement = doc.root, let name = rootElement.tag {
-                            os_log("XML sitemmap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                            os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
                             if name == "page" {
                                 openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                             }
@@ -523,13 +527,12 @@ class OpenHABViewController: UIViewController {
         if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             var sitemapsRequest = URLRequest(url: sitemapsUrl)
             sitemapsRequest.timeoutInterval = 10.0
-
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            os_log("Firing request", log: .viewCycle, type: .info)
-
+            #warning("Workaround for authentication")
             if appData?.openHABVersion == 1 {
                 sitemapsRequest.setAuthCredentials(openHABUsername, openHABPassword)
             }
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            os_log("Firing request", log: .viewCycle, type: .info)
 
             let sitemapsOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
                 .validate(statusCode: 200..<300)
@@ -691,8 +694,8 @@ class OpenHABViewController: UIViewController {
                 os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
             }
 
+            #warning("Workaround for authentication")
             if appData?.openHABVersion == 1 {
-                #warning("Workaround")
                 commandRequest.setAuthCredentials(openHABUsername, openHABPassword)
             }
 
@@ -736,7 +739,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
 
-            #warning("Workaround")
+            #warning("Workaround for authentication")
             if appData?.openHABVersion == 1 {
                 pageRequest.setAuthCredentials(openHABUsername, openHABPassword)
             }
@@ -1054,17 +1057,39 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                         os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
                     }
                 }
+
+                let modifier = AnyModifier { [weak self] request in
+                    var req = request
+                    req.setAuthCredentials(self?.appData?.openHABUsername, self?.appData?.openHABPassword)
+                    return req
+                }
+
                 switch self.iconType {
                 case .png :
-                    cell.imageView?.kf.setImage (with: urlc,
-                                                placeholder: UIImage(named: "blankicon.png"),
-                                                options: [],
-                                                completionHandler: reportOnResults)
+                    if appData?.openHABVersion == 1 {
+                        cell.imageView?.kf.setImage (with: urlc,
+                                                     placeholder: UIImage(named: "blankicon.png"),
+                                                     options: [.requestModifier(modifier)],
+                                                     completionHandler: reportOnResults)
+                    } else {
+                        cell.imageView?.kf.setImage (with: urlc,
+                                                     placeholder: UIImage(named: "blankicon.png"),
+                                                     options: [],
+                                                     completionHandler: reportOnResults)
+                    }
                 case .svg:
+                    if appData?.openHABVersion == 1 {
+                        cell.imageView?.kf.setImage(with: urlc,
+                                                    placeholder: UIImage(named: "blankicon.png"),
+                                                    options: [.requestModifier(modifier),
+                                                              .processor(SVGProcessor())],
+                                                    completionHandler: reportOnResults)
+                    } else {
                     cell.imageView?.kf.setImage(with: urlc,
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 options: [.processor(SVGProcessor())],
                                                 completionHandler: reportOnResults)
+                    }
                 }
             }
         }

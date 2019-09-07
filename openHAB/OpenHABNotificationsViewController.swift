@@ -121,6 +121,10 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
         if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
                     var imageRequest = URLRequest(url: iconUrl)
                     imageRequest.timeoutInterval = 10.0
+                    #warning("Workaround for authentication")
+                    if appData?.openHABVersion == 1 {
+                        imageRequest.setAuthCredentials(openHABUsername, openHABPassword)
+                    }
 
                     let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
                         .validate(statusCode: 200..<300)
