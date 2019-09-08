@@ -127,10 +127,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         var imageRequest = URLRequest(url: url)
         imageRequest.timeoutInterval = 10.0
-        #warning("Workaround for authentication")
-        if appData?.openHABVersion == 1 {
-            imageRequest.setAuthCredentials(appData?.openHABUsername, appData?.openHABPassword)
-        }
 
         if downloadRequest != nil {
             downloadRequest?.cancel()
@@ -138,6 +134,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
 
         downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
+            .authenticate(user: appData?.openHABUsername ?? "", password: appData?.openHABPassword ?? "")
             .validate(statusCode: 200..<300)
             .responseData { [weak self] (response) in
                 switch response.result {
