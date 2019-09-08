@@ -58,8 +58,7 @@ platform :ios do
     )
     increment_build_number(xcodeproj: "openHAB.xcodeproj")
     commit_version_bump(xcodeproj: "openHAB.xcodeproj")
-    push_to_git_remote(
-        signoff: true)
+    push_to_git_remote
     add_git_tag(
         message: comments,
         tag: "v#{version}")
