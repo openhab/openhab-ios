@@ -61,8 +61,7 @@ class NetworkConnection {
 
             if challenge.previousFailureCount > 0 {
                 disposition = .cancelAuthenticationChallenge
-            } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
-                challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
+            } else if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
                 let remoteURL = URL(string: Preferences.remoteUrl)
                 let localURL = URL(string: Preferences.localUrl)
 
