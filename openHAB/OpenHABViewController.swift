@@ -999,7 +999,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             if widget?.mappings.count ?? 0 > 0 {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 // RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if widget?.item?.type == "RollershutterItem" || widget?.item?.type == "Rollershutter" || (widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter") {
+            } else if let type = widget?.item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && widget?.item?.groupType == "Rollershutter") {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
@@ -1082,7 +1082,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.row < (relevantPage?.widgets.count ?? 1) - 1 {
 
             let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
-            if nextWidget?.type == "Frame" || nextWidget?.type == "Image" || nextWidget?.type == "Video" || nextWidget?.type == "Webview" || nextWidget?.type == "Chart" {
+            if let type = nextWidget?.type, type.isAny(of: "Frame", "Image", "Video", "Webview", "Chart") {
                 cell.separatorInset = UIEdgeInsets.zero
             } else if !(widget?.type == "Frame") {
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)

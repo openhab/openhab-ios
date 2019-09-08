@@ -101,7 +101,7 @@ class ServerCertificateManager {
         var evaluateResult: SecTrustResultType = .invalid
 
         SecTrustEvaluate(serverTrust, &evaluateResult)
-        if evaluateResult == .unspecified || evaluateResult == .proceed || allowInvalidCertificates {
+        if evaluateResult.isAny(of: .unspecified, .proceed) || allowInvalidCertificates {
             // This means system thinks this is a legal/usable certificate, just permit the connection
             return true
         }

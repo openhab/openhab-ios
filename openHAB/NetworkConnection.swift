@@ -20,8 +20,7 @@ let onReceiveSessionTaskChallenge = { (session: URLSession, task: URLSessionTask
 
     if challenge.previousFailureCount > 0 {
         return (.cancelAuthenticationChallenge, credential)
-    } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
-        challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
+    } else if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
         if challenge.protectionSpace.host == NetworkConnection.shared.rootUrl?.host {
             credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
             disposition = .useCredential
