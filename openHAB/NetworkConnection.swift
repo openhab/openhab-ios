@@ -23,9 +23,7 @@ let onReceiveSessionTaskChallenge = { (session: URLSession, task: URLSessionTask
     } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
         challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault {
         if challenge.protectionSpace.host == NetworkConnection.shared.rootUrl?.host {
-            let openHABUsername = Preferences.username
-            let openHABPassword = Preferences.password
-            credential = URLCredential(user: openHABUsername, password: openHABPassword, persistence: .forSession)
+            credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
             disposition = .useCredential
             os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
         }
