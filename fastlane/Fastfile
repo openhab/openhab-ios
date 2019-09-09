@@ -24,21 +24,13 @@ platform :ios do
   desc "Build beta"
   lane :beta do |lane|
 
-    # ensure you are in master branch
-    # ensure_git_branch
-
     # ensure that master branch is clean
-    #ensure_git_status_clean
+    ensure_git_status_clean
 
     # check the semantic parameter entered
     if !lane[:bump]
-    raise "No bump type defined! Use one of: patch | minor | major".red
+        raise "No bump type defined! Use one of: patch | minor | major".red
     end
-
-#changelog = prompt(
-#    text: "Changelog: ",
-#    multi_line_end_keyword: "END"
-#    )
 
     # get the last commit comments from Git history
     # and creates our changelog

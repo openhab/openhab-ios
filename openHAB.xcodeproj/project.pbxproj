@@ -50,6 +50,9 @@
 		DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */; };
 		DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
+		DA1AB2C42325378100C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
+		DA1AB2C52325378600C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
+		DA1AB2C62325378700C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA1C2E49230DB61A00FACFB0 /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
 		DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
@@ -1127,6 +1130,7 @@
 				DAC9394D22AD8E3200C5F423 /* OpenHABSitemap.swift in Sources */,
 				1224F7A8228A8AE500750965 /* NotificationController.swift in Sources */,
 				DAC9394F22AD8E6E00C5F423 /* OpenHABWidget.swift in Sources */,
+				DA1AB2C52325378600C5F500 /* Equatable.swift in Sources */,
 				1224F7D0228A8EFC00750965 /* Item.swift in Sources */,
 				DAC9395122AD8F6700C5F423 /* OpenHABLinkedPage.swift in Sources */,
 				DAC019B322B0E19500A0ED7B /* UserDefaultsExtension.swift in Sources */,
@@ -1155,6 +1159,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA1AB2C62325378700C5F500 /* Equatable.swift in Sources */,
 				933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */,
 				933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */,
 			);
@@ -1194,6 +1199,7 @@
 				DAC9394A22AD650900C5F423 /* UserDefaultsRepository.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */,
 				A02486FF231080F100B3F7DD /* ServerCertificateManager.swift in Sources */,
+				DA1AB2C42325378100C5F500 /* Equatable.swift in Sources */,
 				DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

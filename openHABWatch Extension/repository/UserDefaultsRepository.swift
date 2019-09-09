@@ -81,19 +81,6 @@ struct Preferences {
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
-//    static var sitemap: Sitemap {
-//        get {
-//            guard
-//                let sitemap = defaults.object(forKey: #function) as! Data?,
-//                let sitemapValue = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Sitemap.self, from: sitemap) else {
-//                    return Sitemap.init(frames: [])
-//            }
-//            return sitemapValue }
-//        set { defaults.set(
-//            try? NSKeyedArchiver.archivedData(withRootObject: newValue, requiringSecureCoding: true) ,
-//            forKey: #function) }
-//    }
-
     static func readActiveUrl() -> String {
 
         if Preferences.remoteUrl != "" {

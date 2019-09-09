@@ -1056,7 +1056,6 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 case .png :
                     cell.imageView?.kf.setImage (with: urlc,
                                                  placeholder: UIImage(named: "blankicon.png"),
-                                                 options: [],
                                                  completionHandler: reportOnResults)
                 case .svg:
                     cell.imageView?.kf.setImage(with: urlc,
