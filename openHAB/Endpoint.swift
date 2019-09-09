@@ -95,7 +95,7 @@ extension Endpoint {
             ]
         )
 
-        if let type = type, (type == "GroupItem" || type == "Group") {
+        if let type = type, type.isAny(of: "GroupItem", "Group") {
             endpoint.queryItems.append(URLQueryItem(name: "groups", value: name))
         } else {
             endpoint.queryItems.append(URLQueryItem(name: "items", value: name))

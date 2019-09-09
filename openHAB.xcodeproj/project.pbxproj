@@ -36,8 +36,6 @@
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
 		938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */; };
 		9394102622CB5CDB00EB4255 /* Collection+SafeAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */; };
-		A02486FA23107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */; };
-		A02486FE23107C4000B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */; };
 		A02486FF231080F100B3F7DD /* ServerCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */; };
 		A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */; };
 		A08FF14A2233498700203EED /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
@@ -52,8 +50,12 @@
 		DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */; };
 		DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
+		DA1AB2C42325378100C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
+		DA1AB2C52325378600C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
+		DA1AB2C62325378700C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA1C2E49230DB61A00FACFB0 /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
+		DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA28C363225292FF00AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
@@ -239,7 +241,6 @@
 		9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+SafeAccess.swift"; sourceTree = "<group>"; };
 		965E6C0728A41A0442B5E59C /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		97512493BF42657D31F36571 /* Pods-openHABTestsSwift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABTestsSwift.debug.xcconfig"; path = "Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift.debug.xcconfig"; sourceTree = "<group>"; };
-		A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableURLRequest+Auth.swift"; sourceTree = "<group>"; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A08FF1492233498600203EED /* ClientCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientCertificateManager.swift; sourceTree = "<group>"; };
 		A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCertificateManager.swift; sourceTree = "<group>"; };
@@ -287,6 +288,7 @@
 		DA1C2E6D230DC28F00FACFB0 /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
 		DA1C2E6E230DC28F00FACFB0 /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
 		DA1C32B92311CCE200FACFB0 /* JSONData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONData.swift; sourceTree = "<group>"; };
+		DA2837092319C7C60066D7B5 /* Equatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Equatable.swift; sourceTree = "<group>"; };
 		DA28C35F2251F07000AB409C /* OSLogHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogHelper.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -755,7 +757,6 @@
 		DFDEE3FF18832293008B26AC /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				A02486F923107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift */,
 				A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */,
 				DA4A1A63223D57AD005F530F /* ColorUtil.swift */,
 				DA5D0F80223E9991007ADDBD /* Endpoint.swift */,
@@ -777,6 +778,7 @@
 			isa = PBXGroup;
 			children = (
 				938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */,
+				DA2837092319C7C60066D7B5 /* Equatable.swift */,
 				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */,
 				286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */,
@@ -1128,6 +1130,7 @@
 				DAC9394D22AD8E3200C5F423 /* OpenHABSitemap.swift in Sources */,
 				1224F7A8228A8AE500750965 /* NotificationController.swift in Sources */,
 				DAC9394F22AD8E6E00C5F423 /* OpenHABWidget.swift in Sources */,
+				DA1AB2C52325378600C5F500 /* Equatable.swift in Sources */,
 				1224F7D0228A8EFC00750965 /* Item.swift in Sources */,
 				DAC9395122AD8F6700C5F423 /* OpenHABLinkedPage.swift in Sources */,
 				DAC019B322B0E19500A0ED7B /* UserDefaultsExtension.swift in Sources */,
@@ -1139,7 +1142,6 @@
 				1224F7D6228A8F1700750965 /* AppMessageService.swift in Sources */,
 				DAC9395A22B045C200C5F423 /* ClientCertificateManager.swift in Sources */,
 				1224F7A6228A8AE500750965 /* ExtensionDelegate.swift in Sources */,
-				A02486FA23107B7D00B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */,
 				1224F7B9228A8DE200750965 /* PrefsInterfaceController.swift in Sources */,
 				1224F7C6228A8EB600750965 /* AppState.swift in Sources */,
 				1224F7A4228A8AE500750965 /* InterfaceController.swift in Sources */,
@@ -1157,6 +1159,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA1AB2C62325378700C5F500 /* Equatable.swift in Sources */,
 				933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */,
 				933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */,
 			);
@@ -1175,7 +1178,6 @@
 				DAC9394922AD62F500C5F423 /* OpenHabService.swift in Sources */,
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
 				DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */,
-				A02486FE23107C4000B3F7DD /* NSMutableURLRequest+Auth.swift in Sources */,
 				DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */,
 				DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */,
 				DAB9C7B1230B323000A7DB6E /* OpenHABNewXMLParserTests.swift in Sources */,
@@ -1197,6 +1199,7 @@
 				DAC9394A22AD650900C5F423 /* UserDefaultsRepository.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABTestsSwift.swift in Sources */,
 				A02486FF231080F100B3F7DD /* ServerCertificateManager.swift in Sources */,
+				DA1AB2C42325378100C5F500 /* Equatable.swift in Sources */,
 				DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1253,6 +1256,7 @@
 				DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
 				DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */,
+				DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */,
@@ -1734,7 +1738,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 51;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -1775,7 +1779,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 51;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";

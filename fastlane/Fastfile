@@ -22,26 +22,45 @@ platform :ios do
   end
 
   desc "Build beta"
-  lane :beta do
-    changelog = prompt(
-        text: "Changelog: ",
-        multi_line_end_keyword: "END"
-    )
+  lane :beta do |lane|
+
+    # ensure that master branch is clean
     ensure_git_status_clean
-    increment_version_number(
-        bump_type: "patch",
+
+    # check the semantic parameter entered
+    if !lane[:bump]
+        raise "No bump type defined! Use one of: patch | minor | major".red
+    end
+
+    # get the last commit comments from Git history
+    # and creates our changelog
+    comments = changelog_from_git_commits(
+        between: [last_git_tag, "HEAD"],
+        pretty: "- %s",
+        date_format: "short",
+        match_lightweight_tag: false,
+        merge_commit_filtering: "exclude_merges"
+    )
+
+    type = lane[:bump]
+
+    version = increment_version_number(
+        bump_type: type,
         xcodeproj: "openHAB.xcodeproj"
     )
     increment_build_number(xcodeproj: "openHAB.xcodeproj")
     commit_version_bump(xcodeproj: "openHAB.xcodeproj")
-    add_git_tag
     push_to_git_remote
+    add_git_tag(
+        message: comments,
+        tag: "v#{version}")
     build_app(scheme: "openHAB")
     upload_to_testflight(
         distribute_external: true,
         notify_external_testers: true,
-        changelog: changelog,
+        changelog: comments,
         groups: ["Beta Testers"]
     )
   end
+
 end

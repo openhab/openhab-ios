@@ -109,6 +109,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
             let sitemapOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
+                .authenticate(user: openHABUsername, password: openHABPassword)
                 .validate(statusCode: 200..<300)
                 .responseData { (response) in
                     switch response.result {
@@ -173,22 +174,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell.customTextLabel?.text = sitemaps[indexPath.row].label
             if sitemaps[indexPath.row].icon != "" {
                 if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon ).url {
-                    var imageRequest = URLRequest(url: iconURL)
-                    imageRequest.timeoutInterval = 10.0
-
-                    let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
-                        .validate(statusCode: 200..<300)
-                        .responseData { (response) in
-                            switch response.result {
-                            case .success:
-                                if let data = response.data {
-                                    imageView.image = UIImage(data: data)
-                                }
-                            case .failure:
-                                imageView.image = UIImage(named: "icon-76x76.png")
-                            }
-                        }
-                    imageOperation.resume()
+                    imageView.kf.setImage (with: iconURL,
+                                            placeholder: UIImage(named: "icon-76x76.png"))
                 }
             } else {
                 imageView.image = UIImage(named: "icon-76x76.png")

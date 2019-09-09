@@ -62,6 +62,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
             let notificationOperation = NetworkConnection.shared.manager.request(notificationsRequest)
                 .validate(statusCode: 200..<300)
+                .authenticate(user: openHABUsername, password: openHABPassword)
                 .responseData { (response) in
                     switch response.result {
                     case .success:
@@ -123,6 +124,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                     imageRequest.timeoutInterval = 10.0
 
                     let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
+                        .authenticate(user: openHABUsername, password: openHABPassword)
                         .validate(statusCode: 200..<300)
                         .responseData { (response) in
                             switch response.result {
