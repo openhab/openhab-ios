@@ -53,7 +53,6 @@
 		DA1AB2C42325378100C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA1AB2C52325378600C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA1AB2C62325378700C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
-		DA1C2E49230DB61A00FACFB0 /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
 		DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
@@ -1185,7 +1184,6 @@
 				DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */,
 				DAED514D2305BAC1003BCB31 /* OpenHABFormatTests.swift in Sources */,
-				DA1C2E49230DB61A00FACFB0 /* NetworkConnection.swift in Sources */,
 				DAC9394B22AD651400C5F423 /* Sitemap.swift in Sources */,
 				DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */,
 				DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */,

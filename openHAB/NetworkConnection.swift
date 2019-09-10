@@ -53,6 +53,25 @@ let onReceiveSessionChallenge = { (session: URLSession, challenge: URLAuthentica
     }
 }
 
+final class OpenHABAccessTokenAdapter: RequestAdapter {
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
+
+    func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
+        var urlRequest = urlRequest
+
+        guard let user = appData?.openHABUsername, let password = appData?.openHABPassword else { return urlRequest }
+
+        if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
+            urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
+        }
+
+        return urlRequest
+    }
+}
+
 class NetworkConnection {
 
     static var shared: NetworkConnection!
@@ -69,6 +88,7 @@ class NetworkConnection {
         manager.startRequestsImmediately = false
         manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
         manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
+        manager.adapter = OpenHABAccessTokenAdapter()
     }
 
     class func initialize(ignoreSSL: Bool) {

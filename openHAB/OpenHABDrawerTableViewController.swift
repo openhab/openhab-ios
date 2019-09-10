@@ -109,7 +109,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
 
             let sitemapOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
-                .authenticate(user: openHABUsername, password: openHABPassword)
                 .validate(statusCode: 200..<300)
                 .responseData { (response) in
                     switch response.result {

@@ -134,7 +134,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
 
         downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
-            .authenticate(user: appData?.openHABUsername ?? "", password: appData?.openHABPassword ?? "")
             .validate(statusCode: 200..<300)
             .responseData { [weak self] (response) in
                 switch response.result {
