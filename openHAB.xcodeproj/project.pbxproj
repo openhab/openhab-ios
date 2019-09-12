@@ -54,6 +54,7 @@
 		DA1AB2C52325378600C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA1AB2C62325378700C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
+		DA2085AB232AE1940010E4C9 /* OpenHABAccessTokenAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2085AA232AE1940010E4C9 /* OpenHABAccessTokenAdapter.swift */; };
 		DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
@@ -70,7 +71,6 @@
 		DA83B91D22B8193C0016EA49 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
 		DA97BB072329902100AAE470 /* LargeSitemap.json in Resources */ = {isa = PBXBuildFile; fileRef = DA97BB062329902000AAE470 /* LargeSitemap.json */; };
-		DA97BB09232995C100AAE470 /* LargeSitemapJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA97BB08232995C100AAE470 /* LargeSitemapJSON.swift */; };
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
@@ -289,6 +289,7 @@
 		DA1C2E6D230DC28F00FACFB0 /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
 		DA1C2E6E230DC28F00FACFB0 /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
 		DA1C32B92311CCE200FACFB0 /* JSONData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONData.swift; sourceTree = "<group>"; };
+		DA2085AA232AE1940010E4C9 /* OpenHABAccessTokenAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABAccessTokenAdapter.swift; sourceTree = "<group>"; };
 		DA2837092319C7C60066D7B5 /* Equatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Equatable.swift; sourceTree = "<group>"; };
 		DA28C35F2251F07000AB409C /* OSLogHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogHelper.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -300,7 +301,6 @@
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
 		DA97BB062329902000AAE470 /* LargeSitemap.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = LargeSitemap.json; sourceTree = "<group>"; };
-		DA97BB08232995C100AAE470 /* LargeSitemapJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeSitemapJSON.swift; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
@@ -582,7 +582,6 @@
 				DAB9C7B0230B323000A7DB6E /* OpenHABNewXMLParserTests.swift */,
 				DAED514E2305CDE3003BCB31 /* XMLData.swift */,
 				DA97BB062329902000AAE470 /* LargeSitemap.json */,
-				DA97BB08232995C100AAE470 /* LargeSitemapJSON.swift */,
 				DA1C32B92311CCE200FACFB0 /* JSONData.swift */,
 				DA2DC23321F2736C00830730 /* Info.plist */,
 				DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */,
@@ -767,6 +766,7 @@
 				DA5D0F80223E9991007ADDBD /* Endpoint.swift */,
 				A08FF1492233498600203EED /* ClientCertificateManager.swift */,
 				DA19E33722FF4594002F8F2F /* NetworkConnection.swift */,
+				DA2085AA232AE1940010E4C9 /* OpenHABAccessTokenAdapter.swift */,
 				DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */,
 				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
 				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
@@ -1184,7 +1184,6 @@
 				DAC9394922AD62F500C5F423 /* OpenHabService.swift in Sources */,
 				DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */,
 				DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */,
-				DA97BB09232995C100AAE470 /* LargeSitemapJSON.swift in Sources */,
 				DAC019B522B0EE4700A0ED7B /* URLSessionPinningDelegate.swift in Sources */,
 				DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */,
 				DAB9C7B1230B323000A7DB6E /* OpenHABNewXMLParserTests.swift in Sources */,
@@ -1263,6 +1262,7 @@
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
 				DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */,
 				DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */,
+				DA2085AB232AE1940010E4C9 /* OpenHABAccessTokenAdapter.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */,
