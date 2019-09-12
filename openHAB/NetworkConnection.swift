@@ -6,6 +6,7 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import Alamofire
+import Kingfisher
 import os.log
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
@@ -53,7 +54,7 @@ let onReceiveSessionChallenge = { (session: URLSession, challenge: URLAuthentica
     }
 }
 
-final class OpenHABAccessTokenAdapter: RequestAdapter {
+ class OpenHABAccessTokenAdapter: RequestAdapter {
 
     var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
@@ -69,6 +70,17 @@ final class OpenHABAccessTokenAdapter: RequestAdapter {
         }
 
         return urlRequest
+    }
+}
+
+extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
+
+    func modified(for request: URLRequest) -> URLRequest? {
+        do {
+            return try adapt(request)
+        } catch {
+            return request
+        }
     }
 }
 
