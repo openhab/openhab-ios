@@ -33,7 +33,7 @@ type_body_length:
 
 file_length:
     warning: 1000
-    error: 1500
+    error: 150000
     ignore_comment_only_lines: true
 
 cyclomatic_complexity:

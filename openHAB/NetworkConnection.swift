@@ -6,6 +6,7 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import Alamofire
+import Kingfisher
 import os.log
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
@@ -53,6 +54,36 @@ let onReceiveSessionChallenge = { (session: URLSession, challenge: URLAuthentica
     }
 }
 
+ class OpenHABAccessTokenAdapter: RequestAdapter {
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
+
+    func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
+        var urlRequest = urlRequest
+
+        guard let user = appData?.openHABUsername, let password = appData?.openHABPassword else { return urlRequest }
+
+        if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
+            urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
+        }
+
+        return urlRequest
+    }
+}
+
+extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
+
+    func modified(for request: URLRequest) -> URLRequest? {
+        do {
+            return try adapt(request)
+        } catch {
+            return request
+        }
+    }
+}
+
 class NetworkConnection {
 
     static var shared: NetworkConnection!
@@ -69,6 +100,7 @@ class NetworkConnection {
         manager.startRequestsImmediately = false
         manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
         manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
+        manager.adapter = OpenHABAccessTokenAdapter()
     }
 
     class func initialize(ignoreSSL: Bool) {

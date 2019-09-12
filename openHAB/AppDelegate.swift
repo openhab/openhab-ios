@@ -11,6 +11,7 @@
 
 import AVFoundation
 import Firebase
+import Kingfisher
 import os.log
 import SwiftMessages
 import UIKit
@@ -74,6 +75,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
 
         activateWatchConnectivity()
+
+        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter())]
 
         return true
     }

@@ -314,7 +314,6 @@ class OpenHABViewController: UIViewController {
 
                     os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
                     let registrationOperation = NetworkConnection.shared.manager.request(registrationRequest)
-                        .authenticate(user: openHABUsername, password: openHABPassword)
                         .validate(statusCode: 200..<300)
                         .responseData { (response) in
                             switch response.result {
@@ -412,7 +411,6 @@ class OpenHABViewController: UIViewController {
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
         currentPageOperation = NetworkConnection.shared.manager.request(pageRequest)
-            .authenticate(user: openHABUsername, password: openHABPassword)
             .validate(statusCode: 200..<300)
             .responseData { [weak self] (response) in
                 guard let self = self else { return }
@@ -533,7 +531,6 @@ class OpenHABViewController: UIViewController {
             os_log("Firing request", log: .viewCycle, type: .info)
 
             let sitemapsOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
-                .authenticate(user: openHABUsername, password: openHABPassword)
                 .validate(statusCode: 200..<300)
                 .responseData { (response) in
                     switch response.result {
@@ -694,7 +691,6 @@ class OpenHABViewController: UIViewController {
             }
 
             commandOperation = NetworkConnection.shared.manager.request(commandRequest)
-                .authenticate(user: openHABUsername, password: openHABPassword)
                 .validate(statusCode: 200..<300)
                 .responseData { (response) in
                     switch response.result {
@@ -737,7 +733,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             }
 
             commandOperation = NetworkConnection.shared.manager.request(pageRequest)
-                .authenticate(user: appData?.openHABUsername ?? "", password: appData?.openHABPassword ?? "")
                 .validate(statusCode: 200..<300)
                 .responseData { (response) in
                     switch response.result {
