@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Sitemap: NSObject{
+class Sitemap: NSObject {
 
     let frames: [Frame]
 

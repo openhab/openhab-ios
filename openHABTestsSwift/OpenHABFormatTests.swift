@@ -14,6 +14,11 @@ class OpenHABFormatTests: XCTestCase {
         super.setUp()
     }
 
+    func testNamedColors() {
+        XCTAssertEqual("#ff0000", namedColor(toHexString: "red"))
+        XCTAssertEqual(UIColor.red, color(fromHexString: "red"))
+    }
+
     func testValueToText() {
         func valueText(_ widgetValue: Double, step: Double) -> String {
             let digits = max (-Decimal(step).exponent, 0)

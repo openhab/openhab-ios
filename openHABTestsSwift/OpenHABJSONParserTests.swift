@@ -9,7 +9,7 @@
 import os.signpost
 import XCTest
 
-class OpenHABTestsSwift: XCTestCase {
+class OpenHABJSONParserTests: XCTestCase {
 
     let decoder = JSONDecoder()
 
@@ -22,11 +22,6 @@ class OpenHABTestsSwift: XCTestCase {
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testNamedColors() {
-        XCTAssertEqual("#ff0000", namedColor(toHexString: "red"))
-        XCTAssertEqual(UIColor.red, color(fromHexString: "red"))
     }
 
     func testJSONNotificationDecoder() {
