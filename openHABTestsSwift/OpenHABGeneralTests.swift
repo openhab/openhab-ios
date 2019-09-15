@@ -8,7 +8,7 @@
 
 import XCTest
 
-class OpenHABFormatTests: XCTestCase {
+class OpenHABGeneralTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
@@ -39,4 +39,9 @@ class OpenHABFormatTests: XCTestCase {
 
     }
 
+    func testHexString() {
+        let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
+        let hexWithReduce = iPhoneData.reduce("") { $0 + String(format: "%02X", $1) }
+        XCTAssertEqual(hexWithReduce, "54696D206950686F6E65", "hex properly calculated with reduce")
+    }
 }

@@ -48,7 +48,7 @@
 		DA15FF4C221DF7D800FF0FDA /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
 		DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
-		DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */; };
+		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA1AB2C42325378100C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA1AB2C52325378600C5F500 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
@@ -251,7 +251,7 @@
 		DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataDecoded.swift; sourceTree = "<group>"; };
-		DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABFormatTests.swift; sourceTree = "<group>"; };
+		DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABGeneralTests.swift; sourceTree = "<group>"; };
 		DA19E33722FF4594002F8F2F /* NetworkConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkConnection.swift; sourceTree = "<group>"; };
 		DA1C2E4B230DC28F00FACFB0 /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
 		DA1C2E4C230DC28F00FACFB0 /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
@@ -569,7 +569,7 @@
 		DA2DC23021F2736C00830730 /* openHABTestsSwift */ = {
 			isa = PBXGroup;
 			children = (
-				DA19E25A22FD801D002F8F2F /* OpenHABFormatTests.swift */,
+				DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */,
 				DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */,
 				DA97BB062329902000AAE470 /* LargeSitemap.json */,
 				DA1C32B92311CCE200FACFB0 /* JSONData.swift */,
@@ -1182,7 +1182,7 @@
 				DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */,
 				DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */,
 				DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */,
-				DA19E25B22FD801D002F8F2F /* OpenHABFormatTests.swift in Sources */,
+				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
 				DAC9394B22AD651400C5F423 /* Sitemap.swift in Sources */,
 				DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */,
 				DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */,
