@@ -87,48 +87,31 @@ class NetworkConnection {
                          deviceId: String,
                          deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
 
-        if let registrationUrl = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-            let registrationRequest = URLRequest(url: registrationUrl)
-
-            os_log("Registration URL = %{PUBLIC}@", log: .notifications, type: .info, registrationUrl.absoluteString)
-            let task = NetworkConnection.shared.manager.request(registrationRequest)
-                .validate(statusCode: 200..<300)
-                .responseData(completionHandler: completionHandler)
-            task.resume()
+        if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
+            load(from: url, completionHandler: completionHandler)
         }
     }
 
     static func sitemaps(openHABRootUrl: String,
                          completionHandler: @escaping (DataResponse<Data>) -> Void) {
 
-        if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
-            var sitemapsRequest = URLRequest(url: sitemapsUrl)
-            sitemapsRequest.timeoutInterval = 10.0
-
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            os_log("Firing request", log: .viewCycle, type: .info)
-
-            let task = NetworkConnection.shared.manager.request(sitemapsRequest)
-                .validate(statusCode: 200..<300)
-                .responseData(completionHandler: completionHandler)
-            task.resume()
+        if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
+            load(from: url, completionHandler: completionHandler)
         }
     }
 
     static func tracker(openHABRootUrl: String,
                         completionHandler: @escaping (DataResponse<Data>) -> Void) {
-        if let pageToLoadUrl = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
-            var pageRequest = URLRequest(url: pageToLoadUrl)
+        if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
+            load(from: url, completionHandler: completionHandler)
+        }
+    }
 
-            pageRequest.timeoutInterval = 10.0
-            DispatchQueue.main.async {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            }
+    static func notification(urlString: String,
+                             completionHandler: @escaping (DataResponse<Data>) -> Void) {
 
-            let task = NetworkConnection.shared.manager.request(pageRequest)
-                .validate(statusCode: 200..<300)
-                .responseData(completionHandler: completionHandler)
-            task.resume()
+        if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
+            load(from: notificationsUrl, completionHandler: completionHandler)
         }
     }
 
@@ -198,16 +181,17 @@ class NetworkConnection {
 
     }
 
-    static func notification (prefsURL: String,
-                              completionHandler: @escaping (DataResponse<Data>) -> Void) {
-        if let notificationsUrl = Endpoint.notification(prefsURL: Preferences.remoteUrl).url {
-            let notificationsRequest = URLRequest(url: notificationsUrl)
-
-            let task = NetworkConnection.shared.manager.request(notificationsRequest)
-                .validate(statusCode: 200..<300)
-                .responseData (completionHandler: completionHandler)
-            task.resume()
+    static func load(from url: URL, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10.0
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
         }
+        os_log("Firing request", log: .viewCycle, type: .debug)
+        let task = NetworkConnection.shared.manager.request(request)
+            .validate(statusCode: 200..<300)
+            .responseData (completionHandler: completionHandler)
+        task.resume()
     }
 
     func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {

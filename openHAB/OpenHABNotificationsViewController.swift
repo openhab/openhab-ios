@@ -53,7 +53,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
     func loadNotifications() {
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        NetworkConnection.notification(prefsURL: Preferences.remoteUrl) { (response) in
+        NetworkConnection.notification(urlString: Preferences.remoteUrl) { (response) in
             switch response.result {
             case .success:
                 if let data = response.result.value {
@@ -109,26 +109,14 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
         }
 
-        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
-                    var imageRequest = URLRequest(url: iconUrl)
-                    imageRequest.timeoutInterval = 10.0
-
-                    let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
-                        .validate(statusCode: 200..<300)
-                        .responseData { (response) in
-                            switch response.result {
-                            case .success:
-                                if let data = response.data {
-                                    cell?.imageView?.image = UIImage(data: data)
-                                }
-                            case .failure:
-                                cell?.imageView?.image = UIImage(named: "icon-76x76.png")
-                            }
-                        }
-                    imageOperation.resume()
-            } else {
-                cell?.imageView?.image = UIImage(named: "icon-29x29.png")
-            }
+        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl,
+                                       version: appData!.openHABVersion,
+                                       icon: notification.icon,
+                                       value: "",
+                                       iconType: .png).url {
+            cell?.imageView?.kf.setImage (with: iconUrl,
+                                          placeholder: UIImage(named: "icon-76x76.png"))
+        }
 
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
