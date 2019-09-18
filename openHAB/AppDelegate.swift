@@ -56,7 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         loadSettingsDefaults()
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL)
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter() )
 
         registerForPushNotifications()
 

@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Item: NSObject, NSCoding {
+class Item: NSObject {
 
     let name: String
     let label: String
@@ -20,26 +20,6 @@ class Item: NSObject, NSCoding {
         self.label = label
         self.state = state
         self.link = link
-    }
-
-    // serializer
-    required init(coder decoder: NSCoder) {
-        self.name = decoder.decodeObject(forKey: "name") as! String
-        self.label = decoder.decodeObject(forKey: "label") as! String
-        self.link = decoder.decodeObject(forKey: "link") as! String
-        guard let stateString = decoder.decodeObject(forKey: "state") as! String? else {
-            self.state = "OFF"
-            return
-        }
-        self.state = stateString
-
-    }
-
-    func encode(with coder: NSCoder) {
-        coder.encode(name, forKey: "name")
-        coder.encode(label, forKey: "label")
-        coder.encode(state, forKey: "state")
-        coder.encode(link, forKey: "link")
     }
 }
 

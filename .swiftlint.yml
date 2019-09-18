@@ -56,6 +56,8 @@ identifier_name:
     error: 1000
   excluded:
     - id
+    - a
+    - b
     - i
     - v
 
