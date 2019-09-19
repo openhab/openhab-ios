@@ -18,11 +18,11 @@
 <<<<<<< HEAD
 	<string>2.1.10</string>
 	<key>CFBundleVersion</key>
-	<string>44</string>
+	<string>45</string>
 =======
 	<string>2.1.32</string>
 	<key>CFBundleVersion</key>
-	<string>64</string>
+	<string>45</string>
 >>>>>>> origin/develop
 </dict>
 </plist>
