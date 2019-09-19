@@ -8,21 +8,12 @@
 
 import Foundation
 
-class Frame: NSObject, NSCoding {
+class Frame: NSObject {
 
     let items: [Item]
 
     init(items: [Item]) {
         self.items = items
-    }
-
-    // serializer
-    required init(coder decoder: NSCoder) {
-        self.items = decoder.decodeObject(forKey: "items") as! [Item]
-    }
-
-    func encode(with coder: NSCoder) {
-        coder.encode(items, forKey: "items")
     }
 }
 

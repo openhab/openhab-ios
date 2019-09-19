@@ -8,10 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 import os.log
-
-fileprivate extension Selector {
-    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
-}
+import UIKit
 
 class SwitchUITableViewCell: GenericUITableViewCell {
 
@@ -35,17 +32,18 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         self.customTextLabel?.text = widget.labelText
         var state = widget.state
-        //if state is nil or empty using the item state ( OH 1.x compatability )
+        // if state is nil or empty using the item state ( OH 1.x compatability )
         if state.isEmpty {
             state = (widget.item?.state) ?? ""
         }
         self.customDetailTextLabel?.text = widget.labelValue ?? ""
-        widgetSwitch?.isOn = state == "ON" ? true : false
+        widgetSwitch?.isOn = (state == "ON" ? true : false)
         widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
         super.displayWidget()
     }
 
-    @objc func switchChange() {
+    @objc
+    func switchChange() {
         if (widgetSwitch?.isOn)! {
             os_log("Switch to ON", log: .viewCycle, type: .info)
             widget.sendCommand("ON")
@@ -54,4 +52,8 @@ class SwitchUITableViewCell: GenericUITableViewCell {
             widget.sendCommand("OFF")
         }
     }
+}
+
+fileprivate extension Selector {
+    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
 }

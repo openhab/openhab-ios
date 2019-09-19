@@ -18,8 +18,8 @@ class UICircleButton: UIButton {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
-        self.layer.borderWidth = 2
-        self.layer.borderColor = UIColor.init(white: 0, alpha: 0.05).cgColor
+        layer.borderWidth = 2
+        layer.borderColor = UIColor.init(white: 0, alpha: 0.05).cgColor
 
         layer.cornerRadius = bounds.size.width / 2.0
     }

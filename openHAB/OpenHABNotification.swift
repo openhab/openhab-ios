@@ -9,46 +9,6 @@
 
 import Foundation
 
-// Custom DateFormatter to handle fractional seconds
-// Inspired by https://useyourloaf.com/blog/swift-codable-with-custom-dates/
-extension DateFormatter {
-    static let iso8601Full: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
-        formatter.calendar = Calendar(identifier: .iso8601)
-        //formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        return formatter
-    }()
-}
-
-// Decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
-// then convert that into a openHABNotification
-// Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
-extension OpenHABNotification {
-    struct CodingData: Decodable {
-        let id: String
-        let message: String
-        let v: Int
-        let created: Date?
-
-        private enum CodingKeys: String, CodingKey {
-            case id = "_id"
-            case message
-            case v = "__v"
-            case created
-        }
-    }
-}
-
-// Convenience method to convert a decoded value into a proper OpenHABNotification instance
-extension OpenHABNotification.CodingData {
-    var openHABNotification: OpenHABNotification {
-        return OpenHABNotification(message: self.message, created: self.created)
-    }
-
-}
-
 class OpenHABNotification: NSObject {
     var message = ""
     var created: Date?
@@ -77,5 +37,43 @@ class OpenHABNotification: NSObject {
             }
         }
     }
+}
 
+// Decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
+// then convert that into a openHABNotification
+// Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
+extension OpenHABNotification {
+    struct CodingData: Decodable {
+        let id: String
+        let message: String
+        let v: Int
+        let created: Date?
+
+        private enum CodingKeys: String, CodingKey {
+            case id = "_id"
+            case message
+            case v = "__v"
+            case created
+        }
+    }
+}
+
+// Convenience method to convert a decoded value into a proper OpenHABNotification instance
+extension OpenHABNotification.CodingData {
+    var openHABNotification: OpenHABNotification {
+        return OpenHABNotification(message: self.message, created: self.created)
+    }
+}
+
+// Custom DateFormatter to handle fractional seconds
+// Inspired by https://useyourloaf.com/blog/swift-codable-with-custom-dates/
+extension DateFormatter {
+    static let iso8601Full: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
+        formatter.calendar = Calendar(identifier: .iso8601)
+        // formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
 }

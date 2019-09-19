@@ -13,31 +13,8 @@ import MapKit
 class MapViewTableViewCell: GenericUITableViewCell {
     private var mapView: MKMapView!
 
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        mapView = MKMapView(frame: CGRect.zero)
-        mapView.layer.cornerRadius = 4.0
-        mapView.layer.masksToBounds = true
-        contentView.addSubview(mapView)
+    override var widget: OpenHABWidget! {
 
-    }
-
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-
-        mapView = MKMapView(frame: CGRect.zero)
-        mapView.layer.cornerRadius = 4.0
-        mapView.layer.masksToBounds = true
-        contentView.addSubview(mapView)
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        mapView.frame = contentView.bounds.insetBy(dx: 13.0, dy: 8.0)
-    }
-
-    @objc override var widget: OpenHABWidget! {
         get {
             return super.widget
         }
@@ -61,5 +38,29 @@ class MapViewTableViewCell: GenericUITableViewCell {
                 }
             }
         }
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        mapView = MKMapView(frame: CGRect.zero)
+        mapView.layer.cornerRadius = 4.0
+        mapView.layer.masksToBounds = true
+        contentView.addSubview(mapView)
+
+    }
+
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        mapView = MKMapView(frame: CGRect.zero)
+        mapView.layer.cornerRadius = 4.0
+        mapView.layer.masksToBounds = true
+        contentView.addSubview(mapView)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        mapView.frame = contentView.bounds.insetBy(dx: 13.0, dy: 8.0)
     }
 }

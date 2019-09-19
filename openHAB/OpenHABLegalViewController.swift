@@ -15,7 +15,7 @@ class OpenHABLegalViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let legalPath: URL? = Bundle.main.url(forResource: "legal", withExtension: "rtf")
+        let legalPath = Bundle.main.url(forResource: "legal", withExtension: "rtf")
         var legalAttributedString: NSAttributedString?
         if let legalPath = legalPath {
             legalAttributedString = try? NSAttributedString(url: legalPath,

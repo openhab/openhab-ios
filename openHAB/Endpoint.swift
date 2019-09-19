@@ -21,6 +21,13 @@ struct Endpoint {
 }
 
 extension Endpoint {
+    var url: URL? {
+        var components = URLComponents(string: baseURL)
+        components?.path = path
+        components?.queryItems = queryItems
+        os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url?.absoluteString ?? "")
+        return components?.url
+    }
 
     static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
         return Endpoint(
@@ -88,7 +95,7 @@ extension Endpoint {
             ]
         )
 
-        if let type = type, (type == "GroupItem" || type == "Group") {
+        if let type = type, type.isAny(of: "GroupItem", "Group") {
             endpoint.queryItems.append(URLQueryItem(name: "groups", value: name))
         } else {
             endpoint.queryItems.append(URLQueryItem(name: "items", value: name))
@@ -141,14 +148,6 @@ extension Endpoint {
                 queryItems: []
             )
         }
-    }
-
-    var url: URL? {
-        var components = URLComponents(string: baseURL)
-        components?.path = path
-        components?.queryItems = queryItems
-        os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url?.absoluteString ?? "")
-        return components?.url
     }
 }
 

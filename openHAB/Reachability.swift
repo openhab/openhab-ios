@@ -25,6 +25,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+// swiftlint:disable identifier_name file_types_order type_contents_order
+
 import Foundation
 import SystemConfiguration
 
@@ -81,7 +83,7 @@ public class Reachability {
     public var allowsCellularConnection: Bool
 
     // The notification center on which "reachability changed" events are being posted
-    public var notificationCenter: NotificationCenter = NotificationCenter.default
+    public var notificationCenter = NotificationCenter.default
 
     @available(*, deprecated, renamed: "connection.description")
     public var currentReachabilityString: String {

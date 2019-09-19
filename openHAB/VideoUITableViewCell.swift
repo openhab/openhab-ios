@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import Alamofire
 import AVFoundation
 import AVKit
 import os.log
@@ -17,6 +18,8 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell {
+
+    private let activityIndicator = UIActivityIndicatorView(style: .gray)
 
     var didLoad: (() -> Void)?
 
@@ -28,12 +31,10 @@ class VideoUITableViewCell: GenericUITableViewCell {
     }
     private var playerView: PlayerView!
     private var mainImageView: UIImageView!
-    private let activityIndicator = UIActivityIndicatorView(style: .gray)
     private var playerObserver: NSKeyValueObservation?
     private var aspectRatioConstraint: NSLayoutConstraint?
-    private var mjpegRequest: URLSessionDataTask?
+    private var mjpegRequest: Alamofire.Request?
     private var session: URLSession!
-    private var imageData = Data()
     private var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
     }
@@ -119,7 +120,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         if widget.encoding.lowercased() != VideoEncoding.mjpeg.rawValue {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
-            playerObserver = playerItem.observe(\.status, options: [.new, .old], changeHandler: { [weak self] (playerItem, change) in
+            playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] (playerItem, _) in
                 switch playerItem.status {
                 case .failed:
                     os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
@@ -135,8 +136,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
                     self?.updateAspectRatio(forView: self?.playerView, aspectRatio: aspectRatio)
                     self?.didLoad?()
                 }
-            })
-
+            }
             playerView?.playerLayer.player = AVPlayer(playerItem: playerItem)
         }
     }
@@ -153,13 +153,32 @@ class VideoUITableViewCell: GenericUITableViewCell {
 
         bringSubviewToFront(mainImageView)
 
-        session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
-
         var streamRequest = URLRequest(url: url)
-        streamRequest.setAuthCredentials(appData!.openHABUsername, appData!.openHABPassword)
         streamRequest.timeoutInterval = 10.0
 
-        mjpegRequest = session.dataTask(with: streamRequest)
+        let streamImageInitialBytePattern = Data([255, 216])
+        var imageData = Data()
+        mjpegRequest = NetworkConnection.shared.manager.request(streamRequest)
+            .validate(statusCode: 200..<300)
+            .stream { [weak self] (chunkData) in
+                if chunkData.starts(with: streamImageInitialBytePattern) {
+                    if let image = UIImage(data: imageData) {
+                        DispatchQueue.main.async {
+                            if self?.mainImageView?.image == nil {
+                                let aspectRatio = image.size.width / image.size.height
+                                self?.activityIndicator.isHidden = true
+                                self?.updateAspectRatio(forView: self?.mainImageView, aspectRatio: aspectRatio)
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                    self?.didLoad?()
+                                }
+                            }
+                            self?.mainImageView?.image = image
+                        }
+                    }
+                    imageData = Data()
+                }
+                imageData.append(chunkData)
+            }
         mjpegRequest?.resume()
     }
 
@@ -181,7 +200,8 @@ class VideoUITableViewCell: GenericUITableViewCell {
         aspectRatioConstraint = constraint
     }
 
-    @objc private func stopPlayback(andResetUrl reset: Bool = true) {
+    @objc
+    private func stopPlayback(andResetUrl reset: Bool = true) {
         if reset {
             url = nil
         }
@@ -190,30 +210,6 @@ class VideoUITableViewCell: GenericUITableViewCell {
         mjpegRequest?.cancel()
         mjpegRequest = nil
         self.mainImageView?.image = nil
-    }
-}
-
-extension VideoUITableViewCell: URLSessionDataDelegate {
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        if !imageData.isEmpty, let image = UIImage(data: imageData) {
-            DispatchQueue.main.async {
-                if self.mainImageView?.image == nil {
-                    let aspectRatio = image.size.width / image.size.height
-                    self.activityIndicator.isHidden = true
-                    self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01, execute: {
-                        self.didLoad?()
-                    })
-                }
-                self.mainImageView?.image = image
-            }
-            imageData = Data()
-        }
-        completionHandler(.allow)
-    }
-
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        imageData.append(data)
     }
 }
 

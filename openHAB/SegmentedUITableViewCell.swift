@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 import os.log
+import UIKit
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
 
@@ -30,7 +31,9 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        self.customTextLabel?.text = widget.labelText
+        customTextLabel?.text = widget.labelText
+        customDetailTextLabel?.text = widget.labelValue ?? ""
+
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
         widgetSegmentControl?.removeAllSegments()
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
@@ -43,7 +46,8 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl?.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
     }
 
-    @objc func pickOne(_ sender: Any?) {
+    @objc
+    func pickOne(_ sender: Any?) {
         let segmentedControl = sender as? UISegmentedControl
         os_log("Segment pressed %d", log: .default, type: .info, Int(segmentedControl?.selectedSegmentIndex ?? 0))
         let mapping = widget.mappings[segmentedControl?.selectedSegmentIndex ?? 0]

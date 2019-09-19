@@ -13,11 +13,6 @@ import Foundation
 import Fuzi
 
 class OpenHABLinkedPage: NSObject, Decodable {
-    var pageId = ""
-    var title = ""
-    var icon = ""
-    var link = ""
-
     private enum CodingKeys: String, CodingKey {
         case pageId = "id"
         case title
@@ -25,14 +20,19 @@ class OpenHABLinkedPage: NSObject, Decodable {
         case link
     }
 
+    var pageId = ""
+    var title = ""
+    var icon = ""
+    var link = ""
+
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "title": self.title = child.stringValue
-            case "icon": self.icon = child.stringValue
-            case "link": self.link = child.stringValue
-            case "id": self.pageId = child.stringValue
+            case "title": title = child.stringValue
+            case "icon": icon = child.stringValue
+            case "link": link = child.stringValue
+            case "id": pageId = child.stringValue
             default:
                 break
             }

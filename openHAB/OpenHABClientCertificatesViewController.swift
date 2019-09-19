@@ -6,11 +6,16 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import os.log
-import SDWebImage
 import UIKit
 
 class OpenHABClientCertificatesViewController: UITableViewController {
+    static let tableViewCellIdentifier = "ClientCertificatesCell"
+
     var clientCertificates: [SecIdentity] = []
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,27 +33,21 @@ class OpenHABClientCertificatesViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return the number of rows in the section.
-        return OpenHABHTTPRequestOperation.clientCertificateManager.clientIdentities.count
+        return NetworkConnection.shared.clientCertificateManager.clientIdentities.count
     }
-
-    static let tableViewCellIdentifier = "ClientCertificatesCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABClientCertificatesViewController.tableViewCellIdentifier, for: indexPath)
-        cell.textLabel?.text = OpenHABHTTPRequestOperation.clientCertificateManager.getIdentityName(index: indexPath.row)
+        cell.textLabel?.text = NetworkConnection.shared.clientCertificateManager.getIdentityName(index: indexPath.row)
         return cell
     }
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == UITableViewCell.EditingStyle.delete {
-            let status = OpenHABHTTPRequestOperation.clientCertificateManager.deleteFromKeychain(index: indexPath.row)
+            let status = NetworkConnection.shared.clientCertificateManager.deleteFromKeychain(index: indexPath.row)
             if status == noErr {
                 tableView.deleteRows(at: [indexPath], with: .fade)
             }
         }
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
     }
 }

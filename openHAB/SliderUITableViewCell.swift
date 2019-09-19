@@ -9,10 +9,28 @@
 //
 
 import os.log
+import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBOutlet weak var widgetSlider: UISlider!
+
+    @IBOutlet weak var customDetailText: UILabel!
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.initiliaze()
+    }
+
+    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        self.initiliaze()
+    }
+
+    private func initiliaze() {
+        selectionStyle = .none
+        separatorInset = .zero
+    }
 
     @IBAction func sliderValueChanged(_ sender: Any) {
         let widgetValue = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
@@ -25,23 +43,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBAction func sliderTouchOutside(_ sender: Any) {
         sliderDidEndSliding(widgetSlider)
-    }
-
-    @IBOutlet weak var customDetailText: UILabel!
-
-    private func initiliaze() {
-        selectionStyle = .none
-        separatorInset = .zero
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        self.initiliaze()
-    }
-
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.initiliaze()
     }
 
     func adj(_ raw: Double) -> Double {
@@ -60,7 +61,10 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     func valueText(_ widgetValue: Double) -> String {
         let digits = max (-Decimal(widget.step).exponent, 0)
-        return String(format: "%.\(digits)f", widgetValue)
+        let numberFormatter = NumberFormatter()
+        numberFormatter.maximumFractionDigits = digits
+        numberFormatter.decimalSeparator  = "."
+        return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
     }
 
     override func displayWidget() {
@@ -72,7 +76,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
         customDetailText?.text = valueText(widgetValue)
     }
 
-    @objc func sliderDidEndSliding (_ sender: UISlider) {
+    @objc
+    func sliderDidEndSliding (_ sender: UISlider) {
         let res = adj(Double(widgetSlider!.value))
         os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider!.value, res)
         widget.sendCommand(valueText(res))

@@ -20,8 +20,8 @@ class OpenHABWidgetMapping: NSObject, Decodable {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "command": self.command = child.stringValue
-            case "label": self.label = child.stringValue
+            case "command": command = child.stringValue
+            case "label": label = child.stringValue
             default:
                 break
             }

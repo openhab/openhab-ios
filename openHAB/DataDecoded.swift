@@ -15,7 +15,7 @@ protocol AnyDecoder {
 extension JSONDecoder: AnyDecoder {}
 extension PropertyListDecoder: AnyDecoder {}
 
-//Inspired by https://www.swiftbysundell.com/posts/type-inference-powered-serialization-in-swift
+// Inspired by https://www.swiftbysundell.com/posts/type-inference-powered-serialization-in-swift
 extension Data {
     func decoded<T: Decodable>(using decoder: AnyDecoder = JSONDecoder()) throws -> T {
         return try decoder.decode(T.self, from: self)

@@ -8,6 +8,7 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 
+import Kingfisher
 import UIKit
 
 protocol GenericCellCacheProtocol: UITableViewCell {
@@ -16,24 +17,8 @@ protocol GenericCellCacheProtocol: UITableViewCell {
 
 class GenericUITableViewCell: UITableViewCell {
 
-    @objc func displayWidget() {
-        customTextLabel?.text = widget?.labelText
-        customDetailTextLabel?.text = widget?.labelValue ?? ""
-        customDetailTextLabel?.sizeToFit()
-
-        if customDetailTextLabel != nil, customDetailTextLabelConstraint != nil {
-            if accessoryType == .none {
-                // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
-                customDetailTextLabelConstraint.constant = 20.0
-            } else {
-                // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-                customDetailTextLabelConstraint.constant = 0.0
-            }
-        }
-    }
-
     private var _widget: OpenHABWidget!
-    @objc var widget: OpenHABWidget! {
+    var widget: OpenHABWidget! {
         get {
             return _widget
         }
@@ -71,11 +56,6 @@ class GenericUITableViewCell: UITableViewCell {
     @IBOutlet weak var customDetailTextLabel: UILabel!
     @IBOutlet weak var customDetailTextLabelConstraint: NSLayoutConstraint!
 
-    func initialize() {
-        selectionStyle = .none
-        separatorInset = .zero
-    }
-
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         initialize()
@@ -86,20 +66,41 @@ class GenericUITableViewCell: UITableViewCell {
         initialize()
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    func initialize() {
+        selectionStyle = .none
+        separatorInset = .zero
     }
 
-    /*
-     * This setter must be called via `super.widget`
-     * when it gets overriden inside a subclass.
-     */
     // This is to fix possible different sizes of user icons - we fix size and position of UITableViewCell icons
     override func layoutSubviews() {
         super.layoutSubviews()
         imageView?.frame = CGRect(x: 13, y: 5, width: 32, height: 32)
+    }
+
+    func displayWidget() {
+        customTextLabel?.text = widget?.labelText
+        customDetailTextLabel?.text = widget?.labelValue ?? ""
+        customDetailTextLabel?.sizeToFit()
+
+        if customDetailTextLabel != nil, customDetailTextLabelConstraint != nil {
+            if accessoryType == .none {
+                // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
+                customDetailTextLabelConstraint.constant = 20.0
+            } else {
+                // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
+                customDetailTextLabelConstraint.constant = 0.0
+            }
+        }
+    }
+
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView?.kf.cancelDownloadTask()
+        imageView?.image = nil
     }
 
 }

@@ -11,6 +11,7 @@
 
 import AVFoundation
 import Firebase
+import Kingfisher
 import os.log
 import SwiftMessages
 import UIKit
@@ -22,10 +23,10 @@ var player: AVAudioPlayer?
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    static var appDelegate: AppDelegate!
+
     var window: UIWindow?
     var appData: OpenHABDataObject?
-
-    static var appDelegate: AppDelegate!
 
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
@@ -46,7 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
 
-        //init Firebase crash reporting
+        // init Firebase crash reporting
         FirebaseApp.configure()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
@@ -55,7 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         loadSettingsDefaults()
 
-        AFRememberingSecurityPolicy.initializeCertificatesStore()
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter() )
 
         registerForPushNotifications()
 
@@ -74,6 +75,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
 
         activateWatchConnectivity()
+
+        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter())]
 
         return true
     }
@@ -94,7 +97,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         #endif
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
             guard let self = self else { return }
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
@@ -123,8 +126,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
 
         if url.isFileURL {
-            let clientCertificateManager = OpenHABHTTPRequestOperation.clientCertificateManager
-            clientCertificateManager.delegate = appData!.rootViewController!
+            let clientCertificateManager = NetworkConnection.shared.clientCertificateManager
             return clientCertificateManager.startImportClientCertificate(url: url)
         }
 
@@ -134,7 +136,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 
-        let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)}) //try "%02.2hhx",
+        let deviceTokenString = deviceToken.reduce("") { $0 + String(format: "%02X", $1) } //try "%02.2hhx",
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
@@ -153,7 +155,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
     // version without completionHandler is deprecated
-    //func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         os_log("didReceiveRemoteNotification", log: .notifications, type: .info)
 
         if application.applicationState == .active {
@@ -222,7 +224,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func loadSettingsDefaults() {
         let prefs = UserDefaults.standard
-        if prefs.object(forKey: "localUrl") == nil {
+        if  prefs.object(forKey: "localUrl") == nil {
             prefs.setValue("", forKey: "localUrl")
         }
         if prefs.object(forKey: "remoteUrl") == nil {

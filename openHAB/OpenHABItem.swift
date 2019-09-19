@@ -13,24 +13,6 @@ import Fuzi
 import os.log
 import UIKit
 
-extension OpenHABItem {
-
-    struct CodingData: Decodable {
-        let type: String
-        let groupType: String?
-        let name: String
-        let link: String
-        let state: String
-        let label: String?
-    }
-}
-
-extension OpenHABItem.CodingData {
-    var openHABItem: OpenHABItem {
-        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link, label: self.label, groupType: self.groupType)
-    }
-}
-
 final class OpenHABItem: NSObject {
     var type = ""
     var groupType = ""
@@ -52,11 +34,11 @@ final class OpenHABItem: NSObject {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "name": self.name = child.stringValue
-            case "type": self.type = child.stringValue
-            case "groupType": self.groupType = child.stringValue
-            case "state": self.state = child.stringValue
-            case "link": self.link = child.stringValue
+            case "name": name = child.stringValue
+            case "type": type = child.stringValue
+            case "groupType": groupType = child.stringValue
+            case "state": state = child.stringValue
+            case "link": link = child.stringValue
             default:
                 break
             }
@@ -104,9 +86,29 @@ final class OpenHABItem: NSObject {
     }
 }
 
+extension OpenHABItem {
+
+    struct CodingData: Decodable {
+        let type: String
+        let groupType: String?
+        let name: String
+        let link: String
+        let state: String
+        let label: String?
+    }
+}
+
+extension OpenHABItem.CodingData {
+    var openHABItem: OpenHABItem {
+        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link, label: self.label, groupType: self.groupType)
+    }
+}
+
 extension CGFloat {
     init(state string: String, divisor: Float) {
-        if let number = NumberFormatter().number(from: string) {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.locale = Locale(identifier: "EN")
+        if let number = numberFormatter.number(from: string) {
             self.init(number.floatValue/divisor)
         } else {
             self.init(0)

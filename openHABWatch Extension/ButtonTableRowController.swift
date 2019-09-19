@@ -11,10 +11,16 @@ import WatchKit
 
 class ButtonTableRowController: NSObject {
 
-    @IBOutlet var buttonSwitch: WKInterfaceSwitch!
-
     var item: Item?
     var interfaceController: InterfaceController?
+
+    @IBOutlet var buttonSwitch: WKInterfaceSwitch!
+
+    @IBAction func doSwitchButtonPressed(_ value: Bool) {
+        guard let item = item else { return }
+        let command = value ? "ON" : "OFF"
+        switchOpenHabItem(for: item, command: command)
+    }
 
     public func setInterfaceController(interfaceController: InterfaceController) {
         self.interfaceController = interfaceController
@@ -24,12 +30,6 @@ class ButtonTableRowController: NSObject {
         self.item = item
         buttonSwitch.setTitle(item.label)
         buttonSwitch.setOn(item.state == "ON")
-    }
-
-    @IBAction func doSwitchButtonPressed(_ value: Bool) {
-        guard let item = item else { return }
-        let command = value ? "ON" : "OFF"
-        switchOpenHabItem(for: item, command: command)
     }
 
     private func toggleButtonColor(button: WKInterfaceButton) {
@@ -42,7 +42,7 @@ class ButtonTableRowController: NSObject {
     private func switchOpenHabItem(for item: Item, command: String) {
 
         interfaceController!.displayActivityImage()
-        OpenHabService.singleton.switchOpenHabItem(for: item, command: command, {(data, response, error) -> Void in
+        OpenHabService.singleton.switchOpenHabItem(for: item, command: command) {(data, response, error) -> Void in
 
             self.interfaceController!.hideActivityImage()
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
@@ -58,6 +58,6 @@ class ButtonTableRowController: NSObject {
 
             let responseString = String(data: data, encoding: .utf8)
             print("responseString = \(String(describing: responseString))")
-        })
+        }
     }
 }

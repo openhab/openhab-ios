@@ -12,21 +12,6 @@ import ObjectiveC
 import UIKit
 
 private var kNSCBAlertWrapper = 0
-extension UIAlertView {
-    @objc func show(withCompletion completion: @escaping (_ alertView: UIAlertView?, _ buttonIndex: Int) -> Void) {
-        let alertWrapper = NSCBAlertWrapper()
-        alertWrapper.completionBlock = completion
-        delegate = alertWrapper as AnyObject
-
-        // Set the wrapper as an associated object
-        objc_setAssociatedObject(self, &kNSCBAlertWrapper, alertWrapper, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-
-        // Show the alert as normal
-        show()
-    }
-
-// MARK: - Class Public
-}
 
 class NSCBAlertWrapper: NSObject {
     var completionBlock: ((_ alertView: UIAlertView?, _ buttonIndex: Int) -> Void)?
@@ -48,4 +33,21 @@ class NSCBAlertWrapper: NSObject {
             completionBlock?(alertView, alertView.cancelButtonIndex)
         }
     }
+}
+
+extension UIAlertView {
+    @objc
+    func show(withCompletion completion: @escaping (_ alertView: UIAlertView?, _ buttonIndex: Int) -> Void) {
+        let alertWrapper = NSCBAlertWrapper()
+        alertWrapper.completionBlock = completion
+        delegate = alertWrapper as AnyObject
+
+        // Set the wrapper as an associated object
+        objc_setAssociatedObject(self, &kNSCBAlertWrapper, alertWrapper, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+
+        // Show the alert as normal
+        show()
+    }
+
+    // MARK: - Class Public
 }

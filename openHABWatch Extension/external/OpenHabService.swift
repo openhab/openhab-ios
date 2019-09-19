@@ -25,14 +25,13 @@ class OpenHabService {
         // Get the current data from REST-Call
 
         guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
-        var request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
-        request.setAuthCredentials(Preferences.username, Preferences.password)
-        //let session = URLSession.shared
+        let request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
+        // let session = URLSession.shared
         let session = URLSession(
             configuration: URLSessionConfiguration.ephemeral,
             delegate: CertificatePinningURLSessionDelegate(),
             delegateQueue: nil)
-        let task = session.dataTask(with: request, completionHandler: { (data, response, error) -> Void in
+        let task = session.dataTask(with: request) { (data, _, error) -> Void in
 
             guard error == nil else {
                 resultHandler(Sitemap.init(frames: []), "Can't read the sitemap from '\(requestUrl)'. Message is '\(String(describing: error))'")
@@ -52,7 +51,7 @@ class OpenHabService {
                     os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 }
             }
-        })
+        }
         task.resume()
     }
 
@@ -60,7 +59,6 @@ class OpenHabService {
         guard let commandUrl = URL(string: item.link) else { return }
         var request = URLRequest(url: commandUrl)
         request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
-        request.setAuthCredentials(Preferences.username, Preferences.password)
         request.httpMethod = "POST"
         let postString = command
         request.httpBody = postString.data(using: .utf8)

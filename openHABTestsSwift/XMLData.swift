@@ -7,6 +7,7 @@
 //
 
 import Foundation
+// swiftlint:disable line_length
 
 let singleWidgetXML = """
 <widget>
@@ -214,4 +215,65 @@ let fullsitemapXML = """
 <widget>
 <widgetId>Home_0</widgetId>
 <type>Frame</type><label>Controls</label><icon>frame</icon><widget><widgetId>Home_0_0</widgetId><type>Group</type><label>Lighting</label><icon>cust_light</icon><item><type>GroupItem</type><name>Lights</name><state>OFF</state><link>http://114.23.127.44:8080/rest/items/Lights</link></item><linkedPage><id>0000</id><title>Lighting</title><icon>cust_light</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0000</link><leaf>false</leaf></linkedPage></widget><widget><widgetId>Home_0_0_1</widgetId><type>Group</type><label>RGB Lights</label><icon>cust_rgb</icon><item><type>GroupItem</type><name>RGB_LEDs</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/RGB_LEDs</link></item><linkedPage><id>0001</id><title>RGB Lights</title><icon>cust_rgb</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0001</link><leaf>false</leaf></linkedPage></widget><widget><widgetId>Home_0_0_1_2</widgetId><type>Group</type><label>Multimedia</label><icon>cust_film</icon><item><type>GroupItem</type><name>Multimedia</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/Multimedia</link></item><linkedPage><id>0002</id><title>Multimedia</title><icon>cust_film</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0002</link><leaf>false</leaf></linkedPage></widget></widget><widget><widgetId>Home_1</widgetId><type>Frame</type><label>Mode</label><icon>frame</icon><widget><widgetId>Home_1_0</widgetId><type>Switch</type><label>Sleep</label><icon>cust_sleep</icon><item><type>SwitchItem</type><name>Sleep_Mode</name><state>ON</state><link>http://114.23.127.44:8080/rest/items/Sleep_Mode</link></item></widget></widget><widget><widgetId>Home_2</widgetId><type>Frame</type><label>Locations</label><icon>frame</icon><widget><widgetId>Home_2_0</widgetId><type>Group</type><label>Garden</label><icon>cust_garden</icon><item><type>GroupItem</type><name>Garden</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/Garden</link></item><linkedPage><id>0200</id><title>Garden</title><icon>cust_garden</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0200</link><leaf>true</leaf></linkedPage></widget><widget><widgetId>Home_2_0_1</widgetId><type>Group</type><label>Ensuite</label><icon>cust_ensuite</icon><item><type>GroupItem</type><name>Ensuite</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/Ensuite</link></item><linkedPage><id>0201</id><title>Ensuite</title><icon>cust_ensuite</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0201</link><leaf>true</leaf></linkedPage></widget><widget><widgetId>Home_2_0_1_2</widgetId><type>Group</type><label>Main Bathroom</label><icon>cust_bathroom</icon><item><type>GroupItem</type><name>Ensuite</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/Ensuite</link></item><linkedPage><id>0202</id><title>Main Bathroom</title><icon>cust_bathroom</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0202</link><leaf>true</leaf></linkedPage></widget></widget><widget><widgetId>Home_3</widgetId><type>Frame</type><label>Info</label><icon>frame</icon><widget><widgetId>Home_3_0</widgetId><type>Text</type><label>Date [16/08/2019 17:54 pm]</label><icon>cust_date</icon><item><type>DateTimeItem</type><name>Date</name><state>2019-08-16T17:54:18</state><link>http://114.23.127.44:8080/rest/items/Date</link></item></widget><widget><widgetId>Home_3_0_1</widgetId><type>Text</type><label>Sunrise [07:05]</label><icon>cust_sunrise</icon><item><type>DateTimeItem</type><name>Sunrise_Time</name><state>2019-08-16T07:05:00</state><link>http://114.23.127.44:8080/rest/items/Sunrise_Time</link></item></widget><widget><widgetId>Home_3_0_1_2</widgetId><type>Text</type><label>Sunset [17:46]</label><icon>cust_sunset</icon><item><type>DateTimeItem</type><name>Sunset_Time</name><state>2019-08-16T17:46:00</state><link>http://114.23.127.44:8080/rest/items/Sunset_Time</link></item></widget><widget><widgetId>Home_3_0_1_2_3</widgetId><type>Text</type><label>Light Level [0.05 Lux]</label><icon>cust_lux</icon><item><type>NumberItem</type><name>Lounge_Light_Level_Number</name><state>0.05</state><link>http://114.23.127.44:8080/rest/items/Lounge_Light_Level_Number</link></item></widget><widget><widgetId>Home_3_0_1_2_3_4</widgetId><type>Group</type><label>More Info</label><icon>cust_graph</icon><item><type>GroupItem</type><name>Graphs</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/Graphs</link></item><linkedPage><id>0304</id><title>More Info</title><icon>cust_graph</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0304</link><leaf>false</leaf></linkedPage></widget></widget><widget><widgetId>Home_4</widgetId><type>Frame</type><label>Weather</label><icon>frame</icon><widget><widgetId>Home_4_0</widgetId><type>Text</type><label>Current [Fri - 16.08.2019]</label><icon>cust_now</icon><item><type>DateTimeItem</type><name>FIO_ObservationTime</name><state>2019-08-16T17:54:09</state><link>http://114.23.127.44:8080/rest/items/FIO_ObservationTime</link></item></widget><widget><widgetId>Home_4_0_1</widgetId><type>Text</type><label>Condition [Mostly Cloudy]</label><icon>cust_weather</icon><item><type>StringItem</type><name>FIO_Condition</name><state>Mostly Cloudy</state><link>http://114.23.127.44:8080/rest/items/FIO_Condition</link></item></widget><widget><widgetId>Home_4_0_1_2</widgetId><type>Text</type><label>Temperature [12.28 °C]</label><icon>cust_temperature</icon><item><type>NumberItem</type><name>FIO_Temperature</name><state>12.28</state><link>http://114.23.127.44:8080/rest/items/FIO_Temperature</link></item></widget><widget><widgetId>Home_4_0_1_2_3</widgetId><type>Text</type><label>Humidity [73 %]</label><icon>cust_humidity</icon><item><type>NumberItem</type><name>FIO_Humidity</name><state>73.00</state><link>http://114.23.127.44:8080/rest/items/FIO_Humidity</link></item></widget><widget><widgetId>Home_4_0_1_2_3_4</widgetId><type>Group</type><label>Forecast</label><icon>cust_forecast</icon><item><type>GroupItem</type><name>Forecast</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/Forecast</link></item><linkedPage><id>0404</id><title>Forecast</title><icon>cust_forecast</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0404</link><leaf>false</leaf></linkedPage></widget></widget><widget><widgetId>Home_5</widgetId><type>Frame</type><label>Alarm</label><icon>frame</icon><widget><widgetId>Home_5_0</widgetId><type>Group</type><label>Alarm State</label><icon>cust_alarm</icon><item><type>GroupItem</type><name>Alarm_Contacts</name><state>OPEN</state><link>http://114.23.127.44:8080/rest/items/Alarm_Contacts</link></item><linkedPage><id>0500</id><title>Alarm State</title><icon>cust_alarm</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0500</link><leaf>true</leaf></linkedPage></widget></widget><widget><widgetId>Home_6</widgetId><type>Frame</type><label>Settings</label><icon>frame</icon><widget><widgetId>Home_6_0</widgetId><type>Group</type><label>Settings</label><icon>cust_setting</icon><item><type>GroupItem</type><name>Settings</name><state>Uninitialized</state><link>http://114.23.127.44:8080/rest/items/Settings</link></item><linkedPage><id>0600</id><title>Settings</title><icon>cust_setting</icon><link>http://114.23.127.44:8080/rest/sitemaps/Home/0600</link><leaf>false</leaf></linkedPage></widget></widget></page>
+""".data(using: .utf8)
+
+let userprovidedXML = """
+<sitemaps>
+    <sitemap>
+        <name>devices</name>
+        <label>Devices</label>
+        <link>http://localhost:8080/rest/sitemaps/devices</link>
+        <homepage>
+            <link>
+    http://localhost:8080/rest/sitemaps/devices/devices
+            </link>
+        <leaf>false</leaf>
+        </homepage>
+    </sitemap>
+<sitemap>
+<name>settings</name>
+<label>Settings</label>
+<link>http://localhost:8080/rest/sitemaps/settings</link>
+<homepage>
+<link>
+http://localhost:8080/rest/sitemaps/settings/settings
+</link>
+<leaf>false</leaf>
+</homepage>
+</sitemap>
+<sitemap>
+<name>stats</name>
+<label>Internal statistics</label>
+<link>http://localhost:8080/rest/sitemaps/stats</link>
+<homepage>
+<link>http://localhost:8080/rest/sitemaps/stats/stats</link>
+<leaf>false</leaf>
+</homepage>
+</sitemap>
+<sitemap>
+<name>ucb</name>
+<label>Capstone</label>
+<link>http://localhost:8080/rest/sitemaps/ucb</link>
+<homepage>
+<link>http://localhost:8080/rest/sitemaps/ucb/capstone</link>
+<leaf>false</leaf>
+</homepage>
+</sitemap>
+</sitemaps>
+""".data(using: .utf8)
+
+let failurePage = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<page>
+    <id>message</id>
+    <title>Gateway message</title>
+    <link>https://MyArvio.com.au:8444/rest/sitemaps/message/message</link>
+    <leaf>true</leaf>
+    <widget>
+        <widgetId>message_0</widgetId>
+        <type>Text</type>
+        <label>Invalid login attempt, no connection details are provided</label>
+        <icon>text</icon>
+    </widget>
+</page>
 """.data(using: .utf8)

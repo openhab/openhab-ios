@@ -11,10 +11,16 @@
 import os.log
 import UIKit
 
-@objc class OpenHABSelectionTableViewController: UITableViewController {
-    @objc var mappings: [AnyHashable] = []
-    @objc weak var delegate: OpenHABSelectionTableViewControllerDelegate?
-    @objc var selectionItem: OpenHABItem?
+class OpenHABSelectionTableViewController: UITableViewController {
+    static let tableViewCellIdentifier = "SelectionCell"
+
+    var mappings: [AnyHashable] = []
+    weak var delegate: OpenHABSelectionTableViewControllerDelegate?
+    var selectionItem: OpenHABItem?
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,11 +40,8 @@ import UIKit
         return mappings.count
     }
 
-    static let tableViewCellIdentifier = "SelectionCell"
-
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier, for: indexPath)
-        //cell = UITableViewCell(style: .default, reuseIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier)
         let mapping = mappings[indexPath.row] as? OpenHABWidgetMapping
         cell.textLabel?.text = mapping?.label
         if selectionItem?.state == mapping?.command {
@@ -57,9 +60,5 @@ import UIKit
             delegate?.didSelectWidgetMapping(indexPath.row)
         }
         navigationController?.popViewController(animated: true)
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
     }
 }

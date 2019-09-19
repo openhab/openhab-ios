@@ -10,33 +10,21 @@
 
 import DynamicButton
 import os.log
-import SDWebImage
 import SideMenu
 import UIKit
 
-extension UIBarButtonItem {
-
-    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: imageName), for: .normal)
-        button.addTarget(target, action: action, for: .touchUpInside)
-
-        let menuBarItem = UIBarButtonItem(customView: button)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
-
-        return menuBarItem
-    }
-}
-
 class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavigationControllerDelegate {
+    static let tableViewCellIdentifier = "NotificationCell"
+
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-
     var hamburgerButton: DynamicButton!
+
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,57 +52,48 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
     }
 
     func loadNotifications() {
-        let prefs = UserDefaults.standard
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-
-        if let notificationsUrl = Endpoint.notification(prefsURL: prefs.string(forKey: "remoteUrl") ?? "").url {
-            var notificationsRequest = URLRequest(url: notificationsUrl)
-            notificationsRequest.setAuthCredentials(openHABUsername, openHABPassword)
-            let operation = OpenHABHTTPRequestOperation(request: notificationsRequest, delegate: nil)
-
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-
-            operation.setCompletionBlockWithSuccess({ [weak self] operation, responseObject in
-                guard let self = self else { return }
-                if let response = responseObject as? Data {
+        NetworkConnection.notification(urlString: Preferences.remoteUrl) { (response) in
+            switch response.result {
+            case .success:
+                if let data = response.result.value {
                     do {
-                        let codingDatas = try response.decoded(using: decoder) as [OpenHABNotification.CodingData]
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                        let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
                         for codingDatum in codingDatas {
                             self.notifications.add(codingDatum.openHABNotification)
                         }
                     } catch {
                         os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
-                }
 
-                self.refreshControl?.endRefreshing()
-                self.tableView.reloadData()
+                    self.refreshControl?.endRefreshing()
+                    self.tableView.reloadData()
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
+            case .failure(let error):
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            }, failure: { operation, error in
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, Int(operation.response?.statusCode ?? 0))
-                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
-            })
-            operation.start()
+            }
         }
     }
 
-    @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
+    @objc
+    func handleRefresh(_ refreshControl: UIRefreshControl?) {
         os_log("Refresh pulled", log: .default, type: .info)
         loadNotifications()
     }
 
-    @objc func rightDrawerButtonPress(_ sender: Any?) {
+    @objc
+    func rightDrawerButtonPress(_ sender: Any?) {
         present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return notifications.count
     }
-
-    static let tableViewCellIdentifier = "NotificationCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OpenHABNotificationsViewController.tableViewCellIdentifier) as? NotificationTableViewCell
@@ -130,8 +109,15 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
         }
 
-        let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url
-        cell?.imageView?.sd_setImage(with: iconUrl, placeholderImage: UIImage(named: "icon-29x29.png"), options: [])
+        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl,
+                                       version: appData!.openHABVersion,
+                                       icon: notification.icon,
+                                       value: "",
+                                       iconType: .png).url {
+            cell?.imageView?.kf.setImage (with: iconUrl,
+                                          placeholder: UIImage(named: "icon-76x76.png"))
+        }
+
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false
         }
@@ -149,16 +135,23 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
     }
 
     func loadSettings() {
-        let prefs = UserDefaults.standard
-        openHABUsername = prefs.string(forKey: "username") ?? ""
-        openHABPassword = prefs.string(forKey: "password") ?? ""
-        //    self.defaultSitemap = [prefs valueForKey:@"defaultSitemap"];
-        //    self.idleOff = [prefs boolForKey:@"idleOff"];
-        appData?.openHABUsername = openHABUsername
-        appData?.openHABPassword = openHABPassword
+        appData?.openHABUsername = Preferences.username
+        appData?.openHABPassword = Preferences.password
     }
+}
 
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+extension UIBarButtonItem {
+
+    static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: imageName), for: .normal)
+        button.addTarget(target, action: action, for: .touchUpInside)
+
+        let menuBarItem = UIBarButtonItem(customView: button)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 24).isActive = true
+
+        return menuBarItem
     }
 }

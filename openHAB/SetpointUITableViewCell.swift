@@ -11,8 +11,6 @@ import DynamicButton
 import os.log
 
 class SetpointUITableViewCell: GenericUITableViewCell {
-    @IBOutlet weak var downButton: DynamicButton!
-    @IBOutlet weak var upButton: DynamicButton!
 
     private var isIntStep: Bool {
         return widget.step.truncatingRemainder(dividingBy: 1) == 0
@@ -21,6 +19,9 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     private var stateFormat: String {
         return isIntStep ? "%ld" : "%.01f"
     }
+
+    @IBOutlet weak var downButton: DynamicButton!
+    @IBOutlet weak var upButton: DynamicButton!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -43,7 +44,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         super.displayWidget()
     }
 
-    @objc func decreaseValue(_ sender: Any?) {
+    @objc
+    func decreaseValue(_ sender: Any?) {
         os_log("down button pressed", log: .viewCycle, type: .info)
 
         if let item = widget.item {
@@ -63,7 +65,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         }
     }
 
-    @objc func increaseValue(_ sender: Any?) {
+    @objc
+    func increaseValue(_ sender: Any?) {
         os_log("up button pressed", log: .viewCycle, type: .info)
 
         if let item = widget.item {

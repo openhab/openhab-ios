@@ -14,12 +14,6 @@ class InterfaceController: WKInterfaceController {
     @IBOutlet weak var activityImage: WKInterfaceImage!
     @IBOutlet weak var buttonTable: WKInterfaceTable!
 
-//    private let defaults: UserDefaults
-//
-//    init(defaults: UserDefaults = .shared) {
-//        self.defaults = defaults
-//    }
-
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
 
@@ -33,7 +27,7 @@ class InterfaceController: WKInterfaceController {
 
         self.refresh(Preferences.sitemap)
         // load the current Sitemap
-        OpenHabService.singleton.readSitemap({(sitemap, errorString) -> Void in
+        OpenHabService.singleton.readSitemap { (sitemap, errorString) -> Void in
 
             if errorString != "" {
                 // Timeouts happen when the app is in background state.
@@ -45,7 +39,7 @@ class InterfaceController: WKInterfaceController {
             }
             Preferences.sitemap = sitemap
             self.refresh(sitemap)
-        })
+        }
     }
 
     fileprivate func refresh(_ sitemap: (Sitemap)) {
@@ -68,12 +62,12 @@ class InterfaceController: WKInterfaceController {
     }
 
     func displayAlert(message: String) {
-        DispatchQueue.main.async(execute: {
+        DispatchQueue.main.async {
             let okAction = WKAlertAction.init(title: "Ok", style: .default) {
                 print("ok action")
             }
             self.presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
-        })
+        }
     }
 
     func displayActivityImage() {

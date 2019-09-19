@@ -12,6 +12,9 @@ import SDWebImage
 import UIKit
 
 class OpenHABNotificationsViewController: UITableViewController {
+
+    static let tableViewCellIdentifier = "NotificationCell"
+
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
@@ -36,11 +39,6 @@ class OpenHABNotificationsViewController: UITableViewController {
 
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         loadSettings()
@@ -59,7 +57,6 @@ class OpenHABNotificationsViewController: UITableViewController {
         if let notificationsUrl = notificationsUrl {
             notificationsRequest = NSMutableURLRequest(url: notificationsUrl)
         }
-        notificationsRequest?.setAuthCredentials(openHABUsername, openHABPassword)
         var operation: OpenHABHTTPRequestOperation?
         if let notificationsRequest = notificationsRequest {
             operation = OpenHABHTTPRequestOperation(request: notificationsRequest as URLRequest)
@@ -92,12 +89,14 @@ class OpenHABNotificationsViewController: UITableViewController {
         operation?.start()
     }
 
-    @objc func handleRefresh(_ refreshControl: UIRefreshControl?) {
+    @objc
+    func handleRefresh(_ refreshControl: UIRefreshControl?) {
         print("Refresh pulled")
         loadNotifications()
     }
 
-    @objc func rightDrawerButtonPress(_ sender: Any?) {
+    @objc
+    func rightDrawerButtonPress(_ sender: Any?) {
         mm_drawerController.toggle(MMDrawerSide.right, animated: true, completion: nil)
     }
 
@@ -108,8 +107,6 @@ class OpenHABNotificationsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return notifications.count
     }
-
-    static let tableViewCellIdentifier = "NotificationCell"
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: OpenHABNotificationsViewController.tableViewCellIdentifier) as? NotificationTableViewCell
@@ -164,4 +161,10 @@ class OpenHABNotificationsViewController: UITableViewController {
         let theDelegate = UIApplication.shared.delegate as? OpenHABAppDataDelegate?
         return theDelegate??.appData()
     }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
 }

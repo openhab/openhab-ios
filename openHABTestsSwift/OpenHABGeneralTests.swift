@@ -8,10 +8,15 @@
 
 import XCTest
 
-class OpenHABFormatTests: XCTestCase {
+class OpenHABGeneralTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+    }
+
+    func testNamedColors() {
+        XCTAssertEqual("#ff0000", namedColor(toHexString: "red"))
+        XCTAssertEqual(UIColor.red, color(fromHexString: "red"))
     }
 
     func testValueToText() {
@@ -32,5 +37,20 @@ class OpenHABFormatTests: XCTestCase {
         XCTAssertEqual(valueText(1000.0, step: 1), "1000")
         XCTAssertEqual(valueTextWithoutFormatter(1000.0, step: 5.23), "1000.00")
 
+    }
+
+    func testHexString() {
+        let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
+        let hexWithReduce = iPhoneData.reduce("") { $0 + String(format: "%02X", $1) }
+        XCTAssertEqual(hexWithReduce, "54696D206950686F6E65", "hex properly calculated with reduce")
+    }
+
+    func testEndPoints() {
+        let urlc = Endpoint.icon(rootUrl: "http://192.169.2.1",
+                                 version: 2,
+                                 icon: "switch",
+                                 value: "OFF",
+                                 iconType: .svg ).url
+        XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }
 }

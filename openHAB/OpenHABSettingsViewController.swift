@@ -9,12 +9,23 @@
 //
 
 import os.log
-import SDWebImage
 import UIKit
 
 class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate {
-    @IBOutlet var settingsTableView: UITableView!
+    var settingsLocalUrl = ""
+    var settingsRemoteUrl = ""
+    var settingsUsername = ""
+    var settingsPassword = ""
+    var settingsIgnoreSSL = false
+    var settingsDemomode = false
+    var settingsIdleOff = false
+    var settingsIconType: IconType = .png
 
+    var appData: OpenHABDataObject? {
+        return AppDelegate.appDelegate.appData
+    }
+
+    @IBOutlet var settingsTableView: UITableView!
     @IBOutlet weak var demomodeSwitch: UISwitch!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var usernameTextField: UITextField!
@@ -24,14 +35,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet weak var ignoreSSLSwitch: UISwitch!
     @IBOutlet weak var iconSegmentedControl: UISegmentedControl!
 
-    var settingsLocalUrl = ""
-    var settingsRemoteUrl = ""
-    var settingsUsername = ""
-    var settingsPassword = ""
-    var settingsIgnoreSSL = false
-    var settingsDemomode = false
-    var settingsIdleOff = false
-    var settingsIconType: IconType = .png
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,13 +69,14 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         return false
     }
 
-    @objc func cancelButtonPressed(_ sender: Any?) {
+    @objc
+    func cancelButtonPressed(_ sender: Any?) {
         navigationController?.popViewController(animated: true)
         os_log("Cancel button pressed", log: .viewCycle, type: .info)
-
     }
 
-    @objc func saveButtonPressed(_ sender: Any?) {
+    @objc
+    func saveButtonPressed(_ sender: Any?) {
         // TODO: Make a check if any of the preferences has changed
         os_log("Save button pressed", log: .viewCycle, type: .info)
 
@@ -79,7 +86,8 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         navigationController?.popToRootViewController(animated: true)
     }
 
-    @objc func demomodeSwitchChange(_ sender: Any?) {
+    @objc
+    func demomodeSwitchChange(_ sender: Any?) {
         if demomodeSwitch!.isOn {
             os_log("Demo is ON", log: .viewCycle, type: .info)
             disableConnectionSettings()
@@ -111,9 +119,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
         if indexPath.section == 1 && indexPath.row == 2 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
-            let imageCache = SDImageCache.shared
-            imageCache.clearMemory()
-            imageCache.clearDisk()
         }
     }
 
@@ -156,15 +161,14 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     func loadSettings() {
-        let prefs = UserDefaults.standard
-        settingsLocalUrl = prefs.string(forKey: "localUrl") ?? ""
-        settingsRemoteUrl = prefs.string(forKey: "remoteUrl") ?? ""
-        settingsUsername = prefs.string(forKey: "username") ?? ""
-        settingsPassword = prefs.string(forKey: "password") ?? ""
-        settingsIgnoreSSL = prefs.bool(forKey: "ignoreSSL")
-        settingsDemomode = prefs.bool(forKey: "demomode")
-        settingsIdleOff = prefs.bool(forKey: "idleOff")
-        let rawSettingsIconType = prefs.integer(forKey: "iconType")
+        settingsLocalUrl = Preferences.localUrl
+        settingsRemoteUrl = Preferences.remoteUrl
+        settingsUsername = Preferences.username
+        settingsPassword = Preferences.password
+        settingsIgnoreSSL = Preferences.ignoreSSL
+        settingsDemomode = Preferences.demomode
+        settingsIdleOff = Preferences.idleOff
+        let rawSettingsIconType = Preferences.iconType
         settingsIconType = IconType(rawValue: rawSettingsIconType) ?? .png
 
         sendSettingsToWatch()
@@ -182,36 +186,26 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     func saveSettings() {
-        let prefs = UserDefaults.standard
-        prefs.setValue(settingsLocalUrl, forKey: "localUrl")
-        prefs.setValue(settingsRemoteUrl, forKey: "remoteUrl")
-        prefs.setValue(settingsUsername, forKey: "username")
-        prefs.setValue(settingsPassword, forKey: "password")
-        prefs.set(settingsIgnoreSSL, forKey: "ignoreSSL")
-        prefs.set(settingsDemomode, forKey: "demomode")
-        prefs.set(settingsIdleOff, forKey: "idleOff")
-        prefs.set(settingsIconType.rawValue, forKey: "iconType")
+        Preferences.localUrl = settingsLocalUrl
+        Preferences.remoteUrl = settingsRemoteUrl
+        Preferences.username = settingsUsername
+        Preferences.password = settingsPassword
+        Preferences.ignoreSSL = settingsIgnoreSSL
+        Preferences.demomode = settingsDemomode
+        Preferences.idleOff = settingsIdleOff
+        Preferences.iconType = settingsIconType.rawValue
 
         sendSettingsToWatch()
     }
 
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
-    }
-
     func sendSettingsToWatch() {
-        let prefs = UserDefaults.standard
-
         WatchService.singleton.sendToWatch(
-            prefs.string(forKey: "localUrl") ?? "",
-            remoteUrl: prefs.string(forKey: "remoteUrl") ?? "",
-            username: prefs.string(forKey: "username") ?? "",
-            password: prefs.string(forKey: "password") ?? "",
+            Preferences.localUrl,
+            remoteUrl: Preferences.remoteUrl,
+            username: Preferences.username,
+            password: Preferences.password,
             sitemapName: "watch",
-            ignoreSSL: prefs.bool(forKey: "ignoreSSL"))
+            ignoreSSL: Preferences.ignoreSSL)
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
 }
