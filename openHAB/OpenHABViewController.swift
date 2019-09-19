@@ -1002,7 +1002,11 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         if cell is FrameUITableViewCell {
             cell.backgroundColor = UIColor.groupTableViewBackground
         } else {
-            cell.backgroundColor = UIColor.white
+            if #available(iOS 13.0, *) {
+                cell.backgroundColor = UIColor.systemBackground
+            } else {
+                cell.backgroundColor = UIColor.white
+            }     
         }
 
         if let cell = cell as? GenericUITableViewCell {
