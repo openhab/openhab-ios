@@ -48,7 +48,7 @@ class OpenHABXMLParserTests: XCTestCase {
         }
     }
 
-    func testFuzisingleXMLWidgetDecoder() {
+    func testFuziSingleXMLWidgetDecoder() {
         var widget: OpenHABWidget
 
         do {
@@ -64,7 +64,7 @@ class OpenHABXMLParserTests: XCTestCase {
         }
     }
 
-    func testnestedXMLWidgetDecoder() {
+    func testNestedXMLWidgetDecoder() {
         var widget: OpenHABWidget
 
         do {
@@ -80,7 +80,7 @@ class OpenHABXMLParserTests: XCTestCase {
         }
     }
 
-    func testshortUrlXMLWidgetDecoder() {
+    func testShortUrlXMLWidgetDecoder() {
         var widget: OpenHABWidget
 
         do {
