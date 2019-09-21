@@ -6,9 +6,10 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
+import os.signpost
 import XCTest
 
-class OpenHABTestsSwift: XCTestCase {
+class OpenHABJSONParserTests: XCTestCase {
 
     let decoder = JSONDecoder()
 
@@ -21,11 +22,6 @@ class OpenHABTestsSwift: XCTestCase {
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testNamedColors() {
-        XCTAssertEqual("#ff0000", namedColor(toHexString: "red"))
-        XCTAssertEqual(UIColor.red, color(fromHexString: "red"))
     }
 
     func testJSONNotificationDecoder() {
@@ -41,7 +37,7 @@ class OpenHABTestsSwift: XCTestCase {
 
         do {
             let codingData = try decoder.decode([OpenHABNotification.CodingData].self, from: json)
-            XCTAssert(codingData[0].message == "Light Küche was changed", "Message properly parsed")
+            XCTAssertEqual(codingData[0].message, "Light Küche was changed", "Message properly parsed")
         } catch {
             XCTFail("should not throw \(error)")
         }
@@ -51,7 +47,7 @@ class OpenHABTestsSwift: XCTestCase {
         let data = Data(jsonSitemap3.utf8)
         do {
             let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: data)
-            XCTAssert(codingData[0].openHABSitemap.homepageLink == "https://192.168.2.63:8444/rest/sitemaps/myHome/myHome", "Sitemap properly parsed")
+            XCTAssertEqual(codingData[0].openHABSitemap.homepageLink, "https://192.168.2.63:8444/rest/sitemaps/myHome/myHome", "Sitemap properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -66,7 +62,7 @@ class OpenHABTestsSwift: XCTestCase {
         let data = Data(json.utf8)
         do {
             let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: data)
-            XCTAssert(codingData[0].openHABSitemap.homepageLink == "http://192.xxx:8080/rest/sitemaps/Haus/Haus", "Sitemap properly parsed")
+            XCTAssertEqual(codingData[0].openHABSitemap.homepageLink, "http://192.xxx:8080/rest/sitemaps/Haus/Haus", "Sitemap properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -98,7 +94,7 @@ class OpenHABTestsSwift: XCTestCase {
 
         do {
             let codingData = try decoder.decode(OpenHABItem.CodingData.self, from: json)
-            XCTAssert(codingData.type == "Switch", "Item properly parsed")
+            XCTAssertEqual(codingData.type, "Switch", "Item properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -111,7 +107,7 @@ class OpenHABTestsSwift: XCTestCase {
         let data = Data(json.utf8)
         do {
             let decoded = try decoder.decode([OpenHABWidgetMapping].self, from: data)
-            XCTAssert(decoded[0].label == "Overwrite", "WidgetMapping properly parsed")
+            XCTAssertEqual(decoded[0].label, "Overwrite", "WidgetMapping properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -151,7 +147,7 @@ class OpenHABTestsSwift: XCTestCase {
 
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
-            XCTAssert(codingData.widgetId == "0000", "Widget properly parsed")
+            XCTAssertEqual(codingData.widgetId, "0000", "Widget properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -164,7 +160,7 @@ class OpenHABTestsSwift: XCTestCase {
         let data = Data(json.utf8)
         do {
             let decoded = try decoder.decode(OpenHABLinkedPage.self, from: data)
-            XCTAssert(decoded.pageId == "1302", "LinkedPage properly parsed")
+            XCTAssertEqual(decoded.pageId, "1302", "LinkedPage properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -177,16 +173,10 @@ class OpenHABTestsSwift: XCTestCase {
         let data = Data(json.utf8)
         do {
             let decoded = try decoder.decode(OpenHABItem.CodingData.self, from: data)
-            XCTAssert(decoded.name == "lcnDFFOst", "LinkedPage properly parsed")
+            XCTAssertEqual(decoded.name, "lcnDFFOst", "LinkedPage properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
-    }
-
-    func testHexString() {
-        let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
-        let hexWithReduce = iPhoneData.reduce("") { $0 + String(format: "%02X", $1) }
-        XCTAssert (hexWithReduce == "54696D206950686F6E65", "hex properly calculated with reduce")
     }
 
     func testJSONLinkedPage() {
@@ -278,7 +268,7 @@ class OpenHABTestsSwift: XCTestCase {
 """.data(using: .utf8)!
         do {
             let codingData = try decoder.decode(OpenHABLinkedPage.self, from: json)
-            XCTAssert(codingData.pageId == "1304", "OpenHABLinkedPage properly parsed")
+            XCTAssertEqual(codingData.pageId, "1304", "OpenHABLinkedPage properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -303,7 +293,7 @@ class OpenHABTestsSwift: XCTestCase {
 """.data(using: .utf8)!
         do {
             let codingData = try decoder.decode([OpenHABWidgetMapping].self, from: json)
-            XCTAssert(codingData[0].label == "Overwrite", "WidgetMapping properly parsed")
+            XCTAssertEqual(codingData[0].label, "Overwrite", "WidgetMapping properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -369,7 +359,7 @@ class OpenHABTestsSwift: XCTestCase {
 """.data(using: .utf8)!
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
-            XCTAssert(codingData.widgetId == "01", "Widget properly parsed")
+            XCTAssertEqual(codingData.widgetId, "01", "Widget properly parsed")
             XCTAssert(codingData.mappings.isEmpty, "No mappings found")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
@@ -379,8 +369,8 @@ class OpenHABTestsSwift: XCTestCase {
     func testJSONSitemapPage() {
         do {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: jsonSitemap)
-            XCTAssert(codingData.leaf == false, "OpenHABSitemapPage properly parsed")
-            XCTAssert(codingData.widgets?[0].widgetId == "00", "widget properly parsed")
+            XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
+            XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -389,8 +379,8 @@ class OpenHABTestsSwift: XCTestCase {
     func testJSONSitemapPage2() {
         do {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: jsonSitemap2)
-            XCTAssert(codingData.leaf == false, "OpenHABSitemapPage properly parsed")
-            XCTAssert(codingData.widgets?[0].widgetId == "00", "widget properly parsed")
+            XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
+            XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -403,7 +393,7 @@ class OpenHABTestsSwift: XCTestCase {
 """.data(using: .utf8)!
         do {
             let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: json)
-            XCTAssert(codingData.page.link == "https://192.168.2.15:8444/rest/sitemaps/watch/watch", "OpenHABSitemapPage properly parsed")
+            XCTAssertEqual(codingData.page.link, "https://192.168.2.15:8444/rest/sitemaps/watch/watch", "OpenHABSitemapPage properly parsed")
             //        XCTAssert(codingData.openHABSitemapPage. widgets[0].type == "Frame", "")
             //        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
         } catch {
@@ -411,15 +401,6 @@ class OpenHABTestsSwift: XCTestCase {
         }
     }
     // swiftlint:enable line_length
-
-    func testEndPoints() {
-       let urlc = Endpoint.icon(rootUrl: "http://192.169.2.1",
-                             version: 2,
-                             icon: "switch",
-                             value: "OFF",
-                             iconType: .svg ).url
-        XCTAssert(urlc == URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
-    }
 
     func testParsingforRollerShutter() {
         let jsonInputForGroup = """
@@ -461,9 +442,65 @@ class OpenHABTestsSwift: XCTestCase {
         do {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: data)
             let widget = codingData.widgets?[0]
-            XCTAssert( widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter", "")
-            XCTAssert(codingData.widgets?[0].item?.groupType == "Rollershutter", "")
-            XCTAssert(codingData.widgets?[0].item?.type == "Group", "")
+            XCTAssert(widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter", "")
+            XCTAssertEqual(codingData.widgets?[0].item?.groupType, "Rollershutter")
+            XCTAssertEqual(codingData.widgets?[0].item?.type, "Group")
+        } catch {
+            XCTFail("Failed parsing")
+        }
+    }
+
+    func testJSONLargeSitemapParseSwift() {
+        let log = OSLog(
+            subsystem: "org.openhab.app",
+            category: "RecordDecoding"
+        )
+        let signpostID = OSSignpostID(log: log)
+
+        do {
+            let jsonFile = "LargeSitemap"
+            os_signpost(
+                .begin,
+                log: log,
+                name: "Read File",
+                signpostID: signpostID,
+                "%{public}s",
+                jsonFile
+            )
+            let testBundle = Bundle(for: type(of: self))
+            let url = testBundle.url(forResource: jsonFile, withExtension: "json")
+            let contents = try Data(contentsOf: url!)
+            os_signpost(
+                .end,
+                log: log,
+                name: "Read File",
+                signpostID: signpostID,
+                "%{public}s",
+                jsonFile
+            )
+
+            os_signpost(
+                .begin,
+                log: log,
+                name: "Decode JSON",
+                signpostID: signpostID,
+                "Begin"
+            )
+            let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: contents)
+            os_signpost(
+                .end,
+                log: log,
+                name: "Decode JSON",
+                signpostID: signpostID,
+                "End"
+            )
+
+            let widget = codingData.page.widgets?[0]
+            XCTAssertEqual(widget?.label, "Flat Scenes")
+            XCTAssertEqual(widget?.widgets[0].label, "Scenes")
+            XCTAssertEqual(codingData.page.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
+            let widget2 = codingData.page.widgets?[10]
+            XCTAssertEqual(widget2?.widgets[0].label, "Admin Items")
         } catch {
             XCTFail("Failed parsing")
         }

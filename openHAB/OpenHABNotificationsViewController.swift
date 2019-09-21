@@ -53,39 +53,30 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
     func loadNotifications() {
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-
-        if let notificationsUrl = Endpoint.notification(prefsURL: Preferences.remoteUrl).url {
-            let notificationsRequest = URLRequest(url: notificationsUrl)
-
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-
-            let notificationOperation = NetworkConnection.shared.manager.request(notificationsRequest)
-                .validate(statusCode: 200..<300)
-                .responseData { (response) in
-                    switch response.result {
-                    case .success:
-                        if let data = response.result.value {
-                            do {
-                                let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
-                                for codingDatum in codingDatas {
-                                    self.notifications.add(codingDatum.openHABNotification)
-                                }
-                            } catch {
-                                os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                            }
-
-                            self.refreshControl?.endRefreshing()
-                            self.tableView.reloadData()
-                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        NetworkConnection.notification(urlString: Preferences.remoteUrl) { (response) in
+            switch response.result {
+            case .success:
+                if let data = response.result.value {
+                    do {
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                        let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
+                        for codingDatum in codingDatas {
+                            self.notifications.add(codingDatum.openHABNotification)
                         }
-                    case .failure(let error):
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                        os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                        self.refreshControl?.endRefreshing()
+                    } catch {
+                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
+
+                    self.refreshControl?.endRefreshing()
+                    self.tableView.reloadData()
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
-            notificationOperation.resume()
+            case .failure(let error):
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                self.refreshControl?.endRefreshing()
+            }
         }
     }
 
@@ -118,26 +109,14 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
         }
 
-        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl, version: appData!.openHABVersion, icon: notification.icon, value: "", iconType: .png).url {
-                    var imageRequest = URLRequest(url: iconUrl)
-                    imageRequest.timeoutInterval = 10.0
-
-                    let imageOperation = NetworkConnection.shared.manager.request(imageRequest)
-                        .validate(statusCode: 200..<300)
-                        .responseData { (response) in
-                            switch response.result {
-                            case .success:
-                                if let data = response.data {
-                                    cell?.imageView?.image = UIImage(data: data)
-                                }
-                            case .failure:
-                                cell?.imageView?.image = UIImage(named: "icon-76x76.png")
-                            }
-                        }
-                    imageOperation.resume()
-            } else {
-                cell?.imageView?.image = UIImage(named: "icon-29x29.png")
-            }
+        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl,
+                                       version: appData!.openHABVersion,
+                                       icon: notification.icon,
+                                       value: "",
+                                       iconType: .png).url {
+            cell?.imageView?.kf.setImage (with: iconUrl,
+                                          placeholder: UIImage(named: "icon-76x76.png"))
+        }
 
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
             cell?.preservesSuperviewLayoutMargins = false

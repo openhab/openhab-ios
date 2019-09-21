@@ -102,44 +102,34 @@ class OpenHABDrawerTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         os_log("OpenHABDrawerTableViewController viewWillAppear", log: .viewCycle, type: .info)
 
-        if let sitemapsUrl = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
-            var sitemapsRequest = URLRequest(url: sitemapsUrl)
-            sitemapsRequest.timeoutInterval = 10.0
+        NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { (response) in
+            switch response.result {
+            case .success:
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("Sitemap response", log: .viewCycle, type: .info)
 
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+                self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
 
-            let sitemapOperation = NetworkConnection.shared.manager.request(sitemapsRequest)
-                .validate(statusCode: 200..<300)
-                .responseData { (response) in
-                    switch response.result {
-                    case .success:
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                        os_log("Sitemap response", log: .viewCycle, type: .info)
-
-                        self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
-
-                        if self.sitemaps.last?.name == "_default" {
-                            self.sitemaps = Array(self.sitemaps.dropLast())
-                        }
-
-                        // Sort the sitemaps alphabetically.
-                        self.sitemaps.sort { $0.name < $1.name }
-                        self.drawerItems.removeAll()
-                        if self.drawerTableType == .with {
-                            self.setStandardDrawerItems()
-                        }
-                        self.tableView.reloadData()
-                    case .failure(let error):
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                        os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                        self.drawerItems.removeAll()
-                        if self.drawerTableType == .with {
-                            self.setStandardDrawerItems()
-                        }
-                        self.tableView.reloadData()
-                    }
+                if self.sitemaps.last?.name == "_default" {
+                    self.sitemaps = Array(self.sitemaps.dropLast())
                 }
-            sitemapOperation.resume()
+
+                // Sort the sitemaps alphabetically.
+                self.sitemaps.sort { $0.name < $1.name }
+                self.drawerItems.removeAll()
+                if self.drawerTableType == .with {
+                    self.setStandardDrawerItems()
+                }
+                self.tableView.reloadData()
+            case .failure(let error):
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                self.drawerItems.removeAll()
+                if self.drawerTableType == .with {
+                    self.setStandardDrawerItems()
+                }
+                self.tableView.reloadData()
+            }
         }
     }
 

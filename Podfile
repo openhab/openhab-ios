@@ -21,4 +21,5 @@ target 'openHABTestsSwift' do
     inherit! :search_paths
     pod 'Alamofire', '~> 4.0'
     pod 'Fuzi', '~> 3.1'
+    pod 'Kingfisher', '~> 5.0'
 end

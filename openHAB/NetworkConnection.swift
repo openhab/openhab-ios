@@ -6,7 +6,6 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import Alamofire
-import Kingfisher
 import os.log
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
@@ -54,57 +53,145 @@ let onReceiveSessionChallenge = { (session: URLSession, challenge: URLAuthentica
     }
 }
 
- class OpenHABAccessTokenAdapter: RequestAdapter {
-
-    var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
-    }
-
-    func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-        var urlRequest = urlRequest
-
-        guard let user = appData?.openHABUsername, let password = appData?.openHABPassword else { return urlRequest }
-
-        if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
-            urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
-        }
-
-        return urlRequest
-    }
-}
-
-extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
-
-    func modified(for request: URLRequest) -> URLRequest? {
-        do {
-            return try adapt(request)
-        } catch {
-            return request
-        }
-    }
-}
-
 class NetworkConnection {
 
     static var shared: NetworkConnection!
+
+    static var atmosphereTrackingId = ""
 
     var clientCertificateManager = ClientCertificateManager()
     var serverCertificateManager: ServerCertificateManager!
     var manager: Alamofire.SessionManager!
     var rootUrl: URL?
 
-    init(ignoreSSL: Bool) {
+    init(ignoreSSL: Bool,
+         manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
+                                                  delegate: SessionDelegate() ),
+         adapter: RequestAdapter?
+        ) {
         serverCertificateManager = ServerCertificateManager(ignoreCertificates: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
-        manager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default, delegate: SessionDelegate())
-        manager.startRequestsImmediately = false
-        manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
-        manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
-        manager.adapter = OpenHABAccessTokenAdapter()
+        self.manager = manager
+        self.manager.startRequestsImmediately = false
+        self.manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
+        self.manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
+        self.manager.adapter = adapter
     }
 
-    class func initialize(ignoreSSL: Bool) {
-        shared = NetworkConnection(ignoreSSL: ignoreSSL)
+    class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {
+        shared = NetworkConnection(ignoreSSL: ignoreSSL, adapter: adapter)
+    }
+
+    static func register(prefsURL: String,
+                         deviceToken: String,
+                         deviceId: String,
+                         deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+
+        if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
+            load(from: url, completionHandler: completionHandler)
+        }
+    }
+
+    static func sitemaps(openHABRootUrl: String,
+                         completionHandler: @escaping (DataResponse<Data>) -> Void) {
+
+        if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
+            load(from: url, completionHandler: completionHandler)
+        }
+    }
+
+    static func tracker(openHABRootUrl: String,
+                        completionHandler: @escaping (DataResponse<Data>) -> Void) {
+        if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
+            load(from: url, completionHandler: completionHandler)
+        }
+    }
+
+    static func notification(urlString: String,
+                             completionHandler: @escaping (DataResponse<Data>) -> Void) {
+
+        if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
+            load(from: notificationsUrl, completionHandler: completionHandler)
+        }
+    }
+
+    static func sendCommand(item: OpenHABItem, commandToSend command: String?) -> DataRequest? {
+
+        if let commandUrl = URL(string: item.link) {
+            var commandRequest = URLRequest(url: commandUrl)
+
+            commandRequest.httpMethod = "POST"
+            commandRequest.httpBody = command?.data(using: .utf8)
+            commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
+
+            os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
+            let link = item.link
+            os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
+            os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
+
+            return NetworkConnection.shared.manager.request(commandRequest)
+                .validate(statusCode: 200..<300)
+                .responseData { (response) in
+                    switch response.result {
+                    case .success:
+                        os_log("Command sent!", log: .remoteAccess, type: .info)
+                    case .failure(let error):
+                        os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    }
+                }
+        }
+        return nil
+    }
+
+    static func page(pageUrl: String,
+                     longPolling: Bool,
+                     openHABVersion: Int,
+                     completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+
+        if pageUrl == "" {
+        return nil
+        }
+        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+
+        guard let pageToLoadUrl = URL(string: pageUrl) else { return nil }
+        var pageRequest = URLRequest(url: pageToLoadUrl)
+
+        // We accept XML only if openHAB is 1.X
+        if openHABVersion == 1 {
+            pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
+        }
+
+        pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
+        if longPolling {
+            os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
+            pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
+            pageRequest.timeoutInterval = 300.0
+        } else {
+            atmosphereTrackingId = "0"
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            pageRequest.timeoutInterval = 10.0
+        }
+        pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
+
+        os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
+
+        return NetworkConnection.shared.manager.request(pageRequest)
+        .validate(statusCode: 200..<300)
+            .responseData (completionHandler: completionHandler)
+
+    }
+
+    static func load(from url: URL, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10.0
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        }
+        os_log("Firing request", log: .viewCycle, type: .debug)
+        let task = NetworkConnection.shared.manager.request(request)
+            .validate(statusCode: 200..<300)
+            .responseData (completionHandler: completionHandler)
+        task.resume()
     }
 
     func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
