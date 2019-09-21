@@ -75,9 +75,8 @@ struct Preferences {
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
-    static var defaultSitemap: String {
-        get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
-            return string }
+    static var defaultSitemap: String? {
+        get { return defaults.string(forKey: #function) }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 

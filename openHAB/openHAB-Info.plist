@@ -67,8 +67,6 @@
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>MainLaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
 	<key>UIMainStoryboardFile~ipad</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>

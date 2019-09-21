@@ -20,7 +20,6 @@ import WatchConnectivity
 
 var player: AVAudioPlayer?
 
-@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static var appDelegate: AppDelegate!
@@ -49,6 +48,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // init Firebase crash reporting
         FirebaseApp.configure()
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil) // Main is the name of storyboard
+
+        window = UIWindow()
+        self.window?.rootViewController = storyboard.instantiateInitialViewController()
+        self.window?.makeKeyAndVisible()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
 

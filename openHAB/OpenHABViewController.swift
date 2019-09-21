@@ -580,7 +580,7 @@ class OpenHABViewController: UIViewController {
     func loadSettings() {
         openHABUsername = Preferences.username
         openHABPassword = Preferences.password
-        defaultSitemap = Preferences.defaultSitemap
+        defaultSitemap = Preferences.defaultSitemap ?? "demo"
         idleOff = Preferences.idleOff
         let rawIconType = Preferences.iconType
         iconType = IconType(rawValue: rawIconType) ?? .png
