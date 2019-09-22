@@ -136,7 +136,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         if segue.identifier == "showSelectSitemap" {
             os_log("OpenHABSettingsViewController showSelectSitemap", log: .viewCycle, type: .info)
             let dest = segue.destination as! OpenHABDrawerTableViewController
-            dest.drawerTableType = .without
+            dest.drawerTableType = .withoutStandardMenuEntries
             dest.openHABRootUrl = appData?.openHABRootUrl ?? ""
             dest.delegate = appData?.rootViewController
             updateSettings()

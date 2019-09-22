@@ -118,7 +118,7 @@ class OpenHABViewController: UIViewController {
         super.viewDidLoad()
         os_log("OpenHABViewController viewDidLoad", log: .default, type: .info)
 
-        pageNetworkStatus = nil //NetworkStatus(rawValue: -1)
+        pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -263,14 +263,20 @@ class OpenHABViewController: UIViewController {
     fileprivate func setupSideMenu() {
         // Define the menus
 
-        SideMenuManager.default.menuRightNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? UISideMenuNavigationController
+        SideMenuManager.default.rightMenuNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? SideMenuNavigationController
 
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
-        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
-        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
+        SideMenuManager.default.addPanGestureToPresent(toView: self.navigationController!.navigationBar)
+        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
 
-        SideMenuManager.default.menuFadeStatusBar = false
+        let presentationStyle: SideMenuPresentationStyle = .menuSlideIn
+        presentationStyle.presentingEndAlpha = 0
+        var settings = SideMenuSettings()
+        settings.presentationStyle = presentationStyle
+        settings.statusBarEndAlpha = 0
+
+        SideMenuManager.default.rightMenuNavigationController?.settings = settings
     }
 
     func configureTableView() {
@@ -353,15 +359,15 @@ class OpenHABViewController: UIViewController {
         switch segue.identifier {
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
         case "sideMenu":
-            let navigation = segue.destination as? UINavigationController
+            let navigation = segue.destination as? SideMenuNavigationController
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
             drawer?.delegate = self
-            drawer?.drawerTableType = .with
+            drawer?.drawerTableType = .withStandardMenuEntries
         case "showSelectSitemap":
             let dest = segue.destination as! OpenHABDrawerTableViewController
             dest.openHABRootUrl = openHABRootUrl
-            dest.drawerTableType = .without
+            dest.drawerTableType = .withoutStandardMenuEntries
             dest.delegate = self
         default: break
         }
@@ -647,7 +653,7 @@ class OpenHABViewController: UIViewController {
         }
     }
 
-    func sideMenuWillDisappear(menu: UISideMenuNavigationController, animated: Bool) {
+    func sideMenuWillDisappear(menu: SideMenuNavigationController, animated: Bool) {
         self.hamburgerButton.setStyle(.hamburger, animated: animated)
     }
 
@@ -841,6 +847,8 @@ extension OpenHABViewController: ModalHandler {
         switch to {
         case .root:
             navigationController?.popToRootViewController(animated: true)
+            defaultSitemap = Preferences.defaultSitemap
+            selectSitemap()
         case .settings:
             if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
                 navigationController?.pushViewController(newViewController, animated: true)
@@ -858,8 +866,8 @@ extension OpenHABViewController: ModalHandler {
 }
 
 // MARK: - UISideMenuNavigationControllerDelegate
-extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
-    func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
+extension OpenHABViewController: SideMenuNavigationControllerDelegate {
+    func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
         self.hamburgerButton.setStyle(.arrowRight, animated: animated)
 
         guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
@@ -869,7 +877,7 @@ extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
         }
         drawer.openHABRootUrl = openHABRootUrl
         drawer.delegate = self
-        drawer.drawerTableType = .with
+        drawer.drawerTableType = .withStandardMenuEntries
     }
 }
 
@@ -994,7 +1002,11 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         if cell is FrameUITableViewCell {
             cell.backgroundColor = UIColor.groupTableViewBackground
         } else {
-            cell.backgroundColor = UIColor.white
+            if #available(iOS 13.0, *) {
+                cell.backgroundColor = UIColor.systemBackground
+            } else {
+                cell.backgroundColor = UIColor.white
+            }     
         }
 
         if let cell = cell as? GenericUITableViewCell {

@@ -56,8 +56,8 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
 }
 
 enum DrawerTableType {
-    case with
-    case without
+    case withStandardMenuEntries
+    case withoutStandardMenuEntries
 }
 
 class OpenHABDrawerTableViewController: UITableViewController {
@@ -78,8 +78,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     init(drawerTableType: DrawerTableType?) {
-        self.drawerTableType = drawerTableType
         super.init(nibName: nil, bundle: nil)
+        self.drawerTableType = drawerTableType
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -92,7 +92,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems = []
         sitemaps = []
         loadSettings()
-        if drawerTableType == .with {
+        if drawerTableType == .withStandardMenuEntries {
             setStandardDrawerItems()
         }
         os_log("OpenHABDrawerTableViewController did load", log: .viewCycle, type: .info)
@@ -117,7 +117,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.name < $1.name }
                 self.drawerItems.removeAll()
-                if self.drawerTableType == .with {
+                if self.drawerTableType == .withStandardMenuEntries {
                     self.setStandardDrawerItems()
                 }
                 self.tableView.reloadData()
@@ -125,7 +125,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
-                if self.drawerTableType == .with {
+                if self.drawerTableType == .withStandardMenuEntries {
                     self.setStandardDrawerItems()
                 }
                 self.tableView.reloadData()
@@ -213,12 +213,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
             Preferences.defaultSitemap = sitemap.name
             appData?.rootViewController?.pageUrl = ""
             switch drawerTableType {
-            case .with?:
+            case .withStandardMenuEntries?:
                 dismiss(animated: true) {
                     self.delegate?.modalDismissed(to: .root)
                 }
-            case .without?:
-                appData?.rootViewController?.pageUrl = ""
+            case .withoutStandardMenuEntries?:
                 navigationController?.popToRootViewController(animated: true)
             case .none:
                 break

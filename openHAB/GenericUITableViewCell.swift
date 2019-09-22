@@ -40,14 +40,22 @@ class GenericUITableViewCell: UITableViewCell {
                     customTextLabel?.textColor = color
                 }
             } else {
-                customTextLabel?.textColor = UIColor.black
+                if #available(iOS 13.0, *) {
+                    customTextLabel?.textColor = UIColor.label
+                } else {
+                    customTextLabel?.textColor = UIColor.black
+                }
             }
             if _widget.valuecolor != "" {
                 if let color = color(fromHexString: self.widget?.valuecolor) {
                     customDetailTextLabel?.textColor = color
                 }
             } else {
-                customDetailTextLabel?.textColor = UIColor.lightGray
+                if #available(iOS 13.0, *) {
+                    customDetailTextLabel?.textColor = UIColor.secondaryLabel
+                } else {
+                    customDetailTextLabel?.textColor = UIColor.lightGray
+                }
             }
         }
     }
