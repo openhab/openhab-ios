@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Sitemap: NSObject {
+struct Sitemap {
 
     let frames: [Frame]
 
@@ -18,7 +18,7 @@ class Sitemap: NSObject {
 }
 
 extension Sitemap {
-    convenience init? (with codingData: OpenHABSitemap.CodingData?) {
+    init? (with codingData: OpenHABSitemap.CodingData?) {
         let frame = Frame.init(with: codingData)!
         self.init(frames: [frame])
     }

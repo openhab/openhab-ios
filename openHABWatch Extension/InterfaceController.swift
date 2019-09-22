@@ -6,10 +6,14 @@
 //  Copyright © 2018 private. All rights reserved.
 //
 
-import Foundation
-import WatchKit
+import SwiftUI
 
-class InterfaceController: WKInterfaceController {
+class InterfaceController: WKHostingController<OpenHABSitemap> {
+
+    override var body: OpenHABSitemap {
+        OpenHABSitemap(name: <#T##String#>, icon: <#T##String#>, label: <#T##String#>, link: <#T##String#>, leaf: <#T##Bool#>, homepageLink: <#T##String#>)
+    }
+
 
     @IBOutlet weak var activityImage: WKInterfaceImage!
     @IBOutlet weak var buttonTable: WKInterfaceTable!

@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Item: NSObject {
+struct Item {
 
     let name: String
     let label: String
@@ -24,7 +24,7 @@ class Item: NSObject {
 }
 
 extension Item {
-    convenience init? (with codingData: OpenHABItem.CodingData?) {
+    init? (with codingData: OpenHABItem.CodingData?) {
         guard let codingData = codingData else { return nil }
         self.init(name: codingData.name, label: codingData.label ?? "", state: codingData.state, link: codingData.link)
     }

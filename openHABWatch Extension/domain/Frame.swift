@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Frame: NSObject {
+struct Frame {
 
     let items: [Item]
 
@@ -18,7 +18,7 @@ class Frame: NSObject {
 }
 
 extension Frame {
-    convenience init? (with codingData: OpenHABSitemap.CodingData?) {
+     init? (with codingData: OpenHABSitemap.CodingData?) {
         guard let widgets = codingData?.page.widgets else { return nil }
         self.init(items: widgets.compactMap { Item.init(with: $0.item) })
     }
