@@ -52,11 +52,8 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var labelValue: String? {
 
         // Swift 5 raw strings
-        let pattern = #"\[(.*?)\]"#
-        let string = label as NSString
-
-        let regex = try? NSRegularExpression(pattern: pattern, options: [])
-        guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: string.length)) else { return nil }
+        let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [])
+        guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: (label as NSString).length)) else { return nil }
         guard let range = Range(match.range(at: 1), in: label) else { return nil }
         return String(label[range])
 
