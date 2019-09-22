@@ -78,8 +78,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     init(drawerTableType: DrawerTableType?) {
-        self.drawerTableType = drawerTableType
         super.init(nibName: nil, bundle: nil)
+        self.drawerTableType = drawerTableType
     }
 
     required init?(coder aDecoder: NSCoder) {

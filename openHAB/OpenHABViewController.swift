@@ -118,7 +118,7 @@ class OpenHABViewController: UIViewController {
         super.viewDidLoad()
         os_log("OpenHABViewController viewDidLoad", log: .default, type: .info)
 
-        pageNetworkStatus = nil //NetworkStatus(rawValue: -1)
+        pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -841,6 +841,8 @@ extension OpenHABViewController: ModalHandler {
         switch to {
         case .root:
             navigationController?.popToRootViewController(animated: true)
+            defaultSitemap = Preferences.defaultSitemap
+            selectSitemap()
         case .settings:
             if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
                 navigationController?.pushViewController(newViewController, animated: true)
