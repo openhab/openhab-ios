@@ -13,7 +13,7 @@ import os.log
 import SideMenu
 import UIKit
 
-class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavigationControllerDelegate {
+class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigationControllerDelegate {
     static let tableViewCellIdentifier = "NotificationCell"
 
     var notifications: NSMutableArray = []
@@ -88,7 +88,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
-        present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
+        present(SideMenuManager.default.rightMenuNavigationController!, animated: true, completion: nil)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

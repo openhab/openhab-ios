@@ -263,12 +263,12 @@ class OpenHABViewController: UIViewController {
     fileprivate func setupSideMenu() {
         // Define the menus
 
-        SideMenuManager.default.menuRightNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? UISideMenuNavigationController
+        SideMenuManager.default.rightMenuNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? SideMenuNavigationController
 
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
-        SideMenuManager.default.menuAddPanGestureToPresent(toView: self.navigationController!.navigationBar)
-        SideMenuManager.default.menuAddScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
+        SideMenuManager.default.addPanGestureToPresent(toView: self.navigationController!.navigationBar)
+        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
 
         SideMenuManager.default.menuFadeStatusBar = false
     }
@@ -353,15 +353,15 @@ class OpenHABViewController: UIViewController {
         switch segue.identifier {
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
         case "sideMenu":
-            let navigation = segue.destination as? UINavigationController
+            let navigation = segue.destination as? SideMenuNavigationController
             let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
             drawer?.openHABRootUrl = openHABRootUrl
             drawer?.delegate = self
-            drawer?.drawerTableType = .with
+            drawer?.drawerTableType = .withStandardMenuEntries
         case "showSelectSitemap":
             let dest = segue.destination as! OpenHABDrawerTableViewController
             dest.openHABRootUrl = openHABRootUrl
-            dest.drawerTableType = .without
+            dest.drawerTableType = .withoutStandardMenuEntries
             dest.delegate = self
         default: break
         }
@@ -647,7 +647,7 @@ class OpenHABViewController: UIViewController {
         }
     }
 
-    func sideMenuWillDisappear(menu: UISideMenuNavigationController, animated: Bool) {
+    func sideMenuWillDisappear(menu: SideMenuNavigationController, animated: Bool) {
         self.hamburgerButton.setStyle(.hamburger, animated: animated)
     }
 
@@ -858,8 +858,8 @@ extension OpenHABViewController: ModalHandler {
 }
 
 // MARK: - UISideMenuNavigationControllerDelegate
-extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
-    func sideMenuWillAppear(menu: UISideMenuNavigationController, animated: Bool) {
+extension OpenHABViewController: SideMenuNavigationControllerDelegate {
+    func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
         self.hamburgerButton.setStyle(.arrowRight, animated: animated)
 
         guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
@@ -869,7 +869,7 @@ extension OpenHABViewController: UISideMenuNavigationControllerDelegate {
         }
         drawer.openHABRootUrl = openHABRootUrl
         drawer.delegate = self
-        drawer.drawerTableType = .with
+        drawer.drawerTableType = .withStandardMenuEntries
     }
 }
 
