@@ -7,11 +7,11 @@ PODS:
     - Fabric (~> 1.7.2)
   - DynamicButton (6.2.0)
   - Fabric (1.7.13)
-  - Firebase/Core (6.8.0):
+  - Firebase/Core (6.8.1):
     - Firebase/CoreOnly
     - FirebaseAnalytics (= 6.1.1)
-  - Firebase/CoreOnly (6.8.0):
-    - FirebaseCore (= 6.2.2)
+  - Firebase/CoreOnly (6.8.1):
+    - FirebaseCore (= 6.2.3)
   - FirebaseAnalytics (6.1.1):
     - FirebaseCore (~> 6.2)
     - FirebaseInstanceID (~> 4.2)
@@ -21,7 +21,7 @@ PODS:
     - GoogleUtilities/Network (~> 6.0)
     - "GoogleUtilities/NSData+zlib (~> 6.0)"
     - nanopb (~> 0.3)
-  - FirebaseCore (6.2.2):
+  - FirebaseCore (6.2.3):
     - FirebaseCoreDiagnostics (~> 1.0)
     - FirebaseCoreDiagnosticsInterop (~> 1.0)
     - GoogleUtilities/Environment (~> 6.2)
@@ -32,7 +32,7 @@ PODS:
     - GoogleUtilities/Environment (~> 6.2)
     - GoogleUtilities/Logger (~> 6.2)
   - FirebaseCoreDiagnosticsInterop (1.0.0)
-  - FirebaseInstanceID (4.2.4):
+  - FirebaseInstanceID (4.2.5):
     - FirebaseCore (~> 6.0)
     - GoogleUtilities/Environment (~> 6.0)
     - GoogleUtilities/UserDefaults (~> 6.0)
@@ -45,26 +45,26 @@ PODS:
     - "GoogleUtilities/NSData+zlib (~> 6.0)"
     - nanopb (~> 0.3)
   - GoogleDataTransport (1.2.0)
-  - GoogleDataTransportCCTSupport (1.0.3):
+  - GoogleDataTransportCCTSupport (1.0.4):
     - GoogleDataTransport (~> 1.2)
     - nanopb
-  - GoogleUtilities/AppDelegateSwizzler (6.2.5):
+  - GoogleUtilities/AppDelegateSwizzler (6.3.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (6.2.5)
-  - GoogleUtilities/Logger (6.2.5):
+  - GoogleUtilities/Environment (6.3.0)
+  - GoogleUtilities/Logger (6.3.0):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (6.2.5):
+  - GoogleUtilities/MethodSwizzler (6.3.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (6.2.5):
+  - GoogleUtilities/Network (6.3.0):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (6.2.5)"
-  - GoogleUtilities/Reachability (6.2.5):
+  - "GoogleUtilities/NSData+zlib (6.3.0)"
+  - GoogleUtilities/Reachability (6.3.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (6.2.5):
+  - GoogleUtilities/UserDefaults (6.3.0):
     - GoogleUtilities/Logger
   - Kingfisher (5.7.1)
   - nanopb (0.3.901):
@@ -72,9 +72,11 @@ PODS:
     - nanopb/encode (= 0.3.901)
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
-  - SideMenu (5.0.3)
+  - SideMenu (6.3.1)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
+  - SwiftFormat/CLI (0.40.12)
+  - SwiftLint (0.35.0)
   - SwiftMessages (7.0.0):
     - SwiftMessages/App (= 7.0.0)
   - SwiftMessages/App (7.0.0)
@@ -88,8 +90,10 @@ DEPENDENCIES:
   - FlexColorPicker
   - Fuzi (~> 3.1)
   - Kingfisher (~> 5.0)
-  - SideMenu (~> 5.0)
+  - SideMenu
   - SVGKit
+  - SwiftFormat/CLI
+  - SwiftLint
   - SwiftMessages
 
 SPEC REPOS:
@@ -115,6 +119,8 @@ SPEC REPOS:
     - nanopb
     - SideMenu
     - SVGKit
+    - SwiftFormat
+    - SwiftLint
     - SwiftMessages
 
 SPEC CHECKSUMS:
@@ -123,24 +129,26 @@ SPEC CHECKSUMS:
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
   DynamicButton: 99858ce823ceed7263a4eed43bd3870e72723cb2
   Fabric: 25d0963b691fc97be566392243ff0ecef5a68338
-  Firebase: c35912a5c160193dc423f260dac3f167a1a795ab
+  Firebase: 9cbe4e5b5eaafa05dc932be58b7c8c3820d71e88
   FirebaseAnalytics: 843c7f64a8f9c79f0d03281197ebe7bb1d58d477
-  FirebaseCore: 12422a2a2b79ed161b06ccad1edfe650de7a4b34
+  FirebaseCore: e9d9bd1dae61c1e82bc1e0e617a9d832392086a0
   FirebaseCoreDiagnostics: 4c04ae09d0ab027c30179828c6bb47764df1bd13
   FirebaseCoreDiagnosticsInterop: 6829da2b8d1fc795ff1bd99df751d3788035d2cb
-  FirebaseInstanceID: 88932a31aba5a56cfd3a7541706436c71f7f4598
+  FirebaseInstanceID: 550df9be1f99f751d8fcde3ac342a1e21a0e6c42
   FlexColorPicker: 2c6fe41cb33a650d5934fad75ab0e25df4b5af2f
   Fuzi: bcc5694488dd6e672e126cbf3c5471d7a79506d1
   GoogleAppMeasurement: 86a82f0e1f20b8eedf8e20326530138fd71409de
   GoogleDataTransport: 8f9897b8e073687f24ca8d3c3a8013dec7d2d1cc
-  GoogleDataTransportCCTSupport: 51134d81fca795c60cc247d1cb6af63c3d67b8d8
-  GoogleUtilities: e7dc37039b19df7fe543479d3e4a02ac8d11bb69
+  GoogleDataTransportCCTSupport: 7455d07b98851aa63e4c05a34dad356ca588479e
+  GoogleUtilities: 9c2c544202301110b29f7974a82e77fdcf12bf51
   Kingfisher: 176d377ad339113c99ad4980cbae687f807e20fe
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
-  SideMenu: 1dcaabce84538c53325c287f7fe62999379a641c
+  SideMenu: 8c67753662a891321bb646b03fca9f132ae5433a
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
+  SwiftFormat: 73667bbb741386b0febf0bd1a1b8c502aa9d1c98
+  SwiftLint: 5553187048b900c91aa03552807681bb6b027846
   SwiftMessages: a952f7a9103d9aeab93730a2861d2d8fcdd8758f
 
-PODFILE CHECKSUM: fe7b725b7b433c359748dc57fe5eb3cc76993e92
+PODFILE CHECKSUM: 7992aabfa3cc345bf07a1ead0bc7074376d15369
 
 COCOAPODS: 1.7.1

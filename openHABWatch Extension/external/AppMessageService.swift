@@ -12,11 +12,9 @@ import WatchKit
 
 // This class handles values that are passed from the ios app.
 class AppMessageService: NSObject, WCSessionDelegate {
-
     static let singleton = AppMessageService()
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
-
         if let localUrl = applicationContext["localUrl"] as? String {
             Preferences.localUrl = localUrl
         }
@@ -44,7 +42,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     @available(watchOSApplicationExtension 2.2, *)
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-
         DispatchQueue.main.async { () -> Void in
 
             self.updateValuesFromApplicationContext(session.receivedApplicationContext as [String: AnyObject])

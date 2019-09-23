@@ -13,7 +13,7 @@ import os.log
 import SideMenu
 import UIKit
 
-class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavigationControllerDelegate {
+class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigationControllerDelegate {
     static let tableViewCellIdentifier = "NotificationCell"
 
     var notifications: NSMutableArray = []
@@ -36,10 +36,10 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
             tableView.refreshControl = refreshControl
         }
 
-        self.hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
+        hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
         hamburgerButton.setStyle(.hamburger, animated: true)
         hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-        hamburgerButton.strokeColor = self.view.tintColor
+        hamburgerButton.strokeColor = view.tintColor
 
         let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
         navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
@@ -53,7 +53,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
     func loadNotifications() {
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        NetworkConnection.notification(urlString: Preferences.remoteUrl) { (response) in
+        NetworkConnection.notification(urlString: Preferences.remoteUrl) { response in
             switch response.result {
             case .success:
                 if let data = response.result.value {
@@ -72,7 +72,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                     self.tableView.reloadData()
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
-            case .failure(let error):
+            case let .failure(error):
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
@@ -88,7 +88,7 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
-        present(SideMenuManager.default.menuRightNavigationController!, animated: true, completion: nil)
+        present(SideMenuManager.default.rightMenuNavigationController!, animated: true, completion: nil)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -114,8 +114,8 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
                                        icon: notification.icon,
                                        value: "",
                                        iconType: .png).url {
-            cell?.imageView?.kf.setImage (with: iconUrl,
-                                          placeholder: UIImage(named: "icon-76x76.png"))
+            cell?.imageView?.kf.setImage(with: iconUrl,
+                                         placeholder: UIImage(named: "icon-76x76.png"))
         }
 
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
@@ -141,7 +141,6 @@ class OpenHABNotificationsViewController: UITableViewController, UISideMenuNavig
 }
 
 extension UIBarButtonItem {
-
     static func menuButton(_ target: Any?, action: Selector, imageName: String) -> UIBarButtonItem {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: imageName), for: .normal)

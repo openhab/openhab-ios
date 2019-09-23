@@ -52,7 +52,7 @@ enum SnapshotError: Error, CustomDebugStringConvertible {
             return "Couldn't find Snapshot configuration files - can't detect `Users` dir"
         case .cannotFindSimulatorHomeDirectory:
             return "Couldn't find simulator home location. Please, check SIMULATOR_HOST_HOME env variable."
-        case .cannotAccessSimulatorHomeDirectory(let simulatorHostHome):
+        case let .cannotAccessSimulatorHomeDirectory(simulatorHostHome):
             return "Can't prepare environment. Simulator home location is inaccessible. Does \(simulatorHostHome) exist?"
         case .cannotRunOnPhysicalDevice:
             return "Can't use Snapshot on a physical device."
@@ -70,7 +70,6 @@ open class Snapshot: NSObject {
     }
 
     open class func setupSnapshot(_ app: XCUIApplication, waitForAnimations: Bool = true) {
-
         Snapshot.app = app
         Snapshot.waitForAnimations = waitForAnimations
 
@@ -80,7 +79,7 @@ open class Snapshot: NSObject {
             setLanguage(app)
             setLocale(app)
             setLaunchArguments(app)
-        } catch let error {
+        } catch {
             NSLog(error.localizedDescription)
         }
     }
@@ -117,7 +116,7 @@ open class Snapshot: NSObject {
             NSLog("Couldn't detect/set locale...")
         }
 
-        if locale.isEmpty && !deviceLanguage.isEmpty {
+        if locale.isEmpty, !deviceLanguage.isEmpty {
             locale = Locale(identifier: deviceLanguage).identifier
         }
 
@@ -160,40 +159,40 @@ open class Snapshot: NSObject {
         }
 
         #if os(OSX)
-            guard let app = self.app else {
-                NSLog("XCUIApplication is not set. Please call setupSnapshot(app) before snapshot().")
-                return
-            }
+        guard let app = self.app else {
+            NSLog("XCUIApplication is not set. Please call setupSnapshot(app) before snapshot().")
+            return
+        }
 
-            app.typeKey(XCUIKeyboardKeySecondaryFn, modifierFlags: [])
+        app.typeKey(XCUIKeyboardKeySecondaryFn, modifierFlags: [])
         #else
 
-            guard self.app != nil else {
-                NSLog("XCUIApplication is not set. Please call setupSnapshot(app) before snapshot().")
-                return
-            }
+        guard self.app != nil else {
+            NSLog("XCUIApplication is not set. Please call setupSnapshot(app) before snapshot().")
+            return
+        }
 
-            let screenshot = XCUIScreen.main.screenshot()
-            guard var simulator = ProcessInfo().environment["SIMULATOR_DEVICE_NAME"], let screenshotsDir = screenshotsDirectory else { return }
+        let screenshot = XCUIScreen.main.screenshot()
+        guard var simulator = ProcessInfo().environment["SIMULATOR_DEVICE_NAME"], let screenshotsDir = screenshotsDirectory else { return }
 
-            do {
-                // The simulator name contains "Clone X of " inside the screenshot file when running parallelized UI Tests on concurrent devices
-                let regex = try NSRegularExpression(pattern: "Clone [0-9]+ of ")
-                let range = NSRange(location: 0, length: simulator.count)
-                simulator = regex.stringByReplacingMatches(in: simulator, range: range, withTemplate: "")
+        do {
+            // The simulator name contains "Clone X of " inside the screenshot file when running parallelized UI Tests on concurrent devices
+            let regex = try NSRegularExpression(pattern: "Clone [0-9]+ of ")
+            let range = NSRange(location: 0, length: simulator.count)
+            simulator = regex.stringByReplacingMatches(in: simulator, range: range, withTemplate: "")
 
-                let path = screenshotsDir.appendingPathComponent("\(simulator)-\(name).png")
-                try screenshot.pngRepresentation.write(to: path)
-            } catch let error {
-                NSLog("Problem writing screenshot: \(name) to \(screenshotsDir)/\(simulator)-\(name).png")
-                NSLog(error.localizedDescription)
-            }
+            let path = screenshotsDir.appendingPathComponent("\(simulator)-\(name).png")
+            try screenshot.pngRepresentation.write(to: path)
+        } catch {
+            NSLog("Problem writing screenshot: \(name) to \(screenshotsDir)/\(simulator)-\(name).png")
+            NSLog(error.localizedDescription)
+        }
         #endif
     }
 
     class func waitForLoadingIndicatorToDisappear(within timeout: TimeInterval) {
         #if os(tvOS)
-            return
+        return
         #endif
 
         guard let app = self.app else {
@@ -211,27 +210,27 @@ open class Snapshot: NSObject {
         // on OSX config is stored in /Users/<username>/Library
         // and on iOS/tvOS/WatchOS it's in simulator's home dir
         #if os(OSX)
-            guard let user = ProcessInfo().environment["USER"] else {
-                throw SnapshotError.cannotDetectUser
-            }
+        guard let user = ProcessInfo().environment["USER"] else {
+            throw SnapshotError.cannotDetectUser
+        }
 
-            guard let usersDir = FileManager.default.urls(for: .userDirectory, in: .localDomainMask).first else {
-                throw SnapshotError.cannotFindHomeDirectory
-            }
+        guard let usersDir = FileManager.default.urls(for: .userDirectory, in: .localDomainMask).first else {
+            throw SnapshotError.cannotFindHomeDirectory
+        }
 
-            homeDir = usersDir.appendingPathComponent(user)
+        homeDir = usersDir.appendingPathComponent(user)
         #else
-            #if arch(i386) || arch(x86_64)
-                guard let simulatorHostHome = ProcessInfo().environment["SIMULATOR_HOST_HOME"] else {
-                    throw SnapshotError.cannotFindSimulatorHomeDirectory
-                }
-                guard let homeDirUrl = URL(string: simulatorHostHome) else {
-                    throw SnapshotError.cannotAccessSimulatorHomeDirectory(simulatorHostHome)
-                }
-                homeDir = URL(fileURLWithPath: homeDirUrl.path)
-            #else
-                throw SnapshotError.cannotRunOnPhysicalDevice
-            #endif
+        #if arch(i386) || arch(x86_64)
+        guard let simulatorHostHome = ProcessInfo().environment["SIMULATOR_HOST_HOME"] else {
+            throw SnapshotError.cannotFindSimulatorHomeDirectory
+        }
+        guard let homeDirUrl = URL(string: simulatorHostHome) else {
+            throw SnapshotError.cannotAccessSimulatorHomeDirectory(simulatorHostHome)
+        }
+        homeDir = URL(fileURLWithPath: homeDirUrl.path)
+        #else
+        throw SnapshotError.cannotRunOnPhysicalDevice
+        #endif
         #endif
         return homeDir.appendingPathComponent("Library/Caches/tools.fastlane")
     }
@@ -266,13 +265,13 @@ private extension XCUIElementAttributes {
 
 private extension XCUIElementQuery {
     var networkLoadingIndicators: XCUIElementQuery {
-        let isNetworkLoadingIndicator = NSPredicate { (evaluatedObject, _) in
+        let isNetworkLoadingIndicator = NSPredicate { evaluatedObject, _ in
             guard let element = evaluatedObject as? XCUIElementAttributes else { return false }
 
             return element.isNetworkLoadingIndicator
         }
 
-        return self.containing(isNetworkLoadingIndicator)
+        return containing(isNetworkLoadingIndicator)
     }
 
     var deviceStatusBars: XCUIElementQuery {
@@ -282,19 +281,19 @@ private extension XCUIElementQuery {
 
         let deviceWidth = app.windows.firstMatch.frame.width
 
-        let isStatusBar = NSPredicate { (evaluatedObject, _) in
+        let isStatusBar = NSPredicate { evaluatedObject, _ in
             guard let element = evaluatedObject as? XCUIElementAttributes else { return false }
 
             return element.isStatusBar(deviceWidth)
         }
 
-        return self.containing(isStatusBar)
+        return containing(isStatusBar)
     }
 }
 
 private extension CGFloat {
     func isBetween(_ numberA: CGFloat, and numberB: CGFloat) -> Bool {
-        return numberA...numberB ~= self
+        return numberA ... numberB ~= self
     }
 }
 

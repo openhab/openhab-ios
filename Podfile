@@ -4,12 +4,14 @@ platform :ios, '11.0'
 use_frameworks!
 
 target 'openHAB' do
+    pod 'SwiftFormat/CLI'
+    pod 'SwiftLint'
     pod 'SVGKit'
     pod 'Firebase/Core'
     pod 'Fabric', '~> 1.7.2'
     pod 'Crashlytics', '~> 3.9.3'
     pod 'SwiftMessages'
-    pod 'SideMenu', '~> 5.0'
+    pod 'SideMenu'
     pod 'FlexColorPicker'
     pod 'DynamicButton', '~> 6.2'
     pod 'Alamofire', '~> 4.0'

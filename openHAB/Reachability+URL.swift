@@ -14,7 +14,7 @@ extension Reachability {
     }
 
     convenience init(url: URL?) {
-        self.withHostName(url?.host)
+        withHostName(url?.host)
     }
 
     func currentlyReachable() -> Bool {

@@ -46,7 +46,6 @@ public extension Notification.Name {
 }
 
 public class Reachability {
-
     public typealias NetworkReachable = (Reachability) -> Void
     public typealias NetworkUnreachable = (Reachability) -> Void
 
@@ -107,7 +106,7 @@ public class Reachability {
         }
     }
 
-    fileprivate var isRunningOnDevice: Bool = {
+    private var isRunningOnDevice: Bool = {
         #if targetEnvironment(simulator)
         return false
         #else
@@ -115,9 +114,9 @@ public class Reachability {
         #endif
     }()
 
-    fileprivate var notifierRunning = false
-    fileprivate let reachabilityRef: SCNetworkReachability
-    fileprivate let reachabilitySerialQueue: DispatchQueue
+    private var notifierRunning = false
+    private let reachabilityRef: SCNetworkReachability
+    private let reachabilitySerialQueue: DispatchQueue
     fileprivate(set) var flags: SCNetworkReachabilityFlags? {
         didSet {
             guard flags != oldValue else { return }
@@ -126,9 +125,9 @@ public class Reachability {
     }
 
     required public init(reachabilityRef: SCNetworkReachability, queueQoS: DispatchQoS = .default, targetQueue: DispatchQueue? = nil) {
-        self.allowsCellularConnection = true
+        allowsCellularConnection = true
         self.reachabilityRef = reachabilityRef
-        self.reachabilitySerialQueue = DispatchQueue(label: "uk.co.ashleymills.reachability", qos: queueQoS, target: targetQueue)
+        reachabilitySerialQueue = DispatchQueue(label: "uk.co.ashleymills.reachability", qos: queueQoS, target: targetQueue)
     }
 
     public convenience init?(hostname: String, queueQoS: DispatchQoS = .default, targetQueue: DispatchQueue? = nil) {
@@ -152,12 +151,12 @@ public class Reachability {
 }
 
 public extension Reachability {
-
     // MARK: - *** Notifier methods ***
+
     func startNotifier() throws {
         guard !notifierRunning else { return }
 
-        let callback: SCNetworkReachabilityCallBack = { (reachability, flags, info) in
+        let callback: SCNetworkReachabilityCallBack = { reachability, flags, info in
             guard let info = info else { return }
 
             let reachability = Unmanaged<Reachability>.fromOpaque(info).takeUnretainedValue()
@@ -190,6 +189,7 @@ public extension Reachability {
     }
 
     // MARK: - *** Connection test methods ***
+
     @available(*, deprecated, message: "Please use `connection != .none`")
     var isReachable: Bool {
         return connection != .none
@@ -222,8 +222,7 @@ public extension Reachability {
     }
 }
 
-fileprivate extension Reachability {
-
+private extension Reachability {
     func setReachabilityFlags() throws {
         try reachabilitySerialQueue.sync { [unowned self] in
             var flags = SCNetworkReachabilityFlags()
@@ -248,7 +247,6 @@ fileprivate extension Reachability {
 }
 
 extension SCNetworkReachabilityFlags {
-
     typealias Connection = Reachability.Connection
 
     var connection: Connection {
@@ -285,33 +283,43 @@ extension SCNetworkReachabilityFlags {
         return false
         #endif
     }
+
     var isReachableFlagSet: Bool {
         return contains(.reachable)
     }
+
     var isConnectionRequiredFlagSet: Bool {
         return contains(.connectionRequired)
     }
+
     var isInterventionRequiredFlagSet: Bool {
         return contains(.interventionRequired)
     }
+
     var isConnectionOnTrafficFlagSet: Bool {
         return contains(.connectionOnTraffic)
     }
+
     var isConnectionOnDemandFlagSet: Bool {
         return contains(.connectionOnDemand)
     }
+
     var isConnectionOnTrafficOrDemandFlagSet: Bool {
         return !intersection([.connectionOnTraffic, .connectionOnDemand]).isEmpty
     }
+
     var isTransientConnectionFlagSet: Bool {
         return contains(.transientConnection)
     }
+
     var isLocalAddressFlagSet: Bool {
         return contains(.isLocalAddress)
     }
+
     var isDirectFlagSet: Bool {
         return contains(.isDirect)
     }
+
     var isConnectionRequiredAndTransientFlagSet: Bool {
         return intersection([.connectionRequired, .transientConnection]) == [.connectionRequired, .transientConnection]
     }

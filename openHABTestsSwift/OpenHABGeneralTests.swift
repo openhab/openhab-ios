@@ -9,7 +9,6 @@
 import XCTest
 
 class OpenHABGeneralTests: XCTestCase {
-
     override func setUp() {
         super.setUp()
     }
@@ -21,22 +20,21 @@ class OpenHABGeneralTests: XCTestCase {
 
     func testValueToText() {
         func valueText(_ widgetValue: Double, step: Double) -> String {
-            let digits = max (-Decimal(step).exponent, 0)
+            let digits = max(-Decimal(step).exponent, 0)
             let numberFormatter = NumberFormatter()
             numberFormatter.minimumFractionDigits = digits
-            numberFormatter.decimalSeparator  = "."
+            numberFormatter.decimalSeparator = "."
             return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
         }
 
         func valueTextWithoutFormatter(_ widgetValue: Double, step: Double) -> String {
-            let digits = max (-Decimal(step).exponent, 0)
+            let digits = max(-Decimal(step).exponent, 0)
             return String(format: "%.\(digits)f", widgetValue)
         }
 
         XCTAssertEqual(valueText(1000.0, step: 5.23), "1000.00")
         XCTAssertEqual(valueText(1000.0, step: 1), "1000")
         XCTAssertEqual(valueTextWithoutFormatter(1000.0, step: 5.23), "1000.00")
-
     }
 
     func testHexString() {
@@ -50,7 +48,15 @@ class OpenHABGeneralTests: XCTestCase {
                                  version: 2,
                                  icon: "switch",
                                  value: "OFF",
-                                 iconType: .svg ).url
+                                 iconType: .svg).url
         XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
+    }
+
+    func testLabelVale() {
+        let widget = OpenHABWidget()
+        widget.label = "llldl [llsl]"
+        XCTAssertEqual(widget.labelValue, "llsl")
+        widget.label = "llllsl[kkks] llls"
+        XCTAssertEqual(widget.labelValue, "kkks")
     }
 }

@@ -48,28 +48,51 @@ class OpenHABWidget: NSObject, MKAnnotation {
         return array[0].trimmingCharacters(in: .whitespaces)
     }
 
-    // Text after "["
+    // Text between square brackets
     var labelValue: String? {
-        let array = label.components(separatedBy: "[")
-        if array.count > 1 {
-            var characterSet = CharacterSet.whitespaces
-            characterSet.insert(charactersIn: "]")
-            return array[1].trimmingCharacters(in: characterSet)
-        }
-        return nil
+        // Swift 5 raw strings
+        let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [])
+        guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: (label as NSString).length)) else { return nil }
+        guard let range = Range(match.range(at: 1), in: label) else { return nil }
+        return String(label[range])
     }
 
     var coordinate: CLLocationCoordinate2D {
         return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
-    // This is an ugly initializer
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    func sendCommandDouble(_ command: Double) {
+        sendCommand(String(command))
+    }
 
-        func toString (_ with: Double?) -> String {
+    func sendCommand(_ command: String?) {
+        guard let item = item else {
+            os_log("Command for Item = nil", log: .default, type: .info)
+            return
+        }
+        guard let sendCommand = sendCommand else {
+            os_log("sendCommand closure not set", log: .default, type: .info)
+            return
+        }
+        sendCommand(item, command)
+    }
+
+    func mappingIndex(byCommand command: String?) -> Int? {
+        for mapping in mappings where mapping.command == command {
+            return (mappings as NSArray).index(of: mapping)
+        }
+        return nil
+    }
+}
+
+extension OpenHABWidget {
+    // This is an ugly initializer
+    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
+        func toString(_ with: Double?) -> String {
             guard let double = with else { return "" }
             return String(format: "%.1f", double)
         }
+        self.init()
         self.widgetId = widgetId
         self.label = label
         self.type = type
@@ -88,8 +111,8 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.height = toString(height)
         self.isLeaf = isLeaf ?? false
         self.iconColor = iconColor ?? ""
-        self.labelcolor = labelColor ?? ""
-        self.valuecolor = valueColor ?? ""
+        labelcolor = labelColor ?? ""
+        valuecolor = valueColor ?? ""
         self.service = service ?? ""
         self.state = state ?? ""
         self.text = text ?? ""
@@ -105,8 +128,8 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.step = abs(self.step)
     }
 
-    init(xml xmlElement: XMLElement) {
-        super.init()
+    convenience init(xml xmlElement: XMLElement) {
+        self.init()
         for child in xmlElement.children {
             switch child.tag {
             case "widgetId": widgetId = child.stringValue
@@ -132,7 +155,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
             case "legend": legend = child.stringValue == "true" ? true : false
             // Int
             case "refresh": refresh = Int(child.stringValue) ?? 0
-            // Embedded 
+            // Embedded
             case "widget": widgets.append(OpenHABWidget(xml: child))
             case "item": item = OpenHABItem(xml: child)
             case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
@@ -141,29 +164,6 @@ class OpenHABWidget: NSObject, MKAnnotation {
                 break
             }
         }
-    }
-
-    func sendCommandDouble(_ command: Double) {
-        sendCommand(String(command))
-    }
-
-    func sendCommand(_ command: String?) {
-        guard let item = item else {
-            os_log("Command for Item = nil", log: .default, type: .info)
-            return
-        }
-        guard let sendCommand = sendCommand else {
-            os_log("sendCommand closure not set", log: .default, type: .info)
-            return
-        }
-        sendCommand(item, command)
-    }
-
-    func mappingIndex(byCommand command: String?) -> Int? {
-        for mapping in mappings where mapping.command == command {
-            return (mappings as NSArray).index(of: mapping)
-        }
-        return nil
     }
 }
 
@@ -200,8 +200,8 @@ extension OpenHABWidget {
 // swiftlint:disable line_length
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
-        let mappedWidgets = self.widgets.map { $0.openHABWidget }
-        return OpenHABWidget(widgetId: self.widgetId, label: self.label, icon: self.icon, type: self.type, url: self.url, period: self.period, minValue: self.minValue, maxValue: self.maxValue, step: self.step, refresh: self.refresh, height: self.height, isLeaf: self.isLeaf, iconColor: self.iconColor, labelColor: self.labelcolor, valueColor: self.valuecolor, service: self.service, state: self.state, text: self.text, legend: self.legend, encoding: self.encoding, item: self.item?.openHABItem, linkedPage: self.linkedPage, mappings: self.mappings, widgets: mappedWidgets)
+        let mappedWidgets = widgets.map { $0.openHABWidget }
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets)
     }
 }
 
@@ -209,8 +209,8 @@ extension OpenHABWidget.CodingData {
 extension Array where Element == OpenHABWidget {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
-            self.append(widget)
-            self.flatten(widget.widgets)
+            append(widget)
+            flatten(widget.widgets)
         }
     }
 }

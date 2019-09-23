@@ -15,6 +15,7 @@ struct DynamicButtonStyleGear: DynamicButtonBuildableStyle {
     static var styleName: String {
         return "Gear"
     }
+
     let pathVector: DynamicButtonPathVector
 
     init(center: CGPoint, size: CGFloat, offset: CGPoint, lineWidth: CGFloat) {
@@ -60,7 +61,7 @@ struct DynamicButtonStyleGear: DynamicButtonBuildableStyle {
         shape.addLine(to: CGPoint(x: 19.4, y: 13))
         shape.close()
 
-        shape.apply(CGAffineTransform.init(scaleX: (size - 2 * lineWidth) / 21.6, y: (size - 2 * lineWidth) / 21.6))
+        shape.apply(CGAffineTransform(scaleX: (size - 2 * lineWidth) / 21.6, y: (size - 2 * lineWidth) / 21.6))
 
         let radius = size / 4.8 - lineWidth
 

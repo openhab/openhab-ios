@@ -10,7 +10,6 @@ import Foundation
 import WatchConnectivity
 
 class WatchService {
-
     static let singleton = WatchService()
 
     private var lastWatchUpdateTime: Date?
@@ -19,7 +18,6 @@ class WatchService {
     // swiftlint:disable:next function_parameter_count
     func sendToWatch(_ localUrl: String, remoteUrl: String,
                      username: String, password: String, sitemapName: String, ignoreSSL: Bool) {
-
         let applicationDict: [String: Any] =
             ["localUrl": localUrl,
              "remoteUrl": remoteUrl,
@@ -32,7 +30,6 @@ class WatchService {
     }
 
     private func sendOrTransmitToWatch(_ message: [String: Any]) {
-
         // send message if watch is reachable
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(message, replyHandler: { data in
@@ -44,7 +41,6 @@ class WatchService {
                 try? WCSession.default.updateApplicationContext(message)
             })
         } else {
-
             // otherwise, transmit application context
             try? WCSession.default.updateApplicationContext(message)
         }

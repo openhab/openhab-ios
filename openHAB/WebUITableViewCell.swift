@@ -14,7 +14,7 @@ import WebKit
 class WebUITableViewCell: GenericUITableViewCell {
     private var url: URL?
 
-    @IBOutlet weak var widgetWebView: WKWebView!
+    @IBOutlet private var widgetWebView: WKWebView!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)

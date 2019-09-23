@@ -10,12 +10,10 @@ import Foundation
 import os.log
 
 class OpenHabService {
-
     static let singleton = OpenHabService()
 
     /* Reads the sitemap that should be displayed on the watch */
-    func readSitemap(_ resultHandler : @escaping ((Sitemap, String) -> Void)) {
-
+    func readSitemap(_ resultHandler: @escaping ((Sitemap, String) -> Void)) {
         let baseUrl = Preferences.readActiveUrl()
         let sitemapName = Preferences.sitemapName
         if baseUrl == "" {
@@ -27,14 +25,13 @@ class OpenHabService {
         guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
         let request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
         // let session = URLSession.shared
-        let session = URLSession(
-            configuration: URLSessionConfiguration.ephemeral,
-            delegate: CertificatePinningURLSessionDelegate(),
-            delegateQueue: nil)
+        let session = URLSession(configuration: URLSessionConfiguration.ephemeral,
+                                 delegate: CertificatePinningURLSessionDelegate(),
+                                 delegateQueue: nil)
         let task = session.dataTask(with: request) { (data, _, error) -> Void in
 
             guard error == nil else {
-                resultHandler(Sitemap.init(frames: []), "Can't read the sitemap from '\(requestUrl)'. Message is '\(String(describing: error))'")
+                resultHandler(Sitemap(frames: []), "Can't read the sitemap from '\(requestUrl)'. Message is '\(String(describing: error))'")
                 return
             }
             guard let data = data else { return }
@@ -44,10 +41,10 @@ class OpenHabService {
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
                     let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: data)
-                    if let sitemap = Sitemap.init(with: codingData) {
+                    if let sitemap = Sitemap(with: codingData) {
                         resultHandler(sitemap, "")
                     }
-                } catch let error {
+                } catch {
                     os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 }
             }
@@ -55,17 +52,16 @@ class OpenHabService {
         task.resume()
     }
 
-    func switchOpenHabItem(for item: Item, command: String, _ resultHandler : @escaping ((Data?, URLResponse?, Error?) -> Void)) {
+    func switchOpenHabItem(for item: Item, command: String, _ resultHandler: @escaping ((Data?, URLResponse?, Error?) -> Void)) {
         guard let commandUrl = URL(string: item.link) else { return }
         var request = URLRequest(url: commandUrl)
         request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
         let postString = command
         request.httpBody = postString.data(using: .utf8)
-        let session = URLSession(
-            configuration: URLSessionConfiguration.ephemeral,
-            delegate: CertificatePinningURLSessionDelegate(),
-            delegateQueue: nil)
+        let session = URLSession(configuration: URLSessionConfiguration.ephemeral,
+                                 delegate: CertificatePinningURLSessionDelegate(),
+                                 delegateQueue: nil)
         let task = session.dataTask(with: request) { data, response, error in
             DispatchQueue.main.sync {
                 resultHandler(data, response, error)

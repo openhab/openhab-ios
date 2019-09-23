@@ -30,6 +30,14 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
         delegate = self
 
+        if #available(iOS 13.0, *) {
+            // if nothing is set DefaultColorPickerViewController will fall back to .white
+            // if we set this manually DefaultColorPickerViewController will go with that
+            self.view.backgroundColor = .systemBackground
+        } else {
+            // do nothing - DefaultColorPickerViewController will handle this
+        }
+
         super.viewDidLoad()
     }
 
@@ -47,7 +55,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
         os_log("Color changed to HSB(%g, %g, %g).", log: .default, type: .info, hue, saturation, brightness)
 
-        self.widget?.sendCommand("\(hue),\(saturation),\(brightness)")
+        widget?.sendCommand("\(hue),\(saturation),\(brightness)")
     }
 }
 
