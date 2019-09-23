@@ -12,10 +12,11 @@ import DynamicButton
 import os.log
 
 class RollershutterUITableViewCell: GenericUITableViewCell {
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+
     @IBOutlet private var downButton: DynamicButton!
     @IBOutlet private var stopButton: DynamicButton!
     @IBOutlet private var upButton: DynamicButton!
-
     @IBOutlet private var customDetailText: UILabel!
 
     override func initialize() {
@@ -53,18 +54,21 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     func upButtonPressed() {
         os_log("up button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("UP")
+        feedbackGenerator.impactOccurred()
     }
 
     @objc
     func stopButtonPressed() {
         os_log("stop button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("STOP")
+        feedbackGenerator.impactOccurred()
     }
 
     @objc
     func downButtonPressed() {
         os_log("down button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("DOWN")
+        feedbackGenerator.impactOccurred()
     }
 }
 

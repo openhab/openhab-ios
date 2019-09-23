@@ -11,8 +11,11 @@ import os.log
 import UIKit
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+
     // @IBOutlet private var customTextLabel: UILabel!
     @IBOutlet private var widgetSegmentControl: UISegmentedControl!
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
@@ -49,5 +52,6 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         os_log("Segment pressed %d", log: .default, type: .info, Int(segmentedControl?.selectedSegmentIndex ?? 0))
         let mapping = widget.mappings[segmentedControl?.selectedSegmentIndex ?? 0]
         widget.sendCommand(mapping.command)
+        feedbackGenerator.impactOccurred()
     }
 }
