@@ -71,7 +71,6 @@ final class OpenHABSitemap: NSObject {
 }
 
 extension OpenHABSitemap {
-
     struct CodingData: Decodable {
         let name: String
         let label: String
@@ -125,13 +124,11 @@ extension OpenHABSitemap {
 
 extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(
-            name: self.name,
-            icon: self.icon ?? "",
-            label: self.label,
-            link: self.link,
-            leaf: self.page.leaf,
-            homepageLink: self.page.link
-        )
+        return OpenHABSitemap(name: name,
+                              icon: icon ?? "",
+                              label: label,
+                              link: link,
+                              leaf: page.leaf,
+                              homepageLink: page.link)
     }
 }

@@ -54,7 +54,6 @@ final class OpenHABItem: NSObject {
     }
 
     func stateAsUIColor() -> UIColor? {
-
         if state == "Uninitialized" {
             return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         } else {
@@ -87,7 +86,6 @@ final class OpenHABItem: NSObject {
 }
 
 extension OpenHABItem {
-
     struct CodingData: Decodable {
         let type: String
         let groupType: String?
@@ -100,7 +98,7 @@ extension OpenHABItem {
 
 extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
-        return OpenHABItem(name: self.name, type: self.type, state: self.state, link: self.link, label: self.label, groupType: self.groupType)
+        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType)
     }
 }
 
@@ -109,7 +107,7 @@ extension CGFloat {
         let numberFormatter = NumberFormatter()
         numberFormatter.locale = Locale(identifier: "EN")
         if let number = numberFormatter.number(from: string) {
-            self.init(number.floatValue/divisor)
+            self.init(number.floatValue / divisor)
         } else {
             self.init(0)
         }

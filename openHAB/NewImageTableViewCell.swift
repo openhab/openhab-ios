@@ -9,8 +9,7 @@
 import UIKit
 
 class NewImageTableViewCell: UITableViewCell {
-
-    @IBOutlet weak var customImageView: ScaledHeightImageView!
+    @IBOutlet private var customImageView: ScaledHeightImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

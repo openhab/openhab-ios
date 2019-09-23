@@ -12,17 +12,16 @@ import DynamicButton
 import os.log
 
 class RollershutterUITableViewCell: GenericUITableViewCell {
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
 
-    @IBOutlet weak var downButton: DynamicButton!
-    @IBOutlet weak var stopButton: DynamicButton!
-    @IBOutlet weak var upButton: DynamicButton!
-
-    @IBOutlet weak var customDetailText: UILabel!
+    @IBOutlet private var downButton: DynamicButton!
+    @IBOutlet private var stopButton: DynamicButton!
+    @IBOutlet private var upButton: DynamicButton!
+    @IBOutlet private var customDetailText: UILabel!
 
     override func initialize() {
         selectionStyle = .none
         separatorInset = .zero
-
     }
 
     required init?(coder: NSCoder) {
@@ -31,7 +30,7 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         initialize()
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         os_log("RollershutterUITableViewCell initWithStyle", log: .viewCycle, type: .info)
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
@@ -47,32 +46,35 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         stopButton?.addTarget(self, action: .stopButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
         downButton?.highlightStokeColor = Colors.hightlightStrokeColor
-        upButton?.highlightStokeColor =  Colors.hightlightStrokeColor
-        stopButton?.highlightStokeColor =  Colors.hightlightStrokeColor
+        upButton?.highlightStokeColor = Colors.hightlightStrokeColor
+        stopButton?.highlightStokeColor = Colors.hightlightStrokeColor
     }
 
     @objc
     func upButtonPressed() {
         os_log("up button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("UP")
+        feedbackGenerator.impactOccurred()
     }
 
     @objc
     func stopButtonPressed() {
         os_log("stop button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("STOP")
+        feedbackGenerator.impactOccurred()
     }
 
     @objc
     func downButtonPressed() {
         os_log("down button pressed", log: .viewCycle, type: .info)
         widget.sendCommand("DOWN")
+        feedbackGenerator.impactOccurred()
     }
 }
 
 // inspired by: Selectors in swift: A better approach using extensions
 // https://medium.com/@abhimuralidharan/selectors-in-swift-a-better-approach-using-extensions-aa6b0416e850
-fileprivate extension Selector {
+private extension Selector {
     static let upButtonPressed = #selector(RollershutterUITableViewCell.upButtonPressed)
     static let stopButtonPressed = #selector(RollershutterUITableViewCell.stopButtonPressed)
     static let downButtonPressed = #selector(RollershutterUITableViewCell.downButtonPressed)

@@ -16,7 +16,6 @@ protocol GenericCellCacheProtocol: UITableViewCell {
 }
 
 class GenericUITableViewCell: UITableViewCell {
-
     private var _widget: OpenHABWidget!
     var widget: OpenHABWidget! {
         get {
@@ -60,16 +59,17 @@ class GenericUITableViewCell: UITableViewCell {
         }
     }
 
-    @IBOutlet weak var customTextLabel: UILabel!
-    @IBOutlet weak var customDetailTextLabel: UILabel!
-    @IBOutlet weak var customDetailTextLabelConstraint: NSLayoutConstraint!
+    // swiftlint:disable private_outlet
+    @IBOutlet private(set) var customTextLabel: UILabel!
+    @IBOutlet private(set) var customDetailTextLabel: UILabel!
+    @IBOutlet private(set) var customDetailTextLabelConstraint: NSLayoutConstraint!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         initialize()
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
     }
@@ -110,5 +110,4 @@ class GenericUITableViewCell: UITableViewCell {
         imageView?.kf.cancelDownloadTask()
         imageView?.image = nil
     }
-
 }

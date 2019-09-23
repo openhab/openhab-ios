@@ -11,8 +11,7 @@ import os.log
 import UIKit
 
 class SwitchUITableViewCell: GenericUITableViewCell {
-
-    @IBOutlet var widgetSwitch: UISwitch!
+    @IBOutlet private var widgetSwitch: UISwitch!
 
     override func initialize() {
         selectionStyle = .none
@@ -21,22 +20,22 @@ class SwitchUITableViewCell: GenericUITableViewCell {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        self.initialize()
+        initialize()
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.initialize()
+        initialize()
     }
 
     override func displayWidget() {
-        self.customTextLabel?.text = widget.labelText
+        customTextLabel?.text = widget.labelText
         var state = widget.state
         // if state is nil or empty using the item state ( OH 1.x compatability )
         if state.isEmpty {
             state = (widget.item?.state) ?? ""
         }
-        self.customDetailTextLabel?.text = widget.labelValue ?? ""
+        customDetailTextLabel?.text = widget.labelValue ?? ""
         widgetSwitch?.isOn = (state == "ON" ? true : false)
         widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
         super.displayWidget()
@@ -54,6 +53,6 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     }
 }
 
-fileprivate extension Selector {
+private extension Selector {
     static let switchChange = #selector(SwitchUITableViewCell.switchChange)
 }

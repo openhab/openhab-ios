@@ -11,23 +11,23 @@ import os.log
 import UIKit
 
 class SegmentedUITableViewCell: GenericUITableViewCell {
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
 
-    //@IBOutlet weak var customTextLabel: UILabel!
-    @IBOutlet weak var widgetSegmentControl: UISegmentedControl!
+    // @IBOutlet private var customTextLabel: UILabel!
+    @IBOutlet private var widgetSegmentControl: UISegmentedControl!
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
         selectionStyle = .none
         separatorInset = .zero
-
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         selectionStyle = .none
         separatorInset = .zero
-
     }
 
     override func displayWidget() {
@@ -39,7 +39,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl?.apportionsSegmentWidthsByContent = true
 
         for mapping in widget?.mappings ?? [] {
-                widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
+            widgetSegmentControl?.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
         }
 
         widgetSegmentControl?.selectedSegmentIndex = Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1)
@@ -52,5 +52,6 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         os_log("Segment pressed %d", log: .default, type: .info, Int(segmentedControl?.selectedSegmentIndex ?? 0))
         let mapping = widget.mappings[segmentedControl?.selectedSegmentIndex ?? 0]
         widget.sendCommand(mapping.command)
+        feedbackGenerator.impactOccurred()
     }
 }

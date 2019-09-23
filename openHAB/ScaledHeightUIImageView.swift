@@ -9,7 +9,6 @@
 /// An image view that computes its intrinsic height from its width while preserving aspect ratio
 /// Source: https://stackoverflow.com/a/48476446
 class ScaledHeightUIImageView: UIImageView {
-
     // Track the width that the intrinsic size was computed for,
     // to invalidate the intrinsic size when needed
     private var layoutedWidth: CGFloat = 0

@@ -25,15 +25,15 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         return AppDelegate.appDelegate.appData
     }
 
-    @IBOutlet var settingsTableView: UITableView!
-    @IBOutlet weak var demomodeSwitch: UISwitch!
-    @IBOutlet weak var passwordTextField: UITextField!
-    @IBOutlet weak var usernameTextField: UITextField!
-    @IBOutlet weak var remoteUrlTextField: UITextField!
-    @IBOutlet weak var localUrlTextField: UITextField!
-    @IBOutlet weak var idleOffSwitch: UISwitch!
-    @IBOutlet weak var ignoreSSLSwitch: UISwitch!
-    @IBOutlet weak var iconSegmentedControl: UISegmentedControl!
+    @IBOutlet private var settingsTableView: UITableView!
+    @IBOutlet private var demomodeSwitch: UISwitch!
+    @IBOutlet private var passwordTextField: UITextField!
+    @IBOutlet private var usernameTextField: UITextField!
+    @IBOutlet private var remoteUrlTextField: UITextField!
+    @IBOutlet private var localUrlTextField: UITextField!
+    @IBOutlet private var idleOffSwitch: UISwitch!
+    @IBOutlet private var ignoreSSLSwitch: UISwitch!
+    @IBOutlet private var iconSegmentedControl: UISegmentedControl!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -117,7 +117,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         settingsTableView.deselectRow(at: indexPath, animated: true)
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
-        if indexPath.section == 1 && indexPath.row == 2 {
+        if indexPath.section == 1, indexPath.row == 2 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
         }
     }
@@ -199,13 +199,11 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     func sendSettingsToWatch() {
-        WatchService.singleton.sendToWatch(
-            Preferences.localUrl,
-            remoteUrl: Preferences.remoteUrl,
-            username: Preferences.username,
-            password: Preferences.password,
-            sitemapName: "watch",
-            ignoreSSL: Preferences.ignoreSSL)
+        WatchService.singleton.sendToWatch(Preferences.localUrl,
+                                           remoteUrl: Preferences.remoteUrl,
+                                           username: Preferences.username,
+                                           password: Preferences.password,
+                                           sitemapName: "watch",
+                                           ignoreSSL: Preferences.ignoreSSL)
     }
-
 }
