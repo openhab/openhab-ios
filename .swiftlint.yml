@@ -14,6 +14,7 @@ opt_in_rules:
   - reduce_boolean
   - file_types_order
   - type_contents_order
+  - private_outlet
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
