@@ -31,16 +31,16 @@ class SliderUITableViewCell: GenericUITableViewCell {
         separatorInset = .zero
     }
 
-    @IBAction func sliderValueChanged(_ sender: Any) {
+    @IBAction private func sliderValueChanged(_ sender: Any) {
         let widgetValue = adj(Double(widgetSlider?.value ?? Float(widget.minValue)))
         customDetailText?.text = valueText(widgetValue)
     }
 
-    @IBAction func sliderTouchUp(_ sender: Any) {
+    @IBAction private func sliderTouchUp(_ sender: Any) {
         sliderDidEndSliding(widgetSlider)
     }
 
-    @IBAction func sliderTouchOutside(_ sender: Any) {
+    @IBAction private func sliderTouchOutside(_ sender: Any) {
         sliderDidEndSliding(widgetSlider)
     }
 

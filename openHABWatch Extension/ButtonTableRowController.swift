@@ -15,7 +15,7 @@ class ButtonTableRowController: NSObject {
 
     @IBOutlet private var buttonSwitch: WKInterfaceSwitch!
 
-    @IBAction func doSwitchButtonPressed(_ value: Bool) {
+    @IBAction private func doSwitchButtonPressed(_ value: Bool) {
         guard let item = item else { return }
         let command = value ? "ON" : "OFF"
         switchOpenHabItem(for: item, command: command)

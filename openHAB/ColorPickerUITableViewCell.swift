@@ -38,7 +38,7 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         separatorInset = .zero
     }
 
-    @IBAction func colorButtonPressed(_ sender: Any) {
+    @IBAction private func colorButtonPressed(_ sender: Any) {
         delegate?.didPressColorButton(self)
     }
 
