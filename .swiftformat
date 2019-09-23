@@ -1,0 +1,42 @@
+# file options
+--swiftversion 5.0
+--exclude Pods
+--symlinks ignore
+
+# disabled rules
+--disable specifiers # see https://github.com/nicklockwood/SwiftFormat/issues/364
+
+# format options
+--allman false
+--binarygrouping none
+--closingparen same-line
+--commas inline
+--conflictmarkers reject
+--decimalgrouping none
+--elseposition same-line
+--empty void
+--exponentcase lowercase
+--exponentgrouping disabled
+--fractiongrouping disabled
+--fragment false
+--header ignore
+--hexgrouping none
+--hexliteralcase lowercase
+--ifdef no-indent
+--importgrouping alphabetized
+--indent 4
+--indentcase false
+--linebreaks lf
+--octalgrouping none
+--operatorfunc space
+--patternlet hoist
+--ranges spaced
+--self remove
+--selfrequired 
+--semicolons inline
+--stripunusedargs closure-only
+--trailingclosures 
+--trimwhitespace always
+--wraparguments after-first
+--wrapcollections after-first
+--xcodeindentation disabled
