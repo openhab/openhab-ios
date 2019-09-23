@@ -183,10 +183,15 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             if drawerItem.tag == "notifications" {
                 buttonIcon.style = .custom(DynamicButtonStyleBell.self)
-
+                if #available(iOS 13.0, *) {
+                    buttonIcon.strokeColor = .label
+                }
                 cell.customImageView.addSubview(buttonIcon)
             } else if drawerItem.tag == "settings" {
                 buttonIcon.style = .custom(DynamicButtonStyleGear.self)
+                if #available(iOS 13.0, *) {
+                    buttonIcon.strokeColor = .label
+                }
                 cell.customImageView.addSubview(buttonIcon)
             }
         }
