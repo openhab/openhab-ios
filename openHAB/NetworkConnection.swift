@@ -13,7 +13,7 @@ import os.log
 // SessionManager --> Session
 // serverTrustPolicyManager --> serverTrustManager
 // ServerTrustPolicyManager --> ServerTrustManager
-let onReceiveSessionTaskChallenge = { (session: URLSession, task: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
+let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
@@ -30,7 +30,7 @@ let onReceiveSessionTaskChallenge = { (session: URLSession, task: URLSessionTask
     return (disposition, credential)
 }
 
-let onReceiveSessionChallenge = { (session: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
+let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
@@ -54,7 +54,6 @@ let onReceiveSessionChallenge = { (session: URLSession, challenge: URLAuthentica
 }
 
 class NetworkConnection {
-
     static var shared: NetworkConnection!
 
     static var atmosphereTrackingId = ""
@@ -66,9 +65,8 @@ class NetworkConnection {
 
     init(ignoreSSL: Bool,
          manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
-                                                  delegate: SessionDelegate() ),
-         adapter: RequestAdapter?
-        ) {
+                                                  delegate: SessionDelegate()),
+         adapter: RequestAdapter?) {
         serverCertificateManager = ServerCertificateManager(ignoreCertificates: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
         self.manager = manager
@@ -86,7 +84,6 @@ class NetworkConnection {
                          deviceToken: String,
                          deviceId: String,
                          deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
-
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
             load(from: url, completionHandler: completionHandler)
         }
@@ -94,7 +91,6 @@ class NetworkConnection {
 
     static func sitemaps(openHABRootUrl: String,
                          completionHandler: @escaping (DataResponse<Data>) -> Void) {
-
         if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
@@ -109,14 +105,12 @@ class NetworkConnection {
 
     static func notification(urlString: String,
                              completionHandler: @escaping (DataResponse<Data>) -> Void) {
-
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
     }
 
     static func sendCommand(item: OpenHABItem, commandToSend command: String?) -> DataRequest? {
-
         if let commandUrl = URL(string: item.link) {
             var commandRequest = URLRequest(url: commandUrl)
 
@@ -126,16 +120,16 @@ class NetworkConnection {
 
             os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
             let link = item.link
-            os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command  ?? "", link)
+            os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command ?? "", link)
             os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
 
             return NetworkConnection.shared.manager.request(commandRequest)
-                .validate(statusCode: 200..<300)
-                .responseData { (response) in
+                .validate(statusCode: 200 ..< 300)
+                .responseData { response in
                     switch response.result {
                     case .success:
                         os_log("Command sent!", log: .remoteAccess, type: .info)
-                    case .failure(let error):
+                    case let .failure(error):
                         os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     }
                 }
@@ -147,9 +141,8 @@ class NetworkConnection {
                      longPolling: Bool,
                      openHABVersion: Int,
                      completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
-
         if pageUrl == "" {
-        return nil
+            return nil
         }
         os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
 
@@ -176,9 +169,8 @@ class NetworkConnection {
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
         return NetworkConnection.shared.manager.request(pageRequest)
-        .validate(statusCode: 200..<300)
-            .responseData (completionHandler: completionHandler)
-
+            .validate(statusCode: 200 ..< 300)
+            .responseData(completionHandler: completionHandler)
     }
 
     static func load(from url: URL, completionHandler: @escaping (DataResponse<Data>) -> Void) {
@@ -189,8 +181,8 @@ class NetworkConnection {
         }
         os_log("Firing request", log: .viewCycle, type: .debug)
         let task = NetworkConnection.shared.manager.request(request)
-            .validate(statusCode: 200..<300)
-            .responseData (completionHandler: completionHandler)
+            .validate(statusCode: 200 ..< 300)
+            .responseData(completionHandler: completionHandler)
         task.resume()
     }
 
@@ -200,6 +192,6 @@ class NetworkConnection {
     }
 
     func setRootUrl(_ url: String?) {
-        self.rootUrl = URL(string: url ?? "")
+        rootUrl = URL(string: url ?? "")
     }
 }

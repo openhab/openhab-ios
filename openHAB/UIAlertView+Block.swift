@@ -16,7 +16,7 @@ private var kNSCBAlertWrapper = 0
 class NSCBAlertWrapper: NSObject {
     var completionBlock: ((_ alertView: UIAlertView?, _ buttonIndex: Int) -> Void)?
 
-// MARK: - UIAlertViewDelegate
+    // MARK: - UIAlertViewDelegate
 
     // Called when a button is clicked. The view will be automatically dismissed after this call returns
     func alertView(_ alertView: UIAlertView, clickedButtonAt buttonIndex: Int) {

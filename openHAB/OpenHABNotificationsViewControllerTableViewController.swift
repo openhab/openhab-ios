@@ -12,7 +12,6 @@ import SDWebImage
 import UIKit
 
 class OpenHABNotificationsViewController: UITableViewController {
-
     static let tableViewCellIdentifier = "NotificationCell"
 
     var notifications: NSMutableArray = []
@@ -36,7 +35,6 @@ class OpenHABNotificationsViewController: UITableViewController {
         }
         let rightDrawerButton = MMDrawerBarButtonItem(target: self, action: #selector(OpenHABNotificationsViewController.rightDrawerButtonPress(_:)))
         navigationItem.setRightBarButton(rightDrawerButton, animated: true)
-
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -62,7 +60,7 @@ class OpenHABNotificationsViewController: UITableViewController {
             operation = OpenHABHTTPRequestOperation(request: notificationsRequest as URLRequest)
         }
         operation?.responseSerializer = AFJSONResponseSerializer()
-        operation?.setCompletionBlockWithSuccess({ operation, responseObject in
+        operation?.setCompletionBlockWithSuccess({ _, responseObject in
             let response = responseObject as? Data
             self.notifications = []
             print("Notifications response")
@@ -166,5 +164,4 @@ class OpenHABNotificationsViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
 }
