@@ -864,7 +864,6 @@ extension OpenHABViewController: ModalHandler {
 }
 
 // MARK: - UISideMenuNavigationControllerDelegate
-
 extension OpenHABViewController: SideMenuNavigationControllerDelegate {
     func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
         hamburgerButton.setStyle(.arrowRight, animated: animated)
