@@ -115,7 +115,7 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
                                        value: "",
                                        iconType: .png).url {
             cell?.imageView?.kf.setImage(with: iconUrl,
-                                         placeholder: UIImage(named: "icon-76x76.png"))
+                                         placeholder: UIImage(named: "openHABIcon"))
         }
 
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {
