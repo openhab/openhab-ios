@@ -176,21 +176,30 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             cell.customTextLabel?.text = drawerItem.label
 
-            let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
-            buttonIcon.bounceButtonOnTouch = false
             if #available(iOS 13, *) {
-                buttonIcon.strokeColor = .label
+                switch drawerItem.tag {
+                case "notifications":
+                    cell.customImageView.image = UIImage(systemName: "bell")
+                case "settings":
+                    cell.customImageView.image = UIImage(systemName: "gear")
+                default:
+                    break
+                }
             } else {
+                let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
+                buttonIcon.bounceButtonOnTouch = false
+
                 buttonIcon.strokeColor = .black
-            }
-            buttonIcon.lineWidth = 1
+                buttonIcon.lineWidth = 1
 
-            if drawerItem.tag == "notifications" {
-                buttonIcon.style = .custom(DynamicButtonStyleBell.self)
-
-                cell.customImageView.addSubview(buttonIcon)
-            } else if drawerItem.tag == "settings" {
-                buttonIcon.style = .custom(DynamicButtonStyleGear.self)
+                switch drawerItem.tag {
+                case "notifications":
+                    buttonIcon.style = .custom(DynamicButtonStyleBell.self)
+                case "settings":
+                    buttonIcon.style = .custom(DynamicButtonStyleGear.self)
+                default:
+                    break
+                }
                 cell.customImageView.addSubview(buttonIcon)
             }
         }

@@ -13,7 +13,7 @@ import UIKit
 class DrawerUITableViewCell: UITableViewCell {
 
     @IBOutlet weak var customTextLabel: UILabel!
-    @IBOutlet weak var customImageView: UIView!
+    @IBOutlet weak var customImageView: UIImageView!
 
     required init?(coder: NSCoder) {
         os_log("DrawerUITableViewCell initWithCoder", log: .viewCycle, type: .info)
