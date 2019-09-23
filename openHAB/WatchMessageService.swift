@@ -12,13 +12,11 @@ import WatchConnectivity
 // This class receives Watch Request for the configuration data like localUrl.
 // The functionality is activated in the AppDelegate.
 class WatchMessageService: NSObject, WCSessionDelegate {
-
     static let singleton = WatchMessageService()
 
     // This method gets called when the watch requests the localUrl
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-
-        // TODO Use RemoteUrl, TOO
+        // TODO: Use RemoteUrl, TOO
         if message["requestLocalUrl"] != nil {
             replyHandler(["baseUri": Preferences.localUrl])
         }
@@ -29,12 +27,9 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     @available(iOS 9.3, *)
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-    }
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
 
-    func sessionDidBecomeInactive(_ session: WCSession) {
-    }
+    func sessionDidBecomeInactive(_ session: WCSession) {}
 
-    func sessionDidDeactivate(_ session: WCSession) {
-    }
+    func sessionDidDeactivate(_ session: WCSession) {}
 }

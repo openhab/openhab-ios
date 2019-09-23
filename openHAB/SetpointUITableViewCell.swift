@@ -11,7 +11,6 @@ import DynamicButton
 import os.log
 
 class SetpointUITableViewCell: GenericUITableViewCell {
-
     private var isIntStep: Bool {
         return widget.step.truncatingRemainder(dividingBy: 1) == 0
     }
@@ -20,15 +19,14 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         return isIntStep ? "%ld" : "%.01f"
     }
 
-    @IBOutlet weak var downButton: DynamicButton!
-    @IBOutlet weak var upButton: DynamicButton!
+    @IBOutlet private var downButton: DynamicButton!
+    @IBOutlet private var upButton: DynamicButton!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
         selectionStyle = .none
         separatorInset = .zero
-
     }
 
     override func displayWidget() {
@@ -39,7 +37,7 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         upButton.addTarget(self, action: #selector(SetpointUITableViewCell.increaseValue), for: .touchUpInside)
 
         downButton.highlightStokeColor = Colors.hightlightStrokeColor
-        upButton.highlightStokeColor =  Colors.hightlightStrokeColor
+        upButton.highlightStokeColor = Colors.hightlightStrokeColor
 
         super.displayWidget()
     }

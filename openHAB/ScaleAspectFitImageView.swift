@@ -18,46 +18,46 @@ public class ScaleAspectFitImageView: UIImageView {
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.setup()
+        setup()
     }
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        self.setup()
+        setup()
     }
 
     public override init(image: UIImage!) {
         super.init(image: image)
-        self.setup()
+        setup()
     }
 
     public override init(image: UIImage!, highlightedImage: UIImage?) {
         super.init(image: image, highlightedImage: highlightedImage)
-        self.setup()
+        setup()
     }
 
     private func setup() {
-        self.contentMode = .scaleAspectFit
-        self.updateAspectRatioConstraint()
+        contentMode = .scaleAspectFit
+        updateAspectRatioConstraint()
     }
 
     /// Removes any pre-existing aspect ratio constraint, and adds a new one based on the current image
     private func updateAspectRatioConstraint() {
         if let constraint = self.aspectRatioConstraint {
-            self.removeConstraint(constraint)
+            removeConstraint(constraint)
         }
-        self.aspectRatioConstraint = nil
+        aspectRatioConstraint = nil
 
         if let imageSize = image?.size, imageSize.height != 0 {
             let aspectRatio = imageSize.width / imageSize.height
             let constraint = NSLayoutConstraint(item: self, attribute: .width,
-                                       relatedBy: .equal,
-                                       toItem: self, attribute: .height,
-                                       multiplier: aspectRatio, constant: 0)
+                                                relatedBy: .equal,
+                                                toItem: self, attribute: .height,
+                                                multiplier: aspectRatio, constant: 0)
 
             constraint.priority = UILayoutPriority(rawValue: 999)
-            self.addConstraint(constraint)
-            self.aspectRatioConstraint = constraint
+            addConstraint(constraint)
+            aspectRatioConstraint = constraint
         }
     }
 }

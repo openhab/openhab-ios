@@ -13,7 +13,6 @@ enum TestingError: Error {
 }
 
 class OpenHABXMLParserTests: XCTestCase {
-
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
@@ -27,13 +26,13 @@ class OpenHABXMLParserTests: XCTestCase {
         // Use XCTAssert and related functions to verify your tests produce the correct results.
 
         let xml = """
-<item>
-        <type>NumberItem</type>
-        <name>Office_Temperature</name>
-        <state>21.20</state>
-        <link>http://192.168.0.249:8080/rest/items/Office_Temperature</link>
-    </item>
-""".data(using: .utf8)!
+        <item>
+                <type>NumberItem</type>
+                <name>Office_Temperature</name>
+                <state>21.20</state>
+                <link>http://192.168.0.249:8080/rest/items/Office_Temperature</link>
+            </item>
+        """.data(using: .utf8)!
 
         do {
             let document = try XMLDocument(data: xml)

@@ -9,7 +9,6 @@
 //
 
 class SelectionUITableViewCell: GenericUITableViewCell {
-
     override var widget: OpenHABWidget! {
         get {
             return super.widget

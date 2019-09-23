@@ -16,12 +16,11 @@ protocol ColorPickerUITableViewCellDelegate: NSObjectProtocol {
 }
 
 class ColorPickerUITableViewCell: GenericUITableViewCell {
-
     weak var delegate: ColorPickerUITableViewCellDelegate?
 
-    @IBOutlet weak var upButton: DynamicButton!
-    @IBOutlet weak var colorButton: UICircleButton!
-    @IBOutlet weak var downButton: DynamicButton!
+    @IBOutlet private var upButton: DynamicButton!
+    @IBOutlet private var colorButton: UICircleButton!
+    @IBOutlet private var downButton: DynamicButton!
 
     required init?(coder: NSCoder) {
         os_log("ColorPickerUITableViewCell initWithCoder", log: OSLog.viewCycle, type: .info)
@@ -32,7 +31,7 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         separatorInset = .zero
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         selectionStyle = .none
@@ -52,7 +51,7 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
         downButton?.highlightStokeColor = Colors.hightlightStrokeColor
-        upButton?.highlightStokeColor =  Colors.hightlightStrokeColor
+        upButton?.highlightStokeColor = Colors.hightlightStrokeColor
     }
 
     @objc
@@ -68,7 +67,7 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     }
 }
 
-fileprivate extension Selector {
+private extension Selector {
     static let upButtonPressed = #selector(ColorPickerUITableViewCell.upButtonPressed)
     static let downButtonPressed = #selector(ColorPickerUITableViewCell.downButtonPressed)
 }

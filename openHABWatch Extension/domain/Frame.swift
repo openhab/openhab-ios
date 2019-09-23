@@ -9,7 +9,6 @@
 import Foundation
 
 class Frame: NSObject {
-
     let items: [Item]
 
     init(items: [Item]) {
@@ -20,6 +19,6 @@ class Frame: NSObject {
 extension Frame {
     convenience init? (with codingData: OpenHABSitemap.CodingData?) {
         guard let widgets = codingData?.page.widgets else { return nil }
-        self.init(items: widgets.compactMap { Item.init(with: $0.item) })
+        self.init(items: widgets.compactMap { Item(with: $0.item) })
     }
 }

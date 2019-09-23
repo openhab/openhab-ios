@@ -24,5 +24,4 @@ extension Data {
 
         return String(utf16CodeUnits: hexChars, count: hexChars.count)
     }
-
 }

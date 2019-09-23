@@ -11,7 +11,6 @@
 import UIKit
 
 class FrameUITableViewCell: GenericUITableViewCell {
-
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
@@ -19,7 +18,7 @@ class FrameUITableViewCell: GenericUITableViewCell {
         separatorInset = .zero
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         selectionStyle = .none
@@ -32,5 +31,4 @@ class FrameUITableViewCell: GenericUITableViewCell {
         textLabel?.text = widget.label.uppercased()
         contentView.sizeToFit()
     }
-
 }

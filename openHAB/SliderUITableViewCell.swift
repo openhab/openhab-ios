@@ -12,19 +12,18 @@ import os.log
 import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
+    @IBOutlet private var widgetSlider: UISlider!
 
-    @IBOutlet weak var widgetSlider: UISlider!
-
-    @IBOutlet weak var customDetailText: UILabel!
+    @IBOutlet private var customDetailText: UILabel!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        self.initiliaze()
+        initiliaze()
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.initiliaze()
+        initiliaze()
     }
 
     private func initiliaze() {
@@ -33,7 +32,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @IBAction func sliderValueChanged(_ sender: Any) {
-        let widgetValue = adj(Double(widgetSlider?.value ?? Float (widget.minValue)))
+        let widgetValue = adj(Double(widgetSlider?.value ?? Float(widget.minValue)))
         customDetailText?.text = valueText(widgetValue)
     }
 
@@ -60,10 +59,10 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     func valueText(_ widgetValue: Double) -> String {
-        let digits = max (-Decimal(widget.step).exponent, 0)
+        let digits = max(-Decimal(widget.step).exponent, 0)
         let numberFormatter = NumberFormatter()
         numberFormatter.maximumFractionDigits = digits
-        numberFormatter.decimalSeparator  = "."
+        numberFormatter.decimalSeparator = "."
         return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
     }
 
@@ -77,7 +76,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @objc
-    func sliderDidEndSliding (_ sender: UISlider) {
+    func sliderDidEndSliding(_ sender: UISlider) {
         let res = adj(Double(widgetSlider!.value))
         os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider!.value, res)
         widget.sendCommand(valueText(res))

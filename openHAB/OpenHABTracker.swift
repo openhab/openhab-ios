@@ -66,7 +66,7 @@ class OpenHABTracker: NSObject {
                     } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
                         NetworkConnection.shared.manager.request(request)
-                            .validate(statusCode: 200..<300)
+                            .validate(statusCode: 200 ..< 300)
                             .responseData { response in
                                 switch response.result {
                                 case .success:
@@ -133,14 +133,13 @@ class OpenHABTracker: NSObject {
         if let changedReach = notification?.object as? Reachability {
             let nStatus = changedReach.connection
             if nStatus != oldReachabilityStatus {
-                if let oldReachabilityStatus = oldReachabilityStatus { //}, let nStatus = nStatus {
+                if let oldReachabilityStatus = oldReachabilityStatus { // }, let nStatus = nStatus {
                     os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, string(from: oldReachabilityStatus) ?? "", string(from: nStatus) ?? "")
-
                 }
                 oldReachabilityStatus = nStatus
                 if let delegate = delegate as? OpenHABTrackerExtendedDelegate {
 //                    if let nStatus = nStatus {
-                        delegate.openHABTrackingNetworkChange(nStatus)
+                    delegate.openHABTrackingNetworkChange(nStatus)
 //                    }
                 }
             }
@@ -171,7 +170,7 @@ class OpenHABTracker: NSObject {
 
     func isNetworkConnected2() -> Bool {
         let networkReach = Reachability()
-        return (networkReach?.connection == .wifi || networkReach?.connection == .cellular ) ? true : false
+        return (networkReach?.connection == .wifi || networkReach?.connection == .cellular) ? true : false
     }
 
     func isNetworkWiFi() -> Bool {
@@ -196,14 +195,11 @@ class OpenHABTracker: NSObject {
         case .cellular: return "WWAN"
         }
     }
-
 }
 
 extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
-
     // NSNetService delegate methods for publication
     func netServiceDidResolveAddress(_ resolvedNetService: NetService) {
-
         func getStringIp(fromAddressData dataIn: Data?) -> String? {
             var ipString: String?
             let data = dataIn! as NSData
@@ -235,7 +231,7 @@ extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
 extension NSData {
     func castToCPointer<T>() -> T {
         let mem = UnsafeMutablePointer<T>.allocate(capacity: MemoryLayout<T.Type>.size)
-        self.getBytes(mem, length: MemoryLayout<T.Type>.size)
+        getBytes(mem, length: MemoryLayout<T.Type>.size)
         return mem.move()
     }
 }

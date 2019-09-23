@@ -11,7 +11,6 @@ import Foundation
 import Kingfisher
 
 class OpenHABAccessTokenAdapter: RequestAdapter {
-
     var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
     }
@@ -30,7 +29,6 @@ class OpenHABAccessTokenAdapter: RequestAdapter {
 }
 
 extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
-
     func modified(for request: URLRequest) -> URLRequest? {
         do {
             return try adapt(request)

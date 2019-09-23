@@ -31,7 +31,7 @@ class OpenHABSitemapPage: NSObject {
         tempWidgets.flatten(widgets)
         self.widgets = tempWidgets
         self.widgets.forEach {
-            $0.sendCommand = { [weak self] (item, command) in
+            $0.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
         }
@@ -53,7 +53,7 @@ class OpenHABSitemapPage: NSObject {
         tempWidgets.flatten(widgets)
         widgets = tempWidgets
         widgets.forEach {
-            $0.sendCommand = { [weak self] (item, command) in
+            $0.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
         }
@@ -65,12 +65,11 @@ class OpenHABSitemapPage: NSObject {
         self.title = title
         self.link = link
         self.leaf = leaf
-        self.widgets = expandedWidgets
-        self.widgets.forEach {
-            $0.sendCommand = { [weak self] (item, command) in
+        widgets = expandedWidgets
+        widgets.forEach {
+            $0.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
-
         }
     }
 
@@ -83,18 +82,17 @@ class OpenHABSitemapPage: NSObject {
 }
 
 extension OpenHABSitemapPage {
-    func filter (_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: self.pageId,
-                                  title: self.title,
-                                  link: self.link,
-                                  leaf: self.leaf,
-                                  expandedWidgets: try self.widgets.filter(isIncluded))
+    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+        let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: pageId,
+                                                            title: title,
+                                                            link: link,
+                                                            leaf: leaf,
+                                                            expandedWidgets: try widgets.filter(isIncluded))
         return filteredOpenHABSitemapPage
     }
 }
 
 extension OpenHABSitemapPage {
-
     struct CodingData: Decodable {
         let pageId: String?
         let title: String?
@@ -114,7 +112,7 @@ extension OpenHABSitemapPage {
 
 extension OpenHABSitemapPage.CodingData {
     var openHABSitemapPage: OpenHABSitemapPage {
-        let mappedWidgets = self.widgets?.map { $0.openHABWidget } ?? []
-        return OpenHABSitemapPage(pageId: self.pageId ?? "", title: self.title ?? "", link: self.link ?? "", leaf: self.leaf ?? false, widgets: mappedWidgets)
+        let mappedWidgets = widgets?.map { $0.openHABWidget } ?? []
+        return OpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }
