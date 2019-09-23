@@ -16,6 +16,20 @@ class ColorPickerViewController: DefaultColorPickerViewController {
     var widget: OpenHABWidget?
     let tapMaxDelay: Double = 0.3
 
+    /// Throttle engine
+    private var throttler: Throttler?
+
+    /// Throttling interval
+    public var throttlingInterval: Double? = 0 {
+        didSet {
+            guard let interval = throttlingInterval else {
+                self.throttler = nil
+                return
+            }
+            self.throttler = Throttler(seconds: interval)
+        }
+    }
+
     required init?(coder: NSCoder) {
         os_log("ColorPickerViewController initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
@@ -39,6 +53,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         }
 
         super.viewDidLoad()
+        throttlingInterval = 0.3
     }
 
     override func didReceiveMemoryWarning() {
@@ -61,7 +76,11 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
 extension ColorPickerViewController: ColorPickerDelegate {
     func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: ColorControl) {
-        sendColorUpdate(color: selectedColor)
+        if let throttler = self.throttler {
+            throttler.throttle { DispatchQueue.main.async { self.sendColorUpdate(color: selectedColor) } }
+        } else {
+            sendColorUpdate(color: selectedColor)
+        }
     }
 
     func colorPicker(_ colorPicker: ColorPickerController, confirmedColor: UIColor, usingControl: ColorControl) {
