@@ -178,7 +178,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
             buttonIcon.bounceButtonOnTouch = false
-            buttonIcon.strokeColor = .black
+            if #available(iOS 13, *) {
+                buttonIcon.strokeColor = .label
+            } else {
+                buttonIcon.strokeColor = .black
+            }
             buttonIcon.lineWidth = 1
 
             if drawerItem.tag == "notifications" {

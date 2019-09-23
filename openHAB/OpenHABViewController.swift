@@ -1006,7 +1006,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.backgroundColor = UIColor.systemBackground
             } else {
                 cell.backgroundColor = UIColor.white
-            }     
+            }
         }
 
         if let cell = cell as? GenericUITableViewCell {
