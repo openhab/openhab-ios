@@ -14,12 +14,10 @@ class MapViewTableViewCell: GenericUITableViewCell {
     private var mapView: MKMapView!
 
     override var widget: OpenHABWidget! {
-
         get {
             return super.widget
         }
         set(widget) {
-
             let oldLocationCoordinate: CLLocationCoordinate2D? = self.widget?.coordinate
             let oldLocationTitle = self.widget?.labelText ?? ""
             let newLocationCoordinate: CLLocationCoordinate2D? = widget?.coordinate
@@ -46,10 +44,9 @@ class MapViewTableViewCell: GenericUITableViewCell {
         mapView.layer.cornerRadius = 4.0
         mapView.layer.masksToBounds = true
         contentView.addSubview(mapView)
-
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
         mapView = MKMapView(frame: CGRect.zero)

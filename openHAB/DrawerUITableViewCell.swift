@@ -11,16 +11,15 @@ import os.log
 import UIKit
 
 class DrawerUITableViewCell: UITableViewCell {
+    // swiftlint:disable private_outlet
+    @IBOutlet private(set) var customTextLabel: UILabel!
 
-    @IBOutlet weak var customTextLabel: UILabel!
-    @IBOutlet weak var customImageView: UIView!
-
+    @IBOutlet var customImageView: UIImageView!
     required init?(coder: NSCoder) {
         os_log("DrawerUITableViewCell initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
 
         separatorInset = .zero
-
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

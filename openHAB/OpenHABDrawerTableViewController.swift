@@ -61,7 +61,6 @@ enum DrawerTableType {
 }
 
 class OpenHABDrawerTableViewController: UITableViewController {
-
     static let tableViewCellIdentifier = "DrawerCell"
 
     var sitemaps: [OpenHABSitemap] = []
@@ -102,7 +101,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         os_log("OpenHABDrawerTableViewController viewWillAppear", log: .viewCycle, type: .info)
 
-        NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { (response) in
+        NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case .success:
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -121,7 +120,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     self.setStandardDrawerItems()
                 }
                 self.tableView.reloadData()
-            case .failure(let error):
+            case let .failure(error):
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
@@ -157,7 +156,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
         cell.customImageView.subviews.forEach { $0.removeFromSuperview() }
 
-        if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
+        if indexPath.row < sitemaps.count, !sitemaps.isEmpty {
             let imageView = UIImageView(frame: cell.customImageView.bounds)
 
             cell.customTextLabel?.text = sitemaps[indexPath.row].label
@@ -176,21 +175,29 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             cell.customTextLabel?.text = drawerItem.label
 
-            let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
-            buttonIcon.bounceButtonOnTouch = false
-            buttonIcon.strokeColor = .black
-            buttonIcon.lineWidth = 1
-
-            if drawerItem.tag == "notifications" {
-                buttonIcon.style = .custom(DynamicButtonStyleBell.self)
-                if #available(iOS 13.0, *) {
-                    buttonIcon.strokeColor = .label
+            if #available(iOS 13, *) {
+                switch drawerItem.tag {
+                case "notifications":
+                    cell.customImageView.image = UIImage(systemName: "bell")
+                case "settings":
+                    cell.customImageView.image = UIImage(systemName: "gear")
+                default:
+                    break
                 }
-                cell.customImageView.addSubview(buttonIcon)
-            } else if drawerItem.tag == "settings" {
-                buttonIcon.style = .custom(DynamicButtonStyleGear.self)
-                if #available(iOS 13.0, *) {
-                    buttonIcon.strokeColor = .label
+            } else {
+                let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
+                buttonIcon.bounceButtonOnTouch = false
+
+                buttonIcon.strokeColor = .black
+                buttonIcon.lineWidth = 1
+
+                switch drawerItem.tag {
+                case "notifications":
+                    buttonIcon.style = .custom(DynamicButtonStyleBell.self)
+                case "settings":
+                    buttonIcon.style = .custom(DynamicButtonStyleGear.self)
+                default:
+                    break
                 }
                 cell.customImageView.addSubview(buttonIcon)
             }
@@ -213,7 +220,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
         tableView.deselectRow(at: indexPath, animated: false)
         // First sitemaps
-        if indexPath.row < sitemaps.count && !sitemaps.isEmpty {
+        if indexPath.row < sitemaps.count, !sitemaps.isEmpty {
             let sitemap = sitemaps[indexPath.row]
             Preferences.defaultSitemap = sitemap.name
             appData?.rootViewController?.pageUrl = ""
@@ -247,7 +254,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     private func setStandardDrawerItems() {
         // check if we are using my.openHAB, add notifications menu item then
         // Actually this should better test whether the host of the remoteUrl is on openhab.org
-        if Preferences.remoteUrl.contains("openhab.org") && !Preferences.demomode {
+        if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
             let notificationsItem = OpenHABDrawerItem()
             notificationsItem.label = "Notifications"
             notificationsItem.tag = "notifications"

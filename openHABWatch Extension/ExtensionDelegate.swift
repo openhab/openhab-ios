@@ -10,7 +10,6 @@ import WatchConnectivity
 import WatchKit
 
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
-
     var session: WCSession? {
         didSet {
             if let session = session {
@@ -66,5 +65,4 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
             }
         }
     }
-
 }

@@ -10,7 +10,6 @@
 import XCTest
 
 class RESTAPITest: XCTestCase {
-
     override func setUp() {
         super.setUp()
 
@@ -51,8 +50,8 @@ class RESTAPITest: XCTestCase {
         let pageToLoadUrl = URL(string: "http://192.168.2.16")!
         let pageRequest = URLRequest(url: pageToLoadUrl)
         let registrationOperation = NetworkConnection.shared.manager.request(pageRequest)
-            .validate(statusCode: 200..<300)
-            .responseData { (response) in
+            .validate(statusCode: 200 ..< 300)
+            .responseData { response in
                 XCTAssertEqual(response.response?.statusCode, 200)
                 expectation.fulfill()
             }
@@ -63,30 +62,28 @@ class RESTAPITest: XCTestCase {
     }
 
     func testRegisterApp() {
-
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
         let expectation = XCTestExpectation(description: "Register App")
 
         // when
-        NetworkConnection.register(prefsURL: "http://192.168.2.16", deviceToken: "", deviceId: "", deviceName: "") { (response) in
-                XCTAssertEqual(response.response?.statusCode, 200)
-                expectation.fulfill()
+        NetworkConnection.register(prefsURL: "http://192.168.2.16", deviceToken: "", deviceId: "", deviceName: "") { response in
+            XCTAssertEqual(response.response?.statusCode, 200)
+            expectation.fulfill()
         }
         // then
         wait(for: [expectation], timeout: 3)
     }
 
     func testSitemap() {
-
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
         let expectation = XCTestExpectation(description: "Register App")
 
         // when
-        NetworkConnection.sitemaps(openHABRootUrl: "") { (response) in
+        NetworkConnection.sitemaps(openHABRootUrl: "") { response in
             XCTAssertEqual(response.response?.statusCode, 200)
             expectation.fulfill()
         }
@@ -95,14 +92,13 @@ class RESTAPITest: XCTestCase {
     }
 
     func testTracker() {
-
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
         let expectation = XCTestExpectation(description: "Register App")
 
         // when
-        NetworkConnection.tracker(openHABRootUrl: "") { (response) in
+        NetworkConnection.tracker(openHABRootUrl: "") { response in
             XCTAssertEqual(response.response?.statusCode, 200)
             expectation.fulfill()
         }

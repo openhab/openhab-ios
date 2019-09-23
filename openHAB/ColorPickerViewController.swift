@@ -55,7 +55,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
         os_log("Color changed to HSB(%g, %g, %g).", log: .default, type: .info, hue, saturation, brightness)
 
-        self.widget?.sendCommand("\(hue),\(saturation),\(brightness)")
+        widget?.sendCommand("\(hue),\(saturation),\(brightness)")
     }
 }
 

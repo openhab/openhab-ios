@@ -10,13 +10,12 @@ import Foundation
 import WatchKit
 
 class ButtonTableRowController: NSObject {
-
     var item: Item?
     var interfaceController: InterfaceController?
 
-    @IBOutlet var buttonSwitch: WKInterfaceSwitch!
+    @IBOutlet private var buttonSwitch: WKInterfaceSwitch!
 
-    @IBAction func doSwitchButtonPressed(_ value: Bool) {
+    @IBAction private func doSwitchButtonPressed(_ value: Bool) {
         guard let item = item else { return }
         let command = value ? "ON" : "OFF"
         switchOpenHabItem(for: item, command: command)
@@ -40,19 +39,18 @@ class ButtonTableRowController: NSObject {
     }
 
     private func switchOpenHabItem(for item: Item, command: String) {
-
         interfaceController!.displayActivityImage()
-        OpenHabService.singleton.switchOpenHabItem(for: item, command: command) {(data, response, error) -> Void in
+        OpenHabService.singleton.switchOpenHabItem(for: item, command: command) { (data, response, error) -> Void in
 
             self.interfaceController!.hideActivityImage()
-            guard let data = data, error == nil else {                                                 // check for fundamental networking error
+            guard let data = data, error == nil else { // check for fundamental networking error
                 self.interfaceController!.displayAlert(message: "error=\(String(describing: error))")
                 return
             }
 
-            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 { // check for http errors
                 let message = "statusCode should be 200, but is \(httpStatus.statusCode)\n" +
-                "response = \(String(describing: response))"
+                    "response = \(String(describing: response))"
                 self.interfaceController!.displayAlert(message: message)
             }
 

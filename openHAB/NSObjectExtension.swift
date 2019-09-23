@@ -9,9 +9,7 @@
 import Foundation
 
 extension NSObject {
-
     func getProperties(from classType: NSObject.Type) -> [String] {
-
         var propertiesCount: CUnsignedInt = 0
         let propertiesInAClass = class_copyPropertyList(classType, &propertiesCount)
         let propertiesArray: [String]
@@ -20,7 +18,6 @@ extension NSObject {
             let property = propertiesInAClass?[i]
             let strKey = NSString(utf8String: property_getName(property!)) as String?
             propertiesArray.append(strKey)
-
         }
         return propertiesArray
     }

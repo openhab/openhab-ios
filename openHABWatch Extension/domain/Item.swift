@@ -9,7 +9,6 @@
 import Foundation
 
 class Item: NSObject {
-
     let name: String
     let label: String
     var state: String

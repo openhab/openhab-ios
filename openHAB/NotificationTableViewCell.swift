@@ -12,9 +12,9 @@ import os.log
 import UIKit
 
 class NotificationTableViewCell: UITableViewCell {
-
-    @IBOutlet weak var customTextLabel: UILabel!
-    @IBOutlet weak var customDetailTextLabel: UILabel!
+    // swiftlint:disable private_outlet
+    @IBOutlet private(set) var customTextLabel: UILabel!
+    @IBOutlet private(set) var customDetailTextLabel: UILabel!
 
     required init?(coder: NSCoder) {
         os_log("DrawerUITableViewCell initWithCoder", log: .viewCycle, type: .info)

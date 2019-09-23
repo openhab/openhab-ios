@@ -11,10 +11,10 @@
 import UIKit
 
 class OpenHABInfoViewController: UITableViewController {
-    @IBOutlet var appVersionLabel: UILabel!
-    @IBOutlet var openHABVersionLabel: UILabel!
-    @IBOutlet var openHABUUIDLabel: UILabel!
-    @IBOutlet var openHABSecretLabel: UILabel!
+    @IBOutlet private var appVersionLabel: UILabel!
+    @IBOutlet private var openHABVersionLabel: UILabel!
+    @IBOutlet private var openHABUUIDLabel: UILabel!
+    @IBOutlet private var openHABSecretLabel: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()

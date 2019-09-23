@@ -13,7 +13,6 @@ import AVFoundation
 import AVKit
 
 class PlayerView: UIView {
-
     // Override UIView property
     override static var layerClass: AnyClass {
         return AVPlayerLayer.self

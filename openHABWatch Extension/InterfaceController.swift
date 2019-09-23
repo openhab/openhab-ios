@@ -10,9 +10,8 @@ import Foundation
 import WatchKit
 
 class InterfaceController: WKInterfaceController {
-
-    @IBOutlet weak var activityImage: WKInterfaceImage!
-    @IBOutlet weak var buttonTable: WKInterfaceTable!
+    @IBOutlet private var activityImage: WKInterfaceImage!
+    @IBOutlet private var buttonTable: WKInterfaceTable!
 
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
@@ -25,7 +24,7 @@ class InterfaceController: WKInterfaceController {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
 
-        self.refresh(Preferences.sitemap)
+        refresh(Preferences.sitemap)
         // load the current Sitemap
         OpenHabService.singleton.readSitemap { (sitemap, errorString) -> Void in
 
@@ -42,15 +41,14 @@ class InterfaceController: WKInterfaceController {
         }
     }
 
-    fileprivate func refresh(_ sitemap: (Sitemap)) {
-
+    fileprivate func refresh(_ sitemap: Sitemap) {
         if sitemap.frames.isEmpty {
             return
         }
 
-        self.buttonTable.setNumberOfRows(sitemap.frames[0].items.count, withRowType: "buttonRow")
-        for i in 0..<self.buttonTable.numberOfRows {
-            let row = self.buttonTable.rowController(at: i) as! ButtonTableRowController
+        buttonTable.setNumberOfRows(sitemap.frames[0].items.count, withRowType: "buttonRow")
+        for i in 0 ..< buttonTable.numberOfRows {
+            let row = buttonTable.rowController(at: i) as! ButtonTableRowController
             row.setInterfaceController(interfaceController: self)
             row.setItem(item: sitemap.frames[0].items[i])
         }
@@ -63,7 +61,7 @@ class InterfaceController: WKInterfaceController {
 
     func displayAlert(message: String) {
         DispatchQueue.main.async {
-            let okAction = WKAlertAction.init(title: "Ok", style: .default) {
+            let okAction = WKAlertAction(title: "Ok", style: .default) {
                 print("ok action")
             }
             self.presentAlert(withTitle: "Fehler", message: message, preferredStyle: .actionSheet, actions: [okAction])
@@ -72,7 +70,7 @@ class InterfaceController: WKInterfaceController {
 
     func displayActivityImage() {
         activityImage.setHidden(false)
-        activityImage.startAnimatingWithImages(in: NSRange(1...15), duration: 1.0, repeatCount: 0)
+        activityImage.startAnimatingWithImages(in: NSRange(1 ... 15), duration: 1.0, repeatCount: 0)
     }
 
     func hideActivityImage() {

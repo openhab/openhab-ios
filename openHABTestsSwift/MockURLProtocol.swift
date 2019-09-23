@@ -9,7 +9,6 @@
 import Foundation
 
 final class MockURLProtocol: URLProtocol {
-
     enum ResponseType {
         case error(Error)
         case success(HTTPURLResponse)
@@ -44,22 +43,20 @@ final class MockURLProtocol: URLProtocol {
     override func stopLoading() {
         activeTask?.cancel()
     }
-
 }
 
 // MARK: - URLSessionDataDelegate
 
 extension MockURLProtocol: URLSessionDataDelegate {
-
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         client?.urlProtocol(self, didLoad: data)
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         switch MockURLProtocol.responseType {
-        case .error(let error)?:
+        case let .error(error)?:
             client?.urlProtocol(self, didFailWithError: error)
-        case .success(let response)?:
+        case let .success(response)?:
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         default:
             break
@@ -70,7 +67,6 @@ extension MockURLProtocol: URLSessionDataDelegate {
 }
 
 extension MockURLProtocol {
-
     enum MockError: Error {
         case none
     }
