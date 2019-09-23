@@ -48,28 +48,56 @@ class OpenHABWidget: NSObject, MKAnnotation {
         return array[0].trimmingCharacters(in: .whitespaces)
     }
 
-    // Text after "["
+    // Text between square brackets
     var labelValue: String? {
-        let array = label.components(separatedBy: "[")
-        if array.count > 1 {
-            var characterSet = CharacterSet.whitespaces
-            characterSet.insert(charactersIn: "]")
-            return array[1].trimmingCharacters(in: characterSet)
-        }
-        return nil
+
+        // Swift 5 raw strings
+        let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [])
+        guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: (label as NSString).length)) else { return nil }
+        guard let range = Range(match.range(at: 1), in: label) else { return nil }
+        return String(label[range])
+
     }
 
     var coordinate: CLLocationCoordinate2D {
         return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
+    func sendCommandDouble(_ command: Double) {
+        sendCommand(String(command))
+    }
+
+    func sendCommand(_ command: String?) {
+        guard let item = item else {
+            os_log("Command for Item = nil", log: .default, type: .info)
+            return
+        }
+        guard let sendCommand = sendCommand else {
+            os_log("sendCommand closure not set", log: .default, type: .info)
+            return
+        }
+        sendCommand(item, command)
+    }
+
+    func mappingIndex(byCommand command: String?) -> Int? {
+        for mapping in mappings where mapping.command == command {
+            return (mappings as NSArray).index(of: mapping)
+        }
+        return nil
+    }
+
+}
+
+extension OpenHABWidget {
+
     // This is an ugly initializer
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
+    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget] ) {
 
         func toString (_ with: Double?) -> String {
             guard let double = with else { return "" }
             return String(format: "%.1f", double)
         }
+        self.init()
         self.widgetId = widgetId
         self.label = label
         self.type = type
@@ -105,8 +133,8 @@ class OpenHABWidget: NSObject, MKAnnotation {
         self.step = abs(self.step)
     }
 
-    init(xml xmlElement: XMLElement) {
-        super.init()
+    convenience init(xml xmlElement: XMLElement) {
+        self.init()
         for child in xmlElement.children {
             switch child.tag {
             case "widgetId": widgetId = child.stringValue
@@ -141,29 +169,6 @@ class OpenHABWidget: NSObject, MKAnnotation {
                 break
             }
         }
-    }
-
-    func sendCommandDouble(_ command: Double) {
-        sendCommand(String(command))
-    }
-
-    func sendCommand(_ command: String?) {
-        guard let item = item else {
-            os_log("Command for Item = nil", log: .default, type: .info)
-            return
-        }
-        guard let sendCommand = sendCommand else {
-            os_log("sendCommand closure not set", log: .default, type: .info)
-            return
-        }
-        sendCommand(item, command)
-    }
-
-    func mappingIndex(byCommand command: String?) -> Int? {
-        for mapping in mappings where mapping.command == command {
-            return (mappings as NSArray).index(of: mapping)
-        }
-        return nil
     }
 }
 

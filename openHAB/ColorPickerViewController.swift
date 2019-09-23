@@ -37,7 +37,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         } else {
             // do nothing - DefaultColorPickerViewController will handle this
         }
-        
+
         super.viewDidLoad()
     }
 

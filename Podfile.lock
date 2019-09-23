@@ -88,9 +88,9 @@ DEPENDENCIES:
   - FlexColorPicker
   - Fuzi (~> 3.1)
   - Kingfisher (~> 5.0)
-  - SideMenu (~> 6.0)
+  - SideMenu
   - SVGKit
-  - SwiftMessages
+  - SwiftMessages (< 7.0.1)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -139,8 +139,8 @@ SPEC CHECKSUMS:
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   SideMenu: 8c67753662a891321bb646b03fca9f132ae5433a
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
+  SwiftMessages: a952f7a9103d9aeab93730a2861d2d8fcdd8758f
 
-PODFILE CHECKSUM: e9c07ce2bd628da1e1140e5462effaca394ddc4b
+PODFILE CHECKSUM: 062bcf98c6f3cb201c0b414472780f74c5e84314
 
-COCOAPODS: 1.7.0.beta.3
+COCOAPODS: 1.7.1
