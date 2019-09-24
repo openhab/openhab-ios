@@ -218,12 +218,12 @@ class OpenHABWatchTests: XCTestCase {
                 return
             }
             let homepageDict = jsonDict.object(forKey: "homepage") as! NSDictionary
-            if homepageDict.count == 0 {
+            if homepageDict.isEmpty {
                 XCTFail("Not finding homepage")
                 return
             }
             let widgetsDict = homepageDict.object(forKey: "widgets") as! NSMutableArray
-            if widgetsDict.count == 0 {
+            if widgetsDict.isEmpty {
                 XCTFail("widgets not found")
                 return
             }
