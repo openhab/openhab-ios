@@ -210,25 +210,21 @@ class OpenHABWatchTests: XCTestCase {
     func testSiteMapForWatchParsing() {
         let data = Data(jsonInput.utf8)
         do {
-            // swiftlint:disable empty_count
-
             let json = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)
             guard let jsonDict: NSDictionary = json as? NSDictionary else {
                 XCTFail("Not able to parse")
                 return
             }
             let homepageDict = jsonDict.object(forKey: "homepage") as! NSDictionary
-            if homepageDict.count == 0 {
+            if homepageDict.isEmpty {
                 XCTFail("Not finding homepage")
                 return
             }
             let widgetsDict = homepageDict.object(forKey: "widgets") as! NSMutableArray
-            if widgetsDict.count == 0 {
+            if widgetsDict.isEmpty {
                 XCTFail("widgets not found")
                 return
             }
-            // swiftlint:enable empty_count
-
         } catch {
             XCTFail("Failed parsing")
         }

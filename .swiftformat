@@ -6,6 +6,9 @@
 # disabled rules
 --disable specifiers # see https://github.com/nicklockwood/SwiftFormat/issues/364
 
+# opt-in rules
+--enable isEmpty
+
 # format options
 --allman false
 --binarygrouping none
