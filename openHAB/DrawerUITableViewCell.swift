@@ -11,7 +11,6 @@ import os.log
 import UIKit
 
 class DrawerUITableViewCell: UITableViewCell {
-    // swiftlint:disable private_outlet
     @IBOutlet private(set) var customTextLabel: UILabel!
 
     @IBOutlet var customImageView: UIImageView!

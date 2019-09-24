@@ -63,6 +63,9 @@ identifier_name:
     - i
     - v
 
+private_outlet:
+  allow_private_set: true
+
 custom_rules:
   comments_space: # From https://github.com/brandenr/swiftlintconfig
     name: "Space After Comment"
