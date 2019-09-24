@@ -168,7 +168,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             } else {
                 imageView.image = UIImage(named: "openHABIcon")
             }
-            cell.customImageView.addSubview(imageView)
+            cell.customImageView.image = imageView.image
         } else {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]
