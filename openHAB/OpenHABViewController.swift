@@ -508,6 +508,9 @@ class OpenHABViewController: UIViewController {
                 case 2...:
                     if self.defaultSitemap != "" {
                         if let sitemapToOpen = self.sitemap(byName: self.defaultSitemap) {
+                            if self.currentPage?.pageId != sitemapToOpen.name {
+                                self.currentPage?.widgets.removeAll() // NOTE: remove all widgets to ensure cells get invalidated
+                            }
                             self.pageUrl = sitemapToOpen.homepageLink
                             self.loadPage(false)
                         } else {
