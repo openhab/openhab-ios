@@ -14,19 +14,18 @@ import UIKit
 
 class ColorPickerViewController: DefaultColorPickerViewController {
     var widget: OpenHABWidget?
-    let tapMaxDelay: Double = 0.3
 
     /// Throttle engine
     private var throttler: Throttler?
 
     /// Throttling interval
-    public var throttlingInterval: Double? = 0 {
+    public var throttlingInterval: TimeInterval? = 0 {
         didSet {
             guard let interval = throttlingInterval else {
                 self.throttler = nil
                 return
             }
-            self.throttler = Throttler(seconds: interval)
+            self.throttler = Throttler(maxInterval: interval)
         }
     }
 
