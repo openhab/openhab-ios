@@ -163,12 +163,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
             if sitemaps[indexPath.row].icon != "" {
                 if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url {
                     imageView.kf.setImage(with: iconURL,
-                                          placeholder: UIImage(named: "icon-76x76.png"))
+                                          placeholder: UIImage(named: "openHABIcon"))
                 }
             } else {
-                imageView.image = UIImage(named: "icon-76x76.png")
+                imageView.image = UIImage(named: "openHABIcon")
             }
-            cell.customImageView.addSubview(imageView)
+            cell.customImageView.image = imageView.image
         } else {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]
