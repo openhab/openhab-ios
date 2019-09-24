@@ -59,7 +59,6 @@ class GenericUITableViewCell: UITableViewCell {
         }
     }
 
-    // swiftlint:disable private_outlet
     @IBOutlet private(set) var customTextLabel: UILabel!
     @IBOutlet private(set) var customDetailTextLabel: UILabel!
     @IBOutlet private(set) var customDetailTextLabelConstraint: NSLayoutConstraint!

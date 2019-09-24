@@ -12,7 +12,6 @@ import os.log
 import UIKit
 
 class NotificationTableViewCell: UITableViewCell {
-    // swiftlint:disable private_outlet
     @IBOutlet private(set) var customTextLabel: UILabel!
     @IBOutlet private(set) var customDetailTextLabel: UILabel!
 
