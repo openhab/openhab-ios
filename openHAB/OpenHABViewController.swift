@@ -41,7 +41,7 @@ struct SVGProcessor: ImageProcessor {
     let identifier = "org.openhab.svgprocessor"
 
     // Convert input data/image to target image and return it.
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> Image? {
+    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
             print("already an image")

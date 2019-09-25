@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -56,6 +56,9 @@
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA28C363225292FF00AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
+		DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4578233BF812003DDDEF /* Kingfisher */; };
+		DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457B233BF844003DDDEF /* Alamofire */; };
+		DA2D457E233BF990003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457D233BF990003DDDEF /* Alamofire */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
 		DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4A1A63223D57AD005F530F /* ColorUtil.swift */; };
@@ -352,7 +355,6 @@
 		DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemapPage.swift; sourceTree = "<group>"; };
 		DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABWidget.swift; sourceTree = "<group>"; };
 		DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABTracker.swift; sourceTree = "<group>"; };
-		DFDEE41C1883EB99008B26AC /* Reachability+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Reachability+URL.swift"; sourceTree = "<group>"; };
 		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLegalViewController.swift; sourceTree = "<group>"; };
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABInfoViewController.swift; sourceTree = "<group>"; };
@@ -380,6 +382,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				501B5ED14B755B49EB0E71A2 /* Pods_openHABTestsSwift.framework in Frameworks */,
+				DA2D457E233BF990003DDDEF /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,11 +397,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
-				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
-				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
+				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
+				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
+				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
+				DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */,
+				DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */,
 				FBA52365FFB7B2D216F485D5 /* Pods_openHAB.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -757,7 +762,6 @@
 				DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */,
 				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
 				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
-				DFDEE41C1883EB99008B26AC /* Reachability+URL.swift */,
 				DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */,
 				DA28C35F2251F07000AB409C /* OSLogHelper.swift */,
 				9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */,
@@ -850,6 +854,9 @@
 				DA2DC23521F2736C00830730 /* PBXTargetDependency */,
 			);
 			name = openHABTestsSwift;
+			packageProductDependencies = (
+				DA2D457D233BF990003DDDEF /* Alamofire */,
+			);
 			productName = openHABTestsSwift;
 			productReference = DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -872,6 +879,10 @@
 			dependencies = (
 			);
 			name = openHAB;
+			packageProductDependencies = (
+				DA2D4578233BF812003DDDEF /* Kingfisher */,
+				DA2D457B233BF844003DDDEF /* Alamofire */,
+			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
 			productType = "com.apple.product-type.application";
@@ -934,6 +945,10 @@
 				Base,
 			);
 			mainGroup = DFB2621E18830A3600D3244D;
+			packageReferences = (
+				DA2D4577233BF812003DDDEF /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1865,6 +1880,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DA2D4577233BF812003DDDEF /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.8.0;
+			};
+		};
+		DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.9.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DA2D4578233BF812003DDDEF /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2D4577233BF812003DDDEF /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+		DA2D457B233BF844003DDDEF /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		DA2D457D233BF990003DDDEF /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DFB2621F18830A3600D3244D /* Project object */;
 }
