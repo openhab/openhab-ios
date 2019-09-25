@@ -17,8 +17,8 @@ public class Throttler {
     private var previousRun: Date = .distantPast
     private var maxInterval: TimeInterval
 
-    init(seconds: Double) {
-        maxInterval = seconds
+    init(maxInterval: TimeInterval) {
+        self.maxInterval = maxInterval
     }
 
     func throttle(block: @escaping () -> Void) {

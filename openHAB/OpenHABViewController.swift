@@ -133,13 +133,22 @@ class OpenHABViewController: UIViewController {
             widgetTableView.refreshControl = refreshControl
         }
 
-        hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
-        hamburgerButton.setStyle(.hamburger, animated: true)
-        hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-        hamburgerButton.strokeColor = view.tintColor
-
-        let hamburgerButtomItem = UIBarButtonItem(customView: hamburgerButton)
-        navigationItem.setRightBarButton(hamburgerButtomItem, animated: true)
+        let hamburgerButtonItem: UIBarButtonItem
+        if #available(iOS 13.0, *) {
+            let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
+            let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
+            hamburgerButtonItem = UIBarButtonItem(image: buttonImage,
+                                                  style: .plain,
+                                                  target: self,
+                                                  action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+        } else {
+            hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
+            hamburgerButton.setStyle(.hamburger, animated: true)
+            hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+            hamburgerButton.strokeColor = view.tintColor
+            hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
+        }
+        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
 
         navigationController?.navigationBar.prefersLargeTitles = true
 
@@ -653,7 +662,17 @@ class OpenHABViewController: UIViewController {
     }
 
     func sideMenuWillDisappear(menu: SideMenuNavigationController, animated: Bool) {
-        hamburgerButton.setStyle(.hamburger, animated: animated)
+        if #available(iOS 13.0, *) {
+            let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
+            let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
+            let hamburgerButtonItem = UIBarButtonItem(image: buttonImage,
+                                                      style: .plain,
+                                                      target: self,
+                                                      action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+            navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
+        } else {
+            hamburgerButton.setStyle(.hamburger, animated: animated)
+        }
     }
 }
 
@@ -870,7 +889,17 @@ extension OpenHABViewController: ModalHandler {
 
 extension OpenHABViewController: SideMenuNavigationControllerDelegate {
     func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
-        hamburgerButton.setStyle(.arrowRight, animated: animated)
+        if #available(iOS 13.0, *) {
+            let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
+            let buttonImage = UIImage(systemName: "arrow.right", withConfiguration: imageConfig)
+            let hamburgerButtonItem = UIBarButtonItem(image: buttonImage,
+                                                      style: .plain,
+                                                      target: self,
+                                                      action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+            navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
+        } else {
+            hamburgerButton.setStyle(.arrowRight, animated: animated)
+        }
 
         guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
             drawer.delegate == nil || drawer.openHABRootUrl.isEmpty
