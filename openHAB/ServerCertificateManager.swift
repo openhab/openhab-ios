@@ -7,6 +7,7 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import Alamofire
+import Foundation
 import os.log
 
 protocol ServerCertificateManagerDelegate: NSObjectProtocol {
