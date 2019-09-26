@@ -59,6 +59,8 @@
 		DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4578233BF812003DDDEF /* Kingfisher */; };
 		DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457B233BF844003DDDEF /* Alamofire */; };
 		DA2D457E233BF990003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457D233BF990003DDDEF /* Alamofire */; };
+		DA2D4640233D5C22003DDDEF /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
+		DA2D4646233D5EF9003DDDEF /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4645233D5EF9003DDDEF /* SideMenu */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
 		DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4A1A63223D57AD005F530F /* ColorUtil.swift */; };
@@ -404,6 +406,7 @@
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */,
 				DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */,
+				DA2D4646233D5EF9003DDDEF /* SideMenu in Frameworks */,
 				FBA52365FFB7B2D216F485D5 /* Pods_openHAB.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -882,6 +885,7 @@
 			packageProductDependencies = (
 				DA2D4578233BF812003DDDEF /* Kingfisher */,
 				DA2D457B233BF844003DDDEF /* Alamofire */,
+				DA2D4645233D5EF9003DDDEF /* SideMenu */,
 			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
@@ -948,6 +952,7 @@
 			packageReferences = (
 				DA2D4577233BF812003DDDEF /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */,
+				DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1190,6 +1195,7 @@
 				DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */,
 				DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
+				DA2D4640233D5C22003DDDEF /* OpenHABNotificationsViewController.swift in Sources */,
 				DAC9394B22AD651400C5F423 /* Sitemap.swift in Sources */,
 				DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */,
 				DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */,
@@ -1898,6 +1904,14 @@
 				minimumVersion = 4.9.0;
 			};
 		};
+		DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jonkykong/SideMenu";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.4.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1915,6 +1929,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		DA2D4645233D5EF9003DDDEF /* SideMenu */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */;
+			productName = SideMenu;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

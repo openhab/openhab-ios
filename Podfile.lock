@@ -70,7 +70,6 @@ PODS:
     - nanopb/encode (= 0.3.901)
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
-  - SideMenu (6.4.1)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
   - SwiftFormat/CLI (0.40.12)
@@ -86,7 +85,6 @@ DEPENDENCIES:
   - Firebase/Core
   - FlexColorPicker
   - Fuzi (~> 3.1)
-  - SideMenu
   - SVGKit
   - SwiftFormat/CLI
   - SwiftLint
@@ -111,7 +109,6 @@ SPEC REPOS:
     - GoogleDataTransportCCTSupport
     - GoogleUtilities
     - nanopb
-    - SideMenu
     - SVGKit
     - SwiftFormat
     - SwiftLint
@@ -135,12 +132,11 @@ SPEC CHECKSUMS:
   GoogleDataTransportCCTSupport: 9f352523e8785a71f6754f51eeff09f49ec19268
   GoogleUtilities: 9c2c544202301110b29f7974a82e77fdcf12bf51
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
-  SideMenu: a4ef5698eaf6d4662f288e0cac9dbf9d15a3e57d
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
   SwiftFormat: 73667bbb741386b0febf0bd1a1b8c502aa9d1c98
   SwiftLint: 5553187048b900c91aa03552807681bb6b027846
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: ff2d1e319acc3013c6217d88017c374ce60ed089
+PODFILE CHECKSUM: 6bb5377410427f4a716ad1f5f60aa01acb9115f1
 
 COCOAPODS: 1.7.1
