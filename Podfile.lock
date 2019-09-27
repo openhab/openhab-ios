@@ -91,7 +91,7 @@ DEPENDENCIES:
   - SwiftMessages
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - CocoaLumberjack
     - Crashlytics
     - DynamicButton
@@ -139,4 +139,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 6bb5377410427f4a716ad1f5f60aa01acb9115f1
 
-COCOAPODS: 1.7.1
+COCOAPODS: 1.8.1
