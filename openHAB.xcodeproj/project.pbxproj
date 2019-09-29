@@ -65,6 +65,8 @@
 		DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
 		DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4A1A63223D57AD005F530F /* ColorUtil.swift */; };
 		DA4A1A65223D57AE005F530F /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4A1A63223D57AD005F530F /* ColorUtil.swift */; };
+		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
+		DA4D4E0D23409A4600B37E37 /* DynamicButton in Frameworks */ = {isa = PBXBuildFile; productRef = DA4D4E0C23409A4600B37E37 /* DynamicButton */; };
 		DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DA5D0F82223E9991007ADDBD /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
@@ -299,6 +301,8 @@
 		DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABJSONParserTests.swift; sourceTree = "<group>"; };
 		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA4A1A63223D57AD005F530F /* ColorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorUtil.swift; sourceTree = "<group>"; };
+		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA5D0F80223E9991007ADDBD /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
@@ -407,6 +411,7 @@
 				DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */,
 				DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */,
 				DA2D4646233D5EF9003DDDEF /* SideMenu in Frameworks */,
+				DA4D4E0D23409A4600B37E37 /* DynamicButton in Frameworks */,
 				FBA52365FFB7B2D216F485D5 /* Pods_openHAB.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -668,6 +673,8 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
+				DA4D4DB4233F9ACB00B37E37 /* README.md */,
+				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				1224F793228A8AE400750965 /* openHABWatch */,
@@ -886,6 +893,7 @@
 				DA2D4578233BF812003DDDEF /* Kingfisher */,
 				DA2D457B233BF844003DDDEF /* Alamofire */,
 				DA2D4645233D5EF9003DDDEF /* SideMenu */,
+				DA4D4E0C23409A4600B37E37 /* DynamicButton */,
 			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
@@ -953,6 +961,7 @@
 				DA2D4577233BF812003DDDEF /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */,
 				DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */,
+				DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1006,6 +1015,7 @@
 			files = (
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
+				DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
 				DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */,
 				DFDF45311932042B00A6E581 /* legal.rtf in Resources */,
@@ -1912,6 +1922,15 @@
 				minimumVersion = 6.4.2;
 			};
 		};
+		DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yannickl/DynamicButton";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.2.1;
+			};
+		};
+
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1935,6 +1954,12 @@
 			package = DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */;
 			productName = SideMenu;
 		};
+		DA4D4E0C23409A4600B37E37 /* DynamicButton */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */;
+			productName = DynamicButton;
+		};
+
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DFB2621F18830A3600D3244D /* Project object */;

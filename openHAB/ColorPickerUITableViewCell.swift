@@ -10,6 +10,7 @@
 
 import DynamicButton
 import os.log
+import UIKit
 
 protocol ColorPickerUITableViewCellDelegate: NSObjectProtocol {
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?)
