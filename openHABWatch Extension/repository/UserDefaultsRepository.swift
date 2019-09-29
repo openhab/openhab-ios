@@ -12,14 +12,12 @@ let defaultValues = ["username": "test", "password": "test", "sitemapName": "wat
 // Convenient access to UserDefaults
 // Much shorter but to be reworked when Property Wrappers are available
 struct Preferences {
-
     static private let defaults = UserDefaults.standard
 
     static var localUrl: String {
         get {
             guard let localUrl = defaults.string(forKey: #function) else { return "" }
-            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
-                in: CharacterSet.whitespacesAndNewlines)
+            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if !validateUrl(trimmedUri) { return "" }
             return trimmedUri
         }
@@ -29,23 +27,24 @@ struct Preferences {
     static var remoteUrl: String {
         get {
             guard let localUrl = defaults.string(forKey: #function) else { return "https://openhab.org:8444" }
-            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(
-                in: CharacterSet.whitespacesAndNewlines)
+            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if !validateUrl(trimmedUri) { return "" }
             return trimmedUri
-       }
+        }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
     static var username: String {
         get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
-              return string }
+            return string
+        }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
     static var password: String {
         get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
-            return string }
+            return string
+        }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
@@ -56,7 +55,8 @@ struct Preferences {
 
     static var sitemapName: String {
         get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
-            return string }
+            return string
+        }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
@@ -77,12 +77,12 @@ struct Preferences {
 
     static var defaultSitemap: String {
         get { guard let string = defaults.string(forKey: #function) else { return defaultValues[#function]! }
-            return string }
+            return string
+        }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
     static func readActiveUrl() -> String {
-
         if Preferences.remoteUrl != "" {
             return Preferences.remoteUrl
         }
@@ -91,7 +91,7 @@ struct Preferences {
 
     fileprivate static func validateUrl(_ stringURL: String) -> Bool {
         // return nil if the URL has not a valid format
-        let url: URL? = URL.init(string: stringURL)
+        let url: URL? = URL(string: stringURL)
         return url != nil
     }
 
@@ -102,5 +102,4 @@ struct Preferences {
 
         return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
     }
-
 }

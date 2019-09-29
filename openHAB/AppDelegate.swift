@@ -22,7 +22,6 @@ var player: AVAudioPlayer?
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
     static var appDelegate: AppDelegate!
 
     var window: UIWindow?
@@ -56,7 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         loadSettingsDefaults()
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter() )
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter())
 
         registerForPushNotifications()
 
@@ -103,7 +102,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             guard granted else { return }
             self.getNotificationSettings()
         }
-
     }
 
     func getNotificationSettings() {
@@ -117,7 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    func application(_ application: UIApplication, open url: URL, options: [ UIApplication.OpenURLOptionsKey: Any ]) -> Bool {
+    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
 
@@ -135,16 +133,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-
         let deviceTokenString = deviceToken.reduce("") { $0 + String(format: "%02X", $1) } //try "%02.2hhx",
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
-        let dataDict = [
-            "deviceToken": deviceTokenString,
-            "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "" ,
-            "deviceName": UIDevice.current.name
-        ]
+        let dataDict = ["deviceToken": deviceTokenString,
+                        "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
+                        "deviceName": UIDevice.current.name]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
 
@@ -154,8 +149,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-    // version without completionHandler is deprecated
-    // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+        // version without completionHandler is deprecated
+        // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         os_log("didReceiveRemoteNotification", log: .notifications, type: .info)
 
         if application.applicationState == .active {
@@ -174,7 +169,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     player = try AVAudioPlayer(contentsOf: soundPath)
                     player?.numberOfLoops = 0
                     player?.play()
-                } catch let error {
+                } catch {
                     os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
                 }
                 player = try? AVAudioPlayer(contentsOf: soundPath)
@@ -206,7 +201,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
+        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     }
 
@@ -224,7 +219,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func loadSettingsDefaults() {
         let prefs = UserDefaults.standard
-        if  prefs.object(forKey: "localUrl") == nil {
+        if prefs.object(forKey: "localUrl") == nil {
             prefs.setValue("", forKey: "localUrl")
         }
         if prefs.object(forKey: "remoteUrl") == nil {
@@ -248,6 +243,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if prefs.object(forKey: "iconType") == nil {
             prefs.set(false, forKey: "iconType")
         }
-
     }
 }

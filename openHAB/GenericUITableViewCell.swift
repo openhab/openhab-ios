@@ -16,7 +16,6 @@ protocol GenericCellCacheProtocol: UITableViewCell {
 }
 
 class GenericUITableViewCell: UITableViewCell {
-
     private var _widget: OpenHABWidget!
     var widget: OpenHABWidget! {
         get {
@@ -40,28 +39,36 @@ class GenericUITableViewCell: UITableViewCell {
                     customTextLabel?.textColor = color
                 }
             } else {
-                customTextLabel?.textColor = UIColor.black
+                if #available(iOS 13.0, *) {
+                    customTextLabel?.textColor = UIColor.label
+                } else {
+                    customTextLabel?.textColor = UIColor.black
+                }
             }
             if _widget.valuecolor != "" {
                 if let color = color(fromHexString: self.widget?.valuecolor) {
                     customDetailTextLabel?.textColor = color
                 }
             } else {
-                customDetailTextLabel?.textColor = UIColor.lightGray
+                if #available(iOS 13.0, *) {
+                    customDetailTextLabel?.textColor = UIColor.secondaryLabel
+                } else {
+                    customDetailTextLabel?.textColor = UIColor.lightGray
+                }
             }
         }
     }
 
-    @IBOutlet weak var customTextLabel: UILabel!
-    @IBOutlet weak var customDetailTextLabel: UILabel!
-    @IBOutlet weak var customDetailTextLabelConstraint: NSLayoutConstraint!
+    @IBOutlet private(set) var customTextLabel: UILabel!
+    @IBOutlet private(set) var customDetailTextLabel: UILabel!
+    @IBOutlet private(set) var customDetailTextLabelConstraint: NSLayoutConstraint!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         initialize()
     }
 
-    override init (style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
     }
@@ -102,5 +109,4 @@ class GenericUITableViewCell: UITableViewCell {
         imageView?.kf.cancelDownloadTask()
         imageView?.image = nil
     }
-
 }

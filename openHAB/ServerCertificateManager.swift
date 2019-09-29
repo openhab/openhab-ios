@@ -7,6 +7,7 @@
 //  Copyright (c) 2019 David O'Neill. All rights reserved.
 
 import Alamofire
+import Foundation
 import os.log
 
 protocol ServerCertificateManagerDelegate: NSObjectProtocol {
@@ -25,6 +26,7 @@ class ServerCertificateManager {
         case permitOnce
         case permitAlways
     }
+
     var evaluateResult: EvaluateResult = .undecided
     weak var delegate: ServerCertificateManagerDelegate?
     var allowInvalidCertificates: Bool = false
@@ -37,12 +39,12 @@ class ServerCertificateManager {
 
     func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
-        self.loadTrustedCertificates()
+        loadTrustedCertificates()
         if trustedCertificates.isEmpty {
             os_log("No cert store, creating", log: .remoteAccess, type: .info)
             trustedCertificates = [:]
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
-            self.saveTrustedCertificates()
+            saveTrustedCertificates()
         } else {
             os_log("Loaded existing cert store", log: .remoteAccess, type: .info)
         }
@@ -58,7 +60,7 @@ class ServerCertificateManager {
     func saveTrustedCertificates() {
         do {
             let data = try NSKeyedArchiver.archivedData(withRootObject: trustedCertificates, requiringSecureCoding: false)
-            try data.write(to: URL(string: self.getPersistensePath() ?? "")!)
+            try data.write(to: URL(string: getPersistensePath() ?? "")!)
         } catch {
             os_log("Could not save trusted certificates", log: .default)
         }
@@ -67,7 +69,7 @@ class ServerCertificateManager {
     func storeCertificateData(_ certificate: CFData?, forDomain domain: String) {
         let certificateData = certificate as Data?
         trustedCertificates[domain] = certificateData
-        self.saveTrustedCertificates()
+        saveTrustedCertificates()
     }
 
     func certificateData(forDomain domain: String) -> CFData? {
@@ -77,7 +79,7 @@ class ServerCertificateManager {
 
     func loadTrustedCertificates() {
         do {
-            let rawdata = try Data(contentsOf: URL( string: self.getPersistensePath() ?? "" )!)
+            let rawdata = try Data(contentsOf: URL(string: getPersistensePath() ?? "")!)
             if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String: Any] {
                 trustedCertificates = unarchive
             }
@@ -88,7 +90,7 @@ class ServerCertificateManager {
 
     func evaluateTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let serverTrust = challenge.protectionSpace.serverTrust!
-        if self.evaluateServerTrust(serverTrust, forDomain: challenge.protectionSpace.host) {
+        if evaluateServerTrust(serverTrust, forDomain: challenge.protectionSpace.host) {
             let credential = URLCredential(trust: serverTrust)
             return (.useCredential, credential)
         }
@@ -134,7 +136,7 @@ class ServerCertificateManager {
                     case .permitAlways:
                         // User decided to accept invalid certificate and remember decision
                         // Add certificate to storage
-                        self.storeCertificateData(certificateData, forDomain: domain)
+                        storeCertificateData(certificateData, forDomain: domain)
                         return true
                     case .undecided:
                         // Something went wrong, abort connection
@@ -163,7 +165,7 @@ class ServerCertificateManager {
             case .permitAlways:
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
-                self.storeCertificateData(certificateData, forDomain: domain)
+                storeCertificateData(certificateData, forDomain: domain)
                 return true
             case .undecided:
                 return false
@@ -188,6 +190,5 @@ class ServerCertificateManager {
         } else {
             return nil
         }
-
     }
 }

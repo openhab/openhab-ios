@@ -24,6 +24,10 @@ platform :ios do
   desc "Build beta"
   lane :beta do |lane|
 
+    ensure_git_branch(
+ 	 branch: "(master|develop|release\\S+|hotfix\\S+)"
+    )
+	
     # ensure that master branch is clean
     ensure_git_status_clean
 
@@ -50,10 +54,25 @@ platform :ios do
     )
     increment_build_number(xcodeproj: "openHAB.xcodeproj")
     commit_version_bump(xcodeproj: "openHAB.xcodeproj")
+    
+    # push bump commit
     push_to_git_remote
+    
+    # create a local tag with the new version
     add_git_tag(
         message: comments,
         tag: "v#{version}")
+
+    # publish a new release into Github
+    github_release = set_github_release(
+	api_token: ENV["GITHUB_TOKEN"],
+	repository_name: "openhab/openhab-ios",
+        name: "#{type.capitalize} version v#{version}",
+        tag_name: "v#{version}",
+        description: comments,
+        commitish: "master"
+        # upload_assets: no assets supported
+    )
     build_app(scheme: "openHAB")
     upload_to_testflight(
         distribute_external: true,

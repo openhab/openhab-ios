@@ -11,7 +11,6 @@ import UserNotifications
 import WatchKit
 
 class NotificationController: WKUserNotificationInterfaceController {
-
     override init() {
         // Initialize variables here.
         super.init()

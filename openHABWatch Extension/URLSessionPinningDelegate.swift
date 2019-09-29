@@ -19,7 +19,6 @@ struct Certificate {
 }
 
 class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
-
     var clientCertificateManager = ClientCertificateManager()
 
     func urlSession(_ session: URLSession,
@@ -27,7 +26,6 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Swift.Void) {
         let protectionSpace = challenge.protectionSpace
         if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust, let serverTrust = protectionSpace.serverTrust {
-
             if Preferences.ignoreSSL {
                 let credential = URLCredential(trust: serverTrust)
                 os_log("Warning - ignoring invalid certificates", log: OSLog.remoteAccess, type: .info)
@@ -43,8 +41,8 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
             let certificateCount = SecTrustGetCertificateCount(serverTrust)
             guard certificateCount > 0,
                 let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0) else {
-                    completionHandler(.cancelAuthenticationChallenge, nil)
-                    return
+                completionHandler(.cancelAuthenticationChallenge, nil)
+                return
             }
 
             let serverCertificateData = SecCertificateCopyData(certificate) as Data
@@ -60,7 +58,7 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
             completionHandler(.cancelAuthenticationChallenge, nil)
 
         } else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodClientCertificate {
-            self.evaluateClientTrust(challenge: challenge)
+            evaluateClientTrust(challenge: challenge)
         } else {
             if challenge.previousFailureCount == 0 {
                 let credential = URLCredential(trust: challenge.protectionSpace.serverTrust!)
@@ -76,7 +74,7 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
         if let dns = dns {
             let identity = clientCertificateManager.evaluateTrust(distinguishedNames: dns)
             if let identity = identity {
-                let credential = URLCredential.init(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
+                let credential = URLCredential(identity: identity, certificates: nil, persistence: URLCredential.Persistence.forSession)
                 challenge.sender!.use(credential, for: challenge)
                 return
             }
@@ -93,7 +91,7 @@ extension Certificate {
             guard let file = bundle.url(forResource: $0, withExtension: "cer"),
                 let data = try? Data(contentsOf: file),
                 let cert = SecCertificateCreateWithData(nil, data as CFData) else {
-                    return nil
+                return nil
             }
             return Certificate(certificate: cert, data: data)
         }
@@ -111,6 +109,6 @@ extension Certificate {
         let isValid = (result == .unspecified || result == .proceed)
 
         // Validate host certificate against pinned certificate.
-        return isValid && certData == self.data
+        return isValid && certData == data
     }
 }

@@ -17,7 +17,6 @@ enum ImageType {
 }
 
 class NewImageUITableViewCell: GenericUITableViewCell {
-
     var didLoad: (() -> Void)?
 
     private var mainImageView: ScaleAspectFitImageView!
@@ -55,16 +54,14 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         contentView.addSubview(mainImageView)
 
-        let positionGuide = contentView //contentView.layoutMarginsGuide if more margin would be appreciated
+        let positionGuide = contentView // contentView.layoutMarginsGuide if more margin would be appreciated
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
 
-        NSLayoutConstraint.activate([
-            mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
-            mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
-            mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
-            mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)
-            ])
+        NSLayoutConstraint.activate([mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
+                                     mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
+                                     mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
+                                     mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)])
     }
 
     override func willMove(toSuperview newSuperview: UIView?) {
@@ -96,10 +93,10 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     func loadImage() {
         switch widgetPayload {
-        case .embedded(let image):
+        case let .embedded(image):
             mainImageView.image = image
             didLoad?()
-        case .link(let url):
+        case let .link(url):
             guard let url = url else { return }
             loadRemoteImage(withURL: url)
         default:
@@ -134,8 +131,8 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
 
         downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
-            .validate(statusCode: 200..<300)
-            .responseData { [weak self] (response) in
+            .validate(statusCode: 200 ..< 300)
+            .responseData { [weak self] response in
                 switch response.result {
                 case .success:
                     if let data = response.data {
@@ -143,7 +140,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                         self?.widget?.image = UIImage(data: data)
                         self?.didLoad?()
                     }
-                case .failure(let error):
+                case let .failure(error):
                     os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
                 }
             }

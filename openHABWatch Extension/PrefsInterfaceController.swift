@@ -10,12 +10,11 @@ import Foundation
 import WatchKit
 
 class PrefsInterfaceController: WKInterfaceController {
-
-    @IBOutlet weak var versionLabel: WKInterfaceLabel!
-    @IBOutlet weak var localUrlLabel: WKInterfaceLabel!
-    @IBOutlet weak var remoteUrlLabel: WKInterfaceLabel!
-    @IBOutlet weak var usernameLabel: WKInterfaceLabel!
-    @IBOutlet weak var sitemapLabel: WKInterfaceLabel!
+    @IBOutlet private var versionLabel: WKInterfaceLabel!
+    @IBOutlet private var localUrlLabel: WKInterfaceLabel!
+    @IBOutlet private var remoteUrlLabel: WKInterfaceLabel!
+    @IBOutlet private var usernameLabel: WKInterfaceLabel!
+    @IBOutlet private var sitemapLabel: WKInterfaceLabel!
 
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
@@ -34,7 +33,6 @@ class PrefsInterfaceController: WKInterfaceController {
     }
 
     func displayTheApplicationVersionNumber() {
-
         let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
         let buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
 

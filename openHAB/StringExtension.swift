@@ -9,7 +9,6 @@
 import Foundation
 
 extension String {
-
     var doubleValue: Double {
         let formatter = NumberFormatter()
         formatter.decimalSeparator = "."
@@ -37,6 +36,6 @@ extension String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.decimalSeparator = "."
-        return formatter.number(from: self.filter("01234567890.-".contains))
+        return formatter.number(from: filter("01234567890.-".contains))
     }
 }

@@ -10,14 +10,12 @@ import ClockKit
 import Foundation
 
 class ComplicationController: NSObject, CLKComplicationDataSource {
-
     // No Timetravel supported
     func getSupportedTimeTravelDirections(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimeTravelDirections) -> Void) {
         handler([])
     }
 
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimelineEntry?) -> Void) {
-
         let template = getTemplate(complication: complication)
         if template != nil {
             handler(CLKComplicationTimelineEntry(date: Date(), complicationTemplate: template!))
@@ -27,12 +25,10 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Placeholder Templates
 
     func getPlaceholderTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
-
         handler(getTemplate(complication: complication))
     }
 
     fileprivate func getTemplate(complication: CLKComplication) -> CLKComplicationTemplate? {
-
         // default ist circularSmall
         var template: CLKComplicationTemplate?
 

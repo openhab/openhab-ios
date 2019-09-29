@@ -18,7 +18,6 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell {
-
     private let activityIndicator = UIActivityIndicatorView(style: .gray)
 
     var didLoad: (() -> Void)?
@@ -29,6 +28,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
             prepareToPlay()
         }
     }
+
     private var playerView: PlayerView!
     private var mainImageView: UIImageView!
     private var playerObserver: NSKeyValueObservation?
@@ -53,30 +53,24 @@ class VideoUITableViewCell: GenericUITableViewCell {
         playerView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
         playerView.contentMode = .scaleAspectFit
 
-        let marginGuide = contentView //contentView.layoutMarginsGuide if more margin would be appreciated
-        NSLayoutConstraint.activate([
-            playerView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
-            playerView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
-            playerView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
-            playerView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
-            ])
+        let marginGuide = contentView // contentView.layoutMarginsGuide if more margin would be appreciated
+        NSLayoutConstraint.activate([playerView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
+                                     playerView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
+                                     playerView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
+                                     playerView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)])
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
-        NSLayoutConstraint.activate([
-            mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
-            mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
-            mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
-            mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
-            ])
+        NSLayoutConstraint.activate([mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
+                                     mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
+                                     mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
+                                     mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)])
 
         let bottomSpacingConstraint = activityIndicator.bottomAnchor.constraint(greaterThanOrEqualTo: marginGuide.bottomAnchor, constant: 15)
         bottomSpacingConstraint.priority = UILayoutPriority.defaultHigh
-        NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: marginGuide.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: marginGuide.centerYAnchor),
-            activityIndicator.topAnchor.constraint(greaterThanOrEqualTo: marginGuide.topAnchor, constant: 15),
-            bottomSpacingConstraint
-            ])
+        NSLayoutConstraint.activate([activityIndicator.centerXAnchor.constraint(equalTo: marginGuide.centerXAnchor),
+                                     activityIndicator.centerYAnchor.constraint(equalTo: marginGuide.centerYAnchor),
+                                     activityIndicator.topAnchor.constraint(greaterThanOrEqualTo: marginGuide.topAnchor, constant: 15),
+                                     bottomSpacingConstraint])
 
         NotificationCenter.default.addObserver(self, selector: #selector(stopPlayback), name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
@@ -120,7 +114,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         if widget.encoding.lowercased() != VideoEncoding.mjpeg.rawValue {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
-            playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] (playerItem, _) in
+            playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in
                 switch playerItem.status {
                 case .failed:
                     os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
@@ -159,8 +153,8 @@ class VideoUITableViewCell: GenericUITableViewCell {
         let streamImageInitialBytePattern = Data([255, 216])
         var imageData = Data()
         mjpegRequest = NetworkConnection.shared.manager.request(streamRequest)
-            .validate(statusCode: 200..<300)
-            .stream { [weak self] (chunkData) in
+            .validate(statusCode: 200 ..< 300)
+            .stream { [weak self] chunkData in
                 if chunkData.starts(with: streamImageInitialBytePattern) {
                     if let image = UIImage(data: imageData) {
                         DispatchQueue.main.async {
@@ -209,7 +203,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         playerView?.playerLayer.player = nil
         mjpegRequest?.cancel()
         mjpegRequest = nil
-        self.mainImageView?.image = nil
+        mainImageView?.image = nil
     }
 }
 

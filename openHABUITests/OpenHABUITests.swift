@@ -9,7 +9,6 @@
 import XCTest
 
 class OpenHABUITests: XCTestCase {
-
     override func setUp() {
         let app = XCUIApplication()
         app.launchEnvironment = ["UITest": "1"]
@@ -79,6 +78,5 @@ class OpenHABUITests: XCTestCase {
         hamburgerButton.tap()
         sleep(1)
         snapshot("7_Settings")
-
     }
 }

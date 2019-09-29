@@ -11,7 +11,6 @@ import UIKit
 
 /// Bell symbol style: 🔔
 struct DynamicButtonStyleBell: DynamicButtonBuildableStyle {
-
     /// "Bell" style.
     static var styleName: String {
         return "Bell"

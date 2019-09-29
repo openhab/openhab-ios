@@ -14,6 +14,8 @@ opt_in_rules:
   - reduce_boolean
   - file_types_order
   - type_contents_order
+  - private_outlet
+  - private_action
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
@@ -60,6 +62,9 @@ identifier_name:
     - b
     - i
     - v
+
+private_outlet:
+  allow_private_set: true
 
 custom_rules:
   comments_space: # From https://github.com/brandenr/swiftlintconfig

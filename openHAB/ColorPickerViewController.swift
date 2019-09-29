@@ -14,7 +14,20 @@ import UIKit
 
 class ColorPickerViewController: DefaultColorPickerViewController {
     var widget: OpenHABWidget?
-    let tapMaxDelay: Double = 0.3
+
+    /// Throttle engine
+    private var throttler: Throttler?
+
+    /// Throttling interval
+    public var throttlingInterval: TimeInterval? = 0 {
+        didSet {
+            guard let interval = throttlingInterval else {
+                self.throttler = nil
+                return
+            }
+            self.throttler = Throttler(maxInterval: interval)
+        }
+    }
 
     required init?(coder: NSCoder) {
         os_log("ColorPickerViewController initWithCoder", log: .viewCycle, type: .info)
@@ -30,7 +43,16 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
         delegate = self
 
+        if #available(iOS 13.0, *) {
+            // if nothing is set DefaultColorPickerViewController will fall back to .white
+            // if we set this manually DefaultColorPickerViewController will go with that
+            self.view.backgroundColor = .systemBackground
+        } else {
+            // do nothing - DefaultColorPickerViewController will handle this
+        }
+
         super.viewDidLoad()
+        throttlingInterval = 0.3
     }
 
     override func didReceiveMemoryWarning() {
@@ -47,13 +69,17 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
         os_log("Color changed to HSB(%g, %g, %g).", log: .default, type: .info, hue, saturation, brightness)
 
-        self.widget?.sendCommand("\(hue),\(saturation),\(brightness)")
+        widget?.sendCommand("\(hue),\(saturation),\(brightness)")
     }
 }
 
 extension ColorPickerViewController: ColorPickerDelegate {
     func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: ColorControl) {
-        sendColorUpdate(color: selectedColor)
+        if let throttler = self.throttler {
+            throttler.throttle { DispatchQueue.main.async { self.sendColorUpdate(color: selectedColor) } }
+        } else {
+            sendColorUpdate(color: selectedColor)
+        }
     }
 
     func colorPicker(_ colorPicker: ColorPickerController, confirmedColor: UIColor, usingControl: ColorControl) {

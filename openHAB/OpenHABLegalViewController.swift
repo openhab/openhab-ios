@@ -11,7 +11,7 @@
 import UIKit
 
 class OpenHABLegalViewController: UIViewController {
-    @IBOutlet var legalTextView: UITextView!
+    @IBOutlet private var legalTextView: UITextView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
