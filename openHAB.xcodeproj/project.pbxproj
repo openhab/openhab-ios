@@ -1930,6 +1930,7 @@
 				minimumVersion = 6.2.1;
 			};
 		};
+
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1958,6 +1959,7 @@
 			package = DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */;
 			productName = DynamicButton;
 		};
+
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DFB2621F18830A3600D3244D /* Project object */;
