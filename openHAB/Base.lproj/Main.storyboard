@@ -457,6 +457,7 @@
                                                 <constraint firstItem="bnc-pN-4ms" firstAttribute="leading" secondItem="riU-tV-5Y6" secondAttribute="trailing" constant="8" id="gQG-Fy-b58"/>
                                                 <constraint firstItem="IAR-ZJ-192" firstAttribute="firstBaseline" secondItem="f5k-P9-Jll" secondAttribute="firstBaseline" id="hcC-6M-S2a"/>
                                                 <constraint firstItem="riU-tV-5Y6" firstAttribute="leading" secondItem="PzY-Bs-9MZ" secondAttribute="trailing" constant="8" id="i4H-Bc-lv7"/>
+                                                <constraint firstItem="IAR-ZJ-192" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="f5k-P9-Jll" secondAttribute="trailing" constant="8" id="jhW-pl-2Md"/>
                                                 <constraint firstItem="riU-tV-5Y6" firstAttribute="centerY" secondItem="ITS-rT-SZ9" secondAttribute="centerY" id="poT-as-m6f"/>
                                                 <constraint firstItem="PzY-Bs-9MZ" firstAttribute="leading" secondItem="IAR-ZJ-192" secondAttribute="trailing" constant="8" symbolic="YES" id="rcw-b3-uug"/>
                                             </constraints>
