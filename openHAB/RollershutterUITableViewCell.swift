@@ -10,6 +10,7 @@
 
 import DynamicButton
 import os.log
+import UIKit
 
 class RollershutterUITableViewCell: GenericUITableViewCell {
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)

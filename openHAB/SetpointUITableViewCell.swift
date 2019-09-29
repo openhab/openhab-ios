@@ -9,6 +9,7 @@
 //
 import DynamicButton
 import os.log
+import UIKit
 
 class SetpointUITableViewCell: GenericUITableViewCell {
     private var isIntStep: Bool {

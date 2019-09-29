@@ -12,7 +12,6 @@ target 'openHAB' do
     pod 'Crashlytics', '~> 3.9.3'
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
-    pod 'DynamicButton', '~> 6.2'
     pod 'Fuzi', '~> 3.1'
 end
 

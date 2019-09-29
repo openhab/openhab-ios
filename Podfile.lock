@@ -4,7 +4,6 @@ PODS:
   - CocoaLumberjack/Core (3.5.3)
   - Crashlytics (3.9.3):
     - Fabric (~> 1.7.2)
-  - DynamicButton (6.2.0)
   - Fabric (1.7.13)
   - Firebase/Core (6.9.0):
     - Firebase/CoreOnly
@@ -80,7 +79,6 @@ PODS:
 
 DEPENDENCIES:
   - Crashlytics (~> 3.9.3)
-  - DynamicButton (~> 6.2)
   - Fabric (~> 1.7.2)
   - Firebase/Core
   - FlexColorPicker
@@ -94,7 +92,6 @@ SPEC REPOS:
   trunk:
     - CocoaLumberjack
     - Crashlytics
-    - DynamicButton
     - Fabric
     - Firebase
     - FirebaseAnalytics
@@ -117,7 +114,6 @@ SPEC REPOS:
 SPEC CHECKSUMS:
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
-  DynamicButton: 99858ce823ceed7263a4eed43bd3870e72723cb2
   Fabric: 25d0963b691fc97be566392243ff0ecef5a68338
   Firebase: 2d750c54cda57d5a6ae31212cfe5cc813c6be7e4
   FirebaseAnalytics: 5d9ccbf46ed25d3ec9304d263f85bddf1e93e2d2
@@ -137,6 +133,6 @@ SPEC CHECKSUMS:
   SwiftLint: 5553187048b900c91aa03552807681bb6b027846
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: 6bb5377410427f4a716ad1f5f60aa01acb9115f1
+PODFILE CHECKSUM: 5e31c858063487afb7c7888d7cc69a00d397d559
 
 COCOAPODS: 1.8.1
