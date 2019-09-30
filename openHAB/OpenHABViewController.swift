@@ -153,8 +153,6 @@ class OpenHABViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
 
         search.searchResultsUpdater = self
-        navigationItem.searchController = search
-
         search.obscuresBackgroundDuringPresentation = false
         search.searchBar.placeholder = "Search openHAB items"
         definesPresentationContext = true
@@ -170,6 +168,11 @@ class OpenHABViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("OpenHABViewController viewDidAppear", log: .viewCycle, type: .info)
         super.viewDidAppear(animated)
+
+        // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
+        if navigationItem.searchController == nil {
+            navigationItem.searchController = search
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
