@@ -1107,6 +1107,21 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             }
         }
     }
+
+    @available(iOS 13.0, *)
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == "Text", let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
+            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+                let copy = UIAction(title: "Copy item label", image: UIImage(systemName: "square.and.arrow.up")) { _ in
+                    UIPasteboard.general.string = text
+                }
+
+                return UIMenu(title: "", children: [copy])
+            }
+        }
+
+        return nil
+    }
 }
 
 extension OpenHABViewController: AuthenticationChallengeResponsable {
