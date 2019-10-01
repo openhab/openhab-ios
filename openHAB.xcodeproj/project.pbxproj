@@ -59,7 +59,6 @@
 		DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4578233BF812003DDDEF /* Kingfisher */; };
 		DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457B233BF844003DDDEF /* Alamofire */; };
 		DA2D457E233BF990003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457D233BF990003DDDEF /* Alamofire */; };
-		DA2D4640233D5C22003DDDEF /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DA2D4646233D5EF9003DDDEF /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4645233D5EF9003DDDEF /* SideMenu */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2DC23921F275B100830730 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
@@ -1205,7 +1204,6 @@
 				DAB0B661228C9AEF0053E69B /* ClientCertificateManager.swift in Sources */,
 				DAC9394722AD5BB800C5F423 /* Frame.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
-				DA2D4640233D5C22003DDDEF /* OpenHABNotificationsViewController.swift in Sources */,
 				DAC9394B22AD651400C5F423 /* Sitemap.swift in Sources */,
 				DAB2D1BA22357A2B009C6276 /* OpenHABItem.swift in Sources */,
 				DAB2D1BD22357A38009C6276 /* OpenHABWidgetMapping.swift in Sources */,
@@ -1930,7 +1928,6 @@
 				minimumVersion = 6.2.1;
 			};
 		};
-
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1959,7 +1956,6 @@
 			package = DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */;
 			productName = DynamicButton;
 		};
-
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DFB2621F18830A3600D3244D /* Project object */;
