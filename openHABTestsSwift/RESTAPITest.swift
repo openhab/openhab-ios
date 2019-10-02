@@ -7,6 +7,7 @@
 //
 
 @testable import Alamofire
+@testable import openHAB
 import XCTest
 
 class RESTAPITest: XCTestCase {

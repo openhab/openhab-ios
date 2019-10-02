@@ -13,11 +13,10 @@ target 'openHAB' do
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
     pod 'Fuzi', '~> 3.1'
-end
 
-target 'openHABTestsSwift' do
-    inherit! :search_paths
-    pod 'Fuzi', '~> 3.1'
+    target 'openHABTestsSwift' do
+        inherit! :search_paths
+    end
 end
 
 # Note: `pod install --clean-install` must be used if the post_install hook is changed
