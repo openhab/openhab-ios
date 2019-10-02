@@ -31,20 +31,22 @@ class OpenHABUITests: XCTestCase {
 
         widgetTable.staticTexts["Widget Overview"].tap()
         widgetTable/*@START_MENU_TOKEN@*/.staticTexts["BINARY WIDGETS"]/*[[".cells.staticTexts[\"BINARY WIDGETS\"]",".staticTexts[\"BINARY WIDGETS\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.swipeDown()
+
         sleep(5)
         snapshot("1_WidgetOverview")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars["Widget Overview"].buttons["Main Menu"].tap()
 
         sleep(2)
 
         widgetTable.staticTexts["Ground Floor"].tap()
         sleep(5)
-        widgetTable.staticTexts["Kitchen"].tap()
-        sleep(5)
+//      On display of the following pane the app crashes
+//        widgetTable.staticTexts["Kitchen"].tap()
+//        sleep(5)
         snapshot("2_Kitchen")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(2)
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+//        app.navigationBars["Kitchen"].buttons["Ground Floor"].tap()
+//        sleep(2)
+        app.navigationBars["Ground Floor"].buttons["Main Menu"].tap()
         sleep(2)
 
         widgetTable.staticTexts["First Floor"].tap()
@@ -52,31 +54,36 @@ class OpenHABUITests: XCTestCase {
         widgetTable.staticTexts["Office"].tap()
         sleep(5)
         snapshot("3_Office")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars["Office"].buttons["First Floor"].tap()
         sleep(2)
 
         widgetTable.staticTexts["Bathroom"].tap()
         sleep(5)
         snapshot("4_Batchroom")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars["Bathroom"].buttons["First Floor"].tap()
         sleep(2)
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars["First Floor"].buttons["Main Menu"].tap()
         sleep(2)
 
         widgetTable.staticTexts["Group Demo"].tap()
         sleep(5)
         snapshot("5_GroupDemo")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars["Group Demo"].buttons["Main Menu"].tap()
         sleep(2)
 
         widgetTable.staticTexts["Astronomical Data"].tap()
         sleep(5)
         snapshot("6_AstronomicalData")
 
-        let hamburgerButton = app.navigationBars.buttons["Hamburger"]
-
-        hamburgerButton.tap()
-        sleep(1)
-        snapshot("7_Settings")
+        if #available(iOS 13.0, *) {
+            app.navigationBars["Astronomical Data"].buttons["line.horizontal.3"].tap()
+            sleep(1)
+            snapshot("7_Settings")
+        } else {
+            let hamburgerButton = app.navigationBars["Astronomical Data"].buttons["Hamburger"]
+            hamburgerButton.tap()
+            sleep(1)
+            snapshot("7_Settings")
+        }
     }
 }
