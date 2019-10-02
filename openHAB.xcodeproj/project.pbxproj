@@ -831,7 +831,6 @@
 				DA2DC22B21F2736C00830730 /* Sources */,
 				DA2DC22C21F2736C00830730 /* Frameworks */,
 				DA2DC22D21F2736C00830730 /* Resources */,
-				257C3023FA486287BF81E689 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1004,23 +1003,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		257C3023FA486287BF81E689 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		6562C91D1FCF2B56008C61CE /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1527,7 +1509,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
@@ -1567,7 +1549,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
@@ -1710,6 +1692,7 @@
 			baseConfigurationReference = BCF72F56B17C7E8A29FE3759 /* Pods-openHAB.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = openHAB/openHAB.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1752,6 +1735,7 @@
 			baseConfigurationReference = 965E6C0728A41A0442B5E59C /* Pods-openHAB.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = openHAB/openHAB.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
