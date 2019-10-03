@@ -161,6 +161,7 @@ class OpenHABViewController: UIViewController {
 
         #if DEBUG
         // setup accessibilityIdentifiers for UITest
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         widgetTableView.accessibilityIdentifier = "OpenHABViewControllerWidgetTableView"
         #endif
     }
@@ -171,7 +172,9 @@ class OpenHABViewController: UIViewController {
 
         // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
         if navigationItem.searchController == nil {
-            navigationItem.searchController = search
+            DispatchQueue.main.async {
+                self.navigationItem.searchController = self.search
+            }
         }
     }
 
@@ -609,6 +612,7 @@ class OpenHABViewController: UIViewController {
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             defaultSitemap = "demo"
+            iconType = .png
         }
         #endif
     }

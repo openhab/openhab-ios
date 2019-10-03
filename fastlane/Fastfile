@@ -14,20 +14,31 @@
 # update_fastlane
 
 default_platform(:ios)
- 
+
 platform :ios do
   desc "Generate new localized screenshots"
   lane :screenshots do
-    capture_screenshots(workspace: "openHAB.xcworkspace", scheme: "openHABUITests")
+    capture_screenshots(workspace: "openHAB.xcworkspace",
+		        scheme: "openHABUITests",
+			dark_mode: false)
+  end
+
+  desc 'Run unit tests.'
+  lane :unittests do
+      run_tests(
+          workspace: 'openHAB.xcworkspace',
+          scheme: 'openHABTestsSwift',
+          devices: ['iPhone 11 Pro']
+      )
   end
 
   desc "Build beta"
   lane :beta do |lane|
 
     ensure_git_branch(
- 	 branch: "(master|develop|release\\S+|hotfix\\S+)"
+        branch: "(master|develop|release\\S+|hotfix\\S+)"
     )
-	
+
     # ensure that master branch is clean
     ensure_git_status_clean
 
@@ -35,6 +46,9 @@ platform :ios do
     if !lane[:bump]
         raise "No bump type defined! Use one of: patch | minor | major".red
     end
+
+    # run unit tests
+    unittests
 
     # get the last commit comments from Git history
     # and creates our changelog
@@ -54,10 +68,10 @@ platform :ios do
     )
     increment_build_number(xcodeproj: "openHAB.xcodeproj")
     commit_version_bump(xcodeproj: "openHAB.xcodeproj")
-    
+
     # push bump commit
     push_to_git_remote
-    
+
     # create a local tag with the new version
     add_git_tag(
         message: comments,
@@ -65,8 +79,8 @@ platform :ios do
 
     # publish a new release into Github
     github_release = set_github_release(
-	api_token: ENV["GITHUB_TOKEN"],
-	repository_name: "openhab/openhab-ios",
+    	api_token: ENV["GITHUB_TOKEN"],
+    	repository_name: "openhab/openhab-ios",
         name: "#{type.capitalize} version v#{version}",
         tag_name: "v#{version}",
         description: comments,

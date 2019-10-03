@@ -6,6 +6,7 @@
 //  Copyright © 2019 openHAB e.V. All rights reserved.
 //
 
+@testable import openHAB
 import XCTest
 
 class OpenHABGeneralTests: XCTestCase {

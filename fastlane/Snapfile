@@ -14,7 +14,7 @@ devices([
 #])
 
 launch_arguments([
-  "-demomode true -iconType 1"
+  "-demomode true -iconType 0"
 ])
 
 # The name of the scheme which contains the UI Tests
