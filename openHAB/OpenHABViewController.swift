@@ -171,7 +171,9 @@ class OpenHABViewController: UIViewController {
 
         // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
         if navigationItem.searchController == nil {
-            navigationItem.searchController = search
+            DispatchQueue.main.async {
+                self.navigationItem.searchController = self.search
+            }
         }
     }
 
