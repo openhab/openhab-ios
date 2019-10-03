@@ -161,6 +161,7 @@ class OpenHABViewController: UIViewController {
 
         #if DEBUG
         // setup accessibilityIdentifiers for UITest
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         widgetTableView.accessibilityIdentifier = "OpenHABViewControllerWidgetTableView"
         #endif
     }
@@ -609,6 +610,7 @@ class OpenHABViewController: UIViewController {
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             defaultSitemap = "demo"
+            iconType = .png
         }
         #endif
     }
