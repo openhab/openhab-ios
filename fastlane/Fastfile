@@ -18,7 +18,9 @@ default_platform(:ios)
 platform :ios do
   desc "Generate new localized screenshots"
   lane :screenshots do
-    capture_screenshots(workspace: "openHAB.xcworkspace", scheme: "openHABUITests")
+    capture_screenshots(workspace: "openHAB.xcworkspace",
+		        scheme: "openHABUITests",
+			dark_mode: false)
   end
 
   desc 'Run unit tests.'
