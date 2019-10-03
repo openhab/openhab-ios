@@ -19,6 +19,10 @@ target 'openHAB' do
     end
 end
 
+target 'openHABUITests' do
+    inherit! :search_paths
+end
+
 # Note: `pod install --clean-install` must be used if the post_install hook is changed
 # temporary workaround for base language setting
 post_install do |installer|
