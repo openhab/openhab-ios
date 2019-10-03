@@ -10,7 +10,9 @@
 //
 
 import Foundation
+#if !os(watchOS)
 import Fuzi
+#endif
 
 class OpenHABLinkedPage: NSObject, Decodable {
     private enum CodingKeys: String, CodingKey {
@@ -25,6 +27,7 @@ class OpenHABLinkedPage: NSObject, Decodable {
     var icon = ""
     var link = ""
 
+    #if !os(watchOS)
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -38,4 +41,5 @@ class OpenHABLinkedPage: NSObject, Decodable {
             }
         }
     }
+    #endif
 }

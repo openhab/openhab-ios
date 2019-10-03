@@ -10,7 +10,9 @@
 //
 
 import Foundation
+#if !os(watchOS)
 import Fuzi
+#endif
 import MapKit
 import os.log
 
@@ -128,6 +130,7 @@ extension OpenHABWidget {
         self.step = abs(self.step)
     }
 
+    #if !os(watchOS)
     convenience init(xml xmlElement: XMLElement) {
         self.init()
         for child in xmlElement.children {
@@ -165,6 +168,7 @@ extension OpenHABWidget {
             }
         }
     }
+    #endif
 }
 
 extension OpenHABWidget {

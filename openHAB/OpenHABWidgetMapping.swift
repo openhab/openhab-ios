@@ -10,12 +10,15 @@
 //
 
 import Foundation
+#if !os(watchOS)
 import Fuzi
+#endif
 
 class OpenHABWidgetMapping: NSObject, Decodable {
     var command = ""
     var label = ""
 
+    #if !os(watchOS)
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -27,4 +30,5 @@ class OpenHABWidgetMapping: NSObject, Decodable {
             }
         }
     }
+    #endif
 }

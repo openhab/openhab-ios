@@ -9,7 +9,9 @@
 //  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
 //
 import CoreLocation
+#if !os(watchOS)
 import Fuzi
+#endif
 import os.log
 import UIKit
 
@@ -30,6 +32,7 @@ final class OpenHABItem: NSObject {
         self.groupType = groupType ?? ""
     }
 
+    #if !os(watchOS)
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -44,6 +47,7 @@ final class OpenHABItem: NSObject {
             }
         }
     }
+    #endif
 
     func stateAsDouble() -> Double {
         return state.numberValue?.doubleValue ?? 0

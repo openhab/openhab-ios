@@ -12,7 +12,9 @@
 //
 
 import Foundation
+#if !os(watchOS)
 import Fuzi
+#endif
 
 // The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
 // Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
@@ -47,6 +49,7 @@ final class OpenHABSitemap: NSObject {
         self.homepageLink = homepageLink
     }
 
+    #if !os(watchOS)
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -68,6 +71,7 @@ final class OpenHABSitemap: NSObject {
             }
         }
     }
+    #endif
 }
 
 extension OpenHABSitemap {
