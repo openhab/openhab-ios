@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.2.7</string>
+	<string>2.2.8</string>
 	<key>CFBundleVersion</key>
-	<string>89</string>
+	<string>90</string>
 	<key>CLKComplicationPrincipalClass</key>
 	<string>ComplicationController</string>
 	<key>CLKComplicationSupportedFamilies</key>
