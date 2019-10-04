@@ -318,7 +318,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="right" verticalHuggingPriority="251" horizontalCompressionResistancePriority="800" text="Selected" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Adh-o9-6Qx">
-                                                    <rect key="frame" x="123.66666666666669" y="11.999999999999998" width="225" height="20.333333333333329"/>
+                                                    <rect key="frame" x="123.66666666666669" y="11.999999999999998" width="217" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -328,7 +328,7 @@
                                                 <constraint firstItem="Adh-o9-6Qx" firstAttribute="leading" secondItem="hd9-I4-GIr" secondAttribute="trailing" constant="8" id="1Eh-6d-dgZ"/>
                                                 <constraint firstItem="Adh-o9-6Qx" firstAttribute="centerY" secondItem="cLy-KN-ufh" secondAttribute="centerY" id="9sT-dQ-cdg"/>
                                                 <constraint firstItem="hd9-I4-GIr" firstAttribute="centerY" secondItem="cLy-KN-ufh" secondAttribute="centerY" id="BRz-r2-SaM"/>
-                                                <constraint firstAttribute="trailing" secondItem="Adh-o9-6Qx" secondAttribute="trailing" id="HFl-be-UaR"/>
+                                                <constraint firstAttribute="trailing" secondItem="Adh-o9-6Qx" secondAttribute="trailing" constant="8" id="HFl-be-UaR"/>
                                                 <constraint firstItem="hd9-I4-GIr" firstAttribute="leading" secondItem="cLy-KN-ufh" secondAttribute="leading" constant="62" id="pUA-EY-xGm"/>
                                             </constraints>
                                         </tableViewCellContentView>
@@ -1376,7 +1376,7 @@
             <objects>
                 <tableViewController id="MPp-H6-Zce" customClass="OpenHABDrawerTableViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="yaQ-kw-KPl">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <prototypes>
@@ -1434,6 +1434,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="z72-H1-TTm"/>
+        <segue reference="t07-wP-hEy"/>
     </inferredMetricsTieBreakers>
 </document>

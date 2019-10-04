@@ -95,7 +95,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                                      mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
                                      mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)])
 
-        
         if #available(iOS 13.0, *) {
             switch UITraitCollection.current.userInterfaceStyle {
             case .light, .unspecified:
