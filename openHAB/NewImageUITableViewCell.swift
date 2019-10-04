@@ -16,15 +16,47 @@ enum ImageType {
     case empty
 }
 
+enum ChartStyle {
+    case dark
+    case light
+}
+
 class NewImageUITableViewCell: GenericUITableViewCell {
     var didLoad: (() -> Void)?
 
     private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
     private var downloadRequest: Alamofire.Request?
+    private var chartStyle: ChartStyle = .light
 
     private var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
+    }
+
+//    private func setChart (userInterfaceStyle: UIUserInterfaceStyle){
+//        switch userInterfaceStyle {
+//                   case .light, .unspecified:
+//                       chartStyle = .light
+//                   case .dark:
+//                       chartStyle = .dark
+//                   @unknown default:
+//                       chartStyle = .light
+//                   }
+//    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if #available(iOS 12.0, *) {
+            switch traitCollection.userInterfaceStyle {
+            case .light, .unspecified:
+                chartStyle = .light
+            case .dark:
+                chartStyle = .dark
+            @unknown default:
+                chartStyle = .light
+            }
+        }
     }
 
     private var widgetPayload: ImageType {
@@ -32,7 +64,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         switch widget.type {
         case "Chart":
-            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend).url)
+            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: chartStyle).url)
         case "Image":
             if let item = widget.item {
                 return widgetPayload(fromItem: item)
@@ -62,6 +94,18 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                                      mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
                                      mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
                                      mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)])
+
+        
+        if #available(iOS 13.0, *) {
+            switch UITraitCollection.current.userInterfaceStyle {
+            case .light, .unspecified:
+                chartStyle = .light
+            case .dark:
+                chartStyle = .dark
+            @unknown default:
+                chartStyle = .light
+            }
+        }
     }
 
     override func willMove(toSuperview newSuperview: UIView?) {
