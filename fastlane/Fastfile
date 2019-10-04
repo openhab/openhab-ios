@@ -67,6 +67,9 @@ platform :ios do
         xcodeproj: "openHAB.xcodeproj"
     )
     increment_build_number(xcodeproj: "openHAB.xcodeproj")
+
+    clean_build_artifacts	
+
     commit_version_bump(xcodeproj: "openHAB.xcodeproj")
 
     # push bump commit
