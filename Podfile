@@ -13,9 +13,20 @@ target 'openHAB' do
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
     pod 'Fuzi', '~> 3.1'
+
+    target 'openHABTestsSwift' do
+        inherit! :search_paths
+    end
 end
 
-target 'openHABTestsSwift' do
+target 'openHABUITests' do
     inherit! :search_paths
-    pod 'Fuzi', '~> 3.1'
+end
+
+# Note: `pod install --clean-install` must be used if the post_install hook is changed
+# temporary workaround for base language setting
+post_install do |installer|
+    installer.generated_projects.each do |project|
+        project.root_object.known_regions = ["en", "Base"]
+    end
 end

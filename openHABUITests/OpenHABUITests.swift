@@ -30,11 +30,11 @@ class OpenHABUITests: XCTestCase {
         let widgetTable = app.tables["OpenHABViewControllerWidgetTableView"]
 
         widgetTable.staticTexts["Widget Overview"].tap()
+        sleep(2)
         widgetTable/*@START_MENU_TOKEN@*/.staticTexts["BINARY WIDGETS"]/*[[".cells.staticTexts[\"BINARY WIDGETS\"]",".staticTexts[\"BINARY WIDGETS\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.swipeDown()
         sleep(5)
         snapshot("1_WidgetOverview")
         app.navigationBars.buttons.element(boundBy: 0).tap()
-
         sleep(2)
 
         widgetTable.staticTexts["Ground Floor"].tap()
@@ -73,8 +73,7 @@ class OpenHABUITests: XCTestCase {
         sleep(5)
         snapshot("6_AstronomicalData")
 
-        let hamburgerButton = app.navigationBars.buttons["Hamburger"]
-
+        let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
         hamburgerButton.tap()
         sleep(1)
         snapshot("7_Settings")

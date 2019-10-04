@@ -6,6 +6,7 @@
 //
 
 import Fuzi
+@testable import openHAB
 import XCTest
 
 enum TestingError: Error {

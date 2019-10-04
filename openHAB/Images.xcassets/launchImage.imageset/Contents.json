@@ -6,7 +6,17 @@
     },
     {
       "idiom" : "universal",
-      "filename" : "launchImageDark.png",
+      "filename" : "launchImage-1.png",
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ]
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "launchImageDark-1.png",
       "appearances" : [
         {
           "appearance" : "luminosity",

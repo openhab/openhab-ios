@@ -153,8 +153,6 @@ class OpenHABViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
 
         search.searchResultsUpdater = self
-        navigationItem.searchController = search
-
         search.obscuresBackgroundDuringPresentation = false
         search.searchBar.placeholder = "Search openHAB items"
         definesPresentationContext = true
@@ -163,6 +161,7 @@ class OpenHABViewController: UIViewController {
 
         #if DEBUG
         // setup accessibilityIdentifiers for UITest
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         widgetTableView.accessibilityIdentifier = "OpenHABViewControllerWidgetTableView"
         #endif
     }
@@ -170,6 +169,13 @@ class OpenHABViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("OpenHABViewController viewDidAppear", log: .viewCycle, type: .info)
         super.viewDidAppear(animated)
+
+        // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
+        if navigationItem.searchController == nil {
+            DispatchQueue.main.async {
+                self.navigationItem.searchController = self.search
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -606,6 +612,7 @@ class OpenHABViewController: UIViewController {
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             defaultSitemap = "demo"
+            iconType = .png
         }
         #endif
     }
@@ -1103,6 +1110,21 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.invalidateCache()
             }
         }
+    }
+
+    @available(iOS 13.0, *)
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == "Text", let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
+            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+                let copy = UIAction(title: "Copy item label", image: UIImage(systemName: "square.and.arrow.up")) { _ in
+                    UIPasteboard.general.string = text
+                }
+
+                return UIMenu(title: "", children: [copy])
+            }
+        }
+
+        return nil
     }
 }
 

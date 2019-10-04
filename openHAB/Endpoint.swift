@@ -65,7 +65,7 @@ extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func chart(rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?) -> Endpoint {
+    static func chart(rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)
         var endpoint = Endpoint(baseURL: rootUrl,
                                 path: "/chart",
@@ -82,6 +82,12 @@ extension Endpoint {
         }
         if let legend = legend, legend != false {
             endpoint.queryItems.append(URLQueryItem(name: "legend", value: String(legend)))
+        }
+        switch theme {
+        case .dark:
+            endpoint.queryItems.append(URLQueryItem(name: "theme", value: "dark"))
+        case .light:
+            endpoint.queryItems.append(URLQueryItem(name: "theme", value: "light"))
         }
         return endpoint
     }
