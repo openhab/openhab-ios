@@ -9,16 +9,16 @@
 import Foundation
 
 struct Item: Identifiable {
-    private static var idSequence = sequence(first: 1, next: { $0 + 1 })
+    private static var idSequence = sequence(first: 1) { $0 + 1 }
 
     var id: Int
 
     let name: String
     let label: String
-    var state: String
+    var state: Bool
     let link: String
 
-    init?(name: String, label: String, state: String, link: String) {
+    init?(name: String, label: String, state: Bool, link: String) {
         self.name = name
         self.label = label
         self.state = state
@@ -31,6 +31,6 @@ struct Item: Identifiable {
 extension Item {
     init? (with codingData: OpenHABItem.CodingData?) {
         guard let codingData = codingData else { return nil }
-        self.init(name: codingData.name, label: codingData.label ?? "", state: codingData.state, link: codingData.link)
+        self.init(name: codingData.name, label: codingData.label ?? "", state: codingData.state == "true" ? true : false, link: codingData.link)
     }
 }

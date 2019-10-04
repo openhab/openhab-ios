@@ -9,17 +9,11 @@
 import SwiftUI
 
 struct ContentView: View {
-    // var sitemap: Sitemap
-
-    @State private var quantity = 1
-    @State private var status = false
-    let switchArray: [Item] = [Item(name: "Light1", label: "Light Cellar", state: "ON", link: "llsl://101.10.101.11")!]
+    @EnvironmentObject var userData: UserData
 
     var body: some View {
-        ZStack {
-            List(switchArray) { switchItem in
-                SwitchRow(item: switchItem)
-            }
+        ForEach(userData.sitemap) { switchItem in
+            SwitchRow(item: switchItem)
         }
     }
 }

@@ -9,11 +9,10 @@
 import SwiftUI
 
 struct SwitchRow: View {
-    var item: Item
-    @State private var status = false
+    @State var item: Item
 
     var body: some View {
-        Toggle(isOn: $status) {
+        Toggle(isOn: $item.state) {
             HStack {
                 Image(systemName: "photo")
                 Text(item.name).font(.callout)
@@ -27,7 +26,10 @@ struct SwitchRow: View {
 
 struct SwitchRow_Previews: PreviewProvider {
     static var previews: some View {
-        let item1 = Item(name: "Light1", label: "Light Cellar", state: "ON", link: "llsl://101.10.101.11")
+        let item1 = Item(name: "Light1",
+                         label: "Light Cellar",
+                         state: true,
+                         link: "llsl://101.10.101.11")
         return SwitchRow(item: item1!)
             .previewLayout(.fixed(width: 300, height: 70))
     }
