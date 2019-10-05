@@ -280,10 +280,10 @@ class OpenHABViewController: UIViewController {
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
         SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
-        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view)
+        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
 
-        let presentationStyle: SideMenuPresentationStyle = .menuSlideIn
-        presentationStyle.presentingEndAlpha = 0
+        let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
+        presentationStyle.presentingEndAlpha = 1
         var settings = SideMenuSettings()
         settings.presentationStyle = presentationStyle
         settings.statusBarEndAlpha = 0
