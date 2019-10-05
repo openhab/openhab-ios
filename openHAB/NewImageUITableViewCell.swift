@@ -33,32 +33,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         return AppDelegate.appDelegate.appData
     }
 
-//    private func setChart (userInterfaceStyle: UIUserInterfaceStyle){
-//        switch userInterfaceStyle {
-//                   case .light, .unspecified:
-//                       chartStyle = .light
-//                   case .dark:
-//                       chartStyle = .dark
-//                   @unknown default:
-//                       chartStyle = .light
-//                   }
-//    }
-
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        if #available(iOS 12.0, *) {
-            switch traitCollection.userInterfaceStyle {
-            case .light, .unspecified:
-                chartStyle = .light
-            case .dark:
-                chartStyle = .dark
-            @unknown default:
-                chartStyle = .light
-            }
-        }
-    }
-
     private var widgetPayload: ImageType {
         guard let widget = widget else { return .empty }
 
@@ -97,6 +71,21 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         if #available(iOS 13.0, *) {
             switch UITraitCollection.current.userInterfaceStyle {
+            case .light, .unspecified:
+                chartStyle = .light
+            case .dark:
+                chartStyle = .dark
+            @unknown default:
+                chartStyle = .light
+            }
+        }
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if #available(iOS 12.0, *) {
+            switch traitCollection.userInterfaceStyle {
             case .light, .unspecified:
                 chartStyle = .light
             case .dark:
