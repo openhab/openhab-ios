@@ -85,7 +85,7 @@ platform :ios do
     	api_token: ENV["GITHUB_TOKEN"],
     	repository_name: "openhab/openhab-ios",
         name: "#{type.capitalize} version v#{version}",
-        tag_name: "v#{version}",
+        tag_name: "#{version}",
         description: comments,
         commitish: "master"
         # upload_assets: no assets supported
