@@ -63,7 +63,7 @@ platform :ios do
     )
 
     build_number = get_build_number
-    version_number = get_version_number
+    version_number = get_version_number(xcodeproj: "openHAB.xcodeproj")
     changelog = read_changelog
 
     stamp_changelog(section_identifier: "Version #{version_number}, Build #{build_number}") # Stamp Unreleased section with newly released build number
