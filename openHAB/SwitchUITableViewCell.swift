@@ -9,15 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-//
-//  SwitchUITableViewCell.swift
-//  openHAB
-//
-//  Created by Victor Belov on 16/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
-//
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
 import os.log
 import UIKit
 

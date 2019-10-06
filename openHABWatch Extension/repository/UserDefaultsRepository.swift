@@ -9,12 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-//
-//  UserDefaults.swift
-//
-//  Created by Dirk Hermanns on 01.06.18.
-//  Copyright © 2018 private. All rights reserved.
-//
 import os.log
 import UIKit
 
