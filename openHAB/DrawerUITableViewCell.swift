@@ -1,11 +1,13 @@
-//  Converted to Swift 4 by Swiftify v4.2.28993 - https://objectivec2swift.com/
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  DrawerUITableViewCell.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 02/06/16.
-//  Copyright © 2016 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import os.log
 import UIKit
