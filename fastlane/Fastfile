@@ -63,7 +63,7 @@ platform :ios do
     )
 
     build_number = get_build_number
-    version_number = get_version_number(xcodeproj: "openHAB.xcodeproj",
+    version = get_version_number(xcodeproj: "openHAB.xcodeproj",
                                         target: "openHAB")
 
     # get the last commit comments from Git history
