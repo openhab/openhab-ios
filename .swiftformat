@@ -1,6 +1,6 @@
 # file options
 --swiftversion 5.0
---exclude Pods
+--exclude Pods,openHAB/Reachability.swift
 --symlinks ignore
 
 # disabled rules
@@ -43,3 +43,4 @@
 --wraparguments after-first
 --wrapcollections after-first
 --xcodeindentation disabled
+--header "// Copyright (c) 2010-{year} Contributors to the openHAB project\n//\n// See the NOTICE file(s) distributed with this work for additional\n// information.\n//\n// This program and the accompanying materials are made available under the\n// terms of the Eclipse Public License 2.0 which is available at\n// http://www.eclipse.org/legal/epl-2.0\n//\n// SPDX-License-Identifier: EPL-2.0"
