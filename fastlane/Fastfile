@@ -82,7 +82,6 @@ platform :ios do
 
     # commit to git the changes from bumping version number
     commit_version_bump(message: "Committed version bump",
-                        include: "CHANGELOG.md",
                         xcodeproj: "openHAB.xcodeproj",
                         force: true)
 
