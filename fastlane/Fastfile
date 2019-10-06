@@ -76,7 +76,7 @@ platform :ios do
           merge_commit_filtering: "exclude_merges"
     )
 
-    stamp_changelog(section_identifier: "Version #{version_number}, Build #{build_number}") # Stamp Unreleased section with newly released build number
+    #stamp_changelog(section_identifier: "Version #{version_number}, Build #{build_number}") # Stamp Unreleased section with newly released build number
 
     clean_build_artifacts
 
