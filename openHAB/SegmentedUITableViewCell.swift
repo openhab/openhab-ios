@@ -42,7 +42,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
             widgetSegmentControl.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
         }
 
-        widgetSegmentControl.isMomentary = widget.mappings.count == 1
+        widgetSegmentControl.isMomentary = widget.mappings.count == 1 || widget.item?.state == "NULL"
         widgetSegmentControl.selectedSegmentIndex = widgetSegmentControl.isMomentary ? -1 : Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1)
         widgetSegmentControl.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
     }
