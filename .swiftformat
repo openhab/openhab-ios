@@ -1,6 +1,6 @@
 # file options
 --swiftversion 5.0
---exclude Pods
+--exclude Pods,openHAB/Reachability.swift
 --symlinks ignore
 
 # disabled rules
