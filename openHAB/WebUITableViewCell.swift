@@ -31,7 +31,8 @@ class WebUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
 
-        guard url?.absoluteString != widget.url else {
+        let urlString = widget.url.lowercased().hasPrefix("http") ? widget.url : Preferences.localUrl + widget.url
+        guard url?.absoluteString != urlString else {
             os_log("webview URL has not changed, abort loading", log: .viewCycle, type: .info)
             return
         }
@@ -43,7 +44,7 @@ class WebUITableViewCell: GenericUITableViewCell {
         }
         let base64LoginString = loginData.base64EncodedString()
 
-        if let url = URL(string: widget.url) {
+        if let url = URL(string: urlString) {
             self.url = url
             var request = URLRequest(url: url)
             request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
