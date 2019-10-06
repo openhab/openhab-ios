@@ -1330,18 +1330,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8QX-Dp-MYj">
-                                <rect key="frame" x="20" y="0.0" width="335" height="704"/>
-                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="lllsls" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8QX-Dp-MYj">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="724"/>
+                                <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
                         <constraints>
                             <constraint firstItem="8QX-Dp-MYj" firstAttribute="top" secondItem="NPT-SP-acq" secondAttribute="top" id="fIS-bu-0bZ"/>
-                            <constraint firstAttribute="trailing" secondItem="8QX-Dp-MYj" secondAttribute="trailing" constant="20" id="uNM-c6-GWX"/>
-                            <constraint firstItem="vRb-Nk-z4d" firstAttribute="top" secondItem="8QX-Dp-MYj" secondAttribute="bottom" constant="20" id="vdV-RO-YoJ"/>
-                            <constraint firstItem="8QX-Dp-MYj" firstAttribute="leading" secondItem="NPT-SP-acq" secondAttribute="leading" constant="20" id="wz7-de-jLJ"/>
+                            <constraint firstAttribute="trailing" secondItem="8QX-Dp-MYj" secondAttribute="trailing" id="uNM-c6-GWX"/>
+                            <constraint firstItem="vRb-Nk-z4d" firstAttribute="top" secondItem="8QX-Dp-MYj" secondAttribute="bottom" id="vdV-RO-YoJ"/>
+                            <constraint firstItem="8QX-Dp-MYj" firstAttribute="leading" secondItem="NPT-SP-acq" secondAttribute="leading" id="wz7-de-jLJ"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Legal" id="Oss-Zi-gie"/>
