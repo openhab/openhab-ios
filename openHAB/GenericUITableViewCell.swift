@@ -41,9 +41,9 @@ class GenericUITableViewCell: UITableViewCell {
                 }
             } else {
                 if #available(iOS 13.0, *) {
-                    customTextLabel?.textColor = UIColor.label
+                    customTextLabel?.textColor = .label
                 } else {
-                    customTextLabel?.textColor = UIColor.black
+                    customTextLabel?.textColor = .black
                 }
             }
             if _widget.valuecolor != "" {
@@ -52,9 +52,9 @@ class GenericUITableViewCell: UITableViewCell {
                 }
             } else {
                 if #available(iOS 13.0, *) {
-                    customDetailTextLabel?.textColor = UIColor.secondaryLabel
+                    customDetailTextLabel?.textColor = .secondaryLabel
                 } else {
-                    customDetailTextLabel?.textColor = UIColor.lightGray
+                    customDetailTextLabel?.textColor = .lightGray
                 }
             }
         }
