@@ -76,7 +76,9 @@ platform :ios do
           merge_commit_filtering: "exclude_merges"
     )
 
-    #stamp_changelog(section_identifier: "Version #{version_number}, Build #{build_number}") # Stamp Unreleased section with newly released build number
+    changelog = read_changelog # Read changelog
+  
+    stamp_changelog(section_identifier: "Version #{version_number}, Build #{build_number}") # Stamp Unreleased section with newly released build number
 
     clean_build_artifacts
 
@@ -90,7 +92,7 @@ platform :ios do
 
     # create a local tag with the new version
     add_git_tag(
-        message: comments,
+        message: changelog,
         tag: "#{version}")
 
     # publish a new release into Github
@@ -99,7 +101,7 @@ platform :ios do
     	repository_name: "openhab/openhab-ios",
         name: "#{type.capitalize} version #{version}",
         tag_name: "#{version}",
-        description: comments,
+        description: changelog,
         commitish: "master"
         # upload_assets: no assets supported
     )
@@ -110,7 +112,7 @@ platform :ios do
         wait_for_uploaded_build: true,
         distribute_external: true,
         notify_external_testers: true,
-        changelog: comments,
+        changelog: changelog,
         groups: ["Beta Testers"]
     )
 
