@@ -95,8 +95,8 @@ class GenericUITableViewCell: UITableViewCell {
                 // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
                 customDetailTextLabelConstraint.constant = 20.0
             } else {
-                // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-                customDetailTextLabelConstraint.constant = 0.0
+                // If accessory is enabled, set detailTextLabel (widget value) constraint 5px to the right
+                customDetailTextLabelConstraint.constant = 5.0
             }
         }
     }
