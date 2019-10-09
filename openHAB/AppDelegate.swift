@@ -10,7 +10,9 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
+#if !targetEnvironment(macCatalyst)
 import Firebase
+#endif
 import Kingfisher
 import os.log
 import SwiftMessages
@@ -45,9 +47,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
-
+        #if !targetEnvironment(macCatalyst)
         // init Firebase crash reporting
         FirebaseApp.configure()
+        #endif
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
 

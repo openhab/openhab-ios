@@ -1,5 +1,11 @@
 # What has changed
 
+
+removing entry for "LSRequiresIPhoneOS" - not supported on macOS
+adding entry for "NSSupportsAutomaticTermination" => 1
+adding entry for "NSSupportsSuddenTermination" => 1
+error: 'LSSupportsOpeningDocumentsInPlace = NO' is not supported on macOS. Either remove the entry or set it to YES, and also ensure that the application does open documents in place on macOS. (in target 'openHAB' from project 'openHAB')
+
 * The app is now ready for iOS 13:
     * It supports the beautiful Dark Mode
     
