@@ -37,7 +37,7 @@ func namedColor(toHexString namedColor: String) -> String? {
 }
 
 func color(fromHexString hexString: String?) -> UIColor? {
-    var cString: String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ?? "x800000"
+    var cString: String = hexString?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() ?? "#800000"
     if !cString.hasPrefix("#"), let namedColor = namedColor(toHexString: cString) {
         cString = namedColor
     }

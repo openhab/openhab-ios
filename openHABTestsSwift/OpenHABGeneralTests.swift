@@ -20,6 +20,7 @@ class OpenHABGeneralTests: XCTestCase {
     func testNamedColors() {
         XCTAssertEqual("#ff0000", namedColor(toHexString: "red"))
         XCTAssertEqual(UIColor.red, color(fromHexString: "red"))
+        XCTAssertEqual(color(fromHexString: "#800000"), color(fromHexString: nil))
     }
 
     func testValueToText() {
