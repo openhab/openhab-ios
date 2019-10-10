@@ -20,12 +20,21 @@
         }
       },
       {
+        "package": "FlexColorPicker",
+        "repositoryURL": "https://github.com/RastislavMirek/FlexColorPicker",
+        "state": {
+          "branch": null,
+          "revision": "cce785db34360839e2342f09f00de9adb012eb1a",
+          "version": "1.3.1"
+        }
+      },
+      {
         "package": "Kingfisher",
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "4fcc2c1eb9ae5fb358df12e83bb51b7e4fb5d733",
-          "version": "5.8.2"
+          "revision": "9c039c8d8d2aa349b326c1059702d9f1b83bdb82",
+          "version": "5.8.3"
         }
       },
       {
