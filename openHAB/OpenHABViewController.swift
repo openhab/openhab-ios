@@ -976,6 +976,8 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 // RollershutterItem changed to Rollershutter in later builds of OH2
             } else if let type = widget?.item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && widget?.item?.groupType == "Rollershutter") {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+            } else if widget?.item?.stateDescription?.options.count ?? 0 > 0 {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
