@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/RastislavMirek/FlexColorPicker",
         "state": {
           "branch": null,
-          "revision": "1e96de1abbc00b5ab108c738b22e4df53a4222b2",
+          "revision": "cce785db34360839e2342f09f00de9adb012eb1a",
           "version": "1.3.1"
         }
       },
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "ea84ff22e8c6da676354b162476aad0efd013d7d",
-          "version": "5.8.1"
+          "revision": "9c039c8d8d2aa349b326c1059702d9f1b83bdb82",
+          "version": "5.8.3"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/jonkykong/SideMenu",
         "state": {
           "branch": null,
-          "revision": "8dde1951c37b5ea0f696dae7d895f7d6fa53d3e1",
-          "version": "6.4.2"
+          "revision": "17b8fcd41315dba5a22e3231f714f594faefc780",
+          "version": "6.4.3"
         }
       }
     ]

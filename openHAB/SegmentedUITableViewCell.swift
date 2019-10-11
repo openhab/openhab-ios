@@ -40,7 +40,7 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl.removeAllSegments()
         widgetSegmentControl.apportionsSegmentWidthsByContent = true
 
-        for mapping in widget?.mappingsOrItemOptions ?? [] {
+        for mapping in widget?.mappings ?? [] {
             widgetSegmentControl.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
         }
 

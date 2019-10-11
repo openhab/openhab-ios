@@ -151,7 +151,6 @@ class OpenHABJSONParserTests: XCTestCase {
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
             XCTAssertEqual(codingData.widgetId, "0000", "Widget properly parsed")
-            XCTAssertEqual(codingData.item?.stateDescription?.readOnly, false)
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -385,8 +384,6 @@ class OpenHABJSONParserTests: XCTestCase {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: jsonSitemap2)
             XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
             XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
-            XCTAssertEqual(codingData.widgets?[4].widgets[3].item?.stateDescription?.options?[0].label, "New moon", "State description properly parsed")
-
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }

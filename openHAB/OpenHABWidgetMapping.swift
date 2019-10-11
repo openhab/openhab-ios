@@ -15,17 +15,9 @@ import Fuzi
 class OpenHABWidgetMapping: NSObject, Decodable {
     var command = ""
     var label = ""
-}
 
-extension OpenHABWidgetMapping {
-    convenience init(command: String, label: String) {
-        self.init()
-        self.command = command
-        self.label = label
-    }
-
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
+    init(xml xmlElement: XMLElement) {
+        super.init()
         for child in xmlElement.children {
             switch child.tag {
             case "command": command = child.stringValue
