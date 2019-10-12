@@ -17,7 +17,6 @@ Beta releases are available on [Test Flight](https://testflight.apple.com/join/5
 ## Features
 * Control your openHAB server and [openHAB Cloud instance](https://github.com/openhab/openhab-cloud)
 * Receive notifications from openHAB Cloud
-* Send voice commands to openHAB
 * Supports wall mounted tablets
 
 ## Setting up development environment
