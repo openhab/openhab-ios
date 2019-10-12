@@ -1,6 +1,5 @@
 <p align="center">
     <a href="https://www.bountysource.com/teams/openhab/issues?tracker_ids=860186"><img alt="Bountysource" src="https://www.bountysource.com/badge/tracker?tracker_id=860186"></a> 
-    <a href="https://app.bitrise.io/app/0724ad912cb74a73"><img alt="Build Status" src="https://app.bitrise.io/app/0724ad912cb74a73/status.svg?token=R2iixECSi5dcRnX-ENhu-w&branch=master")</a>
     <br>
     <img alt="Logo" src="openHAB/Images.xcassets/AppIcon.appiconset/icon-120x120.png" width="100">
     <br>
