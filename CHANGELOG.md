@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.2.38, Build 1571347885] - 2019-10-17
+
 ### Changed
 - SwiftFormat migrated with SPM
 - Making use of Swift 5.1 property wrappers to reduce boilerplate code
