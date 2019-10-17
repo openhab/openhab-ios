@@ -6,12 +6,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed:
 - Fixed fastlane to avoid littering changelog with irrelevant information
+- Initial commit to address #182 i.e handling of dynamic mapping
 
 ### Changed
 - FlexColorPicker upgraded to 1.3.1, integrated with SPM
+- Parsing the information from the Item/stateDescription/options - Extending the JSON Parser
+- Recognizing the relevant case in OpenHABViewController
+- Convenience mapper in OpenHABWidget to map to [OpenHABWidgetMapping]
+- Displaying the results in SegmentedUITableViewCell and in SelectionUITableViewCell 
+- Adjusting the tests - tested with avmfritz
 
 ## [2.2.32] - 2019-10-08 
-
 
 ### Added:
 - No new feature
