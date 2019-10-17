@@ -763,7 +763,7 @@ extension OpenHABViewController: OpenHABSelectionTableViewControllerDelegate {
     // send command on selected selection widget mapping
     func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
         let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
+        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
         sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
     }
 }
@@ -976,6 +976,8 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 // RollershutterItem changed to Rollershutter in later builds of OH2
             } else if let type = widget?.item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && widget?.item?.groupType == "Rollershutter") {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+            } else if widget?.item?.stateDescription?.options.count ?? 0 > 0 {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
@@ -1101,7 +1103,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
             selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = (selectedWidget?.mappings)!
+            selectionViewController.mappings = (selectedWidget?.mappingsOrItemOptions)!
             selectionViewController.delegate = self
             selectionViewController.selectionItem = selectedWidget?.item
             navigationController?.pushViewController(selectionViewController, animated: true)
