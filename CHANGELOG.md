@@ -4,6 +4,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- SwiftFormat migrated with SPM
+
+## [Version 2.2.37, Build 1571345353] - 2019-10-17
+
 ### Fixed:
 - Fixed fastlane to avoid littering changelog with irrelevant information
 - Initial commit to address #182 i.e handling of dynamic mapping
