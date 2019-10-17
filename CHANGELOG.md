@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - SwiftFormat migrated with SPM
+- Making use of Swift 5.1 property wrappers to reduce boilerplate code
 
 ## [Version 2.2.37, Build 1571345353] - 2019-10-17
 
