@@ -61,6 +61,14 @@ class OpenHABWidget: NSObject, MKAnnotation {
         return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
+    var mappingsOrItemOptions: [OpenHABWidgetMapping] {
+        if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
+            return itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+        } else {
+            return mappings
+        }
+    }
+
     func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
@@ -78,8 +86,8 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     func mappingIndex(byCommand command: String?) -> Int? {
-        for mapping in mappings where mapping.command == command {
-            return (mappings as NSArray).index(of: mapping)
+        for mapping in mappingsOrItemOptions where mapping.command == command {
+            return (mappingsOrItemOptions as NSArray).index(of: mapping)
         }
         return nil
     }
