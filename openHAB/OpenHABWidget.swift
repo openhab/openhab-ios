@@ -86,11 +86,9 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     func mappingIndex(byCommand command: String?) -> Int? {
-        for mapping in mappingsOrItemOptions where mapping.command == command {
-            return (mappingsOrItemOptions as NSArray).index(of: mapping)
-        }
-        return nil
+        return mappingsOrItemOptions.firstIndex{ $0.command == command }
     }
+
 }
 
 extension OpenHABWidget {

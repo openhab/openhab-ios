@@ -23,7 +23,7 @@ class SelectionUITableViewCell: GenericUITableViewCell {
 
     override func displayWidget() {
         super.customTextLabel?.text = widget.labelText
-        if let selectedMapping = widget.mappingIndex(byCommand: widget.item?.state) {
+         if let selectedMapping = widget.mappingIndex(byCommand: widget.item?.state) {
             if let widgetMapping = widget?.mappingsOrItemOptions[Int(selectedMapping)] {
                 customDetailTextLabel?.text = widgetMapping.label
             }

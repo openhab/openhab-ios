@@ -4,6 +4,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Addressing crashes on "Selection" with Dynamic Mapping for Spotify
+
+## [Version 2.2.40, Build 1571429231] - 2019-10-18
+
 ### Fixed 
 - Addressing crashes on OpenHABSelectionTableViewController and on SegmentedUITableViewCell
 
