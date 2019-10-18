@@ -41,10 +41,10 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl.apportionsSegmentWidthsByContent = true
 
         for mapping in widget?.mappingsOrItemOptions ?? [] {
-            widgetSegmentControl.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
+            widgetSegmentControl.insertSegment(withTitle: mapping.label, at: widget.mappingsOrItemOptions.firstIndex(of: mapping) ?? 0, animated: false)
         }
 
-        widgetSegmentControl.isMomentary = widget.mappings.count == 1 || widget.item?.state == "NULL"
+        widgetSegmentControl.isMomentary = widget.mappingsOrItemOptions.count == 1 || widget.item?.state == "NULL"
         widgetSegmentControl.selectedSegmentIndex = widgetSegmentControl.isMomentary ? -1 : Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1)
         widgetSegmentControl.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
     }

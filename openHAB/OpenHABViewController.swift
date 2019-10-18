@@ -286,6 +286,7 @@ class OpenHABViewController: UIViewController {
 
         let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
         presentationStyle.presentingEndAlpha = 1
+        presentationStyle.onTopShadowOpacity = 0.5
         var settings = SideMenuSettings()
         settings.presentationStyle = presentationStyle
         settings.statusBarEndAlpha = 0
@@ -1103,7 +1104,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
             selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = (selectedWidget?.mappingsOrItemOptions)!
+            selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
             selectionViewController.delegate = self
             selectionViewController.selectionItem = selectedWidget?.item
             navigationController?.pushViewController(selectionViewController, animated: true)

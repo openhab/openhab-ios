@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed 
+- Addressing crashes on OpenHABSelectionTableViewController and on SegmentedUITableViewCell
+
 ## [Version 2.2.38, Build 1571347885] - 2019-10-17
 
 ### Changed
