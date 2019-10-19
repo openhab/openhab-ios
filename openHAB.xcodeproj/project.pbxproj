@@ -69,6 +69,8 @@
 		DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
+		DA291415235BA1490024A702 /* OpenHABStateDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EC2350BA630081E80B /* OpenHABStateDescription.swift */; };
+		DA291416235BA1500024A702 /* OpenHABOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EA2350B87A0081E80B /* OpenHABOptions.swift */; };
 		DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4578233BF812003DDDEF /* Kingfisher */; };
 		DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457B233BF844003DDDEF /* Alamofire */; };
 		DA2D457E233BF990003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457D233BF990003DDDEF /* Alamofire */; };
@@ -82,7 +84,6 @@
 		DA7E1E4A22302287002AEFD8 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
-		DA83B91D22B8193C0016EA49 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
 		DA966478232EDEAD00CB418B /* MockURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA966477232EDEAD00CB418B /* MockURLProtocol.swift */; };
 		DA96647A232EE3C200CB418B /* RESTAPITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA966479232EE3C200CB418B /* RESTAPITest.swift */; };
@@ -1356,6 +1357,7 @@
 				DA07764423467B420086C685 /* OpenHABWidget.swift in Sources */,
 				DA0775292346705F0086C685 /* HostingController.swift in Sources */,
 				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
+				DA291416235BA1500024A702 /* OpenHABOptions.swift in Sources */,
 				DA07759F23467A580086C685 /* OpenHABSitemap.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
@@ -1365,6 +1367,7 @@
 				DA077599234673000086C685 /* StringExtension.swift in Sources */,
 				DA077597234670CD0086C685 /* Item.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
+				DA291415235BA1490024A702 /* OpenHABStateDescription.swift in Sources */,
 				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
 				DA0775312346705F0086C685 /* ComplicationController.swift in Sources */,
 				DA07759E23467A450086C685 /* Frame.swift in Sources */,

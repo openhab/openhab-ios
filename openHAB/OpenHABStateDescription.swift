@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import Fuzi
 
 class OpenHABStateDescription {
     var minimum = 0.0
