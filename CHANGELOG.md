@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.2.41, Build 1571438550] - 2019-10-19
+
 ### Fixed
 - Addressing crashes on "Selection" with Dynamic Mapping for Spotify
 
