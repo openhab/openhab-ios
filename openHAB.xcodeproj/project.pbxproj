@@ -25,6 +25,7 @@
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
+		934B610C2348D2F9009112D5 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B610B2348D2F9009112D5 /* ColorUtil.swift */; };
 		938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */; };
 		9394102622CB5CDB00EB4255 /* Collection+SafeAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */; };
 		A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */; };
@@ -73,13 +74,15 @@
 		DA2D457E233BF990003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457D233BF990003DDDEF /* Alamofire */; };
 		DA2D4646233D5EF9003DDDEF /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4645233D5EF9003DDDEF /* SideMenu */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
-		DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4A1A63223D57AD005F530F /* ColorUtil.swift */; };
+		DA3D28A12356E6FE00B7B0B8 /* SwiftFormat in Frameworks */ = {isa = PBXBuildFile; productRef = DA3D28A02356E6FE00B7B0B8 /* SwiftFormat */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA4D4E0D23409A4600B37E37 /* DynamicButton in Frameworks */ = {isa = PBXBuildFile; productRef = DA4D4E0C23409A4600B37E37 /* DynamicButton */; };
 		DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
 		DA7E1E4A22302287002AEFD8 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
+		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
+		DA83B91D22B8193C0016EA49 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
 		DA966478232EDEAD00CB418B /* MockURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA966477232EDEAD00CB418B /* MockURLProtocol.swift */; };
 		DA96647A232EE3C200CB418B /* RESTAPITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA966479232EE3C200CB418B /* RESTAPITest.swift */; };
@@ -90,6 +93,8 @@
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
 		DAA42BAE21DC987C00244B2A /* (null) in Sources */ = {isa = PBXBuildFile; };
 		DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */; };
+		DAB128EB2350B87A0081E80B /* OpenHABOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EA2350B87A0081E80B /* OpenHABOptions.swift */; };
+		DAB128ED2350BA630081E80B /* OpenHABStateDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EC2350BA630081E80B /* OpenHABStateDescription.swift */; };
 		DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */; };
 		DAC9394522AD538300C5F423 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DAC9394622AD541C00C5F423 /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
@@ -97,6 +102,7 @@
 		DAC9395622B0128A00C5F423 /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
 		DAC9395822B0209100C5F423 /* URLSessionPinningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395722B0209100C5F423 /* URLSessionPinningDelegate.swift */; };
 		DAC9395A22B045C200C5F423 /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
+		DAD8AC69234E588C00499060 /* FlexColorPicker in Frameworks */ = {isa = PBXBuildFile; productRef = DAD8AC68234E588C00499060 /* FlexColorPicker */; };
 		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
@@ -255,6 +261,7 @@
 		933D7F0622E7015000621A03 /* OpenHABUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUITests.swift; sourceTree = "<group>"; };
 		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		933D7F0E22E7030600621A03 /* SnapshotHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapshotHelper.swift; path = fastlane/SnapshotHelper.swift; sourceTree = SOURCE_ROOT; };
+		934B610B2348D2F9009112D5 /* ColorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorUtil.swift; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
 		9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+SafeAccess.swift"; sourceTree = "<group>"; };
 		965E6C0728A41A0442B5E59C /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
@@ -332,11 +339,11 @@
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABJSONParserTests.swift; sourceTree = "<group>"; };
 		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA4A1A63223D57AD005F530F /* ColorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorUtil.swift; sourceTree = "<group>"; };
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA5D0F80223E9991007ADDBD /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
 		DA966477232EDEAD00CB418B /* MockURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockURLProtocol.swift; sourceTree = "<group>"; };
 		DA966479232EE3C200CB418B /* RESTAPITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RESTAPITest.swift; sourceTree = "<group>"; };
@@ -345,6 +352,8 @@
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
 		DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUserDefaultsTests.swift; sourceTree = "<group>"; };
+		DAB128EA2350B87A0081E80B /* OpenHABOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABOptions.swift; sourceTree = "<group>"; };
+		DAB128EC2350BA630081E80B /* OpenHABStateDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABStateDescription.swift; sourceTree = "<group>"; };
 		DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABXMLParserTests.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
@@ -450,11 +459,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
+				DA3D28A12356E6FE00B7B0B8 /* SwiftFormat in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
 				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
 				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				DA2D457C233BF844003DDDEF /* Alamofire in Frameworks */,
+				DAD8AC69234E588C00499060 /* FlexColorPicker in Frameworks */,
 				DA2D4579233BF812003DDDEF /* Kingfisher in Frameworks */,
 				DA2D4646233D5EF9003DDDEF /* SideMenu in Frameworks */,
 				DA4D4E0D23409A4600B37E37 /* DynamicButton in Frameworks */,
@@ -762,6 +773,7 @@
 			children = (
 				DA4D4DB4233F9ACB00B37E37 /* README.md */,
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
+				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				1224F793228A8AE400750965 /* openHABWatch */,
@@ -847,6 +859,8 @@
 				DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */,
 				DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */,
 				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */,
+				DAB128EC2350BA630081E80B /* OpenHABStateDescription.swift */,
+				DAB128EA2350B87A0081E80B /* OpenHABOptions.swift */,
 				DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */,
 			);
 			name = Models;
@@ -856,7 +870,7 @@
 			isa = PBXGroup;
 			children = (
 				A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */,
-				DA4A1A63223D57AD005F530F /* ColorUtil.swift */,
+				934B610B2348D2F9009112D5 /* ColorUtil.swift */,
 				DA5D0F80223E9991007ADDBD /* Endpoint.swift */,
 				A08FF1492233498600203EED /* ClientCertificateManager.swift */,
 				DA19E33722FF4594002F8F2F /* NetworkConnection.swift */,
@@ -1022,6 +1036,8 @@
 				DA2D457B233BF844003DDDEF /* Alamofire */,
 				DA2D4645233D5EF9003DDDEF /* SideMenu */,
 				DA4D4E0C23409A4600B37E37 /* DynamicButton */,
+				DAD8AC68234E588C00499060 /* FlexColorPicker */,
+				DA3D28A02356E6FE00B7B0B8 /* SwiftFormat */,
 			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
@@ -1096,6 +1112,8 @@
 				DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */,
 				DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */,
 				DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */,
+				DAD8AC67234E588C00499060 /* XCRemoteSwiftPackageReference "FlexColorPicker" */,
+				DA3D289F2356E6FE00B7B0B8 /* XCRemoteSwiftPackageReference "SwiftFormat" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1169,6 +1187,7 @@
 			files = (
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
+				DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */,
 				DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */,
 				DFB2623518830A3600D3244D /* InfoPlist.strings in Resources */,
 				DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */,
@@ -1375,6 +1394,7 @@
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				DA7E1E4A22302287002AEFD8 /* OpenHABSitemapPage.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
+				934B610C2348D2F9009112D5 /* ColorUtil.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */,
@@ -1419,7 +1439,6 @@
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
 				286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
-				DA4A1A64223D57AE005F530F /* ColorUtil.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
 				DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */,
 				DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */,
@@ -1432,6 +1451,8 @@
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				A0F48313230C80880033E6E7 /* ServerCertificateManager.swift in Sources */,
 				A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */,
+				DAB128ED2350BA630081E80B /* OpenHABStateDescription.swift in Sources */,
+				DAB128EB2350B87A0081E80B /* OpenHABOptions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1669,6 +1690,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
@@ -1707,6 +1729,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1892,6 +1915,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
@@ -1932,6 +1956,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2075,7 +2100,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 83;
+				CURRENT_PROJECT_VERSION = 1571438550;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -2097,11 +2122,13 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};
@@ -2118,7 +2145,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 83;
+				CURRENT_PROJECT_VERSION = 1571438550;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -2139,11 +2166,13 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};
@@ -2251,12 +2280,28 @@
 				minimumVersion = 6.4.2;
 			};
 		};
+		DA3D289F2356E6FE00B7B0B8 /* XCRemoteSwiftPackageReference "SwiftFormat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nicklockwood/SwiftFormat";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.40.13;
+			};
+		};
 		DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/yannickl/DynamicButton";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 6.2.1;
+			};
+		};
+		DAD8AC67234E588C00499060 /* XCRemoteSwiftPackageReference "FlexColorPicker" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RastislavMirek/FlexColorPicker";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -2282,10 +2327,20 @@
 			package = DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */;
 			productName = SideMenu;
 		};
+		DA3D28A02356E6FE00B7B0B8 /* SwiftFormat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA3D289F2356E6FE00B7B0B8 /* XCRemoteSwiftPackageReference "SwiftFormat" */;
+			productName = SwiftFormat;
+		};
 		DA4D4E0C23409A4600B37E37 /* DynamicButton */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */;
 			productName = DynamicButton;
+		};
+		DAD8AC68234E588C00499060 /* FlexColorPicker */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAD8AC67234E588C00499060 /* XCRemoteSwiftPackageReference "FlexColorPicker" */;
+			productName = FlexColorPicker;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

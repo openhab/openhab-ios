@@ -10,9 +10,9 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import Fuzi
 
-extension UserDefaults {
-    static var shared: UserDefaults {
-        return UserDefaults(suiteName: AppConstants.APP_GROUP_ID)!
-    }
+class OpenHABOptions: Decodable {
+    var value = ""
+    var label = ""
 }

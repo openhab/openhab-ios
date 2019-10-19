@@ -1,9 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABNewXMLParserTests.swift
-//  Pods-openHABTestsSwift
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 19.08.19.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import Fuzi
 @testable import openHAB

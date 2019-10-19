@@ -1,10 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  openHABTestsSwift.swift
-//  openHABTestsSwift
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 18.01.19.
-//  Copyright © 2019 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 @testable import openHAB
 import os.signpost
@@ -148,6 +151,7 @@ class OpenHABJSONParserTests: XCTestCase {
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
             XCTAssertEqual(codingData.widgetId, "0000", "Widget properly parsed")
+            XCTAssertEqual(codingData.item?.stateDescription?.readOnly, false)
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -381,6 +385,8 @@ class OpenHABJSONParserTests: XCTestCase {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: jsonSitemap2)
             XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
             XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
+            XCTAssertEqual(codingData.widgets?[4].widgets[3].item?.stateDescription?.options?[0].label, "New moon", "State description properly parsed")
+
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }

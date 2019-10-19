@@ -1,12 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  WebUITableViewCell.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 19/05/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import os.log
 import WebKit
@@ -31,7 +32,8 @@ class WebUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
 
-        guard url?.absoluteString != widget.url else {
+        let urlString = widget.url.lowercased().hasPrefix("http") ? widget.url : Preferences.localUrl + widget.url
+        guard url?.absoluteString != urlString else {
             os_log("webview URL has not changed, abort loading", log: .viewCycle, type: .info)
             return
         }
@@ -43,7 +45,7 @@ class WebUITableViewCell: GenericUITableViewCell {
         }
         let base64LoginString = loginData.base64EncodedString()
 
-        if let url = URL(string: widget.url) {
+        if let url = URL(string: urlString) {
             self.url = url
             var request = URLRequest(url: url)
             request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")

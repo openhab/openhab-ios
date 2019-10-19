@@ -1,10 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  NewImageUITableViewCell.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 16.02.19.
-//  Copyright © 2019 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
 import os.log
@@ -16,12 +19,18 @@ enum ImageType {
     case empty
 }
 
+enum ChartStyle {
+    case dark
+    case light
+}
+
 class NewImageUITableViewCell: GenericUITableViewCell {
     var didLoad: (() -> Void)?
 
     private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
     private var downloadRequest: Alamofire.Request?
+    private var chartStyle: ChartStyle = .light
 
     private var appData: OpenHABDataObject? {
         return AppDelegate.appDelegate.appData
@@ -32,7 +41,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         switch widget.type {
         case "Chart":
-            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend).url)
+            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: chartStyle).url)
         case "Image":
             if let item = widget.item {
                 return widgetPayload(fromItem: item)
@@ -62,6 +71,32 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                                      mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
                                      mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
                                      mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)])
+
+        if #available(iOS 13.0, *) {
+            switch UITraitCollection.current.userInterfaceStyle {
+            case .light, .unspecified:
+                chartStyle = .light
+            case .dark:
+                chartStyle = .dark
+            @unknown default:
+                chartStyle = .light
+            }
+        }
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if #available(iOS 12.0, *) {
+            switch traitCollection.userInterfaceStyle {
+            case .light, .unspecified:
+                chartStyle = .light
+            case .dark:
+                chartStyle = .dark
+            @unknown default:
+                chartStyle = .light
+            }
+        }
     }
 
     override func willMove(toSuperview newSuperview: UIView?) {

@@ -1,13 +1,13 @@
-//  Converted to Swift 4 by Swiftify v4.2.20229 - https://objectivec2swift.com/
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABWidgetMapping.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 17/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import Foundation
 #if !os(watchOS)
@@ -17,10 +17,18 @@ import Fuzi
 class OpenHABWidgetMapping: NSObject, Decodable {
     var command = ""
     var label = ""
+}
+
+extension OpenHABWidgetMapping {
+    convenience init(command: String, label: String) {
+        self.init()
+        self.command = command
+        self.label = label
+    }
 
     #if !os(watchOS)
-    init(xml xmlElement: XMLElement) {
-        super.init()
+    convenience init(xml xmlElement: XMLElement) {
+        self.init()
         for child in xmlElement.children {
             switch child.tag {
             case "command": command = child.stringValue

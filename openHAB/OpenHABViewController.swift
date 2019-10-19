@@ -1,12 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABViewController.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 12/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
 import AVFoundation
@@ -137,10 +138,11 @@ class OpenHABViewController: UIViewController {
         if #available(iOS 13.0, *) {
             let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
             let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
-            hamburgerButtonItem = UIBarButtonItem(image: buttonImage,
-                                                  style: .plain,
-                                                  target: self,
-                                                  action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+            let button = UIButton(type: .custom)
+            button.setImage(buttonImage, for: .normal)
+            button.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+            hamburgerButtonItem = UIBarButtonItem(customView: button)
+            hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
         } else {
             hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
             hamburgerButton.setStyle(.hamburger, animated: true)
@@ -280,10 +282,11 @@ class OpenHABViewController: UIViewController {
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
         SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
-        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view)
+        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
 
-        let presentationStyle: SideMenuPresentationStyle = .menuSlideIn
-        presentationStyle.presentingEndAlpha = 0
+        let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
+        presentationStyle.presentingEndAlpha = 1
+        presentationStyle.onTopShadowOpacity = 0.5
         var settings = SideMenuSettings()
         settings.presentationStyle = presentationStyle
         settings.statusBarEndAlpha = 0
@@ -672,10 +675,11 @@ class OpenHABViewController: UIViewController {
         if #available(iOS 13.0, *) {
             let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
             let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
-            let hamburgerButtonItem = UIBarButtonItem(image: buttonImage,
-                                                      style: .plain,
-                                                      target: self,
-                                                      action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+            let button = UIButton(type: .custom)
+            button.setImage(buttonImage, for: .normal)
+            button.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+            let hamburgerButtonItem = UIBarButtonItem(customView: button)
+            hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
             navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
         } else {
             hamburgerButton.setStyle(.hamburger, animated: animated)
@@ -760,7 +764,7 @@ extension OpenHABViewController: OpenHABSelectionTableViewControllerDelegate {
     // send command on selected selection widget mapping
     func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
         let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
+        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
         sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
     }
 }
@@ -899,10 +903,11 @@ extension OpenHABViewController: SideMenuNavigationControllerDelegate {
         if #available(iOS 13.0, *) {
             let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
             let buttonImage = UIImage(systemName: "arrow.right", withConfiguration: imageConfig)
-            let hamburgerButtonItem = UIBarButtonItem(image: buttonImage,
-                                                      style: .plain,
-                                                      target: self,
-                                                      action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)))
+            let button = UIButton(type: .custom)
+            button.setImage(buttonImage, for: .normal)
+            button.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+            let hamburgerButtonItem = UIBarButtonItem(customView: button)
+            hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
             navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
         } else {
             hamburgerButton.setStyle(.arrowRight, animated: animated)
@@ -972,6 +977,8 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 // RollershutterItem changed to Rollershutter in later builds of OH2
             } else if let type = widget?.item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && widget?.item?.groupType == "Rollershutter") {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+            } else if widget?.item?.stateDescription?.options.count ?? 0 > 0 {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
@@ -1037,12 +1044,16 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         if cell is FrameUITableViewCell {
-            cell.backgroundColor = UIColor.groupTableViewBackground
+            if #available(iOS 13.0, *) {
+                cell.backgroundColor = .secondarySystemGroupedBackground
+            } else {
+                cell.backgroundColor = .groupTableViewBackground
+            }
         } else {
             if #available(iOS 13.0, *) {
-                cell.backgroundColor = UIColor.systemBackground
+                cell.backgroundColor = .systemBackground
             } else {
-                cell.backgroundColor = UIColor.white
+                cell.backgroundColor = .white
             }
         }
 
@@ -1093,7 +1104,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
             selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = (selectedWidget?.mappings)!
+            selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
             selectionViewController.delegate = self
             selectionViewController.selectionItem = selectedWidget?.item
             navigationController?.pushViewController(selectionViewController, animated: true)

@@ -32,8 +32,14 @@ platform :ios do
       )
   end
 
+
   desc "Build beta"
   lane :beta do |lane|
+
+    # check the semantic parameter entered
+    if !lane[:bump]
+        raise "No bump type defined! Use one of: patch | minor | major".red
+    end
 
     ensure_git_branch(
         branch: "(master|develop|release\\S+|hotfix\\S+)"
@@ -42,58 +48,74 @@ platform :ios do
     # ensure that master branch is clean
     ensure_git_status_clean
 
-    # check the semantic parameter entered
-    if !lane[:bump]
-        raise "No bump type defined! Use one of: patch | minor | major".red
-    end
-
     # run unit tests
-    unittests
+    #unittests
 
-    # get the last commit comments from Git history
-    # and creates our changelog
-    comments = changelog_from_git_commits(
-        between: [last_git_tag, "HEAD"],
-        pretty: "- %s",
-        date_format: "short",
-        match_lightweight_tag: false,
-        merge_commit_filtering: "exclude_merges"
+    increment_build_number(
+      build_number: Time.now.to_i
     )
 
     type = lane[:bump]
 
-    version = increment_version_number(
-        bump_type: type,
-        xcodeproj: "openHAB.xcodeproj"
+    increment_version_number(
+           bump_type: type,
+           xcodeproj: "openHAB.xcodeproj"
     )
-    increment_build_number(xcodeproj: "openHAB.xcodeproj")
-    commit_version_bump(xcodeproj: "openHAB.xcodeproj")
+
+    build_number = get_build_number
+    version = get_version_number(xcodeproj: "openHAB.xcodeproj",
+                                        target: "openHAB")
+
+    # get the last commit comments from Git history
+    # and creates our changelog
+    comments = changelog_from_git_commits(
+          between: [last_git_tag, "HEAD"],
+          pretty: "- %s",
+          date_format: "short",
+          match_lightweight_tag: false,
+          merge_commit_filtering: "exclude_merges"
+    )
+
+    changelog = read_changelog # Read changelog
+  
+    stamp_changelog(section_identifier: "Version #{version}, Build #{build_number}") # Stamp Unreleased section with newly released build number
+
+    clean_build_artifacts
+
+    # commit to git the changes from bumping version number
+    commit_version_bump(message: "Committed version bump",
+                        xcodeproj: "openHAB.xcodeproj",
+                        force: true)
 
     # push bump commit
     push_to_git_remote
 
     # create a local tag with the new version
     add_git_tag(
-        message: comments,
-        tag: "v#{version}")
+        message: changelog,
+        tag: "#{version}")
 
     # publish a new release into Github
     github_release = set_github_release(
     	api_token: ENV["GITHUB_TOKEN"],
     	repository_name: "openhab/openhab-ios",
-        name: "#{type.capitalize} version v#{version}",
-        tag_name: "v#{version}",
-        description: comments,
+        name: "#{type.capitalize} version #{version}",
+        tag_name: "#{version}",
+        description: changelog,
         commitish: "master"
         # upload_assets: no assets supported
     )
-    build_app(scheme: "openHAB")
+    build_app(scheme: "openHAB",
+              clean: true,
+              export_method: "app-store")
     upload_to_testflight(
+        wait_for_uploaded_build: true,
         distribute_external: true,
         notify_external_testers: true,
-        changelog: comments,
+        changelog: changelog,
         groups: ["Beta Testers"]
     )
+
   end
 
 end

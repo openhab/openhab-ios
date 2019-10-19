@@ -1,12 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  GenericUITableViewCell.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 15/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import Kingfisher
 import UIKit
@@ -40,9 +41,9 @@ class GenericUITableViewCell: UITableViewCell {
                 }
             } else {
                 if #available(iOS 13.0, *) {
-                    customTextLabel?.textColor = UIColor.label
+                    customTextLabel?.textColor = .label
                 } else {
-                    customTextLabel?.textColor = UIColor.black
+                    customTextLabel?.textColor = .black
                 }
             }
             if _widget.valuecolor != "" {
@@ -51,9 +52,9 @@ class GenericUITableViewCell: UITableViewCell {
                 }
             } else {
                 if #available(iOS 13.0, *) {
-                    customDetailTextLabel?.textColor = UIColor.secondaryLabel
+                    customDetailTextLabel?.textColor = .secondaryLabel
                 } else {
-                    customDetailTextLabel?.textColor = UIColor.lightGray
+                    customDetailTextLabel?.textColor = .lightGray
                 }
             }
         }
@@ -94,8 +95,8 @@ class GenericUITableViewCell: UITableViewCell {
                 // If accessory is disabled, set detailTextLabel (widget value) constraint 20px to the right for padding to the right side of table view
                 customDetailTextLabelConstraint.constant = 20.0
             } else {
-                // If accessory is enabled, set detailTextLabel (widget value) constraint 0px to the right
-                customDetailTextLabelConstraint.constant = 0.0
+                // If accessory is enabled, set detailTextLabel (widget value) constraint 5px to the right
+                customDetailTextLabelConstraint.constant = 5.0
             }
         }
     }

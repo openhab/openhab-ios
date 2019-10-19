@@ -1,10 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  Endpoint.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 17.03.19.
-//  Copyright © 2019 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import Foundation
 import os.log
@@ -65,7 +68,7 @@ extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func chart(rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?) -> Endpoint {
+    static func chart(rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)
         var endpoint = Endpoint(baseURL: rootUrl,
                                 path: "/chart",
@@ -82,6 +85,12 @@ extension Endpoint {
         }
         if let legend = legend, legend != false {
             endpoint.queryItems.append(URLQueryItem(name: "legend", value: String(legend)))
+        }
+        switch theme {
+        case .dark:
+            endpoint.queryItems.append(URLQueryItem(name: "theme", value: "dark"))
+        case .light:
+            endpoint.queryItems.append(URLQueryItem(name: "theme", value: "light"))
         }
         return endpoint
     }
