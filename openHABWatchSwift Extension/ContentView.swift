@@ -9,11 +9,11 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var userData: UserData
+    @ObservedObject var viewModel = OpenHABViewModel()
 
     var body: some View {
-        ForEach(userData.sitemap) { switchItem in
-            SwitchRow(item: switchItem)
+        ForEach(viewModel.items) { item in
+            SwitchRow(item: item)
         }
     }
 }

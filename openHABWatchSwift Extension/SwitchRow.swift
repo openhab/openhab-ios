@@ -9,11 +9,15 @@
 import SwiftUI
 
 struct SwitchRow: View {
+    @ObservedObject var viewModel = SwitchRowViewModel()
+
     @State var item: Item
 
     var body: some View {
         Toggle(isOn: $item.state) {
             HStack {
+                setImage()
+                //
                 Image(systemName: "photo")
                 Text(item.name).font(.callout)
                 Spacer()
@@ -22,6 +26,11 @@ struct SwitchRow: View {
         }.padding()
             .cornerRadius(10)
     }
+
+     func setImage() -> Image {
+        viewModel.lazyLoadImage(url: item.link)
+           return Image(uiImage: viewModel.image ?? UIImage())
+       }
 }
 
 struct SwitchRow_Previews: PreviewProvider {
