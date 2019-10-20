@@ -83,7 +83,7 @@ extension Endpoint {
         if let service = service, !service.isEmpty {
             endpoint.queryItems.append(URLQueryItem(name: "service", value: service))
         }
-        if let legend = legend, legend != false {
+        if let legend = legend {
             endpoint.queryItems.append(URLQueryItem(name: "legend", value: String(legend)))
         }
         switch theme {
