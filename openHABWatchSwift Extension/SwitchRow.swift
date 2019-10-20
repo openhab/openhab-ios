@@ -28,7 +28,7 @@ struct SwitchRow: View {
     }
 
      func setImage() -> Image {
-        viewModel.lazyLoadImage(url: item.link)
+        viewModel.lazyLoadImage(url: URL(string: item.link)!)
            return Image(uiImage: viewModel.image ?? UIImage())
        }
 }

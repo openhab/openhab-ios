@@ -9,7 +9,7 @@
 import Combine
 import SwiftUI
 
-final class RepositoryRowViewModel: ObservableObject {
+final class SwitchRowViewModel: ObservableObject {
 
     @Published private(set) var image = UIImage(named: "placeholder")
 
