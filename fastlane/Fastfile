@@ -109,7 +109,6 @@ platform :ios do
               clean: true,
               export_method: "app-store")
     upload_to_testflight(
-        wait_for_uploaded_build: true,
         distribute_external: true,
         notify_external_testers: true,
         changelog: changelog,
