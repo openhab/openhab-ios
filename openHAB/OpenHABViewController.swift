@@ -972,9 +972,12 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Frame":
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case "Switch":
+            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if widget?.mappings.count ?? 0 > 0 {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 // RollershutterItem changed to Rollershutter in later builds of OH2
+            } else if let type = widget?.item?.type, type == "Switch" {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             } else if let type = widget?.item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && widget?.item?.groupType == "Rollershutter") {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
             } else if widget?.item?.stateDescription?.options.count ?? 0 > 0 {
