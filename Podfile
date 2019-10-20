@@ -4,6 +4,7 @@ platform :ios, '11.0'
 use_frameworks!
 
 target 'openHAB' do
+    pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
     pod 'SVGKit'
     pod 'Firebase/Core'

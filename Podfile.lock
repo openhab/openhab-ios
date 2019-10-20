@@ -71,6 +71,7 @@ PODS:
   - nanopb/encode (0.3.901)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
+  - SwiftFormat/CLI (0.40.13)
   - SwiftLint (0.35.0)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
@@ -82,6 +83,7 @@ DEPENDENCIES:
   - Firebase/Core
   - Fuzi (~> 3.1)
   - SVGKit
+  - SwiftFormat/CLI
   - SwiftLint
   - SwiftMessages
 
@@ -103,6 +105,7 @@ SPEC REPOS:
     - GoogleUtilities
     - nanopb
     - SVGKit
+    - SwiftFormat
     - SwiftLint
     - SwiftMessages
 
@@ -123,9 +126,10 @@ SPEC CHECKSUMS:
   GoogleUtilities: f895fde57977df4e0233edda0dbeac490e3703b6
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
+  SwiftFormat: d548b3585a6dbe64390177b386e95375b8c300b6
   SwiftLint: 5553187048b900c91aa03552807681bb6b027846
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: e64568533786c8dd3dd6504914904f1c4b157dfd
+PODFILE CHECKSUM: bdc504c14c0aa72c07c10268dd5e756a462049d1
 
 COCOAPODS: 1.8.3
