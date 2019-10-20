@@ -503,4 +503,44 @@ class OpenHABJSONParserTests: XCTestCase {
             XCTFail("Failed parsing")
         }
     }
+
+    func testItemWithDescription() {
+        let json = """
+        {
+        "widgetId": "0000",
+        "type": "Switch",
+        "label": "Licht Treppe Keller-EG [Kellertest]",
+        "icon": "switch",
+        "mappings": [],
+        "item": {"link":"http://eye:8080/rest/items/Master_Motion_Sensor",
+            "state":"OFF",
+        "stateDescription": {"readOnly":true,
+        "options":[{"value":"OFF","label":"OK"},{"value":"ON","label":"Alarm"}]},
+            "editable":false,
+            "type":"Switch",
+            "name":"Master_Motion_Sensor",
+            "label":"Master Movement",
+            "category":"motion",
+            "tags":[],
+            "groupNames":["gMotion","gMotion2","LightMotionSensors"]
+        },
+        "widgets": []
+        }
+        """
+        let data = Data(json.utf8)
+        do {
+            var widget: OpenHABWidget
+            widget = try {
+                let widgetCodingData = try data.decoded() as OpenHABWidget.CodingData
+                return widgetCodingData.openHABWidget
+            }()
+
+            XCTAssertEqual(widget.mappingsOrItemOptions[0].command, "OFF", "Checking assignment of stateDescription")
+            XCTAssertEqual(widget.mappingIndex(byCommand: "ON"), 1, "Checking finding of command")
+
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
+
 }
