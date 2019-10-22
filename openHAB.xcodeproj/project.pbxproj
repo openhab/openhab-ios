@@ -78,7 +78,6 @@
 		DA2D457E233BF990003DDDEF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D457D233BF990003DDDEF /* Alamofire */; };
 		DA2D4646233D5EF9003DDDEF /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = DA2D4645233D5EF9003DDDEF /* SideMenu */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
-		DA3D28A12356E6FE00B7B0B8 /* SwiftFormat in Frameworks */ = {isa = PBXBuildFile; productRef = DA3D28A02356E6FE00B7B0B8 /* SwiftFormat */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA4D4E0D23409A4600B37E37 /* DynamicButton in Frameworks */ = {isa = PBXBuildFile; productRef = DA4D4E0C23409A4600B37E37 /* DynamicButton */; };
 		DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
@@ -464,7 +463,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DFB2622B18830A3600D3244D /* Foundation.framework in Frameworks */,
-				DA3D28A12356E6FE00B7B0B8 /* SwiftFormat in Frameworks */,
 				DFB2622F18830A3600D3244D /* UIKit.framework in Frameworks */,
 				DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */,
 				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
@@ -1044,7 +1042,6 @@
 				DA2D4645233D5EF9003DDDEF /* SideMenu */,
 				DA4D4E0C23409A4600B37E37 /* DynamicButton */,
 				DAD8AC68234E588C00499060 /* FlexColorPicker */,
-				DA3D28A02356E6FE00B7B0B8 /* SwiftFormat */,
 			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
@@ -1120,7 +1117,6 @@
 				DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */,
 				DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */,
 				DAD8AC67234E588C00499060 /* XCRemoteSwiftPackageReference "FlexColorPicker" */,
-				DA3D289F2356E6FE00B7B0B8 /* XCRemoteSwiftPackageReference "SwiftFormat" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -2113,7 +2109,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1571438550;
+				CURRENT_PROJECT_VERSION = 1571606105;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -2158,7 +2154,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1571438550;
+				CURRENT_PROJECT_VERSION = 1571606105;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -2293,14 +2289,6 @@
 				minimumVersion = 6.4.2;
 			};
 		};
-		DA3D289F2356E6FE00B7B0B8 /* XCRemoteSwiftPackageReference "SwiftFormat" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/nicklockwood/SwiftFormat";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.40.13;
-			};
-		};
 		DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/yannickl/DynamicButton";
@@ -2339,11 +2327,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DA2D4644233D5EF9003DDDEF /* XCRemoteSwiftPackageReference "SideMenu" */;
 			productName = SideMenu;
-		};
-		DA3D28A02356E6FE00B7B0B8 /* SwiftFormat */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DA3D289F2356E6FE00B7B0B8 /* XCRemoteSwiftPackageReference "SwiftFormat" */;
-			productName = SwiftFormat;
 		};
 		DA4D4E0C23409A4600B37E37 /* DynamicButton */ = {
 			isa = XCSwiftPackageProductDependency;

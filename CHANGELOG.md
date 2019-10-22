@@ -4,6 +4,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.2.47, Build 1571606105] - 2019-10-20
+
+### Fixed
+- Fixed chart legend #481: The legend parameter wasn't work anymore, legend was still displayed if set to false
+
+### Changed
+- Addressing dynamic mapping for z wave devices: aligning behavior to agreed one of for basic ui and android : https://github.com/openhab/openhab-core/issues/952, https://github.com/openhab/openhab-core/issues/1040
+- New icons aligned
+- Revert swiftformat to cocoapods
+
 ## [Version 2.2.41, Build 1571438550] - 2019-10-19
 
 ### Fixed

@@ -83,7 +83,7 @@ struct Preferences {
         return Preferences.localUrl
     }
 
-    fileprivate static func validateUrl(_ stringURL: String) -> Bool {
+    private static func validateUrl(_ stringURL: String) -> Bool {
         // return nil if the URL has not a valid format
         let url: URL? = URL(string: stringURL)
         return url != nil

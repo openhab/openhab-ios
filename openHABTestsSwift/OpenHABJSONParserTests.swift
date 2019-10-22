@@ -542,5 +542,4 @@ class OpenHABJSONParserTests: XCTestCase {
             XCTFail("Whoops, an error occured: \(error)")
         }
     }
-
 }
