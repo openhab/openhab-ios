@@ -1048,13 +1048,13 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
 
         if cell is FrameUITableViewCell {
             if #available(iOS 13.0, *) {
-                cell.backgroundColor = .secondarySystemGroupedBackground
+                cell.backgroundColor = .systemGroupedBackground
             } else {
                 cell.backgroundColor = .groupTableViewBackground
             }
         } else {
             if #available(iOS 13.0, *) {
-                cell.backgroundColor = .systemBackground
+                cell.backgroundColor = .secondarySystemGroupedBackground
             } else {
                 cell.backgroundColor = .white
             }
