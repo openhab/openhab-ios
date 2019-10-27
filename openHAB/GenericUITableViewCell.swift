@@ -36,7 +36,7 @@ class GenericUITableViewCell: UITableViewCell {
             }
 
             if _widget.labelcolor != "" {
-                if let color = color(fromHexString: self.widget?.labelcolor) {
+                if let color = UIColor(name: self.widget?.labelcolor ?? "") {
                     customTextLabel?.textColor = color
                 }
             } else {
