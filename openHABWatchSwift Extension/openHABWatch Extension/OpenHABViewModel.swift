@@ -1,24 +1,26 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABViewModel.swift
-//  openHABWatchSwift Extension
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 19.10.19.
-//  Copyright © 2019 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import Combine
 import Foundation
 
-final class OpenHABViewModel: ObservableObject {
-    @Published var items = [Item]()
-    var query = "" {
-        didSet {
-            if oldValue.isEmpty {
-                self.items = []
-            } else {
-                self.search()
-            }
-        }
-    }
-
-}
+// final class OpenHABViewModel: ObservableObject {
+//    @Published var items = [Item]()
+//    var query = "" {
+//        didSet {
+//            if oldValue.isEmpty {
+//                items = []
+//            } else {
+////                self.search()
+//            }
+//        }
+//    }
+// }

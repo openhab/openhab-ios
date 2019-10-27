@@ -10,8 +10,9 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import SwiftUI
 
-struct Item: Identifiable {
+class Item: Identifiable {
     private static var idSequence = sequence(first: 1) { $0 + 1 }
 
     var id: Int
@@ -20,6 +21,7 @@ struct Item: Identifiable {
     let label: String
     var state: Bool
     let link: String
+    @Published private(set) var image = UIImage(named: "placeholder")
 
     init?(name: String, label: String, state: Bool, link: String) {
         self.name = name
@@ -29,10 +31,21 @@ struct Item: Identifiable {
         guard let id = Item.idSequence.next() else { return nil }
         self.id = id
     }
+
+    func lazyLoadImage(url: URL) {
+        URLSession.shared.dataTask(with: url) { (data, _, _) -> Void in
+            DispatchQueue.main.async {
+                if let data = data, let img = UIImage(data: data) {
+                    self.image = img
+                }
+            }
+        }
+        .resume()
+    }
 }
 
 extension Item {
-    init? (with codingData: OpenHABItem.CodingData?) {
+    convenience init? (with codingData: OpenHABItem.CodingData?) {
         guard let codingData = codingData else { return nil }
         self.init(name: codingData.name, label: codingData.label ?? "", state: codingData.state == "true" ? true : false, link: codingData.link)
     }
