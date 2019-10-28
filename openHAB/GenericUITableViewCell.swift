@@ -47,7 +47,7 @@ class GenericUITableViewCell: UITableViewCell {
                 }
             }
             if _widget.valuecolor != "" {
-                if let color = color(fromHexString: self.widget?.valuecolor) {
+                if let color = UIColor(name: self.widget?.valuecolor ?? "") {
                     customDetailTextLabel?.textColor = color
                 }
             } else {
