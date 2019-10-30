@@ -12,16 +12,16 @@
 import Foundation
 import SwiftUI
 
-class Item: Identifiable {
+class Item: Identifiable, ObservableObject {
     private static var idSequence = sequence(first: 1) { $0 + 1 }
 
     var id: Int
 
     let name: String
     let label: String
-    var state: Bool
+    @Published var state: Bool
     let link: String
-    @Published private(set) var image = UIImage(named: "placeholder")
+    private(set) var image = UIImage(named: "placeholder")
 
     init?(name: String, label: String, state: Bool, link: String) {
         self.name = name

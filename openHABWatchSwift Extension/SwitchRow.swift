@@ -13,18 +13,12 @@ import os.log
 import SwiftUI
 
 struct SwitchRow: View {
-    @EnvironmentObject var userData: UserData
-    var item: Item
-
-    var itemIndex: Int {
-        userData.sitemap.firstIndex { $0.id == item.id }!
-    }
+    @ObservedObject var item: Item
 
     var body: some View {
-        Toggle(isOn: $userData.sitemap[itemIndex].state) {
+        Toggle(isOn: $item.state) {
             HStack {
-                 setImage()
-                Image(systemName: "photo")
+                setImage()
                 Text(item.name).font(.callout)
                 Spacer()
                 Text("llls").font(.caption)
@@ -34,15 +28,18 @@ struct SwitchRow: View {
     }
 
     func setImage() -> Image {
-        $userData.sitempap[itemIndex]. lazyLoadImage(url: URL(string: item.link)!)
-        return Image(uiImage: viewModel.image ?? UIImage())
+        item.lazyLoadImage(url: URL(string: item.link)!)
+        return Image(uiImage: item.image ?? UIImage())
     }
 }
 
 struct SwitchRow_Previews: PreviewProvider {
+    @ObservedObject static var testItem = Item(name: "Light0",
+                                               label: "Light Ground Floor",
+                                               state: true,
+                                               link: "https://192.168.2.15:8444/icon/switch?state=OFF")!
     static var previews: some View {
-        SwitchRow(item: sitemapData[0])
-            .environmentObject(UserData())
+        SwitchRow(item: testItem)
             .previewLayout(.fixed(width: 300, height: 70))
     }
 }

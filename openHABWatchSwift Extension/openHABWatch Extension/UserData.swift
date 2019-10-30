@@ -17,20 +17,20 @@ import SwiftUI
 let sitemapData: [Item] = [Item(name: "Light0",
                                 label: "Light Ground Floor",
                                 state: true,
-                                link: "llsl://101.10.101.10")!,
+                                link: "https://192.168.2.15:8444/icon/switch?state=OFF")!,
                            Item(name: "Light1",
                                 label: "Light First Floor",
                                 state: false,
-                                link: "llsl://101.10.101.11")!,
+                                link: "https://192.168.2.15:8444/icon/switch?state=OFF")!,
                            Item(name: "Light2",
                                 label: "Light Second Floor",
                                 state: false,
-                                link: "llsl://101.10.101.12")!,
+                                link: "https://192.168.2.15:8444/icon/switch?state=OFF")!,
                            Item(name: "Light3",
                                 label: "Light Third Floor",
                                 state: false,
-                                link: "llsl://101.10.101.13")!]
+                                link: "https://192.168.2.15:8444/icon/switch?state=OFF")!]
 
 final class UserData: ObservableObject {
-    @Published var sitemap = sitemapData
+    @Published var items: [Item] = sitemapData
 }

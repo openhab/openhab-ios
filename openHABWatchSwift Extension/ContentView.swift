@@ -12,11 +12,11 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var viewModel: UserData
+    @ObservedObject var viewModel: UserData
 
     var body: some View {
-        VStack(alignment: .leading) {
-            ForEach(viewModel.sitemap) { item in
+        return VStack(alignment: .leading) {
+            ForEach(viewModel.items) { item in
                 SwitchRow(item: item)
             }
         }
@@ -28,12 +28,10 @@ struct ContentView_Previews: PreviewProvider {
         let userData = UserData()
 
         return Group {
-            ContentView()
-                .environmentObject(userData)
+            ContentView(viewModel: userData)
                 .previewDevice("Apple Watch Series 4 - 44mm")
 
-            ContentView()
-                .environmentObject(userData)
+            ContentView(viewModel: userData)
                 .previewDevice("Apple Watch Series 2 - 38mm")
         }
     }
