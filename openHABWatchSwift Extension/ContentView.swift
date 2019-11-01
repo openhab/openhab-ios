@@ -25,13 +25,11 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        let userData = UserData()
-
         return Group {
-            ContentView(viewModel: userData)
+            ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 4 - 44mm")
 
-            ContentView(viewModel: userData)
+            ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 2 - 38mm")
         }
     }

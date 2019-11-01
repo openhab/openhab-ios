@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import os.log
 import SwiftUI
 
 class Item: Identifiable, ObservableObject {
@@ -21,7 +22,8 @@ class Item: Identifiable, ObservableObject {
     let label: String
     @Published var state: Bool
     let link: String
-    private(set) var image = UIImage(named: "placeholder")
+    @Published var dataIsValid = false
+    var data: Data?
 
     init?(name: String, label: String, state: Bool, link: String) {
         self.name = name
@@ -30,17 +32,26 @@ class Item: Identifiable, ObservableObject {
         self.link = link
         guard let id = Item.idSequence.next() else { return nil }
         self.id = id
+        loadData(url: URL(string: self.link)!)
     }
 
-    func lazyLoadImage(url: URL) {
-        URLSession.shared.dataTask(with: url) { (data, _, _) -> Void in
+    func loadData(url: URL) {
+        let task = URLSession.shared.dataTask(with: url) { data, _, error in
             DispatchQueue.main.async {
-                if let data = data, let img = UIImage(data: data) {
-                    self.image = img
-                }
+                os_log("Failed to get icon: %{PUBLIC}@", log: .remoteAccess, type: .error, error?.localizedDescription ?? "")
+            }
+            guard let data = data else { return }
+            DispatchQueue.main.async {
+                self.dataIsValid = true
+                self.data = data
             }
         }
-        .resume()
+
+        task.resume()
+    }
+
+    func imageFromData() -> UIImage {
+        UIImage(data: data!) ?? UIImage()
     }
 }
 

@@ -18,28 +18,23 @@ struct SwitchRow: View {
     var body: some View {
         Toggle(isOn: $item.state) {
             HStack {
-                setImage()
-                Text(item.name).font(.callout)
+                Image(uiImage: (item.dataIsValid ? item.imageFromData() : UIImage(systemName: "photo"))!)
+                    .resizable()
+                    .frame(width: 25.0, height: 25.0)
+                Text(item.name)
+                    .font(.callout)
                 Spacer()
-                Text("llls").font(.caption)
+                Text("llls")
+                    .font(.caption)
             }
         }.padding()
             .cornerRadius(10)
     }
-
-    func setImage() -> Image {
-        item.lazyLoadImage(url: URL(string: item.link)!)
-        return Image(uiImage: item.image ?? UIImage())
-    }
 }
 
 struct SwitchRow_Previews: PreviewProvider {
-    @ObservedObject static var testItem = Item(name: "Light0",
-                                               label: "Light Ground Floor",
-                                               state: true,
-                                               link: "https://192.168.2.15:8444/icon/switch?state=OFF")!
     static var previews: some View {
-        SwitchRow(item: testItem)
+        return SwitchRow(item: sitemapData[0])
             .previewLayout(.fixed(width: 300, height: 70))
     }
 }
