@@ -58,6 +58,10 @@ let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationCh
     }
 }
 
+protocol CommItem {
+    var link: String { get set }
+}
+
 class NetworkConnection {
     static var shared: NetworkConnection!
 
@@ -85,6 +89,7 @@ class NetworkConnection {
         shared = NetworkConnection(ignoreSSL: ignoreSSL, adapter: adapter)
     }
 
+    #if !os(watchOS)
     static func register(prefsURL: String,
                          deviceToken: String,
                          deviceId: String,
@@ -114,8 +119,9 @@ class NetworkConnection {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
     }
+    #endif
 
-    static func sendCommand(item: OpenHABItem, commandToSend command: String?) -> DataRequest? {
+    static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
         if let commandUrl = URL(string: item.link) {
             var commandRequest = URLRequest(url: commandUrl)
 
@@ -142,6 +148,7 @@ class NetworkConnection {
         return nil
     }
 
+    #if !os(watchOS)
     static func page(pageUrl: String,
                      longPolling: Bool,
                      openHABVersion: Int,
@@ -190,6 +197,7 @@ class NetworkConnection {
             .responseData(completionHandler: completionHandler)
         task.resume()
     }
+    #endif
 
     func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
         serverCertificateManager.delegate = serverDelegate

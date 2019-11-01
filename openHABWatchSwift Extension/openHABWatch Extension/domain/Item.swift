@@ -9,19 +9,32 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Alamofire
+import Combine
 import Foundation
 import os.log
 import SwiftUI
 
-class Item: Identifiable, ObservableObject {
+class Item: Identifiable, ObservableObject, CommItem {
     private static var idSequence = sequence(first: 1) { $0 + 1 }
+
+    let objectWillChange = ObservableObjectPublisher()
+    private var commandOperation: Alamofire.Request?
 
     var id: Int
 
     let name: String
     let label: String
-    @Published var state: Bool
-    let link: String
+    var link: String
+
+    var state: Bool {
+        willSet {
+            NetworkConnection.sendCommand(item: self, commandToSend: state ? "ON" : "OFF")
+
+            objectWillChange.send()
+        }
+    }
+
     @Published var dataIsValid = false
     var data: Data?
 
@@ -52,6 +65,17 @@ class Item: Identifiable, ObservableObject {
 
     func imageFromData() -> UIImage {
         UIImage(data: data!) ?? UIImage()
+    }
+
+    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
+        if commandOperation != nil {
+            commandOperation?.cancel()
+            commandOperation = nil
+        }
+        if let item = item, let command = command {
+            commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
+            commandOperation?.resume()
+        }
     }
 }
 

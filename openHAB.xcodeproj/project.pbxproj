@@ -79,6 +79,16 @@
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA4D4E0D23409A4600B37E37 /* DynamicButton in Frameworks */ = {isa = PBXBuildFile; productRef = DA4D4E0C23409A4600B37E37 /* DynamicButton */; };
 		DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
+		DA72E151236CD2E300B8EF3A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA72E150236CD2E300B8EF3A /* Alamofire */; };
+		DA72E152236CD34B00B8EF3A /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
+		DA72E153236CD38E00B8EF3A /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
+		DA72E154236CD3A400B8EF3A /* UserDefaultsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07759B234679470086C685 /* UserDefaultsRepository.swift */; };
+		DA72E155236CD3B200B8EF3A /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
+		DA72E156236CD3C700B8EF3A /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
+		DA72E157236CD40600B8EF3A /* ServerCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */; };
+		DA72E159236CD49B00B8EF3A /* ChartStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E158236CD49B00B8EF3A /* ChartStyle.swift */; };
+		DA72E15A236CD4A800B8EF3A /* ChartStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E158236CD49B00B8EF3A /* ChartStyle.swift */; };
+		DA72E15C236CD65D00B8EF3A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA72E15B236CD65D00B8EF3A /* Alamofire */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
 		DA7E1E4A22302287002AEFD8 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
@@ -91,7 +101,6 @@
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
-		DAA42BAE21DC987C00244B2A /* (null) in Sources */ = {isa = PBXBuildFile; };
 		DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */; };
 		DAB128EB2350B87A0081E80B /* OpenHABOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EA2350B87A0081E80B /* OpenHABOptions.swift */; };
 		DAB128ED2350BA630081E80B /* OpenHABStateDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EC2350BA630081E80B /* OpenHABStateDescription.swift */; };
@@ -343,6 +352,7 @@
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA5D0F80223E9991007ADDBD /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
+		DA72E158236CD49B00B8EF3A /* ChartStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartStyle.swift; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
@@ -421,6 +431,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA72E15C236CD65D00B8EF3A /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,6 +447,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA72E151236CD2E300B8EF3A /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -894,6 +906,7 @@
 				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */,
 				286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */,
+				DA72E158236CD49B00B8EF3A /* ChartStyle.swift */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -969,6 +982,9 @@
 				DA0775242346705F0086C685 /* PBXTargetDependency */,
 			);
 			name = openHABWatchSwift;
+			packageProductDependencies = (
+				DA72E15B236CD65D00B8EF3A /* Alamofire */,
+			);
 			productName = openHABWatchSwift2;
 			productReference = DA0775152346705D0086C685 /* openHABWatchSwift.app */;
 			productType = "com.apple.product-type.application.watchapp2";
@@ -986,6 +1002,9 @@
 			dependencies = (
 			);
 			name = "openHABWatchSwift Extension";
+			packageProductDependencies = (
+				DA72E150236CD2E300B8EF3A /* Alamofire */,
+			);
 			productName = "openHABWatchSwift2 Extension";
 			productReference = DA0775212346705F0086C685 /* openHABWatchSwift Extension.appex */;
 			productType = "com.apple.product-type.watchkit2-extension";
@@ -1360,15 +1379,22 @@
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
 				DA07764623467B890086C685 /* OpenHABWidgetMapping.swift in Sources */,
 				DA07764523467B5A0086C685 /* OpenHABLinkedPage.swift in Sources */,
+				DA72E152236CD34B00B8EF3A /* NetworkConnection.swift in Sources */,
+				DA72E157236CD40600B8EF3A /* ServerCertificateManager.swift in Sources */,
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,
 				DAB599EC236C995B005DDF0B /* OSLogHelper.swift in Sources */,
 				DA077599234673000086C685 /* StringExtension.swift in Sources */,
 				DA077597234670CD0086C685 /* Item.swift in Sources */,
+				DA72E153236CD38E00B8EF3A /* Equatable.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
 				DA291415235BA1490024A702 /* OpenHABStateDescription.swift in Sources */,
+				DA72E15A236CD4A800B8EF3A /* ChartStyle.swift in Sources */,
 				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
 				DA0775312346705F0086C685 /* ComplicationController.swift in Sources */,
+				DA72E154236CD3A400B8EF3A /* UserDefaultsRepository.swift in Sources */,
+				DA72E155236CD3B200B8EF3A /* ClientCertificateManager.swift in Sources */,
 				DA07759E23467A450086C685 /* Frame.swift in Sources */,
+				DA72E156236CD3C700B8EF3A /* Endpoint.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1412,6 +1438,7 @@
 				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
 				DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */,
 				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */,
+				DA72E159236CD49B00B8EF3A /* ChartStyle.swift in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
 				DFDF45341934699B00A6E581 /* OpenHABInfoViewController.swift in Sources */,
 				DA28C3602251F07000AB409C /* OSLogHelper.swift in Sources */,
@@ -1448,7 +1475,6 @@
 				DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
-				DAA42BAE21DC987C00244B2A /* (null) in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				A0F48313230C80880033E6E7 /* ServerCertificateManager.swift in Sources */,
 				A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */,
@@ -2326,6 +2352,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DA4D4E0B23409A4600B37E37 /* XCRemoteSwiftPackageReference "DynamicButton" */;
 			productName = DynamicButton;
+		};
+		DA72E150236CD2E300B8EF3A /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		DA72E15B236CD65D00B8EF3A /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2D457A233BF844003DDDEF /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 		DAD8AC68234E588C00499060 /* FlexColorPicker */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -19,11 +19,6 @@ enum ImageType {
     case empty
 }
 
-enum ChartStyle {
-    case dark
-    case light
-}
-
 class NewImageUITableViewCell: GenericUITableViewCell {
     var didLoad: (() -> Void)?
 

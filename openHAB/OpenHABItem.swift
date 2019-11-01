@@ -16,7 +16,7 @@ import Fuzi
 import os.log
 import UIKit
 
-final class OpenHABItem: NSObject {
+final class OpenHABItem: NSObject, CommItem {
     var type = ""
     var groupType = ""
     var name = ""
