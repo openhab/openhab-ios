@@ -11,12 +11,7 @@
 
 import Foundation
 
-class OpenHABDataObject: NSObject {
-    var openHABRootUrl = ""
-    var openHABUsername = ""
-    var openHABPassword = ""
-    #if !os(watchOS)
-    var rootViewController: OpenHABViewController?
-    #endif
-    var openHABVersion: Int = 0
+// Class that contains general constants used in different classes
+class AppConstants {
+    internal static let APP_GROUP_ID = "group.org.openhab.openhabwatch"
 }

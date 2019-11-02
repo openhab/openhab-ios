@@ -100,12 +100,29 @@ class ServerCertificateManager {
         return (.cancelAuthenticationChallenge, nil)
     }
 
+    func wrapperSecTrustEvaluate(serverTrust: SecTrust) -> SecTrustResultType {
+        var result: SecTrustResultType = .invalid
+
+        if #available(iOS 12.0, *) {
+            // SecTrustEvaluate is deprecated.
+            // Wrap new API to have same calling pattern as we had prior to deprecation.
+
+            var error: CFError?
+            _ = SecTrustEvaluateWithError(serverTrust, &error)
+            SecTrustGetTrustResult(serverTrust, &result)
+            return result
+
+        } else {
+            SecTrustEvaluate(serverTrust, &result)
+            return result
+        }
+    }
+
     func evaluateServerTrust(_ serverTrust: SecTrust, forDomain domain: String) -> Bool {
         // Evaluates trust received during SSL negotiation and checks it against known ones,
         // against policy setting to ignore certificate errors and so on.
-        var evaluateResult: SecTrustResultType = .invalid
+        let evaluateResult = wrapperSecTrustEvaluate(serverTrust: serverTrust)
 
-        SecTrustEvaluate(serverTrust, &evaluateResult)
         if evaluateResult.isAny(of: .unspecified, .proceed) || allowInvalidCertificates {
             // This means system thinks this is a legal/usable certificate, just permit the connection
             return true

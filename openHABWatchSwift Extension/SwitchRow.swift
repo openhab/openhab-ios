@@ -20,6 +20,7 @@ struct SwitchRow: View {
             HStack {
                 Image(uiImage: (item.dataIsValid ? item.imageFromData() : UIImage(systemName: "photo"))!)
                     .resizable()
+                    .scaledToFit()
                     .frame(width: 25.0, height: 25.0)
                 Text(item.name)
                     .font(.callout)

@@ -47,8 +47,8 @@ func color(fromHexString hexString: String?) -> UIColor? {
     if cString.count != 6 {
         return UIColor.gray
     }
-    var rgbValue: UInt32 = 0
-    Scanner(string: cString).scanHexInt32(&rgbValue)
+    var rgbValue: UInt64 = 0
+    Scanner(string: cString).scanHexInt64(&rgbValue)
     return UIColor(red: CGFloat((rgbValue & 0xff0000) >> 16) / 255.0,
                    green: CGFloat((rgbValue & 0x00ff00) >> 8) / 255.0,
                    blue: CGFloat(rgbValue & 0x0000ff) / 255.0,

@@ -11,12 +11,8 @@
 
 import Foundation
 
-class OpenHABDataObject: NSObject {
-    var openHABRootUrl = ""
-    var openHABUsername = ""
-    var openHABPassword = ""
-    #if !os(watchOS)
-    var rootViewController: OpenHABViewController?
-    #endif
-    var openHABVersion: Int = 0
+class AppState {
+    static let singleton = AppState()
+
+    var active = false
 }
