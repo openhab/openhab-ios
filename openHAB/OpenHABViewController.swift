@@ -327,7 +327,8 @@ class OpenHABViewController: UIViewController {
 
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
-        performSegue(withIdentifier: "sideMenu", sender: nil)
+        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
+        present(menu, animated: true)
     }
 
     func doRegisterAps() {
@@ -373,12 +374,6 @@ class OpenHABViewController: UIViewController {
 
         switch segue.identifier {
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
-        case "sideMenu":
-            let navigation = segue.destination as? SideMenuNavigationController
-            let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
-            drawer?.openHABRootUrl = openHABRootUrl
-            drawer?.delegate = self
-            drawer?.drawerTableType = .withStandardMenuEntries
         case "showSelectSitemap":
             let dest = segue.destination as! OpenHABDrawerTableViewController
             dest.openHABRootUrl = openHABRootUrl

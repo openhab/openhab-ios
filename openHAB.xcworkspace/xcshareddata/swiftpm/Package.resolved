@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/Alamofire/Alamofire",
         "state": {
           "branch": null,
-          "revision": "ce5be6fbc6f51414c49f56fc8e2b7c99253d9f8e",
-          "version": "4.9.0"
+          "revision": "747c8db8d57b68d5e35275f10c92d55f982adbd4",
+          "version": "4.9.1"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher",
         "state": {
           "branch": null,
-          "revision": "ea84ff22e8c6da676354b162476aad0efd013d7d",
-          "version": "5.8.1"
+          "revision": "3f0200463a2c747f985fa32845e7b70b0172474c",
+          "version": "5.9.0"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/jonkykong/SideMenu",
         "state": {
           "branch": null,
-          "revision": "8dde1951c37b5ea0f696dae7d895f7d6fa53d3e1",
-          "version": "6.4.2"
+          "revision": "fb25017bc7238145c4d6405255c3aeaa7993b4c7",
+          "version": "6.4.6"
         }
       }
     ]
