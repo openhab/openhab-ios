@@ -579,7 +579,6 @@
                     <navigationItem key="navigationItem" id="N7h-KT-EtL"/>
                     <connections>
                         <outlet property="widgetTableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
-                        <segue destination="TS8-mI-318" kind="presentation" identifier="sideMenu" id="UQA-38-N3R"/>
                         <segue destination="MPp-H6-Zce" kind="show" identifier="showSelectSitemap" id="t07-wP-hEy"/>
                     </connections>
                 </viewController>
@@ -1078,7 +1077,7 @@
             <objects>
                 <navigationController storyboardIdentifier="RightMenuNavigationController" id="TS8-mI-318" customClass="SideMenuNavigationController" customModule="SideMenu" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="1Cd-5P-USA">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="56"/>
+                        <rect key="frame" x="0.0" y="44" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <userDefinedRuntimeAttributes>
@@ -1375,7 +1374,7 @@
             <objects>
                 <tableViewController id="MPp-H6-Zce" customClass="OpenHABDrawerTableViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="yaQ-kw-KPl">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <prototypes>
@@ -1433,6 +1432,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="t07-wP-hEy"/>
+        <segue reference="z72-H1-TTm"/>
     </inferredMetricsTieBreakers>
 </document>
