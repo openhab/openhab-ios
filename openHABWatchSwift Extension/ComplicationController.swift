@@ -15,7 +15,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Timeline Configuration
 
     func getSupportedTimeTravelDirections(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimeTravelDirections) -> Void) {
-        handler([.forward, .backward])
+        handler([])
     }
 
     func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
@@ -34,7 +34,10 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
 
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimelineEntry?) -> Void) {
         // Call the handler with the current timeline entry
-        handler(nil)
+        let template = getTemplate(complication: complication)
+        if template != nil {
+            handler(CLKComplicationTimelineEntry(date: Date(), complicationTemplate: template!))
+        }
     }
 
     func getTimelineEntries(for complication: CLKComplication, before date: Date, limit: Int, withHandler handler: @escaping ([CLKComplicationTimelineEntry]?) -> Void) {
@@ -51,6 +54,50 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
 
     func getLocalizableSampleTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
         // This method will be called once per supported complication, and the results will be cached
-        handler(nil)
+        handler(getTemplate(complication: complication))
+    }
+
+    func getPlaceholderTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
+        handler(getTemplate(complication: complication))
+    }
+
+    fileprivate func getTemplate(complication: CLKComplication) -> CLKComplicationTemplate? {
+        // default ist circularSmall
+        var template: CLKComplicationTemplate?
+
+        switch complication.family {
+        case .modularSmall:
+            template = CLKComplicationTemplateModularSmallRingImage()
+            (template as! CLKComplicationTemplateModularSmallRingImage).imageProvider =
+                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Modular")!)
+        case .utilitarianSmall:
+            template = CLKComplicationTemplateUtilitarianSmallRingImage()
+            (template as! CLKComplicationTemplateUtilitarianSmallRingImage).imageProvider =
+                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Utilitarian")!)
+        case .circularSmall:
+            template = CLKComplicationTemplateCircularSmallRingImage()
+            (template as! CLKComplicationTemplateCircularSmallRingImage).imageProvider =
+                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Circular")!)
+        case .graphicCorner:
+            if #available(watchOSApplicationExtension 5.0, *) {
+                let modTemplate = CLKComplicationTemplateGraphicCornerTextImage()
+                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular")!)
+                modTemplate.textProvider = CLKSimpleTextProvider(text: "openHAB")
+                template = modTemplate
+            } else {
+                abort()
+            }
+        case .graphicCircular:
+            if #available(watchOSApplicationExtension 5.0, *) {
+                let modTemplate = CLKComplicationTemplateGraphicCircularImage()
+                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular")!)
+                template = modTemplate
+            } else {
+                abort()
+            }
+        default: break
+        }
+
+        return template
     }
 }
