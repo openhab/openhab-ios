@@ -87,6 +87,16 @@ extension OpenHABSitemap {
             case link
             case icon
         }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            name = try container.decode(forKey: .name)
+            label = try container.decode(forKey: .label, default: name)
+            page = try container.decode(forKey: .page)
+            link = try container.decode(forKey: .link)
+            icon = try container.decodeIfPresent(forKey: .icon)
+        }
     }
 
     enum PageType: Decodable {
