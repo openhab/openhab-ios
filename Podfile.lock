@@ -1,15 +1,17 @@
 PODS:
+  - Alamofire (4.9.1)
   - CocoaLumberjack (3.6.0):
     - CocoaLumberjack/Core (= 3.6.0)
   - CocoaLumberjack/Core (3.6.0)
-  - Crashlytics (3.9.3):
-    - Fabric (~> 1.7.2)
-  - Fabric (1.7.13)
-  - Firebase/Core (6.10.0):
+  - Crashlytics (3.14.0):
+    - Fabric (~> 1.10.2)
+  - DynamicButton (6.2.1)
+  - Fabric (1.10.2)
+  - Firebase/Core (6.11.0):
     - Firebase/CoreOnly
     - FirebaseAnalytics (= 6.1.3)
-  - Firebase/CoreOnly (6.10.0):
-    - FirebaseCore (= 6.3.1)
+  - Firebase/CoreOnly (6.11.0):
+    - FirebaseCore (= 6.3.2)
   - FirebaseAnalytics (6.1.3):
     - FirebaseCore (~> 6.3)
     - FirebaseInstanceID (~> 4.2)
@@ -19,7 +21,7 @@ PODS:
     - GoogleUtilities/Network (~> 6.0)
     - "GoogleUtilities/NSData+zlib (~> 6.0)"
     - nanopb (~> 0.3.901)
-  - FirebaseCore (6.3.1):
+  - FirebaseCore (6.3.2):
     - FirebaseCoreDiagnostics (~> 1.0)
     - FirebaseCoreDiagnosticsInterop (~> 1.0)
     - GoogleUtilities/Environment (~> 6.2)
@@ -31,10 +33,11 @@ PODS:
     - GoogleUtilities/Logger (~> 6.2)
     - nanopb (~> 0.3.901)
   - FirebaseCoreDiagnosticsInterop (1.0.0)
-  - FirebaseInstanceID (4.2.5):
+  - FirebaseInstanceID (4.2.6):
     - FirebaseCore (~> 6.0)
     - GoogleUtilities/Environment (~> 6.0)
     - GoogleUtilities/UserDefaults (~> 6.0)
+  - FlexColorPicker (1.3.1)
   - Fuzi (3.1.1)
   - GoogleAppMeasurement (6.1.3):
     - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
@@ -64,24 +67,33 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (6.3.1):
     - GoogleUtilities/Logger
-  - nanopb (0.3.901):
-    - nanopb/decode (= 0.3.901)
-    - nanopb/encode (= 0.3.901)
-  - nanopb/decode (0.3.901)
-  - nanopb/encode (0.3.901)
+  - Kingfisher (5.9.0):
+    - Kingfisher/Core (= 5.9.0)
+  - Kingfisher/Core (5.9.0)
+  - nanopb (0.3.9011):
+    - nanopb/decode (= 0.3.9011)
+    - nanopb/encode (= 0.3.9011)
+  - nanopb/decode (0.3.9011)
+  - nanopb/encode (0.3.9011)
+  - SideMenu (6.4.6)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
-  - SwiftFormat/CLI (0.40.13)
-  - SwiftLint (0.35.0)
+  - SwiftFormat/CLI (0.40.14)
+  - SwiftLint (0.36.0)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
   - SwiftMessages/App (7.0.1)
 
 DEPENDENCIES:
-  - Crashlytics (~> 3.9.3)
-  - Fabric (~> 1.7.2)
+  - Alamofire (~> 4.0)
+  - Crashlytics (~> 3.9)
+  - DynamicButton (~> 6.2)
+  - Fabric (~> 1.7)
   - Firebase/Core
+  - FlexColorPicker (from `https://github.com/RastislavMirek/FlexColorPicker.git`, tag `1.3.1`)
   - Fuzi (~> 3.1)
+  - Kingfisher (~> 5.0)
+  - SideMenu (~> 6.4)
   - SVGKit
   - SwiftFormat/CLI
   - SwiftLint
@@ -89,8 +101,10 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Alamofire
     - CocoaLumberjack
     - Crashlytics
+    - DynamicButton
     - Fabric
     - Firebase
     - FirebaseAnalytics
@@ -103,33 +117,50 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleDataTransportCCTSupport
     - GoogleUtilities
+    - Kingfisher
     - nanopb
+    - SideMenu
     - SVGKit
     - SwiftFormat
     - SwiftLint
     - SwiftMessages
 
+EXTERNAL SOURCES:
+  FlexColorPicker:
+    :git: https://github.com/RastislavMirek/FlexColorPicker.git
+    :tag: 1.3.1
+
+CHECKOUT OPTIONS:
+  FlexColorPicker:
+    :git: https://github.com/RastislavMirek/FlexColorPicker.git
+    :tag: 1.3.1
+
 SPEC CHECKSUMS:
+  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
-  Crashlytics: dbb07d01876c171c5ccbdf7826410380189e452c
-  Fabric: 25d0963b691fc97be566392243ff0ecef5a68338
-  Firebase: 5e6b7b12bf9adb90986688edc06b156c37e109cd
+  Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
+  DynamicButton: 95f30460793bd3510a5c213ac1b810a5e3d54b6a
+  Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
+  Firebase: bc9cfc7a96c73268656d5aaab453ff1b4b530e0e
   FirebaseAnalytics: 0e3ecff2c5d86070f7d4325e21f1edabfbd558dc
-  FirebaseCore: 064c2dd92a8ca5974bbdcb080df9921e46bd34cd
+  FirebaseCore: beeff42c07c30ea94702471d99db2089b594fbbd
   FirebaseCoreDiagnostics: af29e43048607588c050889d19204f4d7b758c9f
   FirebaseCoreDiagnosticsInterop: 6829da2b8d1fc795ff1bd99df751d3788035d2cb
-  FirebaseInstanceID: 550df9be1f99f751d8fcde3ac342a1e21a0e6c42
+  FirebaseInstanceID: d0eafcd8bdbd3447cd694594734078c3e3e77d8b
+  FlexColorPicker: e627af3d744786378ae65e53214528cc31105921
   Fuzi: bcc5694488dd6e672e126cbf3c5471d7a79506d1
   GoogleAppMeasurement: 434cc7be25e71dc04b8d0e3079125127b330e84a
   GoogleDataTransport: 166f9b9f82cbf60a204e8fe2daa9db3e3ec1fb15
   GoogleDataTransportCCTSupport: f6ab1962e9dc05ab1fb938b795e5b310209edeec
   GoogleUtilities: f895fde57977df4e0233edda0dbeac490e3703b6
-  nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
+  Kingfisher: ff98240aebb7302bdc4f1ecd701761030ce18b16
+  nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
+  SideMenu: 43910eb6dc994dd59771f8e82573d04a9e776361
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftFormat: d548b3585a6dbe64390177b386e95375b8c300b6
-  SwiftLint: 5553187048b900c91aa03552807681bb6b027846
+  SwiftFormat: 21c9c3c748d5fcece493d8610eee23df15393458
+  SwiftLint: fc9859e4e1752340664851f667bb1898b9c90114
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: bdc504c14c0aa72c07c10268dd5e756a462049d1
+PODFILE CHECKSUM: 64e0916e174beb823206322d8d0d7158f50e9c0c
 
 COCOAPODS: 1.8.4
