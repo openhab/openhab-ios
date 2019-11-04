@@ -69,19 +69,19 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         case .modularSmall:
             template = CLKComplicationTemplateModularSmallRingImage()
             (template as! CLKComplicationTemplateModularSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Modular")!)
+                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Modular") ?? UIImage())
         case .utilitarianSmall:
             template = CLKComplicationTemplateUtilitarianSmallRingImage()
             (template as! CLKComplicationTemplateUtilitarianSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Utilitarian")!)
+                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Utilitarian") ?? UIImage())
         case .circularSmall:
             template = CLKComplicationTemplateCircularSmallRingImage()
             (template as! CLKComplicationTemplateCircularSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Circular")!)
+                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Circular") ?? UIImage())
         case .graphicCorner:
             if #available(watchOSApplicationExtension 5.0, *) {
                 let modTemplate = CLKComplicationTemplateGraphicCornerTextImage()
-                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular")!)
+                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular") ?? UIImage())
                 modTemplate.textProvider = CLKSimpleTextProvider(text: "openHAB")
                 template = modTemplate
             } else {
@@ -90,7 +90,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         case .graphicCircular:
             if #available(watchOSApplicationExtension 5.0, *) {
                 let modTemplate = CLKComplicationTemplateGraphicCircularImage()
-                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular")!)
+                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular") ?? UIImage())
                 template = modTemplate
             } else {
                 abort()

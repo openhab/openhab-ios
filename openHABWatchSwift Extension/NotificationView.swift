@@ -12,15 +12,34 @@
 import SwiftUI
 
 struct NotificationView: View {
+    let customTextLabel: String?
+    let customDetailTextLabel: String?
+
+    init(customTextLabel: String? = nil, customDetailTextLabel: String? = nil) {
+        self.customTextLabel = customTextLabel
+        self.customDetailTextLabel = customDetailTextLabel
+    }
+
     var body: some View {
-        Text("Hello World")
+        VStack {
+            Text(customTextLabel ?? "Unknown Message Text")
+                .font(.headline)
+                .lineLimit(0)
+
+            Text(customDetailTextLabel ?? "Unknown Message Text")
+                .font(.caption)
+                .lineLimit(0)
+        }
     }
 }
 
-#if DEBUG
 struct NotificationView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationView()
+        Group {
+            NotificationView()
+
+            NotificationView(customTextLabel: "Light 1", customDetailTextLabel: "Off")
+        }
+        .previewLayout(.sizeThatFits)
     }
 }
-#endif
