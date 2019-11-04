@@ -38,7 +38,7 @@ struct NotificationView_Previews: PreviewProvider {
         Group {
             NotificationView()
 
-            NotificationView(customTextLabel: "Light 1", customDetailTextLabel: "Off")
+            NotificationView(customTextLabel: "Light 2", customDetailTextLabel: "Off")
         }
         .previewLayout(.sizeThatFits)
     }

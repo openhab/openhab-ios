@@ -69,6 +69,7 @@
 		DA4D4E0D23409A4600B37E37 /* DynamicButton in Frameworks */ = {isa = PBXBuildFile; productRef = DA4D4E0C23409A4600B37E37 /* DynamicButton */; };
 		DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
+		DA6587222370C9D8007E2E7F /* PreferencesHostViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostViewController.swift */; };
 		DA72E151236CD2E300B8EF3A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DA72E150236CD2E300B8EF3A /* Alamofire */; };
 		DA72E152236CD34B00B8EF3A /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA72E153236CD38E00B8EF3A /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
@@ -316,6 +317,7 @@
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA5D0F80223E9991007ADDBD /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
 		DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
+		DA6587212370C9D8007E2E7F /* PreferencesHostViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesHostViewController.swift; sourceTree = "<group>"; };
 		DA72E158236CD49B00B8EF3A /* ChartStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartStyle.swift; sourceTree = "<group>"; };
 		DA72E1B0236DE9F200B8EF3A /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
@@ -532,6 +534,7 @@
 				1224F7C9228A8ED100750965 /* external */,
 				DA658720236F841F007E2E7F /* Views */,
 				DA0775282346705F0086C685 /* HostingController.swift */,
+				DA6587212370C9D8007E2E7F /* PreferencesHostViewController.swift */,
 				DA07752A2346705F0086C685 /* ExtensionDelegate.swift */,
 				DA07752C2346705F0086C685 /* NotificationController.swift */,
 				DA07752E2346705F0086C685 /* NotificationView.swift */,
@@ -1253,6 +1256,7 @@
 				DA72E153236CD38E00B8EF3A /* Equatable.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
 				DA291415235BA1490024A702 /* OpenHABStateDescription.swift in Sources */,
+				DA6587222370C9D8007E2E7F /* PreferencesHostViewController.swift in Sources */,
 				DA72E1B9236DEA0900B8EF3A /* OpenHabService.swift in Sources */,
 				DA72E15A236CD4A800B8EF3A /* ChartStyle.swift in Sources */,
 				DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */,

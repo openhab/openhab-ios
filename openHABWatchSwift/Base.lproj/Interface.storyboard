@@ -9,9 +9,20 @@
         <!--Hosting Controller-->
         <scene sceneID="RUd-og-cv4">
             <objects>
-                <hostingController id="NBu-mt-KyX" customClass="HostingController" customModule="openHABWatchSwift" customModuleProvider="target"/>
+                <hostingController id="NBu-mt-KyX" customClass="HostingController" customModule="openHABWatchSwift" customModuleProvider="target">
+                    <connections>
+                        <segue destination="PiX-Cb-fwf" kind="relationship" relationship="nextPage" id="vdR-4M-bYa"/>
+                    </connections>
+                </hostingController>
             </objects>
             <point key="canvasLocation" x="187" y="141"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="wnv-iI-6rY">
+            <objects>
+                <hostingController id="PiX-Cb-fwf"/>
+            </objects>
+            <point key="canvasLocation" x="488" y="141"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">

@@ -9,12 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Foundation
 import SwiftUI
 import WatchKit
 
-class HostingController: WKHostingController<ContentView> {
-    override var body: ContentView {
-        return ContentView(viewModel: UserData())
+class PreferencesHostViewController: WKHostingController<PreferencesSwiftUIView> {
+    override var body: PreferencesSwiftUIView {
+        return PreferencesSwiftUIView()
     }
 }
