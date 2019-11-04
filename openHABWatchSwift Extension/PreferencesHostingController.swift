@@ -12,7 +12,7 @@
 import SwiftUI
 import WatchKit
 
-class PreferencesHostViewController: WKHostingController<PreferencesSwiftUIView> {
+class PreferencesHostingController: WKHostingController<PreferencesSwiftUIView> {
     override var body: PreferencesSwiftUIView {
         return PreferencesSwiftUIView()
     }

@@ -17,10 +17,10 @@
             </objects>
             <point key="canvasLocation" x="187" y="141"/>
         </scene>
-        <!--Hosting Controller-->
+        <!--Preferences Hosting Controller-->
         <scene sceneID="wnv-iI-6rY">
             <objects>
-                <hostingController id="PiX-Cb-fwf"/>
+                <hostingController id="PiX-Cb-fwf" customClass="PreferencesHostingController" customModule="openHABWatchSwift" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="488" y="141"/>
         </scene>
