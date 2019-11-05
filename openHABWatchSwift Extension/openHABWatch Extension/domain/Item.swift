@@ -27,12 +27,13 @@ class Item: Identifiable, ObservableObject, CommItem {
     let label: String
     var link: String
 
-    var state: Bool {
-        willSet {
-            NetworkConnection.sendCommand(item: self, commandToSend: state ? "ON" : "OFF")
+    @Published var state: Bool
 
-            objectWillChange.send()
-        }
+    private var statePublisher: AnyPublisher<Bool, Never> {
+        $state
+            .debounce(for: 0.8, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 
     @Published var dataIsValid = false
@@ -46,6 +47,16 @@ class Item: Identifiable, ObservableObject, CommItem {
         guard let id = Item.idSequence.next() else { return nil }
         self.id = id
         loadData(url: URL(string: self.link)!)
+
+        _ = statePublisher
+            .receive(on: RunLoop.main)
+            .map { value -> String in
+                value ? "ON" : "OFF"
+            }
+            .sink { receivedValue in
+                // sink is the subscriber and terminates the pipeline
+                print("\(name) \(receivedValue)")
+            }
     }
 
     func loadData(url: URL) {
