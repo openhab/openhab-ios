@@ -61,8 +61,10 @@ class Item: Identifiable, ObservableObject, CommItem {
 
     func loadData(url: URL) {
         let task = URLSession.shared.dataTask(with: url) { data, _, error in
-            DispatchQueue.main.async {
-                os_log("Failed to get icon: %{PUBLIC}@", log: .remoteAccess, type: .error, error?.localizedDescription ?? "")
+            if let error = error {
+                DispatchQueue.main.async {
+                    os_log("Failed to get icon: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+                }
             }
             guard let data = data else { return }
             DispatchQueue.main.async {

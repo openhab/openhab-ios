@@ -15,7 +15,7 @@ struct ContentView: View {
     @ObservedObject var viewModel: UserData
 
     var body: some View {
-        return VStack(alignment: .leading) {
+        return List {
             ForEach(viewModel.items) { item in
                 SwitchRow(item: item)
             }

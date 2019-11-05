@@ -6,10 +6,10 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="15501"/>
     </dependencies>
     <scenes>
-        <!--Hosting Controller-->
+        <!--openHAB-->
         <scene sceneID="RUd-og-cv4">
             <objects>
-                <hostingController id="NBu-mt-KyX" customClass="HostingController" customModule="openHABWatchSwift" customModuleProvider="target">
+                <hostingController id="NBu-mt-KyX" userLabel="openHAB" customClass="HostingController" customModule="openHABWatchSwift" customModuleProvider="target" colorLabel="IBBuiltInLabel-Orange">
                     <connections>
                         <segue destination="PiX-Cb-fwf" kind="relationship" relationship="nextPage" id="vdR-4M-bYa"/>
                     </connections>
@@ -17,10 +17,10 @@
             </objects>
             <point key="canvasLocation" x="187" y="141"/>
         </scene>
-        <!--Preferences Hosting Controller-->
+        <!--Preferences-->
         <scene sceneID="wnv-iI-6rY">
             <objects>
-                <hostingController id="PiX-Cb-fwf" customClass="PreferencesHostingController" customModule="openHABWatchSwift" customModuleProvider="target"/>
+                <hostingController id="PiX-Cb-fwf" userLabel="Preferences" customClass="PreferencesHostingController" customModule="openHABWatchSwift" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="488" y="141"/>
         </scene>

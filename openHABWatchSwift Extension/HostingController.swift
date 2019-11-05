@@ -15,6 +15,6 @@ import WatchKit
 
 class HostingController: WKHostingController<ContentView> {
     override var body: ContentView {
-        return ContentView(viewModel: UserData())
+        ContentView(viewModel: UserData())
     }
 }
