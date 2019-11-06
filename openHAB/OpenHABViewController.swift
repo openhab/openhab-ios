@@ -1137,6 +1137,8 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// MARK: Kingfisher authentication with NSURLCredential
+
 extension OpenHABViewController: AuthenticationChallengeResponsable {
     // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,

@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
 import os.log
 import SwiftUI
 
@@ -18,7 +19,8 @@ struct SwitchRow: View {
     var body: some View {
         Toggle(isOn: $item.state) {
             HStack {
-                Image(uiImage: (item.dataIsValid ? item.imageFromData() : UIImage(systemName: "photo"))!)
+                KFImage(URL(string: item.link))
+                    .cancelOnDisappear(true)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 25.0, height: 25.0)
@@ -28,8 +30,8 @@ struct SwitchRow: View {
                 Text("llls")
                     .font(.caption)
             }
-        }.padding()
-            .cornerRadius(10)
+        }
+        .cornerRadius(10)
     }
 }
 

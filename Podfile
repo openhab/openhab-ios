@@ -35,6 +35,7 @@ target 'openHABWatchSwift Extension' do
     platform :watchos, '6.0'
     inherit! :search_paths
     pod 'Alamofire', '~> 4.0'
+    pod 'Kingfisher/SwiftUI'
 end
 
 # Note: `pod install --clean-install` must be used if the post_install hook is changed

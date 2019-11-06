@@ -31,13 +31,10 @@ class Item: Identifiable, ObservableObject, CommItem {
 
     private var statePublisher: AnyPublisher<Bool, Never> {
         $state
-            .debounce(for: 0.8, scheduler: RunLoop.main)
+            .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-
-    @Published var dataIsValid = false
-    var data: Data?
 
     init?(name: String, label: String, state: Bool, link: String) {
         self.name = name
@@ -46,7 +43,6 @@ class Item: Identifiable, ObservableObject, CommItem {
         self.link = link
         guard let id = Item.idSequence.next() else { return nil }
         self.id = id
-        loadData(url: URL(string: self.link)!)
 
         _ = statePublisher
             .receive(on: RunLoop.main)
@@ -55,32 +51,12 @@ class Item: Identifiable, ObservableObject, CommItem {
             }
             .sink { receivedValue in
                 // sink is the subscriber and terminates the pipeline
-                print("\(name) \(receivedValue)")
+                self.sendCommand(self, commandToSend: receivedValue)
+                print("Sending to: \(name) command: \(receivedValue)")
             }
     }
 
-    func loadData(url: URL) {
-        let task = URLSession.shared.dataTask(with: url) { data, _, error in
-            if let error = error {
-                DispatchQueue.main.async {
-                    os_log("Failed to get icon: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-                }
-            }
-            guard let data = data else { return }
-            DispatchQueue.main.async {
-                self.dataIsValid = true
-                self.data = data
-            }
-        }
-
-        task.resume()
-    }
-
-    func imageFromData() -> UIImage {
-        UIImage(data: data!) ?? UIImage()
-    }
-
-    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
+    func sendCommand(_ item: Item?, commandToSend command: String?) {
         if commandOperation != nil {
             commandOperation?.cancel()
             commandOperation = nil

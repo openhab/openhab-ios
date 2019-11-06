@@ -11,9 +11,7 @@
 
 import Alamofire
 import Foundation
-#if !os(watchOS)
 import Kingfisher
-#endif
 
 class OpenHABAccessTokenAdapter: RequestAdapter {
     #if !os(watchOS)
@@ -28,7 +26,6 @@ class OpenHABAccessTokenAdapter: RequestAdapter {
     }
     #endif
 
-    #if !os(watchOS)
     func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
         var urlRequest = urlRequest
 
@@ -40,23 +37,8 @@ class OpenHABAccessTokenAdapter: RequestAdapter {
 
         return urlRequest
     }
-
-    #else
-    func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-        var urlRequest = urlRequest
-
-        guard let user = appData?.openHABUsername, let password = appData?.openHABPassword else { return urlRequest }
-
-        if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
-            urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
-        }
-
-        return urlRequest
-    }
-    #endif
 }
 
-#if !os(watchOS)
 extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
     func modified(for request: URLRequest) -> URLRequest? {
         do {
@@ -66,4 +48,3 @@ extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
         }
     }
 }
-#endif

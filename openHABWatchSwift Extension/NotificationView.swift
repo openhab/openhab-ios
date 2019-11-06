@@ -15,11 +15,6 @@ struct NotificationView: View {
     let customTextLabel: String?
     let customDetailTextLabel: String?
 
-    init(customTextLabel: String? = nil, customDetailTextLabel: String? = nil) {
-        self.customTextLabel = customTextLabel
-        self.customDetailTextLabel = customDetailTextLabel
-    }
-
     var body: some View {
         VStack {
             Text(customTextLabel ?? "Unknown Message Text")
@@ -30,6 +25,11 @@ struct NotificationView: View {
                 .font(.caption)
                 .lineLimit(0)
         }
+    }
+
+    init(customTextLabel: String? = nil, customDetailTextLabel: String? = nil) {
+        self.customTextLabel = customTextLabel
+        self.customDetailTextLabel = customDetailTextLabel
     }
 }
 
