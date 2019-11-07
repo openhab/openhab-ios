@@ -1,12 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABViewController.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 12/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
 import AVFoundation
@@ -285,6 +286,7 @@ class OpenHABViewController: UIViewController {
 
         let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
         presentationStyle.presentingEndAlpha = 1
+        presentationStyle.onTopShadowOpacity = 0.5
         var settings = SideMenuSettings()
         settings.presentationStyle = presentationStyle
         settings.statusBarEndAlpha = 0
@@ -325,7 +327,8 @@ class OpenHABViewController: UIViewController {
 
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
-        performSegue(withIdentifier: "sideMenu", sender: nil)
+        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
+        present(menu, animated: true)
     }
 
     func doRegisterAps() {
@@ -371,12 +374,6 @@ class OpenHABViewController: UIViewController {
 
         switch segue.identifier {
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
-        case "sideMenu":
-            let navigation = segue.destination as? SideMenuNavigationController
-            let drawer = navigation?.viewControllers[0] as? OpenHABDrawerTableViewController
-            drawer?.openHABRootUrl = openHABRootUrl
-            drawer?.delegate = self
-            drawer?.drawerTableType = .withStandardMenuEntries
         case "showSelectSitemap":
             let dest = segue.destination as! OpenHABDrawerTableViewController
             dest.openHABRootUrl = openHABRootUrl
@@ -762,7 +759,7 @@ extension OpenHABViewController: OpenHABSelectionTableViewControllerDelegate {
     // send command on selected selection widget mapping
     func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
         let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappings[selectedMappingIndex]
+        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
         sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
     }
 }
@@ -970,11 +967,16 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Frame":
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case "Switch":
+            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if widget?.mappings.count ?? 0 > 0 {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 // RollershutterItem changed to Rollershutter in later builds of OH2
+            } else if let type = widget?.item?.type, type == "Switch" {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             } else if let type = widget?.item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && widget?.item?.groupType == "Rollershutter") {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+            } else if widget?.item?.stateDescription?.options.count ?? 0 > 0 {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
@@ -1040,12 +1042,16 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         if cell is FrameUITableViewCell {
-            cell.backgroundColor = UIColor.groupTableViewBackground
+            if #available(iOS 13.0, *) {
+                cell.backgroundColor = .systemGroupedBackground
+            } else {
+                cell.backgroundColor = .groupTableViewBackground
+            }
         } else {
             if #available(iOS 13.0, *) {
-                cell.backgroundColor = UIColor.systemBackground
+                cell.backgroundColor = .secondarySystemGroupedBackground
             } else {
-                cell.backgroundColor = UIColor.white
+                cell.backgroundColor = .white
             }
         }
 
@@ -1096,7 +1102,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
             selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = (selectedWidget?.mappings)!
+            selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
             selectionViewController.delegate = self
             selectionViewController.selectionItem = selectedWidget?.item
             navigationController?.pushViewController(selectionViewController, animated: true)

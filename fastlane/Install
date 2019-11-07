@@ -1,0 +1,7 @@
+brew install ruby
+bundle exec fastlane add_plugin changelog --user-install
+echo 'export PATH="/usr/local/opt/ruby/bin:$PATH"' >> ~/.bash_profile
+sudo gem install -n /usr/local/bin fastlane -NV
+
+pod install
+# How to install swift packages from command line

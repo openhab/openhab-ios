@@ -1,15 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABSitemap.swift
-//  HelloRestKit
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 10/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  This class parses and holds data for a sitemap list entry
-//  REST: /sitemaps
-//
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import Foundation
 import Fuzi
@@ -84,6 +82,16 @@ extension OpenHABSitemap {
             case label
             case link
             case icon
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            name = try container.decode(forKey: .name)
+            label = try container.decode(forKey: .label, default: name)
+            page = try container.decode(forKey: .page)
+            link = try container.decode(forKey: .link)
+            icon = try container.decodeIfPresent(forKey: .icon)
         }
     }
 

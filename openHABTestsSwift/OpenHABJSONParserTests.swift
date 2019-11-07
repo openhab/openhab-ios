@@ -1,10 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  openHABTestsSwift.swift
-//  openHABTestsSwift
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 18.01.19.
-//  Copyright © 2019 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 @testable import openHAB
 import os.signpost
@@ -148,6 +151,7 @@ class OpenHABJSONParserTests: XCTestCase {
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
             XCTAssertEqual(codingData.widgetId, "0000", "Widget properly parsed")
+            XCTAssertEqual(codingData.item?.stateDescription?.readOnly, false)
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -381,6 +385,8 @@ class OpenHABJSONParserTests: XCTestCase {
             let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: jsonSitemap2)
             XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
             XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
+            XCTAssertEqual(codingData.widgets?[4].widgets[3].item?.stateDescription?.options?[0].label, "New moon", "State description properly parsed")
+
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -495,6 +501,45 @@ class OpenHABJSONParserTests: XCTestCase {
             XCTAssertEqual(widget2?.widgets[0].label, "Admin Items")
         } catch {
             XCTFail("Failed parsing")
+        }
+    }
+
+    func testItemWithDescription() {
+        let json = """
+        {
+        "widgetId": "0000",
+        "type": "Switch",
+        "label": "Licht Treppe Keller-EG [Kellertest]",
+        "icon": "switch",
+        "mappings": [],
+        "item": {"link":"http://eye:8080/rest/items/Master_Motion_Sensor",
+            "state":"OFF",
+        "stateDescription": {"readOnly":true,
+        "options":[{"value":"OFF","label":"OK"},{"value":"ON","label":"Alarm"}]},
+            "editable":false,
+            "type":"Switch",
+            "name":"Master_Motion_Sensor",
+            "label":"Master Movement",
+            "category":"motion",
+            "tags":[],
+            "groupNames":["gMotion","gMotion2","LightMotionSensors"]
+        },
+        "widgets": []
+        }
+        """
+        let data = Data(json.utf8)
+        do {
+            var widget: OpenHABWidget
+            widget = try {
+                let widgetCodingData = try data.decoded() as OpenHABWidget.CodingData
+                return widgetCodingData.openHABWidget
+            }()
+
+            XCTAssertEqual(widget.mappingsOrItemOptions[0].command, "OFF", "Checking assignment of stateDescription")
+            XCTAssertEqual(widget.mappingIndex(byCommand: "ON"), 1, "Checking finding of command")
+
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
         }
     }
 }

@@ -1,12 +1,13 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABSelectionTableViewController.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 16/04/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import os.log
 import UIKit
@@ -42,13 +43,14 @@ class OpenHABSelectionTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier, for: indexPath)
-        let mapping = mappings[indexPath.row] as? OpenHABWidgetMapping
-        cell.textLabel?.text = mapping?.label
-        if selectionItem?.state == mapping?.command {
-            os_log("This item is selected", log: .viewCycle, type: .info)
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
+        if let mapping = mappings[indexPath.row] as? OpenHABWidgetMapping {
+            cell.textLabel?.text = mapping.label
+            if selectionItem?.state == mapping.command {
+                os_log("This item is selected", log: .viewCycle, type: .info)
+                cell.accessoryType = .checkmark
+            } else {
+                cell.accessoryType = .none
+            }
         }
         return cell
     }

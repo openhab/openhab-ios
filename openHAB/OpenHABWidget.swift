@@ -1,13 +1,13 @@
-//  Converted to Swift 4 by Swiftify v4.2.20229 - https://objectivec2swift.com/
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  OpenHABWidget.swift
-//  HelloRestKit
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 08/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
 
 import Foundation
 import Fuzi
@@ -61,6 +61,14 @@ class OpenHABWidget: NSObject, MKAnnotation {
         return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
+    var mappingsOrItemOptions: [OpenHABWidgetMapping] {
+        if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
+            return itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+        } else {
+            return mappings
+        }
+    }
+
     func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
@@ -78,10 +86,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     func mappingIndex(byCommand command: String?) -> Int? {
-        for mapping in mappings where mapping.command == command {
-            return (mappings as NSArray).index(of: mapping)
-        }
-        return nil
+        return mappingsOrItemOptions.firstIndex { $0.command == command }
     }
 }
 

@@ -1,12 +1,14 @@
+// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-//  SegmentedUITableViewCell.swift
-//  openHAB
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Victor Belov on 17/01/14.
-//  Copyright (c) 2014 Victor Belov. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
-//  Converted to Swift 4 by Tim Müller-Seydlitz and Swiftify on 06/01/18
-//
+// SPDX-License-Identifier: EPL-2.0
+
 import os.log
 import UIKit
 
@@ -38,11 +40,11 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl.removeAllSegments()
         widgetSegmentControl.apportionsSegmentWidthsByContent = true
 
-        for mapping in widget?.mappings ?? [] {
-            widgetSegmentControl.insertSegment(withTitle: mapping.label, at: widget.mappings.firstIndex(of: mapping)!, animated: false)
+        for mapping in widget?.mappingsOrItemOptions ?? [] {
+            widgetSegmentControl.insertSegment(withTitle: mapping.label, at: widget.mappingsOrItemOptions.firstIndex(of: mapping) ?? 0, animated: false)
         }
 
-        widgetSegmentControl.isMomentary = widget.mappings.count == 1
+        widgetSegmentControl.isMomentary = widget.mappingsOrItemOptions.count == 1 || widget.item?.state == "NULL"
         widgetSegmentControl.selectedSegmentIndex = widgetSegmentControl.isMomentary ? -1 : Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1)
         widgetSegmentControl.addTarget(self, action: #selector(SegmentedUITableViewCell.pickOne(_:)), for: .valueChanged)
     }
