@@ -39,8 +39,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         downButton.addTarget(self, action: #selector(SetpointUITableViewCell.decreaseValue), for: .touchUpInside)
         upButton.addTarget(self, action: #selector(SetpointUITableViewCell.increaseValue), for: .touchUpInside)
 
-        downButton.highlightStokeColor = Colors.hightlightStrokeColor
-        upButton.highlightStokeColor = Colors.hightlightStrokeColor
+        downButton.highlightStokeColor = .ohHightlightStrokeColor
+        upButton.highlightStokeColor = .ohHightlightStrokeColor
 
         super.displayWidget()
     }

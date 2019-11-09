@@ -274,6 +274,12 @@ class OpenHABViewController: UIViewController {
         }
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        widgetTableView.reloadData()
+    }
+
     fileprivate func setupSideMenu() {
         // Define the menus
 
@@ -1042,17 +1048,9 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         if cell is FrameUITableViewCell {
-            if #available(iOS 13.0, *) {
-                cell.backgroundColor = .systemGroupedBackground
-            } else {
-                cell.backgroundColor = .groupTableViewBackground
-            }
+            cell.backgroundColor = .ohSystemGroupedBackground
         } else {
-            if #available(iOS 13.0, *) {
-                cell.backgroundColor = .secondarySystemGroupedBackground
-            } else {
-                cell.backgroundColor = .white
-            }
+            cell.backgroundColor = .ohSecondarySystemGroupedBackground
         }
 
         if let cell = cell as? GenericUITableViewCell {

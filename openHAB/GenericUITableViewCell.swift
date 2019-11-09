@@ -35,28 +35,8 @@ class GenericUITableViewCell: UITableViewCell {
                 //        self.userInteractionEnabled = NO;
             }
 
-            if _widget.labelcolor != "" {
-                if let color = color(fromHexString: self.widget?.labelcolor) {
-                    customTextLabel?.textColor = color
-                }
-            } else {
-                if #available(iOS 13.0, *) {
-                    customTextLabel?.textColor = .label
-                } else {
-                    customTextLabel?.textColor = .black
-                }
-            }
-            if _widget.valuecolor != "" {
-                if let color = color(fromHexString: self.widget?.valuecolor) {
-                    customDetailTextLabel?.textColor = color
-                }
-            } else {
-                if #available(iOS 13.0, *) {
-                    customDetailTextLabel?.textColor = .secondaryLabel
-                } else {
-                    customDetailTextLabel?.textColor = .lightGray
-                }
-            }
+            customTextLabel?.textColor = _widget.labelcolor != "" ? UIColor(fromString: _widget.labelcolor) : .ohLabel
+            customDetailTextLabel?.textColor = _widget.valuecolor != "" ? UIColor(fromString: _widget.valuecolor) : .ohSecondaryLabel
         }
     }
 
