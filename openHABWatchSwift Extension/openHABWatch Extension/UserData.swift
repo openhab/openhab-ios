@@ -10,27 +10,48 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-
 import Combine
+import os.log
 import SwiftUI
 
-let sitemapData: [Item] = [Item(name: "Light0",
-                                label: "Light Ground Floor",
-                                state: true,
-                                link: "http://192.168.2.15:8081/icon/switch?state=OFF")!,
-                           Item(name: "Light1",
-                                label: "Light First Floor",
-                                state: false,
-                                link: "http://192.168.2.15:8081/icon/switch?state=ON")!,
-                           Item(name: "Light2",
-                                label: "Light Second Floor",
-                                state: false,
-                                link: "http://192.168.2.15:8081/icon/light?state=OFF")!,
-                           Item(name: "Light3",
-                                label: "Light Third Floor",
-                                state: false,
-                                link: "http://192.168.2.15:8081/icon/switch?state=OFF")!]
+let sitemapJson = """
+{"name":"watch","label":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch",
+    "homepage":
+{"id":"watch","title":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch/watch","leaf":false,"timeout":false,
+            "widgets":[
+                {"widgetId":"00","type":"Switch","label":"Licht Keller WC Decke","icon":"switch","mappings":[],
+            "item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch6_1","label":"Licht Keller WC Decke","tags":["Lighting"],"groupNames":["gKellerLicht","gLcn"]},"widgets":[]},
+                {"widgetId":"01","type":"Switch","label":"Licht Oberlicht","icon":"switch","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1","state":"ON","editable":false,"type":"Switch","name":"lcnLightSwitch14_1","label":"Licht Oberlicht","tags":["Lighting"],"groupNames":["gEGLicht","G_PresenceSimulation","gLcn"]},"widgets":[]}
+            ]
+        }
+    }
+""".data(using: .utf8)!
 
 final class UserData: ObservableObject {
-    @Published var items: [Item] = sitemapData
+    @Published var items: [NewOpenHABWidget] = []
+
+    let decoder = JSONDecoder()
+
+    var openHABSitemapPage: OpenHABSitemapPage<NewOpenHABWidget>?
+
+    init() {
+        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+
+        let data = sitemapJson
+
+        items = openHABSitemapPage?.widgets ?? []
+
+        do {
+            // Self-executing closure
+            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+            openHABSitemapPage = try {
+                let sitemapPageCodingData = try data.decoded() as OpenHABSitemapPage<NewOpenHABWidget>.CodingData
+                return sitemapPageCodingData.openHABSitemapPage
+            }()
+        } catch {
+            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+        }
+
+    }
+
 }

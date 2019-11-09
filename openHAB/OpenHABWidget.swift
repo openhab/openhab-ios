@@ -9,6 +9,10 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+#if canImport(Combine)
+import Alamofire
+import Combine
+#endif
 import Foundation
 #if !os(watchOS)
 import Fuzi
@@ -16,7 +20,39 @@ import Fuzi
 import MapKit
 import os.log
 
-class OpenHABWidget: NSObject, MKAnnotation {
+protocol Widget: class {
+    associatedtype ChildWidget: Widget
+    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)? { get set }
+    var widgetId: String { get set }
+    var label: String{ get set }
+    var icon : String{ get set }
+    var type : String{ get set }
+    var url: String{ get set }
+    var period : String{ get set }
+    var minValue: Double { get set }
+    var maxValue: Double { get set }
+    var step: Double { get set }
+    var refresh: Int { get set }
+    var height: Double { get set }
+    var isLeaf: Bool { get set }
+    var iconColor: String { get set }
+    var labelcolor: String { get set }
+    var valuecolor: String { get set }
+    var service: String { get set }
+    var state: String { get set }
+    var text: String { get set }
+    var legend: Bool { get set }
+    var encoding: String { get set }
+    var item: OpenHABItem? { get set }
+    var linkedPage: OpenHABLinkedPage? { get set }
+    var mappings: [OpenHABWidgetMapping] { get set }
+    var image: UIImage? { get set }
+    var widgets: [ChildWidget] { get set }
+    
+}
+
+class OpenHABWidget: NSObject, MKAnnotation, Widget {
+
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""
     var label = ""
@@ -28,7 +64,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     var maxValue = 100.0
     var step = 1.0
     var refresh = 0
-    var height = ""
+    var height = 44.0
     var isLeaf = false
     var iconColor = ""
     var labelcolor = ""
@@ -90,16 +126,11 @@ class OpenHABWidget: NSObject, MKAnnotation {
     func mappingIndex(byCommand command: String?) -> Int? {
         return mappingsOrItemOptions.firstIndex { $0.command == command }
     }
-}
 
-extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
-        func toString(_ with: Double?) -> String {
-            guard let double = with else { return "" }
-            return String(format: "%.1f", double)
-        }
-        self.init()
+    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
+
+        super.init()
         self.widgetId = widgetId
         self.label = label
         self.type = type
@@ -115,7 +146,7 @@ extension OpenHABWidget {
         } else {
             self.refresh = 0
         }
-        self.height = toString(height)
+        self.height = height ?? 44.0
         self.isLeaf = isLeaf ?? false
         self.iconColor = iconColor ?? ""
         labelcolor = labelColor ?? ""
@@ -136,44 +167,90 @@ extension OpenHABWidget {
     }
 
     #if !os(watchOS)
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "widgetId": widgetId = child.stringValue
-            case "label": label = child.stringValue
-            case "type": type = child.stringValue
-            case "icon": icon = child.stringValue
-            case "url": url = child.stringValue
-            case "period": period = child.stringValue
-            case "iconColor": iconColor = child.stringValue
-            case "labelcolor": labelcolor = child.stringValue
-            case "valuecolor": valuecolor = child.stringValue
-            case "service": service = child.stringValue
-            case "state": state = child.stringValue
-            case "text": text = child.stringValue
-            case "height": height = child.stringValue
-            case "encoding": encoding = child.stringValue
-            // Double
-            case "minValue": minValue = Double(child.stringValue) ?? 0.0
-            case "maxValue": maxValue = Double(child.stringValue) ?? 0.0
-            case "step": step = Double(child.stringValue) ?? 0.0
-            // Bool
-            case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
-            case "legend": legend = child.stringValue == "true" ? true : false
-            // Int
-            case "refresh": refresh = Int(child.stringValue) ?? 0
-            // Embedded
-            case "widget": widgets.append(OpenHABWidget(xml: child))
-            case "item": item = OpenHABItem(xml: child)
-            case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
-            default:
-                break
-            }
-        }
+        init(xml xmlElement: XMLElement) {
+           super.init()
+           for child in xmlElement.children {
+               switch child.tag {
+               case "widgetId": widgetId = child.stringValue
+               case "label": label = child.stringValue
+               case "type": type = child.stringValue
+               case "icon": icon = child.stringValue
+               case "url": url = child.stringValue
+               case "period": period = child.stringValue
+               case "iconColor": iconColor = child.stringValue
+               case "labelcolor": labelcolor = child.stringValue
+               case "valuecolor": valuecolor = child.stringValue
+               case "service": service = child.stringValue
+               case "state": state = child.stringValue
+               case "text": text = child.stringValue
+               case "height": height = Double(child.stringValue) ?? 44.0
+               case "encoding": encoding = child.stringValue
+               // Double
+               case "minValue": minValue = Double(child.stringValue) ?? 0.0
+               case "maxValue": maxValue = Double(child.stringValue) ?? 0.0
+               case "step": step = Double(child.stringValue) ?? 0.0
+               // Bool
+               case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
+               case "legend": legend = child.stringValue == "true" ? true : false
+               // Int
+               case "refresh": refresh = Int(child.stringValue) ?? 0
+               // Embedded
+               case "widget": widgets.append(OpenHABWidget(xml: child))
+               case "item": item = OpenHABItem(xml: child)
+               case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
+               case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
+               default:
+                   break
+               }
+           }
+       }
+       #endif
+}
+
+@available(iOS 13, watchOS 6, *)
+class NewOpenHABWidget: OpenHABWidget, ObservableObject, Identifiable {
+
+    var id: String
+
+    private var commandOperation: Alamofire.Request?
+
+    @Published var stateBinding: String
+
+    private var statePublisher: AnyPublisher<String, Never> {
+        $stateBinding
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
-    #endif
+    override init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
+        self.id = widgetId
+        self.stateBinding = state ?? ""
+
+
+
+        super.init(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelColor, valueColor: valueColor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item, linkedPage: linkedPage, mappings: mappings, widgets: widgets)
+
+
+
+         _ = statePublisher
+             .receive(on: RunLoop.main)
+//             .map { value -> String in
+//                 value ? "ON" : "OFF"
+//             }
+             .sink { receivedValue in
+                 // sink is the subscriber and terminates the pipeline
+                 self.sendCommand(receivedValue)
+                 print("Sending to: \(widgetId) command: \(receivedValue)")
+             }
+     }
+
+}
+
+
+extension OpenHABWidget {
+
+
+
 }
 
 extension OpenHABWidget {
@@ -215,7 +292,7 @@ extension OpenHABWidget.CodingData {
 }
 
 //  Recursive parsing of nested widget structure
-extension Array where Element == OpenHABWidget {
+extension Array where Element: Widget {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)

@@ -107,6 +107,8 @@
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
+		DAD2370C2373F77D004E5A23 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
+		DAD2370D2374C6B6004E5A23 /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
 		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
@@ -1243,6 +1245,7 @@
 				DA07759F23467A580086C685 /* OpenHABSitemap.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
+				DAD2370D2374C6B6004E5A23 /* DataDecoded.swift in Sources */,
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
 				DA07764623467B890086C685 /* OpenHABWidgetMapping.swift in Sources */,
 				DA07764523467B5A0086C685 /* OpenHABLinkedPage.swift in Sources */,
@@ -1258,6 +1261,7 @@
 				DAB599EC236C995B005DDF0B /* OSLogHelper.swift in Sources */,
 				DA077599234673000086C685 /* StringExtension.swift in Sources */,
 				DA077597234670CD0086C685 /* Item.swift in Sources */,
+				DAD2370C2373F77D004E5A23 /* OpenHABSitemapPage.swift in Sources */,
 				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
 				DA72E153236CD38E00B8EF3A /* Equatable.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,

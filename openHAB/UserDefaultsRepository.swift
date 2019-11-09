@@ -14,7 +14,7 @@ import UIKit
 
 // Convenient access to UserDefaults
 struct Preferences {
-    // Much shorter as Property Wrappers are now available
+    // Much shorter as Property Wrappers are available with Swift 5.1
     // Inspired by https://www.avanderlee.com/swift/property-wrappers/
     @propertyWrapper
     struct UserDefault<T> {

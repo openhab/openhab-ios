@@ -10,24 +10,26 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+#if !os(watchOS)
 import Fuzi
+#endif
 import os.log
 
-class OpenHABSitemapPage: NSObject {
+class OpenHABSitemapPage<T: Widget>: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
-    var widgets: [OpenHABWidget] = []
+    var widgets: [T] = []
     var pageId = ""
     var title = ""
     var link = ""
     var leaf = false
 
-    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [T]) {
         super.init()
         self.pageId = pageId
         self.title = title
         self.link = link
         self.leaf = leaf
-        var tempWidgets = [OpenHABWidget]()
+        var tempWidgets = [T]()
         tempWidgets.flatten(widgets)
         self.widgets = tempWidgets
         self.widgets.forEach {
@@ -37,11 +39,12 @@ class OpenHABSitemapPage: NSObject {
         }
     }
 
+    #if !os(watchOS)
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "widget": widgets.append(OpenHABWidget(xml: child))
+            case "widget": widgets.append(T.init(xml: child))
             case "id": pageId = child.stringValue
             case "title": title = child.stringValue
             case "link": link = child.stringValue
@@ -49,7 +52,7 @@ class OpenHABSitemapPage: NSObject {
             default: break
             }
         }
-        var tempWidgets = [OpenHABWidget]()
+        var tempWidgets = [T]()
         tempWidgets.flatten(widgets)
         widgets = tempWidgets
         widgets.forEach {
@@ -58,8 +61,9 @@ class OpenHABSitemapPage: NSObject {
             }
         }
     }
+    #endif
 
-    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [T]) {
         super.init()
         self.pageId = pageId
         self.title = title
@@ -116,3 +120,6 @@ extension OpenHABSitemapPage.CodingData {
         return OpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }
+
+@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
+extension OpenHABSitemapPage: ObservableObject {}
