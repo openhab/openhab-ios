@@ -10,9 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-#if !os(watchOS)
 import Fuzi
-#endif
 import os.log
 
 class OpenHABSitemapPage: NSObject {
@@ -39,7 +37,6 @@ class OpenHABSitemapPage: NSObject {
         }
     }
 
-    #if !os(watchOS)
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -61,7 +58,6 @@ class OpenHABSitemapPage: NSObject {
             }
         }
     }
-    #endif
 
     init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
         super.init()

@@ -10,9 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-#if !os(watchOS)
 import Fuzi
-#endif
 
 class OpenHABWidgetMapping: NSObject, Decodable {
     var command = ""
@@ -26,7 +24,6 @@ extension OpenHABWidgetMapping {
         self.label = label
     }
 
-    #if !os(watchOS)
     convenience init(xml xmlElement: XMLElement) {
         self.init()
         for child in xmlElement.children {
@@ -38,5 +35,4 @@ extension OpenHABWidgetMapping {
             }
         }
     }
-    #endif
 }

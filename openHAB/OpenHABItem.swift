@@ -10,9 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CoreLocation
-#if !os(watchOS)
 import Fuzi
-#endif
 import os.log
 import UIKit
 
@@ -35,7 +33,6 @@ final class OpenHABItem: NSObject, CommItem {
         self.stateDescription = stateDescription
     }
 
-    #if !os(watchOS)
     init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
@@ -50,11 +47,9 @@ final class OpenHABItem: NSObject, CommItem {
             }
         }
     }
-    #endif
 }
 
 extension OpenHABItem {
-    
     func stateAsDouble() -> Double {
         return state.numberValue?.doubleValue ?? 0
     }

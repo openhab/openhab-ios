@@ -14,9 +14,7 @@ import Alamofire
 import Combine
 #endif
 import Foundation
-#if !os(watchOS)
 import Fuzi
-#endif
 import MapKit
 import os.log
 
@@ -183,7 +181,6 @@ extension OpenHABWidget {
             }
     }
 
-    #if !os(watchOS)
     convenience init(xml xmlElement: XMLElement) {
         self.init()
         id = widgetId
@@ -224,7 +221,6 @@ extension OpenHABWidget {
             }
         }
     }
-    #endif
 
     private var statePublisher: AnyPublisher<Bool, Never> {
         $stateBinding

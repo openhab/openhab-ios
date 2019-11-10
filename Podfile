@@ -36,6 +36,8 @@ target 'openHABWatchSwift Extension' do
     inherit! :search_paths
     pod 'Alamofire', '~> 4.0'
     pod 'Kingfisher/SwiftUI'
+    pod 'Fuzi', '~> 3.1'
+
 end
 
 # Note: `pod install --clean-install` must be used if the post_install hook is changed
