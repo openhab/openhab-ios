@@ -32,7 +32,7 @@ extension String {
 
     /**
      Transforms the string received in json response into NSNumber
-     Independent of locale's decicmal separator
+     Independent of locale's decimal separator
 
      */
     var numberValue: NSNumber? {

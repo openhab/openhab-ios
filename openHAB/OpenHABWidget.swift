@@ -20,15 +20,15 @@ import Fuzi
 import MapKit
 import os.log
 
-protocol Widget: class {
+protocol Widget: AnyObject {
     associatedtype ChildWidget: Widget
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)? { get set }
     var widgetId: String { get set }
-    var label: String{ get set }
-    var icon : String{ get set }
-    var type : String{ get set }
-    var url: String{ get set }
-    var period : String{ get set }
+    var label: String { get set }
+    var icon: String { get set }
+    var type: String { get set }
+    var url: String { get set }
+    var period: String { get set }
     var minValue: Double { get set }
     var maxValue: Double { get set }
     var step: Double { get set }
@@ -48,10 +48,10 @@ protocol Widget: class {
     var mappings: [OpenHABWidgetMapping] { get set }
     var image: UIImage? { get set }
     var widgets: [ChildWidget] { get set }
-    
 }
 
-class OpenHABWidget: NSObject, MKAnnotation, Widget {
+class OpenHABWidget: NSObject, MKAnnotation, ObservableObject, Identifiable {
+    var id: String = ""
 
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""
@@ -79,6 +79,8 @@ class OpenHABWidget: NSObject, MKAnnotation, Widget {
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
     var widgets: [OpenHABWidget] = []
+
+    @Published var stateBinding: Bool = false
 
     // Text prior to "["
     var labelText: String? {
@@ -126,11 +128,15 @@ class OpenHABWidget: NSObject, MKAnnotation, Widget {
     func mappingIndex(byCommand command: String?) -> Int? {
         return mappingsOrItemOptions.firstIndex { $0.command == command }
     }
+}
 
+extension OpenHABWidget {
     // This is an ugly initializer
-    init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
+    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
+        self.init()
+        id = widgetId
+        stateBinding = state == "ON" ? true : false
 
-        super.init()
         self.widgetId = widgetId
         self.label = label
         self.type = type
@@ -164,94 +170,108 @@ class OpenHABWidget: NSObject, MKAnnotation, Widget {
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
+
+        _ = statePublisher
+            .receive(on: RunLoop.main)
+            .map { value -> String in
+                value ? "ON" : "OFF"
+            }
+            .sink { receivedValue in
+                // sink is the subscriber and terminates the pipeline
+                self.sendCommand(receivedValue)
+                print("Sending to: \(widgetId) command: \(receivedValue)")
+            }
     }
 
     #if !os(watchOS)
-        init(xml xmlElement: XMLElement) {
-           super.init()
-           for child in xmlElement.children {
-               switch child.tag {
-               case "widgetId": widgetId = child.stringValue
-               case "label": label = child.stringValue
-               case "type": type = child.stringValue
-               case "icon": icon = child.stringValue
-               case "url": url = child.stringValue
-               case "period": period = child.stringValue
-               case "iconColor": iconColor = child.stringValue
-               case "labelcolor": labelcolor = child.stringValue
-               case "valuecolor": valuecolor = child.stringValue
-               case "service": service = child.stringValue
-               case "state": state = child.stringValue
-               case "text": text = child.stringValue
-               case "height": height = Double(child.stringValue) ?? 44.0
-               case "encoding": encoding = child.stringValue
-               // Double
-               case "minValue": minValue = Double(child.stringValue) ?? 0.0
-               case "maxValue": maxValue = Double(child.stringValue) ?? 0.0
-               case "step": step = Double(child.stringValue) ?? 0.0
-               // Bool
-               case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
-               case "legend": legend = child.stringValue == "true" ? true : false
-               // Int
-               case "refresh": refresh = Int(child.stringValue) ?? 0
-               // Embedded
-               case "widget": widgets.append(OpenHABWidget(xml: child))
-               case "item": item = OpenHABItem(xml: child)
-               case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-               case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
-               default:
-                   break
-               }
-           }
-       }
-       #endif
-}
+    convenience init(xml xmlElement: XMLElement) {
+        self.init()
+        id = widgetId
+        stateBinding = state == "ON" ? true : false
 
-@available(iOS 13, watchOS 6, *)
-class NewOpenHABWidget: OpenHABWidget, ObservableObject, Identifiable {
+        for child in xmlElement.children {
+            switch child.tag {
+            case "widgetId": widgetId = child.stringValue
+            case "label": label = child.stringValue
+            case "type": type = child.stringValue
+            case "icon": icon = child.stringValue
+            case "url": url = child.stringValue
+            case "period": period = child.stringValue
+            case "iconColor": iconColor = child.stringValue
+            case "labelcolor": labelcolor = child.stringValue
+            case "valuecolor": valuecolor = child.stringValue
+            case "service": service = child.stringValue
+            case "state": state = child.stringValue
+            case "text": text = child.stringValue
+            case "height": height = Double(child.stringValue) ?? 44.0
+            case "encoding": encoding = child.stringValue
+            // Double
+            case "minValue": minValue = Double(child.stringValue) ?? 0.0
+            case "maxValue": maxValue = Double(child.stringValue) ?? 0.0
+            case "step": step = Double(child.stringValue) ?? 0.0
+            // Bool
+            case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
+            case "legend": legend = child.stringValue == "true" ? true : false
+            // Int
+            case "refresh": refresh = Int(child.stringValue) ?? 0
+            // Embedded
+            case "widget": widgets.append(OpenHABWidget(xml: child))
+            case "item": item = OpenHABItem(xml: child)
+            case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
+            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
+            default:
+                break
+            }
+        }
+    }
+    #endif
 
-    var id: String
-
-    private var commandOperation: Alamofire.Request?
-
-    @Published var stateBinding: String
-
-    private var statePublisher: AnyPublisher<String, Never> {
+    private var statePublisher: AnyPublisher<Bool, Never> {
         $stateBinding
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-    override init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
-        self.id = widgetId
-        self.stateBinding = state ?? ""
+}
 
-
-
-        super.init(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelColor, valueColor: valueColor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item, linkedPage: linkedPage, mappings: mappings, widgets: widgets)
-
-
-
-         _ = statePublisher
-             .receive(on: RunLoop.main)
-//             .map { value -> String in
-//                 value ? "ON" : "OFF"
+// @available(iOS 13, watchOS 6, *)
+// class NewOpenHABWidget: OpenHABWidget, ObservableObject, Identifiable {
+//
+//    var id: String
+//
+//    private var commandOperation: Alamofire.Request?
+//
+//    @Published var stateBinding: String
+//
+//    private var statePublisher: AnyPublisher<String, Never> {
+//        $stateBinding
+//            .debounce(for: 0.1, scheduler: RunLoop.main)
+//            .removeDuplicates()
+//            .eraseToAnyPublisher()
+//    }
+//    override init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
+//        self.id = widgetId
+//        self.stateBinding = state ?? ""
+//
+//
+//
+//        super.init(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelColor, valueColor: valueColor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item, linkedPage: linkedPage, mappings: mappings, widgets: widgets)
+//
+//
+//
+//         _ = statePublisher
+//             .receive(on: RunLoop.main)
+////             .map { value -> String in
+////                 value ? "ON" : "OFF"
+////             }
+//             .sink { receivedValue in
+//                 // sink is the subscriber and terminates the pipeline
+//                 self.sendCommand(receivedValue)
+//                 print("Sending to: \(widgetId) command: \(receivedValue)")
 //             }
-             .sink { receivedValue in
-                 // sink is the subscriber and terminates the pipeline
-                 self.sendCommand(receivedValue)
-                 print("Sending to: \(widgetId) command: \(receivedValue)")
-             }
-     }
-
-}
-
-
-extension OpenHABWidget {
-
-
-
-}
+//     }
+//
+// }
 
 extension OpenHABWidget {
     struct CodingData: Decodable {
@@ -292,7 +312,7 @@ extension OpenHABWidget.CodingData {
 }
 
 //  Recursive parsing of nested widget structure
-extension Array where Element: Widget {
+extension Array where Element == OpenHABWidget {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)

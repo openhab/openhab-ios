@@ -54,7 +54,7 @@ final class OpenHABItem: NSObject, CommItem {
 }
 
 extension OpenHABItem {
-
+    
     func stateAsDouble() -> Double {
         return state.numberValue?.doubleValue ?? 0
     }

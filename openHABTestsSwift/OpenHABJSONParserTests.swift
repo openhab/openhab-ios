@@ -531,7 +531,7 @@ class OpenHABJSONParserTests: XCTestCase {
         do {
             var widget: OpenHABWidget
             widget = try {
-                let widgetCodingData = try data.decoded() as OpenHABWidget.CodingData
+                let widgetCodingData = try decoder.decode(OpenHABWidget.CodingData.self, from: data)
                 return widgetCodingData.openHABWidget
             }()
 
@@ -541,5 +541,10 @@ class OpenHABJSONParserTests: XCTestCase {
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
+    }
+
+    func testUserData() {
+        let userData = UserData()
+        XCTAssertEqual(userData.items[0].widgetId, "00")
     }
 }

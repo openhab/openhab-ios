@@ -14,17 +14,37 @@ import os.log
 import SwiftUI
 
 struct SwitchRow: View {
-    @ObservedObject var item: Item
+    @ObservedObject var widget: OpenHABWidget
+
+    var iconUrl: URL? {
+        return Endpoint.icon(rootUrl: "http://192.168.2.15:8081",
+                             version: 2,
+                             icon: widget.icon,
+                             value: widget.item?.state ?? "",
+                             iconType: .png).url
+    }
 
     var body: some View {
-        Toggle(isOn: $item.state) {
+        return Toggle(isOn: $widget.stateBinding) {
             HStack {
-                KFImage(URL(string: item.link))
+                KFImage(iconUrl)
+                    .onSuccess { retrieveImageResult in
+                        print("success: \(retrieveImageResult)")
+                    }
+                    .onFailure { kingfisherError in
+                        print("failure: \(kingfisherError)")
+                    }
+                    .placeholder {
+                        // Placeholder while downloading.
+                        Image(systemName: "arrow.2.circlepath.circle")
+                            .font(.callout)
+                            .opacity(0.3)
+                    }
                     .cancelOnDisappear(true)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 25.0, height: 25.0)
-                Text(item.name)
+                Text(widget.label)
                     .font(.callout)
                 Spacer()
                 Text("llls")
@@ -37,7 +57,8 @@ struct SwitchRow: View {
 
 struct SwitchRow_Previews: PreviewProvider {
     static var previews: some View {
-        return SwitchRow(item: sitemapData[0])
+        let widget = UserData().items[0]
+        return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
     }
 }

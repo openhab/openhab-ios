@@ -15,21 +15,21 @@ import Fuzi
 #endif
 import os.log
 
-class OpenHABSitemapPage<T: Widget>: NSObject {
+class OpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
-    var widgets: [T] = []
+    var widgets: [OpenHABWidget] = []
     var pageId = ""
     var title = ""
     var link = ""
     var leaf = false
 
-    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [T]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title
         self.link = link
         self.leaf = leaf
-        var tempWidgets = [T]()
+        var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
         self.widgets = tempWidgets
         self.widgets.forEach {
@@ -44,7 +44,7 @@ class OpenHABSitemapPage<T: Widget>: NSObject {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "widget": widgets.append(T.init(xml: child))
+            case "widget": widgets.append(OpenHABWidget(xml: child))
             case "id": pageId = child.stringValue
             case "title": title = child.stringValue
             case "link": link = child.stringValue
@@ -52,7 +52,7 @@ class OpenHABSitemapPage<T: Widget>: NSObject {
             default: break
             }
         }
-        var tempWidgets = [T]()
+        var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
         widgets = tempWidgets
         widgets.forEach {
@@ -63,7 +63,7 @@ class OpenHABSitemapPage<T: Widget>: NSObject {
     }
     #endif
 
-    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [T]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title

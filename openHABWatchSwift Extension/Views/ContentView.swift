@@ -16,8 +16,8 @@ struct ContentView: View {
 
     var body: some View {
         return List {
-            ForEach(viewModel.items) { item in
-                SwitchRow(item: item)
+            ForEach(viewModel.items) { widget in
+                SwitchRow(widget: widget)
             }
         }
     }

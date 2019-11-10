@@ -68,6 +68,27 @@
 		DA5D0F81223E9991007ADDBD /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
+		DA6ADD172377155F005A2743 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0776EF234788010086C685 /* UserData.swift */; };
+		DA6ADD18237716C5005A2743 /* OpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */; };
+		DA6ADD19237716D1005A2743 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
+		DA6ADD1A237716E3005A2743 /* DateFormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1BA236DEE9800B8EF3A /* DateFormatterExtension.swift */; };
+		DA6ADD1B2377172E005A2743 /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
+		DA6ADD1C23771739005A2743 /* OpenHABItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.swift */; };
+		DA6ADD1D23771743005A2743 /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
+		DA6ADD1E2377174B005A2743 /* OpenHABWidgetMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */; };
+		DA6ADD1F23771777005A2743 /* OpenHABStateDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EC2350BA630081E80B /* OpenHABStateDescription.swift */; };
+		DA6ADD202377178F005A2743 /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
+		DA6ADD21237717B7005A2743 /* OpenHABOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB128EA2350B87A0081E80B /* OpenHABOptions.swift */; };
+		DA6ADD22237717CC005A2743 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
+		DA6ADD23237717D3005A2743 /* UserDefaultsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07759B234679470086C685 /* UserDefaultsRepository.swift */; };
+		DA6ADD24237717E3005A2743 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D0F80223E9991007ADDBD /* Endpoint.swift */; };
+		DA6ADD2523771812005A2743 /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA28C35F2251F07000AB409C /* OSLogHelper.swift */; };
+		DA6ADD262377181A005A2743 /* ServerCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F48312230C80870033E6E7 /* ServerCertificateManager.swift */; };
+		DA6ADD2723771825005A2743 /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08FF1492233498600203EED /* ClientCertificateManager.swift */; };
+		DA6ADD2823771863005A2743 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
+		DA6ADD292377187D005A2743 /* ChartStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E158236CD49B00B8EF3A /* ChartStyle.swift */; };
+		DA6ADD2C23777C02005A2743 /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
+		DA6ADD2D2377857A005A2743 /* CodableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934C6D87236EFBC200B4B452 /* CodableExtension.swift */; };
 		DA72E152236CD34B00B8EF3A /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
 		DA72E153236CD38E00B8EF3A /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2837092319C7C60066D7B5 /* Equatable.swift */; };
 		DA72E154236CD3A400B8EF3A /* UserDefaultsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07759B234679470086C685 /* UserDefaultsRepository.swift */; };
@@ -1284,15 +1305,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA6ADD21237717B7005A2743 /* OpenHABOptions.swift in Sources */,
+				DA6ADD19237716D1005A2743 /* OpenHABSitemapPage.swift in Sources */,
 				DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */,
 				DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */,
+				DA6ADD1D23771743005A2743 /* OpenHABLinkedPage.swift in Sources */,
+				DA6ADD2823771863005A2743 /* StringExtension.swift in Sources */,
+				DA6ADD292377187D005A2743 /* ChartStyle.swift in Sources */,
 				DA96647A232EE3C200CB418B /* RESTAPITest.swift in Sources */,
+				DA6ADD22237717CC005A2743 /* Equatable.swift in Sources */,
 				DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */,
+				DA6ADD2523771812005A2743 /* OSLogHelper.swift in Sources */,
+				DA6ADD1C23771739005A2743 /* OpenHABItem.swift in Sources */,
+				DA6ADD1A237716E3005A2743 /* DateFormatterExtension.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
+				DA6ADD2D2377857A005A2743 /* CodableExtension.swift in Sources */,
+				DA6ADD1E2377174B005A2743 /* OpenHABWidgetMapping.swift in Sources */,
+				DA6ADD262377181A005A2743 /* ServerCertificateManager.swift in Sources */,
+				DA6ADD2723771825005A2743 /* ClientCertificateManager.swift in Sources */,
+				DA6ADD2C23777C02005A2743 /* OpenHABSitemap.swift in Sources */,
+				DA6ADD23237717D3005A2743 /* UserDefaultsRepository.swift in Sources */,
 				DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */,
+				DA6ADD202377178F005A2743 /* NetworkConnection.swift in Sources */,
 				DA966478232EDEAD00CB418B /* MockURLProtocol.swift in Sources */,
+				DA6ADD24237717E3005A2743 /* Endpoint.swift in Sources */,
+				DA6ADD1B2377172E005A2743 /* DataDecoded.swift in Sources */,
+				DA6ADD1F23771777005A2743 /* OpenHABStateDescription.swift in Sources */,
+				DA6ADD172377155F005A2743 /* UserData.swift in Sources */,
 				DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */,
+				DA6ADD18237716C5005A2743 /* OpenHABWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1442,7 +1484,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1483,7 +1525,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1679,7 +1721,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1722,7 +1764,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABTestsSwift/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1790,7 +1832,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -1838,7 +1880,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 5.0;
@@ -1865,7 +1907,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1912,7 +1954,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
