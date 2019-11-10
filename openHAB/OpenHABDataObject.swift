@@ -11,7 +11,7 @@
 
 import Foundation
 
-class OpenHABDataObject: NSObject {
+class OpenHABDataObject: NSObject, ObservableObject {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
