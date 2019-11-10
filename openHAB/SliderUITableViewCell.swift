@@ -13,8 +13,20 @@ import os.log
 import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
-    @IBOutlet private var widgetSlider: UISlider!
+    private var isInTransition: Bool = false
+    private var transitionItem: DispatchWorkItem?
+    private var throttler: Throttler?
+    private var throttlingInterval: TimeInterval? = 0 {
+        didSet {
+            guard let interval = throttlingInterval else {
+                throttler = nil
+                return
+            }
+            throttler = Throttler(maxInterval: interval)
+        }
+    }
 
+    @IBOutlet private var widgetSlider: UISlider!
     @IBOutlet private var customDetailText: UILabel!
 
     required init?(coder: NSCoder) {
@@ -30,28 +42,39 @@ class SliderUITableViewCell: GenericUITableViewCell {
     private func initiliaze() {
         selectionStyle = .none
         separatorInset = .zero
+        throttlingInterval = 0.1
     }
 
     @IBAction private func sliderValueChanged(_ sender: Any) {
         let widgetValue = adj(Double(widgetSlider?.value ?? Float(widget.minValue)))
         customDetailText?.text = valueText(widgetValue)
+        transitionItem?.cancel()
+        isInTransition = true
+        throttler?.throttle { DispatchQueue.main.async { self.sliderDidChange(toValue: widgetValue) } }
     }
 
     @IBAction private func sliderTouchUp(_ sender: Any) {
-        sliderDidEndSliding(widgetSlider)
+        stopTransitionDelayed()
     }
 
     @IBAction private func sliderTouchOutside(_ sender: Any) {
-        sliderDidEndSliding(widgetSlider)
+        stopTransitionDelayed()
     }
 
-    func adj(_ raw: Double) -> Double {
+    private func stopTransitionDelayed() {
+        transitionItem = DispatchWorkItem { [weak self] in
+            self?.isInTransition = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: transitionItem!)
+    }
+
+    private func adj(_ raw: Double) -> Double {
         var valueAdjustedToStep = floor((raw - widget.minValue) / widget.step) * widget.step
         valueAdjustedToStep += widget.minValue
         return min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
     }
 
-    func adjustedValue() -> Double {
+    private func adjustedValue() -> Double {
         if let item = widget.item {
             return adj(item.stateAsDouble())
         } else {
@@ -59,7 +82,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
         }
     }
 
-    func valueText(_ widgetValue: Double) -> String {
+    private func valueText(_ widgetValue: Double) -> String {
         let digits = max(-Decimal(widget.step).exponent, 0)
         let numberFormatter = NumberFormatter()
         numberFormatter.maximumFractionDigits = digits
@@ -68,6 +91,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
+        guard !isInTransition else { return }
+
         customTextLabel?.text = widget.labelText
         widgetSlider?.minimumValue = Float(widget.minValue)
         widgetSlider?.maximumValue = Float(widget.maxValue)
@@ -76,10 +101,8 @@ class SliderUITableViewCell: GenericUITableViewCell {
         customDetailText?.text = valueText(widgetValue)
     }
 
-    @objc
-    func sliderDidEndSliding(_ sender: UISlider) {
-        let res = adj(Double(widgetSlider!.value))
-        os_log("Slider new value = %g, adjusted to %g", log: .default, type: .info, widgetSlider!.value, res)
-        widget.sendCommand(valueText(res))
+    private func sliderDidChange(toValue value: Double) {
+        os_log("Slider new value = %g", log: .default, type: .info, value)
+        widget.sendCommandDouble(value)
     }
 }
