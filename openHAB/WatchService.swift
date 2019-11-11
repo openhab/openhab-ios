@@ -42,7 +42,6 @@ class WatchService {
             }, errorHandler: { error in
                 os_log("%{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
 
-
                 // transmit message on failure
                 try? WCSession.default.updateApplicationContext(message)
             })

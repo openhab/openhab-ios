@@ -177,7 +177,7 @@ extension OpenHABWidget {
             .sink { receivedValue in
                 // sink is the subscriber and terminates the pipeline
                 self.sendCommand(receivedValue)
-                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, widgetId, receivedValue)
+                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, item?.name ?? "", receivedValue)
             }
     }
 

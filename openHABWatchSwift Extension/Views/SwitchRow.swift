@@ -57,7 +57,7 @@ struct SwitchRow: View {
 
 struct SwitchRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().items[0]
+        let widget = UserData().widgets[0]
         return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
             .environmentObject(OpenHABDataObject(openHABRootUrl: "http://192.168.2.15:8081"))

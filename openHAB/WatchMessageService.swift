@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import os.log
 import WatchConnectivity
 
 // This class receives Watch Request for the configuration data like localUrl.

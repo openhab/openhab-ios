@@ -14,6 +14,6 @@ import WatchKit
 
 class PreferencesHostingController: WKHostingController<PreferencesSwiftUIView> {
     override var body: PreferencesSwiftUIView {
-        return PreferencesSwiftUIView()
+        PreferencesSwiftUIView()
     }
 }
