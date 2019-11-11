@@ -11,7 +11,7 @@
 
 import Foundation
 
-class OpenHABDataObject: NSObject {
+class OpenHABDataObject: NSObject, ObservableObject {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
@@ -19,4 +19,11 @@ class OpenHABDataObject: NSObject {
     var rootViewController: OpenHABViewController?
     #endif
     var openHABVersion: Int = 0
+}
+
+extension OpenHABDataObject {
+    convenience init(openHABRootUrl: String) {
+        self.init()
+        self.openHABRootUrl = openHABRootUrl
+    }
 }

@@ -45,7 +45,7 @@ struct SVGProcessor: ImageProcessor {
     func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
-            print("already an image")
+            os_log("already an image", log: .default, type: .info)
             return image
         case let .data(data):
             if let image = SVGKImage(data: data) {

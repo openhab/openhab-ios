@@ -20,7 +20,7 @@ let sitemapJson = """
 """.data(using: .utf8)!
 
 final class UserData: ObservableObject {
-    @Published var items: [OpenHABWidget] = []
+    @Published var widgets: [OpenHABWidget] = []
 
     let decoder = JSONDecoder()
 
@@ -42,6 +42,6 @@ final class UserData: ObservableObject {
             os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
         }
 
-        items = openHABSitemapPage?.widgets ?? []
+        widgets = openHABSitemapPage?.widgets ?? []
     }
 }

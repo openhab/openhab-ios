@@ -15,9 +15,10 @@ import SwiftUI
 
 struct SwitchRow: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var dataObject: OpenHABDataObject
 
     var iconUrl: URL? {
-        return Endpoint.icon(rootUrl: "http://192.168.2.15:8081",
+        return Endpoint.icon(rootUrl: dataObject.openHABRootUrl,
                              version: 2,
                              icon: widget.icon,
                              value: widget.item?.state ?? "",
@@ -29,13 +30,12 @@ struct SwitchRow: View {
             HStack {
                 KFImage(iconUrl)
                     .onSuccess { retrieveImageResult in
-                        print("success: \(retrieveImageResult)")
+                        os_log("success: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
                     }
                     .onFailure { kingfisherError in
-                        print("failure: \(kingfisherError)")
+                        os_log("failure: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
                     }
                     .placeholder {
-                        // Placeholder while downloading.
                         Image(systemName: "arrow.2.circlepath.circle")
                             .font(.callout)
                             .opacity(0.3)
@@ -60,5 +60,6 @@ struct SwitchRow_Previews: PreviewProvider {
         let widget = UserData().items[0]
         return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
+            .environmentObject(OpenHABDataObject(openHABRootUrl: "http://192.168.2.15:8081"))
     }
 }

@@ -14,10 +14,20 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
 
+    func rowWidget(widget: OpenHABWidget) -> AnyView? {
+        switch widget.type {
+        case "Switch":
+            return AnyView(SwitchRow(widget: widget))
+        default:
+            return nil
+        }
+    }
+
     var body: some View {
         return List {
-            ForEach(viewModel.items) { widget in
-                SwitchRow(widget: widget)
+            ForEach(viewModel.widgets) { widget in
+                self.rowWidget(widget: widget)
+                    .environmentObject(OpenHABDataObject())
             }
         }
     }

@@ -177,7 +177,7 @@ extension OpenHABWidget {
             .sink { receivedValue in
                 // sink is the subscriber and terminates the pipeline
                 self.sendCommand(receivedValue)
-                print("Sending to: \(widgetId) command: \(receivedValue)")
+                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, widgetId, receivedValue)
             }
     }
 
@@ -229,45 +229,6 @@ extension OpenHABWidget {
             .eraseToAnyPublisher()
     }
 }
-
-// @available(iOS 13, watchOS 6, *)
-// class NewOpenHABWidget: OpenHABWidget, ObservableObject, Identifiable {
-//
-//    var id: String
-//
-//    private var commandOperation: Alamofire.Request?
-//
-//    @Published var stateBinding: String
-//
-//    private var statePublisher: AnyPublisher<String, Never> {
-//        $stateBinding
-//            .debounce(for: 0.1, scheduler: RunLoop.main)
-//            .removeDuplicates()
-//            .eraseToAnyPublisher()
-//    }
-//    override init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
-//        self.id = widgetId
-//        self.stateBinding = state ?? ""
-//
-//
-//
-//        super.init(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelColor, valueColor: valueColor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item, linkedPage: linkedPage, mappings: mappings, widgets: widgets)
-//
-//
-//
-//         _ = statePublisher
-//             .receive(on: RunLoop.main)
-////             .map { value -> String in
-////                 value ? "ON" : "OFF"
-////             }
-//             .sink { receivedValue in
-//                 // sink is the subscriber and terminates the pipeline
-//                 self.sendCommand(receivedValue)
-//                 print("Sending to: \(widgetId) command: \(receivedValue)")
-//             }
-//     }
-//
-// }
 
 extension OpenHABWidget {
     struct CodingData: Decodable {

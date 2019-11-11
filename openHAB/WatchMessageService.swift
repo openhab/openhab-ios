@@ -26,7 +26,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        print("Received message: \(message)")
+        os_log("Received message: %{PUBLIC}@", log: .default, type: .info, message)
     }
 
     @available(iOS 9.3, *)
