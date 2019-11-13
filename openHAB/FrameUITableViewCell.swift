@@ -27,11 +27,7 @@ class FrameUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        if #available(iOS 13.0, *) {
-            textLabel?.textColor = .secondaryLabel
-        } else {
-            textLabel?.textColor = .lightGray
-        }
+        textLabel?.textColor = .ohSecondaryLabel
         textLabel?.font = .preferredFont(forTextStyle: .callout)
         textLabel?.text = widget.label.uppercased()
         contentView.sizeToFit()
