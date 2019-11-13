@@ -13,6 +13,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
+    @EnvironmentObject var openHABDataObject: OpenHABDataObject
 
     func rowWidget(widget: OpenHABWidget) -> AnyView? {
         switch widget.type {
@@ -27,9 +28,15 @@ struct ContentView: View {
         return List {
             ForEach(viewModel.widgets) { widget in
                 self.rowWidget(widget: widget)
-                    .environmentObject(OpenHABDataObject())
+                    .environmentObject(self.openHABDataObject)
             }
         }
+    }
+}
+
+extension ContentView {
+    init(urlString: String) {
+        viewModel = UserData(urlString: urlString)
     }
 }
 
@@ -39,7 +46,7 @@ struct ContentView_Previews: PreviewProvider {
             ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 4 - 44mm")
 
-            ContentView(viewModel: UserData())
+            ContentView(viewModel: UserData(urlString: "http://192.168.2.15:8081"))
                 .previewDevice("Apple Watch Series 2 - 38mm")
         }
     }

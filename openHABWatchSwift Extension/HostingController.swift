@@ -14,29 +14,12 @@ import Kingfisher
 import SwiftUI
 import WatchKit
 
-class HostingController: WKHostingController<ContentView> {
-    override var body: ContentView {
-        ContentView(viewModel: UserData())
-    }
-}
-
-// MARK: Kingfisher authentication with NSURLCredential
-
-extension HostingController: AuthenticationChallengeResponsable {
-    // sessionDelegate.onReceiveSessionTaskChallenge
-    func downloader(_ downloader: ImageDownloader,
-                    task: URLSessionTask,
-                    didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
-        completionHandler(disposition, credential)
-    }
-
-    // sessionDelegate.onReceiveSessionChallenge
-    func downloader(_ downloader: ImageDownloader,
-                    didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
-        completionHandler(disposition, credential)
+class HostingController: WKHostingController<AnyView> {
+    var openHABDataObject = OpenHABDataObject(openHABRootUrl: "https://192.168.2.15:8444")
+    override var body: AnyView {
+        AnyView(
+            ContentView(viewModel: UserData(urlString: "https://192.168.2.15:8444"))
+                .environmentObject(openHABDataObject)
+        )
     }
 }

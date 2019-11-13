@@ -14,17 +14,14 @@ import Foundation
 import Kingfisher
 
 class OpenHABAccessTokenAdapter: RequestAdapter {
-    #if !os(watchOS)
     var appData: OpenHABDataObject? {
+        #if os(iOS)
         return AppDelegate.appDelegate.appData
+        #endif
+        #if os(watchOS)
+        return ExtensionDelegate.extensionDelegate.appData
+        #endif
     }
-
-    #else
-    var appData: OpenHABDataObject? {
-        return nil
-        #warning("Must be reworked")
-    }
-    #endif
 
     func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
         var urlRequest = urlRequest

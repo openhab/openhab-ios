@@ -30,10 +30,10 @@ struct SwitchRow: View {
             HStack {
                 KFImage(iconUrl)
                     .onSuccess { retrieveImageResult in
-                        os_log("success: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
+                        os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
                     }
                     .onFailure { kingfisherError in
-                        os_log("failure: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
+                        os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
                     }
                     .placeholder {
                         Image(systemName: "arrow.2.circlepath.circle")
@@ -44,11 +44,16 @@ struct SwitchRow: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 25.0, height: 25.0)
-                Text(widget.label)
-                    .font(.callout)
-                Spacer()
-                Text("llls")
-                    .font(.caption)
+                VStack {
+                    Text(widget.labelText ?? "")
+                        .font(.callout)
+                        .lineLimit(2)
+                    widget.labelValue.map {
+                        Text($0)
+                            .font(.caption)
+                            .lineLimit(1)
+                    }
+                }
             }
         }
         .cornerRadius(10)

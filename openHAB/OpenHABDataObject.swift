@@ -12,9 +12,9 @@
 import Foundation
 
 class OpenHABDataObject: NSObject, ObservableObject {
-    var openHABRootUrl = ""
-    var openHABUsername = ""
-    var openHABPassword = ""
+    @Published var openHABRootUrl = ""
+    @Published var openHABUsername = ""
+    @Published var openHABPassword = ""
     #if !os(watchOS)
     var rootViewController: OpenHABViewController?
     #endif

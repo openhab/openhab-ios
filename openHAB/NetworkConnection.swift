@@ -89,7 +89,6 @@ class NetworkConnection {
         shared = NetworkConnection(ignoreSSL: ignoreSSL, adapter: adapter)
     }
 
-    #if !os(watchOS)
     static func register(prefsURL: String,
                          deviceToken: String,
                          deviceId: String,
@@ -119,7 +118,6 @@ class NetworkConnection {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
     }
-    #endif
 
     static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
         if let commandUrl = URL(string: item.link) {
@@ -148,18 +146,13 @@ class NetworkConnection {
         return nil
     }
 
-    #if !os(watchOS)
-    static func page(pageUrl: String,
+    static func page(url: URL?,
                      longPolling: Bool,
                      openHABVersion: Int,
                      completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
-        if pageUrl == "" {
-            return nil
-        }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+        guard let url = url else { return nil }
 
-        guard let pageToLoadUrl = URL(string: pageUrl) else { return nil }
-        var pageRequest = URLRequest(url: pageToLoadUrl)
+        var pageRequest = URLRequest(url: url)
 
         // We accept XML only if openHAB is 1.X
         if openHABVersion == 1 {
@@ -173,7 +166,6 @@ class NetworkConnection {
             pageRequest.timeoutInterval = 300.0
         } else {
             atmosphereTrackingId = "0"
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
             pageRequest.timeoutInterval = 10.0
         }
         pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
@@ -185,19 +177,30 @@ class NetworkConnection {
             .responseData(completionHandler: completionHandler)
     }
 
+    static func page(pageUrl: String,
+                     longPolling: Bool,
+                     openHABVersion: Int,
+                     completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+        if pageUrl == "" {
+            return nil
+        }
+        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+
+        guard let pageToLoadUrl = URL(string: pageUrl) else { return nil }
+
+        return page(url: pageToLoadUrl, longPolling: longPolling, openHABVersion: openHABVersion, completionHandler: completionHandler)
+    }
+
     static func load(from url: URL, completionHandler: @escaping (DataResponse<Data>) -> Void) {
         var request = URLRequest(url: url)
         request.timeoutInterval = 10.0
-        DispatchQueue.main.async {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-        }
+
         os_log("Firing request", log: .viewCycle, type: .debug)
         let task = NetworkConnection.shared.manager.request(request)
             .validate(statusCode: 200 ..< 300)
             .responseData(completionHandler: completionHandler)
         task.resume()
     }
-    #endif
 
     func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
         serverCertificateManager.delegate = serverDelegate
