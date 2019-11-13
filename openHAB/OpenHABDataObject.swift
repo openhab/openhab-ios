@@ -15,6 +15,7 @@ class OpenHABDataObject: NSObject {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
+    var openHABAlwaysSendCreds = false
     var rootViewController: OpenHABViewController?
     var openHABVersion: Int = 0
 }

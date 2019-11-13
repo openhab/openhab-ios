@@ -70,6 +70,7 @@ class OpenHABViewController: UIViewController {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
+    var openHABAlwaysSendCreds = false
     var defaultSitemap = ""
     var idleOff = false
     var sitemaps: [OpenHABSitemap] = []
@@ -598,6 +599,7 @@ class OpenHABViewController: UIViewController {
     func loadSettings() {
         openHABUsername = Preferences.username
         openHABPassword = Preferences.password
+        openHABAlwaysSendCreds = Preferences.alwaysSendCreds
         defaultSitemap = Preferences.defaultSitemap
         idleOff = Preferences.idleOff
         let rawIconType = Preferences.iconType
@@ -605,6 +607,7 @@ class OpenHABViewController: UIViewController {
 
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
+        appData?.openHABAlwaysSendCreds = openHABAlwaysSendCreds
 
         #if DEBUG
         // always use demo sitemap for UITest

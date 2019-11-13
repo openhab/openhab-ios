@@ -770,6 +770,40 @@
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
                                     </tableViewCell>
+
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="J8n-bp-UeE">
+                                        <rect key="frame" x="0.0" y="55.333332061767578" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="J8n-bp-UeE" id="OIC-CW-S2k">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Always send credentials" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Dn3-BH-eJh">
+                                                    <rect key="frame" x="28.000000000000007" y="11.666666666666664" width="93.666666666666686" height="21"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u49-Vc-87C">
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                </switch>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailingMargin" secondItem="u49-Vc-87C" secondAttribute="trailing" constant="10" id="oG8-tb-hW5"/>
+                                                <constraint firstItem="u49-Vc-87C" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Dn3-BH-eJh" secondAttribute="trailing" constant="10" id="vgh-du-Cnp"/>
+                                                <constraint firstItem="Dn3-BH-eJh" firstAttribute="centerY" secondItem="OIC-CW-S2k" secondAttribute="centerY" id="xdH-NZ-Jxv"/>
+                                                <constraint firstItem="Dn3-BH-eJh" firstAttribute="leading" secondItem="OIC-CW-S2k" secondAttribute="leadingMargin" constant="12" id="EaC-j9-ujS"/>
+                                                <constraint firstItem="u49-Vc-87C" firstAttribute="centerY" secondItem="OIC-CW-S2k" secondAttribute="centerY" id="IIZ-BT-R1p"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" notEnabled="YES"/>
+                                        </accessibility>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="selectionStyle">
+                                                <integer key="value" value="0"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                             <tableViewSection headerTitle="Application Settings" id="iwU-AW-FNd">
@@ -1004,6 +1038,7 @@
                         <outlet property="remoteUrlTextField" destination="ppC-da-pKq" id="FyS-4h-tKY"/>
                         <outlet property="settingsTableView" destination="Gpo-Jj-aMP" id="w5C-jq-jO6"/>
                         <outlet property="usernameTextField" destination="7GO-er-lvr" id="nLw-7S-7YN"/>
+                        <outlet property="alwaysSendCredsSwitch" destination="u49-Vc-87C" id="fyh-cn-GhG"/>
                         <segue destination="VQn-En-nLm" kind="unwind" identifier="unwindToRoot" unwindAction="unwindToRootViewController:" id="Ez7-Nt-ZRa"/>
                     </connections>
                 </tableViewController>
