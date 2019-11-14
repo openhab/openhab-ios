@@ -21,14 +21,15 @@ class WatchService {
 
     // swiftlint:disable:next function_parameter_count
     func sendToWatch(_ localUrl: String, remoteUrl: String,
-                     username: String, password: String, sitemapName: String, ignoreSSL: Bool) {
+                     username: String, password: String, sitemapName: String, ignoreSSL: Bool, trustedCertficates: [String: Any] = [:]) {
         let applicationDict: [String: Any] =
             ["localUrl": localUrl,
              "remoteUrl": remoteUrl,
              "username": username,
              "password": password,
              "sitemapName": sitemapName,
-             "ignoreSSL": ignoreSSL]
+             "ignoreSSL": ignoreSSL,
+             "trustedCertificates": trustedCertficates]
 
         sendOrTransmitToWatch(applicationDict)
     }

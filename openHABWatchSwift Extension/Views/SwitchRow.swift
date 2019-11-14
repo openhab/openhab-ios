@@ -43,20 +43,20 @@ struct SwitchRow: View {
                     .cancelOnDisappear(true)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 25.0, height: 25.0)
+                    .frame(width: 20.0, height: 20.0)
                 VStack {
                     Text(widget.labelText ?? "")
-                        .font(.callout)
+                        .font(.caption)
                         .lineLimit(2)
                     widget.labelValue.map {
                         Text($0)
-                            .font(.caption)
+                            .font(.footnote)
                             .lineLimit(1)
                     }
                 }
             }
         }
-        .cornerRadius(10)
+        .cornerRadius(5)
     }
 }
 

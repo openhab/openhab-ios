@@ -205,6 +205,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                                            username: Preferences.username,
                                            password: Preferences.password,
                                            sitemapName: "watch",
-                                           ignoreSSL: Preferences.ignoreSSL)
+                                           ignoreSSL: Preferences.ignoreSSL,
+                                           trustedCertficates: NetworkConnection.shared.serverCertificateManager.trustedCertificates)
     }
 }

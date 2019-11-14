@@ -98,7 +98,6 @@
 		DA72E15E236D76FD00B8EF3A /* OpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.swift */; };
 		DA72E1B2236DE9F200B8EF3A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B0236DE9F200B8EF3A /* AppState.swift */; };
 		DA72E1B3236DE9F200B8EF3A /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */; };
-		DA72E1B7236DEA0900B8EF3A /* URLSessionPinningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B4236DEA0900B8EF3A /* URLSessionPinningDelegate.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA72E1BB236DEE9800B8EF3A /* DateFormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1BA236DEE9800B8EF3A /* DateFormatterExtension.swift */; };
 		DA72E1BC236DEE9800B8EF3A /* DateFormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1BA236DEE9800B8EF3A /* DateFormatterExtension.swift */; };
@@ -331,7 +330,6 @@
 		DA72E158236CD49B00B8EF3A /* ChartStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartStyle.swift; sourceTree = "<group>"; };
 		DA72E1B0236DE9F200B8EF3A /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
-		DA72E1B4236DEA0900B8EF3A /* URLSessionPinningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLSessionPinningDelegate.swift; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
 		DA72E1BA236DEE9800B8EF3A /* DateFormatterExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatterExtension.swift; sourceTree = SOURCE_ROOT; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
@@ -483,7 +481,6 @@
 			isa = PBXGroup;
 			children = (
 				DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */,
-				DA72E1B4236DEA0900B8EF3A /* URLSessionPinningDelegate.swift */,
 			);
 			name = external;
 			path = "../openHABWatch Extension";
@@ -1281,7 +1278,6 @@
 				DA72E154236CD3A400B8EF3A /* UserDefaultsRepository.swift in Sources */,
 				DA72E155236CD3B200B8EF3A /* ClientCertificateManager.swift in Sources */,
 				DA72E156236CD3C700B8EF3A /* Endpoint.swift in Sources */,
-				DA72E1B7236DEA0900B8EF3A /* URLSessionPinningDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

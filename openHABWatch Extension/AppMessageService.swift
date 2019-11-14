@@ -41,6 +41,13 @@ class AppMessageService: NSObject, WCSessionDelegate {
         if let ignoreSSLCertificate = applicationContext["ignoreSSL"] as? Bool {
             Preferences.ignoreSSL = ignoreSSLCertificate
         }
+
+        if let trustedCertificate = applicationContext["trustedCertificates"] as? [String: Any] {
+            let serverCertificateManager = ServerCertificateManager(ignoreCertificates: Preferences.ignoreSSL)
+            serverCertificateManager.trustedCertificates = trustedCertificate
+            serverCertificateManager.saveTrustedCertificates()
+            NetworkConnection.shared.serverCertificateManager = serverCertificateManager
+        }
     }
 
     @available(watchOSApplicationExtension 2.2, *)
