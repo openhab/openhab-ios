@@ -27,12 +27,7 @@ class OpenHABLegalViewController: UIViewController {
             legalTextView.attributedText = legalAttributedString
         }
 
-        if #available(iOS 13.0, *) {
-            legalTextView.backgroundColor = .systemBackground
-            legalTextView.textColor = .label
-        } else {
-            legalTextView.backgroundColor = .white
-            legalTextView.textColor = .black
-        }
+        legalTextView.backgroundColor = .ohSystemBackground
+        legalTextView.textColor = .ohLabel
     }
 }

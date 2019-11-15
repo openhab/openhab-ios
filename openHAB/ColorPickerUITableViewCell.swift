@@ -52,8 +52,8 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
         colorButton?.backgroundColor = widget.item?.stateAsUIColor()
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
-        downButton?.highlightStokeColor = Colors.hightlightStrokeColor
-        upButton?.highlightStokeColor = Colors.hightlightStrokeColor
+        downButton?.highlightStokeColor = .ohHightlightStrokeColor
+        upButton?.highlightStokeColor = .ohHightlightStrokeColor
     }
 
     @objc
