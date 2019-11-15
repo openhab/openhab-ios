@@ -47,9 +47,9 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         stopButton?.addTarget(self, action: .stopButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
-        downButton?.highlightStokeColor = Colors.hightlightStrokeColor
-        upButton?.highlightStokeColor = Colors.hightlightStrokeColor
-        stopButton?.highlightStokeColor = Colors.hightlightStrokeColor
+        downButton?.highlightStokeColor = .ohHightlightStrokeColor
+        upButton?.highlightStokeColor = .ohHightlightStrokeColor
+        stopButton?.highlightStokeColor = .ohHightlightStrokeColor
     }
 
     @objc
