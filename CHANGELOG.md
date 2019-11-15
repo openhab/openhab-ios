@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [Version 2.3.0, Build 1573822048] - 2019-11-15
+## [Version 2.2.50, Build 1573822048] - 2019-11-15
 
 ### Fixed
 - Fixed side menu presentation
