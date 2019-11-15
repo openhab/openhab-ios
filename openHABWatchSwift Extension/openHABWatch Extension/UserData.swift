@@ -21,24 +21,13 @@ let sitemapJson = """
 """.data(using: .utf8)!
 
 final class UserData: ObservableObject {
-    @Published var widgets: [OpenHABWidget] = []
+    @Published var widgets: [ObservableOpenHABWidget] = []
 
     let decoder = JSONDecoder()
 
-    var openHABSitemapPage: OpenHABSitemapPage?
+    var openHABSitemapPage: ObservableOpenHABSitemapPage?
 
     private var commandOperation: Alamofire.Request?
-
-    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        if commandOperation != nil {
-            commandOperation?.cancel()
-            commandOperation = nil
-        }
-        if let item = item, let command = command {
-            commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
-            commandOperation?.resume()
-        }
-    }
 
     init() {
         decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
@@ -49,7 +38,7 @@ final class UserData: ObservableObject {
             // Self-executing closure
             // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
             openHABSitemapPage = try {
-                let sitemapPageCodingData = try data.decoded() as OpenHABSitemapPage.CodingData
+                let sitemapPageCodingData = try data.decoded() as ObservableOpenHABSitemapPage.CodingData
                 return sitemapPageCodingData.openHABSitemapPage
             }()
         } catch {
@@ -80,7 +69,7 @@ final class UserData: ObservableObject {
                         // Self-executing closure
                         // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
                         self.openHABSitemapPage = try {
-                            let sitemapPageCodingData = try data.decoded() as OpenHABSitemapPage.CodingData
+                            let sitemapPageCodingData = try data.decoded() as ObservableOpenHABSitemapPage.CodingData
                             return sitemapPageCodingData.openHABSitemapPage
                         }()
                     } catch {
@@ -99,5 +88,16 @@ final class UserData: ObservableObject {
             }
         }
         commandOperation?.resume()
+    }
+
+    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
+        if commandOperation != nil {
+            commandOperation?.cancel()
+            commandOperation = nil
+        }
+        if let item = item, let command = command {
+            commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
+            commandOperation?.resume()
+        }
     }
 }

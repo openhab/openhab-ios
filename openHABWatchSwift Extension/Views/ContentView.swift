@@ -13,16 +13,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
-    @EnvironmentObject var openHABDataObject: OpenHABDataObject
-
-    func rowWidget(widget: OpenHABWidget) -> AnyView? {
-        switch widget.type {
-        case "Switch":
-            return AnyView(SwitchRow(widget: widget))
-        default:
-            return nil
-        }
-    }
+    @EnvironmentObject var openHABDataObject: ObservableOpenHABDataObject
 
     var body: some View {
         return List {
@@ -30,6 +21,15 @@ struct ContentView: View {
                 self.rowWidget(widget: widget)
                     .environmentObject(self.openHABDataObject)
             }
+        }
+    }
+
+    func rowWidget(widget: ObservableOpenHABWidget) -> AnyView? {
+        switch widget.type {
+        case "Switch":
+            return AnyView(SwitchRow(widget: widget))
+        default:
+            return nil
         }
     }
 }

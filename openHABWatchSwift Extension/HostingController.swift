@@ -15,10 +15,10 @@ import SwiftUI
 import WatchKit
 
 class HostingController: WKHostingController<AnyView> {
-    var openHABDataObject = OpenHABDataObject(openHABRootUrl: "https://192.168.2.15:8444")
+    var openHABDataObject = ObservableOpenHABDataObject(openHABRootUrl: Preferences.localUrl)
     override var body: AnyView {
         AnyView(
-            ContentView(viewModel: UserData(urlString: "https://192.168.2.15:8444"))
+            ContentView(viewModel: UserData(urlString: Preferences.localUrl))
                 .environmentObject(openHABDataObject)
         )
     }

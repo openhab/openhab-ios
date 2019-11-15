@@ -16,7 +16,7 @@ import WatchKit
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
     static var extensionDelegate: ExtensionDelegate!
 
-    var appData = OpenHABDataObject()
+    var appData = ObservableOpenHABDataObject()
 
     var session: WCSession? {
         didSet {
@@ -28,7 +28,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     override init() {
-        appData = OpenHABDataObject()
+        appData = ObservableOpenHABDataObject()
         super.init()
         ExtensionDelegate.extensionDelegate = self
 
@@ -119,26 +119,21 @@ extension ExtensionDelegate: AuthenticationChallengeResponsable {
 
 extension ExtensionDelegate: ServerCertificateManagerDelegate {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-    }
+    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {}
 
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-    }
+    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {}
 }
 
 // MARK: - ClientCertificateManagerDelegate
 
 extension ExtensionDelegate: ClientCertificateManagerDelegate {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
-    }
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {}
 
     // delegate should ask user for the export password used to decode the PKCS#12
-    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
-    }
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {}
 
     // delegate should alert the user that an error occured importing the certificate
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
-    }
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
 }

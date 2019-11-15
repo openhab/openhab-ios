@@ -14,7 +14,7 @@ import Foundation
 import Kingfisher
 
 class OpenHABAccessTokenAdapter: RequestAdapter {
-    var appData: OpenHABDataObject? {
+    var appData: DataObject? {
         #if os(iOS)
         return AppDelegate.appDelegate.appData
         #endif

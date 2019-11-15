@@ -14,8 +14,8 @@ import os.log
 import SwiftUI
 
 struct SwitchRow: View {
-    @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var dataObject: OpenHABDataObject
+    @ObservedObject var widget: ObservableOpenHABWidget
+    @EnvironmentObject var dataObject: ObservableOpenHABDataObject
 
     var iconUrl: URL? {
         return Endpoint.icon(rootUrl: dataObject.openHABRootUrl,
@@ -65,6 +65,6 @@ struct SwitchRow_Previews: PreviewProvider {
         let widget = UserData().widgets[0]
         return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
-            .environmentObject(OpenHABDataObject(openHABRootUrl: "http://192.168.2.15:8081"))
+            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: "http://192.168.2.15:8081"))
     }
 }
