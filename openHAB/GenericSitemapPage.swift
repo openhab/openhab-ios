@@ -1,35 +1,27 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
 //
-// See the NOTICE file(s) distributed with this work for additional
-// information.
+//  GenericSitemapPage.swift
+//  openHAB
 //
-// This program and the accompanying materials are made available under the
-// terms of the Eclipse Public License 2.0 which is available at
-// http://www.eclipse.org/legal/epl-2.0
+//  Created by Tim Müller-Seydlitz on 15.11.19.
+//  Copyright © 2019 openHAB e.V. All rights reserved.
 //
-// SPDX-License-Identifier: EPL-2.0
 
-import Foundation
-import Fuzi
-import os.log
-
-class ObservableOpenHABSitemapPage: NSObject {
+class GenericOpenHABSitemapPage<T>: NSObject, SitemapPage {
+    
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
-    var widgets: [ObservableOpenHABWidget] = []
+    var widgets: [T] = []
     var pageId = ""
     var title = ""
     var link = ""
     var leaf = false
-
-    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [ObservableOpenHABWidget]) {
+    
+    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [T]) {
         super.init()
         self.pageId = pageId
         self.title = title
         self.link = link
         self.leaf = leaf
-        var tempWidgets = [ObservableOpenHABWidget]()
-        tempWidgets.flatten(widgets)
-        self.widgets = tempWidgets
+        self.flattenWidgets()
         self.widgets.forEach {
             $0.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
@@ -41,7 +33,7 @@ class ObservableOpenHABSitemapPage: NSObject {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "widget": widgets.append(ObservableOpenHABWidget(xml: child))
+            case "widget": widgets.append(OpenHABWidget(xml: child))
             case "id": pageId = child.stringValue
             case "title": title = child.stringValue
             case "link": link = child.stringValue
@@ -49,7 +41,7 @@ class ObservableOpenHABSitemapPage: NSObject {
             default: break
             }
         }
-        var tempWidgets = [ObservableOpenHABWidget]()
+        var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
         widgets = tempWidgets
         widgets.forEach {
@@ -59,7 +51,7 @@ class ObservableOpenHABSitemapPage: NSObject {
         }
     }
 
-    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [ObservableOpenHABWidget]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [T]) {
         super.init()
         self.pageId = pageId
         self.title = title
@@ -79,15 +71,27 @@ class ObservableOpenHABSitemapPage: NSObject {
         os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", item.name)
         sendCommand?(item, command)
     }
+    
 }
 
-extension ObservableOpenHABSitemapPage {
+extension GenericOpenHABSitemapPage {
+    func filter(_ isIncluded: (T) throws -> Bool) rethrows -> Self {
+        let filteredOpenHABSitemapPage = Self.init(pageId: pageId,
+                                                            title: title,
+                                                            link: link,
+                                                            leaf: leaf,
+                                                            expandedWidgets: try widgets.filter(isIncluded))
+        return filteredOpenHABSitemapPage
+    }
+}
+
+extension GenericOpenHABSitemapPage {
     struct CodingData: Decodable {
         let pageId: String?
         let title: String?
         let link: String?
         let leaf: Bool?
-        let widgets: [ObservableOpenHABWidget.CodingData]?
+        let widgets: [T.CodingData]?
 
         private enum CodingKeys: String, CodingKey {
             case pageId = "id"
@@ -99,20 +103,9 @@ extension ObservableOpenHABSitemapPage {
     }
 }
 
-extension ObservableOpenHABSitemapPage.CodingData {
-    var openHABSitemapPage: ObservableOpenHABSitemapPage {
+extension GenericOpenHABSitemapPage.CodingData {
+    var openHABSitemapPage: Self {
         let mappedWidgets = widgets?.map { $0.openHABWidget } ?? []
-        return ObservableOpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
-    }
-}
-
-extension ObservableOpenHABSitemapPage {
-    func filter(_ isIncluded: (ObservableOpenHABWidget) throws -> Bool) rethrows -> ObservableOpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = ObservableOpenHABSitemapPage(pageId: pageId,
-                                                                      title: title,
-                                                                      link: link,
-                                                                      leaf: leaf,
-                                                                      expandedWidgets: try widgets.filter(isIncluded))
-        return filteredOpenHABSitemapPage
+        return Self(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }
