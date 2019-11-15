@@ -69,6 +69,7 @@ struct Preferences {
 
     @UserDefault("username", defaultValue: "test") static var username: String
     @UserDefault("password", defaultValue: "test") static var password: String
+    @UserDefault("alwaysSendCreds", defaultValue: false) static var alwaysSendCreds: Bool
     @UserDefault("ignoreSSL", defaultValue: false) static var ignoreSSL: Bool
     @UserDefault("sitemapName", defaultValue: "watch") static var sitemapName: String
     @UserDefault("demomode", defaultValue: true) static var demomode: Bool

@@ -17,6 +17,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsRemoteUrl = ""
     var settingsUsername = ""
     var settingsPassword = ""
+    var settingsAlwaysSendCreds = false
     var settingsIgnoreSSL = false
     var settingsDemomode = false
     var settingsIdleOff = false
@@ -35,6 +36,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var idleOffSwitch: UISwitch!
     @IBOutlet private var ignoreSSLSwitch: UISwitch!
     @IBOutlet private var iconSegmentedControl: UISegmentedControl!
+    @IBOutlet private var alwaysSendCredsSwitch: UISwitch!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -105,7 +107,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
             if demomodeSwitch!.isOn {
                 ret = 1
             } else {
-                ret = 5
+                ret = 6
             }
         case 1:
             ret = 8
@@ -150,6 +152,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         remoteUrlTextField?.text = settingsRemoteUrl
         usernameTextField?.text = settingsUsername
         passwordTextField?.text = settingsPassword
+        alwaysSendCredsSwitch?.isOn = settingsAlwaysSendCreds
         ignoreSSLSwitch?.isOn = settingsIgnoreSSL
         demomodeSwitch?.isOn = settingsDemomode
         idleOffSwitch?.isOn = settingsIdleOff
@@ -166,6 +169,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsRemoteUrl = Preferences.remoteUrl
         settingsUsername = Preferences.username
         settingsPassword = Preferences.password
+        settingsAlwaysSendCreds = Preferences.alwaysSendCreds
         settingsIgnoreSSL = Preferences.ignoreSSL
         settingsDemomode = Preferences.demomode
         settingsIdleOff = Preferences.idleOff
@@ -180,6 +184,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsRemoteUrl = remoteUrlTextField?.text ?? ""
         settingsUsername = usernameTextField?.text ?? ""
         settingsPassword = passwordTextField?.text ?? ""
+        settingsAlwaysSendCreds = alwaysSendCredsSwitch?.isOn ?? false
         settingsIgnoreSSL = ignoreSSLSwitch?.isOn ?? false
         settingsDemomode = demomodeSwitch?.isOn ?? false
         settingsIdleOff = idleOffSwitch?.isOn ?? false
@@ -191,6 +196,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.remoteUrl = settingsRemoteUrl
         Preferences.username = settingsUsername
         Preferences.password = settingsPassword
+        Preferences.alwaysSendCreds = settingsAlwaysSendCreds
         Preferences.ignoreSSL = settingsIgnoreSSL
         Preferences.demomode = settingsDemomode
         Preferences.idleOff = settingsIdleOff
@@ -204,6 +210,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                                            remoteUrl: Preferences.remoteUrl,
                                            username: Preferences.username,
                                            password: Preferences.password,
+                                           alwaysSendCreds: Preferences.alwaysSendCreds,
                                            sitemapName: "watch",
                                            ignoreSSL: Preferences.ignoreSSL)
     }

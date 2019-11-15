@@ -21,10 +21,14 @@ class OpenHABAccessTokenAdapter: RequestAdapter {
     func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
         var urlRequest = urlRequest
 
-        guard let user = appData?.openHABUsername, let password = appData?.openHABPassword else { return urlRequest }
+        guard let alwaysSendCreds = appData?.openHABAlwaysSendCreds, let user = appData?.openHABUsername, let password = appData?.openHABPassword else { return urlRequest }
 
-        if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
-            urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
+        if alwaysSendCreds {
+            if !user.isEmpty || !password.isEmpty {
+                if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
+                    urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
+                }
+            }
         }
 
         return urlRequest
