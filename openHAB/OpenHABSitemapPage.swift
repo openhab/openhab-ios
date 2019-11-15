@@ -116,6 +116,3 @@ extension OpenHABSitemapPage.CodingData {
         return OpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }
-
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
-extension OpenHABSitemapPage: ObservableObject {}
