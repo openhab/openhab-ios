@@ -4,6 +4,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Fixed side menu presentation
+- Adjusted UTI settings to get client certificate import working properly on iOS 13.
+- Reverted SPM to CocoaPods
+- Handling of blank sitemap label
+
+### Added
+- Slider update in real-time
+- Add connection setting called "Always send credentials" which controlls whether HTTP Basic Auth credentials should be sent for requests regardless of whether a challenge was issued by the server.  Under standard server setups, this option should be turned off.  This option can be turned on for servers which don't respond with a 401 challenge when credentials are required (#497)
+- Support for more HTML colors
+
 ## [Version 2.2.47, Build 1571606105] - 2019-10-20
 
 ### Fixed
