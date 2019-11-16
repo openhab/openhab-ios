@@ -15,6 +15,50 @@ import Fuzi
 import MapKit
 import os.log
 
+protocol Widget: AnyObject {
+    //  Recursive constraints possible as of Swift 4.1
+    associatedtype ChildWidget: Widget
+
+    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)? { get set }
+    var widgetId: String { get set }
+    var label: String { get set }
+    var icon: String { get set }
+    var type: String { get set }
+    var url: String { get set }
+    var period: String { get set }
+    var minValue: Double { get set }
+    var maxValue: Double { get set }
+    var step: Double { get set }
+    var refresh: Int { get set }
+    var height: Double { get set }
+    var isLeaf: Bool { get set }
+    var iconColor: String { get set }
+    var labelcolor: String { get set }
+    var valuecolor: String { get set }
+    var service: String { get set }
+    var state: String { get set }
+    var text: String { get set }
+    var legend: Bool { get set }
+    var encoding: String { get set }
+    var item: OpenHABItem? { get set }
+    var linkedPage: OpenHABLinkedPage? { get set }
+    var mappings: [OpenHABWidgetMapping] { get set }
+    var image: UIImage? { get set }
+    var widgets: [ChildWidget] { get set }
+
+    func flatten(_: [ChildWidget])
+}
+
+////  Recursive parsing of nested widget structure
+// extension Widget  {
+//    func flatten(_ widgets: [ChildWidget]) {
+//        for widget in widgets {
+//            append(widget)
+//            flatten(widget.widgets)
+//        }
+//    }
+// }
+
 class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     var id: String = ""
 

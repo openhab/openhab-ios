@@ -42,6 +42,8 @@
 		DA077598234671300086C685 /* OpenHABItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE404188322FA008B26AC /* OpenHABItem.swift */; };
 		DA077599234673000086C685 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
 		DA07759C234679470086C685 /* UserDefaultsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA07759B234679470086C685 /* UserDefaultsRepository.swift */; };
+		DA07759F23467A580086C685 /* OpenHABSitemap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */; };
+		DA07764423467B420086C685 /* OpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */; };
 		DA07764523467B5A0086C685 /* OpenHABLinkedPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE406188322FA008B26AC /* OpenHABLinkedPage.swift */; };
 		DA07764623467B890086C685 /* OpenHABWidgetMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */; };
 		DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA077649234683BC0086C685 /* SwitchRow.swift */; };
@@ -98,11 +100,6 @@
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA72E1BB236DEE9800B8EF3A /* DateFormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1BA236DEE9800B8EF3A /* DateFormatterExtension.swift */; };
 		DA72E1BC236DEE9800B8EF3A /* DateFormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1BA236DEE9800B8EF3A /* DateFormatterExtension.swift */; };
-		DA766801237F481A00E20DA2 /* SitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA766800237F481A00E20DA2 /* SitemapPage.swift */; };
-		DA766802237F483E00E20DA2 /* SitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA766800237F481A00E20DA2 /* SitemapPage.swift */; };
-		DA766804237F497900E20DA2 /* GenericSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA766803237F497900E20DA2 /* GenericSitemapPage.swift */; };
-		DA766805237F522600E20DA2 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7667FD237F47C200E20DA2 /* Widget.swift */; };
-		DA766806237F522700E20DA2 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7667FD237F47C200E20DA2 /* Widget.swift */; };
 		DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
 		DA7E1E4A22302287002AEFD8 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
@@ -125,6 +122,7 @@
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
+		DAD2370C2373F77D004E5A23 /* OpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */; };
 		DAD2370D2374C6B6004E5A23 /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
 		DADF4414237DDAC70025DCD9 /* ObservableOpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADF4412237DD9F30025DCD9 /* ObservableOpenHABWidget.swift */; };
 		DADF4417237E79DD0025DCD9 /* ObservableOpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADF4415237DEB670025DCD9 /* ObservableOpenHABSitemapPage.swift */; };
@@ -338,9 +336,6 @@
 		DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
 		DA72E1BA236DEE9800B8EF3A /* DateFormatterExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatterExtension.swift; sourceTree = SOURCE_ROOT; };
-		DA7667FD237F47C200E20DA2 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
-		DA766800237F481A00E20DA2 /* SitemapPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapPage.swift; sourceTree = "<group>"; };
-		DA766803237F497900E20DA2 /* GenericSitemapPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericSitemapPage.swift; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
@@ -818,15 +813,12 @@
 				DFDEE408188322FA008B26AC /* OpenHABSitemap.swift */,
 				DFDEE40A188322FA008B26AC /* OpenHABSitemapPage.swift */,
 				DADF4415237DEB670025DCD9 /* ObservableOpenHABSitemapPage.swift */,
-				DA766803237F497900E20DA2 /* GenericSitemapPage.swift */,
 				DFDEE40C188322FA008B26AC /* OpenHABWidget.swift */,
 				DADF4412237DD9F30025DCD9 /* ObservableOpenHABWidget.swift */,
 				DFA16EBD1889867B00EDB0BB /* OpenHABWidgetMapping.swift */,
 				DAB128EC2350BA630081E80B /* OpenHABStateDescription.swift */,
 				DAB128EA2350B87A0081E80B /* OpenHABOptions.swift */,
 				DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */,
-				DA766800237F481A00E20DA2 /* SitemapPage.swift */,
-				DA7667FD237F47C200E20DA2 /* Widget.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -1261,10 +1253,12 @@
 			files = (
 				DA077598234671300086C685 /* OpenHABItem.swift in Sources */,
 				DA72E1BC236DEE9800B8EF3A /* DateFormatterExtension.swift in Sources */,
+				DA07764423467B420086C685 /* OpenHABWidget.swift in Sources */,
 				DA0775292346705F0086C685 /* HostingController.swift in Sources */,
 				DADF441D237E8A5F0025DCD9 /* DataObject.swift in Sources */,
 				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
 				DA291416235BA1500024A702 /* OpenHABOptions.swift in Sources */,
+				DA07759F23467A580086C685 /* OpenHABSitemap.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
 				DADF441A237E81910025DCD9 /* ObservableOpenHABDataObject.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
@@ -1282,10 +1276,9 @@
 				DAC65FE4236F5C6600F4501E /* CodableExtension.swift in Sources */,
 				DAB599EC236C995B005DDF0B /* OSLogHelper.swift in Sources */,
 				DA077599234673000086C685 /* StringExtension.swift in Sources */,
-				DA766806237F522700E20DA2 /* Widget.swift in Sources */,
+				DAD2370C2373F77D004E5A23 /* OpenHABSitemapPage.swift in Sources */,
 				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
 				DADF4417237E79DD0025DCD9 /* ObservableOpenHABSitemapPage.swift in Sources */,
-				DA766802237F483E00E20DA2 /* SitemapPage.swift in Sources */,
 				DA72E153236CD38E00B8EF3A /* Equatable.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
 				DA291415235BA1490024A702 /* OpenHABStateDescription.swift in Sources */,
@@ -1353,9 +1346,7 @@
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,
-				DA766805237F522600E20DA2 /* Widget.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
-				DA766801237F481A00E20DA2 /* SitemapPage.swift in Sources */,
 				DA15FF4B221DF7D800FF0FDA /* StringExtension.swift in Sources */,
 				A08FF14A2233498700203EED /* ClientCertificateManager.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
@@ -1400,7 +1391,6 @@
 				DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */,
 				DA28370A2319C7C60066D7B5 /* Equatable.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,
-				DA766804237F497900E20DA2 /* GenericSitemapPage.swift in Sources */,
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,

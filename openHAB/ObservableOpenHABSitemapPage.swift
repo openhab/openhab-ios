@@ -13,6 +13,66 @@ import Foundation
 import Fuzi
 import os.log
 
+// protocol SitemapPage {
+//    associatedtype T
+//    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)? {get set}
+//    var widgets: [T] {get set}
+//    var pageId: String {get set}
+//    var title:  String {get set}
+//    var link: String {get set}
+//    var leaf: Bool {get set}
+//    func flatten()
+//
+//
+// }
+//
+// extension SitemapPage {
+//    func flatten() {
+//        var tempWidgets = [T]()
+//        tempWidgets.flattenWidgets(widgets)
+//        widgets = tempWidgets
+//
+//    }
+// }
+//
+// extension Array where Element:  {
+//    mutating func flatten(_ widgets: [Element]) {
+//        for widget in widgets {
+//            append(widget)
+//            flatten(widget.widgets)
+//        }
+//    }
+// }
+
+//
+// class GenericOpenHABSitemapPage<T: Type>: NSObject {
+//
+//    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
+//    var widgets: [T] = []
+//    var pageId = ""
+//    var title = ""
+//    var link = ""
+//    var leaf = false
+//
+//    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [T]) {
+//           super.init()
+//           self.pageId = pageId
+//           self.title = title
+//           self.link = link
+//           self.leaf = leaf
+//           var tempWidgets = [T]()
+//           tempWidgets.flatten(widgets)
+//           self.widgets = tempWidgets
+//           self.widgets.forEach {
+//               $0.sendCommand = { [weak self] item, command in
+//                   self?.sendCommand(item, commandToSend: command)
+//               }
+//           }
+//       }
+//
+//
+// }
+
 class ObservableOpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgets: [ObservableOpenHABWidget] = []

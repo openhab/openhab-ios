@@ -13,10 +13,6 @@ import Foundation
 import Fuzi
 import os.log
 
-class OpenHABSitemapPage: GenericOpenHABSitemapPage<OpenHABWidget> {
-    
-}
-
 class OpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgets: [OpenHABWidget] = []

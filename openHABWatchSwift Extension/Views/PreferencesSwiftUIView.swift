@@ -16,7 +16,7 @@ struct PreferencesSwiftUIView: View {
         let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
         let buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
 
-        return "V\(versionNumber)-\(buildNumber)"
+        return "V\(versionNumber).\(buildNumber)"
     }()
 
     var body: some View {
