@@ -11,6 +11,7 @@
 
 import SwiftUI
 
+// swiftlint:disable file_types_order
 struct PreferencesRowUIView: View {
     var label: String
     var content: String

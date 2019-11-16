@@ -13,6 +13,7 @@ import Kingfisher
 import os.log
 import SwiftUI
 
+// swiftlint:disable file_types_order
 struct SwitchRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @EnvironmentObject var dataObject: ObservableOpenHABDataObject

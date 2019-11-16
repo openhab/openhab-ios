@@ -100,6 +100,13 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 }
 
 extension ObservableOpenHABWidget {
+    private var statePublisher: AnyPublisher<Bool, Never> {
+        $stateBinding
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
     // This is an ugly initializer
     convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget]) {
         self.init()
@@ -192,13 +199,6 @@ extension ObservableOpenHABWidget {
                 break
             }
         }
-    }
-
-    private var statePublisher: AnyPublisher<Bool, Never> {
-        $stateBinding
-            .debounce(for: 0.1, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
     }
 }
 

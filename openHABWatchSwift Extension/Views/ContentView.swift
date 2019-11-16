@@ -11,6 +11,7 @@
 
 import SwiftUI
 
+// swiftlint:disable file_types_order
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var openHABDataObject: ObservableOpenHABDataObject

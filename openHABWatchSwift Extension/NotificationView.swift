@@ -11,6 +11,7 @@
 
 import SwiftUI
 
+// swiftlint:disable file_types_order
 struct NotificationView: View {
     let customTextLabel: String?
     let customDetailTextLabel: String?

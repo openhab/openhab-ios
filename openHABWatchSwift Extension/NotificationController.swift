@@ -36,7 +36,7 @@ class NotificationController: WKUserNotificationHostingController<NotificationVi
     override func didReceive(_ notification: UNNotification) {
         // This method is called when a notification needs to be presented.
 
-        let userData = UserData()
+        _ = UserData()
 
         let notificationData = notification.request.content.userInfo as? [String: Any]
 

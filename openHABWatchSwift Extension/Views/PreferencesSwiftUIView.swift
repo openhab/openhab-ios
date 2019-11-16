@@ -11,6 +11,7 @@
 
 import SwiftUI
 
+// swiftlint:disable file_types_order
 struct PreferencesSwiftUIView: View {
     var applicationVersionNumber: String = {
         let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
