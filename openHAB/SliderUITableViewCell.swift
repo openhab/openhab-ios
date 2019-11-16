@@ -103,6 +103,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     private func sliderDidChange(toValue value: Double) {
         os_log("Slider new value = %g", log: .default, type: .info, value)
-        widget.sendCommandDouble(value)
+        widget.sendCommand(valueText(value))
     }
 }
