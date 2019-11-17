@@ -11,7 +11,7 @@
 
 import Foundation
 
-protocol AnyDecoder {
+public protocol AnyDecoder {
     func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T
 }
 
@@ -20,7 +20,7 @@ extension PropertyListDecoder: AnyDecoder {}
 
 // Inspired by https://www.swiftbysundell.com/posts/type-inference-powered-serialization-in-swift
 extension Data {
-    func decoded<T: Decodable>(using decoder: AnyDecoder = JSONDecoder()) throws -> T {
+    public func decoded<T: Decodable>(using decoder: AnyDecoder = JSONDecoder()) throws -> T {
         return try decoder.decode(T.self, from: self)
     }
 }

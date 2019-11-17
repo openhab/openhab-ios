@@ -15,6 +15,7 @@ import AVKit
 import DynamicButton
 import Fuzi
 import Kingfisher
+import OpenHABCore
 import os.log
 import SideMenu
 import SVGKit

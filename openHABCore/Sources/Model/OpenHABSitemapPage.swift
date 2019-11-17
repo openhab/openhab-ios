@@ -13,15 +13,15 @@ import Foundation
 import Fuzi
 import os.log
 
-class OpenHABSitemapPage: NSObject {
-    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
-    var widgets: [OpenHABWidget] = []
-    var pageId = ""
-    var title = ""
-    var link = ""
-    var leaf = false
+public class OpenHABSitemapPage: NSObject {
+    public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
+    public var widgets: [OpenHABWidget] = []
+    public var pageId = ""
+    public var title = ""
+    public var link = ""
+    public var leaf = false
 
-    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
+    public init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title
@@ -37,7 +37,7 @@ class OpenHABSitemapPage: NSObject {
         }
     }
 
-    init(xml xmlElement: XMLElement) {
+    public init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
@@ -59,7 +59,7 @@ class OpenHABSitemapPage: NSObject {
         }
     }
 
-    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
+    public init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title
@@ -82,7 +82,7 @@ class OpenHABSitemapPage: NSObject {
 }
 
 extension OpenHABSitemapPage {
-    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+    public func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
         let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: pageId,
                                                             title: title,
                                                             link: link,
@@ -93,7 +93,7 @@ extension OpenHABSitemapPage {
 }
 
 extension OpenHABSitemapPage {
-    struct CodingData: Decodable {
+    public struct CodingData: Decodable {
         let pageId: String?
         let title: String?
         let link: String?
@@ -111,7 +111,7 @@ extension OpenHABSitemapPage {
 }
 
 extension OpenHABSitemapPage.CodingData {
-    var openHABSitemapPage: OpenHABSitemapPage {
+    public var openHABSitemapPage: OpenHABSitemapPage {
         let mappedWidgets = widgets?.map { $0.openHABWidget } ?? []
         return OpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }

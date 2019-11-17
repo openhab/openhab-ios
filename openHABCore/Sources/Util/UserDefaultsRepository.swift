@@ -13,11 +13,11 @@ import os.log
 import UIKit
 
 // Convenient access to UserDefaults
-struct Preferences {
+public struct Preferences {
     // Much shorter as Property Wrappers are available with Swift 5.1
     // Inspired by https://www.avanderlee.com/swift/property-wrappers/
     @propertyWrapper
-    struct UserDefault<T> {
+    public struct UserDefault<T> {
         let key: String
         let defaultValue: T
 
@@ -26,7 +26,7 @@ struct Preferences {
             self.defaultValue = defaultValue
         }
 
-        var wrappedValue: T {
+        public var wrappedValue: T {
             get {
                 return UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
             }
@@ -40,7 +40,7 @@ struct Preferences {
     // As long as multiple property wrappers are not supported we need to add a little repetitive boiler plate code
 
     @propertyWrapper
-    struct UserDefaultURL {
+    public struct UserDefaultURL {
         let key: String
         let defaultValue: String
 
@@ -49,7 +49,7 @@ struct Preferences {
             self.defaultValue = defaultValue
         }
 
-        var wrappedValue: String {
+        public var wrappedValue: String {
             get {
                 guard let localUrl = UserDefaults.standard.string(forKey: key) else { return defaultValue }
                 let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
@@ -64,17 +64,26 @@ struct Preferences {
 
     static private let defaults = UserDefaults.standard
 
-    @UserDefaultURL("localUrl", defaultValue: "") static var localUrl: String
-    @UserDefaultURL("remoteUrl", defaultValue: "https://openhab.org:8444") static var remoteUrl: String
-
-    @UserDefault("username", defaultValue: "test") static var username: String
-    @UserDefault("password", defaultValue: "test") static var password: String
-    @UserDefault("ignoreSSL", defaultValue: false) static var ignoreSSL: Bool
-    @UserDefault("sitemapName", defaultValue: "watch") static var sitemapName: String
-    @UserDefault("demomode", defaultValue: true) static var demomode: Bool
-    @UserDefault("idleOff", defaultValue: false) static var idleOff: Bool
-    @UserDefault("iconType", defaultValue: 0) static var iconType: Int
-    @UserDefault("defaultSitemap", defaultValue: "demo") static var defaultSitemap: String
+    @UserDefaultURL("localUrl", defaultValue: "")
+    public static var localUrl: String
+    @UserDefaultURL("remoteUrl", defaultValue: "https://openhab.org:8444")
+    public static var remoteUrl: String
+    @UserDefault("username", defaultValue: "test")
+    public static var username: String
+    @UserDefault("password", defaultValue: "test")
+    public static var password: String
+    @UserDefault("ignoreSSL", defaultValue: false)
+    public static var ignoreSSL: Bool
+    @UserDefault("sitemapName", defaultValue: "watch")
+    public static var sitemapName: String
+    @UserDefault("demomode", defaultValue: true)
+    public static var demomode: Bool
+    @UserDefault("idleOff", defaultValue: false)
+    public static var idleOff: Bool
+    @UserDefault("iconType", defaultValue: 0)
+    public static var iconType: Int
+    @UserDefault("defaultSitemap", defaultValue: "demo")
+    public static var defaultSitemap: String
 
     static func readActiveUrl() -> String {
         if Preferences.remoteUrl != "" {

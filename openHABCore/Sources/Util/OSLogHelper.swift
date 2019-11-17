@@ -19,14 +19,14 @@ extension OSLog {
     private static var subsystem = Bundle.main.bundleIdentifier!
 
     /// Logs the view cycles like viewDidLoad.
-    static let viewCycle = OSLog(subsystem: subsystem, category: "viewcycle")
+    public static let viewCycle = OSLog(subsystem: subsystem, category: "viewcycle")
 
     /// Logs the remote accesses
-    static let remoteAccess = OSLog(subsystem: subsystem, category: "remoteAccess")
+    public static let remoteAccess = OSLog(subsystem: subsystem, category: "remoteAccess")
 
     /// Logs the URL composition
-    static let urlComposition = OSLog(subsystem: subsystem, category: "urlComposition")
+    public static let urlComposition = OSLog(subsystem: subsystem, category: "urlComposition")
 
     /// Logs the notifications
-    static let notifications = OSLog(subsystem: subsystem, category: "notifications")
+    public static let notifications = OSLog(subsystem: subsystem, category: "notifications")
 }

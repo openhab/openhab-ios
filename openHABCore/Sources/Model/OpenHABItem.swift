@@ -14,16 +14,16 @@ import Fuzi
 import os.log
 import UIKit
 
-final class OpenHABItem: NSObject, CommItem {
-    var type = ""
-    var groupType = ""
-    var name = ""
-    var state = ""
-    var link = ""
-    var label = ""
-    var stateDescription: OpenHABStateDescription?
+public final class OpenHABItem: NSObject, CommItem {
+    public var type = ""
+    public var groupType = ""
+    public var name = ""
+    public var state = ""
+    public var link = ""
+    public var label = ""
+    public var stateDescription: OpenHABStateDescription?
 
-    init(name: String, type: String, state: String, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?) {
+    public init(name: String, type: String, state: String, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?) {
         self.name = name
         self.type = type
         self.state = state
@@ -33,7 +33,7 @@ final class OpenHABItem: NSObject, CommItem {
         self.stateDescription = stateDescription
     }
 
-    init(xml xmlElement: XMLElement) {
+    public init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
@@ -50,15 +50,15 @@ final class OpenHABItem: NSObject, CommItem {
 }
 
 extension OpenHABItem {
-    func stateAsDouble() -> Double {
+    public func stateAsDouble() -> Double {
         return state.numberValue?.doubleValue ?? 0
     }
 
-    func stateAsInt() -> Int {
+    public func stateAsInt() -> Int {
         return state.numberValue?.intValue ?? 0
     }
 
-    func stateAsUIColor() -> UIColor? {
+    public func stateAsUIColor() -> UIColor? {
         if state == "Uninitialized" {
             return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         } else {
@@ -75,7 +75,7 @@ extension OpenHABItem {
         }
     }
 
-    func stateAsLocation() -> CLLocation? {
+    public func stateAsLocation() -> CLLocation? {
         if type == "Location" {
             // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitued>,<altitude>')
             let locationComponents = state.components(separatedBy: ",")
@@ -91,7 +91,7 @@ extension OpenHABItem {
 }
 
 extension OpenHABItem {
-    struct CodingData: Decodable {
+    public struct CodingData: Decodable {
         let type: String
         let groupType: String?
         let name: String
@@ -103,7 +103,7 @@ extension OpenHABItem {
 }
 
 extension OpenHABItem.CodingData {
-    var openHABItem: OpenHABItem {
+    public var openHABItem: OpenHABItem {
         return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription)
     }
 }

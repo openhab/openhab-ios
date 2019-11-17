@@ -12,6 +12,7 @@
 import Alamofire
 import Combine
 import Foundation
+import OpenHABCoreWatch
 import os.log
 import SwiftUI
 

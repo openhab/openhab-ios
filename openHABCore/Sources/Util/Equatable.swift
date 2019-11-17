@@ -12,7 +12,7 @@
 import Foundation
 
 extension Equatable {
-    func isAny(of candidates: Self...) -> Bool {
+    public func isAny(of candidates: Self...) -> Bool {
         return candidates.contains(self)
     }
 }

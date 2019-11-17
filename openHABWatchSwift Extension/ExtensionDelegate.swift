@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Kingfisher
+import OpenHABCoreWatch
 import WatchConnectivity
 import WatchKit
 
@@ -39,11 +40,11 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
         // Perform any final initialization of your application.
         activateWatchConnectivity()
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter())
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))
 
         NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
 
-        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter())]
+        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))]
     }
 
     func activateWatchConnectivity() {

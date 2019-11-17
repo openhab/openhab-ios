@@ -12,19 +12,19 @@
 import Foundation
 import os.log
 
-enum IconType: Int {
+public enum IconType: Int {
     case png
     case svg
 }
 
-struct Endpoint {
+public struct Endpoint {
     let baseURL: String
     let path: String
     var queryItems: [URLQueryItem]
 }
 
 extension Endpoint {
-    var url: URL? {
+    public var url: URL? {
         var components = URLComponents(string: baseURL)
         components?.path = path
         components?.queryItems = queryItems
@@ -32,16 +32,16 @@ extension Endpoint {
         return components?.url
     }
 
-    static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
+    public static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
         return Endpoint(baseURL: openHABRootUrl,
                         path: "/rest/sitemaps/\(sitemapName)/\(sitemapName)",
                         queryItems: [URLQueryItem(name: "jsoncallback", value: "callback")])
     }
 
-    static func appleRegistration(prefsURL: String,
-                                  deviceToken: String,
-                                  deviceId: String,
-                                  deviceName: String) -> Endpoint {
+    public static func appleRegistration(prefsURL: String,
+                                         deviceToken: String,
+                                         deviceId: String,
+                                         deviceName: String) -> Endpoint {
         return Endpoint(baseURL: prefsURL,
                         path: "/addAppleRegistration",
                         queryItems: [URLQueryItem(name: "regId", value: deviceToken),
@@ -49,26 +49,26 @@ extension Endpoint {
                                      URLQueryItem(name: "deviceModel", value: deviceName)])
     }
 
-    static func notification(prefsURL: String) -> Endpoint {
+    public static func notification(prefsURL: String) -> Endpoint {
         return Endpoint(baseURL: prefsURL,
                         path: "/api/v1/notifications",
                         queryItems: [URLQueryItem(name: "limit", value: "20")])
     }
 
-    static func tracker(openHABRootUrl: String) -> Endpoint {
+    public static func tracker(openHABRootUrl: String) -> Endpoint {
         return Endpoint(baseURL: openHABRootUrl,
                         path: "/rest/bindings",
                         queryItems: [])
     }
 
-    static func sitemaps(openHABRootUrl: String) -> Endpoint {
+    public static func sitemaps(openHABRootUrl: String) -> Endpoint {
         return Endpoint(baseURL: openHABRootUrl,
                         path: "/rest/sitemaps",
                         queryItems: [URLQueryItem(name: "limit", value: "20")])
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func chart(rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
+    public static func chart(rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)
         var endpoint = Endpoint(baseURL: rootUrl,
                                 path: "/chart",
@@ -95,7 +95,7 @@ extension Endpoint {
         return endpoint
     }
 
-    static func icon(rootUrl: String, version: Int, icon: String?, value: String, iconType: IconType) -> Endpoint {
+    public static func icon(rootUrl: String, version: Int, icon: String?, value: String, iconType: IconType) -> Endpoint {
         guard let icon = icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
@@ -113,7 +113,7 @@ extension Endpoint {
         }
     }
 
-    static func iconForDrawer(rootUrl: String, version: Int, icon: String) -> Endpoint {
+    public static func iconForDrawer(rootUrl: String, version: Int, icon: String) -> Endpoint {
         if version == 2 {
             return Endpoint(baseURL: rootUrl,
                             path: "/icon/\(icon).png",
@@ -127,7 +127,7 @@ extension Endpoint {
 }
 
 extension URL {
-    init(staticString string: StaticString) {
+    public init(staticString string: StaticString) {
         guard let url = URL(string: "\(string)") else {
             preconditionFailure("Invalid static URL string: \(string)")
         }

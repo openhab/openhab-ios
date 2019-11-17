@@ -13,7 +13,7 @@ import Foundation
 import os.log
 import Security
 
-protocol ClientCertificateManagerDelegate: NSObjectProtocol {
+public protocol ClientCertificateManagerDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?)
     // delegate should ask user for the export password used to decode the PKCS#12
@@ -22,7 +22,7 @@ protocol ClientCertificateManagerDelegate: NSObjectProtocol {
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String)
 }
 
-class ClientCertificateManager {
+public class ClientCertificateManager {
     private var importingRawCert: Data?
     private var importingClientKey: SecKey?
     private var importingClientCert: SecCertificate?
@@ -30,13 +30,13 @@ class ClientCertificateManager {
 
     weak var delegate: ClientCertificateManagerDelegate?
 
-    var clientIdentities: [SecIdentity] = []
+    public var clientIdentities: [SecIdentity] = []
 
     init() {
         loadFromKeychain()
     }
 
-    func loadFromKeychain() {
+    public func loadFromKeychain() {
         let getIdentityQuery: [String: Any] = [kSecClass as String: kSecClassIdentity,
                                                kSecReturnRef as String: true,
                                                kSecMatchLimit as String: kSecMatchLimitAll]
@@ -47,7 +47,7 @@ class ClientCertificateManager {
         }
     }
 
-    func getIdentityName(index: Int) -> String {
+    public func getIdentityName(index: Int) -> String {
         if index >= 0, index < clientIdentities.count {
             let identity = clientIdentities[index]
             var cert: SecCertificate?
@@ -60,7 +60,7 @@ class ClientCertificateManager {
         return ""
     }
 
-    func evaluateTrust(distinguishedNames: [Data]) -> SecIdentity? {
+    public func evaluateTrust(distinguishedNames: [Data]) -> SecIdentity? {
         // Search the keychain for an identity that matches the DN of the certificate being requested by the server
         let getIdentityQuery: [String: Any] = [kSecClass as String: kSecClassIdentity,
                                                kSecReturnRef as String: true,
@@ -74,7 +74,7 @@ class ClientCertificateManager {
         return nil
     }
 
-    func addToKeychain(key: SecKey, cert: SecCertificate) -> OSStatus {
+    public func addToKeychain(key: SecKey, cert: SecCertificate) -> OSStatus {
         // Add the certificate to the keychain
         let addCertQuery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                            kSecValueRef as String: cert]
@@ -102,7 +102,7 @@ class ClientCertificateManager {
         return status
     }
 
-    func deleteFromKeychain(index: Int) -> OSStatus {
+    public func deleteFromKeychain(index: Int) -> OSStatus {
         let identity = clientIdentities[index]
 
         var cert: SecCertificate?
@@ -124,7 +124,7 @@ class ClientCertificateManager {
         return status
     }
 
-    func startImportClientCertificate(url: URL) -> Bool {
+    public func startImportClientCertificate(url: URL) -> Bool {
         do {
             // Import PKCS12 client cert
             importingRawCert = try Data(contentsOf: url)
@@ -141,7 +141,7 @@ class ClientCertificateManager {
         return true
     }
 
-    func clientCertificateAccepted(password: String?) {
+    public func clientCertificateAccepted(password: String?) {
         // Import PKCS12 client cert
         importingPassword = password
         let status = decodePKCS12()
@@ -159,14 +159,14 @@ class ClientCertificateManager {
         }
     }
 
-    func clientCertificateRejected() {
+    public func clientCertificateRejected() {
         importingClientKey = nil
         importingClientCert = nil
         importingRawCert = nil
         importingPassword = nil
     }
 
-    func addClientCertificateToKeychain() {
+    public func addClientCertificateToKeychain() {
         let status = addToKeychain(key: importingClientKey!, cert: importingClientCert!)
         if status != noErr {
             var errMsg = "Unable to add certificate to the keychain: \(status)."

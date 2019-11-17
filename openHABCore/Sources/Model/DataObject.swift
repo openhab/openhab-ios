@@ -11,7 +11,9 @@
 
 import Foundation
 
-class OpenHABOptions: Decodable {
-    var value = ""
-    var label = ""
+public protocol DataObject: AnyObject {
+    var openHABRootUrl: String { get set }
+    var openHABUsername: String { get set }
+    var openHABPassword: String { get set }
+    var openHABVersion: Int { get set }
 }

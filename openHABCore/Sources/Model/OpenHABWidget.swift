@@ -10,55 +10,93 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
-#if canImport(Combine)
-import Combine
-#endif
 import Foundation
 import Fuzi
 import MapKit
 import os.log
 
-@available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
-class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
-    var id: String = ""
+protocol Widget: AnyObject {
+    //  Recursive constraints possible as of Swift 4.1
+    associatedtype ChildWidget: Widget
 
-    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
-    var widgetId = ""
-    var label = ""
-    var icon = ""
-    var type = ""
-    var url = ""
-    var period = ""
-    var minValue = 0.0
-    var maxValue = 100.0
-    var step = 1.0
-    var refresh = 0
-    var height = 44.0
-    var isLeaf = false
-    var iconColor = ""
-    var labelcolor = ""
-    var valuecolor = ""
-    var service = ""
-    var state = ""
-    var text = ""
-    var legend = false
-    var encoding = ""
-    var item: OpenHABItem?
-    var linkedPage: OpenHABLinkedPage?
-    var mappings: [OpenHABWidgetMapping] = []
-    var image: UIImage?
-    var widgets: [ObservableOpenHABWidget] = []
+    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)? { get set }
+    var widgetId: String { get set }
+    var label: String { get set }
+    var icon: String { get set }
+    var type: String { get set }
+    var url: String { get set }
+    var period: String { get set }
+    var minValue: Double { get set }
+    var maxValue: Double { get set }
+    var step: Double { get set }
+    var refresh: Int { get set }
+    var height: Double { get set }
+    var isLeaf: Bool { get set }
+    var iconColor: String { get set }
+    var labelcolor: String { get set }
+    var valuecolor: String { get set }
+    var service: String { get set }
+    var state: String { get set }
+    var text: String { get set }
+    var legend: Bool { get set }
+    var encoding: String { get set }
+    var item: OpenHABItem? { get set }
+    var linkedPage: OpenHABLinkedPage? { get set }
+    var mappings: [OpenHABWidgetMapping] { get set }
+    var image: UIImage? { get set }
+    var widgets: [ChildWidget] { get set }
 
-    @Published var stateBinding: Bool = false
+    func flatten(_: [ChildWidget])
+}
+
+////  Recursive parsing of nested widget structure
+// extension Widget  {
+//    func flatten(_ widgets: [ChildWidget]) {
+//        for widget in widgets {
+//            append(widget)
+//            flatten(widget.widgets)
+//        }
+//    }
+// }
+
+public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
+    public var id: String = ""
+
+    public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
+    public var widgetId = ""
+    public var label = ""
+    public var icon = ""
+    public var type = ""
+    public var url = ""
+    public var period = ""
+    public var minValue = 0.0
+    public var maxValue = 100.0
+    public var step = 1.0
+    public var refresh = 0
+    public var height = 44.0
+    public var isLeaf = false
+    public var iconColor = ""
+    public var labelcolor = ""
+    public var valuecolor = ""
+    public var service = ""
+    public var state = ""
+    public var text = ""
+    public var legend = false
+    public var encoding = ""
+    public var item: OpenHABItem?
+    public var linkedPage: OpenHABLinkedPage?
+    public var mappings: [OpenHABWidgetMapping] = []
+    public var image: UIImage?
+    public var widgets: [OpenHABWidget] = []
 
     // Text prior to "["
-    var labelText: String? {
+    public var labelText: String? {
         let array = label.components(separatedBy: "[")
         return array[0].trimmingCharacters(in: .whitespaces)
     }
 
     // Text between square brackets
-    var labelValue: String? {
+    public var labelValue: String? {
         // Swift 5 raw strings
         let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [])
         guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: (label as NSString).length)) else { return nil }
@@ -66,11 +104,11 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         return String(label[range])
     }
 
-    var coordinate: CLLocationCoordinate2D {
+    public var coordinate: CLLocationCoordinate2D {
         return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
-    var mappingsOrItemOptions: [OpenHABWidgetMapping] {
+    public var mappingsOrItemOptions: [OpenHABWidgetMapping] {
         if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
             return itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
         } else {
@@ -78,11 +116,11 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         }
     }
 
-    func sendCommandDouble(_ command: Double) {
+    public func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
 
-    func sendCommand(_ command: String?) {
+    public func sendCommand(_ command: String?) {
         guard let item = item else {
             os_log("Command for Item = nil", log: .default, type: .info)
             return
@@ -94,25 +132,16 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         sendCommand(item, command)
     }
 
-    func mappingIndex(byCommand command: String?) -> Int? {
+    public func mappingIndex(byCommand command: String?) -> Int? {
         return mappingsOrItemOptions.firstIndex { $0.command == command }
     }
 }
 
-extension ObservableOpenHABWidget {
-    private var statePublisher: AnyPublisher<Bool, Never> {
-        $stateBinding
-            .debounce(for: 0.1, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-
+extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget]) {
+    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
         self.init()
-
         id = widgetId
-        stateBinding = state == "ON" ? true : false
 
         self.widgetId = widgetId
         self.label = label
@@ -147,23 +176,11 @@ extension ObservableOpenHABWidget {
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
-
-        _ = statePublisher
-            .receive(on: RunLoop.main)
-            .map { value -> String in
-                value ? "ON" : "OFF"
-            }
-            .sink { receivedValue in
-                // sink is the subscriber and terminates the pipeline
-                self.sendCommand(receivedValue)
-                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, item?.name ?? "", receivedValue)
-            }
     }
 
     convenience init(xml xmlElement: XMLElement) {
         self.init()
         id = widgetId
-        stateBinding = state == "ON" ? true : false
 
         for child in xmlElement.children {
             switch child.tag {
@@ -191,7 +208,7 @@ extension ObservableOpenHABWidget {
             // Int
             case "refresh": refresh = Int(child.stringValue) ?? 0
             // Embedded
-            case "widget": widgets.append(ObservableOpenHABWidget(xml: child))
+            case "widget": widgets.append(OpenHABWidget(xml: child))
             case "item": item = OpenHABItem(xml: child)
             case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
             case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
@@ -202,8 +219,8 @@ extension ObservableOpenHABWidget {
     }
 }
 
-extension ObservableOpenHABWidget {
-    struct CodingData: Decodable {
+extension OpenHABWidget {
+    public struct CodingData: Decodable {
         let widgetId: String
         let label: String
         let type: String
@@ -228,20 +245,20 @@ extension ObservableOpenHABWidget {
         let item: OpenHABItem.CodingData?
         let linkedPage: OpenHABLinkedPage?
         let mappings: [OpenHABWidgetMapping]
-        let widgets: [ObservableOpenHABWidget.CodingData]
+        let widgets: [OpenHABWidget.CodingData]
     }
 }
 
 // swiftlint:disable line_length
-extension ObservableOpenHABWidget.CodingData {
-    var openHABWidget: ObservableOpenHABWidget {
+extension OpenHABWidget.CodingData {
+    var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map { $0.openHABWidget }
-        return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets)
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets)
     }
 }
 
 //  Recursive parsing of nested widget structure
-extension Array where Element == ObservableOpenHABWidget {
+extension Array where Element == OpenHABWidget {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)

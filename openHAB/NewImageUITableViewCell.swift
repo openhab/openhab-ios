@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
+import OpenHABCore
 import os.log
 import UIKit
 

@@ -11,6 +11,7 @@
 
 import Foundation
 import Fuzi
+import OpenHABCoreWatch
 import os.log
 
 // protocol SitemapPage {

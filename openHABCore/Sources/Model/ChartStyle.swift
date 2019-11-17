@@ -11,7 +11,7 @@
 
 import Foundation
 
-enum ChartStyle {
+public enum ChartStyle {
     case dark
     case light
 }

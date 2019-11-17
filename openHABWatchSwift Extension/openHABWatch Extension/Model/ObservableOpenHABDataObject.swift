@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCoreWatch
 
 class ObservableOpenHABDataObject: NSObject, DataObject, ObservableObject {
     @Published var openHABRootUrl = ""

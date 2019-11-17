@@ -12,24 +12,27 @@
 import Foundation
 import Fuzi
 
-class OpenHABWidgetMapping: NSObject, Decodable {
-    var command = ""
-    var label = ""
-}
-
-extension OpenHABWidgetMapping {
-    convenience init(command: String, label: String) {
-        self.init()
-        self.command = command
-        self.label = label
+public class OpenHABLinkedPage: NSObject, Decodable {
+    private enum CodingKeys: String, CodingKey {
+        case pageId = "id"
+        case title
+        case icon
+        case link
     }
 
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
+    public var pageId = ""
+    public var title = ""
+    public var icon = ""
+    public var link = ""
+
+    public init(xml xmlElement: XMLElement) {
+        super.init()
         for child in xmlElement.children {
             switch child.tag {
-            case "command": command = child.stringValue
-            case "label": label = child.stringValue
+            case "title": title = child.stringValue
+            case "icon": icon = child.stringValue
+            case "link": link = child.stringValue
+            case "id": pageId = child.stringValue
             default:
                 break
             }

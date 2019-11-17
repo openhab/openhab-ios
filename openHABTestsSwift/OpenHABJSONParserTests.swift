@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import openHAB
+@testable import OpenHABCore
 import os.signpost
 import XCTest
 
@@ -543,8 +544,8 @@ class OpenHABJSONParserTests: XCTestCase {
         }
     }
 
-    func testUserData() {
-        let userData = UserData()
-        XCTAssertEqual(userData.items[0].widgetId, "00")
-    }
+//    func testUserData() {
+//        let userData = UserData()
+//        XCTAssertEqual(userData.items[0].widgetId, "00")
+//    }
 }

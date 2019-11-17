@@ -11,13 +11,13 @@
 
 import Foundation
 
-class OpenHABStateDescription {
-    var minimum = 0.0
-    var maximum = 100.0
-    var step = 1.0
-    var readOnly = false
+public class OpenHABStateDescription {
+    public var minimum = 0.0
+    public var maximum = 100.0
+    public var step = 1.0
+    public var readOnly = false
 
-    var options: [OpenHABOptions] = []
+    public var options: [OpenHABOptions] = []
 
     init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?) {
         self.minimum = minimum ?? 0.0
@@ -29,7 +29,7 @@ class OpenHABStateDescription {
 }
 
 extension OpenHABStateDescription {
-    struct CodingData: Decodable {
+    public struct CodingData: Decodable {
         let minimum: Double?
         let maximum: Double?
         let step: Double?

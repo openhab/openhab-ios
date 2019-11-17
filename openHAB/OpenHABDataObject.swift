@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
 
 class OpenHABDataObject: NSObject, DataObject {
     var openHABRootUrl = ""

@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCoreWatch
 import SwiftUI
 
 // swiftlint:disable file_types_order

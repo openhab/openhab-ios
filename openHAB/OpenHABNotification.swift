@@ -45,7 +45,7 @@ class OpenHABNotification: NSObject {
 // then convert that into a openHABNotification
 // Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
 extension OpenHABNotification {
-    struct CodingData: Decodable {
+    public struct CodingData: Decodable {
         let id: String
         let message: String
         let v: Int

@@ -14,7 +14,7 @@ import Fuzi
 
 // The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
 // Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
-struct ValueOrFalse<T: Decodable>: Decodable {
+public struct ValueOrFalse<T: Decodable>: Decodable {
     let value: T?
 
     public init(from decoder: Decoder) throws {
@@ -28,15 +28,15 @@ struct ValueOrFalse<T: Decodable>: Decodable {
     }
 }
 
-final class OpenHABSitemap: NSObject {
-    var name = ""
-    var icon = ""
-    var label = ""
-    var link = ""
-    var leaf: Bool?
-    var homepageLink = ""
+public final class OpenHABSitemap: NSObject {
+    public var name = ""
+    public var icon = ""
+    public var label = ""
+    public var link = ""
+    public var leaf: Bool?
+    public var homepageLink = ""
 
-    init(name: String, icon: String, label: String, link: String, leaf: Bool, homepageLink: String) {
+    public init(name: String, icon: String, label: String, link: String, leaf: Bool, homepageLink: String) {
         self.name = name
         self.icon = icon
         self.label = label
@@ -45,7 +45,7 @@ final class OpenHABSitemap: NSObject {
         self.homepageLink = homepageLink
     }
 
-    init(xml xmlElement: XMLElement) {
+    public init(xml xmlElement: XMLElement) {
         super.init()
         for child in xmlElement.children {
             switch child.tag {
@@ -69,12 +69,12 @@ final class OpenHABSitemap: NSObject {
 }
 
 extension OpenHABSitemap {
-    struct CodingData: Decodable {
-        let name: String
-        let label: String
-        let page: HomePage
-        let link: String
-        let icon: String?
+    public struct CodingData: Decodable {
+        public let name: String
+        public let label: String
+        public let page: HomePage
+        public let link: String
+        public let icon: String?
 
         private enum CodingKeys: String, CodingKey {
             case page = "homepage"
@@ -84,7 +84,7 @@ extension OpenHABSitemap {
             case icon
         }
 
-        init(from decoder: Decoder) throws {
+        public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
             name = try container.decode(forKey: .name)
@@ -122,16 +122,16 @@ extension OpenHABSitemap {
         }
     }
 
-    struct HomePage: Decodable {
-        let link: String
-        let leaf: Bool
-        let timeout: ValueOrFalse<String>?
-        let widgets: [OpenHABWidget.CodingData]?
+    public struct HomePage: Decodable {
+        public let link: String
+        public let leaf: Bool
+        public let timeout: ValueOrFalse<String>?
+        public let widgets: [OpenHABWidget.CodingData]?
     }
 }
 
 extension OpenHABSitemap.CodingData {
-    var openHABSitemap: OpenHABSitemap {
+    public var openHABSitemap: OpenHABSitemap {
         return OpenHABSitemap(name: name,
                               icon: icon ?? "",
                               label: label,

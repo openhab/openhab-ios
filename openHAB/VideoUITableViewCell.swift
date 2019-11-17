@@ -12,6 +12,7 @@
 import Alamofire
 import AVFoundation
 import AVKit
+import OpenHABCore
 import os.log
 
 enum VideoEncoding: String {

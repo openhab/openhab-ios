@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import Alamofire
-@testable import openHAB
+@testable import OpenHABCore
 import XCTest
 
 class RESTAPITest: XCTestCase {

@@ -13,30 +13,30 @@ import Alamofire
 import Foundation
 import os.log
 
-protocol ServerCertificateManagerDelegate: NSObjectProtocol {
+public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on what to do with invalid certificate
     func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
 }
 
-class ServerCertificateManager {
+public class ServerCertificateManager {
     // Handle the different responses of the user
     // Ideal for transfer to Result type of swift 5.0
-    enum EvaluateResult {
+    public enum EvaluateResult {
         case undecided
         case deny
         case permitOnce
         case permitAlways
     }
 
-    var evaluateResult: EvaluateResult = .undecided
+    public var evaluateResult: EvaluateResult = .undecided
     weak var delegate: ServerCertificateManagerDelegate?
     var allowInvalidCertificates: Bool = false
-    var trustedCertificates: [String: Any] = [:]
+    public var trustedCertificates: [String: Any] = [:]
 
     // Init a ServerCertificateManager and set ignore certificates setting
-    init(ignoreCertificates: Bool) {
+    public init(ignoreCertificates: Bool) {
         allowInvalidCertificates = ignoreCertificates
     }
 
@@ -60,7 +60,7 @@ class ServerCertificateManager {
         return filePath
     }
 
-    func saveTrustedCertificates() {
+    public func saveTrustedCertificates() {
         do {
             let data = try NSKeyedArchiver.archivedData(withRootObject: trustedCertificates, requiringSecureCoding: false)
             try data.write(to: URL(string: getPersistensePath() ?? "")!)

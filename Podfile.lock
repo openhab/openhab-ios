@@ -95,7 +95,7 @@ DEPENDENCIES:
   - FlexColorPicker (from `https://github.com/RastislavMirek/FlexColorPicker.git`, tag `1.3.1`)
   - Fuzi (~> 3.1)
   - Kingfisher (~> 5.0)
-  - Kingfisher/SwiftUI
+  - Kingfisher/SwiftUI (~> 5.0)
   - SideMenu (~> 6.4)
   - SVGKit
   - SwiftFormat/CLI
@@ -164,6 +164,6 @@ SPEC CHECKSUMS:
   SwiftLint: c078a14d7d7ade75e5507795d185e3da41d844d2
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: 6ff7eca6cf2c841b269ffb8df6feab216d4e53fe
+PODFILE CHECKSUM: 4b30d14c57133b173d791433a7ecdfe393c4f335
 
 COCOAPODS: 1.8.4

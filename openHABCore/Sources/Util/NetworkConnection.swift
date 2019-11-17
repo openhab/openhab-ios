@@ -18,7 +18,7 @@ import UIKit
 // SessionManager --> Session
 // serverTrustPolicyManager --> serverTrustManager
 // ServerTrustPolicyManager --> ServerTrustManager
-let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
+public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
@@ -35,7 +35,7 @@ let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challen
     return (disposition, credential)
 }
 
-let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
+public let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
@@ -58,19 +58,19 @@ let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationCh
     }
 }
 
-protocol CommItem {
+public protocol CommItem {
     var link: String { get set }
 }
 
-class NetworkConnection {
-    static var shared: NetworkConnection!
+public class NetworkConnection {
+    public static var shared: NetworkConnection!
 
-    static var atmosphereTrackingId = ""
+    public static var atmosphereTrackingId = ""
 
-    var clientCertificateManager = ClientCertificateManager()
-    var serverCertificateManager: ServerCertificateManager!
-    var manager: Alamofire.SessionManager!
-    var rootUrl: URL?
+    public var clientCertificateManager = ClientCertificateManager()
+    public var serverCertificateManager: ServerCertificateManager!
+    public var manager: Alamofire.SessionManager!
+    public var rootUrl: URL?
 
     init(ignoreSSL: Bool,
          manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
@@ -85,41 +85,41 @@ class NetworkConnection {
         self.manager.adapter = adapter
     }
 
-    class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {
+    public class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {
         shared = NetworkConnection(ignoreSSL: ignoreSSL, adapter: adapter)
     }
 
-    static func register(prefsURL: String,
-                         deviceToken: String,
-                         deviceId: String,
-                         deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    public static func register(prefsURL: String,
+                                deviceToken: String,
+                                deviceId: String,
+                                deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
-    static func sitemaps(openHABRootUrl: String,
-                         completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    public static func sitemaps(openHABRootUrl: String,
+                                completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
-    static func tracker(openHABRootUrl: String,
-                        completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    public static func tracker(openHABRootUrl: String,
+                               completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
-    static func notification(urlString: String,
-                             completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    public static func notification(urlString: String,
+                                    completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
     }
 
-    static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
+    public static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
         if let commandUrl = URL(string: item.link) {
             var commandRequest = URLRequest(url: commandUrl)
 
@@ -146,10 +146,10 @@ class NetworkConnection {
         return nil
     }
 
-    static func page(url: URL?,
-                     longPolling: Bool,
-                     openHABVersion: Int,
-                     completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+    public static func page(url: URL?,
+                            longPolling: Bool,
+                            openHABVersion: Int,
+                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
         guard let url = url else { return nil }
 
         var pageRequest = URLRequest(url: url)
@@ -177,10 +177,10 @@ class NetworkConnection {
             .responseData(completionHandler: completionHandler)
     }
 
-    static func page(pageUrl: String,
-                     longPolling: Bool,
-                     openHABVersion: Int,
-                     completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+    public static func page(pageUrl: String,
+                            longPolling: Bool,
+                            openHABVersion: Int,
+                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
         if pageUrl == "" {
             return nil
         }
@@ -202,12 +202,12 @@ class NetworkConnection {
         task.resume()
     }
 
-    func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
+    public func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
         serverCertificateManager.delegate = serverDelegate
         clientCertificateManager.delegate = clientDelegate
     }
 
-    func setRootUrl(_ url: String?) {
+    public func setRootUrl(_ url: String?) {
         rootUrl = URL(string: url ?? "")
     }
 }
