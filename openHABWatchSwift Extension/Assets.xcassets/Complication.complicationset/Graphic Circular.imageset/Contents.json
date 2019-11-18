@@ -7,9 +7,8 @@
     },
     {
       "idiom" : "watch",
-      "filename" : "openhab84.png",
-      "screen-width" : ">161",
-      "scale" : "2x"
+      "scale" : "2x",
+      "screen-width" : ">161"
     },
     {
       "idiom" : "watch",
@@ -18,9 +17,8 @@
     },
     {
       "idiom" : "watch",
-      "filename" : "openhab94.png",
-      "screen-width" : ">183",
-      "scale" : "2x"
+      "scale" : "2x",
+      "screen-width" : ">183"
     }
   ],
   "info" : {

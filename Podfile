@@ -52,6 +52,7 @@ target 'openHABWatchSwift Extension' do
     inherit! :search_paths
     shared_pods
     pod 'Kingfisher/SwiftUI', '~> 5.0'
+    pod 'DeviceKit', '~> 2.0'
 end
 
 # Note: `pod install --clean-install` must be used if the post_install hook is changed

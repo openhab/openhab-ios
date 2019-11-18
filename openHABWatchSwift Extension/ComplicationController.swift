@@ -10,6 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import ClockKit
+import DeviceKit
+import WatchKit
 
 class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Timeline Configuration
@@ -61,7 +63,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         handler(getTemplate(complication: complication))
     }
 
-    fileprivate func getTemplate(complication: CLKComplication) -> CLKComplicationTemplate? {
+    private func getTemplate(complication: CLKComplication) -> CLKComplicationTemplate? {
         // default ist circularSmall
         var template: CLKComplicationTemplate?
 
@@ -69,35 +71,63 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         case .modularSmall:
             template = CLKComplicationTemplateModularSmallRingImage()
             (template as! CLKComplicationTemplateModularSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Modular") ?? UIImage())
+                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
         case .utilitarianSmall:
             template = CLKComplicationTemplateUtilitarianSmallRingImage()
             (template as! CLKComplicationTemplateUtilitarianSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Utilitarian") ?? UIImage())
+                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
         case .circularSmall:
             template = CLKComplicationTemplateCircularSmallRingImage()
             (template as! CLKComplicationTemplateCircularSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "Complication/Circular") ?? UIImage())
+                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
+        case .extraLarge:
+            template = CLKComplicationTemplateExtraLargeSimpleImage()
+            (template as! CLKComplicationTemplateExtraLargeSimpleImage).imageProvider =
+                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
         case .graphicCorner:
-            if #available(watchOSApplicationExtension 5.0, *) {
-                let modTemplate = CLKComplicationTemplateGraphicCornerTextImage()
-                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular") ?? UIImage())
-                modTemplate.textProvider = CLKSimpleTextProvider(text: "openHAB")
-                template = modTemplate
-            } else {
-                abort()
-            }
+            let modTemplate = CLKComplicationTemplateGraphicCornerTextImage()
+            modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: getGraphicCornerImage())
+            modTemplate.textProvider = CLKSimpleTextProvider(text: "openHAB")
+            template = modTemplate
+        case .graphicBezel:
+            let modTemplate = CLKComplicationTemplateGraphicBezelCircularText()
+            let image = CLKComplicationTemplateGraphicCircularImage()
+            image.imageProvider = CLKFullColorImageProvider(fullColorImage: getGraphicCircularImage())
+            modTemplate.circularTemplate = image
+            modTemplate.textProvider = CLKSimpleTextProvider(text: "openHAB")
+            template = modTemplate
         case .graphicCircular:
-            if #available(watchOSApplicationExtension 5.0, *) {
-                let modTemplate = CLKComplicationTemplateGraphicCircularImage()
-                modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: UIImage(named: "Complication/Graphic Circular") ?? UIImage())
-                template = modTemplate
-            } else {
-                abort()
-            }
+            let modTemplate = CLKComplicationTemplateGraphicCircularImage()
+            modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: getGraphicCircularImage())
+            template = modTemplate
         default: break
         }
 
         return template
+    }
+
+    private func getGraphicCornerImage() -> UIImage {
+        let dimension: CGFloat = Device.current.diagonal < 2.0 ? 20 : 22
+        return getGraphicImage(withSize: CGSize(width: dimension, height: dimension))
+    }
+
+    private func getGraphicCircularImage() -> UIImage {
+        let dimension: CGFloat = Device.current.diagonal < 2.0 ? 42 : 47
+        return getGraphicImage(withSize: CGSize(width: dimension, height: dimension))
+    }
+
+    private func getGraphicImage(withSize size: CGSize) -> UIImage {
+        let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, WKInterfaceDevice.current().screenScale)
+
+        if let image = UIImage(named: "OHIcon") {
+            image.draw(in: rect.insetBy(dx: -(rect.width / 10), dy: -(rect.height / 10)))
+        }
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return image ?? UIImage()
     }
 }
