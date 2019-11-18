@@ -67,6 +67,6 @@ struct SwitchRow_Previews: PreviewProvider {
         let widget = UserData().widgets[0]
         return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
-            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: "http://192.168.2.15:8081"))
+            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
     }
 }

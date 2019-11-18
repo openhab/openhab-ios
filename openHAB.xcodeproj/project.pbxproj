@@ -102,6 +102,7 @@
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
+		DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* Preview_Constants.swift */; };
 		DA72E1B2236DE9F200B8EF3A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B0236DE9F200B8EF3A /* AppState.swift */; };
 		DA72E1B3236DE9F200B8EF3A /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
@@ -386,6 +387,7 @@
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesHostingController.swift; sourceTree = "<group>"; };
+		DA7224D123828D3300712D20 /* Preview_Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preview_Constants.swift; sourceTree = "<group>"; };
 		DA72E1B0236DE9F200B8EF3A /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
@@ -798,6 +800,7 @@
 				DA077649234683BC0086C685 /* SwitchRow.swift */,
 				DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */,
 				DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */,
+				DA7224D123828D3300712D20 /* Preview_Constants.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1575,6 +1578,7 @@
 				DA0775292346705F0086C685 /* HostingController.swift in Sources */,
 				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
+				DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
 				93F38D482380374B001B1451 /* ObservableOpenHABDataObject.swift in Sources */,
