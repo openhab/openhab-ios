@@ -46,9 +46,11 @@ struct ContentView_Previews: PreviewProvider {
         return Group {
             ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 4 - 44mm")
+                .environmentObject(ObservableOpenHABDataObject())
 
             ContentView(viewModel: UserData(urlString: "http://192.168.2.15:8081"))
                 .previewDevice("Apple Watch Series 2 - 38mm")
+                .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: "http://192.168.2.15:8081"))
         }
     }
 }
