@@ -76,7 +76,7 @@ class OpenHABViewController: UIViewController {
     var sitemaps: [OpenHABSitemap] = []
     var currentPage: OpenHABSitemapPage?
     var selectionPicker: UIPickerView?
-    var pageNetworkStatus: Reachability.Connection?
+    var pageNetworkStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
     var pageNetworkStatusAvailable = false
     var toggle: Int = 0
     var deviceToken = ""
@@ -635,16 +635,16 @@ class OpenHABViewController: UIViewController {
     func pageNetworkStatusChanged() -> Bool {
         os_log("OpenHABViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
         if pageUrl != "" {
-            let pageReachability = Reachability(hostname: pageUrl)
+            let pageReachability = NetworkReachabilityManager(host: pageUrl)
             if !pageNetworkStatusAvailable {
-                pageNetworkStatus = pageReachability?.connection
+                pageNetworkStatus = pageReachability?.networkReachabilityStatus
                 pageNetworkStatusAvailable = true
                 return false
             } else {
-                if pageNetworkStatus == pageReachability?.connection {
+                if pageNetworkStatus == pageReachability?.networkReachabilityStatus {
                     return false
                 } else {
-                    pageNetworkStatus = pageReachability?.connection
+                    pageNetworkStatus = pageReachability?.networkReachabilityStatus
                     return true
                 }
             }

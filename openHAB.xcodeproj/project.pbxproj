@@ -43,7 +43,6 @@
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
 		DA15FF4B221DF7D800FF0FDA /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */; };
-		DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19652B21FBCE1A00768AEE /* Reachability.swift */; };
 		DA19C65C22F0D4EB007CC1DF /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA19E33822FF4594002F8F2F /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E33722FF4594002F8F2F /* NetworkConnection.swift */; };
@@ -236,7 +235,6 @@
 		BCF72F56B17C7E8A29FE3759 /* Pods-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
 		D2258F2EAAAC86E23B82B81E /* Pods-openHAB-openHABUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB-openHABUITests.release.xcconfig"; path = "Target Support Files/Pods-openHAB-openHABUITests/Pods-openHAB-openHABUITests.release.xcconfig"; sourceTree = "<group>"; };
 		DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
-		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		DA19C65B22F0D4EB007CC1DF /* DataDecoded.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataDecoded.swift; sourceTree = "<group>"; };
 		DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABGeneralTests.swift; sourceTree = "<group>"; };
 		DA19E33722FF4594002F8F2F /* NetworkConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkConnection.swift; sourceTree = "<group>"; };
@@ -759,7 +757,6 @@
 				DA19E33722FF4594002F8F2F /* NetworkConnection.swift */,
 				DA2085AA232AE1940010E4C9 /* OpenHABAccessTokenAdapter.swift */,
 				DAD3714321EB91BF00255BBB /* NSObjectExtension.swift */,
-				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
 				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
 				DA15FF4A221DF7D800FF0FDA /* StringExtension.swift */,
 				DA28C35F2251F07000AB409C /* OSLogHelper.swift */,
@@ -1208,7 +1205,6 @@
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
 				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
-				DA19652C21FBCE1A00768AEE /* Reachability.swift in Sources */,
 				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
 				DFDF45341934699B00A6E581 /* OpenHABInfoViewController.swift in Sources */,

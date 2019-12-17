@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Alamofire
 import Foundation
 import os.log
 import SystemConfiguration
@@ -20,18 +21,18 @@ protocol OpenHABTrackerDelegate: AnyObject {
 }
 
 protocol OpenHABTrackerExtendedDelegate: OpenHABTrackerDelegate {
-    func openHABTrackingNetworkChange(_ networkStatus: Reachability.Connection)
+    func openHABTrackingNetworkChange(_ networkStatus: NetworkReachabilityManager.NetworkReachabilityStatus)
 }
 
 class OpenHABTracker: NSObject {
-    var oldReachabilityStatus: Reachability.Connection?
+    var oldReachabilityStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
 
     weak var delegate: OpenHABTrackerDelegate?
     var openHABDemoMode = false
     var openHABLocalUrl = ""
     var openHABRemoteUrl = ""
     var netService: NetService?
-    var reach: Reachability?
+    var reach = NetworkReachabilityManager()
 
     override init() {
         super.init()
@@ -48,8 +49,30 @@ class OpenHABTracker: NSObject {
     }
 
     func start() {
+        // Start NetworkReachabilityManager.Listener
+        oldReachabilityStatus = reach?.networkReachabilityStatus
+        reach?.listener = { [weak self] status in
+            guard let self = self else { return }
+
+            let nStatus = status
+            if nStatus != self.oldReachabilityStatus {
+                if let oldReachabilityStatus = self.oldReachabilityStatus {
+                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
+                }
+                self.oldReachabilityStatus = nStatus
+                (self.delegate as? OpenHABTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
+                if self.isNetworkConnected() {
+                    self.reach?.stopListening()
+                    self.start()
+                }
+            }
+        }
+        if !(reach?.startListening() ?? false) {
+            os_log("Starting NetworkReachabilityManager.Listener failed.", log: .remoteAccess, type: .info)
+        }
+
         // Check if any network is available
-        if isNetworkConnected2() {
+        if isNetworkConnected() {
             // Check if demo mode is switched on in preferences
             if openHABDemoMode {
                 os_log("OpenHABTracker demo mode preference is on", log: .default, type: .info)
@@ -86,14 +109,6 @@ class OpenHABTracker: NSObject {
             errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
             let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
             delegate?.openHABTrackingError(trackingError)
-            reach = Reachability()
-            oldReachabilityStatus = reach?.connection
-            NotificationCenter.default.addObserver(self, selector: #selector(OpenHABTracker.reachabilityChanged(_:)), name: NSNotification.Name.reachabilityChanged, object: reach)
-            do {
-                try reach?.startNotifier()
-            } catch {
-                os_log("Start notifier throws ", log: .remoteAccess, type: .info)
-            }
         }
     }
 
@@ -130,24 +145,6 @@ class OpenHABTracker: NSObject {
         delegate?.openHABTracked(trackedUrl)
     }
 
-    @objc
-    func reachabilityChanged(_ notification: Notification?) {
-        if let changedReach = notification?.object as? Reachability {
-            let nStatus = changedReach.connection
-            if nStatus != oldReachabilityStatus {
-                if let oldReachabilityStatus = oldReachabilityStatus { // }, let nStatus = nStatus {
-                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, string(from: oldReachabilityStatus) ?? "", string(from: nStatus) ?? "")
-                }
-                oldReachabilityStatus = nStatus
-                if let delegate = delegate as? OpenHABTrackerExtendedDelegate {
-//                    if let nStatus = nStatus {
-                    delegate.openHABTrackingNetworkChange(nStatus)
-//                    }
-                }
-            }
-        }
-    }
-
     func startDiscovery() {
         os_log("OpenHABTracking starting Bonjour discovery", log: .default, type: .info)
 
@@ -170,14 +167,12 @@ class OpenHABTracker: NSObject {
         return urlTest.evaluate(with: url)
     }
 
-    func isNetworkConnected2() -> Bool {
-        let networkReach = Reachability()
-        return (networkReach?.connection == .wifi || networkReach?.connection == .cellular) ? true : false
+    func isNetworkConnected() -> Bool {
+        reach?.isReachable ?? false
     }
 
     func isNetworkWiFi() -> Bool {
-        let wifiReach = Reachability()
-        return wifiReach?.connection == .wifi ? true : false
+        reach?.isReachableOnEthernetOrWiFi ?? false
     }
 
     func isNetworkVPN() -> Bool {
@@ -190,11 +185,12 @@ class OpenHABTracker: NSObject {
         return false
     }
 
-    func string(from status: Reachability.Connection) -> String? {
+    func string(from status: NetworkReachabilityManager.NetworkReachabilityStatus) -> String? {
         switch status {
-        case .none: return "unreachable"
-        case .wifi: return "WiFi"
-        case .cellular: return "WWAN"
+        case .unknown, .notReachable:
+            return "unreachable"
+        case let .reachable(connectionType):
+            return connectionType == .ethernetOrWiFi ? "WiFi" : "WWAN"
         }
     }
 }
