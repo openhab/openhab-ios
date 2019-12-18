@@ -114,6 +114,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     func loadImage() {
         switch widgetPayload {
         case let .embedded(image):
+            widget?.image = image
             mainImageView.image = image
             didLoad?()
         case let .link(url):
