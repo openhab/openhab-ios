@@ -4,6 +4,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Replace `ReachabilitySwift` with `Alamofire.NetworkReachabilityManager` and handle connection type changes
+- closes #431
+- closes #512
+- fix infinite loop, closes #513
+
 ## [Version 2.2.50, Build 1573822048] - 2019-11-15
 
 ### Fixed
