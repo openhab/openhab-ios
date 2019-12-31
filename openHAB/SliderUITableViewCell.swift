@@ -25,6 +25,9 @@ class SliderUITableViewCell: GenericUITableViewCell {
             throttler = Throttler(maxInterval: interval)
         }
     }
+    private var widgetValue: Double {
+        adj(Double(widgetSlider?.value ?? Float(widget.minValue)))
+    }
 
     @IBOutlet private var widgetSlider: UISlider!
     @IBOutlet private var customDetailText: UILabel!
@@ -46,19 +49,25 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @IBAction private func sliderValueChanged(_ sender: Any) {
-        let widgetValue = adj(Double(widgetSlider?.value ?? Float(widget.minValue)))
         customDetailText?.text = valueText(widgetValue)
-        transitionItem?.cancel()
-        isInTransition = true
-        throttler?.throttle { DispatchQueue.main.async { self.sliderDidChange(toValue: widgetValue) } }
+
+        if Preferences.realTimeSliders {
+            transitionItem?.cancel()
+            isInTransition = true
+            throttler?.throttle { DispatchQueue.main.async { self.sliderDidChange(toValue: self.widgetValue) } }
+        }
     }
 
     @IBAction private func sliderTouchUp(_ sender: Any) {
-        stopTransitionDelayed()
+        if Preferences.realTimeSliders {
+            stopTransitionDelayed()
+        } else {
+            sliderDidChange(toValue: widgetValue)
+        }
     }
 
     @IBAction private func sliderTouchOutside(_ sender: Any) {
-        stopTransitionDelayed()
+        sliderTouchUp(sender)
     }
 
     private func stopTransitionDelayed() {

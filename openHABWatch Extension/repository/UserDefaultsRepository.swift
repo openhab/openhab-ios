@@ -74,6 +74,7 @@ struct Preferences {
     @UserDefault("sitemapName", defaultValue: "watch") static var sitemapName: String
     @UserDefault("demomode", defaultValue: true) static var demomode: Bool
     @UserDefault("idleOff", defaultValue: false) static var idleOff: Bool
+    @UserDefault("realTimeSliders", defaultValue: false) static var realTimeSliders: Bool
     @UserDefault("iconType", defaultValue: 0) static var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") static var defaultSitemap: String
 
