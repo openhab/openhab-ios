@@ -7,6 +7,8 @@ PODS:
     - Fabric (~> 1.10.2)
   - DynamicButton (6.2.1)
   - Fabric (1.10.2)
+  - Firebase/Analytics (6.14.0):
+    - Firebase/Core
   - Firebase/Core (6.14.0):
     - Firebase/CoreOnly
     - FirebaseAnalytics (= 6.1.7)
@@ -89,8 +91,8 @@ DEPENDENCIES:
   - Crashlytics (~> 3.9)
   - DynamicButton (~> 6.2)
   - Fabric (~> 1.7)
-  - Firebase/Core
-  - FlexColorPicker (from `https://github.com/RastislavMirek/FlexColorPicker.git`, tag `1.3.1`)
+  - Firebase/Analytics
+  - FlexColorPicker
   - Fuzi (~> 3.1)
   - Kingfisher (~> 5.0)
   - SideMenu (~> 6.4)
@@ -112,6 +114,7 @@ SPEC REPOS:
     - FirebaseCoreDiagnostics
     - FirebaseCoreDiagnosticsInterop
     - FirebaseInstanceID
+    - FlexColorPicker
     - Fuzi
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -124,16 +127,6 @@ SPEC REPOS:
     - SwiftFormat
     - SwiftLint
     - SwiftMessages
-
-EXTERNAL SOURCES:
-  FlexColorPicker:
-    :git: https://github.com/RastislavMirek/FlexColorPicker.git
-    :tag: 1.3.1
-
-CHECKOUT OPTIONS:
-  FlexColorPicker:
-    :git: https://github.com/RastislavMirek/FlexColorPicker.git
-    :tag: 1.3.1
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
@@ -161,6 +154,6 @@ SPEC CHECKSUMS:
   SwiftLint: 4105f061f9812b214568b736dab580ab2c73a582
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: 64e0916e174beb823206322d8d0d7158f50e9c0c
+PODFILE CHECKSUM: cc6c86e00b14afdf5c4ded973f5fd3c956c7b578
 
 COCOAPODS: 1.8.4

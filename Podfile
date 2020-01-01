@@ -7,12 +7,15 @@ target 'openHAB' do
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
     pod 'SVGKit'
-    pod 'Firebase/Core'
+
     pod 'Fabric', '~> 1.7'
     pod 'Crashlytics', '~> 3.9'
+    pod 'Firebase/Analytics'
+
     pod 'SwiftMessages'
     pod 'Fuzi', '~> 3.1'
-    pod 'FlexColorPicker', :git => 'https://github.com/RastislavMirek/FlexColorPicker.git', :tag => '1.3.1'
+    pod 'FlexColorPicker'
+    
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
     pod 'Alamofire', '~> 4.0'
