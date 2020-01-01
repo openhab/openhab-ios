@@ -4,6 +4,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.2.55, Build 1577866798] - 2020-01-01
+
+### Fixed
+- Make real-time sliders optional, refs #506
+- Fix for #516 - legend for charts with multiple time-series
+- Fix for #517 - very long items
+
 ## [Version 2.2.54, Build 1577538804] - 2019-12-28
 
 ### Fixed
