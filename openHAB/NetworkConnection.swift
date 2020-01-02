@@ -72,7 +72,7 @@ class NetworkConnection {
          manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
                                                   delegate: SessionDelegate()),
          adapter: RequestAdapter?) {
-        serverCertificateManager = ServerCertificateManager(ignoreCertificates: ignoreSSL)
+        serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
         self.manager = manager
         self.manager.startRequestsImmediately = false

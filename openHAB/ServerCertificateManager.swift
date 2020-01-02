@@ -32,12 +32,13 @@ class ServerCertificateManager {
 
     var evaluateResult: EvaluateResult = .undecided
     weak var delegate: ServerCertificateManagerDelegate?
-    var allowInvalidCertificates: Bool = false
+    // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
+    var ignoreSSL: Bool = false
     var trustedCertificates: [String: Any] = [:]
 
     // Init a ServerCertificateManager and set ignore certificates setting
-    init(ignoreCertificates: Bool) {
-        allowInvalidCertificates = ignoreCertificates
+    init(ignoreSSL: Bool) {
+        self.ignoreSSL = ignoreSSL
     }
 
     func initializeCertificatesStore() {
@@ -106,7 +107,7 @@ class ServerCertificateManager {
         var evaluateResult: SecTrustResultType = .invalid
 
         SecTrustEvaluate(serverTrust, &evaluateResult)
-        if evaluateResult.isAny(of: .unspecified, .proceed) || allowInvalidCertificates {
+        if evaluateResult.isAny(of: .unspecified, .proceed) || ignoreSSL {
             // This means system thinks this is a legal/usable certificate, just permit the connection
             return true
         }

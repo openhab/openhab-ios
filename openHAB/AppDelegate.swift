@@ -53,8 +53,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UserDefaults.standard.register(defaults: appDefaults)
 
-        loadSettingsDefaults()
-
         NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter())
 
         registerForPushNotifications()
@@ -217,31 +215,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-    func loadSettingsDefaults() {
-        let prefs = UserDefaults.standard
-        if prefs.object(forKey: "localUrl") == nil {
-            prefs.setValue("", forKey: "localUrl")
-        }
-        if prefs.object(forKey: "remoteUrl") == nil {
-            prefs.setValue("", forKey: "remoteUrl")
-        }
-        if prefs.object(forKey: "username") == nil {
-            prefs.setValue("", forKey: "username")
-        }
-        if prefs.object(forKey: "password") == nil {
-            prefs.setValue("", forKey: "password")
-        }
-        if prefs.object(forKey: "ignoreSSL") == nil {
-            prefs.set(false, forKey: "ignoreSSL")
-        }
-        if prefs.object(forKey: "demomode") == nil {
-            prefs.set(true, forKey: "demomode")
-        }
-        if prefs.object(forKey: "idleOff") == nil {
-            prefs.set(false, forKey: "idleOff")
-        }
-        if prefs.object(forKey: "iconType") == nil {
-            prefs.set(false, forKey: "iconType")
-        }
-    }
 }

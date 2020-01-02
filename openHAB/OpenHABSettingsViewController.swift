@@ -190,6 +190,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsPassword = passwordTextField?.text ?? ""
         settingsAlwaysSendCreds = alwaysSendCredsSwitch?.isOn ?? false
         settingsIgnoreSSL = ignoreSSLSwitch?.isOn ?? false
+        NetworkConnection.shared.serverCertificateManager.ignoreSSL = settingsIgnoreSSL
         settingsDemomode = demomodeSwitch?.isOn ?? false
         settingsIdleOff = idleOffSwitch?.isOn ?? false
         settingsRealTimeSliders = realTimeSlidersSwitch?.isOn ?? false
