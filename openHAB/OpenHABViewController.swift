@@ -335,6 +335,12 @@ class OpenHABViewController: UIViewController {
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
         guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
+
+        let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
+        drawer?.openHABRootUrl = openHABRootUrl
+        drawer?.delegate = self
+        drawer?.drawerTableType = .withStandardMenuEntries
+
         present(menu, animated: true)
     }
 
