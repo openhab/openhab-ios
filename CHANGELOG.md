@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.2.56, Build 1578225438] - 2020-01-05
+
 ### Fixed 
 - Change of site to update list of sitemaps, fix for #514
 - "Ignore SSL Certificates" toggle not only considered at startup, fix for #504
