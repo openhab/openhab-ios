@@ -81,7 +81,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var service = ""
     public var state = ""
     public var text = ""
-    public var legend = false
+    public var legend: Bool?
     public var encoding = ""
     public var item: OpenHABItem?
     public var linkedPage: OpenHABLinkedPage?
@@ -166,7 +166,7 @@ extension OpenHABWidget {
         self.service = service ?? ""
         self.state = state ?? ""
         self.text = text ?? ""
-        self.legend = legend ?? false
+        self.legend = legend
         self.encoding = encoding ?? ""
         self.item = item
         self.linkedPage = linkedPage
