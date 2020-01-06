@@ -16,9 +16,12 @@ opt_in_rules:
   - type_contents_order
   - private_outlet
   - private_action
+  - prefer_self_type_over_type_of_self
+
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
+
 excluded: 
   - Pods
 
