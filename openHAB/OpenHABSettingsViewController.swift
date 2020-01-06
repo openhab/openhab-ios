@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import os.log
 import UIKit
 
@@ -219,6 +220,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                                            password: Preferences.password,
                                            alwaysSendCreds: Preferences.alwaysSendCreds,
                                            sitemapName: "watch",
-                                           ignoreSSL: Preferences.ignoreSSL)
+                                           ignoreSSL: Preferences.ignoreSSL,
+                                           trustedCertficates: NetworkConnection.shared.serverCertificateManager.trustedCertificates)
     }
 }

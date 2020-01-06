@@ -5,6 +5,7 @@ PODS:
   - CocoaLumberjack/Core (3.6.0)
   - Crashlytics (3.14.0):
     - Fabric (~> 1.10.2)
+  - DeviceKit (2.3.0)
   - DynamicButton (6.2.1)
   - Fabric (1.10.2)
   - Firebase/Analytics (6.14.0):
@@ -72,6 +73,8 @@ PODS:
   - Kingfisher (5.12.0):
     - Kingfisher/Core (= 5.12.0)
   - Kingfisher/Core (5.12.0)
+  - Kingfisher/SwiftUI (5.12.0):
+    - Kingfisher/Core
   - nanopb (0.3.9011):
     - nanopb/decode (= 0.3.9011)
     - nanopb/encode (= 0.3.9011)
@@ -80,8 +83,8 @@ PODS:
   - SideMenu (6.4.7)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
-  - SwiftFormat/CLI (0.43.3)
-  - SwiftLint (0.38.0)
+  - SwiftFormat/CLI (0.43.5)
+  - SwiftLint (0.38.1)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
   - SwiftMessages/App (7.0.1)
@@ -89,12 +92,14 @@ PODS:
 DEPENDENCIES:
   - Alamofire (~> 4.0)
   - Crashlytics (~> 3.9)
+  - DeviceKit (~> 2.0)
   - DynamicButton (~> 6.2)
   - Fabric (~> 1.7)
   - Firebase/Analytics
   - FlexColorPicker
   - Fuzi (~> 3.1)
   - Kingfisher (~> 5.0)
+  - Kingfisher/SwiftUI (~> 5.0)
   - SideMenu (~> 6.4)
   - SVGKit
   - SwiftFormat/CLI
@@ -106,6 +111,7 @@ SPEC REPOS:
     - Alamofire
     - CocoaLumberjack
     - Crashlytics
+    - DeviceKit
     - DynamicButton
     - Fabric
     - Firebase
@@ -132,6 +138,7 @@ SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
   Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
+  DeviceKit: da103891aa928d89f64ea8dd8aca738c5f3d8ac0
   DynamicButton: 95f30460793bd3510a5c213ac1b810a5e3d54b6a
   Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
   Firebase: 0219bb4782eb1406f1b9b0628a2e625484ce910d
@@ -150,10 +157,10 @@ SPEC CHECKSUMS:
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
   SideMenu: 928a015669c3afc201e1fe3a87f1b0bc8993a664
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftFormat: 3922ef954e793b982f832501120af300129a75f1
-  SwiftLint: 4105f061f9812b214568b736dab580ab2c73a582
+  SwiftFormat: 352ea545e3e13cfd7a449e621c1f3c2e244d4906
+  SwiftLint: 0aeb99ca7ccfc222ef93e2560a35e669f5465e6c
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: cc6c86e00b14afdf5c4ded973f5fd3c956c7b578
+PODFILE CHECKSUM: 9b7a5d10c1cddbb09c2603a3c410808553418069
 
 COCOAPODS: 1.8.4

@@ -15,6 +15,7 @@ import AVKit
 import DynamicButton
 import Fuzi
 import Kingfisher
+import OpenHABCore
 import os.log
 import SideMenu
 import SVGKit
@@ -45,7 +46,7 @@ struct SVGProcessor: ImageProcessor {
     func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
-            print("already an image")
+            os_log("already an image", log: .default, type: .info)
             return image
         case let .data(data):
             if let image = SVGKImage(data: data) {
@@ -960,9 +961,9 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Image", "Chart", "Video":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
-            if let height = widget?.height, height.intValue != 0 {
+            if let height = widget?.height, height != 0 {
                 // calculate webview/mapview height and return it
-                let heightValue = (Double(height) ?? 0.0) * 44
+                let heightValue = height * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
                 return CGFloat(heightValue)
             } else {
@@ -1144,13 +1145,15 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// MARK: Kingfisher authentication with NSURLCredential
+
 extension OpenHABViewController: AuthenticationChallengeResponsable {
     // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(), task, challenge)
+        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
         completionHandler(disposition, credential)
     }
 
@@ -1158,7 +1161,7 @@ extension OpenHABViewController: AuthenticationChallengeResponsable {
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(), challenge)
+        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
         completionHandler(disposition, credential)
     }
 }

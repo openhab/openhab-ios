@@ -11,6 +11,7 @@
 
 import DynamicButton
 import Fuzi
+import OpenHABCore
 import os.log
 import UIKit
 

@@ -12,6 +12,7 @@
 import AVFoundation
 import Firebase
 import Kingfisher
+import OpenHABCore
 import os.log
 import SwiftMessages
 import UIKit
@@ -25,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static var appDelegate: AppDelegate!
 
     var window: UIWindow?
-    var appData: OpenHABDataObject?
+    var appData: OpenHABDataObject
 
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
@@ -53,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UserDefaults.standard.register(defaults: appDefaults)
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter())
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
 
         registerForPushNotifications()
 
@@ -73,7 +74,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         activateWatchConnectivity()
 
-        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter())]
+        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))]
 
         return true
     }

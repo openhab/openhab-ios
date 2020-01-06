@@ -1,0 +1,14 @@
+{
+    "aps": {
+        "alert": {
+            "body": "Light 2",
+            "title": "Status changed",
+            "subtitle": "Optional subtitle"
+        },
+        "category": "openHABNotification",
+        "thread-id": "5280"
+    },
+
+    "openHABMessageIndexKey": 1
+    
+}

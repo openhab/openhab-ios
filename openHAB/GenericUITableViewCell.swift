@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Kingfisher
+import OpenHABCore
 import UIKit
 
 protocol GenericCellCacheProtocol: UITableViewCell {

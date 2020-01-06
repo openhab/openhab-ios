@@ -10,6 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
+import os.log
 import WatchConnectivity
 
 // This class receives Watch Request for the configuration data like localUrl.
@@ -26,7 +28,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        print("Received message: \(message)")
+        os_log("Received message: %{PUBLIC}@", log: .default, type: .info, message)
     }
 
     @available(iOS 9.3, *)

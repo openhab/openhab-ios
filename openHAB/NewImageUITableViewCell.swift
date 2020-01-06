@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
+import OpenHABCore
 import os.log
 import UIKit
 
@@ -17,11 +18,6 @@ enum ImageType {
     case link(url: URL?)
     case embedded(image: UIImage?)
     case empty
-}
-
-enum ChartStyle {
-    case dark
-    case light
 }
 
 class NewImageUITableViewCell: GenericUITableViewCell {

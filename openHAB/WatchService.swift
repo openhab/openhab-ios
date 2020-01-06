@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import os.log
 import WatchConnectivity
 
 class WatchService {
@@ -20,7 +21,7 @@ class WatchService {
 
     // swiftlint:disable:next function_parameter_count
     func sendToWatch(_ localUrl: String, remoteUrl: String,
-                     username: String, password: String, alwaysSendCreds: Bool, sitemapName: String, ignoreSSL: Bool) {
+                     username: String, password: String, alwaysSendCreds: Bool, sitemapName: String, ignoreSSL: Bool, trustedCertficates: [String: Any] = [:]) {
         let applicationDict: [String: Any] =
             ["localUrl": localUrl,
              "remoteUrl": remoteUrl,
@@ -28,7 +29,8 @@ class WatchService {
              "password": password,
              "alwaysSendCreds": alwaysSendCreds,
              "sitemapName": sitemapName,
-             "ignoreSSL": ignoreSSL]
+             "ignoreSSL": ignoreSSL,
+             "trustedCertificates": trustedCertficates]
 
         sendOrTransmitToWatch(applicationDict)
     }
@@ -37,9 +39,10 @@ class WatchService {
         // send message if watch is reachable
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(message, replyHandler: { data in
-                print("Received data: \(data)")
+                os_log("Received data: %{PUBLIC}@", log: .default, type: .info, data)
+
             }, errorHandler: { error in
-                print(error)
+                os_log("%{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
 
                 // transmit message on failure
                 try? WCSession.default.updateApplicationContext(message)
