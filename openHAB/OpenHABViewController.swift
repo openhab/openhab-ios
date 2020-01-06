@@ -961,9 +961,9 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Image", "Chart", "Video":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
-            if let height = widget?.height, height != 0 {
+             if let height = widget?.height, Int(height) != 0 {
                 // calculate webview/mapview height and return it
-                let heightValue = height * 44
+                let heightValue = (Double(height) ?? 0.0) * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
                 return CGFloat(heightValue)
             } else {

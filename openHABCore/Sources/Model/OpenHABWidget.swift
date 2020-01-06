@@ -73,7 +73,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var maxValue = 100.0
     public var step = 1.0
     public var refresh = 0
-    public var height = 44.0
+    public var height = ""
     public var isLeaf = false
     public var iconColor = ""
     public var labelcolor = ""
@@ -140,9 +140,12 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 extension OpenHABWidget {
     // This is an ugly initializer
     convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
+        func toString(_ with: Double?) -> String {
+            guard let double = with else { return "" }
+            return String(format: "%.1f", double)
+        }
         self.init()
         id = widgetId
-
         self.widgetId = widgetId
         self.label = label
         self.type = type
@@ -158,7 +161,7 @@ extension OpenHABWidget {
         } else {
             self.refresh = 0
         }
-        self.height = height ?? 44.0
+        self.height = toString(height)
         self.isLeaf = isLeaf ?? false
         self.iconColor = iconColor ?? ""
         labelcolor = labelColor ?? ""
@@ -196,7 +199,7 @@ extension OpenHABWidget {
             case "service": service = child.stringValue
             case "state": state = child.stringValue
             case "text": text = child.stringValue
-            case "height": height = Double(child.stringValue) ?? 44.0
+            case "height": height = child.stringValue
             case "encoding": encoding = child.stringValue
             // Double
             case "minValue": minValue = Double(child.stringValue) ?? 0.0
