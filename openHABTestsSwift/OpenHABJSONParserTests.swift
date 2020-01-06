@@ -471,7 +471,7 @@ class OpenHABJSONParserTests: XCTestCase {
                         signpostID: signpostID,
                         "%{public}s",
                         jsonFile)
-            let testBundle = Bundle(for: type(of: self))
+            let testBundle = Bundle(for: Self.self)
             let url = testBundle.url(forResource: jsonFile, withExtension: "json")
             let contents = try Data(contentsOf: url!)
             os_signpost(.end,
