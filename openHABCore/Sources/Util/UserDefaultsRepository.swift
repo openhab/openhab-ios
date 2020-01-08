@@ -13,54 +13,71 @@ import os.log
 import UIKit
 
 // Convenient access to UserDefaults
+
+// Much shorter as Property Wrappers are available with Swift 5.1
+// Inspired by https://www.avanderlee.com/swift/property-wrappers/
+@propertyWrapper
+public struct UserDefault<T> {
+    let key: String
+    let defaultValue: T
+
+    public var wrappedValue: T {
+        get {
+            return UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: key)
+        }
+    }
+
+    init(_ key: String, defaultValue: T) {
+        self.key = key
+        self.defaultValue = defaultValue
+    }
+
+}
+
+// It would be nice to write something like  @UserDefault @TrimmedURL ("localUrl", defaultValue: "test") static var localUrl: String
+// As long as multiple property wrappers are not supported we need to add a little repetitive boiler plate code
+
+@propertyWrapper
+public struct UserDefaultURL {
+    let key: String
+    let defaultValue: String
+
+    public var wrappedValue: String {
+        get {
+            guard let localUrl = UserDefaults.standard.string(forKey: key) else { return defaultValue }
+            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            if !validateUrl(trimmedUri) { return defaultValue }
+            return trimmedUri
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: key)
+        }
+    }
+
+    init(_ key: String, defaultValue: String) {
+        self.key = key
+        self.defaultValue = defaultValue
+    }
+
+    private func validateUrl(_ stringURL: String) -> Bool {
+        // return nil if the URL has not a valid format
+        let url: URL? = URL(string: stringURL)
+        return url != nil
+    }
+
+    func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
+        if !hostUri.hasSuffix("/") {
+            return hostUri
+        }
+
+        return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
+    }
+}
+
 public struct Preferences {
-    // Much shorter as Property Wrappers are available with Swift 5.1
-    // Inspired by https://www.avanderlee.com/swift/property-wrappers/
-    @propertyWrapper
-    public struct UserDefault<T> {
-        let key: String
-        let defaultValue: T
-
-        init(_ key: String, defaultValue: T) {
-            self.key = key
-            self.defaultValue = defaultValue
-        }
-
-        public var wrappedValue: T {
-            get {
-                return UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
-            }
-            set {
-                UserDefaults.standard.set(newValue, forKey: key)
-            }
-        }
-    }
-
-    // It would be nice to write something like  @UserDefault @TrimmedURL ("localUrl", defaultValue: "test") static var localUrl: String
-    // As long as multiple property wrappers are not supported we need to add a little repetitive boiler plate code
-
-    @propertyWrapper
-    public struct UserDefaultURL {
-        let key: String
-        let defaultValue: String
-
-        init(_ key: String, defaultValue: String) {
-            self.key = key
-            self.defaultValue = defaultValue
-        }
-
-        public var wrappedValue: String {
-            get {
-                guard let localUrl = UserDefaults.standard.string(forKey: key) else { return defaultValue }
-                let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-                if !validateUrl(trimmedUri) { return defaultValue }
-                return trimmedUri
-            }
-            set {
-                UserDefaults.standard.set(newValue, forKey: key)
-            }
-        }
-    }
 
     static private let defaults = UserDefaults.standard
 
@@ -83,19 +100,5 @@ public struct Preferences {
             return Preferences.remoteUrl
         }
         return Preferences.localUrl
-    }
-
-    private static func validateUrl(_ stringURL: String) -> Bool {
-        // return nil if the URL has not a valid format
-        let url: URL? = URL(string: stringURL)
-        return url != nil
-    }
-
-    static func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
-        if !hostUri.hasSuffix("/") {
-            return hostUri
-        }
-
-        return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
     }
 }

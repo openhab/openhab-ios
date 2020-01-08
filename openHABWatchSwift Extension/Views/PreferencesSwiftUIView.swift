@@ -14,6 +14,9 @@ import SwiftUI
 
 // swiftlint:disable file_types_order
 struct PreferencesSwiftUIView: View {
+
+    @ObservedObject var settings = UserSettings.shared
+
     var applicationVersionNumber: String = {
         let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
         let buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
@@ -24,10 +27,10 @@ struct PreferencesSwiftUIView: View {
     var body: some View {
         List {
             PreferencesRowUIView(label: "Version", content: applicationVersionNumber)
-            PreferencesRowUIView(label: "Local URL", content: Preferences.localUrl)
-            PreferencesRowUIView(label: "Remote URL", content: Preferences.remoteUrl)
-            PreferencesRowUIView(label: "Sitemap", content: Preferences.sitemapName)
-            PreferencesRowUIView(label: "Username", content: Preferences.username)
+            PreferencesRowUIView(label: "Local URL", content: settings.localUrl)
+            PreferencesRowUIView(label: "Remote URL", content: settings.remoteUrl)
+            PreferencesRowUIView(label: "Sitemap", content: settings.sitemapName)
+            PreferencesRowUIView(label: "Username", content: settings.username)
         }.font(.footnote)
     }
 }

@@ -20,31 +20,31 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
         if let localUrl = applicationContext["localUrl"] as? String {
-            Preferences.localUrl = localUrl
+            UserSettings.shared.localUrl = localUrl
         }
 
         if let remoteUrl = applicationContext["remoteUrl"] as? String {
-            Preferences.remoteUrl = remoteUrl
+            UserSettings.shared.remoteUrl = remoteUrl
         }
 
         if let sitemapName = applicationContext["sitemapName"] as? String {
-            Preferences.sitemapName = sitemapName
+            UserSettings.shared.sitemapName = sitemapName
         }
 
         if let username = applicationContext["username"] as? String {
-            Preferences.username = username
+            UserSettings.shared.username = username
         }
 
         if let password = applicationContext["password"] as? String {
-            Preferences.password = password
+            UserSettings.shared.password = password
         }
 
         if let ignoreSSLCertificate = applicationContext["ignoreSSL"] as? Bool {
-            Preferences.ignoreSSL = ignoreSSLCertificate
+            UserSettings.shared.ignoreSSL = ignoreSSLCertificate
         }
 
         if let trustedCertificate = applicationContext["trustedCertificates"] as? [String: Any] {
-            let serverCertificateManager = ServerCertificateManager(ignoreSSL: Preferences.ignoreSSL)
+            let serverCertificateManager = ServerCertificateManager(ignoreSSL:  UserSettings.shared.ignoreSSL)
             serverCertificateManager.trustedCertificates = trustedCertificate
             serverCertificateManager.saveTrustedCertificates()
             NetworkConnection.shared.serverCertificateManager = serverCertificateManager
