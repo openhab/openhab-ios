@@ -14,13 +14,13 @@ import SwiftUI
 // swiftlint:disable file_types_order
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
-    @EnvironmentObject var openHABDataObject: ObservableOpenHABDataObject
+    @ObservedObject var settings = UserSettings.shared
 
     var body: some View {
-        return List {
+        List {
             ForEach(viewModel.widgets) { widget in
                 self.rowWidget(widget: widget)
-                    .environmentObject(self.openHABDataObject)
+                    .environmentObject(self.settings)
             }
         }
     }
@@ -43,14 +43,14 @@ extension ContentView {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        return Group {
+        Group {
             ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 4 - 44mm")
-                .environmentObject(ObservableOpenHABDataObject())
+                .environmentObject(UserSettings())
 
             ContentView(viewModel: UserData(urlString: PreviewConstants.remoteURLString))
                 .previewDevice("Apple Watch Series 2 - 38mm")
-                .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
+                .environmentObject(UserSettings(openHABRootUrl: PreviewConstants.remoteURLString))
         }
     }
 }

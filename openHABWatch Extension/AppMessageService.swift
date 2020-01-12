@@ -20,7 +20,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
         if let localUrl = applicationContext["localUrl"] as? String {
-            UserSettings.shared.localUrl = localUrl
+            UserSettings.shared.openHABRootUrl = localUrl
         }
 
         if let remoteUrl = applicationContext["remoteUrl"] as? String {
@@ -32,19 +32,19 @@ class AppMessageService: NSObject, WCSessionDelegate {
         }
 
         if let username = applicationContext["username"] as? String {
-            UserSettings.shared.username = username
+            UserSettings.shared.openHABUsername = username
         }
 
         if let password = applicationContext["password"] as? String {
-            UserSettings.shared.password = password
+            UserSettings.shared.openHABPassword = password
         }
 
-        if let ignoreSSLCertificate = applicationContext["ignoreSSL"] as? Bool {
-            UserSettings.shared.ignoreSSL = ignoreSSLCertificate
+        if let ignoreSSL = applicationContext["ignoreSSL"] as? Bool {
+            UserSettings.shared.ignoreSSL = ignoreSSL
         }
 
         if let trustedCertificate = applicationContext["trustedCertificates"] as? [String: Any] {
-            let serverCertificateManager = ServerCertificateManager(ignoreSSL:  UserSettings.shared.ignoreSSL)
+            let serverCertificateManager = ServerCertificateManager(ignoreSSL: UserSettings.shared.ignoreSSL)
             serverCertificateManager.trustedCertificates = trustedCertificate
             serverCertificateManager.saveTrustedCertificates()
             NetworkConnection.shared.serverCertificateManager = serverCertificateManager
@@ -54,7 +54,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
     @available(watchOSApplicationExtension 2.2, *)
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         DispatchQueue.main.async { () -> Void in
-
             self.updateValuesFromApplicationContext(session.receivedApplicationContext as [String: AnyObject])
         }
     }
@@ -62,22 +61,30 @@ class AppMessageService: NSObject, WCSessionDelegate {
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        updateValuesFromApplicationContext(applicationContext as [String: AnyObject])
+        DispatchQueue.main.async { () -> Void in
+            self.updateValuesFromApplicationContext(applicationContext as [String: AnyObject])
+        }
     }
 
     /** Called on the delegate of the receiver. Will be called on startup if the user info finished transferring when the receiver was not running. */
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
-        updateValuesFromApplicationContext(userInfo as [String: AnyObject])
+        DispatchQueue.main.async { () -> Void in
+            self.updateValuesFromApplicationContext(userInfo as [String: AnyObject])
+        }
     }
 
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        updateValuesFromApplicationContext(message as [String: AnyObject])
+        DispatchQueue.main.async { () -> Void in
+            self.updateValuesFromApplicationContext(message as [String: AnyObject])
+        }
     }
 
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
-        updateValuesFromApplicationContext(message as [String: AnyObject])
+        DispatchQueue.main.async { () -> Void in
+            self.updateValuesFromApplicationContext(message as [String: AnyObject])
+        }
     }
 }

@@ -17,13 +17,16 @@ import os.log
 import SwiftUI
 
 final class UserData: ObservableObject {
+
     @Published var widgets: [ObservableOpenHABWidget] = []
+    @Published var showAlert: Bool = false
 
     let decoder = JSONDecoder()
 
     var openHABSitemapPage: ObservableOpenHABSitemapPage?
 
     private var commandOperation: Alamofire.Request?
+    private var currentPageOperation: Alamofire.Request?
 
     init() {
         decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
@@ -47,6 +50,21 @@ final class UserData: ObservableObject {
             self?.sendCommand(item, commandToSend: command)
         }
     }
+
+//    init(urlString: String, refresh: Bool) {
+//        pageURL = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: "watch").url
+//        loadPage(longPolling: false, refresh: refresh)
+//    }
+//
+//    func loadPage(longPolling: Bool, refresh: Bool) {
+//    if currentPageOperation != nil {
+//        currentPageOperation?.cancel()
+//        currentPageOperation = nil
+//    }
+//
+//    guard let pageURL = pageURL else { return }
+//    os_log("pageURL = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageURL.absoluteString)
+//    }
 
     init(urlString: String) {
         commandOperation = NetworkConnection.page(url: Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: "watch").url,
@@ -79,8 +97,11 @@ final class UserData: ObservableObject {
 
                 self.widgets = self.openHABSitemapPage?.widgets ?? []
 
+                self.showAlert = false
+
             case .failure:
-                break
+                self.widgets = []
+                self.showAlert = true
             }
         }
         commandOperation?.resume()

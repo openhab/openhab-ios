@@ -17,10 +17,10 @@ import SwiftUI
 // swiftlint:disable file_types_order
 struct SwitchRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var dataObject: ObservableOpenHABDataObject
+    @EnvironmentObject var userSettings: UserSettings
 
     var iconUrl: URL? {
-        return Endpoint.icon(rootUrl: dataObject.openHABRootUrl,
+        return Endpoint.icon(rootUrl: userSettings.openHABRootUrl,
                              version: 2,
                              icon: widget.icon,
                              value: widget.item?.state ?? "",
@@ -67,6 +67,6 @@ struct SwitchRow_Previews: PreviewProvider {
         let widget = UserData().widgets[0]
         return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
-            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
+            .environmentObject(UserSettings(openHABRootUrl: PreviewConstants.remoteURLString))
     }
 }

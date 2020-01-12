@@ -27,10 +27,9 @@ struct PreferencesSwiftUIView: View {
     var body: some View {
         List {
             PreferencesRowUIView(label: "Version", content: applicationVersionNumber)
-            PreferencesRowUIView(label: "Local URL", content: settings.localUrl)
-            PreferencesRowUIView(label: "Remote URL", content: settings.remoteUrl)
+            PreferencesRowUIView(label: "Local URL", content: settings.openHABRootUrl)
             PreferencesRowUIView(label: "Sitemap", content: settings.sitemapName)
-            PreferencesRowUIView(label: "Username", content: settings.username)
+            PreferencesRowUIView(label: "Username", content: settings.openHABUsername)
         }.font(.footnote)
     }
 }

@@ -25,7 +25,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""
-    var label = ""
+    @Published var label = ""
     var icon = ""
     var type = ""
     var url = ""

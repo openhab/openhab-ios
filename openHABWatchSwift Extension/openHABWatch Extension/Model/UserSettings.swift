@@ -8,6 +8,7 @@
 
 import Combine
 import Foundation
+import OpenHABCoreWatch
 
 @propertyWrapper
 struct UserDefault<T> {
@@ -29,14 +30,16 @@ struct UserDefault<T> {
     }
 }
 
-final class UserSettings: ObservableObject {
+final class UserSettings: DataObject, ObservableObject {
 
     static let shared = UserSettings()
+
+    var openHABVersion: Int = 2
 
     let objectWillChange = PassthroughSubject<Void, Never>()
 
     @UserDefault("localUrl", defaultValue: "")
-    var localUrl: String {
+    var openHABRootUrl: String {
         willSet {
             objectWillChange.send()
         }
@@ -57,14 +60,14 @@ final class UserSettings: ObservableObject {
     }
 
     @UserDefault("username", defaultValue: "")
-    var username: String {
+    var openHABUsername: String {
         willSet {
             objectWillChange.send()
         }
     }
 
     @UserDefault("password", defaultValue: "")
-    var password: String {
+    var openHABPassword: String {
         willSet {
             objectWillChange.send()
         }
@@ -74,7 +77,22 @@ final class UserSettings: ObservableObject {
     var ignoreSSL: Bool {
         willSet {
             objectWillChange.send()
+            NetworkConnection.shared.serverCertificateManager.ignoreSSL = newValue
+        }
+    }
+
+    @UserDefault("alwaysSendCreds", defaultValue: false)
+    var openHABAlwaysSendCreds: Bool {
+        willSet {
+            objectWillChange.send()
         }
     }
 
 }
+
+extension UserSettings {
+     convenience init(openHABRootUrl: String) {
+         self.init()
+         self.openHABRootUrl = openHABRootUrl
+     }
+ }
