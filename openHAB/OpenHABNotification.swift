@@ -63,7 +63,7 @@ extension OpenHABNotification {
 // Convenience method to convert a decoded value into a proper OpenHABNotification instance
 extension OpenHABNotification.CodingData {
     var openHABNotification: OpenHABNotification {
-        return OpenHABNotification(message: message, created: created)
+        OpenHABNotification(message: message, created: created)
     }
 }
 

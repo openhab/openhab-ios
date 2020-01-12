@@ -13,14 +13,14 @@ import Foundation
 
 extension KeyedDecodingContainerProtocol {
     func decode<T: Decodable>(forKey key: Key) throws -> T {
-        return try decode(T.self, forKey: key)
+        try decode(T.self, forKey: key)
     }
 
     func decodeIfPresent<T: Decodable>(forKey key: Key) throws -> T? {
-        return try decodeIfPresent(T.self, forKey: key)
+        try decodeIfPresent(T.self, forKey: key)
     }
 
     func decode<T: Decodable>(forKey key: Key, default defaultValue: T) throws -> T {
-        return try decodeIfPresent(T.self, forKey: key) ?? defaultValue
+        try decodeIfPresent(T.self, forKey: key) ?? defaultValue
     }
 }

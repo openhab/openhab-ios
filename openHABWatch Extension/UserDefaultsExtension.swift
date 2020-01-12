@@ -13,6 +13,6 @@ import Foundation
 
 extension UserDefaults {
     static var shared: UserDefaults {
-        return UserDefaults(suiteName: AppConstants.APP_GROUP_ID)!
+        UserDefaults(suiteName: AppConstants.APP_GROUP_ID)!
     }
 }

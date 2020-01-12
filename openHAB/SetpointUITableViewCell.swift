@@ -15,11 +15,11 @@ import UIKit
 
 class SetpointUITableViewCell: GenericUITableViewCell {
     private var isIntStep: Bool {
-        return widget.step.truncatingRemainder(dividingBy: 1) == 0
+        widget.step.truncatingRemainder(dividingBy: 1) == 0
     }
 
     private var stateFormat: String {
-        return isIntStep ? "%ld" : "%.01f"
+        isIntStep ? "%ld" : "%.01f"
     }
 
     @IBOutlet private var downButton: DynamicButton!

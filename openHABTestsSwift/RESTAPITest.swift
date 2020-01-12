@@ -29,7 +29,7 @@ class RESTAPITest: XCTestCase {
 
         class MockURLRequestAdapter: RequestAdapter {
             func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-                return urlRequest
+                urlRequest
             }
         }
 

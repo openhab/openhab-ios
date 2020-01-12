@@ -33,7 +33,7 @@ extension Endpoint {
     }
 
     static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
-        return Endpoint(baseURL: openHABRootUrl,
+        Endpoint(baseURL: openHABRootUrl,
                         path: "/rest/sitemaps/" + sitemapName,
                         queryItems: [URLQueryItem(name: "jsoncallback", value: "callback")])
     }
@@ -42,7 +42,7 @@ extension Endpoint {
                                   deviceToken: String,
                                   deviceId: String,
                                   deviceName: String) -> Endpoint {
-        return Endpoint(baseURL: prefsURL,
+        Endpoint(baseURL: prefsURL,
                         path: "/addAppleRegistration",
                         queryItems: [URLQueryItem(name: "regId", value: deviceToken),
                                      URLQueryItem(name: "deviceId", value: deviceId),
@@ -50,19 +50,19 @@ extension Endpoint {
     }
 
     static func notification(prefsURL: String) -> Endpoint {
-        return Endpoint(baseURL: prefsURL,
+        Endpoint(baseURL: prefsURL,
                         path: "/api/v1/notifications",
                         queryItems: [URLQueryItem(name: "limit", value: "20")])
     }
 
     static func tracker(openHABRootUrl: String) -> Endpoint {
-        return Endpoint(baseURL: openHABRootUrl,
+        Endpoint(baseURL: openHABRootUrl,
                         path: "/rest/bindings",
                         queryItems: [])
     }
 
     static func sitemaps(openHABRootUrl: String) -> Endpoint {
-        return Endpoint(baseURL: openHABRootUrl,
+        Endpoint(baseURL: openHABRootUrl,
                         path: "/rest/sitemaps",
                         queryItems: [URLQueryItem(name: "limit", value: "20")])
     }

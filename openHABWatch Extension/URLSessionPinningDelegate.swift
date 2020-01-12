@@ -90,7 +90,7 @@ class CertificatePinningURLSessionDelegate: NSObject, URLSessionDelegate {
 extension Certificate {
     static func localCertificates(with names: [String] = ["CertificateRenewed", "Certificate"],
                                   from bundle: Bundle = .main) -> [Certificate] {
-        return names.lazy.map {
+        names.lazy.map {
             guard let file = bundle.url(forResource: $0, withExtension: "cer"),
                 let data = try? Data(contentsOf: file),
                 let cert = SecCertificateCreateWithData(nil, data as CFData) else {

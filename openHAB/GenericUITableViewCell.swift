@@ -20,7 +20,7 @@ class GenericUITableViewCell: UITableViewCell {
     private var _widget: OpenHABWidget!
     var widget: OpenHABWidget! {
         get {
-            return _widget
+            _widget
         }
         set(widget) {
             _widget = widget

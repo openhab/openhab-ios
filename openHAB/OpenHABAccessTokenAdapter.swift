@@ -15,7 +15,7 @@ import Kingfisher
 
 class OpenHABAccessTokenAdapter: RequestAdapter {
     var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+        AppDelegate.appDelegate.appData
     }
 
     func adapt(_ urlRequest: URLRequest) throws -> URLRequest {

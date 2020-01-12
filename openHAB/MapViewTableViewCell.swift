@@ -16,7 +16,7 @@ class MapViewTableViewCell: GenericUITableViewCell {
 
     override var widget: OpenHABWidget! {
         get {
-            return super.widget
+            super.widget
         }
         set(widget) {
             let oldLocationCoordinate: CLLocationCoordinate2D? = self.widget?.coordinate

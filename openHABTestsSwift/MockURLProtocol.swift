@@ -27,15 +27,15 @@ final class MockURLProtocol: URLProtocol {
     }()
 
     override class func canInit(with request: URLRequest) -> Bool {
-        return true
+        true
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        return request
+        request
     }
 
     override class func requestIsCacheEquivalent(_ a: URLRequest, to b: URLRequest) -> Bool {
-        return false
+        false
     }
 
     override func startLoading() {

@@ -25,7 +25,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsRealTimeSliders = false
 
     var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+        AppDelegate.appDelegate.appData
     }
 
     @IBOutlet private var settingsTableView: UITableView!

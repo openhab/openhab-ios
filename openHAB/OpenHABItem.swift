@@ -49,11 +49,11 @@ final class OpenHABItem: NSObject {
     }
 
     func stateAsDouble() -> Double {
-        return state.numberValue?.doubleValue ?? 0
+        state.numberValue?.doubleValue ?? 0
     }
 
     func stateAsInt() -> Int {
-        return state.numberValue?.intValue ?? 0
+        state.numberValue?.intValue ?? 0
     }
 
     func stateAsUIColor() -> UIColor? {
@@ -102,7 +102,7 @@ extension OpenHABItem {
 
 extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
-        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription)
+        OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription)
     }
 }
 

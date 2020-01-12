@@ -132,7 +132,7 @@ extension OpenHABSitemap {
 
 extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(name: name,
+        OpenHABSitemap(name: name,
                               icon: icon ?? "",
                               label: label,
                               link: link,

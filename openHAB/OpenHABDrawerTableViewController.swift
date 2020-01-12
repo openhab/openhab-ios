@@ -74,7 +74,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     // App wide data access
     var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+        AppDelegate.appDelegate.appData
     }
 
     init(drawerTableType: DrawerTableType?) {
@@ -149,7 +149,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sitemaps.count + drawerItems.count
+        sitemaps.count + drawerItems.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -212,7 +212,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 44
+        44
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

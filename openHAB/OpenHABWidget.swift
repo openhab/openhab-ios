@@ -58,7 +58,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     var coordinate: CLLocationCoordinate2D {
-        return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
+        item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
     var mappingsOrItemOptions: [OpenHABWidgetMapping] {
@@ -86,7 +86,7 @@ class OpenHABWidget: NSObject, MKAnnotation {
     }
 
     func mappingIndex(byCommand command: String?) -> Int? {
-        return mappingsOrItemOptions.firstIndex { $0.command == command }
+        mappingsOrItemOptions.firstIndex { $0.command == command }
     }
 }
 

@@ -24,6 +24,7 @@ disabled_rules: # rule identifiers to exclude from running
 
 excluded: 
   - Pods
+  - fastlane
 
 nesting: 
     type_level: 2

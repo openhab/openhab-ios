@@ -33,7 +33,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     private var chartStyle: ChartStyle = .light
 
     private var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+        AppDelegate.appDelegate.appData
     }
 
     private var widgetPayload: ImageType {
