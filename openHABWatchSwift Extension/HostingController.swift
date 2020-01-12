@@ -15,15 +15,6 @@ import OpenHABCoreWatch
 import SwiftUI
 import WatchKit
 
-//class HostingController: WKHostingController<AnyView> {
-//    @ObservedObject var settings = UserSettings.shared
-//
-//    override var body: AnyView {
-//        AnyView(
-//            ContentView(viewModel: UserData(urlString: settings.openHABRootUrl))
-//                .environmentObject(settings)
-//        )
-//    }
 class HostingController: WKHostingController<ContentView> {
     @ObservedObject var settings = UserSettings.shared
     override var body: ContentView {
