@@ -23,6 +23,9 @@ struct ContentView: View {
                     .environmentObject(self.settings)
             }
         }
+        .alert(isPresented: $viewModel.showAlert) {
+            Alert(title: Text("Error"), message: Text(viewModel.errorDescription), dismissButton: .default(Text("Got it!")))
+        }
     }
 
     func rowWidget(widget: ObservableOpenHABWidget) -> AnyView? {

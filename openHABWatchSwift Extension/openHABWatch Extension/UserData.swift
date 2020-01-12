@@ -19,7 +19,8 @@ import SwiftUI
 final class UserData: ObservableObject {
 
     @Published var widgets: [ObservableOpenHABWidget] = []
-    @Published var showAlert: Bool = false
+    @Published var showAlert = false
+    @Published var errorDescription = ""
 
     let decoder = JSONDecoder()
 
@@ -51,24 +52,22 @@ final class UserData: ObservableObject {
         }
     }
 
-//    init(urlString: String, refresh: Bool) {
-//        pageURL = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: "watch").url
-//        loadPage(longPolling: false, refresh: refresh)
-//    }
-//
-//    func loadPage(longPolling: Bool, refresh: Bool) {
-//    if currentPageOperation != nil {
-//        currentPageOperation?.cancel()
-//        currentPageOperation = nil
-//    }
-//
-//    guard let pageURL = pageURL else { return }
-//    os_log("pageURL = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageURL.absoluteString)
-//    }
+    init(urlString: String, refresh: Bool = true) {
+        loadPage(urlString: urlString,
+                 longPolling: false,
+                 refresh: refresh)
+    }
 
-    init(urlString: String) {
-        commandOperation = NetworkConnection.page(url: Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: "watch").url,
-                                                  longPolling: false,
+    func loadPage(urlString: String,
+                  longPolling: Bool,
+                  refresh: Bool) {
+        if currentPageOperation != nil {
+            currentPageOperation?.cancel()
+            currentPageOperation = nil
+        }
+
+        currentPageOperation = NetworkConnection.page(url: Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: "watch").url,
+                                                  longPolling: longPolling,
                                                   openHABVersion: 2) { [weak self] response in
             guard let self = self else { return }
 
@@ -98,13 +97,18 @@ final class UserData: ObservableObject {
                 self.widgets = self.openHABSitemapPage?.widgets ?? []
 
                 self.showAlert = false
+                if refresh { self.loadPage(urlString: urlString,
+                    longPolling: true,
+                    refresh: true) }
 
-            case .failure:
+            case let .failure(error):
+                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                self.errorDescription = error.localizedDescription
                 self.widgets = []
                 self.showAlert = true
-            }
+                                                    }
         }
-        commandOperation?.resume()
+        currentPageOperation?.resume()
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
