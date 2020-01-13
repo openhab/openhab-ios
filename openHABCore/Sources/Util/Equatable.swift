@@ -13,6 +13,6 @@ import Foundation
 
 extension Equatable {
     public func isAny(of candidates: Self...) -> Bool {
-        return candidates.contains(self)
+        candidates.contains(self)
     }
 }

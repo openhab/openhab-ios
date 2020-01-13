@@ -23,9 +23,9 @@ public class OpenHABAccessTokenAdapter: RequestAdapter {
     public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
         var urlRequest = urlRequest
 
-       let alwaysSendCreds = appData.openHABAlwaysSendCreds
+        let alwaysSendCreds = appData.openHABAlwaysSendCreds
         let user = appData.openHABUsername
-        let password = appData.openHABPassword //else { return urlRequest }
+        let password = appData.openHABPassword // else { return urlRequest }
 
         if alwaysSendCreds {
             if !user.isEmpty || !password.isEmpty {

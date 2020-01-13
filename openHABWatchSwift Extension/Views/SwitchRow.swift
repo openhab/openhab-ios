@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -17,18 +17,18 @@ import SwiftUI
 // swiftlint:disable file_types_order
 struct SwitchRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var userSettings: UserSettings
+    @EnvironmentObject var userSettings: ObservableOpenHABDataObject
 
     var iconUrl: URL? {
-        return Endpoint.icon(rootUrl: userSettings.openHABRootUrl,
-                             version: 2,
-                             icon: widget.icon,
-                             value: widget.item?.state ?? "",
-                             iconType: .png).url
+        Endpoint.icon(rootUrl: userSettings.openHABRootUrl,
+                      version: 2,
+                      icon: widget.icon,
+                      value: widget.item?.state ?? "",
+                      iconType: .png).url
     }
 
     var body: some View {
-        return Toggle(isOn: $widget.stateBinding) {
+        Toggle(isOn: $widget.stateBinding) {
             HStack {
                 KFImage(iconUrl)
                     .onSuccess { retrieveImageResult in
@@ -67,6 +67,6 @@ struct SwitchRow_Previews: PreviewProvider {
         let widget = UserData().widgets[0]
         return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
-            .environmentObject(UserSettings(openHABRootUrl: PreviewConstants.remoteURLString))
+            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
     }
 }

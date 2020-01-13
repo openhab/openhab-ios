@@ -44,7 +44,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
     private var mjpegRequest: Alamofire.Request?
     private var session: URLSession!
     private var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+        AppDelegate.appDelegate.appData
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

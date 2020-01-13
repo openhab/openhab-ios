@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -17,7 +17,6 @@ import os.log
 import SwiftUI
 
 final class UserData: ObservableObject {
-
     @Published var widgets: [ObservableOpenHABWidget] = []
     @Published var showAlert = false
     @Published var errorDescription = ""
@@ -67,8 +66,8 @@ final class UserData: ObservableObject {
         }
 
         currentPageOperation = NetworkConnection.page(url: Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: "watch").url,
-                                                  longPolling: longPolling,
-                                                  openHABVersion: 2) { [weak self] response in
+                                                      longPolling: longPolling,
+                                                      openHABVersion: 2) { [weak self] response in
             guard let self = self else { return }
 
             switch response.result {
@@ -98,15 +97,15 @@ final class UserData: ObservableObject {
 
                 self.showAlert = false
                 if refresh { self.loadPage(urlString: urlString,
-                    longPolling: true,
-                    refresh: true) }
+                                           longPolling: true,
+                                           refresh: true) }
 
             case let .failure(error):
                 os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                 self.errorDescription = error.localizedDescription
                 self.widgets = []
                 self.showAlert = true
-                                                    }
+            }
         }
         currentPageOperation?.resume()
     }

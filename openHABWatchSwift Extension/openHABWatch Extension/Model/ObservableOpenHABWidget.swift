@@ -68,7 +68,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     }
 
     var coordinate: CLLocationCoordinate2D {
-        return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
+        item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
     var mappingsOrItemOptions: [OpenHABWidgetMapping] {
@@ -96,17 +96,17 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     }
 
     func mappingIndex(byCommand command: String?) -> Int? {
-        return mappingsOrItemOptions.firstIndex { $0.command == command }
+        mappingsOrItemOptions.firstIndex { $0.command == command }
     }
 }
 
 extension ObservableOpenHABWidget {
-//    private var statePublisher: AnyPublisher<Bool, Never> {
-//        $stateBinding
-//            .debounce(for: 0.1, scheduler: RunLoop.main)
-//            .removeDuplicates()
-//            .eraseToAnyPublisher()
-//    }
+    private var statePublisher: AnyPublisher<Bool, Never> {
+        $stateBinding
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
 
     // This is an ugly initializer
     convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget]) {
@@ -149,21 +149,22 @@ extension ObservableOpenHABWidget {
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
 
-//        _ = statePublisher
-//            .receive(on: RunLoop.main)
-//            .map { value -> String in
-//                value ? "ON" : "OFF"
-//            }
-//            .sink { receivedValue in
-//                // sink is the subscriber and terminates the pipeline
-//                self.sendCommand(receivedValue)
-//                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, item?.name ?? "", receivedValue)
-//            }
+        _ = statePublisher
+            .receive(on: RunLoop.main)
+            .map { value -> String in
+                value ? "ON" : "OFF"
+            }
+            .sink { receivedValue in
+                // sink is the subscriber and terminates the pipeline
+                self.sendCommand(receivedValue)
+                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, item?.name ?? "", receivedValue)
+            }
     }
 
     convenience init(xml xmlElement: XMLElement) {
         self.init()
         id = widgetId
+        // OH 1.x compatability
         stateBinding = state == "ON" ? true : false
 
         for child in xmlElement.children {

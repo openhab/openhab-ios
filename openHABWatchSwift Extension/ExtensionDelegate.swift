@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -17,7 +17,7 @@ import WatchKit
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
     static var extensionDelegate: ExtensionDelegate!
 
-    var appData = UserSettings()
+    var appData = ObservableOpenHABDataObject()
 
     var session: WCSession? {
         didSet {
@@ -29,7 +29,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     override init() {
-        appData = UserSettings()
+        appData = ObservableOpenHABDataObject()
         super.init()
         ExtensionDelegate.extensionDelegate = self
 

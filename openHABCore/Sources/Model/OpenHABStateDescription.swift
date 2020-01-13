@@ -40,6 +40,6 @@ extension OpenHABStateDescription {
 
 extension OpenHABStateDescription.CodingData {
     var openHABStateDescription: OpenHABStateDescription {
-        return OpenHABStateDescription(minimum: minimum, maximum: maximum, step: step, readOnly: readOnly, options: options)
+        OpenHABStateDescription(minimum: minimum, maximum: maximum, step: step, readOnly: readOnly, options: options)
     }
 }

@@ -99,7 +99,7 @@ class OpenHABViewController: UIViewController {
     // App wide data access
     // https://stackoverflow.com/questions/45832155/how-do-i-refactor-my-code-to-call-appdelegate-on-the-main-thread
     var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+        AppDelegate.appDelegate.appData
     }
 
     // MARK: - Private instance methods
@@ -110,7 +110,7 @@ class OpenHABViewController: UIViewController {
     }
 
     var isFiltering: Bool {
-        return search.isActive && !searchBarIsEmpty
+        search.isActive && !searchBarIsEmpty
     }
 
     @IBOutlet private var widgetTableView: UITableView!
@@ -373,7 +373,7 @@ class OpenHABViewController: UIViewController {
     }
 
     func relevantWidget(indexPath: IndexPath) -> OpenHABWidget? {
-        return relevantPage?.widgets[indexPath.row]
+        relevantPage?.widgets[indexPath.row]
     }
 
     private func updateWidgetTableView() {
@@ -950,7 +950,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 44.0
+        44.0
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -961,7 +961,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Image", "Chart", "Video":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
-             if let height = widget?.height, Int(height) != 0 {
+            if let height = widget?.height, Int(height) != 0 {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)

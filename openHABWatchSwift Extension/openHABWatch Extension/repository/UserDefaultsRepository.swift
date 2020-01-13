@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -60,7 +60,7 @@ struct Preferences {
     }
 
     static var ignoreSSL: Bool {
-        get { return defaults.bool(forKey: #function) }
+        get { defaults.bool(forKey: #function) }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
@@ -72,17 +72,17 @@ struct Preferences {
     }
 
     static var demomode: Bool {
-        get { return defaults.bool(forKey: #function) }
+        get { defaults.bool(forKey: #function) }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
     static var idleOff: Bool {
-        get { return defaults.bool(forKey: #function) }
+        get { defaults.bool(forKey: #function) }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 
     static var iconType: Int {
-        get { return defaults.integer(forKey: #function) }
+        get { defaults.integer(forKey: #function) }
         set { defaults.setValue(newValue, forKey: #function) }
     }
 

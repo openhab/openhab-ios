@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -14,7 +14,7 @@ import SwiftUI
 // swiftlint:disable file_types_order
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
-    @ObservedObject var settings = UserSettings.shared
+    @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
         List {
@@ -49,11 +49,11 @@ struct ContentView_Previews: PreviewProvider {
         Group {
             ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 4 - 44mm")
-                .environmentObject(UserSettings())
+                .environmentObject(ObservableOpenHABDataObject())
 
             ContentView(viewModel: UserData(urlString: PreviewConstants.remoteURLString))
                 .previewDevice("Apple Watch Series 2 - 38mm")
-                .environmentObject(UserSettings(openHABRootUrl: PreviewConstants.remoteURLString))
+                .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
         }
     }
 }

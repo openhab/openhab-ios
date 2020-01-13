@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -49,16 +49,6 @@ protocol Widget: AnyObject {
     func flatten(_: [ChildWidget])
 }
 
-////  Recursive parsing of nested widget structure
-// extension Widget  {
-//    func flatten(_ widgets: [ChildWidget]) {
-//        for widget in widgets {
-//            append(widget)
-//            flatten(widget.widgets)
-//        }
-//    }
-// }
-
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var id: String = ""
 
@@ -105,7 +95,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     }
 
     public var coordinate: CLLocationCoordinate2D {
-        return item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
+        item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
     }
 
     public var mappingsOrItemOptions: [OpenHABWidgetMapping] {
@@ -133,7 +123,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     }
 
     public func mappingIndex(byCommand command: String?) -> Int? {
-        return mappingsOrItemOptions.firstIndex { $0.command == command }
+        mappingsOrItemOptions.firstIndex { $0.command == command }
     }
 }
 

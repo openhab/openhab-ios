@@ -23,7 +23,7 @@ public struct UserDefault<T> {
 
     public var wrappedValue: T {
         get {
-            return UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
+            UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
         }
         set {
             UserDefaults.standard.set(newValue, forKey: key)
@@ -34,7 +34,6 @@ public struct UserDefault<T> {
         self.key = key
         self.defaultValue = defaultValue
     }
-
 }
 
 // It would be nice to write something like  @UserDefault @TrimmedURL ("localUrl", defaultValue: "test") static var localUrl: String
@@ -78,7 +77,6 @@ public struct UserDefaultURL {
 }
 
 public struct Preferences {
-
     static private let defaults = UserDefaults.standard
 
     @UserDefaultURL("localUrl", defaultValue: "") static public var localUrl: String

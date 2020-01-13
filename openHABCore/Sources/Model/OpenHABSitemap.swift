@@ -132,11 +132,11 @@ extension OpenHABSitemap {
 
 extension OpenHABSitemap.CodingData {
     public var openHABSitemap: OpenHABSitemap {
-        return OpenHABSitemap(name: name,
-                              icon: icon ?? "",
-                              label: label,
-                              link: link,
-                              leaf: page.leaf,
-                              homepageLink: page.link)
+        OpenHABSitemap(name: name,
+                       icon: icon ?? "",
+                       label: label,
+                       link: link,
+                       leaf: page.leaf,
+                       homepageLink: page.link)
     }
 }

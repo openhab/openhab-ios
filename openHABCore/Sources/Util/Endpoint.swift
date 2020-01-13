@@ -34,8 +34,8 @@ extension Endpoint {
 
     public static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
         Endpoint(baseURL: openHABRootUrl,
-                        path: "/rest/sitemaps/\(sitemapName)/\(sitemapName)",
-                        queryItems: [URLQueryItem(name: "jsoncallback", value: "callback")])
+                 path: "/rest/sitemaps/\(sitemapName)/\(sitemapName)",
+                 queryItems: [URLQueryItem(name: "jsoncallback", value: "callback")])
     }
 
     public static func appleRegistration(prefsURL: String,
@@ -43,28 +43,28 @@ extension Endpoint {
                                          deviceId: String,
                                          deviceName: String) -> Endpoint {
         Endpoint(baseURL: prefsURL,
-                        path: "/addAppleRegistration",
-                        queryItems: [URLQueryItem(name: "regId", value: deviceToken),
-                                     URLQueryItem(name: "deviceId", value: deviceId),
-                                     URLQueryItem(name: "deviceModel", value: deviceName)])
+                 path: "/addAppleRegistration",
+                 queryItems: [URLQueryItem(name: "regId", value: deviceToken),
+                              URLQueryItem(name: "deviceId", value: deviceId),
+                              URLQueryItem(name: "deviceModel", value: deviceName)])
     }
 
     public static func notification(prefsURL: String) -> Endpoint {
         Endpoint(baseURL: prefsURL,
-                        path: "/api/v1/notifications",
-                        queryItems: [URLQueryItem(name: "limit", value: "20")])
+                 path: "/api/v1/notifications",
+                 queryItems: [URLQueryItem(name: "limit", value: "20")])
     }
 
     public static func tracker(openHABRootUrl: String) -> Endpoint {
         Endpoint(baseURL: openHABRootUrl,
-                        path: "/rest/bindings",
-                        queryItems: [])
+                 path: "/rest/bindings",
+                 queryItems: [])
     }
 
     public static func sitemaps(openHABRootUrl: String) -> Endpoint {
         Endpoint(baseURL: openHABRootUrl,
-                        path: "/rest/sitemaps",
-                        queryItems: [URLQueryItem(name: "limit", value: "20")])
+                 path: "/rest/sitemaps",
+                 queryItems: [URLQueryItem(name: "limit", value: "20")])
     }
 
     // swiftlint:disable:next function_parameter_count

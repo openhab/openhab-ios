@@ -21,6 +21,6 @@ extension PropertyListDecoder: AnyDecoder {}
 // Inspired by https://www.swiftbysundell.com/posts/type-inference-powered-serialization-in-swift
 extension Data {
     public func decoded<T: Decodable>(using decoder: AnyDecoder = JSONDecoder()) throws -> T {
-        return try decoder.decode(T.self, from: self)
+        try decoder.decode(T.self, from: self)
     }
 }

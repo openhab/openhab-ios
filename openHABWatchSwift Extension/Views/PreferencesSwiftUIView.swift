@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -14,8 +14,7 @@ import SwiftUI
 
 // swiftlint:disable file_types_order
 struct PreferencesSwiftUIView: View {
-
-    @ObservedObject var settings = UserSettings.shared
+    @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var applicationVersionNumber: String = {
         let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String

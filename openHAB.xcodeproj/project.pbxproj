@@ -73,7 +73,6 @@
 		93F38C68238034BD001B1451 /* OpenHABCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 93F38C63238034BD001B1451 /* OpenHABCore.h */; };
 		93F38C6C238034DA001B1451 /* DataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38C6B238034DA001B1451 /* DataObject.swift */; };
 		93F38C6D238034DA001B1451 /* DataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38C6B238034DA001B1451 /* DataObject.swift */; };
-		93F38D482380374B001B1451 /* ObservableOpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38D472380374A001B1451 /* ObservableOpenHABDataObject.swift */; };
 		93F38D4B238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38D4A238037E3001B1451 /* OpenHABAccessTokenAdapter.swift */; };
 		93F38D4C238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38D4A238037E3001B1451 /* OpenHABAccessTokenAdapter.swift */; };
 		9F259B7C92716165691D7ADF /* Pods_openHABWatchSwift_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04CDCA68E8E4BB3CC9B14990 /* Pods_openHABWatchSwift_Extension.framework */; };
@@ -93,7 +92,7 @@
 		DA07753B2346705F0086C685 /* openHABWatchSwift.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA0775152346705D0086C685 /* openHABWatchSwift.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA077649234683BC0086C685 /* SwitchRow.swift */; };
 		DA0776F0234788010086C685 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0776EF234788010086C685 /* UserData.swift */; };
-		DA15BFBD23C6726400BD8ADA /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15BFBC23C6726400BD8ADA /* UserSettings.swift */; };
+		DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
@@ -314,7 +313,6 @@
 		93F38C63238034BD001B1451 /* OpenHABCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenHABCore.h; sourceTree = "<group>"; };
 		93F38C66238034BD001B1451 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		93F38C6B238034DA001B1451 /* DataObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataObject.swift; sourceTree = "<group>"; };
-		93F38D472380374A001B1451 /* ObservableOpenHABDataObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABDataObject.swift; sourceTree = "<group>"; };
 		93F38D4A238037E3001B1451 /* OpenHABAccessTokenAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABAccessTokenAdapter.swift; sourceTree = "<group>"; };
 		9470E742136EBB59A05BC3C3 /* Pods-openHABUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABUITests.debug.xcconfig"; path = "Target Support Files/Pods-openHABUITests/Pods-openHABUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
@@ -341,7 +339,7 @@
 		DA0775382346705F0086C685 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
 		DA077649234683BC0086C685 /* SwitchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchRow.swift; sourceTree = "<group>"; };
 		DA0776EF234788010086C685 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
-		DA15BFBC23C6726400BD8ADA /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
+		DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABDataObject.swift; sourceTree = "<group>"; };
 		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABGeneralTests.swift; sourceTree = "<group>"; };
 		DA1C2E4B230DC28F00FACFB0 /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
@@ -643,10 +641,9 @@
 		93F38D4623803731001B1451 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				93F38D472380374A001B1451 /* ObservableOpenHABDataObject.swift */,
+				DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */,
 				9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */,
 				9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */,
-				DA15BFBC23C6726400BD8ADA /* UserSettings.swift */,
 			);
 			name = Model;
 			path = "openHABWatch Extension/Model";
@@ -1128,11 +1125,12 @@
 			buildConfigurationList = DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */;
 			buildPhases = (
 				410F97BEAC757E83206AE074 /* [CP] Check Pods Manifest.lock */,
+				DAEAA89921E1F4BD00267EA3 /* Run script Swiftformat */,
+				DA0EEF2123CD1DD10006A167 /* Run Script swiftlint */,
 				DFB2622318830A3600D3244D /* Sources */,
 				DFB2622418830A3600D3244D /* Frameworks */,
 				DFB2622518830A3600D3244D /* Resources */,
-				6562C91D1FCF2B56008C61CE /* ShellScript */,
-				DAEAA89921E1F4BD00267EA3 /* ShellScript */,
+				6562C91D1FCF2B56008C61CE /* Run Script Crashlytics */,
 				1224F7B7228A8AE600750965 /* Embed Watch Content */,
 				E82FCE18FFA26DBD72F7963D /* [CP] Embed Pods Frameworks */,
 				93F38C4C23803499001B1451 /* Embed Frameworks */,
@@ -1319,13 +1317,14 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		6562C91D1FCF2B56008C61CE /* ShellScript */ = {
+		6562C91D1FCF2B56008C61CE /* Run Script Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Run Script Crashlytics";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1437,7 +1436,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		DAEAA89921E1F4BD00267EA3 /* ShellScript */ = {
+		DA0EEF2123CD1DD10006A167 /* Run Script swiftlint */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1446,13 +1445,32 @@
 			);
 			inputPaths = (
 			);
+			name = "Run Script swiftlint";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${PODS_ROOT}/SwiftFormat/CommandLineTool/swiftformat ${SRCROOT}\n${PODS_ROOT}/SwiftLint/swiftlint\n";
+			shellScript = "\"${PODS_ROOT}/SwiftLint/swiftlint\"\n";
+		};
+		DAEAA89921E1F4BD00267EA3 /* Run script Swiftformat */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run script Swiftformat";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#\"${PODS_ROOT}/SwiftFormat/CommandLineTool/swiftformat $SRCROOT\"\n";
 		};
 		DB71152C73442FFD6A9C9D27 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1573,14 +1591,13 @@
 				DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
-				93F38D482380374B001B1451 /* ObservableOpenHABDataObject.swift in Sources */,
 				DA72E1B3236DE9F200B8EF3A /* AppConstants.swift in Sources */,
 				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
 				DA72E1B2236DE9F200B8EF3A /* AppState.swift in Sources */,
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,
 				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
 				9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */,
-				DA15BFBD23C6726400BD8ADA /* UserSettings.swift in Sources */,
+				DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
 				DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */,
 				DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */,

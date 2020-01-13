@@ -16,7 +16,7 @@ import UIKit
 struct DynamicButtonStyleGear: DynamicButtonBuildableStyle {
     /// "Gear" style.
     static var styleName: String {
-        return "Gear"
+        "Gear"
     }
 
     let pathVector: DynamicButtonPathVector

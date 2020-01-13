@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -16,7 +16,7 @@ import SwiftUI
 import WatchKit
 
 class HostingController: WKHostingController<ContentView> {
-    @ObservedObject var settings = UserSettings.shared
+    @ObservedObject var settings = ObservableOpenHABDataObject.shared
     override var body: ContentView {
         ContentView(urlString: settings.openHABRootUrl)
     }

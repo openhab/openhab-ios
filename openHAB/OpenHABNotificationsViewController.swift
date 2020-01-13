@@ -25,7 +25,7 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     var hamburgerButton: DynamicButton!
 
     var appData: OpenHABDataObject? {
-        return AppDelegate.appDelegate.appData
+        AppDelegate.appDelegate.appData
     }
 
     override func viewDidLoad() {
@@ -94,7 +94,7 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return notifications.count
+        notifications.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

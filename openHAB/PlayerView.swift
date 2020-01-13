@@ -18,12 +18,12 @@ import AVKit
 class PlayerView: UIView {
     // Override UIView property
     override static var layerClass: AnyClass {
-        return AVPlayerLayer.self
+        AVPlayerLayer.self
     }
 
     var player: AVPlayer? {
         get {
-            return playerLayer.player
+            playerLayer.player
         }
         set {
             playerLayer.player = newValue
@@ -31,6 +31,6 @@ class PlayerView: UIView {
     }
 
     var playerLayer: AVPlayerLayer {
-        return layer as! AVPlayerLayer
+        layer as! AVPlayerLayer
     }
 }

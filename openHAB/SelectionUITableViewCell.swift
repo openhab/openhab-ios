@@ -14,7 +14,7 @@ import OpenHABCore
 class SelectionUITableViewCell: GenericUITableViewCell {
     override var widget: OpenHABWidget! {
         get {
-            return super.widget
+            super.widget
         }
         set(widget) {
             super.widget = widget

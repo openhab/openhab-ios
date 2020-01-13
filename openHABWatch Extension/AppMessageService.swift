@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2019 Contributors to the openHAB project
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -20,31 +20,31 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
         if let localUrl = applicationContext["localUrl"] as? String {
-            UserSettings.shared.openHABRootUrl = localUrl
+            ObservableOpenHABDataObject.shared.openHABRootUrl = localUrl
         }
 
         if let remoteUrl = applicationContext["remoteUrl"] as? String {
-            UserSettings.shared.remoteUrl = remoteUrl
+            ObservableOpenHABDataObject.shared.remoteUrl = remoteUrl
         }
 
         if let sitemapName = applicationContext["sitemapName"] as? String {
-            UserSettings.shared.sitemapName = sitemapName
+            ObservableOpenHABDataObject.shared.sitemapName = sitemapName
         }
 
         if let username = applicationContext["username"] as? String {
-            UserSettings.shared.openHABUsername = username
+            ObservableOpenHABDataObject.shared.openHABUsername = username
         }
 
         if let password = applicationContext["password"] as? String {
-            UserSettings.shared.openHABPassword = password
+            ObservableOpenHABDataObject.shared.openHABPassword = password
         }
 
         if let ignoreSSL = applicationContext["ignoreSSL"] as? Bool {
-            UserSettings.shared.ignoreSSL = ignoreSSL
+            ObservableOpenHABDataObject.shared.ignoreSSL = ignoreSSL
         }
 
         if let trustedCertificate = applicationContext["trustedCertificates"] as? [String: Any] {
-            let serverCertificateManager = ServerCertificateManager(ignoreSSL: UserSettings.shared.ignoreSSL)
+            let serverCertificateManager = ServerCertificateManager(ignoreSSL: ObservableOpenHABDataObject.shared.ignoreSSL)
             serverCertificateManager.trustedCertificates = trustedCertificate
             serverCertificateManager.saveTrustedCertificates()
             NetworkConnection.shared.serverCertificateManager = serverCertificateManager
