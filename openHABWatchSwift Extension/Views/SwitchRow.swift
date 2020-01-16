@@ -28,7 +28,22 @@ struct SwitchRow: View {
     }
 
     var body: some View {
-        Toggle(isOn: $widget.stateBinding) {
+
+        let stateBinding = Binding<Bool>(
+            get: { self.widget.stateBinding },
+            set: {
+                if !(self.widget.stateBinding) {
+                    os_log("Switch to ON", log: .viewCycle, type: .info)
+                    self.widget.sendCommand("ON")
+                } else {
+                    os_log("Switch to OFF", log: .viewCycle, type: .info)
+                    self.widget.sendCommand("OFF")
+                }
+                self.widget.stateBinding = $0
+            }
+        )
+
+        return Toggle(isOn: stateBinding) {
             HStack {
                 KFImage(iconUrl)
                     .onSuccess { retrieveImageResult in
@@ -59,6 +74,10 @@ struct SwitchRow: View {
             }
         }
         .cornerRadius(5)
+        .onTapGesture {
+            self.widget.stateBinding.toggle()
+        }
+
     }
 }
 

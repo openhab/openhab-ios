@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E96C96570B51C7043095EF1 /* Pods_OpenHABCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6C94F93F332A550786A783A /* Pods_OpenHABCore.framework */; };
 		1224F78E228A89FD00750965 /* WatchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78C228A89FC00750965 /* WatchService.swift */; };
 		1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78D228A89FC00750965 /* WatchMessageService.swift */; };
-		154A224D0B8902F877345E7E /* Pods_OpenHABCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 373AB8D52FD8F2AC8660AF28 /* Pods_OpenHABCore.framework */; };
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
-		370D6BBECE8902E4482C39DE /* Pods_openHABTestsSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A432BE377BB304441CE9AC8F /* Pods_openHABTestsSwift.framework */; };
+		4BFA80124CD53614E917544F /* Pods_OpenHABCoreWatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7C18F7BEFBD51AF13F77164 /* Pods_OpenHABCoreWatch.framework */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
-		898FA23972AE5C290DF7ADD7 /* Pods_openHABUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08A2E1DD593320C34CC8671C /* Pods_openHABUITests.framework */; };
+		7FC9367CB7380FA8A9AEA922 /* Pods_openHABTestsSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA646789654D6BCEA2EB3BD4 /* Pods_openHABTestsSwift.framework */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
@@ -59,8 +59,6 @@
 		9350F195238151F100054BA8 /* UserDefaultsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F193238151F100054BA8 /* UserDefaultsRepository.swift */; };
 		9350F1972381523700054BA8 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1962381523700054BA8 /* Equatable.swift */; };
 		9350F1982381523700054BA8 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1962381523700054BA8 /* Equatable.swift */; };
-		9350F19E2381631500054BA8 /* ChartStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F19D2381631500054BA8 /* ChartStyle.swift */; };
-		9350F19F2381631500054BA8 /* ChartStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F19D2381631500054BA8 /* ChartStyle.swift */; };
 		938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */; };
 		9394102622CB5CDB00EB4255 /* Collection+SafeAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */; };
 		93F38C4723803499001B1451 /* OpenHABCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 93F38C4523803499001B1451 /* OpenHABCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -75,10 +73,10 @@
 		93F38C6D238034DA001B1451 /* DataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38C6B238034DA001B1451 /* DataObject.swift */; };
 		93F38D4B238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38D4A238037E3001B1451 /* OpenHABAccessTokenAdapter.swift */; };
 		93F38D4C238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F38D4A238037E3001B1451 /* OpenHABAccessTokenAdapter.swift */; };
-		9F259B7C92716165691D7ADF /* Pods_openHABWatchSwift_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04CDCA68E8E4BB3CC9B14990 /* Pods_openHABWatchSwift_Extension.framework */; };
 		A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */; };
 		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
+		AF0711E4A7FABD09BBE2FC4E /* Pods_openHABWatchSwift_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 13978A99E8EAE0AB5CF98CF4 /* Pods_openHABWatchSwift_Extension.framework */; };
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
 		DA0775192346705D0086C685 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0775172346705D0086C685 /* Interface.storyboard */; };
 		DA07751B2346705F0086C685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA07751A2346705F0086C685 /* Assets.xcassets */; };
@@ -103,7 +101,6 @@
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
 		DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* Preview_Constants.swift */; };
 		DA72E1B2236DE9F200B8EF3A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B0236DE9F200B8EF3A /* AppState.swift */; };
-		DA72E1B3236DE9F200B8EF3A /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
@@ -121,7 +118,6 @@
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
-		DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
@@ -158,8 +154,8 @@
 		DFDF45341934699B00A6E581 /* OpenHABInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */; };
 		DFE10414197415F900D94943 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE10413197415F900D94943 /* Security.framework */; };
 		DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */; };
-		E123549FEFC7AA69D0BC422A /* Pods_openHAB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72DD66FBC6D4916C89AE9686 /* Pods_openHAB.framework */; };
-		F1E7A384CD1A6F54E02BFF22 /* Pods_OpenHABCoreWatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39734B0EE393577CC328F485 /* Pods_OpenHABCoreWatch.framework */; };
+		ECFEB223F6D45EA2FB47FB6C /* Pods_openHAB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24E2199EA99EE79481394E0B /* Pods_openHAB.framework */; };
+		F5D79718DDE3DEAFC6236E74 /* Pods_openHABUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 534A93FB00BC7EDE9C60FE93 /* Pods_openHABUITests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -255,26 +251,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		04CDCA68E8E4BB3CC9B14990 /* Pods_openHABWatchSwift_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABWatchSwift_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		08A2E1DD593320C34CC8671C /* Pods_openHABUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1224F78C228A89FC00750965 /* WatchService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchService.swift; sourceTree = "<group>"; };
 		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
-		1EDC0FE1E62985C2F8D5A6B8 /* Pods-openHABUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABUITests.release.xcconfig"; path = "Target Support Files/Pods-openHABUITests/Pods-openHABUITests.release.xcconfig"; sourceTree = "<group>"; };
-		26EF9B583DBE9F1402D8F4FE /* Pods-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
+		13978A99E8EAE0AB5CF98CF4 /* Pods_openHABWatchSwift_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABWatchSwift_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		24E2199EA99EE79481394E0B /* Pods_openHAB.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHAB.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicButtonStyleBell.swift; sourceTree = "<group>"; };
 		286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicButtonStyleGear.swift; sourceTree = "<group>"; };
-		289968A09B183B8EB26F6DBB /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
-		373AB8D52FD8F2AC8660AF28 /* Pods_OpenHABCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OpenHABCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		39734B0EE393577CC328F485 /* Pods_OpenHABCoreWatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OpenHABCoreWatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3B29B4A861FF98A4EEA57369 /* Pods-OpenHABCoreWatch.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCoreWatch.release.xcconfig"; path = "Target Support Files/Pods-OpenHABCoreWatch/Pods-OpenHABCoreWatch.release.xcconfig"; sourceTree = "<group>"; };
-		3C142F87D664E32A7932D0EF /* Pods-openHABTestsSwift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABTestsSwift.debug.xcconfig"; path = "Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift.debug.xcconfig"; sourceTree = "<group>"; };
-		47AE9000D0984E2FA5B8E1F5 /* Pods-OpenHABCore.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCore.debug.xcconfig"; path = "Target Support Files/Pods-OpenHABCore/Pods-OpenHABCore.debug.xcconfig"; sourceTree = "<group>"; };
-		64C31AA8C9DF011D7124F8E2 /* Pods-openHABTestsSwift.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABTestsSwift.release.xcconfig"; path = "Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift.release.xcconfig"; sourceTree = "<group>"; };
+		2BA451543FFD48B162709ACB /* Pods-openHABWatchSwift Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatchSwift Extension.debug.xcconfig"; path = "Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension.debug.xcconfig"; sourceTree = "<group>"; };
+		534A93FB00BC7EDE9C60FE93 /* Pods_openHABUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		536930BAF5AAB33BA805A89F /* Pods-OpenHABCoreWatch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCoreWatch.debug.xcconfig"; path = "Target Support Files/Pods-OpenHABCoreWatch/Pods-OpenHABCoreWatch.debug.xcconfig"; sourceTree = "<group>"; };
+		56964974AB3033D2DD698878 /* Pods-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
+		5DFC9392DC87A2DAB901C463 /* Pods-OpenHABCore.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCore.release.xcconfig"; path = "Target Support Files/Pods-OpenHABCore/Pods-OpenHABCore.release.xcconfig"; sourceTree = "<group>"; };
 		653C09D41EAD691A00BA4C4A /* openHAB.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHAB.entitlements; sourceTree = "<group>"; };
 		656916D81FCB82BC00667B2A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "openHAB/GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
-		72DD66FBC6D4916C89AE9686 /* Pods_openHAB.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHAB.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8869B33275A883F123045BB8 /* Pods-openHABWatchSwift Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatchSwift Extension.release.xcconfig"; path = "Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension.release.xcconfig"; sourceTree = "<group>"; };
-		8903727A1AF690AC5E53AF8B /* Pods-OpenHABCoreWatch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCoreWatch.debug.xcconfig"; path = "Target Support Files/Pods-OpenHABCoreWatch/Pods-OpenHABCoreWatch.debug.xcconfig"; sourceTree = "<group>"; };
+		8F0E24B8CEAD77483918122F /* Pods-OpenHABCore.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCore.debug.xcconfig"; path = "Target Support Files/Pods-OpenHABCore/Pods-OpenHABCore.debug.xcconfig"; sourceTree = "<group>"; };
 		933D7F0422E7015000621A03 /* openHABUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		933D7F0622E7015000621A03 /* OpenHABUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUITests.swift; sourceTree = "<group>"; };
 		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -301,7 +291,6 @@
 		9350F190238151CE00054BA8 /* StringExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		9350F193238151F100054BA8 /* UserDefaultsRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsRepository.swift; sourceTree = "<group>"; };
 		9350F1962381523700054BA8 /* Equatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Equatable.swift; sourceTree = "<group>"; };
-		9350F19D2381631500054BA8 /* ChartStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartStyle.swift; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
 		9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+SafeAccess.swift"; sourceTree = "<group>"; };
 		93F38C4323803499001B1451 /* OpenHABCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OpenHABCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -314,16 +303,17 @@
 		93F38C66238034BD001B1451 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		93F38C6B238034DA001B1451 /* DataObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataObject.swift; sourceTree = "<group>"; };
 		93F38D4A238037E3001B1451 /* OpenHABAccessTokenAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABAccessTokenAdapter.swift; sourceTree = "<group>"; };
-		9470E742136EBB59A05BC3C3 /* Pods-openHABUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABUITests.debug.xcconfig"; path = "Target Support Files/Pods-openHABUITests/Pods-openHABUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A3F4C3A21A49A5090019A09F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = openHAB/Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
-		A432BE377BB304441CE9AC8F /* Pods_openHABTestsSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABTestsSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A4286216545D31B234012400 /* Pods-openHABUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABUITests.debug.xcconfig"; path = "Target Support Files/Pods-openHABUITests/Pods-openHABUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		A4C4C3B393913405F231E759 /* Pods-openHABTestsSwift.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABTestsSwift.release.xcconfig"; path = "Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift.release.xcconfig"; sourceTree = "<group>"; };
+		A53C41F8B4B11D3EA41DC509 /* Pods-openHABUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABUITests.release.xcconfig"; path = "Target Support Files/Pods-openHABUITests/Pods-openHABUITests.release.xcconfig"; sourceTree = "<group>"; };
+		A5C135867B486B4D1C30329A /* Pods-openHABTestsSwift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABTestsSwift.debug.xcconfig"; path = "Target Support Files/Pods-openHABTestsSwift/Pods-openHABTestsSwift.debug.xcconfig"; sourceTree = "<group>"; };
+		B332484106D9FA0A2CDC8838 /* Pods-OpenHABCoreWatch.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCoreWatch.release.xcconfig"; path = "Target Support Files/Pods-OpenHABCoreWatch/Pods-OpenHABCoreWatch.release.xcconfig"; sourceTree = "<group>"; };
 		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
-		BC04EF42B17D9E8EA6D6274D /* Pods-OpenHABCore-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCore-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-OpenHABCore-openHAB/Pods-OpenHABCore-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
-		BEC4678407984CB9A9A77DFE /* Pods-OpenHABCore-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCore-openHAB.release.xcconfig"; path = "Target Support Files/Pods-OpenHABCore-openHAB/Pods-OpenHABCore-openHAB.release.xcconfig"; sourceTree = "<group>"; };
-		D3DE97DCE36E7611A7195425 /* Pods-openHABWatchSwift Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatchSwift Extension.debug.xcconfig"; path = "Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension.debug.xcconfig"; sourceTree = "<group>"; };
-		D9C883C4431AF6E812BCF044 /* Pods-OpenHABCore.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCore.release.xcconfig"; path = "Target Support Files/Pods-OpenHABCore/Pods-OpenHABCore.release.xcconfig"; sourceTree = "<group>"; };
+		CFED23E27938AF8AEA6DD3BD /* Pods-openHABWatchSwift Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatchSwift Extension.release.xcconfig"; path = "Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension.release.xcconfig"; sourceTree = "<group>"; };
+		D6C94F93F332A550786A783A /* Pods_OpenHABCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OpenHABCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0775152346705D0086C685 /* openHABWatchSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHABWatchSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0775182346705D0086C685 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		DA07751A2346705F0086C685 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -387,7 +377,6 @@
 		DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesHostingController.swift; sourceTree = "<group>"; };
 		DA7224D123828D3300712D20 /* Preview_Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preview_Constants.swift; sourceTree = "<group>"; };
 		DA72E1B0236DE9F200B8EF3A /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
-		DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
@@ -406,12 +395,12 @@
 		DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesRowUIView.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
-		DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSelectionTableViewControllerDelegate.swift; sourceTree = "<group>"; };
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DAED514E2305CDE3003BCB31 /* XMLData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLData.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
+		DC0A1DBD8BDC4D36D2D2AE79 /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RollershutterUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
@@ -447,6 +436,8 @@
 		DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABInfoViewController.swift; sourceTree = "<group>"; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UICircleButton.swift; sourceTree = "<group>"; };
+		E7C18F7BEFBD51AF13F77164 /* Pods_OpenHABCoreWatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OpenHABCoreWatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA646789654D6BCEA2EB3BD4 /* Pods_openHABTestsSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABTestsSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -461,7 +452,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				898FA23972AE5C290DF7ADD7 /* Pods_openHABUITests.framework in Frameworks */,
+				F5D79718DDE3DEAFC6236E74 /* Pods_openHABUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,7 +460,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				154A224D0B8902F877345E7E /* Pods_OpenHABCore.framework in Frameworks */,
+				0E96C96570B51C7043095EF1 /* Pods_OpenHABCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -477,7 +468,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F1E7A384CD1A6F54E02BFF22 /* Pods_OpenHABCoreWatch.framework in Frameworks */,
+				4BFA80124CD53614E917544F /* Pods_OpenHABCoreWatch.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -485,8 +476,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9F259B7C92716165691D7ADF /* Pods_openHABWatchSwift_Extension.framework in Frameworks */,
 				93F38C5C238034AE001B1451 /* OpenHABCoreWatch.framework in Frameworks */,
+				AF0711E4A7FABD09BBE2FC4E /* Pods_openHABWatchSwift_Extension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -494,7 +485,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				370D6BBECE8902E4482C39DE /* Pods_openHABTestsSwift.framework in Frameworks */,
+				7FC9367CB7380FA8A9AEA922 /* Pods_openHABTestsSwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -508,7 +499,7 @@
 				DFE10414197415F900D94943 /* Security.framework in Frameworks */,
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				93F38C4A23803499001B1451 /* OpenHABCore.framework in Frameworks */,
-				E123549FEFC7AA69D0BC422A /* Pods_openHAB.framework in Frameworks */,
+				ECFEB223F6D45EA2FB47FB6C /* Pods_openHAB.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,7 +518,6 @@
 		1224F7C0228A8E9A00750965 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				DA72E1B1236DE9F200B8EF3A /* AppConstants.swift */,
 				DA72E1B0236DE9F200B8EF3A /* AppState.swift */,
 			);
 			name = App;
@@ -555,20 +545,18 @@
 		4CB71842E56AD59CF6A07897 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				26EF9B583DBE9F1402D8F4FE /* Pods-openHAB.debug.xcconfig */,
-				289968A09B183B8EB26F6DBB /* Pods-openHAB.release.xcconfig */,
-				3C142F87D664E32A7932D0EF /* Pods-openHABTestsSwift.debug.xcconfig */,
-				64C31AA8C9DF011D7124F8E2 /* Pods-openHABTestsSwift.release.xcconfig */,
-				9470E742136EBB59A05BC3C3 /* Pods-openHABUITests.debug.xcconfig */,
-				1EDC0FE1E62985C2F8D5A6B8 /* Pods-openHABUITests.release.xcconfig */,
-				D3DE97DCE36E7611A7195425 /* Pods-openHABWatchSwift Extension.debug.xcconfig */,
-				8869B33275A883F123045BB8 /* Pods-openHABWatchSwift Extension.release.xcconfig */,
-				47AE9000D0984E2FA5B8E1F5 /* Pods-OpenHABCore.debug.xcconfig */,
-				D9C883C4431AF6E812BCF044 /* Pods-OpenHABCore.release.xcconfig */,
-				8903727A1AF690AC5E53AF8B /* Pods-OpenHABCoreWatch.debug.xcconfig */,
-				3B29B4A861FF98A4EEA57369 /* Pods-OpenHABCoreWatch.release.xcconfig */,
-				BC04EF42B17D9E8EA6D6274D /* Pods-OpenHABCore-openHAB.debug.xcconfig */,
-				BEC4678407984CB9A9A77DFE /* Pods-OpenHABCore-openHAB.release.xcconfig */,
+				8F0E24B8CEAD77483918122F /* Pods-OpenHABCore.debug.xcconfig */,
+				5DFC9392DC87A2DAB901C463 /* Pods-OpenHABCore.release.xcconfig */,
+				536930BAF5AAB33BA805A89F /* Pods-OpenHABCoreWatch.debug.xcconfig */,
+				B332484106D9FA0A2CDC8838 /* Pods-OpenHABCoreWatch.release.xcconfig */,
+				56964974AB3033D2DD698878 /* Pods-openHAB.debug.xcconfig */,
+				DC0A1DBD8BDC4D36D2D2AE79 /* Pods-openHAB.release.xcconfig */,
+				A5C135867B486B4D1C30329A /* Pods-openHABTestsSwift.debug.xcconfig */,
+				A4C4C3B393913405F231E759 /* Pods-openHABTestsSwift.release.xcconfig */,
+				A4286216545D31B234012400 /* Pods-openHABUITests.debug.xcconfig */,
+				A53C41F8B4B11D3EA41DC509 /* Pods-openHABUITests.release.xcconfig */,
+				2BA451543FFD48B162709ACB /* Pods-openHABWatchSwift Extension.debug.xcconfig */,
+				CFED23E27938AF8AEA6DD3BD /* Pods-openHABWatchSwift Extension.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -623,7 +611,6 @@
 		93F38C65238034BD001B1451 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				9350F19D2381631500054BA8 /* ChartStyle.swift */,
 				9350F17423814F6600054BA8 /* DataDecoded.swift */,
 				93F38C6B238034DA001B1451 /* DataObject.swift */,
 				9350F0FF23814CD500054BA8 /* OpenHABItem.swift */,
@@ -822,7 +809,6 @@
 				DFDF45331934699B00A6E581 /* OpenHABInfoViewController.swift */,
 				DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */,
 				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */,
-				DAEAA89621DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift */,
 				A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DF4A02291CF3157B006C3456 /* Drawer */,
@@ -910,12 +896,12 @@
 				DFE10413197415F900D94943 /* Security.framework */,
 				DFB2622E18830A3600D3244D /* UIKit.framework */,
 				DFB2624C18830A3600D3244D /* XCTest.framework */,
-				A432BE377BB304441CE9AC8F /* Pods_openHABTestsSwift.framework */,
-				08A2E1DD593320C34CC8671C /* Pods_openHABUITests.framework */,
-				04CDCA68E8E4BB3CC9B14990 /* Pods_openHABWatchSwift_Extension.framework */,
-				373AB8D52FD8F2AC8660AF28 /* Pods_OpenHABCore.framework */,
-				39734B0EE393577CC328F485 /* Pods_OpenHABCoreWatch.framework */,
-				72DD66FBC6D4916C89AE9686 /* Pods_openHAB.framework */,
+				D6C94F93F332A550786A783A /* Pods_OpenHABCore.framework */,
+				E7C18F7BEFBD51AF13F77164 /* Pods_OpenHABCoreWatch.framework */,
+				24E2199EA99EE79481394E0B /* Pods_openHAB.framework */,
+				FA646789654D6BCEA2EB3BD4 /* Pods_openHABTestsSwift.framework */,
+				534A93FB00BC7EDE9C60FE93 /* Pods_openHABUITests.framework */,
+				13978A99E8EAE0AB5CF98CF4 /* Pods_openHABWatchSwift_Extension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1009,7 +995,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 933D7F0D22E7015100621A03 /* Build configuration list for PBXNativeTarget "openHABUITests" */;
 			buildPhases = (
-				9912DF7B74C896359F4F496A /* [CP] Check Pods Manifest.lock */,
+				1F08A56357917F7830874BF0 /* [CP] Check Pods Manifest.lock */,
 				933D7F0022E7015000621A03 /* Sources */,
 				933D7F0122E7015000621A03 /* Frameworks */,
 				933D7F0222E7015000621A03 /* Resources */,
@@ -1028,7 +1014,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 93F38C4F23803499001B1451 /* Build configuration list for PBXNativeTarget "OpenHABCore" */;
 			buildPhases = (
-				DB71152C73442FFD6A9C9D27 /* [CP] Check Pods Manifest.lock */,
+				D34E5469A291C6BF045F6BFA /* [CP] Check Pods Manifest.lock */,
 				93F38C3E23803499001B1451 /* Headers */,
 				93F38C3F23803499001B1451 /* Sources */,
 				93F38C4023803499001B1451 /* Frameworks */,
@@ -1047,7 +1033,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 93F38C5E238034AE001B1451 /* Build configuration list for PBXNativeTarget "OpenHABCoreWatch" */;
 			buildPhases = (
-				69EBCC01B31B41240FAB01D2 /* [CP] Check Pods Manifest.lock */,
+				CB74265B7F83139423AD3DBF /* [CP] Check Pods Manifest.lock */,
 				93F38C50238034AE001B1451 /* Headers */,
 				93F38C51238034AE001B1451 /* Sources */,
 				93F38C52238034AE001B1451 /* Frameworks */,
@@ -1084,12 +1070,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA0775412346705F0086C685 /* Build configuration list for PBXNativeTarget "openHABWatchSwift Extension" */;
 			buildPhases = (
-				65E1F54BE38D5A3A31C72DFD /* [CP] Check Pods Manifest.lock */,
+				CE19FBA24DD255AA6E6F1EFA /* [CP] Check Pods Manifest.lock */,
 				DA07751D2346705F0086C685 /* Sources */,
 				DA07751E2346705F0086C685 /* Frameworks */,
 				DA07751F2346705F0086C685 /* Resources */,
-				D4024F7BCAE454CA8446701A /* [CP] Embed Pods Frameworks */,
 				93F38C61238034AE001B1451 /* Embed Frameworks */,
+				4F7130360FE9B42C5A2FDD5E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1105,7 +1091,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA2DC23821F2736D00830730 /* Build configuration list for PBXNativeTarget "openHABTestsSwift" */;
 			buildPhases = (
-				6B29E6CE07B2A2EF87A161CA /* [CP] Check Pods Manifest.lock */,
+				6CFD91FCB0795A11D94FFA99 /* [CP] Check Pods Manifest.lock */,
 				DA2DC22B21F2736C00830730 /* Sources */,
 				DA2DC22C21F2736C00830730 /* Frameworks */,
 				DA2DC22D21F2736C00830730 /* Resources */,
@@ -1124,7 +1110,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DFB2625C18830A3600D3244D /* Build configuration list for PBXNativeTarget "openHAB" */;
 			buildPhases = (
-				410F97BEAC757E83206AE074 /* [CP] Check Pods Manifest.lock */,
+				A1B0BE65396C257ED4B78C01 /* [CP] Check Pods Manifest.lock */,
 				DAEAA89921E1F4BD00267EA3 /* Run script Swiftformat */,
 				DA0EEF2123CD1DD10006A167 /* Run Script swiftlint */,
 				DFB2622318830A3600D3244D /* Sources */,
@@ -1132,8 +1118,8 @@
 				DFB2622518830A3600D3244D /* Resources */,
 				6562C91D1FCF2B56008C61CE /* Run Script Crashlytics */,
 				1224F7B7228A8AE600750965 /* Embed Watch Content */,
-				E82FCE18FFA26DBD72F7963D /* [CP] Embed Pods Frameworks */,
 				93F38C4C23803499001B1451 /* Embed Frameworks */,
+				F60A539462371D69DF04E8F7 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1295,109 +1281,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		410F97BEAC757E83206AE074 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-openHAB-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		6562C91D1FCF2B56008C61CE /* Run Script Crashlytics */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script Crashlytics";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Fabric/run\"\n";
-		};
-		65E1F54BE38D5A3A31C72DFD /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-openHABWatchSwift Extension-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		69EBCC01B31B41240FAB01D2 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-OpenHABCoreWatch-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		6B29E6CE07B2A2EF87A161CA /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-openHABTestsSwift-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9912DF7B74C896359F4F496A /* [CP] Check Pods Manifest.lock */ = {
+		1F08A56357917F7830874BF0 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1419,7 +1303,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		D4024F7BCAE454CA8446701A /* [CP] Embed Pods Frameworks */ = {
+		4F7130360FE9B42C5A2FDD5E /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1434,6 +1318,130 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6562C91D1FCF2B56008C61CE /* Run Script Crashlytics */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script Crashlytics";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Fabric/run\"\n";
+		};
+		6CFD91FCB0795A11D94FFA99 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-openHABTestsSwift-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A1B0BE65396C257ED4B78C01 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-openHAB-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CB74265B7F83139423AD3DBF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-OpenHABCoreWatch-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CE19FBA24DD255AA6E6F1EFA /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-openHABWatchSwift Extension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D34E5469A291C6BF045F6BFA /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-OpenHABCore-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		DA0EEF2123CD1DD10006A167 /* Run Script swiftlint */ = {
@@ -1472,29 +1480,7 @@
 			shellPath = /bin/sh;
 			shellScript = "#\"${PODS_ROOT}/SwiftFormat/CommandLineTool/swiftformat $SRCROOT\"\n";
 		};
-		DB71152C73442FFD6A9C9D27 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-OpenHABCore-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E82FCE18FFA26DBD72F7963D /* [CP] Embed Pods Frameworks */ = {
+		F60A539462371D69DF04E8F7 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1529,7 +1515,6 @@
 			files = (
 				9350F17223814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16623814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
-				9350F19E2381631500054BA8 /* ChartStyle.swift in Sources */,
 				9350F194238151F100054BA8 /* UserDefaultsRepository.swift in Sources */,
 				93F38C6C238034DA001B1451 /* DataObject.swift in Sources */,
 				9350F16C23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
@@ -1558,7 +1543,6 @@
 			files = (
 				9350F17323814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16723814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
-				9350F19F2381631500054BA8 /* ChartStyle.swift in Sources */,
 				9350F195238151F100054BA8 /* UserDefaultsRepository.swift in Sources */,
 				93F38C6D238034DA001B1451 /* DataObject.swift in Sources */,
 				9350F16D23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
@@ -1591,7 +1575,6 @@
 				DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
-				DA72E1B3236DE9F200B8EF3A /* AppConstants.swift in Sources */,
 				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
 				DA72E1B2236DE9F200B8EF3A /* AppState.swift in Sources */,
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,
@@ -1646,7 +1629,6 @@
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
 				DFDF45341934699B00A6E581 /* OpenHABInfoViewController.swift in Sources */,
 				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */,
-				DAEAA89721DF8D8C00267EA3 /* OpenHABSelectionTableViewControllerDelegate.swift in Sources */,
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
 				DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */,
@@ -1739,7 +1721,7 @@
 /* Begin XCBuildConfiguration section */
 		933D7F0B22E7015100621A03 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9470E742136EBB59A05BC3C3 /* Pods-openHABUITests.debug.xcconfig */;
+			baseConfigurationReference = A4286216545D31B234012400 /* Pods-openHABUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1780,7 +1762,7 @@
 		};
 		933D7F0C22E7015100621A03 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1EDC0FE1E62985C2F8D5A6B8 /* Pods-openHABUITests.release.xcconfig */;
+			baseConfigurationReference = A53C41F8B4B11D3EA41DC509 /* Pods-openHABUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1821,7 +1803,7 @@
 		};
 		93F38C4D23803499001B1451 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 47AE9000D0984E2FA5B8E1F5 /* Pods-OpenHABCore.debug.xcconfig */;
+			baseConfigurationReference = 8F0E24B8CEAD77483918122F /* Pods-OpenHABCore.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1868,7 +1850,7 @@
 		};
 		93F38C4E23803499001B1451 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D9C883C4431AF6E812BCF044 /* Pods-OpenHABCore.release.xcconfig */;
+			baseConfigurationReference = 5DFC9392DC87A2DAB901C463 /* Pods-OpenHABCore.release.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1914,7 +1896,7 @@
 		};
 		93F38C5F238034AE001B1451 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8903727A1AF690AC5E53AF8B /* Pods-OpenHABCoreWatch.debug.xcconfig */;
+			baseConfigurationReference = 536930BAF5AAB33BA805A89F /* Pods-OpenHABCoreWatch.debug.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1963,7 +1945,7 @@
 		};
 		93F38C60238034AE001B1451 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B29B4A861FF98A4EEA57369 /* Pods-OpenHABCoreWatch.release.xcconfig */;
+			baseConfigurationReference = B332484106D9FA0A2CDC8838 /* Pods-OpenHABCoreWatch.release.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -2085,7 +2067,7 @@
 		};
 		DA07753F2346705F0086C685 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D3DE97DCE36E7611A7195425 /* Pods-openHABWatchSwift Extension.debug.xcconfig */;
+			baseConfigurationReference = 2BA451543FFD48B162709ACB /* Pods-openHABWatchSwift Extension.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
@@ -2125,7 +2107,7 @@
 		};
 		DA0775402346705F0086C685 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8869B33275A883F123045BB8 /* Pods-openHABWatchSwift Extension.release.xcconfig */;
+			baseConfigurationReference = CFED23E27938AF8AEA6DD3BD /* Pods-openHABWatchSwift Extension.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
@@ -2165,7 +2147,7 @@
 		};
 		DA2DC23621F2736D00830730 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3C142F87D664E32A7932D0EF /* Pods-openHABTestsSwift.debug.xcconfig */;
+			baseConfigurationReference = A5C135867B486B4D1C30329A /* Pods-openHABTestsSwift.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -2207,7 +2189,7 @@
 		};
 		DA2DC23721F2736D00830730 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 64C31AA8C9DF011D7124F8E2 /* Pods-openHABTestsSwift.release.xcconfig */;
+			baseConfigurationReference = A4C4C3B393913405F231E759 /* Pods-openHABTestsSwift.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -2363,7 +2345,7 @@
 		};
 		DFB2625D18830A3600D3244D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 26EF9B583DBE9F1402D8F4FE /* Pods-openHAB.debug.xcconfig */;
+			baseConfigurationReference = 56964974AB3033D2DD698878 /* Pods-openHAB.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2410,7 +2392,7 @@
 		};
 		DFB2625E18830A3600D3244D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 289968A09B183B8EB26F6DBB /* Pods-openHAB.release.xcconfig */;
+			baseConfigurationReference = DC0A1DBD8BDC4D36D2D2AE79 /* Pods-openHAB.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;

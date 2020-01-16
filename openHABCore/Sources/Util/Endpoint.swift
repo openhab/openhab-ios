@@ -12,6 +12,11 @@
 import Foundation
 import os.log
 
+public enum ChartStyle {
+    case dark
+    case light
+}
+
 public enum IconType: Int {
     case png
     case svg

@@ -52,6 +52,8 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     @Published var stateBinding: Bool = false
 
+    let stateSubject = CurrentValueSubject<Bool, Never>(true)
+
     // Text prior to "["
     var labelText: String? {
         let array = label.components(separatedBy: "[")
@@ -149,16 +151,29 @@ extension ObservableOpenHABWidget {
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
 
-        _ = statePublisher
-            .receive(on: RunLoop.main)
+//        _ = statePublisher
+//            .receive(on: RunLoop.main)
+//            .map { value -> String in
+//                value ? "ON" : "OFF"
+//            }
+//            .sink { receivedValue in
+//                // sink is the subscriber and terminates the pipeline
+//                self.sendCommand(receivedValue)
+//                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, item?.name ?? "", receivedValue)
+//            }
+
+//        _ = statePublisher.sink(receiveValue: { value in
+//            print("Received value: \(value)")
+//        })
+
+        _ = $stateBinding
             .map { value -> String in
                 value ? "ON" : "OFF"
             }
-            .sink { receivedValue in
-                // sink is the subscriber and terminates the pipeline
-                self.sendCommand(receivedValue)
-                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, item?.name ?? "", receivedValue)
+            .sink {
+                os_log("Sending to: %{PUBLIC}@ command: %{PUBLIC}@", log: .default, type: .info, item?.name ?? "", $0)
             }
+        _ = stateSubject
     }
 
     convenience init(xml xmlElement: XMLElement) {

@@ -13,6 +13,10 @@ import OpenHABCore
 import os.log
 import UIKit
 
+public protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
+    func didSelectWidgetMapping(_ selectedMapping: Int)
+}
+
 class OpenHABSelectionTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "SelectionCell"
 
