@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import os.log
 import SwiftUI
 
 // swiftlint:disable file_types_order
@@ -24,7 +25,10 @@ struct ContentView: View {
             }
         }
         .alert(isPresented: $viewModel.showAlert) {
-            Alert(title: Text("Error"), message: Text(viewModel.errorDescription), dismissButton: .default(Text("Got it!")))
+            Alert(title: Text("Error"), message: Text(viewModel.errorDescription), dismissButton: .default(Text("Got it!")) {
+                self.viewModel.loadPage(urlString: self.settings.openHABRootUrl, longPolling: false, refresh: true)
+                os_log("reload after alert", log: .default, type: .info)
+                })
         }
     }
 
@@ -49,11 +53,8 @@ struct ContentView_Previews: PreviewProvider {
         Group {
             ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 4 - 44mm")
-                .environmentObject(ObservableOpenHABDataObject())
-
             ContentView(viewModel: UserData(urlString: PreviewConstants.remoteURLString))
                 .previewDevice("Apple Watch Series 2 - 38mm")
-                .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
         }
     }
 }

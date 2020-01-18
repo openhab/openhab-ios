@@ -95,7 +95,7 @@ final class UserData: ObservableObject {
 
                 self.widgets = self.openHABSitemapPage?.widgets ?? []
 
-                self.showAlert = false
+                self.showAlert = self.widgets.isEmpty ? true : false
                 if refresh { self.loadPage(urlString: urlString,
                                            longPolling: true,
                                            refresh: true) }

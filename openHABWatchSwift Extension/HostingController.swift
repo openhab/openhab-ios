@@ -12,6 +12,7 @@
 import Foundation
 import Kingfisher
 import OpenHABCoreWatch
+import os.log
 import SwiftUI
 import WatchKit
 

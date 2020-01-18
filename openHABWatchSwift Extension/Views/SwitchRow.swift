@@ -17,10 +17,10 @@ import SwiftUI
 // swiftlint:disable file_types_order
 struct SwitchRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @EnvironmentObject var userSettings: ObservableOpenHABDataObject
+    @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var iconUrl: URL? {
-        Endpoint.icon(rootUrl: userSettings.openHABRootUrl,
+        Endpoint.icon(rootUrl: settings.openHABRootUrl,
                       version: 2,
                       icon: widget.icon,
                       value: widget.item?.state ?? "",
@@ -29,6 +29,7 @@ struct SwitchRow: View {
 
     var body: some View {
 
+        // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
         let stateBinding = Binding<Bool>(
             get: { self.widget.stateBinding },
             set: {
