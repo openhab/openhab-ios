@@ -15,7 +15,7 @@ import os.log
 import SwiftUI
 
 // swiftlint:disable file_types_order
-struct SwitchRow: View {
+struct SliderRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
@@ -28,24 +28,38 @@ struct SwitchRow: View {
     }
 
     var body: some View {
-        // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
-        let stateBinding = Binding<Bool>(
+
+        func adj(_ raw: Double) -> Double {
+            var valueAdjustedToStep = floor((raw - widget.minValue) / widget.step) * widget.step
+            valueAdjustedToStep += widget.minValue
+            return min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
+        }
+
+        func valueText(_ widgetValue: Double) -> String {
+            let digits = max(-Decimal(widget.step).exponent, 0)
+            let numberFormatter = NumberFormatter()
+            numberFormatter.maximumFractionDigits = digits
+            numberFormatter.decimalSeparator = "."
+            return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
+        }
+
+        let valueBinding = Binding<Double>(
             get: {
-                self.widget.stateBinding
+                if let item = self.widget.item {
+                    return adj(item.stateAsDouble())
+                } else {
+                    return self.widget.minValue
+                }
             },
             set: {
-                if !self.widget.stateBinding {
-                    os_log("Switch to ON", log: .viewCycle, type: .info)
-                    self.widget.sendCommand("ON")
-                } else {
-                    os_log("Switch to OFF", log: .viewCycle, type: .info)
-                    self.widget.sendCommand("OFF")
-                }
-                self.widget.stateBinding = $0
+                os_log("Slider new value = %g", log: .default, type: .info, $0)
+                self.widget.sendCommand(valueText($0))
+                self.widget.stateDouble = $0
             }
         )
 
-        return Toggle(isOn: stateBinding) {
+        return
+            VStack {
             HStack {
                 KFImage(iconUrl)
                     .onSuccess { retrieveImageResult in
@@ -74,20 +88,16 @@ struct SwitchRow: View {
                     }
                 }
             }
-        }
-        .padding(.trailing, 5)
-        .cornerRadius(5)
-        .onTapGesture {
-            self.widget.stateBinding.toggle()
-        }
+            Slider(value: valueBinding, in: widget.minValue...widget.maxValue, step: widget.step)
+            }
     }
 }
 
-struct SwitchRow_Previews: PreviewProvider {
+struct SliderRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[0]
-        return SwitchRow(widget: widget)
+        let widget = UserData().widgets[3]
+        return SliderRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
-            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
+//            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
     }
 }

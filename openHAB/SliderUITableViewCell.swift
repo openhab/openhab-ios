@@ -36,15 +36,15 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        initiliaze()
+        initialize()
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        initiliaze()
+        initialize()
     }
 
-    private func initiliaze() {
+    override public func initialize() {
         selectionStyle = .none
         separatorInset = .zero
         throttlingInterval = 0.1

@@ -40,17 +40,18 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var labelcolor = ""
     var valuecolor = ""
     var service = ""
-    var state = ""
+    @Published var state = ""
     var text = ""
     var legend: Bool?
     var encoding = ""
-    var item: OpenHABItem?
+    @Published var item: OpenHABItem?
     var linkedPage: OpenHABLinkedPage?
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
     var widgets: [ObservableOpenHABWidget] = []
 
     @Published var stateBinding: Bool = false
+    @Published var stateDouble: Double?
 
     // Text prior to "["
     var labelText: String? {
@@ -101,7 +102,6 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 }
 
 extension ObservableOpenHABWidget {
-
     // This is an ugly initializer
     convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget]) {
         self.init()
@@ -142,7 +142,6 @@ extension ObservableOpenHABWidget {
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
-
     }
 
     convenience init(xml xmlElement: XMLElement) {

@@ -28,7 +28,7 @@ struct ContentView: View {
             Alert(title: Text("Error"), message: Text(viewModel.errorDescription), dismissButton: .default(Text("Got it!")) {
                 self.viewModel.loadPage(urlString: self.settings.openHABRootUrl, longPolling: false, refresh: true)
                 os_log("reload after alert", log: .default, type: .info)
-                })
+            })
         }
     }
 
@@ -36,6 +36,8 @@ struct ContentView: View {
         switch widget.type {
         case "Switch":
             return AnyView(SwitchRow(widget: widget))
+        case "Slider":
+            return AnyView(SliderRow(widget: widget))
         default:
             return nil
         }
