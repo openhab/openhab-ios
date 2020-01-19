@@ -707,7 +707,11 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
         DispatchQueue.main.async {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
         }
-        openHABRootUrl = openHABUrl == nil ? "" : "\(openHABUrl!)"
+        if let openHABUrl = openHABUrl {
+            openHABRootUrl = openHABUrl.absoluteString
+        } else {
+            openHABRootUrl = ""
+        }
         appData?.openHABRootUrl = openHABRootUrl
         NetworkConnection.shared.setRootUrl(openHABRootUrl)
 

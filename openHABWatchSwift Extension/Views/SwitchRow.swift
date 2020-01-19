@@ -74,6 +74,7 @@ struct SwitchRow: View {
                 }
             }
         }
+        .padding(.trailing, 5)
         .cornerRadius(5)
         .onTapGesture {
             self.widget.stateBinding.toggle()

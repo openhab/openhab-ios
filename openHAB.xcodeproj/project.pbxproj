@@ -330,7 +330,6 @@
 		DA077649234683BC0086C685 /* SwitchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchRow.swift; sourceTree = "<group>"; };
 		DA0776EF234788010086C685 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABDataObject.swift; sourceTree = "<group>"; };
-		DA19652B21FBCE1A00768AEE /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABGeneralTests.swift; sourceTree = "<group>"; };
 		DA1C2E4B230DC28F00FACFB0 /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
 		DA1C2E4C230DC28F00FACFB0 /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
@@ -949,7 +948,6 @@
 			isa = PBXGroup;
 			children = (
 				934B610B2348D2F9009112D5 /* ColorUtil.swift */,
-				DA19652B21FBCE1A00768AEE /* Reachability.swift */,
 				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
 				9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */,
 			);
