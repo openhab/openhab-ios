@@ -17,13 +17,16 @@ import OpenHABCoreWatch
 struct UserDefault<T> {
     let key: String
     let defaultValue: T
+    // https://www.swiftbysundell.com/articles/property-wrappers-in-swift/
+    var storage: UserDefaults = .standard
+
 
     public var wrappedValue: T {
         get {
-            UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
+            storage.object(forKey: key) as? T ?? defaultValue
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: key)
+            storage.set(newValue, forKey: key)
         }
     }
 

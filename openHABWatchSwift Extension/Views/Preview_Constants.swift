@@ -103,7 +103,7 @@ struct PreviewConstants {
             "sendFrequency": 0,
             "item": {
                 "link": "https://192.168.2.15:8444/rest/items/lcnLightDimmer",
-                "state": "100",
+                "state": "49",
                 "stateDescription": {
                     "pattern": "%s",
                     "readOnly": false,

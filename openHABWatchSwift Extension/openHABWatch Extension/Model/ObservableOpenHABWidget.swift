@@ -19,6 +19,17 @@ import MapKit
 import OpenHABCoreWatch
 import os.log
 
+enum StateEnum {
+    case switcher(Bool)
+    case slider(Double)
+    case unassigned
+
+    var boolState: Bool {
+        guard case .switcher(let value) = self else { return false }
+        return value
+    }
+}
+
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     var id: String = ""
@@ -50,8 +61,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var image: UIImage?
     var widgets: [ObservableOpenHABWidget] = []
 
-    @Published var stateBinding: Bool = false
-    @Published var stateDouble: Double?
+    @Published var stateEnumBinding: StateEnum = .unassigned
 
     // Text prior to "["
     var labelText: String? {
@@ -99,6 +109,20 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     func mappingIndex(byCommand command: String?) -> Int? {
         mappingsOrItemOptions.firstIndex { $0.command == command }
     }
+
+    private func adj(_ raw: Double) -> Double {
+        var valueAdjustedToStep = floor((raw - minValue) / step) * step
+        valueAdjustedToStep += minValue
+        return min(max(valueAdjustedToStep, minValue), maxValue)
+    }
+
+    func adjustedValue() -> Double {
+        if let item = item {
+            return adj(item.stateAsDouble())
+        } else {
+            return self.minValue
+        }
+    }
 }
 
 extension ObservableOpenHABWidget {
@@ -107,7 +131,6 @@ extension ObservableOpenHABWidget {
         self.init()
 
         id = widgetId
-        stateBinding = item?.state == "ON" ? true : false
 
         self.widgetId = widgetId
         self.label = label
@@ -142,13 +165,21 @@ extension ObservableOpenHABWidget {
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
+
+        switch type {
+        case "Switch":
+            stateEnumBinding = .switcher(item?.state == "ON" ? true : false)
+        case "Slider":
+            stateEnumBinding = .slider(adjustedValue())
+        default:
+            stateEnumBinding = .unassigned
+        }
     }
 
     convenience init(xml xmlElement: XMLElement) {
         self.init()
         id = widgetId
         // OH 1.x compatability
-        stateBinding = state == "ON" ? true : false
 
         for child in xmlElement.children {
             switch child.tag {

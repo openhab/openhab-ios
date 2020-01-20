@@ -19,50 +19,27 @@ struct SwitchRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
-    var iconUrl: URL? {
-        Endpoint.icon(rootUrl: settings.openHABRootUrl,
-                      version: 2,
-                      icon: widget.icon,
-                      value: widget.item?.state ?? "",
-                      iconType: .png).url
-    }
-
     var body: some View {
         // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
         let stateBinding = Binding<Bool>(
             get: {
-                self.widget.stateBinding
+                self.widget.stateEnumBinding.boolState
             },
             set: {
-                if !self.widget.stateBinding {
+                if $0 {
                     os_log("Switch to ON", log: .viewCycle, type: .info)
                     self.widget.sendCommand("ON")
                 } else {
                     os_log("Switch to OFF", log: .viewCycle, type: .info)
                     self.widget.sendCommand("OFF")
                 }
-                self.widget.stateBinding = $0
+                self.widget.stateEnumBinding = .switcher($0)
             }
         )
 
         return Toggle(isOn: stateBinding) {
             HStack {
-                KFImage(iconUrl)
-                    .onSuccess { retrieveImageResult in
-                        os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
-                    }
-                    .onFailure { kingfisherError in
-                        os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
-                    }
-                    .placeholder {
-                        Image(systemName: "arrow.2.circlepath.circle")
-                            .font(.callout)
-                            .opacity(0.3)
-                    }
-                    .cancelOnDisappear(true)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20.0, height: 20.0)
+                IconView(widget: widget, settings: settings)
                 VStack {
                     Text(widget.labelText ?? "")
                         .font(.caption)
@@ -77,17 +54,13 @@ struct SwitchRow: View {
         }
         .padding(.trailing, 5)
         .cornerRadius(5)
-        .onTapGesture {
-            self.widget.stateBinding.toggle()
-        }
     }
 }
 
 struct SwitchRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[0]
+        let widget = UserData().widgets[2]
         return SwitchRow(widget: widget)
             .previewLayout(.fixed(width: 300, height: 70))
-            .environmentObject(ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
     }
 }
