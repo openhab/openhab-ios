@@ -20,7 +20,6 @@ struct UserDefault<T> {
     // https://www.swiftbysundell.com/articles/property-wrappers-in-swift/
     var storage: UserDefaults = .standard
 
-
     public var wrappedValue: T {
         get {
             storage.object(forKey: key) as? T ?? defaultValue

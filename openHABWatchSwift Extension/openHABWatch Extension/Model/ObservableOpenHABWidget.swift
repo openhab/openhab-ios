@@ -90,6 +90,25 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         }
     }
 
+    var adjustedValue: Double {
+        if let item = item {
+            return adj(item.stateAsDouble())
+        } else {
+            return self.minValue
+        }
+    }
+
+    var stateEnum: StateEnum {
+        switch type {
+        case "Switch":
+            return .switcher(item?.state == "ON" ? true : false)
+        case "Slider":
+            return .slider(adjustedValue)
+        default:
+            return .unassigned
+        }
+    }
+
     func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
@@ -116,13 +135,6 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         return min(max(valueAdjustedToStep, minValue), maxValue)
     }
 
-    func adjustedValue() -> Double {
-        if let item = item {
-            return adj(item.stateAsDouble())
-        } else {
-            return self.minValue
-        }
-    }
 }
 
 extension ObservableOpenHABWidget {
@@ -166,14 +178,8 @@ extension ObservableOpenHABWidget {
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
 
-        switch type {
-        case "Switch":
-            stateEnumBinding = .switcher(item?.state == "ON" ? true : false)
-        case "Slider":
-            stateEnumBinding = .slider(adjustedValue())
-        default:
-            stateEnumBinding = .unassigned
-        }
+        stateEnumBinding = stateEnum
+
     }
 
     convenience init(xml xmlElement: XMLElement) {
@@ -215,6 +221,8 @@ extension ObservableOpenHABWidget {
                 break
             }
         }
+
+        stateEnumBinding = stateEnum
     }
 }
 
