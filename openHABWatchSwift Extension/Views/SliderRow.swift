@@ -44,15 +44,9 @@ struct SliderRow: View {
             VStack {
                 HStack {
                     IconView(widget: widget, settings: settings)
-                    Text(widget.labelText ?? "")
-                        .font(.caption)
-                        .lineLimit(2)
+                    TextLabelView(widget: widget)
                     Spacer()
-                    widget.labelValue.map {
-                        Text($0)
-                            .font(.footnote)
-                            .lineLimit(1)
-                    }
+                    DetailTextLabelView(widget: widget)
                 }
                 Slider(value: valueBinding, in: widget.minValue...widget.maxValue, step: widget.step)
             }

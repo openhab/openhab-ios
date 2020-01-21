@@ -41,14 +41,8 @@ struct SwitchRow: View {
             HStack {
                 IconView(widget: widget, settings: settings)
                 VStack {
-                    Text(widget.labelText ?? "")
-                        .font(.caption)
-                        .lineLimit(2)
-                    widget.labelValue.map {
-                        Text($0)
-                            .font(.footnote)
-                            .lineLimit(1)
-                    }
+                    TextLabelView(widget: widget)
+                    DetailTextLabelView(widget: widget)
                 }
             }
         }
