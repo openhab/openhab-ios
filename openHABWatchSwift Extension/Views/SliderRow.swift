@@ -19,7 +19,6 @@ struct SliderRow: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
-
         func valueText(_ widgetValue: Double) -> String {
             let digits = max(-Decimal(widget.step).exponent, 0)
             let numberFormatter = NumberFormatter()
@@ -30,7 +29,7 @@ struct SliderRow: View {
 
         let valueBinding = Binding<Double>(
             get: {
-                guard case .slider(let value) = self.widget.stateEnumBinding else { return 0 }
+                guard case let .slider(value) = self.widget.stateEnumBinding else { return 0 }
                 return value
             },
             set: {
@@ -48,7 +47,7 @@ struct SliderRow: View {
                     Spacer()
                     DetailTextLabelView(widget: widget)
                 }
-                Slider(value: valueBinding, in: widget.minValue...widget.maxValue, step: widget.step)
+                Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
             }
     }
 }
@@ -61,7 +60,6 @@ struct SliderRow_Previews: PreviewProvider {
                 .previewLayout(.fixed(width: 300, height: 70))
             SliderRow(widget: widget)
                 .previewDevice("Apple Watch Series 4 - 44mm")
-
         }
     }
 }

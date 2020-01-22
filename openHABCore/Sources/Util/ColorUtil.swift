@@ -11,54 +11,69 @@
 
 import UIKit
 
-enum OHInterfaceStyle: Int {
+public enum OHInterfaceStyle: Int {
     case light, dark
 
-    static var current: OHInterfaceStyle {
+    public static var current: OHInterfaceStyle {
+        #if(iOS)
         if #available(iOS 13.0, *) {
             if UITraitCollection.current.userInterfaceStyle == .dark {
                 return .dark
             }
         }
+        #endif
 
         return .light
     }
 }
 
-extension UIColor {
+public extension UIColor {
     // system colors
     class var ohLabel: UIColor {
+        #if(iOS)
         if #available(iOS 13.0, *) {
             return .label
         }
+        #endif
         return .black
     }
 
     class var ohSecondaryLabel: UIColor {
+        #if(iOS)
         if #available(iOS 13.0, *) {
             return .secondaryLabel
         }
+        #endif
         return .lightGray
     }
 
     class var ohSystemBackground: UIColor {
+        #if(iOS)
         if #available(iOS 13.0, *) {
             return .systemBackground
         }
+        #endif
         return .white
     }
 
     class var ohSystemGroupedBackground: UIColor {
+        #if(iOS)
         if #available(iOS 13.0, *) {
             return .systemGroupedBackground
+        } else {
+            return .groupTableViewBackground
         }
-        return .groupTableViewBackground
+        #endif
+        return .black
     }
 
     class var ohSecondarySystemGroupedBackground: UIColor {
+        #if(iOS)
         if #available(iOS 13.0, *) {
             return .secondarySystemGroupedBackground
         }
+        #endif
+
         return .white
     }
 
@@ -136,7 +151,7 @@ extension UIColor {
     }
 }
 
-extension UIColor {
+public extension UIColor {
     convenience init(fromString string: String) {
         let namedColors = ["maroon": UIColor.ohMaroon,
                            "red": UIColor.ohRed,

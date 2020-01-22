@@ -1,10 +1,13 @@
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
-//  IconView.swift
-//  openHABWatchSwift Extension
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 20.01.20.
-//  Copyright © 2020 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import Kingfisher
 import OpenHABCoreWatch
@@ -23,23 +26,24 @@ struct IconView: View {
                       value: widget.item?.state ?? "",
                       iconType: .png).url
     }
+
     var body: some View {
         KFImage(iconUrl)
-        .onSuccess { retrieveImageResult in
-            os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
-        }
-        .onFailure { kingfisherError in
-            os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
-        }
-        .placeholder {
-            Image(systemName: "arrow.2.circlepath.circle")
-                .font(.callout)
-                .opacity(0.3)
-        }
-        .cancelOnDisappear(true)
-        .resizable()
-        .scaledToFit()
-        .frame(width: 20.0, height: 20.0)
+            .onSuccess { retrieveImageResult in
+                os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
+            }
+            .onFailure { kingfisherError in
+                os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
+            }
+            .placeholder {
+                Image(systemName: "arrow.2.circlepath.circle")
+                    .font(.callout)
+                    .opacity(0.3)
+            }
+            .cancelOnDisappear(true)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 20.0, height: 20.0)
     }
 }
 

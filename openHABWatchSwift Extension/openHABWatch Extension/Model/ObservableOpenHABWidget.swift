@@ -25,7 +25,7 @@ enum StateEnum {
     case unassigned
 
     var boolState: Bool {
-        guard case .switcher(let value) = self else { return false }
+        guard case let .switcher(value) = self else { return false }
         return value
     }
 }
@@ -94,7 +94,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         if let item = item {
             return adj(item.stateAsDouble())
         } else {
-            return self.minValue
+            return minValue
         }
     }
 
@@ -134,7 +134,6 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         valueAdjustedToStep += minValue
         return min(max(valueAdjustedToStep, minValue), maxValue)
     }
-
 }
 
 extension ObservableOpenHABWidget {
@@ -179,7 +178,6 @@ extension ObservableOpenHABWidget {
         self.step = abs(self.step)
 
         stateEnumBinding = stateEnum
-
     }
 
     convenience init(xml xmlElement: XMLElement) {

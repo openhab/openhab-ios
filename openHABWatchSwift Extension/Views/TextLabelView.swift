@@ -1,13 +1,17 @@
+// Copyright (c) 2010-2020 Contributors to the openHAB project
 //
-//  TextLabelView.swift
-//  openHABWatchSwift Extension
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 21.01.20.
-//  Copyright © 2020 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import SwiftUI
 
+// swiftlint:disable file_types_order
 struct TextLabelView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
 

@@ -123,10 +123,11 @@
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514E2305CDE3003BCB31 /* XMLData.swift */; };
 		DAF4578223D630C70018B495 /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578123D630C70018B495 /* IconView.swift */; };
-		DAF4578423D780730018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
 		DAF4578523D7807A0018B495 /* UIColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B610B2348D2F9009112D5 /* UIColorUtil.swift */; };
 		DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578623D798A50018B495 /* TextLabelView.swift */; };
 		DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */; };
+		DAF4579D23D904350018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
+		DAF4579E23D904360018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
@@ -659,6 +660,7 @@
 				9350F1812381514E00054BA8 /* ServerCertificateManager.swift */,
 				9350F190238151CE00054BA8 /* StringExtension.swift */,
 				9350F193238151F100054BA8 /* UserDefaultsRepository.swift */,
+				DAF4578323D780730018B495 /* ColorUtil.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -962,7 +964,6 @@
 		DFDEE3FF18832293008B26AC /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				DAF4578323D780730018B495 /* ColorUtil.swift */,
 				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
 				9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */,
 			);
@@ -1541,6 +1542,7 @@
 				9350F17C2381509300054BA8 /* OSLogHelper.swift in Sources */,
 				9350F1882381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1822381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
+				DAF4579D23D904350018B495 /* ColorUtil.swift in Sources */,
 				9350F16323814EC200054BA8 /* OpenHABSitemap.swift in Sources */,
 				9350F10123814CD500054BA8 /* OpenHABItem.swift in Sources */,
 				9350F10423814CFF00054BA8 /* OpenHABLinkedPage.swift in Sources */,
@@ -1569,6 +1571,7 @@
 				9350F17D2381509300054BA8 /* OSLogHelper.swift in Sources */,
 				9350F1892381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1832381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
+				DAF4579E23D904360018B495 /* ColorUtil.swift in Sources */,
 				9350F16423814EC200054BA8 /* OpenHABSitemap.swift in Sources */,
 				9350F10223814CD500054BA8 /* OpenHABItem.swift in Sources */,
 				9350F10523814CFF00054BA8 /* OpenHABLinkedPage.swift in Sources */,
@@ -1595,7 +1598,6 @@
 				DA72E1B2236DE9F200B8EF3A /* AppState.swift in Sources */,
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,
 				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
-				DAF4578423D780730018B495 /* ColorUtil.swift in Sources */,
 				9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */,
