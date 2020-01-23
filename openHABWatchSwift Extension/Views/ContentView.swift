@@ -33,11 +33,13 @@ struct ContentView: View {
     }
 
     func rowWidget(widget: ObservableOpenHABWidget) -> AnyView? {
-        switch widget.type {
-        case "Switch":
+        switch widget.stateEnum {
+        case .switcher:
             return AnyView(SwitchRow(widget: widget))
-        case "Slider":
+        case .slider:
             return AnyView(SliderRow(widget: widget))
+        case .segmented:
+            return AnyView(SegmentRow(widget: widget))
         default:
             return nil
         }

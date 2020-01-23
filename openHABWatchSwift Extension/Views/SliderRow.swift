@@ -46,8 +46,16 @@ struct SliderRow: View {
                     TextLabelView(widget: widget)
                     Spacer()
                     DetailTextLabelView(widget: widget)
-                }
+                }.padding(.top, 8)
+
                 Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
+                .focusable(true)
+                .digitalCrownRotation(valueBinding,
+                                      from: widget.minValue,
+                                      through: widget.maxValue,
+                                      by: widget.step,
+                                      sensitivity: .medium,
+                                      isHapticFeedbackEnabled: true)
             }
     }
 }

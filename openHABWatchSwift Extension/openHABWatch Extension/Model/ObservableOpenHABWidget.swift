@@ -22,7 +22,17 @@ import os.log
 enum StateEnum {
     case switcher(Bool)
     case slider(Double)
+    case segmented(Int)
     case unassigned
+    case rollershutter
+    case frame
+    case setpoint
+    case selection
+    case colorpicker
+    case image
+    case video
+    case webview
+    case mapview
 
     var boolState: Bool {
         guard case let .switcher(value) = self else { return false }
@@ -100,10 +110,38 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     var stateEnum: StateEnum {
         switch type {
+        case "Frame":
+            return .frame
         case "Switch":
-            return .switcher(item?.state == "ON" ? true : false)
+            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
+            if !mappings.isEmpty {
+                return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+            // RollershutterItem changed to Rollershutter in later builds of OH2
+            } else if let type = item?.type, type == "Switch" {
+                return .switcher(item?.state == "ON" ? true : false)
+            } else if let type = item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && item?.groupType == "Rollershutter") {
+                return .rollershutter
+            } else if item?.stateDescription?.options.count ?? 0 > 0 {
+                return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+            } else {
+                return .switcher(item?.state == "ON" ? true : false)
+            }
+        case "Setpoint":
+            return .setpoint
         case "Slider":
             return .slider(adjustedValue)
+        case "Selection":
+            return .selection
+        case "Colorpicker":
+            return .colorpicker
+        case "Image", "Chart":
+            return .image
+        case "Video":
+            return .video
+        case "Webview":
+            return .webview
+        case "Mapview":
+            return .mapview
         default:
             return .unassigned
         }

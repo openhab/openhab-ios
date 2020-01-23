@@ -128,6 +128,7 @@
 		DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */; };
 		DAF4579D23D904350018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
 		DAF4579E23D904360018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
+		DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
@@ -409,6 +410,7 @@
 		DAF4578323D780730018B495 /* ColorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorUtil.swift; sourceTree = "<group>"; };
 		DAF4578623D798A50018B495 /* TextLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLabelView.swift; sourceTree = "<group>"; };
 		DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailTextLabelView.swift; sourceTree = "<group>"; };
+		DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DC0A1DBD8BDC4D36D2D2AE79 /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
@@ -787,6 +789,7 @@
 				DA0775262346705F0086C685 /* ContentView.swift */,
 				DA077649234683BC0086C685 /* SwitchRow.swift */,
 				DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */,
+				DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */,
 				DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */,
 				DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */,
 				DA7224D123828D3300712D20 /* Preview_Constants.swift */,
@@ -1599,6 +1602,7 @@
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,
 				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
 				9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */,
+				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
