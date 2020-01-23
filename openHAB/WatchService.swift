@@ -20,8 +20,14 @@ class WatchService {
     private var lastWatchComplicationUpdateTime: Date?
 
     // swiftlint:disable:next function_parameter_count
-    func sendToWatch(_ localUrl: String, remoteUrl: String,
-                     username: String, password: String, alwaysSendCreds: Bool, sitemapName: String, ignoreSSL: Bool, trustedCertficates: [String: Any] = [:]) {
+    func sendToWatch(_ localUrl: String,
+                     remoteUrl: String,
+                     username: String,
+                     password: String,
+                     alwaysSendCreds: Bool,
+                     sitemapName: String,
+                     ignoreSSL: Bool,
+                     trustedCertficates: [String: Any] = [:]) {
         let applicationDict: [String: Any] =
             ["localUrl": localUrl,
              "remoteUrl": remoteUrl,

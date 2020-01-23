@@ -49,6 +49,11 @@ class AppMessageService: NSObject, WCSessionDelegate {
             serverCertificateManager.saveTrustedCertificates()
             NetworkConnection.shared.serverCertificateManager = serverCertificateManager
         }
+
+        if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {
+            ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds
+        }
+
     }
 
     @available(watchOSApplicationExtension 2.2, *)
