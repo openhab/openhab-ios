@@ -63,8 +63,11 @@ public extension UIColor {
         } else {
             return .groupTableViewBackground
         }
-        #endif
+        #elseif watchOS
         return .black
+        #else
+        return .white
+        #endif
     }
 
     class var ohSecondarySystemGroupedBackground: UIColor {

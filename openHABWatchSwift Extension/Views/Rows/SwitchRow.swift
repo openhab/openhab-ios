@@ -35,17 +35,18 @@ struct SwitchRow: View {
             self.widget.stateEnumBinding = .switcher($0)
         })
 
-        return Toggle(isOn: stateBinding) {
-            HStack {
-                IconView(widget: widget, settings: settings)
-                VStack {
-                    TextLabelView(widget: widget)
-                    DetailTextLabelView(widget: widget)
+        return
+            Toggle(isOn: stateBinding) {
+                HStack {
+                    IconView(widget: widget, settings: settings)
+                    VStack {
+                        TextLabelView(widget: widget)
+                        DetailTextLabelView(widget: widget)
+                    }
                 }
             }
-        }
-        .padding(.trailing, 5)
-        .cornerRadius(5)
+            .padding(.trailing)
+            .cornerRadius(5)
     }
 }
 

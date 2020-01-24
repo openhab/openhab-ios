@@ -49,6 +49,7 @@ struct SliderRow: View {
                 }.padding(.top, 8)
 
                 Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
+                .labelsHidden()
                 .focusable(true)
                 .digitalCrownRotation(valueBinding,
                                       from: widget.minValue,

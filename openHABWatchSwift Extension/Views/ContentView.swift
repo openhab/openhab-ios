@@ -40,6 +40,8 @@ struct ContentView: View {
             return AnyView(SliderRow(widget: widget))
         case .segmented:
             return AnyView(SegmentRow(widget: widget))
+        case .rollershutter:
+            return AnyView(RollershutterRow(widget: widget))
         default:
             return nil
         }

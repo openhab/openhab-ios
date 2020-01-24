@@ -32,26 +32,30 @@ struct SegmentRow: View {
                 self.widget.stateEnumBinding = .segmented($0)
             }
         )
-
         return
-            Picker(selection: valueBinding,
-                   label: HStack {
-                        IconView(widget: widget, settings: settings)
-                        TextLabelView(widget: widget)
-                        Spacer()
-                        DetailTextLabelView(widget: widget)
-                   }
-            ) {
-                ForEach(0 ..< widget.mappingsOrItemOptions.count) {
-                    Text(self.widget.mappingsOrItemOptions[$0].label)
+            VStack {
+                HStack {
+                    IconView(widget: widget, settings: settings)
+                    TextLabelView(widget: widget)
+                    Spacer()
+                    DetailTextLabelView(widget: widget)
                 }
-        }
+                Picker("Picker", selection: valueBinding) {
+                    ForEach(0 ..< widget.mappingsOrItemOptions.count) {
+                        Text(self.widget.mappingsOrItemOptions[$0].label).tag($0)
+                    }
+                }
+                .labelsHidden()
+                .frame(height: 100)
+                .padding(.top, 0)
+
+            }
     }
 }
 
 struct SegmentRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[3]
+        let widget = UserData().widgets[4]
         return Group {
             SegmentRow(widget: widget)
                 .previewLayout(.fixed(width: 300, height: 70))

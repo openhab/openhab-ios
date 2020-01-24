@@ -129,6 +129,7 @@
 		DAF4579D23D904350018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
 		DAF4579E23D904360018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
 		DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */; };
+		DAF457A223DB6C640018B495 /* RollershutterRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A123DB6C640018B495 /* RollershutterRow.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
 		DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF1F18965B5400FF2F9B /* RollershutterUITableViewCell.swift */; };
@@ -411,6 +412,7 @@
 		DAF4578623D798A50018B495 /* TextLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLabelView.swift; sourceTree = "<group>"; };
 		DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailTextLabelView.swift; sourceTree = "<group>"; };
 		DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentRow.swift; sourceTree = "<group>"; };
+		DAF457A123DB6C640018B495 /* RollershutterRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollershutterRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DC0A1DBD8BDC4D36D2D2AE79 /* Pods-openHAB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.release.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.release.xcconfig"; sourceTree = "<group>"; };
 		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
@@ -787,17 +789,34 @@
 			children = (
 				934B610B2348D2F9009112D5 /* UIColorUtil.swift */,
 				DA0775262346705F0086C685 /* ContentView.swift */,
-				DA077649234683BC0086C685 /* SwitchRow.swift */,
-				DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */,
-				DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */,
+				DAF457A323DB7A820018B495 /* Rows */,
 				DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */,
 				DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */,
 				DA7224D123828D3300712D20 /* Preview_Constants.swift */,
 				DAF4578123D630C70018B495 /* IconView.swift */,
 				DAF4578623D798A50018B495 /* TextLabelView.swift */,
 				DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */,
+				DAF457A423DB7AB60018B495 /* Utils */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		DAF457A323DB7A820018B495 /* Rows */ = {
+			isa = PBXGroup;
+			children = (
+				DA077649234683BC0086C685 /* SwitchRow.swift */,
+				DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */,
+				DAF457A123DB6C640018B495 /* RollershutterRow.swift */,
+				DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */,
+			);
+			path = Rows;
+			sourceTree = "<group>";
+		};
+		DAF457A423DB7AB60018B495 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 		DF4A02291CF3157B006C3456 /* Drawer */ = {
@@ -1612,6 +1631,7 @@
 				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
 				DA0775312346705F0086C685 /* ComplicationController.swift in Sources */,
 				DAF4578523D7807A0018B495 /* UIColorUtil.swift in Sources */,
+				DAF457A223DB6C640018B495 /* RollershutterRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

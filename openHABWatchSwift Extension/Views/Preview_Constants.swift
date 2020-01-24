@@ -18,7 +18,7 @@ struct PreviewConstants {
     {
         "id": "watch",
         "title": "watch",
-        "link": "https://192.168.2.15:8444/rest/sitemaps/watch/watch",
+        "link": "http://192.168.2.15:8081/rest/sitemaps/watch/watch",
         "leaf": true,
         "timeout": false,
         "widgets": [
@@ -30,7 +30,7 @@ struct PreviewConstants {
                 "icon": "switch",
                 "mappings": [],
                 "item": {
-                    "link": "https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1",
+                    "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch6_1",
                     "state": "OFF",
                     "type": "Switch",
                     "name": "lcnLightSwitch6_1",
@@ -53,7 +53,7 @@ struct PreviewConstants {
                 "icon": "switch",
                 "mappings": [],
                 "item": {
-                    "link": "https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1",
+                    "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch14_1",
                     "state": "OFF",
                     "type": "Switch",
                     "name": "lcnLightSwitch14_1",
@@ -77,7 +77,7 @@ struct PreviewConstants {
                 "icon": "switch",
                 "mappings": [],
                 "item": {
-                    "link": "https://192.168.2.15:8444/rest/items/lcnLightSwitch20_1",
+                    "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch20_1",
                     "state": "ON",
                     "type": "Switch",
                     "name": "lcnLightSwitch20_1",
@@ -102,8 +102,8 @@ struct PreviewConstants {
                 "switchSupport": false,
                 "sendFrequency": 0,
                 "item": {
-                    "link": "https://192.168.2.15:8444/rest/items/lcnLightDimmer",
-                    "state": "49",
+                    "link": "http://192.168.2.15:8081/rest/items/lcnLightDimmer",
+                    "state": "100",
                     "stateDescription": {
                         "pattern": "%s",
                         "readOnly": false,
@@ -117,6 +117,61 @@ struct PreviewConstants {
                     ],
                     "groupNames": [
                         "gEGLicht",
+                        "gLcn"
+                    ]
+                },
+                "widgets": []
+            },
+            {
+                "widgetId": "04",
+                "type": "Switch",
+                "visibility": true,
+                "label": "Fernsteuerung",
+                "icon": "switch",
+                "mappings": [
+                    {
+                        "command": "0",
+                        "label": "Overwrite"
+                    },
+                    {
+                        "command": "1",
+                        "label": "Kalender"
+                    },
+                    {
+                        "command": "2",
+                        "label": "Automatik"
+                    }
+                ],
+                "item": {
+                    "link": "http://192.168.2.15:8081/rest/items/Automatik",
+                    "state": "ON",
+                    "type": "String",
+                    "name": "Automatik",
+                    "tags": [],
+                    "groupNames": []
+                },
+                "widgets": []
+            },
+            {
+                "widgetId": "05",
+                "type": "Switch",
+                "visibility": true,
+                "label": "Jalousie WZ SÃ¼d links",
+                "icon": "rollershutter",
+                "mappings": [],
+                "item": {
+                    "link": "http://192.168.2.15:8081/rest/items/lcnJalousieWZSuedLinks",
+                    "state": "NULL",
+                    "type": "Rollershutter",
+                    "name": "lcnJalousieWZSuedLinks",
+                    "label": "Jalousie WZ Süd links",
+                    "tags": [],
+                    "groupNames": [
+                        "gWZ",
+                        "gEGJalousien",
+                        "gHausJalousie",
+                        "gJalousienSued",
+                        "gEGJalousienSued",
                         "gLcn"
                     ]
                 },
