@@ -42,6 +42,8 @@ struct ContentView: View {
             return AnyView(SegmentRow(widget: widget))
         case .rollershutter:
             return AnyView(RollershutterRow(widget: widget))
+        case .setpoint:
+            return AnyView(SetpointRow(widget: widget))
         default:
             return nil
         }

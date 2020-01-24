@@ -16,168 +16,195 @@ struct PreviewConstants {
 
     static let sitemapJson = """
     {
-        "id": "watch",
-        "title": "watch",
-        "link": "http://192.168.2.15:8081/rest/sitemaps/watch/watch",
-        "leaf": true,
-        "timeout": false,
-        "widgets": [
-            {
-                "widgetId": "00",
+    "id": "watch",
+    "title": "watch",
+    "link": "http://192.168.2.15:8081/rest/sitemaps/watch/watch",
+    "leaf": true,
+    "timeout": false,
+    "widgets": [
+        {
+            "widgetId": "00",
+            "type": "Switch",
+            "visibility": true,
+            "label": "Licht Keller WC Decke",
+            "icon": "switch",
+            "mappings": [],
+            "item": {
+                "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch6_1",
+                "state": "OFF",
                 "type": "Switch",
-                "visibility": true,
+                "name": "lcnLightSwitch6_1",
                 "label": "Licht Keller WC Decke",
-                "icon": "switch",
-                "mappings": [],
-                "item": {
-                    "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch6_1",
-                    "state": "OFF",
-                    "type": "Switch",
-                    "name": "lcnLightSwitch6_1",
-                    "label": "Licht Keller WC Decke",
-                    "tags": [
-                        "Lighting"
-                    ],
-                    "groupNames": [
-                        "gKellerLicht",
-                        "gLcn"
-                    ]
-                },
-                "widgets": []
-            },
-            {
-                "widgetId": "01",
-                "type": "Switch",
-                "visibility": true,
-                "label": "Licht Oberlicht",
-                "icon": "switch",
-                "mappings": [],
-                "item": {
-                    "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch14_1",
-                    "state": "OFF",
-                    "type": "Switch",
-                    "name": "lcnLightSwitch14_1",
-                    "label": "Licht Oberlicht",
-                    "tags": [
-                        "Lighting"
-                    ],
-                    "groupNames": [
-                        "gEGLicht",
-                        "G_PresenceSimulation",
-                        "gLcn"
-                    ]
-                },
-                "widgets": []
-            },
-            {
-                "widgetId": "02",
-                "type": "Switch",
-                "visibility": true,
-                "label": "Licht Esstisch",
-                "icon": "switch",
-                "mappings": [],
-                "item": {
-                    "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch20_1",
-                    "state": "ON",
-                    "type": "Switch",
-                    "name": "lcnLightSwitch20_1",
-                    "label": "Licht Esstisch",
-                    "tags": [],
-                    "groupNames": [
-                        "gEGLicht",
-                        "G_PresenceSimulation",
-                        "gLcn",
-                        "gStateON"
-                    ]
-                },
-                "widgets": []
-            },
-            {
-                "widgetId": "03",
-                "type": "Slider",
-                "visibility": true,
-                "label": "Esstisch [100]",
-                "icon": "slider",
-                "mappings": [],
-                "switchSupport": false,
-                "sendFrequency": 0,
-                "item": {
-                    "link": "http://192.168.2.15:8081/rest/items/lcnLightDimmer",
-                    "state": "100",
-                    "stateDescription": {
-                        "pattern": "%s",
-                        "readOnly": false,
-                        "options": []
-                    },
-                    "type": "Dimmer",
-                    "name": "lcnLightDimmer",
-                    "label": "Esstisch",
-                    "tags": [
-                        "Lighting"
-                    ],
-                    "groupNames": [
-                        "gEGLicht",
-                        "gLcn"
-                    ]
-                },
-                "widgets": []
-            },
-            {
-                "widgetId": "04",
-                "type": "Switch",
-                "visibility": true,
-                "label": "Fernsteuerung",
-                "icon": "switch",
-                "mappings": [
-                    {
-                        "command": "0",
-                        "label": "Overwrite"
-                    },
-                    {
-                        "command": "1",
-                        "label": "Kalender"
-                    },
-                    {
-                        "command": "2",
-                        "label": "Automatik"
-                    }
+                "tags": [
+                    "Lighting"
                 ],
-                "item": {
-                    "link": "http://192.168.2.15:8081/rest/items/Automatik",
-                    "state": "ON",
-                    "type": "String",
-                    "name": "Automatik",
-                    "tags": [],
-                    "groupNames": []
-                },
-                "widgets": []
+                "groupNames": [
+                    "gKellerLicht",
+                    "gLcn"
+                ]
             },
-            {
-                "widgetId": "05",
+            "widgets": []
+        },
+        {
+            "widgetId": "01",
+            "type": "Switch",
+            "visibility": true,
+            "label": "Licht Oberlicht",
+            "icon": "switch",
+            "mappings": [],
+            "item": {
+                "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch14_1",
+                "state": "OFF",
                 "type": "Switch",
-                "visibility": true,
-                "label": "Jalousie WZ SÃ¼d links",
-                "icon": "rollershutter",
-                "mappings": [],
-                "item": {
-                    "link": "http://192.168.2.15:8081/rest/items/lcnJalousieWZSuedLinks",
-                    "state": "NULL",
-                    "type": "Rollershutter",
-                    "name": "lcnJalousieWZSuedLinks",
-                    "label": "Jalousie WZ Süd links",
-                    "tags": [],
-                    "groupNames": [
-                        "gWZ",
-                        "gEGJalousien",
-                        "gHausJalousie",
-                        "gJalousienSued",
-                        "gEGJalousienSued",
-                        "gLcn"
-                    ]
+                "name": "lcnLightSwitch14_1",
+                "label": "Licht Oberlicht",
+                "tags": [
+                    "Lighting"
+                ],
+                "groupNames": [
+                    "gEGLicht",
+                    "G_PresenceSimulation",
+                    "gLcn"
+                ]
+            },
+            "widgets": []
+        },
+        {
+            "widgetId": "02",
+            "type": "Switch",
+            "visibility": true,
+            "label": "Licht Esstisch",
+            "icon": "switch",
+            "mappings": [],
+            "item": {
+                "link": "http://192.168.2.15:8081/rest/items/lcnLightSwitch20_1",
+                "state": "ON",
+                "type": "Switch",
+                "name": "lcnLightSwitch20_1",
+                "label": "Licht Esstisch",
+                "tags": [],
+                "groupNames": [
+                    "gEGLicht",
+                    "G_PresenceSimulation",
+                    "gLcn",
+                    "gStateON"
+                ]
+            },
+            "widgets": []
+        },
+        {
+            "widgetId": "03",
+            "type": "Slider",
+            "visibility": true,
+            "label": "Esstisch [100]",
+            "icon": "slider",
+            "mappings": [],
+            "switchSupport": false,
+            "sendFrequency": 0,
+            "item": {
+                "link": "http://192.168.2.15:8081/rest/items/lcnLightDimmer",
+                "state": "100",
+                "stateDescription": {
+                    "pattern": "%s",
+                    "readOnly": false,
+                    "options": []
                 },
-                "widgets": []
-            }
-        ]
+                "type": "Dimmer",
+                "name": "lcnLightDimmer",
+                "label": "Esstisch",
+                "tags": [
+                    "Lighting"
+                ],
+                "groupNames": [
+                    "gEGLicht",
+                    "gLcn"
+                ]
+            },
+            "widgets": []
+        },
+        {
+            "widgetId": "04",
+            "type": "Switch",
+            "visibility": true,
+            "label": "Fernsteuerung",
+            "icon": "switch",
+            "mappings": [
+                {
+                    "command": "0",
+                    "label": "Overwrite"
+                },
+                {
+                    "command": "1",
+                    "label": "Kalender"
+                },
+                {
+                    "command": "2",
+                    "label": "Automatik"
+                }
+            ],
+            "item": {
+                "link": "http://192.168.2.15:8081/rest/items/Automatik",
+                "state": "2",
+                "type": "String",
+                "name": "Automatik",
+                "tags": [],
+                "groupNames": []
+            },
+            "widgets": []
+        },
+        {
+            "widgetId": "05",
+            "type": "Switch",
+            "visibility": true,
+            "label": "Jalousie WZ Süd links",
+            "icon": "rollershutter",
+            "mappings": [],
+            "item": {
+                "link": "http://192.168.2.15:8081/rest/items/lcnJalousieWZSuedLinks",
+                "state": "100",
+                "type": "Rollershutter",
+                "name": "lcnJalousieWZSuedLinks",
+                "label": "Jalousie WZ Süd links",
+                "tags": [],
+                "groupNames": [
+                    "gWZ",
+                    "gEGJalousien",
+                    "gHausJalousie",
+                    "gJalousienSued",
+                    "gEGJalousienSued",
+                    "gLcn"
+                ]
+            },
+            "widgets": []
+        },
+        {
+            "widgetId": "06",
+            "type": "Setpoint",
+            "visibility": true,
+            "label": "Setpoint Temperature [16.0 °C]",
+            "icon": "temperature",
+            "mappings": [],
+            "minValue": 8,
+            "maxValue": 25,
+            "step": 0.5,
+            "item": {
+                "link": "http://192.168.2.15:8081/rest/items/ZimmerPaul_SetpointTemperature",
+                "state": "16.0 °C",
+                "stateDescription": {
+                    "pattern": "%.1f %unit%",
+                    "readOnly": false,
+                    "options": []
+                },
+                "type": "Number:Temperature",
+                "name": "ZimmerPaul_SetpointTemperature",
+                "label": "Setpoint Temperature [%.1f °C]",
+                "category": "Temperature",
+                "tags": [],
+                "groupNames": []
+            },
+            "widgets": []
+        }
+    ]
     }
     """.data(using: .utf8)!
 }
