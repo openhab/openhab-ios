@@ -16,14 +16,20 @@ struct FrameRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
     var body: some View {
-        HStack {
-            Text(widget.labelText?.uppercased() ?? "")
-                .font(.callout)
-                .lineLimit(2)
-                .foregroundColor(widget.labelcolor != "" ? Color(fromString: widget.labelcolor) : .primary)
-            Spacer()
+        let gray = Color(UIColor.darkGray)
+        return VStack {
+            HStack {
+                Text(widget.labelText?.uppercased() ?? "")
+                    .font(.callout)
+                    .lineLimit(1)
+                Spacer()
+            }
         }
+        .background(gray.edgesIgnoringSafeArea(.all))
+        //.background(SwiftUI.Color.yellow.edgesIgnoringSafeArea(.all))
+    //.background( Color(color:.systemGray))
     }
+
 }
 
 struct FrameRow_Previews: PreviewProvider {
