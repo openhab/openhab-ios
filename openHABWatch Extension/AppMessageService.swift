@@ -53,7 +53,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
         if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {
             ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds
         }
-
     }
 
     @available(watchOSApplicationExtension 2.2, *)

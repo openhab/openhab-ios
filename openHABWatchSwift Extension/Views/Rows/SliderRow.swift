@@ -27,17 +27,15 @@ struct SliderRow: View {
             return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
         }
 
-        let valueBinding = Binding<Double>(
-            get: {
-                guard case let .slider(value) = self.widget.stateEnumBinding else { return 0 }
-                return value
-            },
-            set: {
-                os_log("Slider new value = %g", log: .default, type: .info, $0)
-                self.widget.sendCommand(valueText($0))
-                self.widget.stateEnumBinding = .slider($0)
-            }
-        )
+        let valueBinding = Binding<Double>(get: {
+            guard case let .slider(value) = self.widget.stateEnumBinding else { return 0 }
+            return value
+        },
+                                           set: {
+            os_log("Slider new value = %g", log: .default, type: .info, $0)
+            self.widget.sendCommand(valueText($0))
+            self.widget.stateEnumBinding = .slider($0)
+        })
 
         return
             VStack {
@@ -49,14 +47,14 @@ struct SliderRow: View {
                 }.padding(.top, 8)
 
                 Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
-                .labelsHidden()
-                .focusable(true)
-                .digitalCrownRotation(valueBinding,
-                                      from: widget.minValue,
-                                      through: widget.maxValue,
-                                      by: widget.step,
-                                      sensitivity: .medium,
-                                      isHapticFeedbackEnabled: true)
+                    .labelsHidden()
+                    .focusable(true)
+                    .digitalCrownRotation(valueBinding,
+                                          from: widget.minValue,
+                                          through: widget.maxValue,
+                                          by: widget.step,
+                                          sensitivity: .medium,
+                                          isHapticFeedbackEnabled: true)
             }
     }
 }

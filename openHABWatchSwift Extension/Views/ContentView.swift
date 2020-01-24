@@ -44,6 +44,8 @@ struct ContentView: View {
             return AnyView(RollershutterRow(widget: widget))
         case .setpoint:
             return AnyView(SetpointRow(widget: widget))
+        case .frame:
+            return AnyView(FrameRow(widget: widget))
         default:
             return nil
         }

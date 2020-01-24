@@ -13,10 +13,10 @@ import SwiftUI
 
 extension Color {
     init(fromString string: String) {
-        self.init( UIColor(fromString: string))
+        self.init(UIColor(fromString: string))
     }
 
     init(hex: String) {
-        self.init( UIColor(hex: hex))
+        self.init(UIColor(hex: hex))
     }
 }

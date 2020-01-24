@@ -116,7 +116,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if !mappings.isEmpty {
                 return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
-            // RollershutterItem changed to Rollershutter in later builds of OH2
+                // RollershutterItem changed to Rollershutter in later builds of OH2
             } else if let type = item?.type, type == "Switch" {
                 return .switcher(item?.state == "ON" ? true : false)
             } else if let type = item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && item?.groupType == "Rollershutter") {
