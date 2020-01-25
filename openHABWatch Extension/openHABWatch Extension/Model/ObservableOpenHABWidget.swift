@@ -29,6 +29,7 @@ enum StateEnum {
     case setpoint
     case selection
     case colorpicker
+    case chart
     case image
     case video
     case webview
@@ -38,6 +39,7 @@ enum StateEnum {
         guard case let .switcher(value) = self else { return false }
         return value
     }
+
 }
 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -134,7 +136,9 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
             return .selection
         case "Colorpicker":
             return .colorpicker
-        case "Image", "Chart":
+        case "Chart":
+            return .chart
+        case "Image":
             return .image
         case "Video":
             return .video
