@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.2.56</string>
+	<string>2.2.57</string>
 	<key>CFBundleVersion</key>
-	<string>1578225438</string>
+	<string>1579971938</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
