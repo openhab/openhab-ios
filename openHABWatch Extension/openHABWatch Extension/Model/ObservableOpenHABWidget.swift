@@ -39,7 +39,6 @@ enum StateEnum {
         guard case let .switcher(value) = self else { return false }
         return value
     }
-
 }
 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)

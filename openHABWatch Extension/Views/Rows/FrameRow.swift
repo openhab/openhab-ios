@@ -26,10 +26,9 @@ struct FrameRow: View {
             }
         }
         .background(gray.edgesIgnoringSafeArea(.all))
-        //.background(SwiftUI.Color.yellow.edgesIgnoringSafeArea(.all))
-    //.background( Color(color:.systemGray))
+        // .background(SwiftUI.Color.yellow.edgesIgnoringSafeArea(.all))
+        // .background( Color(color:.systemGray))
     }
-
 }
 
 struct FrameRow_Previews: PreviewProvider {

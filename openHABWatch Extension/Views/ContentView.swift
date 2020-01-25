@@ -51,14 +51,13 @@ struct ContentView: View {
             if let item = widget.item {
                 return AnyView(ImageRawRow(widget: widget))
             }
-            return AnyView(ImageRow(widget: widget, url: URL(string: widget.url) ))
+            return AnyView(ImageRow(widget: widget, url: URL(string: widget.url)))
         case .chart:
             let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
-            return AnyView(ImageRow(widget: widget, url: url ))
+            return AnyView(ImageRow(widget: widget, url: url))
         default:
             return AnyView(GenericRow(widget: widget))
         }
-
     }
 }
 
