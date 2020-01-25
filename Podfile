@@ -50,7 +50,7 @@ target 'OpenHABCoreWatch' do
     pod 'Kingfisher/SwiftUI', '~> 5.0'
 end
 
-target 'openHABWatchSwift Extension' do
+target 'openHABWatch Extension' do
     platform :watchos, '6.0'
     inherit! :search_paths
     shared_pods
