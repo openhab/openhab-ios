@@ -17,7 +17,7 @@ struct RollershutterRow: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
-        VStack {
+        VStack(spacing: -5) {
             HStack {
                 IconView(widget: widget, settings: settings)
                 TextLabelView(widget: widget)

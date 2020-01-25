@@ -1,10 +1,11 @@
 # file options
---swiftversion 5.0
---exclude Pods, openHABCore/Sources/Util/ColorUtil.swift
+--swiftversion 5.1
+--exclude Pods #, openHABCore/Sources/Util/ColorUtil.swift
 --symlinks ignore
 
 # disabled rules
 --disable specifiers # see https://github.com/nicklockwood/SwiftFormat/issues/364
+--disable redundantParens
 
 # opt-in rules
 --enable isEmpty

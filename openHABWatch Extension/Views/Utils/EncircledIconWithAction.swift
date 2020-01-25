@@ -21,7 +21,7 @@ struct EncircledIconWithAction: View {
             .frame(width: 35, height: 35)
             .overlay(
                 Image(systemName: systemName)
-                    .font(.headline)
+                    .font(.system(size: 25))
             )
             .onTapGesture {
                 self.action()

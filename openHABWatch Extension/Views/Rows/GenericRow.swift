@@ -19,17 +19,16 @@ struct GenericRow: View {
     var body: some View {
         HStack {
             IconView(widget: widget, settings: settings)
-            VStack {
-                TextLabelView(widget: widget)
-                DetailTextLabelView(widget: widget)
-            }
+            TextLabelView(widget: widget)
+            Spacer()
+            DetailTextLabelView(widget: widget)
         }
     }
 }
 
 struct GenericRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[4]
+        let widget = UserData().widgets[7]
         return GenericRow(widget: widget)
     }
 }

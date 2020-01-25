@@ -41,7 +41,7 @@ struct ImageRow: View {
 
 struct ImageRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[4]
+        let widget = UserData().widgets[8]
         return ImageRow(widget: widget)
     }
 }

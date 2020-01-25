@@ -38,7 +38,7 @@ struct SliderRow: View {
         })
 
         return
-            VStack {
+            VStack(spacing: 3) {
                 HStack {
                     IconView(widget: widget, settings: settings)
                     TextLabelView(widget: widget)

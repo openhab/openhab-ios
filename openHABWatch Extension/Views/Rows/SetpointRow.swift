@@ -26,7 +26,7 @@ struct SetpointRow: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: 5) {
             HStack {
                 IconView(widget: widget, settings: settings)
                 TextLabelView(widget: widget)
@@ -36,7 +36,7 @@ struct SetpointRow: View {
                 Spacer()
 
                 EncircledIconWithAction(systemName: "chevron.down",
-                              action: self.decreaseValue)
+                                        action: self.decreaseValue)
 
                 Spacer()
 
@@ -46,11 +46,11 @@ struct SetpointRow: View {
                 Spacer()
 
                 EncircledIconWithAction(systemName: "chevron.up",
-                              action: self.increaseValue)
+                                        action: self.increaseValue)
 
                 Spacer()
             }
-            .frame(height: 50)
+
         }
     }
 

@@ -106,7 +106,7 @@ class OpenHABViewController: UIViewController {
 
     var searchBarIsEmpty: Bool {
         // Returns true if the text is empty or nil
-        return search.searchBar.text?.isEmpty ?? true
+        search.searchBar.text?.isEmpty ?? true
     }
 
     var isFiltering: Bool {
