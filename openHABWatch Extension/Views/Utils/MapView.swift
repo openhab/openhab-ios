@@ -24,12 +24,10 @@ struct MapView: WKInterfaceObjectRepresentable {
 
     func updateWKInterfaceObject(_ map: WKInterfaceMap, context: WKInterfaceObjectRepresentableContext<MapView>) {
         if widget.item?.stateAsLocation() != nil {
-            var locationCoordinate: CLLocationCoordinate2D {
-                CLLocationCoordinate2D(latitude: -116.166868,
-                                       longitude: 34.011286)
-            }
 
-            let region = MKCoordinateRegion(center: locationCoordinate, // widget.coordinate,
+            map.addAnnotation(widget.coordinate, with: WKInterfaceMapPinColor.red)
+
+            let region = MKCoordinateRegion(center: widget.coordinate,
                                             latitudinalMeters: 1000.0,
                                             longitudinalMeters: 1000.0)
             map.setRegion(region)
