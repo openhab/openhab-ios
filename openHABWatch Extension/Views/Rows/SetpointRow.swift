@@ -50,7 +50,6 @@ struct SetpointRow: View {
 
                 Spacer()
             }
-
         }
     }
 

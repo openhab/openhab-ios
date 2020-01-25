@@ -239,6 +239,30 @@ struct PreviewConstants {
                 "mappings": [],
                 "url": "http://192.168.2.15:8081/proxy?sitemap=watch.sitemap&widgetId=08",
                 "widgets": []
+            },
+            {
+                "widgetId": "09",
+                "type": "Mapview",
+                "visibility": true,
+                "label": "Location [-°N -°E -m]",
+                "icon": "mapview",
+                "mappings": [],
+                "height": 5,
+                "item": {
+                    "link": "http://192.168.2.15:8081/rest/items/GPSTrackerTi_Location",
+                    "state": "NULL",
+                    "stateDescription": {
+                        "pattern": "%2$s°N %3$s°E %1$sm",
+                        "readOnly": true,
+                        "options": []
+                    },
+                    "type": "Location",
+                    "name": "GPSTrackerTi_Location",
+                    "label": "Location",
+                    "tags": [],
+                    "groupNames": []
+                },
+                "widgets": []
             }
         ]
     }
