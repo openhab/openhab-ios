@@ -131,7 +131,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        let deviceTokenString = deviceToken.reduce("") { $0 + String(format: "%02X", $1) } //try "%02.2hhx",
+        let deviceTokenString = deviceToken.reduce("") { $0 + String(format: "%02X", $1) } // try "%02.2hhx",
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
@@ -214,5 +214,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-
 }

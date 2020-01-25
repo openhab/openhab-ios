@@ -37,7 +37,7 @@ class OpenHABClientCertificatesViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return the number of rows in the section.
-        return NetworkConnection.shared.clientCertificateManager.clientIdentities.count
+        NetworkConnection.shared.clientCertificateManager.clientIdentities.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
