@@ -19,12 +19,13 @@ struct ContentView: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
-        List {
+        ScrollView {
             ForEach(viewModel.widgets) { widget in
                 self.rowWidget(widget: widget)
                     .environmentObject(self.settings)
             }
         }
+        .navigationBarTitle(Text("openHAB"))
         .alert(isPresented: $viewModel.showAlert) {
             Alert(title: Text("Error"), message: Text(viewModel.errorDescription), dismissButton: .default(Text("Got it!")) {
                 self.viewModel.loadPage(urlString: self.settings.openHABRootUrl, longPolling: false, refresh: true)
@@ -48,7 +49,7 @@ struct ContentView: View {
         case .frame:
             return AnyView(FrameRow(widget: widget))
         case .image:
-            if let item = widget.item {
+            if widget.item != nil {
                 return AnyView(ImageRawRow(widget: widget))
             }
             return AnyView(ImageRow(widget: widget, url: URL(string: widget.url)))

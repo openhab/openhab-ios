@@ -26,27 +26,21 @@ struct RollershutterRow: View {
             HStack {
                 Spacer()
 
-                Image(systemName: "chevron.up")
-                    .onTapGesture {
-                        self.widget.sendCommand("UP")
-                    }
-                    .font(.headline)
+                EncircledIconWithAction(systemName: "chevron.up") {
+                    self.widget.sendCommand("UP")
+                }
 
                 Spacer()
 
-                Image(systemName: "square")
-                    .onTapGesture {
-                        self.widget.sendCommand("STOP")
-                    }
-                    .font(.headline)
+                EncircledIconWithAction(systemName: "square") {
+                    self.widget.sendCommand("STOP")
+                }
 
                 Spacer()
 
-                Image(systemName: "chevron.down")
-                    .onTapGesture {
-                        self.widget.sendCommand("DOWN")
-                    }
-                    .font(.headline)
+                EncircledIconWithAction(systemName: "chevron.down") {
+                    self.widget.sendCommand("DOWN")
+                }
 
                 Spacer()
             }

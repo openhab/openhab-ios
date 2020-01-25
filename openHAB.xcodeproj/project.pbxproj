@@ -94,6 +94,8 @@
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
+		DA2E0AA223DC8E33009B0A99 /* CircleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA123DC8E32009B0A99 /* CircleImage.swift */; };
+		DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
@@ -386,6 +388,8 @@
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABJSONParserTests.swift; sourceTree = "<group>"; };
 		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA2E0AA123DC8E32009B0A99 /* CircleImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircleImage.swift; sourceTree = "<group>"; };
+		DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncircledIconWithAction.swift; sourceTree = "<group>"; };
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
@@ -836,6 +840,8 @@
 				DAF4578123D630C70018B495 /* IconView.swift */,
 				DAF4578623D798A50018B495 /* TextLabelView.swift */,
 				DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */,
+				DA2E0AA123DC8E32009B0A99 /* CircleImage.swift */,
+				DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1633,6 +1639,7 @@
 				DA0F37D023D4ACC7007EAB48 /* SliderRow.swift in Sources */,
 				DA0775292346705F0086C685 /* HostingController.swift in Sources */,
 				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
+				DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */,
 				DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
 				DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */,
@@ -1642,6 +1649,7 @@
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
 				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,
+				DA2E0AA223DC8E33009B0A99 /* CircleImage.swift in Sources */,
 				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
 				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
 				9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */,

@@ -35,23 +35,18 @@ struct SetpointRow: View {
             HStack {
                 Spacer()
 
-                Image(systemName: "chevron.down")
-                    .onTapGesture {
-                        self.decreaseValue()
-                    }
-                    .font(.headline)
+                EncircledIconWithAction(systemName: "chevron.down",
+                              action: self.decreaseValue)
 
                 Spacer()
 
                 DetailTextLabelView(widget: widget)
+                    .font(.headline)
 
                 Spacer()
 
-                Image(systemName: "chevron.up")
-                    .onTapGesture {
-                        self.increaseValue()
-                    }
-                    .font(.headline)
+                EncircledIconWithAction(systemName: "chevron.up",
+                              action: self.increaseValue)
 
                 Spacer()
             }
@@ -61,7 +56,6 @@ struct SetpointRow: View {
 
     func decreaseValue() {
         os_log("down button pressed", log: .viewCycle, type: .info)
-
         if let item = widget.item {
             if item.state == "Uninitialized" {
                 widget.sendCommandDouble(widget.minValue)
