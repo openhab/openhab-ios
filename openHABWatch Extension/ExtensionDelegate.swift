@@ -11,6 +11,7 @@
 
 import Kingfisher
 import OpenHABCoreWatch
+import os.log
 import WatchConnectivity
 import WatchKit
 
@@ -48,9 +49,8 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     func activateWatchConnectivity() {
-        if WCSession.isSupported() {
-            session = WCSession.default
-        }
+        // WCSession.isSupported is always supported on a Watch
+        session = WCSession.default
     }
 
     func applicationDidBecomeActive() {

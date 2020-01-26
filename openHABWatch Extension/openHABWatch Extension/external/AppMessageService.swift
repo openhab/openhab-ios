@@ -11,6 +11,7 @@
 
 import Foundation
 import OpenHABCoreWatch
+import os.log
 import WatchConnectivity
 import WatchKit
 
@@ -57,6 +58,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     @available(watchOSApplicationExtension 2.2, *)
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(session.receivedApplicationContext as [String: AnyObject])
         }
@@ -65,6 +67,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        os_log("Did receive context %{PUBLIC}@", log: .watch, type: .info, "\(applicationContext)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(applicationContext as [String: AnyObject])
         }
@@ -73,6 +76,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     /** Called on the delegate of the receiver. Will be called on startup if the user info finished transferring when the receiver was not running. */
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+        os_log("Did receive user info %{PUBLIC}@", log: .watch, type: .info, "\(userInfo)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(userInfo as [String: AnyObject])
         }
@@ -80,6 +84,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        os_log("Did receive message %{PUBLIC}@", log: .watch, type: .info, "\(message)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }
@@ -87,6 +92,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
+        os_log("Did receive message %{PUBLIC}@", log: .watch, type: .info, "\(message)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }

@@ -27,10 +27,16 @@ struct ContentView: View {
         }
         .navigationBarTitle(Text("openHAB"))
         .alert(isPresented: $viewModel.showAlert) {
-            Alert(title: Text("Error"), message: Text(viewModel.errorDescription), dismissButton: .default(Text("Got it!")) {
-                self.viewModel.loadPage(urlString: self.settings.openHABRootUrl, longPolling: false, refresh: true)
-                os_log("reload after alert", log: .default, type: .info)
-            })
+            Alert(title: Text("Error"),
+                  message: Text(viewModel.errorDescription),
+                  dismissButton: .default(Text("Retry in 30s")) {
+                      DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+                          self.viewModel.loadPage(urlString: self.settings.openHABRootUrl,
+                                                  longPolling: false,
+                                                  refresh: true)
+                          os_log("reload after alert", log: .default, type: .info)
+                      }
+                  })
         }
     }
 

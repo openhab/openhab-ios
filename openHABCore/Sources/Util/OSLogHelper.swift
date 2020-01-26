@@ -29,4 +29,7 @@ extension OSLog {
 
     /// Logs the notifications
     public static let notifications = OSLog(subsystem: subsystem, category: "notifications")
+
+    /// Logs watch connectivity
+    public static let watch = OSLog(subsystem: subsystem, category: "watch")
 }

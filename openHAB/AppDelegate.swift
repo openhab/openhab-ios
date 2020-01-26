@@ -34,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if let session = session {
                 session.delegate = WatchMessageService.singleton
                 session.activate()
+                os_log("Paired watch %{PUBLIC}@, watch app installed %{PUBLIC}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
             }
         }
     }
@@ -82,6 +83,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func activateWatchConnectivity() {
         if WCSession.isSupported() {
             session = WCSession.default
+        } else {
+            os_log("WCSession is not supported - For instance on iPad", log: .watch, type: .debug)
         }
     }
 
