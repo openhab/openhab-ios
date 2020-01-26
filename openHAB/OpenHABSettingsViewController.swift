@@ -113,9 +113,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                 ret = 6
             }
         case 1:
-            ret = 8
+            ret = 9
         default:
-            ret = 8
+            ret = 9
         }
         return ret
     }
