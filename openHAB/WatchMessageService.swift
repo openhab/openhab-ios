@@ -19,7 +19,10 @@ import WatchConnectivity
 class WatchMessageService: NSObject, WCSessionDelegate {
     static let singleton = WatchMessageService()
 
-    // This method gets called when the watch requests the localUrl
+    private var lastWatchUpdateTime: Date?
+    private var lastWatchComplicationUpdateTime: Date?
+
+    // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         // TODO: Use RemoteUrl, TOO
         os_log("didReceive Message %{PUBLIC}@", log: .watch, type: .info, "\(message)")
@@ -33,10 +36,49 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         os_log("Received message: %{PUBLIC}@", log: .default, type: .info, message)
     }
 
-    @available(iOS 9.3, *)
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
 
     func sessionDidBecomeInactive(_ session: WCSession) {}
 
     func sessionDidDeactivate(_ session: WCSession) {}
+
+    // swiftlint:disable:next function_parameter_count
+    func sendToWatch(_ localUrl: String,
+                     remoteUrl: String,
+                     username: String,
+                     password: String,
+                     alwaysSendCreds: Bool,
+                     sitemapName: String,
+                     ignoreSSL: Bool,
+                     trustedCertficates: [String: Any] = [:]) {
+        let applicationDict: [String: Any] =
+            ["localUrl": localUrl,
+             "remoteUrl": remoteUrl,
+             "username": username,
+             "password": password,
+             "alwaysSendCreds": alwaysSendCreds,
+             "sitemapName": sitemapName,
+             "ignoreSSL": ignoreSSL,
+             "trustedCertificates": trustedCertficates]
+
+        sendOrTransmitToWatch(applicationDict)
+    }
+
+    private func sendOrTransmitToWatch(_ message: [String: Any]) {
+        // send message if watch is reachable
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(message, replyHandler: { data in
+                os_log("Received data: %{PUBLIC}@", log: .watch, type: .info, data)
+
+            }, errorHandler: { error in
+                os_log("%{PUBLIC}@", log: .watch, type: .info, error.localizedDescription)
+
+                // transmit message on failure
+                try? WCSession.default.updateApplicationContext(message)
+            })
+        } else {
+            // otherwise, transmit application context
+            try? WCSession.default.updateApplicationContext(message)
+        }
+    }
 }

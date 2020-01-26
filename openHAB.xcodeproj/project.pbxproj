@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0E96C96570B51C7043095EF1 /* Pods_OpenHABCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6C94F93F332A550786A783A /* Pods_OpenHABCore.framework */; };
-		1224F78E228A89FD00750965 /* WatchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78C228A89FC00750965 /* WatchService.swift */; };
 		1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78D228A89FC00750965 /* WatchMessageService.swift */; };
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
@@ -269,7 +268,6 @@
 
 /* Begin PBXFileReference section */
 		01E2600D86D1E0B08E9FCB06 /* Pods-openHABWatch Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatch Extension.release.xcconfig"; path = "Target Support Files/Pods-openHABWatch Extension/Pods-openHABWatch Extension.release.xcconfig"; sourceTree = "<group>"; };
-		1224F78C228A89FC00750965 /* WatchService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchService.swift; sourceTree = "<group>"; };
 		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
 		24E2199EA99EE79481394E0B /* Pods_openHAB.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHAB.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicButtonStyleBell.swift; sourceTree = "<group>"; };
@@ -543,7 +541,6 @@
 			isa = PBXGroup;
 			children = (
 				1224F78D228A89FC00750965 /* WatchMessageService.swift */,
-				1224F78C228A89FC00750965 /* WatchService.swift */,
 			);
 			name = Watch;
 			sourceTree = "<group>";
@@ -1721,7 +1718,6 @@
 				286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */,
 				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */,
 				938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */,
-				1224F78E228A89FD00750965 /* WatchService.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABViewController.swift in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,

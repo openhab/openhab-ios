@@ -214,13 +214,13 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     func sendSettingsToWatch() {
-        WatchService.singleton.sendToWatch(Preferences.localUrl,
-                                           remoteUrl: Preferences.remoteUrl,
-                                           username: Preferences.username,
-                                           password: Preferences.password,
-                                           alwaysSendCreds: Preferences.alwaysSendCreds,
-                                           sitemapName: "watch",
-                                           ignoreSSL: Preferences.ignoreSSL,
-                                           trustedCertficates: NetworkConnection.shared.serverCertificateManager.trustedCertificates)
+        WatchMessageService.singleton.sendToWatch(Preferences.localUrl,
+                                                  remoteUrl: Preferences.remoteUrl,
+                                                  username: Preferences.username,
+                                                  password: Preferences.password,
+                                                  alwaysSendCreds: Preferences.alwaysSendCreds,
+                                                  sitemapName: "watch",
+                                                  ignoreSSL: Preferences.ignoreSSL,
+                                                  trustedCertficates: NetworkConnection.shared.serverCertificateManager.trustedCertificates)
     }
 }

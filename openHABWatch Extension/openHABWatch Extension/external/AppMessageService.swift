@@ -84,7 +84,8 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        os_log("Did receive message %{PUBLIC}@", log: .watch, type: .info, "\(message)")
+        let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
+        os_log("didReceiveMessage Filtered messages: %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }
