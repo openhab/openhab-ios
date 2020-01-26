@@ -17,7 +17,7 @@ struct PreferencesRowUIView: View {
     var content: String
     var body: some View {
         HStack {
-            Text("\(label):")
+            Text("\(label)")
                 .fontWeight(.bold)
             Text(content)
         }

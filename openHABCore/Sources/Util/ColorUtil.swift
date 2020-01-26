@@ -15,7 +15,7 @@ public enum OHInterfaceStyle: Int {
     case light, dark
 
     public static var current: OHInterfaceStyle {
-        #if (iOS)
+        #if os(iOS)
         if #available(iOS 13.0, *) {
             if UITraitCollection.current.userInterfaceStyle == .dark {
                 return .dark
@@ -30,7 +30,7 @@ public enum OHInterfaceStyle: Int {
 public extension UIColor {
     // system colors
     class var ohLabel: UIColor {
-        #if (iOS)
+        #if os(iOS)
         if #available(iOS 13.0, *) {
             return .label
         }
@@ -39,7 +39,7 @@ public extension UIColor {
     }
 
     class var ohSecondaryLabel: UIColor {
-        #if (iOS)
+        #if os(iOS)
         if #available(iOS 13.0, *) {
             return .secondaryLabel
         }
@@ -48,7 +48,7 @@ public extension UIColor {
     }
 
     class var ohSystemBackground: UIColor {
-        #if (iOS)
+        #if os(iOS)
         if #available(iOS 13.0, *) {
             return .systemBackground
         }
@@ -57,13 +57,13 @@ public extension UIColor {
     }
 
     class var ohSystemGroupedBackground: UIColor {
-        #if (iOS)
+        #if os(iOS)
         if #available(iOS 13.0, *) {
             return .systemGroupedBackground
         } else {
             return .groupTableViewBackground
         }
-        #elseif watchOS
+        #elseif os(watchOS)
         return .black
         #else
         return .white
@@ -71,7 +71,7 @@ public extension UIColor {
     }
 
     class var ohSecondarySystemGroupedBackground: UIColor {
-        #if (iOS)
+        #if os(iOS)
         if #available(iOS 13.0, *) {
             return .secondarySystemGroupedBackground
         }

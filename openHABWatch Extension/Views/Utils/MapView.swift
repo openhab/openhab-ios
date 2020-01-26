@@ -24,7 +24,6 @@ struct MapView: WKInterfaceObjectRepresentable {
 
     func updateWKInterfaceObject(_ map: WKInterfaceMap, context: WKInterfaceObjectRepresentableContext<MapView>) {
         if widget.item?.stateAsLocation() != nil {
-
             map.addAnnotation(widget.coordinate, with: WKInterfaceMapPinColor.red)
 
             let region = MKCoordinateRegion(center: widget.coordinate,
@@ -37,7 +36,7 @@ struct MapView: WKInterfaceObjectRepresentable {
 
 struct MapView_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[4]
+        let widget = UserData().widgets[9]
         return MapView(widget: widget)
     }
 }

@@ -250,7 +250,7 @@ struct PreviewConstants {
                 "height": 5,
                 "item": {
                     "link": "http://192.168.2.15:8081/rest/items/GPSTrackerTi_Location",
-                    "state": "NULL",
+                    "state":"52.5200066,13.4049540",
                     "stateDescription": {
                         "pattern": "%2$s°N %3$s°E %1$sm",
                         "readOnly": true,

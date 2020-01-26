@@ -22,6 +22,11 @@ struct GenericRow: View {
             TextLabelView(widget: widget)
             Spacer()
             DetailTextLabelView(widget: widget)
+            if widget.linkedPage != nil {
+                NavigationLink(destination: Text("Destination")) {
+                    Image(systemName: "chevron.right")
+                }
+            }
         }
     }
 }

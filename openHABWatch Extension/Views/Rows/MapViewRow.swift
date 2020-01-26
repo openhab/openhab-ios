@@ -21,14 +21,14 @@ struct MapViewRow: View {
             MapView(widget: widget)
                 .scaledToFit()
                 .padding()
-                .frame(height: 300)
+            // .frame(height: 300)
         }
     }
 }
 
 struct MapViewRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[4]
+        let widget = UserData().widgets[9]
         return MapViewRow(widget: widget)
     }
 }
