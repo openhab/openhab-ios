@@ -19,28 +19,44 @@ import WatchConnectivity
 class WatchMessageService: NSObject, WCSessionDelegate {
     static let singleton = WatchMessageService()
 
-    private var lastWatchUpdateTime: Date?
-    private var lastWatchComplicationUpdateTime: Date?
+    private var lastWatchUpdateTime: CFAbsoluteTime = 0
+    private var lastWatchComplicationUpdateTime: CFAbsoluteTime = 0
 
     // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         // TODO: Use RemoteUrl, TOO
-        os_log("didReceive Message %{PUBLIC}@", log: .watch, type: .info, "\(message)")
+        os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
 
-        if message["requestLocalUrl"] != nil {
-            replyHandler(["baseUri": Preferences.localUrl])
+        if message["request"] != nil {
+            let applicationDict: [String: Any] =
+                ["localUrl": Preferences.localUrl,
+                 "remoteUrl": Preferences.remoteUrl,
+                 "username": Preferences.username,
+                 "password": Preferences.password,
+                 "alwaysSendCreds": Preferences.alwaysSendCreds,
+                 "defaultSitemap": Preferences.defaultSitemap,
+                 "ignoreSSL": Preferences.ignoreSSL,
+                 "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates]
+
+            replyHandler(applicationDict)
         }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        os_log("Received message: %{PUBLIC}@", log: .default, type: .info, message)
+        os_log("Received message: %{PUBLIC}@", log: .watch, type: .info, message)
     }
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
+    }
 
-    func sessionDidBecomeInactive(_ session: WCSession) {}
+    func sessionDidBecomeInactive(_ session: WCSession) {
+        os_log("sessionDidBecomeInactive", log: .watch, type: .info)
+    }
 
-    func sessionDidDeactivate(_ session: WCSession) {}
+    func sessionDidDeactivate(_ session: WCSession) {
+        os_log("sessionDidDeactivate", log: .watch, type: .info)
+    }
 
     // swiftlint:disable:next function_parameter_count
     func sendToWatch(_ localUrl: String,
@@ -51,6 +67,13 @@ class WatchMessageService: NSObject, WCSessionDelegate {
                      sitemapName: String,
                      ignoreSSL: Bool,
                      trustedCertficates: [String: Any] = [:]) {
+        let currentTime = CFAbsoluteTimeGetCurrent()
+
+        // if less than half a second has passed, bail out
+        if lastWatchUpdateTime + 0.5 > currentTime {
+            return
+        }
+
         let applicationDict: [String: Any] =
             ["localUrl": localUrl,
              "remoteUrl": remoteUrl,
@@ -62,13 +85,15 @@ class WatchMessageService: NSObject, WCSessionDelegate {
              "trustedCertificates": trustedCertficates]
 
         sendOrTransmitToWatch(applicationDict)
+
+        lastWatchUpdateTime = CFAbsoluteTimeGetCurrent()
     }
 
     private func sendOrTransmitToWatch(_ message: [String: Any]) {
         // send message if watch is reachable
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(message, replyHandler: { data in
-                os_log("Received data: %{PUBLIC}@", log: .watch, type: .info, data)
+                os_log("Sent to watch and received data: %{PUBLIC}@", log: .watch, type: .info, data)
 
             }, errorHandler: { error in
                 os_log("%{PUBLIC}@", log: .watch, type: .info, error.localizedDescription)

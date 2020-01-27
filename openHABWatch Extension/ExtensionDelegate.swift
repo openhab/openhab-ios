@@ -18,7 +18,7 @@ import WatchKit
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
     static var extensionDelegate: ExtensionDelegate!
 
-    var appData = ObservableOpenHABDataObject()
+    var appData: ObservableOpenHABDataObject
 
     var session: WCSession? {
         didSet {
@@ -30,7 +30,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     override init() {
-        appData = ObservableOpenHABDataObject()
+        appData = ObservableOpenHABDataObject.shared
         super.init()
         ExtensionDelegate.extensionDelegate = self
 

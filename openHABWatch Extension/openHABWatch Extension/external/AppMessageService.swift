@@ -27,8 +27,8 @@ class AppMessageService: NSObject, WCSessionDelegate {
         if let remoteUrl = applicationContext["remoteUrl"] as? String {
             ObservableOpenHABDataObject.shared.remoteUrl = remoteUrl
         }
-
-        if let sitemapName = applicationContext["sitemapName"] as? String {
+        // !!!
+        if let sitemapName = applicationContext["defaultSitemap"] as? String {
             ObservableOpenHABDataObject.shared.sitemapName = sitemapName
         }
 
@@ -67,7 +67,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        os_log("Did receive context %{PUBLIC}@", log: .watch, type: .info, "\(applicationContext)")
+        os_log("didReceiveApplicationContext %{PUBLIC}@", log: .watch, type: .info, "\(applicationContext)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(applicationContext as [String: AnyObject])
         }
@@ -76,7 +76,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     /** Called on the delegate of the receiver. Will be called on startup if the user info finished transferring when the receiver was not running. */
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
-        os_log("Did receive user info %{PUBLIC}@", log: .watch, type: .info, "\(userInfo)")
+        os_log("didReceiveUserInfo %{PUBLIC}@", log: .watch, type: .info, "\(userInfo)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(userInfo as [String: AnyObject])
         }
@@ -85,7 +85,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-        os_log("didReceiveMessage Filtered messages: %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
+        os_log("didReceiveMessage some filtered messages: %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }
@@ -93,7 +93,9 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
-        os_log("Did receive message %{PUBLIC}@", log: .watch, type: .info, "\(message)")
+        let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username", "defaultSitemap"].contains($0.key) }
+        os_log("didReceiveMessage some filtered messages: %{PUBLIC}@ with reply handler", log: .watch, type: .info, "\(filteredMessages)")
+
         DispatchQueue.main.async { () -> Void in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }
