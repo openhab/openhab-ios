@@ -58,7 +58,7 @@ extension OpenHABItem {
         state.numberValue?.intValue ?? 0
     }
 
-    public func stateAsUIColor() -> UIColor? {
+    public func stateAsUIColor() -> UIColor {
         if state == "Uninitialized" {
             return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         } else {

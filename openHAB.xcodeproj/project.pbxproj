@@ -74,6 +74,8 @@
 		A3F4C3A31A49A5090019A09F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A11A49A5090019A09F /* Main.storyboard */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
+		DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0749DD23E0B5950057FA83 /* ColorPickerRow.swift */; };
+		DA0749E023E0BF510057FA83 /* ColorSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0749DF23E0BF510057FA83 /* ColorSelection.swift */; };
 		DA0775192346705D0086C685 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0775172346705D0086C685 /* Interface.storyboard */; };
 		DA07751B2346705F0086C685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA07751A2346705F0086C685 /* Assets.xcassets */; };
 		DA0775222346705F0086C685 /* openHABWatch Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DA0775212346705F0086C685 /* openHABWatch Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -330,6 +332,8 @@
 		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
 		CFED23E27938AF8AEA6DD3BD /* Pods-openHABWatchSwift Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatchSwift Extension.release.xcconfig"; path = "Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension.release.xcconfig"; sourceTree = "<group>"; };
 		D6C94F93F332A550786A783A /* Pods_OpenHABCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OpenHABCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA0749DD23E0B5950057FA83 /* ColorPickerRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerRow.swift; sourceTree = "<group>"; };
+		DA0749DF23E0BF510057FA83 /* ColorSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSelection.swift; sourceTree = "<group>"; };
 		DA0775152346705D0086C685 /* openHABWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = openHABWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0775182346705D0086C685 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		DA07751A2346705F0086C685 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -828,6 +832,7 @@
 				DAF4581723DC4A050018B495 /* ImageRow.swift */,
 				DAF4581D23DC60020018B495 /* ImageRawRow.swift */,
 				DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */,
+				DA0749DD23E0B5950057FA83 /* ColorPickerRow.swift */,
 			);
 			path = Rows;
 			sourceTree = "<group>";
@@ -842,6 +847,7 @@
 				DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */,
 				DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */,
 				DA2E0B0D23DCC152009B0A99 /* MapView.swift */,
+				DA0749DF23E0BF510057FA83 /* ColorSelection.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1643,11 +1649,13 @@
 				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
 				DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */,
 				DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */,
+				DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
 				DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */,
 				DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */,
 				DAF4578223D630C70018B495 /* IconView.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
+				DA0749E023E0BF510057FA83 /* ColorSelection.swift in Sources */,
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
 				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,

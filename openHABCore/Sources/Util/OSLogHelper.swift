@@ -32,4 +32,7 @@ extension OSLog {
 
     /// Logs watch connectivity
     public static let watch = OSLog(subsystem: subsystem, category: "watch")
+
+    /// Logs commands
+    public static let command = OSLog(subsystem: subsystem, category: "command")
 }

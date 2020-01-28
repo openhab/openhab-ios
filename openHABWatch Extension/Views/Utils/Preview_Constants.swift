@@ -263,6 +263,27 @@ struct PreviewConstants {
                     "groupNames": []
                 },
                 "widgets": []
+            },
+            {
+                       "widgetId": "10",
+                       "type": "Colorpicker",
+                       "visibility": true,
+                       "label": "Color",
+                       "icon": "colorlight",
+                       "mappings": [],
+                       "item": {
+                           "link": "http://192.168.2.160:8080/rest/items/LEDVANCECLA60RGBWZ3_Color",
+                           "state": "UNDEF",
+                           "type": "Color",
+                           "name": "LEDVANCECLA60RGBWZ3_Color",
+                           "label": "Color",
+                           "category": "ColorLight",
+                           "tags": [],
+                           "groupNames": [
+                               "dg_AllItems"
+                           ]
+                       },
+                       "widgets": []
             }
         ]
     }

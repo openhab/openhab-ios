@@ -45,6 +45,7 @@ struct SwitchRow: View {
                     }
                 }
             }
+            .focusable(true)
             .padding(.trailing)
             .cornerRadius(5)
     }

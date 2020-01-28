@@ -64,6 +64,8 @@ struct ContentView: View {
             return AnyView(ImageRow(widget: widget, url: url))
         case .mapview:
             return AnyView(MapViewRow(widget: widget))
+        case .colorpicker:
+            return AnyView(ColorPickerRow(widget: widget))
         default:
             return AnyView(GenericRow(widget: widget))
         }
