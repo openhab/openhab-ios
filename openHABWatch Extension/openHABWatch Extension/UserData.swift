@@ -51,21 +51,23 @@ final class UserData: ObservableObject {
         }
     }
 
-    init(urlString: String, refresh: Bool = true) {
+    init(urlString: String, refresh: Bool = true, sitemapName: String = "watch") {
         loadPage(urlString: urlString,
                  longPolling: false,
-                 refresh: refresh)
+                 refresh: refresh,
+                 sitemapName: sitemapName)
     }
 
     func loadPage(urlString: String,
                   longPolling: Bool,
-                  refresh: Bool) {
+                  refresh: Bool,
+                  sitemapName: String = "watch") {
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
         }
 
-        currentPageOperation = NetworkConnection.page(url: Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: "watch").url,
+        currentPageOperation = NetworkConnection.page(url: Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: sitemapName).url,
                                                       longPolling: longPolling,
                                                       openHABVersion: 2) { [weak self] response in
             guard let self = self else { return }
@@ -98,7 +100,8 @@ final class UserData: ObservableObject {
                 self.showAlert = self.widgets.isEmpty ? true : false
                 if refresh { self.loadPage(urlString: urlString,
                                            longPolling: true,
-                                           refresh: true) }
+                                           refresh: true,
+                                           sitemapName: sitemapName) }
 
             case let .failure(error):
                 os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)

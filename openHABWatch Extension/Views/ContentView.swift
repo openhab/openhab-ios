@@ -70,12 +70,6 @@ struct ContentView: View {
     }
 }
 
-extension ContentView {
-    init(urlString: String) {
-        viewModel = UserData(urlString: urlString)
-    }
-}
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
