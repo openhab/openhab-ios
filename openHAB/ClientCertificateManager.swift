@@ -263,7 +263,7 @@ class ClientCertificateManager {
     }
 
     func buildIdentityCertChain(cert: SecCertificate) -> [SecCertificate]? {
-        let certArray = [ cert ]
+        let certArray = [cert]
         var optionalTrust: SecTrust?
         let policy = SecPolicyCreateSSL(false, nil)
         let status = SecTrustCreateWithCertificates(certArray as AnyObject,
@@ -283,10 +283,10 @@ class ClientCertificateManager {
 
         let chainSize = SecTrustGetCertificateCount(trust)
 
-        if trustResult == .recoverableTrustFailure && chainSize > 1 {
+        if trustResult == .recoverableTrustFailure, chainSize > 1 {
             trustResult = SecTrustResultType.proceed
             let rootCA = SecTrustGetCertificateAtIndex(trust, chainSize - 1)
-            let anchors = [ rootCA ]
+            let anchors = [rootCA]
             os_log("Setting anchor for trust evaluation to %s", log: .default, type: .info, rootCA.debugDescription)
             SecTrustSetAnchorCertificates(trust, anchors as CFArray)
             if #available(iOS 12.0, *) {
@@ -306,7 +306,7 @@ class ClientCertificateManager {
         }
 
         var certChain: [SecCertificate] = []
-        for ix in 0...chainSize-1 {
+        for ix in 0 ... chainSize - 1 {
             guard let ct = SecTrustGetCertificateAtIndex(trust, ix) else { return nil }
             if ct != cert {
                 certChain.append(ct)
