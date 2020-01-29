@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ni3-JL-qg0">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ni3-JL-qg0">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -1316,6 +1316,7 @@
         <!--Client Certificates-->
         <scene sceneID="fgY-qh-UHk">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="0R3-f7-bHv" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tableViewController id="sb0-mR-isg" userLabel="Client Certificates" customClass="OpenHABClientCertificatesViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="dsq-Ze-GrF">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
@@ -1336,8 +1337,8 @@
                             <outlet property="delegate" destination="sb0-mR-isg" id="hyM-i6-hNW"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" title="Client Certificates" id="yeB-hq-8ch"/>
                 </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="0R3-f7-bHv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="4270" y="875"/>
         </scene>
