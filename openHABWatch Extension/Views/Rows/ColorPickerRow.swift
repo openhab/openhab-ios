@@ -20,7 +20,7 @@ struct ColorPickerRow: View {
         let uiColor = widget.item?.stateAsUIColor()
 
         return
-            VStack {
+            VStack(spacing: 0) {
                 HStack {
                     IconView(widget: widget, settings: settings)
                     TextLabelView(widget: widget)
@@ -44,7 +44,6 @@ struct ColorPickerRow: View {
                     EncircledIconWithAction(systemName: "chevron.up",
                                             action: self.upButtonPressed)
                     Spacer()
-
                 }
             }
     }

@@ -19,8 +19,10 @@ struct ColorSelection: View {
         return Circle()
             .fill(conic)
             .gesture(
-                DragGesture(minimumDistance: 0, coordinateSpace: .global)
-                    .onChanged { _ in
+                DragGesture(minimumDistance: 0,
+                            coordinateSpace: .local)
+                    .onChanged { value in
+                        value.translation. location
 
                         // self.position = value.location
                     }
