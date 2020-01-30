@@ -58,13 +58,12 @@ struct ColorSelection: View {
     var body: some View {
         let spectrum = Gradient(colors: [.red, .yellow, .green, .blue, .purple, .red])
 
-        let conic = AngularGradient(gradient: spectrum, center: .center, angle: .degrees(-90))
+        let conic = AngularGradient(gradient: spectrum, center: .center, angle: .degrees(0))
 
         return
             GeometryReader { (geometry: GeometryProxy) in
                     Circle()
                         .size(geometry.size)
-                        // .frame(width: geometry.size.width, height: geometry.size.height)
                         .fill(conic)
                         .overlay(self.generateHandle(geometry: geometry))
                 }
@@ -78,6 +77,18 @@ struct ColorSelection: View {
     /// Prevent the draggable element from going over its limit
     func limitDisplacement(_ value: Double, _ limit: CGFloat, _ state: CGFloat) -> CGFloat {
         max(0, min(limit, CGFloat(value) * limit + state))
+    }
+
+    func limitCircle(_ x: Double, _ y: Double, _ limit: CGFloat, _ statex: CGFloat, _ statey: CGFloat) -> (CGFloat, CGFloat) {
+        let newx = CGFloat(x) * limit + statex
+        let newy = CGFloat(y) * limit + statey
+
+        let x1 = newx - limit / 2
+        let y1 = newy - limit / 2
+        let theta = atan(y1 / x1)
+        let radius = min(sqrt(x1 * x1 + y1 * y1), limit / 2)
+
+        return (cos(theta) * radius + limit / 2, sin(theta) * radius + limit / 2)
     }
 
     /// Creates the `Handle` and adds the drag gesture to it.
