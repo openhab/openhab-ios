@@ -20,7 +20,7 @@ platform :ios do
   lane :screenshots do
     capture_screenshots(workspace: "openHAB.xcworkspace",
 		        scheme: "openHABUITests",
-			dark_mode: false)
+			dark_mode: true)
   end
 
   desc 'Run unit tests.'
