@@ -52,7 +52,7 @@ platform :ios do
     #unittests
 
     increment_build_number_in_xcodeproj(
-      build_number: Time.now.to_i
+        xcodeproj: "openHAB.xcodeproj"
     )
 
     type = lane[:bump]
