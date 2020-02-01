@@ -33,18 +33,18 @@
 		9350F17023814F2500054BA8 /* OpenHABStateDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F16E23814F2500054BA8 /* OpenHABStateDescription.swift */; };
 		9350F17223814F4400054BA8 /* OpenHABOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17123814F4400054BA8 /* OpenHABOptions.swift */; };
 		9350F17323814F4400054BA8 /* OpenHABOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17123814F4400054BA8 /* OpenHABOptions.swift */; };
-		9350F17523814F6600054BA8 /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17423814F6600054BA8 /* DataDecoded.swift */; };
-		9350F17623814F6600054BA8 /* DataDecoded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17423814F6600054BA8 /* DataDecoded.swift */; };
+		9350F17523814F6600054BA8 /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17423814F6600054BA8 /* DataExtension.swift */; };
+		9350F17623814F6600054BA8 /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17423814F6600054BA8 /* DataExtension.swift */; };
 		9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */; };
 		9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */; };
-		9350F17C2381509300054BA8 /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17B2381509300054BA8 /* OSLogHelper.swift */; };
-		9350F17D2381509300054BA8 /* OSLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17B2381509300054BA8 /* OSLogHelper.swift */; };
+		9350F17C2381509300054BA8 /* OSLogExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17B2381509300054BA8 /* OSLogExtension.swift */; };
+		9350F17D2381509300054BA8 /* OSLogExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17B2381509300054BA8 /* OSLogExtension.swift */; };
 		9350F17F2381513200054BA8 /* DateFormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17E2381513200054BA8 /* DateFormatterExtension.swift */; };
 		9350F1802381513200054BA8 /* DateFormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17E2381513200054BA8 /* DateFormatterExtension.swift */; };
 		9350F1822381514E00054BA8 /* ServerCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1812381514E00054BA8 /* ServerCertificateManager.swift */; };
 		9350F1832381514E00054BA8 /* ServerCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1812381514E00054BA8 /* ServerCertificateManager.swift */; };
-		9350F1852381516300054BA8 /* CodableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1842381516300054BA8 /* CodableExtension.swift */; };
-		9350F1862381516300054BA8 /* CodableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1842381516300054BA8 /* CodableExtension.swift */; };
+		9350F1852381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1842381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift */; };
+		9350F1862381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1842381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift */; };
 		9350F1882381517D00054BA8 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1872381517D00054BA8 /* Endpoint.swift */; };
 		9350F1892381517D00054BA8 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1872381517D00054BA8 /* Endpoint.swift */; };
 		9350F18B2381519300054BA8 /* ClientCertificateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F18A2381519300054BA8 /* ClientCertificateManager.swift */; };
@@ -53,8 +53,8 @@
 		9350F18F238151AD00054BA8 /* NetworkConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F18D238151AD00054BA8 /* NetworkConnection.swift */; };
 		9350F191238151CE00054BA8 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F190238151CE00054BA8 /* StringExtension.swift */; };
 		9350F192238151CE00054BA8 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F190238151CE00054BA8 /* StringExtension.swift */; };
-		9350F194238151F100054BA8 /* UserDefaultsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F193238151F100054BA8 /* UserDefaultsRepository.swift */; };
-		9350F195238151F100054BA8 /* UserDefaultsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F193238151F100054BA8 /* UserDefaultsRepository.swift */; };
+		9350F194238151F100054BA8 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F193238151F100054BA8 /* Preferences.swift */; };
+		9350F195238151F100054BA8 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F193238151F100054BA8 /* Preferences.swift */; };
 		9350F1972381523700054BA8 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1962381523700054BA8 /* Equatable.swift */; };
 		9350F1982381523700054BA8 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1962381523700054BA8 /* Equatable.swift */; };
 		938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */; };
@@ -101,7 +101,7 @@
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
-		DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* Preview_Constants.swift */; };
+		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
@@ -124,11 +124,11 @@
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514E2305CDE3003BCB31 /* XMLData.swift */; };
 		DAF4578223D630C70018B495 /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578123D630C70018B495 /* IconView.swift */; };
-		DAF4578523D7807A0018B495 /* UIColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B610B2348D2F9009112D5 /* UIColorUtil.swift */; };
+		DAF4578523D7807A0018B495 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B610B2348D2F9009112D5 /* Color+Extension.swift */; };
 		DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578623D798A50018B495 /* TextLabelView.swift */; };
 		DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */; };
-		DAF4579D23D904350018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
-		DAF4579E23D904360018B495 /* ColorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* ColorUtil.swift */; };
+		DAF4579D23D904350018B495 /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* UIColorExtension.swift */; };
+		DAF4579E23D904360018B495 /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578323D780730018B495 /* UIColorExtension.swift */; };
 		DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */; };
 		DAF457A223DB6C640018B495 /* RollershutterRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A123DB6C640018B495 /* RollershutterRow.swift */; };
 		DAF457A623DB9CE00018B495 /* SetpointRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF457A523DB9CE00018B495 /* SetpointRow.swift */; };
@@ -287,7 +287,7 @@
 		933D7F0622E7015000621A03 /* OpenHABUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUITests.swift; sourceTree = "<group>"; };
 		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		933D7F0E22E7030600621A03 /* SnapshotHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapshotHelper.swift; path = fastlane/SnapshotHelper.swift; sourceTree = SOURCE_ROOT; };
-		934B610B2348D2F9009112D5 /* UIColorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorUtil.swift; sourceTree = "<group>"; };
+		934B610B2348D2F9009112D5 /* Color+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		9350F0FF23814CD500054BA8 /* OpenHABItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABItem.swift; sourceTree = "<group>"; };
 		9350F10323814CFF00054BA8 /* OpenHABLinkedPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLinkedPage.swift; sourceTree = "<group>"; };
 		9350F16223814EC200054BA8 /* OpenHABSitemap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSitemap.swift; sourceTree = "<group>"; };
@@ -296,18 +296,18 @@
 		9350F16B23814F0D00054BA8 /* OpenHABWidgetMapping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABWidgetMapping.swift; sourceTree = "<group>"; };
 		9350F16E23814F2500054BA8 /* OpenHABStateDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABStateDescription.swift; sourceTree = "<group>"; };
 		9350F17123814F4400054BA8 /* OpenHABOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABOptions.swift; sourceTree = "<group>"; };
-		9350F17423814F6600054BA8 /* DataDecoded.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataDecoded.swift; sourceTree = "<group>"; };
+		9350F17423814F6600054BA8 /* DataExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataExtension.swift; sourceTree = "<group>"; };
 		9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABWidget.swift; sourceTree = "<group>"; };
 		9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABSitemapPage.swift; sourceTree = "<group>"; };
-		9350F17B2381509300054BA8 /* OSLogHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OSLogHelper.swift; sourceTree = "<group>"; };
+		9350F17B2381509300054BA8 /* OSLogExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OSLogExtension.swift; sourceTree = "<group>"; };
 		9350F17E2381513200054BA8 /* DateFormatterExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateFormatterExtension.swift; sourceTree = "<group>"; };
 		9350F1812381514E00054BA8 /* ServerCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCertificateManager.swift; sourceTree = "<group>"; };
-		9350F1842381516300054BA8 /* CodableExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodableExtension.swift; sourceTree = "<group>"; };
+		9350F1842381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyedDecodingContainerProtocolExtension.swift; sourceTree = "<group>"; };
 		9350F1872381517D00054BA8 /* Endpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
 		9350F18A2381519300054BA8 /* ClientCertificateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientCertificateManager.swift; sourceTree = "<group>"; };
 		9350F18D238151AD00054BA8 /* NetworkConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkConnection.swift; sourceTree = "<group>"; };
 		9350F190238151CE00054BA8 /* StringExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
-		9350F193238151F100054BA8 /* UserDefaultsRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsRepository.swift; sourceTree = "<group>"; };
+		9350F193238151F100054BA8 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		9350F1962381523700054BA8 /* Equatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Equatable.swift; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
 		9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+SafeAccess.swift"; sourceTree = "<group>"; };
@@ -398,7 +398,7 @@
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesHostingController.swift; sourceTree = "<group>"; };
-		DA7224D123828D3300712D20 /* Preview_Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preview_Constants.swift; sourceTree = "<group>"; };
+		DA7224D123828D3300712D20 /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
 		DA72E1B0236DE9F200B8EF3A /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = "openHABWatch Extension/app/AppState.swift"; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppMessageService.swift; path = "openHABWatch Extension/external/AppMessageService.swift"; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
@@ -423,7 +423,7 @@
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DAED514E2305CDE3003BCB31 /* XMLData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLData.swift; sourceTree = "<group>"; };
 		DAF4578123D630C70018B495 /* IconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconView.swift; sourceTree = "<group>"; };
-		DAF4578323D780730018B495 /* ColorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorUtil.swift; sourceTree = "<group>"; };
+		DAF4578323D780730018B495 /* UIColorExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		DAF4578623D798A50018B495 /* TextLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLabelView.swift; sourceTree = "<group>"; };
 		DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailTextLabelView.swift; sourceTree = "<group>"; };
 		DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentRow.swift; sourceTree = "<group>"; };
@@ -647,7 +647,7 @@
 		93F38C65238034BD001B1451 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				9350F17423814F6600054BA8 /* DataDecoded.swift */,
+				9350F17423814F6600054BA8 /* DataExtension.swift */,
 				93F38C6B238034DA001B1451 /* DataObject.swift */,
 				9350F0FF23814CD500054BA8 /* OpenHABItem.swift */,
 				9350F10323814CFF00054BA8 /* OpenHABLinkedPage.swift */,
@@ -676,17 +676,17 @@
 			isa = PBXGroup;
 			children = (
 				9350F18A2381519300054BA8 /* ClientCertificateManager.swift */,
-				9350F1842381516300054BA8 /* CodableExtension.swift */,
+				9350F1842381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift */,
 				9350F17E2381513200054BA8 /* DateFormatterExtension.swift */,
 				9350F1872381517D00054BA8 /* Endpoint.swift */,
 				9350F1962381523700054BA8 /* Equatable.swift */,
 				9350F18D238151AD00054BA8 /* NetworkConnection.swift */,
 				93F38D4A238037E3001B1451 /* OpenHABAccessTokenAdapter.swift */,
-				9350F17B2381509300054BA8 /* OSLogHelper.swift */,
+				9350F17B2381509300054BA8 /* OSLogExtension.swift */,
 				9350F1812381514E00054BA8 /* ServerCertificateManager.swift */,
 				9350F190238151CE00054BA8 /* StringExtension.swift */,
-				9350F193238151F100054BA8 /* UserDefaultsRepository.swift */,
-				DAF4578323D780730018B495 /* ColorUtil.swift */,
+				9350F193238151F100054BA8 /* Preferences.swift */,
+				DAF4578323D780730018B495 /* UIColorExtension.swift */,
 				9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */,
 			);
 			path = Util;
@@ -840,8 +840,8 @@
 		DAF457A723DBA2C40018B495 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				DA7224D123828D3300712D20 /* Preview_Constants.swift */,
-				934B610B2348D2F9009112D5 /* UIColorUtil.swift */,
+				DA7224D123828D3300712D20 /* PreviewConstants.swift */,
+				934B610B2348D2F9009112D5 /* Color+Extension.swift */,
 				DAF4578123D630C70018B495 /* IconView.swift */,
 				DAF4578623D798A50018B495 /* TextLabelView.swift */,
 				DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */,
@@ -1583,27 +1583,27 @@
 			files = (
 				9350F17223814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16623814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
-				9350F194238151F100054BA8 /* UserDefaultsRepository.swift in Sources */,
+				9350F194238151F100054BA8 /* Preferences.swift in Sources */,
 				93F38C6C238034DA001B1451 /* DataObject.swift in Sources */,
 				9350F16C23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
 				93F38D4B238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */,
 				DAF4581F23DC62F10018B495 /* Collection+SafeAccess.swift in Sources */,
 				9350F1972381523700054BA8 /* Equatable.swift in Sources */,
 				9350F17F2381513200054BA8 /* DateFormatterExtension.swift in Sources */,
-				9350F17523814F6600054BA8 /* DataDecoded.swift in Sources */,
+				9350F17523814F6600054BA8 /* DataExtension.swift in Sources */,
 				9350F16923814EF500054BA8 /* OpenHABWidget.swift in Sources */,
 				9350F18E238151AD00054BA8 /* NetworkConnection.swift in Sources */,
 				9350F16F23814F2500054BA8 /* OpenHABStateDescription.swift in Sources */,
-				9350F17C2381509300054BA8 /* OSLogHelper.swift in Sources */,
+				9350F17C2381509300054BA8 /* OSLogExtension.swift in Sources */,
 				9350F1882381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1822381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
-				DAF4579D23D904350018B495 /* ColorUtil.swift in Sources */,
+				DAF4579D23D904350018B495 /* UIColorExtension.swift in Sources */,
 				9350F16323814EC200054BA8 /* OpenHABSitemap.swift in Sources */,
 				9350F10123814CD500054BA8 /* OpenHABItem.swift in Sources */,
 				9350F10423814CFF00054BA8 /* OpenHABLinkedPage.swift in Sources */,
 				9350F191238151CE00054BA8 /* StringExtension.swift in Sources */,
 				9350F18B2381519300054BA8 /* ClientCertificateManager.swift in Sources */,
-				9350F1852381516300054BA8 /* CodableExtension.swift in Sources */,
+				9350F1852381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1613,27 +1613,27 @@
 			files = (
 				9350F17323814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16723814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
-				9350F195238151F100054BA8 /* UserDefaultsRepository.swift in Sources */,
+				9350F195238151F100054BA8 /* Preferences.swift in Sources */,
 				93F38C6D238034DA001B1451 /* DataObject.swift in Sources */,
 				9350F16D23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
 				93F38D4C238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */,
 				DAF4582023DC62F10018B495 /* Collection+SafeAccess.swift in Sources */,
 				9350F1982381523700054BA8 /* Equatable.swift in Sources */,
 				9350F1802381513200054BA8 /* DateFormatterExtension.swift in Sources */,
-				9350F17623814F6600054BA8 /* DataDecoded.swift in Sources */,
+				9350F17623814F6600054BA8 /* DataExtension.swift in Sources */,
 				9350F16A23814EF500054BA8 /* OpenHABWidget.swift in Sources */,
 				9350F18F238151AD00054BA8 /* NetworkConnection.swift in Sources */,
 				9350F17023814F2500054BA8 /* OpenHABStateDescription.swift in Sources */,
-				9350F17D2381509300054BA8 /* OSLogHelper.swift in Sources */,
+				9350F17D2381509300054BA8 /* OSLogExtension.swift in Sources */,
 				9350F1892381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1832381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
-				DAF4579E23D904360018B495 /* ColorUtil.swift in Sources */,
+				DAF4579E23D904360018B495 /* UIColorExtension.swift in Sources */,
 				9350F16423814EC200054BA8 /* OpenHABSitemap.swift in Sources */,
 				9350F10223814CD500054BA8 /* OpenHABItem.swift in Sources */,
 				9350F10523814CFF00054BA8 /* OpenHABLinkedPage.swift in Sources */,
 				9350F192238151CE00054BA8 /* StringExtension.swift in Sources */,
 				9350F18C2381519300054BA8 /* ClientCertificateManager.swift in Sources */,
-				9350F1862381516300054BA8 /* CodableExtension.swift in Sources */,
+				9350F1862381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1651,7 +1651,7 @@
 				DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */,
 				DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
-				DA7224D223828D3400712D20 /* Preview_Constants.swift in Sources */,
+				DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */,
 				DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */,
 				DAF4578223D630C70018B495 /* IconView.swift in Sources */,
 				DA07752D2346705F0086C685 /* NotificationController.swift in Sources */,
@@ -1673,7 +1673,7 @@
 				9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */,
 				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
 				DA0775312346705F0086C685 /* ComplicationController.swift in Sources */,
-				DAF4578523D7807A0018B495 /* UIColorUtil.swift in Sources */,
+				DAF4578523D7807A0018B495 /* Color+Extension.swift in Sources */,
 				DAF457A223DB6C640018B495 /* RollershutterRow.swift in Sources */,
 				DAF457A923DBA4990018B495 /* FrameRow.swift in Sources */,
 			);
