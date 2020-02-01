@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import os.log
 import SwiftUI
 
 /// Drag State describing the combination of a long press and drag gesture.
@@ -79,16 +80,20 @@ struct ColorSelection: View {
         max(0, min(limit, CGFloat(value) * limit + state))
     }
 
-    func limitCircle(_ x: Double, _ y: Double, _ limit: CGFloat, _ statex: CGFloat, _ statey: CGFloat) -> (CGFloat, CGFloat) {
-        let newx = CGFloat(x) * limit + statex
-        let newy = CGFloat(y) * limit + statey
+    /// Prevent the draggable element from going beyond the circle
+    func limitCircle(_ point: CGPoint, _ limit: CGSize, _ state: CGSize) -> (CGPoint) {
+        let newx = point.x * limit.width + state.width
+        let newy = point.y * limit.height + state.height
 
-        let x1 = newx - limit / 2
-        let y1 = newy - limit / 2
-        let theta = atan(y1 / x1)
-        let radius = min(sqrt(x1 * x1 + y1 * y1), limit / 2)
+        let x1 = newx - limit.width / 2
+        let y1 = -newy + limit.height / 2
+        let theta = atan2(x1, y1)
+        // Circle limit.width = limit.height
+        let radius = min(sqrt(x1 * x1 + y1 * y1), limit.width / 2)
 
-        return (cos(theta) * radius + limit / 2, sin(theta) * radius + limit / 2)
+        os_log("Slider new x1, x2 = %g, %g", log: .default, type: .info, x1, y1)
+
+        return CGPoint(x: cos(theta) * radius + limit.width / 2, y: -sin(theta) * radius + limit.width / 2)
     }
 
     /// Creates the `Handle` and adds the drag gesture to it.
@@ -122,12 +127,7 @@ struct ColorSelection: View {
             .overlay(satBrightState.isDragging ? Circle().stroke(Color.white, lineWidth: 2) : nil)
             .foregroundColor(.white)
             .frame(width: 25, height: 25, alignment: .center)
-            .position(x: limitDisplacement(saturation,
-                                           geometry.size.width,
-                                           satBrightState.translation.width),
-                      y: limitDisplacement(brightness,
-                                           geometry.size.height,
-                                           satBrightState.translation.height))
+            .position(limitCircle(CGPoint(x: saturation, y: brightness), geometry.size, satBrightState.translation))
             .animation(.interactiveSpring())
             .gesture(longPressDrag)
     }

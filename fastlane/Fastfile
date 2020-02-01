@@ -20,7 +20,7 @@ platform :ios do
   lane :screenshots do
     capture_screenshots(workspace: "openHAB.xcworkspace",
 		        scheme: "openHABUITests",
-			dark_mode: false)
+			dark_mode: true)
   end
 
   desc 'Run unit tests.'
@@ -51,15 +51,15 @@ platform :ios do
     # run unit tests
     #unittests
 
-    increment_build_number(
-      build_number: Time.now.to_i
+    increment_build_number_in_xcodeproj(
+        xcodeproj: "openHAB.xcodeproj"
     )
 
     type = lane[:bump]
 
-    increment_version_number(
-           bump_type: type,
-           xcodeproj: "openHAB.xcodeproj"
+    increment_version_number_in_xcodeproj(
+        bump_type: type,
+        xcodeproj: "openHAB.xcodeproj"
     )
 
     build_number = get_build_number
