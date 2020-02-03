@@ -51,7 +51,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @IBAction private func sliderValueChanged(_ sender: Any) {
-        customDetailText?.text = valueText(widgetValue)
+        customDetailText?.text = widgetValue.valueText(step: widget.step)
 
         if Preferences.realTimeSliders {
             transitionItem?.cancel()
@@ -93,14 +93,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
         }
     }
 
-    private func valueText(_ widgetValue: Double) -> String {
-        let digits = max(-Decimal(widget.step).exponent, 0)
-        let numberFormatter = NumberFormatter()
-        numberFormatter.maximumFractionDigits = digits
-        numberFormatter.decimalSeparator = "."
-        return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
-    }
-
     override func displayWidget() {
         guard !isInTransition else { return }
 
@@ -109,11 +101,11 @@ class SliderUITableViewCell: GenericUITableViewCell {
         widgetSlider?.maximumValue = Float(widget.maxValue)
         let widgetValue = adjustedValue()
         widgetSlider?.value = Float(widgetValue)
-        customDetailText?.text = valueText(widgetValue)
+        customDetailText?.text = widgetValue.valueText(step: widget.step)
     }
 
     private func sliderDidChange(toValue value: Double) {
         os_log("Slider new value = %g", log: .default, type: .info, value)
-        widget.sendCommand(valueText(value))
+        widget.sendCommand(value.valueText(step: widget.step))
     }
 }

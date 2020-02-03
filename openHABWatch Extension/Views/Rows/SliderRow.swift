@@ -19,21 +19,13 @@ struct SliderRow: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
-        func valueText(_ widgetValue: Double) -> String {
-            let digits = max(-Decimal(widget.step).exponent, 0)
-            let numberFormatter = NumberFormatter()
-            numberFormatter.maximumFractionDigits = digits
-            numberFormatter.decimalSeparator = "."
-            return numberFormatter.string(from: NSNumber(value: widgetValue)) ?? ""
-        }
-
         let valueBinding = Binding<Double>(get: {
             guard case let .slider(value) = self.widget.stateEnumBinding else { return 0 }
             return value
         },
                                            set: {
             os_log("Slider new value = %g", log: .default, type: .info, $0)
-            self.widget.sendCommand(valueText($0))
+            self.widget.sendCommand($0.valueText(step: self.widget.step))
             self.widget.stateEnumBinding = .slider($0)
         })
 
