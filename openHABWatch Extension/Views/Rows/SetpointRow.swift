@@ -21,10 +21,6 @@ struct SetpointRow: View {
         widget.step.truncatingRemainder(dividingBy: 1) == 0
     }
 
-    private var stateFormat: String {
-        isIntStep ? "%ld" : "%.01f"
-    }
-
     var body: some View {
         VStack(spacing: 5) {
             HStack {
@@ -62,11 +58,11 @@ struct SetpointRow: View {
                 if !isIntStep {
                     var newValue = item.stateAsDouble() - widget.step
                     newValue = max(newValue, widget.minValue)
-                    widget.sendCommand(String(format: stateFormat, newValue))
+                    widget.sendCommand(newValue.valueText(step: widget.step))
                 } else {
                     var newValue = item.stateAsInt() - Int(widget.step)
                     newValue = max(newValue, Int(widget.minValue))
-                    widget.sendCommand(String(format: stateFormat, newValue))
+                    widget.sendCommand(String(format: "%ld", newValue))
                 }
             }
         }
@@ -79,14 +75,14 @@ struct SetpointRow: View {
             if item.state == "Uninitialized" {
                 widget.sendCommandDouble(widget.minValue)
             } else {
-                if !isIntStep {
+               if !isIntStep {
                     var newValue = item.stateAsDouble() + widget.step
                     newValue = min(newValue, widget.maxValue)
-                    widget.sendCommand(String(format: stateFormat, newValue))
+                    widget.sendCommand(newValue.valueText(step: widget.step))
                 } else {
                     var newValue = item.stateAsInt() + Int(widget.step)
                     newValue = min(newValue, Int(widget.maxValue))
-                    widget.sendCommand(String(format: stateFormat, newValue))
+                    widget.sendCommand(String(format: "%ld", newValue))
                 }
             }
         }
