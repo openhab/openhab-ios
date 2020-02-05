@@ -35,4 +35,5 @@ extension OSLog {
 
     /// Logs commands
     public static let command = OSLog(subsystem: subsystem, category: "command")
+
 }

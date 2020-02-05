@@ -28,6 +28,7 @@ final class UserData: ObservableObject {
     private var commandOperation: Alamofire.Request?
     private var currentPageOperation: Alamofire.Request?
 
+    // Demo
     init() {
         decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
@@ -51,6 +52,12 @@ final class UserData: ObservableObject {
         }
     }
 
+    init(url: URL?, refresh: Bool = true) {
+        loadPage(url: url,
+                 longPolling: true,
+                 refresh: refresh)
+    }
+
     init(urlString: String, refresh: Bool = true, sitemapName: String = "watch") {
         loadPage(urlString: urlString,
                  longPolling: false,
@@ -62,12 +69,19 @@ final class UserData: ObservableObject {
                   longPolling: Bool,
                   refresh: Bool,
                   sitemapName: String = "watch") {
+        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: sitemapName).url
+        loadPage(url: url, longPolling: longPolling, refresh: refresh)
+    }
+
+    func loadPage(url: URL?,
+                  longPolling: Bool,
+                  refresh: Bool) {
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
         }
 
-        currentPageOperation = NetworkConnection.page(url: Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: sitemapName).url,
+        currentPageOperation = NetworkConnection.page(url: url,
                                                       longPolling: longPolling,
                                                       openHABVersion: 2) { [weak self] response in
             guard let self = self else { return }
@@ -98,10 +112,9 @@ final class UserData: ObservableObject {
                 self.widgets = self.openHABSitemapPage?.widgets ?? []
 
                 self.showAlert = self.widgets.isEmpty ? true : false
-                if refresh { self.loadPage(urlString: urlString,
+                if refresh { self.loadPage(url: url,
                                            longPolling: true,
-                                           refresh: true,
-                                           sitemapName: sitemapName) }
+                                           refresh: true) }
 
             case let .failure(error):
                 os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)

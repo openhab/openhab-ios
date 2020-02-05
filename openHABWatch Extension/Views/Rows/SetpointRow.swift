@@ -75,7 +75,7 @@ struct SetpointRow: View {
             if item.state == "Uninitialized" {
                 widget.sendCommandDouble(widget.minValue)
             } else {
-               if !isIntStep {
+                if !isIntStep {
                     var newValue = item.stateAsDouble() + widget.step
                     newValue = min(newValue, widget.maxValue)
                     widget.sendCommand(newValue.valueText(step: widget.step))

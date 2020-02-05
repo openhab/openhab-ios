@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import os.log
 import SwiftUI
 
 // swiftlint:disable file_types_order
@@ -22,11 +23,27 @@ struct GenericRow: View {
             TextLabelView(widget: widget)
             Spacer()
             DetailTextLabelView(widget: widget)
-            if widget.linkedPage != nil {
-                NavigationLink(destination: Text("Destination")) {
+            widget.makeView(settings: settings)
+        }
+    }
+}
+
+extension ObservableOpenHABWidget {
+    func makeView(settings: ObservableOpenHABDataObject) -> AnyView {
+        if linkedPage != nil {
+            let title = linkedPage?.title.components(separatedBy: "[")[0]
+            let pageUrl = linkedPage?.link ?? ""
+            os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
+            return AnyView(
+                NavigationLink(destination:
+                    ContentView(viewModel: UserData(url: URL(string: pageUrl)),
+                                settings: settings)
+                ) {
                     Image(systemName: "chevron.right")
-                }
-            }
+                } )
+
+        } else {
+            return AnyView(EmptyView())
         }
     }
 }
