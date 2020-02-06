@@ -40,7 +40,7 @@ extension ObservableOpenHABWidget {
                                 settings: settings)
                 ) {
                     Image(systemName: "chevron.right")
-                } )
+                })
 
         } else {
             return AnyView(EmptyView())
