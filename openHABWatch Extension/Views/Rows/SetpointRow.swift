@@ -21,6 +21,10 @@ struct SetpointRow: View {
         widget.step.truncatingRemainder(dividingBy: 1) == 0
     }
 
+    private var stateFormat: String {
+        isIntStep ? "%ld" : "%.01f"
+    }
+
     var body: some View {
         VStack(spacing: 5) {
             HStack {
