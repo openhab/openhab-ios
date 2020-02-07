@@ -115,7 +115,6 @@
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
-		DAA42BAE21DC987C00244B2A /* BuildFile in Sources */ = {isa = PBXBuildFile; };
 		DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */; };
 		DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
@@ -1743,7 +1742,6 @@
 				DFA16EB818883CF300EDB0BB /* SetpointUITableViewCell.swift in Sources */,
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
-				DAA42BAE21DC987C00244B2A /* BuildFile in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */,
 			);
