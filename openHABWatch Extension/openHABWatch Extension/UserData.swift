@@ -16,6 +16,15 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
+// swiftlint:disable file_types_order
+extension OpenHABCoreWatch.Future where Value == ObservableOpenHABSitemapPage.CodingData {
+    func trafo() -> OpenHABCoreWatch.Future<ObservableOpenHABSitemapPage> {
+        transformed { data in
+            data.openHABSitemapPage
+        }
+    }
+}
+
 final class UserData: ObservableObject {
     @Published var widgets: [ObservableOpenHABWidget] = []
     @Published var showAlert = false
@@ -38,7 +47,7 @@ final class UserData: ObservableObject {
             // Self-executing closure
             // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
             openHABSitemapPage = try {
-                let sitemapPageCodingData = try data.decoded() as ObservableOpenHABSitemapPage.CodingData
+                let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
                 return sitemapPageCodingData.openHABSitemapPage
             }()
         } catch {
@@ -73,6 +82,57 @@ final class UserData: ObservableObject {
         loadPage(url: url, longPolling: longPolling, refresh: refresh)
     }
 
+    func request(_ endpoint: Endpoint) -> OpenHABCoreWatch.Future<Data> {
+        // Start by constructing a Promise, that will later be
+        // returned as a Future
+        let promise = Promise<Data>()
+
+        // Immediately reject the promise in case the passed
+        // endpoint can't be converted into a valid URL
+        guard let url = endpoint.url else {
+            promise.reject(with: NetworkingError.invalidURL)
+            return promise
+        }
+
+        if currentPageOperation != nil {
+            currentPageOperation?.cancel()
+            currentPageOperation = nil
+        }
+
+        currentPageOperation = NetworkConnection.page(url: url,
+                                                      longPolling: true,
+                                                      openHABVersion: 2) { [weak self] response in
+            guard self != nil else { return }
+
+            switch response.result {
+            case .success:
+                os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                promise.resolve(with: response.result.value ?? Data())
+
+            case let .failure(error):
+                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                promise.reject(with: error)
+            }
+        }
+        currentPageOperation?.resume()
+
+        return promise
+    }
+
+    func loadPage(_ endpoint: Endpoint) {
+        request(endpoint)
+            .decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+            .trafo()
+            .observe { result in
+                switch result {
+                case let .failure(error):
+                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+                case let .success(page):
+                    self.openHABSitemapPage = page
+                }
+            }
+    }
+
     func loadPage(url: URL?,
                   longPolling: Bool,
                   refresh: Bool) {
@@ -97,7 +157,7 @@ final class UserData: ObservableObject {
                         // Self-executing closure
                         // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
                         self.openHABSitemapPage = try {
-                            let sitemapPageCodingData = try data.decoded() as ObservableOpenHABSitemapPage.CodingData
+                            let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
                             return sitemapPageCodingData.openHABSitemapPage
                         }()
                     } catch {

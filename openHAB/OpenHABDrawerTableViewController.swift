@@ -44,7 +44,7 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
             os_log("openHAB 2", log: .viewCycle, type: .info)
             do {
                 os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                let sitemapsCodingData = try response.decoded() as [OpenHABSitemap.CodingData]
+                let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
                 for sitemapCodingDatum in sitemapsCodingData {
                     os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
                     sitemaps.append(sitemapCodingDatum.openHABSitemap)

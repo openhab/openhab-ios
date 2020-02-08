@@ -17,6 +17,7 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @State var title = "openHAB"
 
     var body: some View {
         ScrollView {
@@ -25,7 +26,7 @@ struct ContentView: View {
                     .environmentObject(self.settings)
             }
         }
-        .navigationBarTitle(Text("openHAB"))
+        .navigationBarTitle(Text(title))
         .alert(isPresented: $viewModel.showAlert) {
             Alert(title: Text("Error"),
                   message: Text(viewModel.errorDescription),

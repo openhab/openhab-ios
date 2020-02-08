@@ -450,7 +450,7 @@ class OpenHABViewController: UIViewController {
                             // Self-executing closure
                             // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
                             openHABSitemapPage = try {
-                                let sitemapPageCodingData = try data.decoded() as OpenHABSitemapPage.CodingData
+                                let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
                                 return sitemapPageCodingData.openHABSitemapPage
                             }()
                         } catch {

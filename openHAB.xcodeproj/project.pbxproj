@@ -116,11 +116,13 @@
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
 		DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */; };
+		DAB2438C23EF4E1F00C9C68E /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE249A023EE07C800986877 /* Future.swift */; };
 		DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
+		DAE249A223EE07C800986877 /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE249A023EE07C800986877 /* Future.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
@@ -421,6 +423,7 @@
 		DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesRowUIView.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
+		DAE249A023EE07C800986877 /* Future.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Future.swift; path = openHABCore/Sources/Util/Future.swift; sourceTree = SOURCE_ROOT; };
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
@@ -678,6 +681,7 @@
 		93F38D492380379F001B1451 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				DAE249A023EE07C800986877 /* Future.swift */,
 				9350F18A2381519300054BA8 /* ClientCertificateManager.swift */,
 				9350F1842381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift */,
 				9350F17E2381513200054BA8 /* DateFormatterExtension.swift */,
@@ -1592,6 +1596,7 @@
 				93F38C6C238034DA001B1451 /* DataObject.swift in Sources */,
 				9350F16C23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
 				93F38D4B238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */,
+				DAB2438C23EF4E1F00C9C68E /* Future.swift in Sources */,
 				DAF4581F23DC62F10018B495 /* Collection+SafeAccess.swift in Sources */,
 				9350F1972381523700054BA8 /* Equatable.swift in Sources */,
 				9350F17F2381513200054BA8 /* DateFormatterExtension.swift in Sources */,
@@ -1623,6 +1628,7 @@
 				93F38C6D238034DA001B1451 /* DataObject.swift in Sources */,
 				9350F16D23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
 				93F38D4C238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */,
+				DAE249A223EE07C800986877 /* Future.swift in Sources */,
 				DAF4582023DC62F10018B495 /* Collection+SafeAccess.swift in Sources */,
 				9350F1982381523700054BA8 /* Equatable.swift in Sources */,
 				9350F1802381513200054BA8 /* DateFormatterExtension.swift in Sources */,

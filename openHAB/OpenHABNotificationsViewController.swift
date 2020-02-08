@@ -62,7 +62,7 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
                     do {
                         let decoder = JSONDecoder()
                         decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let codingDatas = try data.decoded(using: decoder) as [OpenHABNotification.CodingData]
+                        let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
                         for codingDatum in codingDatas {
                             self.notifications.add(codingDatum.openHABNotification)
                         }

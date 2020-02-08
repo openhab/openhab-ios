@@ -31,13 +31,15 @@ struct GenericRow: View {
 extension ObservableOpenHABWidget {
     func makeView(settings: ObservableOpenHABDataObject) -> AnyView {
         if linkedPage != nil {
-            let title = linkedPage?.title.components(separatedBy: "[")[0]
+            let title = linkedPage?.title.components(separatedBy: "[")[0] ?? ""
             let pageUrl = linkedPage?.link ?? ""
             os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
             return AnyView(
                 NavigationLink(destination:
-                    ContentView(viewModel: UserData(url: URL(string: pageUrl)),
-                                settings: settings)
+                    ContentView(viewModel: UserData(urlString: settings.openHABRootUrl, sitemapName: settings.sitemapName), settings:
+                        settings, title: title)
+//                    ContentView(viewModel: UserData(url: URL(string: pageUrl)),
+//                                settings: settings)
                 ) {
                     Image(systemName: "chevron.right")
                 })
