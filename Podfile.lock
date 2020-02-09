@@ -1,11 +1,11 @@
 PODS:
   - Alamofire (4.9.1)
-  - CocoaLumberjack (3.6.0):
-    - CocoaLumberjack/Core (= 3.6.0)
-  - CocoaLumberjack/Core (3.6.0)
+  - CocoaLumberjack (3.6.1):
+    - CocoaLumberjack/Core (= 3.6.1)
+  - CocoaLumberjack/Core (3.6.1)
   - Crashlytics (3.14.0):
     - Fabric (~> 1.10.2)
-  - DeviceKit (2.3.0)
+  - DeviceKit (3.0.0)
   - DynamicButton (6.2.1)
   - Fabric (1.10.2)
   - Firebase/Analytics (6.16.0):
@@ -89,7 +89,7 @@ PODS:
   - SideMenu (6.4.7)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
-  - SwiftFormat/CLI (0.44.1)
+  - SwiftFormat/CLI (0.44.2)
   - SwiftLint (0.38.2)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
@@ -98,7 +98,7 @@ PODS:
 DEPENDENCIES:
   - Alamofire (~> 4.0)
   - Crashlytics (~> 3.9)
-  - DeviceKit (~> 2.0)
+  - DeviceKit (~> 3.0)
   - DynamicButton (~> 6.2)
   - Fabric (~> 1.7)
   - Firebase/Analytics
@@ -144,9 +144,9 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
+  CocoaLumberjack: b17ae15142558d08bbacf69775fa10c4abbebcc9
   Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
-  DeviceKit: da103891aa928d89f64ea8dd8aca738c5f3d8ac0
+  DeviceKit: fc3c2bd361a8d68d8a91eb715e453aede57317e5
   DynamicButton: 95f30460793bd3510a5c213ac1b810a5e3d54b6a
   Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
   Firebase: 497158b816d0a86fc31babbd05546fcd7e6083ff
@@ -167,10 +167,10 @@ SPEC CHECKSUMS:
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
   SideMenu: 928a015669c3afc201e1fe3a87f1b0bc8993a664
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftFormat: d367353eca56ef21506bd45b88a0f323ac5a9f5c
+  SwiftFormat: 53968b5cc5d466727e796f789fa9be6c38da34cb
   SwiftLint: 8f5d2f903e1c9bcbc832fd16771e80a263ac6cbb
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: c0aa00a118e8b1f335f71147d67de49e00bfba69
+PODFILE CHECKSUM: ba32ee2afd2062b9d8b4772a91878dd85b5a8245
 
-COCOAPODS: 1.9.0.beta.2
+COCOAPODS: 1.9.0.beta.3
