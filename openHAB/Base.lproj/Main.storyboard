@@ -935,7 +935,7 @@
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
                                     </tableViewCell>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="ukN-g4-MLG">
+                                    <tableViewCell tag="999" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="ukN-g4-MLG">
                                         <rect key="frame" x="0.0" y="543.33333206176758" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ukN-g4-MLG" id="C1I-js-LCZ">
@@ -1316,7 +1316,6 @@
         <!--Client Certificates-->
         <scene sceneID="fgY-qh-UHk">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="0R3-f7-bHv" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tableViewController id="sb0-mR-isg" userLabel="Client Certificates" customClass="OpenHABClientCertificatesViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="dsq-Ze-GrF">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
@@ -1339,6 +1338,7 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Client Certificates" id="yeB-hq-8ch"/>
                 </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="0R3-f7-bHv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="4270" y="875"/>
         </scene>

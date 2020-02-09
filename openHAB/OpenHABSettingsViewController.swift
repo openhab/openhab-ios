@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
 import OpenHABCore
 import os.log
 import UIKit
@@ -123,8 +124,11 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         settingsTableView.deselectRow(at: indexPath, animated: true)
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
-        if indexPath.section == 1, indexPath.row == 2 {
+        if tableView.cellForRow(at: indexPath)?.tag == 999 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
+            KingfisherManager.shared.cache.clearMemoryCache()
+            KingfisherManager.shared.cache.clearDiskCache()
+            KingfisherManager.shared.cache.cleanExpiredDiskCache()
         }
     }
 
