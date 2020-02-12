@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.3.8, Build 1580410428] - 2020-02-12
+
 ### Fixed
 - fix image cache purging, refs #455
 
