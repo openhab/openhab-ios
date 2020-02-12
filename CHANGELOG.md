@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- fix image cache purging, refs #455
+
 ## [Version 2.2.56, Build 1578225438] - 2020-01-05
 
 ### Fixed 
