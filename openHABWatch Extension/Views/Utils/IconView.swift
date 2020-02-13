@@ -28,7 +28,23 @@ struct IconView: View {
     }
 
     var body: some View {
-        ImageRow(URL: iconURL)
+        let image = iconURL != nil ? KFImage(source: .network(ImageResource(downloadURL: iconURL!,
+                                                                            cacheKey: iconURL!.path + (iconURL!.query ?? "")))) : KFImage(iconURL)
+        return image
+            .onSuccess { retrieveImageResult in
+                os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
+            }
+            .onFailure { kingfisherError in
+                os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
+            }
+            .placeholder {
+                Image(systemName: "arrow.2.circlepath.circle")
+                    .font(.callout)
+                    .opacity(0.3)
+            }
+            .cancelOnDisappear(true)
+            .resizable()
+            .scaledToFit()
             .frame(width: 20.0, height: 20.0)
     }
 }
