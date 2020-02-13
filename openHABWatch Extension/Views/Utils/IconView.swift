@@ -19,7 +19,7 @@ struct IconView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
-    var iconUrl: URL? {
+    var iconURL: URL? {
         Endpoint.icon(rootUrl: settings.openHABRootUrl,
                       version: 2,
                       icon: widget.icon,
@@ -28,21 +28,7 @@ struct IconView: View {
     }
 
     var body: some View {
-        KFImage(iconUrl)
-            .onSuccess { retrieveImageResult in
-                os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
-            }
-            .onFailure { kingfisherError in
-                os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
-            }
-            .placeholder {
-                Image(systemName: "arrow.2.circlepath.circle")
-                    .font(.callout)
-                    .opacity(0.3)
-            }
-            .cancelOnDisappear(true)
-            .resizable()
-            .scaledToFit()
+        ImageRow(URL: iconURL)
             .frame(width: 20.0, height: 20.0)
     }
 }

@@ -16,12 +16,10 @@ import SwiftUI
 
 // swiftlint:disable file_types_order
 struct ImageRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
-    var url: URL?
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @State var URL: URL?
 
     var body: some View {
-        KFImage(url)
+        KFImage(URL)
             .onSuccess { retrieveImageResult in
                 os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
             }
@@ -41,7 +39,12 @@ struct ImageRow: View {
 
 struct ImageRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[8]
-        return ImageRow(widget: widget)
+        let iconURL = Endpoint.icon(rootUrl: PreviewConstants.remoteURLString,
+                                    version: 2,
+                                    icon: "Switch",
+                                    value: "ON",
+                                    iconType: .png).url
+        // let widget = UserData().widgets[8]
+        return ImageRow(URL: iconURL)
     }
 }

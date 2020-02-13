@@ -73,7 +73,7 @@ struct PreviewConstants {
                 "widgetId": "02",
                 "type": "Switch",
                 "visibility": true,
-                "label": "Licht Esstisch",
+                "label": "Licht Esstisch [Test]",
                 "icon": "switch",
                 "mappings": [],
                 "item": {

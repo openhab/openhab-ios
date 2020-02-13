@@ -30,6 +30,15 @@ struct MapView: WKInterfaceObjectRepresentable {
                                             latitudinalMeters: 1000.0,
                                             longitudinalMeters: 1000.0)
             map.setRegion(region)
+
+        } else {
+            let span = MKCoordinateSpan(latitudeDelta: 0.02,
+                                        longitudeDelta: 0.02)
+
+            let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 40, longitude: -5),
+                                            span: span)
+
+            map.setRegion(region)
         }
     }
 }
@@ -38,5 +47,6 @@ struct MapView_Previews: PreviewProvider {
     static var previews: some View {
         let widget = UserData().widgets[9]
         return MapView(widget: widget)
+            .previewDevice("Apple Watch Series 5 - 44mm")
     }
 }

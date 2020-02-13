@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+
+
+## [Version 2.3.11, Build 1580410431] - 2020-02-12
+
+### Fixed
 - fix image cache purging, refs #455
 - Backed out capability in Xcode that was not used
 

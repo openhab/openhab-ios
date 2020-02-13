@@ -56,13 +56,15 @@ struct ContentView: View {
         case .frame:
             return AnyView(FrameRow(widget: widget))
         case .image:
+            // Encoded image
             if widget.item != nil {
                 return AnyView(ImageRawRow(widget: widget))
+            } else {
+                return AnyView(ImageRow(URL: URL(string: widget.url)))
             }
-            return AnyView(ImageRow(widget: widget, url: URL(string: widget.url)))
         case .chart:
             let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
-            return AnyView(ImageRow(widget: widget, url: url))
+            return AnyView(ImageRow(URL: url))
         case .mapview:
             return AnyView(MapViewRow(widget: widget))
         case .colorpicker:
