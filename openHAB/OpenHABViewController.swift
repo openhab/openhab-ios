@@ -1049,11 +1049,11 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
 
                 switch iconType {
                 case .png:
-                    cell.imageView?.kf.setImage(with: urlc,
+                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 completionHandler: reportOnResults)
                 case .svg:
-                    cell.imageView?.kf.setImage(with: urlc,
+                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 options: [.processor(SVGProcessor())],
                                                 completionHandler: reportOnResults)

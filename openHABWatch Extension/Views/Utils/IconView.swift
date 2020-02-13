@@ -28,7 +28,8 @@ struct IconView: View {
     }
 
     var body: some View {
-        KFImage(iconUrl)
+        let image = iconUrl != nil ? KFImage(source: .network(ImageResource(downloadURL: iconUrl!, cacheKey: iconUrl!.path + (iconUrl!.query ?? "")))) : KFImage(iconUrl)
+        return image
             .onSuccess { retrieveImageResult in
                 os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
             }
