@@ -40,8 +40,8 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         widgetSegmentControl.removeAllSegments()
         widgetSegmentControl.apportionsSegmentWidthsByContent = true
 
-        for mapping in widget?.mappingsOrItemOptions ?? [] {
-            widgetSegmentControl.insertSegment(withTitle: mapping.label, at: widget.mappingsOrItemOptions.firstIndex(of: mapping) ?? 0, animated: false)
+        for (index, mapping) in (widget?.mappingsOrItemOptions ?? []).enumerated() {
+            widgetSegmentControl.insertSegment(withTitle: mapping.label, at: index, animated: false)
         }
 
         widgetSegmentControl.isMomentary = widget.mappingsOrItemOptions.count == 1 || widget.item?.state == "NULL"
@@ -56,8 +56,8 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
         }
 
         os_log("Segment pressed %d", log: .default, type: .info, segmentedControl.selectedSegmentIndex)
-        let index = widget.mappings.indices.contains(segmentedControl.selectedSegmentIndex) ? segmentedControl.selectedSegmentIndex : 0
-        let mapping = widget.mappings[index]
+        let index = widget.mappingsOrItemOptions.indices.contains(segmentedControl.selectedSegmentIndex) ? segmentedControl.selectedSegmentIndex : 0
+        let mapping = widget.mappingsOrItemOptions[index]
         widget.sendCommand(mapping.command)
         feedbackGenerator.impactOccurred()
     }
