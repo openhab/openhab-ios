@@ -5,6 +5,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- SliderUITableViewCell: if there is a formatted value in widget label, take it. Otherwise display local value. Addresses #534
+- Fix segmented control, closes #538
+- Use same icon cacheKey for local and remote connection, refs #536
+
+### Changed
+- add lane to upload dSYMs to Crashlytics
+
+## [Version 2.3.12, Build 1580410432] - 2020-02-15
+
+### Fixed
 
 
 ## [Version 2.3.11, Build 1580410431] - 2020-02-12

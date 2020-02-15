@@ -101,7 +101,12 @@ class SliderUITableViewCell: GenericUITableViewCell {
         widgetSlider?.maximumValue = Float(widget.maxValue)
         let widgetValue = adjustedValue()
         widgetSlider?.value = Float(widgetValue)
-        customDetailText?.text = widgetValue.valueText(step: widget.step)
+        // if there is a formatted value in widget label, take it. Otherwise display local value
+        if let labelValue = widget?.labelValue {
+            customDetailText?.text = labelValue
+        } else {
+            customDetailText?.text = widgetValue.valueText(step: widget.step)
+        }
     }
 
     private func sliderDidChange(toValue value: Double) {
