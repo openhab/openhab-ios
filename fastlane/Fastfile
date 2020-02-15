@@ -32,6 +32,15 @@ platform :ios do
       )
   end
 
+  desc 'Refresh dSYMS.'
+  lane :refresh_dsyms do
+      download_dsyms(
+          version: "latest",
+          wait_for_dsym_processing: true,
+          wait_timeout: 600)
+      upload_symbols_to_crashlytics
+      clean_build_artifacts
+  end
 
   desc "Build beta"
   lane :beta do |lane|
@@ -77,7 +86,7 @@ platform :ios do
     )
 
     changelog = read_changelog # Read changelog
-  
+
     stamp_changelog(section_identifier: "Version #{version}, Build #{build_number}") # Stamp Unreleased section with newly released build number
 
     clean_build_artifacts
@@ -114,6 +123,7 @@ platform :ios do
         changelog: changelog,
         groups: ["Beta Testers"]
     )
+    refresh_dsyms
 
   end
 
