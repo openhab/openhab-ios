@@ -51,13 +51,11 @@ class SegmentedUITableViewCell: GenericUITableViewCell {
 
     @objc
     func pickOne(_ sender: Any?) {
-        guard let segmentedControl = sender as? UISegmentedControl else {
+        guard let segmentedControl = sender as? UISegmentedControl, let mapping = widget.mappingsOrItemOptions[safe: segmentedControl.selectedSegmentIndex] else {
             return
         }
 
         os_log("Segment pressed %d", log: .default, type: .info, segmentedControl.selectedSegmentIndex)
-        let index = widget.mappingsOrItemOptions.indices.contains(segmentedControl.selectedSegmentIndex) ? segmentedControl.selectedSegmentIndex : 0
-        let mapping = widget.mappingsOrItemOptions[index]
         widget.sendCommand(mapping.command)
         feedbackGenerator.impactOccurred()
     }
