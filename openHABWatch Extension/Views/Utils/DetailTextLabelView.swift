@@ -16,11 +16,11 @@ struct DetailTextLabelView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
 
     var body: some View {
-        widget.labelValue.map {
+        Unwrap(widget.labelValue) {
             Text($0)
                 .font(.footnote)
                 .lineLimit(1)
-                .foregroundColor(widget.valuecolor != "" ? Color(fromString: widget.valuecolor) : .secondary)
+                .foregroundColor(self.widget.valuecolor != "" ? Color(fromString: self.widget.valuecolor) : .secondary)
         }
     }
 }
