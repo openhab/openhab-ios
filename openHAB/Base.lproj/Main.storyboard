@@ -538,30 +538,10 @@
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cNS-Yn-KPo" id="Tr2-YU-Z8o">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bpq-qh-s5O">
-                                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                                                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                                                    <wkWebViewConfiguration key="configuration">
-                                                        <dataDetectorTypes key="dataDetectorTypes" none="YES"/>
-                                                        <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
-                                                        <wkPreferences key="preferences"/>
-                                                    </wkWebViewConfiguration>
-                                                </wkWebView>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstAttribute="trailing" secondItem="bpq-qh-s5O" secondAttribute="trailing" id="4Uf-fM-rFE"/>
-                                                <constraint firstItem="bpq-qh-s5O" firstAttribute="top" secondItem="Tr2-YU-Z8o" secondAttribute="top" id="A9l-WE-9nf"/>
-                                                <constraint firstAttribute="bottom" secondItem="bpq-qh-s5O" secondAttribute="bottom" id="koD-P3-nTj"/>
-                                                <constraint firstItem="bpq-qh-s5O" firstAttribute="leading" secondItem="Tr2-YU-Z8o" secondAttribute="leading" id="rDZ-IY-OZf"/>
-                                            </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
                                             <accessibilityTraits key="traits" notEnabled="YES"/>
                                         </accessibility>
-                                        <connections>
-                                            <outlet property="widgetWebView" destination="bpq-qh-s5O" id="3bc-MS-NLR"/>
-                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                                 <connections>

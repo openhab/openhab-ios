@@ -16,13 +16,25 @@ import WebKit
 class WebUITableViewCell: GenericUITableViewCell {
     private var url: URL?
 
-    @IBOutlet private var widgetWebView: WKWebView!
+    private var widgetWebView: WKWebView!
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
         selectionStyle = .none
         separatorInset = .zero
+
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = []
+        widgetWebView = WKWebView(frame: contentView.frame, configuration: configuration)
+        contentView.addSubview(widgetWebView)
+
+        widgetWebView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([widgetWebView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
+                                     widgetWebView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+                                     widgetWebView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                                     widgetWebView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)])
     }
 
     override func awakeFromNib() {
