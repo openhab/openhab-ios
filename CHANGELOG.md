@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.3.15, Build 1580410435] - 2020-02-20
+
 ### Fixed
 -  enable inline and automatic media playback, refs #540
 
