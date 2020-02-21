@@ -32,6 +32,10 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         AppDelegate.appDelegate.appData
     }
 
+    private var shouldCache: Bool {
+        widget?.refresh == 0
+    }
+
     private var widgetPayload: ImageType {
         guard let widget = widget else { return .empty }
 
@@ -141,6 +145,9 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         var imageRequest = URLRequest(url: url)
         imageRequest.timeoutInterval = 10.0
+        if !shouldCache {
+            imageRequest.cachePolicy = .reloadIgnoringCacheData
+        }
 
         if downloadRequest != nil {
             downloadRequest?.cancel()
