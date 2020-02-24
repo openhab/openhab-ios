@@ -89,7 +89,7 @@ PODS:
   - SideMenu (6.4.7)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
-  - SwiftFormat/CLI (0.44.2)
+  - SwiftFormat/CLI (0.44.3)
   - SwiftLint (0.39.1)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
@@ -167,10 +167,10 @@ SPEC CHECKSUMS:
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
   SideMenu: 928a015669c3afc201e1fe3a87f1b0bc8993a664
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftFormat: 53968b5cc5d466727e796f789fa9be6c38da34cb
+  SwiftFormat: a18012d0de9f988d065f52bfe43c934b0c15b8c3
   SwiftLint: 55e96a4a4d537d4a3156859fc1c54bd24851a046
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
 PODFILE CHECKSUM: ba32ee2afd2062b9d8b4772a91878dd85b5a8245
 
-COCOAPODS: 1.9.0.beta.2
+COCOAPODS: 1.9.0.beta.3
