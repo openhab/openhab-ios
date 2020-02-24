@@ -57,6 +57,9 @@ platform :ios do
     # ensure that master branch is clean
     ensure_git_status_clean
 
+    # fetch the git tags
+    sh('git fetch --tags'
+
     # run unit tests
     #unittests
 
