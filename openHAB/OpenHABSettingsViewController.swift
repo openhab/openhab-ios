@@ -180,8 +180,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsRealTimeSliders = Preferences.realTimeSliders
         let rawSettingsIconType = Preferences.iconType
         settingsIconType = IconType(rawValue: rawSettingsIconType) ?? .png
-
-        sendSettingsToWatch()
     }
 
     func updateSettings() {
@@ -210,17 +208,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.realTimeSliders = settingsRealTimeSliders
         Preferences.iconType = settingsIconType.rawValue
 
-        sendSettingsToWatch()
-    }
-
-    func sendSettingsToWatch() {
-        WatchMessageService.singleton.sendToWatch(Preferences.localUrl,
-                                                  remoteUrl: Preferences.remoteUrl,
-                                                  username: Preferences.username,
-                                                  password: Preferences.password,
-                                                  alwaysSendCreds: Preferences.alwaysSendCreds,
-                                                  sitemapName: "watch",
-                                                  ignoreSSL: Preferences.ignoreSSL,
-                                                  trustedCertficates: NetworkConnection.shared.serverCertificateManager.trustedCertificates)
+        WatchMessageService.singleton.sendToWatch()
     }
 }

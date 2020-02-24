@@ -41,9 +41,17 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
     var openHABVersion: Int = 2
 
     let objectWillChange = PassthroughSubject<Void, Never>()
+    let objectRefreshed = PassthroughSubject<Void, Never>()
+
+    @UserDefault("rootUrl", defaultValue: "")
+    var openHABRootUrl: String {
+        willSet {
+            objectWillChange.send()
+        }
+    }
 
     @UserDefault("localUrl", defaultValue: "")
-    var openHABRootUrl: String {
+    var localUrl: String {
         willSet {
             objectWillChange.send()
         }
@@ -89,6 +97,13 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
     var openHABAlwaysSendCreds: Bool {
         willSet {
             objectWillChange.send()
+        }
+    }
+
+    @UserDefault("haveReceivedAppContext", defaultValue: false)
+    var haveReceivedAppContext: Bool {
+        willSet {
+            objectRefreshed.send()
         }
     }
 }

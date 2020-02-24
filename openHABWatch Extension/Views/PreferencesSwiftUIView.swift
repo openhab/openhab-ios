@@ -28,31 +28,15 @@ struct PreferencesSwiftUIView: View {
     var body: some View {
         List {
             PreferencesRowUIView(label: "Version", content: applicationVersionNumber).font(.footnote)
-            PreferencesRowUIView(label: "Local URL", content: settings.openHABRootUrl).font(.footnote)
+            PreferencesRowUIView(label: "Active URL", content: settings.openHABRootUrl).font(.footnote)
+            PreferencesRowUIView(label: "Local URL", content: settings.localUrl).font(.footnote)
+            PreferencesRowUIView(label: "Remote URL", content: settings.remoteUrl).font(.footnote)
             PreferencesRowUIView(label: "Sitemap", content: settings.sitemapName).font(.footnote)
             PreferencesRowUIView(label: "Username", content: settings.openHABUsername).font(.footnote)
             HStack {
-                Button(action: { self.sendMessage() }, label: { Text("Sync preferences") })
+                Button(action: { AppMessageService.singleton.requestApplicationContext() }, label: { Text("Sync preferences") })
             }
         }
-    }
-
-    func sendMessage() {
-        WCSession
-            .default
-            .sendMessage(["request": "Preferences"],
-                         replyHandler: { (response) in
-                             let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-                             os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
-
-                             DispatchQueue.main.async { () -> Void in
-                                 AppMessageService.singleton.updateValuesFromApplicationContext(response as [String: AnyObject])
-                             }
-                         },
-                         errorHandler: { (error) in
-                             os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
-
-            })
     }
 }
 

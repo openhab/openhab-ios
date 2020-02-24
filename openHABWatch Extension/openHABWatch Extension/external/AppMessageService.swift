@@ -20,40 +20,62 @@ class AppMessageService: NSObject, WCSessionDelegate {
     static let singleton = AppMessageService()
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
-        if let localUrl = applicationContext["localUrl"] as? String {
-            ObservableOpenHABDataObject.shared.openHABRootUrl = localUrl
-        }
+        if !applicationContext.isEmpty {
+            if let localUrl = applicationContext["localUrl"] as? String {
+                ObservableOpenHABDataObject.shared.localUrl = localUrl
+            }
 
-        if let remoteUrl = applicationContext["remoteUrl"] as? String {
-            ObservableOpenHABDataObject.shared.remoteUrl = remoteUrl
-        }
-        // !!!
-        if let sitemapName = applicationContext["defaultSitemap"] as? String {
-            ObservableOpenHABDataObject.shared.sitemapName = sitemapName
-        }
+            if let remoteUrl = applicationContext["remoteUrl"] as? String {
+                ObservableOpenHABDataObject.shared.remoteUrl = remoteUrl
+            }
+            // !!!
+            if let sitemapName = applicationContext["defaultSitemap"] as? String {
+                ObservableOpenHABDataObject.shared.sitemapName = sitemapName
+            }
 
-        if let username = applicationContext["username"] as? String {
-            ObservableOpenHABDataObject.shared.openHABUsername = username
-        }
+            if let username = applicationContext["username"] as? String {
+                ObservableOpenHABDataObject.shared.openHABUsername = username
+            }
 
-        if let password = applicationContext["password"] as? String {
-            ObservableOpenHABDataObject.shared.openHABPassword = password
-        }
+            if let password = applicationContext["password"] as? String {
+                ObservableOpenHABDataObject.shared.openHABPassword = password
+            }
 
-        if let ignoreSSL = applicationContext["ignoreSSL"] as? Bool {
-            ObservableOpenHABDataObject.shared.ignoreSSL = ignoreSSL
-        }
+            if let ignoreSSL = applicationContext["ignoreSSL"] as? Bool {
+                ObservableOpenHABDataObject.shared.ignoreSSL = ignoreSSL
+            }
 
-        if let trustedCertificate = applicationContext["trustedCertificates"] as? [String: Any] {
-            let serverCertificateManager = ServerCertificateManager(ignoreSSL: ObservableOpenHABDataObject.shared.ignoreSSL)
-            serverCertificateManager.trustedCertificates = trustedCertificate
-            serverCertificateManager.saveTrustedCertificates()
-            NetworkConnection.shared.serverCertificateManager = serverCertificateManager
-        }
+            if let trustedCertificate = applicationContext["trustedCertificates"] as? [String: Any] {
+                let serverCertificateManager = ServerCertificateManager(ignoreSSL: ObservableOpenHABDataObject.shared.ignoreSSL)
+                serverCertificateManager.trustedCertificates = trustedCertificate
+                serverCertificateManager.saveTrustedCertificates()
+                NetworkConnection.shared.serverCertificateManager = serverCertificateManager
+            }
 
-        if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {
-            ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds
+            if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {
+                ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds
+            }
+
+            ObservableOpenHABDataObject.shared.haveReceivedAppContext = true
         }
+    }
+
+    func requestApplicationContext() {
+        WCSession
+            .default
+            .sendMessage(["request": "Preferences"],
+                         replyHandler: { (response) in
+                             let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
+                             os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
+
+                             DispatchQueue.main.async { () -> Void in
+                                 AppMessageService.singleton.updateValuesFromApplicationContext(response as [String: AnyObject])
+                             }
+                         },
+                         errorHandler: { (error) in
+                             os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
+
+            })
     }
 
     @available(watchOSApplicationExtension 2.2, *)

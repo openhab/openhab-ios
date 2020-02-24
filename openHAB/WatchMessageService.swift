@@ -28,16 +28,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
 
         if message["request"] != nil {
-            let applicationDict: [String: Any] =
-                ["localUrl": Preferences.localUrl,
-                 "remoteUrl": Preferences.remoteUrl,
-                 "username": Preferences.username,
-                 "password": Preferences.password,
-                 "alwaysSendCreds": Preferences.alwaysSendCreds,
-                 "defaultSitemap": Preferences.defaultSitemap,
-                 "ignoreSSL": Preferences.ignoreSSL,
-                 "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates]
-
+            let applicationDict = buildApplicationDict()
             replyHandler(applicationDict)
         }
     }
@@ -58,15 +49,21 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         os_log("sessionDidDeactivate", log: .watch, type: .info)
     }
 
-    // swiftlint:disable:next function_parameter_count
-    func sendToWatch(_ localUrl: String,
-                     remoteUrl: String,
-                     username: String,
-                     password: String,
-                     alwaysSendCreds: Bool,
-                     sitemapName: String,
-                     ignoreSSL: Bool,
-                     trustedCertficates: [String: Any] = [:]) {
+    func buildApplicationDict() -> [String: Any] {
+        let applicationDict: [String: Any] =
+            ["localUrl": Preferences.localUrl,
+             "remoteUrl": Preferences.remoteUrl,
+             "username": Preferences.username,
+             "password": Preferences.password,
+             "alwaysSendCreds": Preferences.alwaysSendCreds,
+             "defaultSitemap": "watch",
+             "ignoreSSL": Preferences.ignoreSSL,
+             "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates]
+
+        return applicationDict
+    }
+
+    func sendToWatch() {
         let currentTime = CFAbsoluteTimeGetCurrent()
 
         // if less than half a second has passed, bail out
@@ -74,16 +71,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
             return
         }
 
-        let applicationDict: [String: Any] =
-            ["localUrl": localUrl,
-             "remoteUrl": remoteUrl,
-             "username": username,
-             "password": password,
-             "alwaysSendCreds": alwaysSendCreds,
-             "sitemapName": sitemapName,
-             "ignoreSSL": ignoreSSL,
-             "trustedCertificates": trustedCertficates]
-
+        let applicationDict = buildApplicationDict()
         sendOrTransmitToWatch(applicationDict)
 
         lastWatchUpdateTime = CFAbsoluteTimeGetCurrent()
