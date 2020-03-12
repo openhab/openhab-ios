@@ -144,6 +144,8 @@ extension ExtensionDelegate: ServerCertificateManagerDelegate {
             self.viewModel?.certificateErrorDescription = "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?"
         }
     }
+
+    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {}
 }
 
 // MARK: - ClientCertificateManagerDelegate

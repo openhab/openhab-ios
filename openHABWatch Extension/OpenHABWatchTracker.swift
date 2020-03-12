@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Alamofire
 import Foundation
 import Network
 import OpenHABCoreWatch
@@ -30,6 +31,7 @@ class OpenHABWatchTracker: NSObject {
     weak var delegate: OpenHABWatchTrackerDelegate?
     var netBrowser: NWBrowser?
     var pathMonitor = NWPathMonitor()
+    var connectivityTask: DataRequest?
 
     override init() {
         super.init()
@@ -72,8 +74,11 @@ class OpenHABWatchTracker: NSObject {
                 if ObservableOpenHABDataObject.shared.localUrl.isEmpty {
                     startDiscovery()
                 } else {
+                    if let connectivityTask = connectivityTask {
+                        connectivityTask.cancel()
+                    }
                     let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                    NetworkConnection.shared.manager.request(request)
+                    connectivityTask = NetworkConnection.shared.manager.request(request)
                         .validate(statusCode: 200 ..< 300)
                         .responseData { response in
                             switch response.result {
@@ -83,7 +88,7 @@ class OpenHABWatchTracker: NSObject {
                                 self.trackedRemoteUrl()
                             }
                         }
-                        .resume()
+                    connectivityTask?.resume()
                 }
             }
         } else {

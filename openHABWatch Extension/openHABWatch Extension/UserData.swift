@@ -71,6 +71,7 @@ final class UserData: ObservableObject {
             // New settings updates from the phone app to start a reconnect
             self.refreshUrl()
         }
+        refreshUrl()
     }
 
     func loadPage(urlString: String,
@@ -146,7 +147,10 @@ final class UserData: ObservableObject {
     }
 
     func refreshUrl() {
-        tracker?.selectUrl()
+        if ObservableOpenHABDataObject.shared.haveReceivedAppContext {
+            showAlert = false
+            tracker?.selectUrl()
+        }
     }
 }
 
@@ -163,7 +167,6 @@ extension UserData: OpenHABWatchTrackerDelegate {
         }
 
         ObservableOpenHABDataObject.shared.openHABRootUrl = urlString
-        NetworkConnection.shared.setRootUrl(urlString)
         loadPage(urlString: urlString,
                  longPolling: false,
                  refresh: true,

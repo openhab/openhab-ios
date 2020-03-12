@@ -102,7 +102,7 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
 
     @UserDefault("haveReceivedAppContext", defaultValue: false)
     var haveReceivedAppContext: Bool {
-        willSet {
+        didSet {
             objectRefreshed.send()
         }
     }

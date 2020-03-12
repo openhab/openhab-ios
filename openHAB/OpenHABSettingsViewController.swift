@@ -208,6 +208,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.realTimeSliders = settingsRealTimeSliders
         Preferences.iconType = settingsIconType.rawValue
 
-        WatchMessageService.singleton.sendToWatch()
+        WatchMessageService.singleton.syncPreferencesToWatch()
     }
 }

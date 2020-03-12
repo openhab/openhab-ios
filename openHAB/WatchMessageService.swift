@@ -19,9 +19,6 @@ import WatchConnectivity
 class WatchMessageService: NSObject, WCSessionDelegate {
     static let singleton = WatchMessageService()
 
-    private var lastWatchUpdateTime: CFAbsoluteTime = 0
-    private var lastWatchComplicationUpdateTime: CFAbsoluteTime = 0
-
     // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         // TODO: Use RemoteUrl, TOO
@@ -63,35 +60,10 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         return applicationDict
     }
 
-    func sendToWatch() {
-        let currentTime = CFAbsoluteTimeGetCurrent()
-
-        // if less than half a second has passed, bail out
-        if lastWatchUpdateTime + 0.5 > currentTime {
-            return
-        }
-
-        let applicationDict = buildApplicationDict()
-        sendOrTransmitToWatch(applicationDict)
-
-        lastWatchUpdateTime = CFAbsoluteTimeGetCurrent()
-    }
-
-    private func sendOrTransmitToWatch(_ message: [String: Any]) {
-        // send message if watch is reachable
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(message, replyHandler: { data in
-                os_log("Sent to watch and received data: %{PUBLIC}@", log: .watch, type: .info, data)
-
-            }, errorHandler: { error in
-                os_log("%{PUBLIC}@", log: .watch, type: .info, error.localizedDescription)
-
-                // transmit message on failure
-                try? WCSession.default.updateApplicationContext(message)
-            })
-        } else {
-            // otherwise, transmit application context
-            try? WCSession.default.updateApplicationContext(message)
+    public func syncPreferencesToWatch() {
+        if WCSession.default.activationState == .activated {
+            let applicationDict = buildApplicationDict()
+            try? WCSession.default.updateApplicationContext(applicationDict)
         }
     }
 }
