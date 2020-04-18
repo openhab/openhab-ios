@@ -5,80 +5,75 @@ PODS:
   - CocoaLumberjack/Core (3.6.1)
   - Crashlytics (3.14.0):
     - Fabric (~> 1.10.2)
-  - DeviceKit (3.0.0)
+  - DeviceKit (3.1.0)
   - DynamicButton (6.2.1)
   - Fabric (1.10.2)
-  - Firebase/Analytics (6.17.0):
+  - Firebase/Analytics (6.22.0):
     - Firebase/Core
-  - Firebase/Core (6.17.0):
+  - Firebase/Core (6.22.0):
     - Firebase/CoreOnly
-    - FirebaseAnalytics (= 6.2.2)
-  - Firebase/CoreOnly (6.17.0):
-    - FirebaseCore (= 6.6.2)
-  - FirebaseAnalytics (6.2.2):
+    - FirebaseAnalytics (= 6.4.1)
+  - Firebase/CoreOnly (6.22.0):
+    - FirebaseCore (= 6.6.6)
+  - FirebaseAnalytics (6.4.1):
     - FirebaseCore (~> 6.6)
-    - FirebaseInstanceID (~> 4.3)
-    - GoogleAppMeasurement (= 6.2.2)
+    - FirebaseInstallations (~> 1.1)
+    - GoogleAppMeasurement (= 6.4.1)
     - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
     - GoogleUtilities/MethodSwizzler (~> 6.0)
     - GoogleUtilities/Network (~> 6.0)
     - "GoogleUtilities/NSData+zlib (~> 6.0)"
     - nanopb (= 0.3.9011)
-  - FirebaseCore (6.6.2):
+  - FirebaseCore (6.6.6):
     - FirebaseCoreDiagnostics (~> 1.2)
     - FirebaseCoreDiagnosticsInterop (~> 1.2)
     - GoogleUtilities/Environment (~> 6.5)
     - GoogleUtilities/Logger (~> 6.5)
-  - FirebaseCoreDiagnostics (1.2.0):
+  - FirebaseCoreDiagnostics (1.2.3):
     - FirebaseCoreDiagnosticsInterop (~> 1.2)
-    - GoogleDataTransportCCTSupport (~> 1.3)
+    - GoogleDataTransportCCTSupport (~> 2.0)
     - GoogleUtilities/Environment (~> 6.5)
     - GoogleUtilities/Logger (~> 6.5)
     - nanopb (~> 0.3.901)
   - FirebaseCoreDiagnosticsInterop (1.2.0)
-  - FirebaseInstallations (1.1.0):
+  - FirebaseInstallations (1.1.1):
     - FirebaseCore (~> 6.6)
     - GoogleUtilities/UserDefaults (~> 6.5)
     - PromisesObjC (~> 1.2)
-  - FirebaseInstanceID (4.3.1):
-    - FirebaseCore (~> 6.6)
-    - FirebaseInstallations (~> 1.0)
-    - GoogleUtilities/Environment (~> 6.5)
-    - GoogleUtilities/UserDefaults (~> 6.5)
   - FlexColorPicker (1.3.1)
-  - Fuzi (3.1.1)
-  - GoogleAppMeasurement (6.2.2):
+  - Fuzi (3.1.2)
+  - GoogleAppMeasurement (6.4.1):
     - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
     - GoogleUtilities/MethodSwizzler (~> 6.0)
     - GoogleUtilities/Network (~> 6.0)
     - "GoogleUtilities/NSData+zlib (~> 6.0)"
     - nanopb (= 0.3.9011)
-  - GoogleDataTransport (4.0.0)
-  - GoogleDataTransportCCTSupport (1.4.0):
-    - GoogleDataTransport (~> 4.0)
+  - GoogleDataTransport (5.1.1)
+  - GoogleDataTransportCCTSupport (2.0.3):
+    - GoogleDataTransport (~> 5.1)
     - nanopb (~> 0.3.901)
-  - GoogleUtilities/AppDelegateSwizzler (6.5.1):
+  - GoogleUtilities/AppDelegateSwizzler (6.5.2):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (6.5.1)
-  - GoogleUtilities/Logger (6.5.1):
+  - GoogleUtilities/Environment (6.5.2)
+  - GoogleUtilities/Logger (6.5.2):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (6.5.1):
+  - GoogleUtilities/MethodSwizzler (6.5.2):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (6.5.1):
+  - GoogleUtilities/Network (6.5.2):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (6.5.1)"
-  - GoogleUtilities/Reachability (6.5.1):
+  - "GoogleUtilities/NSData+zlib (6.5.2)"
+  - GoogleUtilities/Reachability (6.5.2):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (6.5.1):
+  - GoogleUtilities/UserDefaults (6.5.2):
     - GoogleUtilities/Logger
-  - Kingfisher (5.13.1):
-    - Kingfisher/Core (= 5.13.1)
-  - Kingfisher/Core (5.13.1)
-  - Kingfisher/SwiftUI (5.13.1):
+  - Kingfisher (5.13.4):
+    - Kingfisher/Core (= 5.13.4)
+  - Kingfisher/Core (5.13.4)
+  - Kingfisher/SwiftUI (5.13.4):
     - Kingfisher/Core
   - nanopb (0.3.9011):
     - nanopb/decode (= 0.3.9011)
@@ -86,11 +81,11 @@ PODS:
   - nanopb/decode (0.3.9011)
   - nanopb/encode (0.3.9011)
   - PromisesObjC (1.2.8)
-  - SideMenu (6.4.7)
+  - SideMenu (6.4.8)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
-  - SwiftFormat/CLI (0.44.3)
-  - SwiftLint (0.39.1)
+  - SwiftFormat/CLI (0.44.7)
+  - SwiftLint (0.39.2)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
   - SwiftMessages/App (7.0.1)
@@ -126,7 +121,6 @@ SPEC REPOS:
     - FirebaseCoreDiagnostics
     - FirebaseCoreDiagnosticsInterop
     - FirebaseInstallations
-    - FirebaseInstanceID
     - FlexColorPicker
     - Fuzi
     - GoogleAppMeasurement
@@ -146,31 +140,30 @@ SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   CocoaLumberjack: b17ae15142558d08bbacf69775fa10c4abbebcc9
   Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
-  DeviceKit: fc3c2bd361a8d68d8a91eb715e453aede57317e5
+  DeviceKit: b9a28acbad6b8dbccf456814b6f95bef17a6654f
   DynamicButton: 95f30460793bd3510a5c213ac1b810a5e3d54b6a
   Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
-  Firebase: 2672e5636b42f977177716317e68346ae5e9de25
-  FirebaseAnalytics: cf95d3aab897612783020fbd98401d5366f135ee
-  FirebaseCore: a1dd9dd6355a8356dd30a8f076839e242285a81c
-  FirebaseCoreDiagnostics: 5e78803ab276bc5b50340e3c539c06c3de35c649
+  Firebase: 32f9520684e87c7af3f0704f7f88042626d6b536
+  FirebaseAnalytics: 83f822fd0d33a46f49f89b8c3ab16ab4d89df08a
+  FirebaseCore: 9aca0f1fffb405176ba15311a5621fcde4106fcf
+  FirebaseCoreDiagnostics: 13a6564cd6d5375066bbc8940cc1753af24497f3
   FirebaseCoreDiagnosticsInterop: 296e2c5f5314500a850ad0b83e9e7c10b011a850
-  FirebaseInstallations: 575cd32f2aec0feeb0e44f5d0110a09e5e60b47b
-  FirebaseInstanceID: 031d7d0c8e7b5c030bbeb4d2a690550375e83fec
+  FirebaseInstallations: acb3216eb9784d3b1d2d2d635ff74fa892cc0c44
   FlexColorPicker: e627af3d744786378ae65e53214528cc31105921
-  Fuzi: bcc5694488dd6e672e126cbf3c5471d7a79506d1
-  GoogleAppMeasurement: d0560d915abf15e692e8538ba1d58442217b6aff
-  GoogleDataTransport: 47fe3b8e1673e5187dfd615656a3c5034f150d69
-  GoogleDataTransportCCTSupport: 36f69887fd212db6d7ef4dd45ba44523717a434e
-  GoogleUtilities: 06eb53bb579efe7099152735900dd04bf09e7275
-  Kingfisher: f33a848445e33c543620812158dc5d47f6bf90df
+  Fuzi: dba7215e52fb39dd7b1a62f69ede1e30edff0ae1
+  GoogleAppMeasurement: e49be3954045b17d046f271b9cc1ec052bad9702
+  GoogleDataTransport: 6ffa4dd0b6d547f8d27b91bd92fa9e197a3f5f1f
+  GoogleDataTransportCCTSupport: 2d7e609f8c5af1a33d7d59053e6f8cba59365df5
+  GoogleUtilities: ad0f3b691c67909d03a3327cc205222ab8f42e0e
+  Kingfisher: d2279a7abece3c7f25a80cd2b7f363ca5cf3f44c
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
-  SideMenu: 928a015669c3afc201e1fe3a87f1b0bc8993a664
+  SideMenu: 4a891be552d30bb6fa87ad404d62e485f8450c34
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftFormat: a18012d0de9f988d065f52bfe43c934b0c15b8c3
-  SwiftLint: 55e96a4a4d537d4a3156859fc1c54bd24851a046
+  SwiftFormat: fd97e27b8de5a46c9d1988bf1db1dc92e79f86a3
+  SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
 PODFILE CHECKSUM: ba32ee2afd2062b9d8b4772a91878dd85b5a8245
 
-COCOAPODS: 1.9.0.beta.3
+COCOAPODS: 1.9.1
