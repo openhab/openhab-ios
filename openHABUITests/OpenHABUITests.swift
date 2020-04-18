@@ -34,7 +34,7 @@ class OpenHABUITests: XCTestCase {
 
         widgetTable.staticTexts["Widget Overview"].tap()
         sleep(3)
-        widgetTable/*@START_MENU_TOKEN@*/ .staticTexts["BINARY WIDGETS"]/*[[".cells.staticTexts[\"BINARY WIDGETS\"]",".staticTexts[\"BINARY WIDGETS\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.swipeDown()
+        widgetTable/*@START_MENU_TOKEN@*/ .staticTexts["BINARY WIDGETS"]/*[[".cells.staticTexts[\"BINARY WIDGETS\"]",".staticTexts[\"BINARY WIDGETS\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .swipeDown()
         sleep(6)
         snapshot("1_WidgetOverview")
         app.navigationBars.buttons.element(boundBy: 0).tap()
