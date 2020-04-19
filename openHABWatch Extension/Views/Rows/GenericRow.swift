@@ -36,7 +36,7 @@ extension ObservableOpenHABWidget {
             os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
             return AnyView(
                 NavigationLink(destination:
-                    ContentView(viewModel: UserData(urlString: settings.openHABRootUrl, sitemapName: settings.sitemapName), settings:
+                    ContentView(viewModel: UserData(sitemapName: settings.sitemapName), settings:
                         settings, title: title)
 //                    ContentView(viewModel: UserData(url: URL(string: pageUrl)),
 //                                settings: settings)

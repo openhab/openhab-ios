@@ -169,8 +169,8 @@ class OpenHABWatchTracker: NSObject {
                             components.scheme = "https"
                             components.port = Int(port.rawValue)
                             switch host {
-                            case let .name(name):
-                                components.host = name.0
+                            case let .name(name, _):
+                                components.host = name
                             case let .ipv4(ipv4):
                                 components.host = self.getStringIp(addressFamily: AF_INET, fromAddressData: ipv4.rawValue)
                             case let .ipv6(ipv6):
