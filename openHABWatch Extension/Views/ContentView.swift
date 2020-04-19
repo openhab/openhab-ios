@@ -30,14 +30,25 @@ struct ContentView: View {
         .alert(isPresented: $viewModel.showAlert) {
             Alert(title: Text("Error"),
                   message: Text(viewModel.errorDescription),
-                  dismissButton: .default(Text("Retry in 30s")) {
-                      DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
-                          self.viewModel.loadPage(urlString: self.settings.openHABRootUrl,
-                                                  longPolling: false,
-                                                  refresh: true)
+                  dismissButton: .default(Text("Retry")) {
+                      DispatchQueue.main.async {
+                          self.viewModel.refreshUrl()
                           os_log("reload after alert", log: .default, type: .info)
                       }
                   })
+        }
+        .actionSheet(isPresented: $viewModel.showCertificateAlert) {
+            ActionSheet(title: Text("Warning"),
+                        message: Text(viewModel.certificateErrorDescription),
+                        buttons: [.default(Text("Abort")) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
+                        },
+                                  .default(Text("Once")) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
+                        },
+                                  .default(Text("Always")) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
+                                }])
         }
     }
 
@@ -80,7 +91,7 @@ struct ContentView_Previews: PreviewProvider {
         Group {
             ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 4 - 44mm")
-            ContentView(viewModel: UserData(urlString: PreviewConstants.remoteURLString))
+            ContentView(viewModel: UserData())
                 .previewDevice("Apple Watch Series 2 - 38mm")
         }
     }

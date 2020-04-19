@@ -713,7 +713,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             openHABRootUrl = ""
         }
         appData?.openHABRootUrl = openHABRootUrl
-        NetworkConnection.shared.setRootUrl(openHABRootUrl)
 
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
@@ -831,6 +830,11 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
             alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
             self.present(alertView, animated: true) {}
         }
+    }
+
+    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {
+        // User's decision about trusting server certificates has changed.  Send updates to the paired watch.
+        WatchMessageService.singleton.syncPreferencesToWatch()
     }
 }
 

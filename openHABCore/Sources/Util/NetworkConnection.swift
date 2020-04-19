@@ -26,7 +26,9 @@ public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, 
     if challenge.previousFailureCount > 0 {
         return (.cancelAuthenticationChallenge, credential)
     } else if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-        if challenge.protectionSpace.host == NetworkConnection.shared.rootUrl?.host {
+        let localUrl = URL(string: Preferences.localUrl)
+        let remoteUrl = URL(string: Preferences.remoteUrl)
+        if challenge.protectionSpace.host == localUrl?.host || challenge.protectionSpace.host == remoteUrl?.host {
             credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
             disposition = .useCredential
             os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
@@ -205,9 +207,5 @@ public class NetworkConnection {
     public func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
         serverCertificateManager.delegate = serverDelegate
         clientCertificateManager.delegate = clientDelegate
-    }
-
-    public func setRootUrl(_ url: String?) {
-        rootUrl = URL(string: url ?? "")
     }
 }

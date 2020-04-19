@@ -18,8 +18,14 @@ import WatchKit
 
 class HostingController: WKHostingController<ContentView> {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    let userData = UserData(sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
+
     override var body: ContentView {
-        ContentView(viewModel: UserData(urlString: settings.openHABRootUrl, sitemapName: settings.sitemapName), settings:
-            settings)
+        ContentView(viewModel: userData, settings: settings)
+    }
+
+    override init() {
+        super.init()
+        ExtensionDelegate.extensionDelegate.viewModel = userData
     }
 }
