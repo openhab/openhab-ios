@@ -29,6 +29,8 @@ final class UserData: ObservableObject {
     @Published var widgets: [ObservableOpenHABWidget] = []
     @Published var showAlert = false
     @Published var errorDescription = ""
+    @Published var showCertificateAlert = false
+    @Published var certificateErrorDescription = ""
 
     let decoder = JSONDecoder()
 
@@ -36,6 +38,8 @@ final class UserData: ObservableObject {
 
     private var commandOperation: Alamofire.Request?
     private var currentPageOperation: Alamofire.Request?
+    private var tracker: OpenHABWatchTracker?
+    private var dataObjectCancellable: AnyCancellable?
 
     // Demo
     init() {
@@ -67,11 +71,16 @@ final class UserData: ObservableObject {
                  refresh: refresh)
     }
 
-    init(urlString: String, refresh: Bool = true, sitemapName: String = "watch") {
-        loadPage(urlString: urlString,
-                 longPolling: false,
-                 refresh: refresh,
-                 sitemapName: sitemapName)
+    init(sitemapName: String = "watch") {
+        tracker = OpenHABWatchTracker()
+        tracker?.delegate = self
+        tracker?.start()
+
+        dataObjectCancellable = ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
+            // New settings updates from the phone app to start a reconnect
+            self.refreshUrl()
+        }
+        refreshUrl()
     }
 
     func loadPage(urlString: String,
@@ -195,5 +204,40 @@ final class UserData: ObservableObject {
             commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
             commandOperation?.resume()
         }
+    }
+
+    func refreshUrl() {
+        if ObservableOpenHABDataObject.shared.haveReceivedAppContext {
+            showAlert = false
+            tracker?.selectUrl()
+        }
+    }
+}
+
+extension UserData: OpenHABWatchTrackerDelegate {
+    func openHABTracked(_ openHABUrl: URL?) {
+        guard let urlString = openHABUrl?.absoluteString else { return }
+        os_log("openHABTracked: %{PUBLIC}@", log: .remoteAccess, type: .error, urlString)
+
+        if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
+            AppMessageService.singleton.requestApplicationContext()
+            errorDescription = "Settings not yet received from phone."
+            showAlert = true
+            return
+        }
+
+        ObservableOpenHABDataObject.shared.openHABRootUrl = urlString
+        loadPage(urlString: urlString,
+                 longPolling: false,
+                 refresh: true,
+                 sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
+    }
+
+    func openHABTrackingProgress(_ message: String?) {
+        os_log("openHABTrackingProgress: %{PUBLIC}@", log: .remoteAccess, type: .error, message ?? "")
+    }
+
+    func openHABTrackingError(_ error: Error) {
+        os_log("openHABTrackingError: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
     }
 }

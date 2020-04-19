@@ -29,6 +29,8 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
         }
     }
 
+    var viewModel: UserData?
+
     override init() {
         appData = ObservableOpenHABDataObject.shared
         super.init()
@@ -120,10 +122,30 @@ extension ExtensionDelegate: AuthenticationChallengeResponsable {
 
 extension ExtensionDelegate: ServerCertificateManagerDelegate {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {}
+    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
+        guard viewModel != nil else {
+            policy!.evaluateResult = .deny
+            return
+        }
+        DispatchQueue.main.async {
+            self.viewModel?.showCertificateAlert = true
+            self.viewModel?.certificateErrorDescription = "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?"
+        }
+    }
 
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {}
+    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
+        guard viewModel != nil else {
+            policy!.evaluateResult = .deny
+            return
+        }
+        DispatchQueue.main.async {
+            self.viewModel?.showCertificateAlert = true
+            self.viewModel?.certificateErrorDescription = "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?"
+        }
+    }
+
+    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {}
 }
 
 // MARK: - ClientCertificateManagerDelegate

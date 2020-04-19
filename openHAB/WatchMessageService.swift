@@ -19,25 +19,13 @@ import WatchConnectivity
 class WatchMessageService: NSObject, WCSessionDelegate {
     static let singleton = WatchMessageService()
 
-    private var lastWatchUpdateTime: CFAbsoluteTime = 0
-    private var lastWatchComplicationUpdateTime: CFAbsoluteTime = 0
-
     // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         // TODO: Use RemoteUrl, TOO
         os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
 
         if message["request"] != nil {
-            let applicationDict: [String: Any] =
-                ["localUrl": Preferences.localUrl,
-                 "remoteUrl": Preferences.remoteUrl,
-                 "username": Preferences.username,
-                 "password": Preferences.password,
-                 "alwaysSendCreds": Preferences.alwaysSendCreds,
-                 "defaultSitemap": Preferences.defaultSitemap,
-                 "ignoreSSL": Preferences.ignoreSSL,
-                 "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates]
-
+            let applicationDict = buildApplicationDict()
             replyHandler(applicationDict)
         }
     }
@@ -58,52 +46,24 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         os_log("sessionDidDeactivate", log: .watch, type: .info)
     }
 
-    // swiftlint:disable:next function_parameter_count
-    func sendToWatch(_ localUrl: String,
-                     remoteUrl: String,
-                     username: String,
-                     password: String,
-                     alwaysSendCreds: Bool,
-                     sitemapName: String,
-                     ignoreSSL: Bool,
-                     trustedCertficates: [String: Any] = [:]) {
-        let currentTime = CFAbsoluteTimeGetCurrent()
-
-        // if less than half a second has passed, bail out
-        if lastWatchUpdateTime + 0.5 > currentTime {
-            return
-        }
-
+    func buildApplicationDict() -> [String: Any] {
         let applicationDict: [String: Any] =
-            ["localUrl": localUrl,
-             "remoteUrl": remoteUrl,
-             "username": username,
-             "password": password,
-             "alwaysSendCreds": alwaysSendCreds,
-             "sitemapName": sitemapName,
-             "ignoreSSL": ignoreSSL,
-             "trustedCertificates": trustedCertficates]
+            ["localUrl": Preferences.localUrl,
+             "remoteUrl": Preferences.remoteUrl,
+             "username": Preferences.username,
+             "password": Preferences.password,
+             "alwaysSendCreds": Preferences.alwaysSendCreds,
+             "defaultSitemap": "watch",
+             "ignoreSSL": Preferences.ignoreSSL,
+             "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates]
 
-        sendOrTransmitToWatch(applicationDict)
-
-        lastWatchUpdateTime = CFAbsoluteTimeGetCurrent()
+        return applicationDict
     }
 
-    private func sendOrTransmitToWatch(_ message: [String: Any]) {
-        // send message if watch is reachable
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(message, replyHandler: { data in
-                os_log("Sent to watch and received data: %{PUBLIC}@", log: .watch, type: .info, data)
-
-            }, errorHandler: { error in
-                os_log("%{PUBLIC}@", log: .watch, type: .info, error.localizedDescription)
-
-                // transmit message on failure
-                try? WCSession.default.updateApplicationContext(message)
-            })
-        } else {
-            // otherwise, transmit application context
-            try? WCSession.default.updateApplicationContext(message)
+    public func syncPreferencesToWatch() {
+        if WCSession.default.activationState == .activated {
+            let applicationDict = buildApplicationDict()
+            try? WCSession.default.updateApplicationContext(applicationDict)
         }
     }
 }

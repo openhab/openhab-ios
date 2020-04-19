@@ -18,6 +18,8 @@ public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
     func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
+    // notify delegate that the certificagtes that a user is willing to trust has changed
+    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?)
 }
 
 public class ServerCertificateManager {
@@ -30,7 +32,16 @@ public class ServerCertificateManager {
         case permitAlways
     }
 
-    public var evaluateResult: EvaluateResult = .undecided
+    public var evaluateResult: EvaluateResult = .undecided {
+        didSet {
+            if evaluateResult != .undecided {
+                evaluateResultSemaphore.signal()
+            }
+        }
+    }
+
+    var evaluateResultSemaphore = DispatchSemaphore(value: 1)
+
     weak var delegate: ServerCertificateManagerDelegate?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL: Bool = false
@@ -144,9 +155,7 @@ public class ServerCertificateManager {
                 if delegate != nil {
                     self.evaluateResult = .undecided
                     delegate?.evaluateCertificateMismatch(self, summary: certificateSummary as String?, forDomain: domain)
-                    while self.evaluateResult == .undecided {
-                        Thread.sleep(forTimeInterval: 0.1)
-                    }
+                    evaluateResultSemaphore.wait()
                     switch self.evaluateResult {
                     case .deny:
                         // User decided to abort connection
@@ -158,6 +167,7 @@ public class ServerCertificateManager {
                         // User decided to accept invalid certificate and remember decision
                         // Add certificate to storage
                         storeCertificateData(certificateData, forDomain: domain)
+                        delegate?.acceptedServerCertificatesChanged(self)
                         return true
                     case .undecided:
                         // Something went wrong, abort connection
@@ -173,9 +183,7 @@ public class ServerCertificateManager {
             self.evaluateResult = .undecided
             delegate?.evaluateServerTrust(self, summary: certificateSummary as String?, forDomain: domain)
             // Wait until we get response from delegate with user's decision
-            while self.evaluateResult == .undecided {
-                Thread.sleep(forTimeInterval: 0.1)
-            }
+            evaluateResultSemaphore.wait()
             switch self.evaluateResult {
             case .deny:
                 // User decided to abort connection
@@ -187,6 +195,7 @@ public class ServerCertificateManager {
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
                 storeCertificateData(certificateData, forDomain: domain)
+                delegate?.acceptedServerCertificatesChanged(self)
                 return true
             case .undecided:
                 return false
