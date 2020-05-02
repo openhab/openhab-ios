@@ -80,6 +80,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func setupCrashReporting() {
+        guard Preferences.sendCrashReports else {
+            // The user has not opted-in to crash reporting.
+            return
+        }
+
         // init Firebase crash reporting
         FirebaseApp.configure()
     }
