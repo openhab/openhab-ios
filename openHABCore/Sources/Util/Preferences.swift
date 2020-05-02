@@ -92,6 +92,7 @@ public struct Preferences {
     @UserDefault("realTimeSliders", defaultValue: false) static public var realTimeSliders: Bool
     @UserDefault("iconType", defaultValue: 0) static public var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") static public var defaultSitemap: String
+    @UserDefault("sendCrashReports", defaultValue: false) static public var sendCrashReports: Bool
 
     static func readActiveUrl() -> String {
         if Preferences.remoteUrl != "" {
