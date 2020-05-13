@@ -48,8 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
 
-        // init Firebase crash reporting
-        FirebaseApp.configure()
+        setupCrashReporting()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
 
@@ -78,6 +77,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))]
 
         return true
+    }
+
+    private func setupCrashReporting() {
+        guard Preferences.sendCrashReports else {
+            // The user has not opted-in to crash reporting.
+            return
+        }
+
+        // init Firebase crash reporting
+        FirebaseApp.configure()
     }
 
     func activateWatchConnectivity() {

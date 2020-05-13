@@ -1012,8 +1012,43 @@
                                             <segue destination="MPp-H6-Zce" kind="show" identifier="showSelectSitemap" id="z72-H1-TTm"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="5Rk-xB-wOS">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="ONl-L8-q69">
                                         <rect key="frame" x="0.0" y="719.33333206176758" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="ONl-L8-q69" id="AuF-Td-pUt">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Crash reporting" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ai7-cr-dBg">
+                                                    <rect key="frame" x="28" y="11.666666666666664" width="120" height="21"/>
+                                                    <accessibility key="accessibilityConfiguration" label="Disable idle timeout"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qS5-yP-H2i">
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                </switch>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailingMargin" secondItem="qS5-yP-H2i" secondAttribute="trailing" constant="10" id="22p-Ux-EFs"/>
+                                                <constraint firstItem="qS5-yP-H2i" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ai7-cr-dBg" secondAttribute="trailing" constant="15" id="6pF-f8-Wr8"/>
+                                                <constraint firstItem="Ai7-cr-dBg" firstAttribute="leading" secondItem="AuF-Td-pUt" secondAttribute="leadingMargin" constant="12" id="CZz-JU-M5s"/>
+                                                <constraint firstItem="Ai7-cr-dBg" firstAttribute="centerY" secondItem="AuF-Td-pUt" secondAttribute="centerY" id="Phc-el-FpD"/>
+                                                <constraint firstItem="qS5-yP-H2i" firstAttribute="centerY" secondItem="AuF-Td-pUt" secondAttribute="centerY" id="XZh-ll-ey8"/>
+                                                <constraint firstItem="qS5-yP-H2i" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ai7-cr-dBg" secondAttribute="trailing" constant="12" id="fTd-fS-wrC"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <accessibility key="accessibilityConfiguration" label="Disable idle timeout">
+                                            <accessibilityTraits key="traits" notEnabled="YES"/>
+                                        </accessibility>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="selectionStyle">
+                                                <integer key="value" value="0"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="5Rk-xB-wOS">
+                                        <rect key="frame" x="0.0" y="763.33333206176758" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="5Rk-xB-wOS" id="szB-fb-9zj">
                                             <rect key="frame" x="0.0" y="0.0" width="348" height="44"/>
@@ -1054,6 +1089,7 @@
                         <outlet property="passwordTextField" destination="3La-Yc-Vmi" id="pPI-mK-EET"/>
                         <outlet property="realTimeSlidersSwitch" destination="8cM-D4-bge" id="jLY-fF-wlf"/>
                         <outlet property="remoteUrlTextField" destination="ppC-da-pKq" id="FyS-4h-tKY"/>
+                        <outlet property="sendCrashReportsSwitch" destination="qS5-yP-H2i" id="ePn-02-tM8"/>
                         <outlet property="settingsTableView" destination="Gpo-Jj-aMP" id="w5C-jq-jO6"/>
                         <outlet property="usernameTextField" destination="7GO-er-lvr" id="nLw-7S-7YN"/>
                         <segue destination="VQn-En-nLm" kind="unwind" identifier="unwindToRoot" unwindAction="unwindToRootViewController:" id="Ez7-Nt-ZRa"/>
