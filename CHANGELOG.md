@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.3.24, Build 1580410444] - 2020-05-13
+
 ### Changed
 - Make crash reporting opt-in in order to comply with GDPR, refs #546
 
