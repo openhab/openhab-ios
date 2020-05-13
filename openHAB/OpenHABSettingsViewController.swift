@@ -25,6 +25,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsIdleOff = false
     var settingsIconType: IconType = .png
     var settingsRealTimeSliders = false
+    var settingsSendCrashReports = false
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -41,6 +42,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var iconSegmentedControl: UISegmentedControl!
     @IBOutlet private var alwaysSendCredsSwitch: UISwitch!
     @IBOutlet private var realTimeSlidersSwitch: UISwitch!
+    @IBOutlet private var sendCrashReportsSwitch: UISwitch!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -114,9 +116,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                 ret = 6
             }
         case 1:
-            ret = 9
+            ret = 10
         default:
-            ret = 9
+            ret = 10
         }
         return ret
     }
@@ -164,6 +166,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         demomodeSwitch?.isOn = settingsDemomode
         idleOffSwitch?.isOn = settingsIdleOff
         realTimeSlidersSwitch?.isOn = settingsRealTimeSliders
+        sendCrashReportsSwitch?.isOn = settingsSendCrashReports
         iconSegmentedControl?.selectedSegmentIndex = settingsIconType.rawValue
         if settingsDemomode == true {
             disableConnectionSettings()
@@ -182,6 +185,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsDemomode = Preferences.demomode
         settingsIdleOff = Preferences.idleOff
         settingsRealTimeSliders = Preferences.realTimeSliders
+        settingsSendCrashReports = Preferences.sendCrashReports
         let rawSettingsIconType = Preferences.iconType
         settingsIconType = IconType(rawValue: rawSettingsIconType) ?? .png
     }
@@ -197,6 +201,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsDemomode = demomodeSwitch?.isOn ?? false
         settingsIdleOff = idleOffSwitch?.isOn ?? false
         settingsRealTimeSliders = realTimeSlidersSwitch?.isOn ?? false
+        settingsSendCrashReports = sendCrashReportsSwitch?.isOn ?? false
         settingsIconType = IconType(rawValue: iconSegmentedControl.selectedSegmentIndex) ?? .png
     }
 
@@ -211,6 +216,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.idleOff = settingsIdleOff
         Preferences.realTimeSliders = settingsRealTimeSliders
         Preferences.iconType = settingsIconType.rawValue
+        Preferences.sendCrashReports = settingsSendCrashReports
 
         WatchMessageService.singleton.syncPreferencesToWatch()
     }
