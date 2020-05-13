@@ -78,6 +78,7 @@ final class UserData: ObservableObject {
 
         dataObjectCancellable = ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
             // New settings updates from the phone app to start a reconnect
+            os_log("Settings update received, starting reconnect", log: .remoteAccess, type: .info)
             self.refreshUrl()
         }
         refreshUrl()

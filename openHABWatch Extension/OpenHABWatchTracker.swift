@@ -33,6 +33,8 @@ class OpenHABWatchTracker: NSObject {
     var pathMonitor = NWPathMonitor()
     var connectivityTask: DataRequest?
 
+    let backgroundQueue = DispatchQueue.global(qos: .background)
+
     override init() {
         super.init()
     }
@@ -55,7 +57,7 @@ class OpenHABWatchTracker: NSObject {
                 }
             }
         }
-        pathMonitor.start(queue: .main)
+        pathMonitor.start(queue: backgroundQueue)
 
         selectUrl()
     }
