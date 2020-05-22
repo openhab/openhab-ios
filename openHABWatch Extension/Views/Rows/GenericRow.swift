@@ -28,6 +28,19 @@ struct GenericRow: View {
     }
 }
 
+// https://medium.com/better-programming/swiftui-navigation-links-and-the-common-pitfalls-faced-505cbfd8029b
+struct LazyView<Content: View>: View {
+    let build: () -> Content
+
+    var body: Content {
+        build()
+    }
+
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+}
+
 extension ObservableOpenHABWidget {
     func makeView(settings: ObservableOpenHABDataObject) -> AnyView {
         if linkedPage != nil {
@@ -36,8 +49,10 @@ extension ObservableOpenHABWidget {
             os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
             return AnyView(
                 NavigationLink(destination:
-                    ContentView(viewModel: UserData(sitemapName: settings.sitemapName), settings:
-                        settings, title: title)
+                    LazyView(//     EmptyView()
+                        // )
+                        ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings:
+                            settings, title: title))
 //                    ContentView(viewModel: UserData(url: URL(string: pageUrl)),
 //                                settings: settings)
                 ) {
@@ -52,7 +67,7 @@ extension ObservableOpenHABWidget {
 
 struct GenericRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[7]
+        let widget = UserData().widgets[6]
         return GenericRow(widget: widget)
     }
 }

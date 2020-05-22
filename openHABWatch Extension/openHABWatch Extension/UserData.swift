@@ -71,6 +71,19 @@ final class UserData: ObservableObject {
                  refresh: refresh)
     }
 
+    init(url: URL?) {
+        tracker = OpenHABWatchTracker()
+        tracker?.delegate = self
+        tracker?.trackedUrl(url)
+
+//        dataObjectCancellable = ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
+//            // New settings updates from the phone app to start a reconnect
+//            os_log("Settings update received, starting reconnect", log: .remoteAccess, type: .info)
+//            self.refreshUrl()
+//        }
+//        refreshUrl()
+    }
+
     init(sitemapName: String = "watch") {
         tracker = OpenHABWatchTracker()
         tracker?.delegate = self

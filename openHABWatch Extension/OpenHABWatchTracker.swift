@@ -62,6 +62,10 @@ class OpenHABWatchTracker: NSObject {
         selectUrl()
     }
 
+    func start(URL: URL?) {
+        trackedUrl(URL)
+    }
+
     func selectUrl() {
         // Check if any network is available
         if isNetworkConnected() {
