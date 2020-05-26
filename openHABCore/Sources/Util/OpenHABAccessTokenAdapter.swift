@@ -20,31 +20,39 @@ public class OpenHABAccessTokenAdapter: RequestAdapter {
         appData = data
     }
 
-    public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
+    // Alamofire 5: new signature of protocol : was public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
+    // new return
+
+    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var urlRequest = urlRequest
 
         let alwaysSendCreds = appData.openHABAlwaysSendCreds
         let user = appData.openHABUsername
-        let password = appData.openHABPassword // else { return urlRequest }
+        let password = appData.openHABPassword
 
         if alwaysSendCreds {
             if !user.isEmpty || !password.isEmpty {
-                if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
-                    urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
-                }
+                urlRequest.headers.add(.authorization(username: user, password: password))
             }
         }
-
-        return urlRequest
+        completion(.success(urlRequest))
     }
 }
 
 extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
-    public func modified(for request: URLRequest) -> URLRequest? {
-        do {
-            return try adapt(request)
-        } catch {
-            return request
+    public func modified(for urlRequest: URLRequest) -> URLRequest? {
+        var urlRequest = urlRequest
+
+        let alwaysSendCreds = appData.openHABAlwaysSendCreds
+        let user = appData.openHABUsername
+        let password = appData.openHABPassword
+
+        if alwaysSendCreds {
+            if !user.isEmpty || !password.isEmpty {
+                urlRequest.headers.add(.authorization(username: user, password: password))
+            }
         }
+
+        return urlRequest
     }
 }

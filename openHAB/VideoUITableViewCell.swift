@@ -160,26 +160,33 @@ class VideoUITableViewCell: GenericUITableViewCell {
 
         let streamImageInitialBytePattern = Data([255, 216])
         var imageData = Data()
-        mjpegRequest = NetworkConnection.shared.manager.request(streamRequest)
+        mjpegRequest = NetworkConnection.shared.manager.streamRequest(streamRequest)
             .validate(statusCode: 200 ..< 300)
-            .stream { [weak self] chunkData in
-                if chunkData.starts(with: streamImageInitialBytePattern) {
-                    if let image = UIImage(data: imageData) {
-                        DispatchQueue.main.async {
-                            if self?.mainImageView?.image == nil {
-                                let aspectRatio = image.size.width / image.size.height
-                                self?.activityIndicator.isHidden = true
-                                self?.updateAspectRatio(forView: self?.mainImageView, aspectRatio: aspectRatio)
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                    self?.didLoad?()
+            .responseStream { [weak self] stream in
+                switch stream.event {
+                case let .stream(result):
+                    switch result {
+                    case let .success(chunkData):
+                        if chunkData.starts(with: streamImageInitialBytePattern) {
+                            if let image = UIImage(data: imageData) {
+                                DispatchQueue.main.async {
+                                    if self?.mainImageView?.image == nil {
+                                        let aspectRatio = image.size.width / image.size.height
+                                        self?.activityIndicator.isHidden = true
+                                        self?.updateAspectRatio(forView: self?.mainImageView, aspectRatio: aspectRatio)
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                            self?.didLoad?()
+                                        }
+                                    }
+                                    self?.mainImageView?.image = image
                                 }
                             }
-                            self?.mainImageView?.image = image
+                            imageData = Data()
                         }
+                        imageData.append(chunkData)
                     }
-                    imageData = Data()
+                case let .complete(completion): print(completion)
                 }
-                imageData.append(chunkData)
             }
         mjpegRequest?.resume()
     }

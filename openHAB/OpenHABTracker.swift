@@ -51,8 +51,10 @@ class OpenHABTracker: NSObject {
 
     func start() {
         // Start NetworkReachabilityManager.Listener
-        oldReachabilityStatus = reach?.networkReachabilityStatus
-        reach?.listener = { [weak self] status in
+
+        oldReachabilityStatus = reach?.status
+
+        reach?.startListening { [weak self] status in
             guard let self = self else { return }
 
             let nStatus = status
@@ -68,9 +70,10 @@ class OpenHABTracker: NSObject {
                 }
             }
         }
-        if !(reach?.startListening() ?? false) {
-            os_log("Starting NetworkReachabilityManager.Listener failed.", log: .remoteAccess, type: .info)
-        }
+
+//        if !(reach?.startListening() ?? false) {
+//            os_log("Starting NetworkReachabilityManager.Listener failed.", log: .remoteAccess, type: .info)
+//        }
 
         // Check if any network is available
         if isNetworkConnected() {

@@ -130,7 +130,7 @@ final class UserData: ObservableObject {
             switch response.result {
             case .success:
                 os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                promise.resolve(with: response.result.value ?? Data())
+                promise.resolve(with: response.value ?? Data())
 
             case let .failure(error):
                 os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
@@ -173,7 +173,7 @@ final class UserData: ObservableObject {
             case .success:
                 os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
 
-                if let data = response.result.value {
+                if let data = response.value {
                     // Newer versions talk JSON!
                     os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
                     do {

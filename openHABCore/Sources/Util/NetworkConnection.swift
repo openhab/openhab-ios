@@ -71,51 +71,60 @@ public class NetworkConnection {
 
     public var clientCertificateManager = ClientCertificateManager()
     public var serverCertificateManager: ServerCertificateManager!
-    public var manager: Alamofire.SessionManager!
+    public var manager: Alamofire.Session!
     public var rootUrl: URL?
 
     init(ignoreSSL: Bool,
-         manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
-                                                  delegate: SessionDelegate()),
-         adapter: RequestAdapter?) {
+         configuration: URLSessionConfiguration = .default,
+         delegate: SessionDelegate = SessionDelegate(),
+         startRequestsImmediately: Bool = false,
+         interceptor: RequestAdapter?) {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
-        self.manager = manager
-        self.manager.startRequestsImmediately = false
-        self.manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
-        self.manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
-        self.manager.adapter = adapter
+        manager = Session(configuration: configuration,
+                          delegate: delegate,
+                          startRequestsImmediately: startRequestsImmediately,
+                          // interceptor: interceptor,
+                          serverTrustManager: serverCertificateManager)
+
+        // startRequestsImmediately : now a parameter in the convenience initializer for Session
+        // self.manager.startRequestsImmediately = false
+
+        // self.manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
+        // self.manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
+        // now a parameter in the convenience initializer
+        // self.manager.adapter = adapter
     }
 
     public class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {
-        shared = NetworkConnection(ignoreSSL: ignoreSSL, adapter: adapter)
+        shared = NetworkConnection(ignoreSSL: ignoreSSL, interceptor: adapter)
     }
 
     public static func register(prefsURL: String,
                                 deviceToken: String,
                                 deviceId: String,
-                                deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                deviceName: String, completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func sitemaps(openHABRootUrl: String,
-                                completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func tracker(openHABRootUrl: String,
-                               completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                               completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func notification(urlString: String,
-                                    completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                    completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
@@ -151,7 +160,7 @@ public class NetworkConnection {
     public static func page(url: URL?,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest? {
         guard let url = url else { return nil }
 
         var pageRequest = URLRequest(url: url)
@@ -182,7 +191,7 @@ public class NetworkConnection {
     public static func page(pageUrl: String,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest? {
         if pageUrl == "" {
             return nil
         }
@@ -193,7 +202,7 @@ public class NetworkConnection {
         return page(url: pageToLoadUrl, longPolling: longPolling, openHABVersion: openHABVersion, completionHandler: completionHandler)
     }
 
-    static func load(from url: URL, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    static func load(from url: URL, completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         var request = URLRequest(url: url)
         request.timeoutInterval = 10.0
 

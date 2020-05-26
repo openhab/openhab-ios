@@ -104,33 +104,34 @@ class OpenHABDrawerTableViewController: UITableViewController {
         os_log("OpenHABDrawerTableViewController viewWillAppear", log: .viewCycle, type: .info)
 
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
-            switch response.result {
-            case .success:
+
+            guard let data = response.value else {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("Sitemap response", log: .viewCycle, type: .info)
-
-                self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
-
-                if self.sitemaps.last?.name == "_default" {
-                    self.sitemaps = Array(self.sitemaps.dropLast())
-                }
-
-                // Sort the sitemaps alphabetically.
-                self.sitemaps.sort { $0.name < $1.name }
+                os_log("%{PUBLIC}@", log: .default, type: .error, response.error?.localizedDescription ?? "")
                 self.drawerItems.removeAll()
                 if self.drawerTableType == .withStandardMenuEntries {
                     self.setStandardDrawerItems()
                 }
                 self.tableView.reloadData()
-            case let .failure(error):
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                self.drawerItems.removeAll()
-                if self.drawerTableType == .withStandardMenuEntries {
-                    self.setStandardDrawerItems()
-                }
-                self.tableView.reloadData()
+                return
             }
+
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            os_log("Sitemap response", log: .viewCycle, type: .info)
+
+            self.sitemaps = deriveSitemaps(data, version: self.appData?.openHABVersion)
+
+            if self.sitemaps.last?.name == "_default" {
+                self.sitemaps = Array(self.sitemaps.dropLast())
+            }
+
+            // Sort the sitemaps alphabetically.
+            self.sitemaps.sort { $0.name < $1.name }
+            self.drawerItems.removeAll()
+            if self.drawerTableType == .withStandardMenuEntries {
+                self.setStandardDrawerItems()
+            }
+            self.tableView.reloadData()
         }
     }
 

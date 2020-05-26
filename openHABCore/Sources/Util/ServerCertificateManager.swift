@@ -22,7 +22,7 @@ public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
     func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?)
 }
 
-public class ServerCertificateManager {
+public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating {
     // Handle the different responses of the user
     // Ideal for transfer to Result type of swift 5.0
     public enum EvaluateResult {
@@ -49,6 +49,7 @@ public class ServerCertificateManager {
 
     // Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool) {
+        super.init(evaluators: [:])
         self.ignoreSSL = ignoreSSL
     }
 
@@ -104,12 +105,13 @@ public class ServerCertificateManager {
     }
 
     func evaluateTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        let serverTrust = challenge.protectionSpace.serverTrust!
-        if evaluateServerTrust(serverTrust, forDomain: challenge.protectionSpace.host) {
-            let credential = URLCredential(trust: serverTrust)
-            return (.useCredential, credential)
+        do {
+            let serverTrust = challenge.protectionSpace.serverTrust!
+            try evaluate(serverTrust, forHost: challenge.protectionSpace.host)
+            return (.useCredential, URLCredential(trust: serverTrust))
+        } catch {
+            return (.cancelAuthenticationChallenge, nil)
         }
-        return (.cancelAuthenticationChallenge, nil)
     }
 
     func wrapperSecTrustEvaluate(serverTrust: SecTrust) -> SecTrustResultType {
@@ -130,14 +132,14 @@ public class ServerCertificateManager {
         }
     }
 
-    func evaluateServerTrust(_ serverTrust: SecTrust, forDomain domain: String) -> Bool {
+    public func evaluate(_ serverTrust: SecTrust, forHost domain: String) throws {
         // Evaluates trust received during SSL negotiation and checks it against known ones,
         // against policy setting to ignore certificate errors and so on.
         let evaluateResult = wrapperSecTrustEvaluate(serverTrust: serverTrust)
 
         if evaluateResult.isAny(of: .unspecified, .proceed) || ignoreSSL {
             // This means system thinks this is a legal/usable certificate, just permit the connection
-            return true
+            return
         }
         let certificate = getLeafCertificate(trust: serverTrust)
         let certificateSummary = SecCertificateCopySubjectSummary(certificate!)
@@ -147,7 +149,7 @@ public class ServerCertificateManager {
         if let previousCertificateData = self.certificateData(forDomain: domain) {
             if CFEqual(previousCertificateData, certificateData) {
                 // If certificate matched one in our store - permit this connection
-                return true
+                return
             } else {
                 // We have a certificate for this domain in our memory of decisions, but the certificate we've got now
                 // differs. We need to warn user about possible MiM attack and wait for users decision.
@@ -159,22 +161,22 @@ public class ServerCertificateManager {
                     switch self.evaluateResult {
                     case .deny:
                         // User decided to abort connection
-                        return false
+                        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
                     case .permitOnce:
                         // User decided to accept invalid certificate once
-                        return true
+                        return
                     case .permitAlways:
                         // User decided to accept invalid certificate and remember decision
                         // Add certificate to storage
                         storeCertificateData(certificateData, forDomain: domain)
                         delegate?.acceptedServerCertificatesChanged(self)
-                        return true
+                        return
                     case .undecided:
                         // Something went wrong, abort connection
-                        return false
+                        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
                     }
                 }
-                return false
+                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
             }
         }
         // Warn user about invalid certificate and wait for user's decision
@@ -187,22 +189,22 @@ public class ServerCertificateManager {
             switch self.evaluateResult {
             case .deny:
                 // User decided to abort connection
-                return false
+                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
             case .permitOnce:
                 // User decided to accept invalid certificate once
-                return true
+                return
             case .permitAlways:
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
                 storeCertificateData(certificateData, forDomain: domain)
                 delegate?.acceptedServerCertificatesChanged(self)
-                return true
+                return
             case .undecided:
-                return false
+                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
             }
         }
         // We have no way of handling it so no access!
-        return false
+        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
     }
 
     func getLeafCertificate(trust: SecTrust?) -> SecCertificate? {
@@ -221,4 +223,33 @@ public class ServerCertificateManager {
             return nil
         }
     }
+
+    public override func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
+        self as ServerTrustEvaluating
+    }
 }
+
+// Example code on ServerTrustManager
+//
+// ```swift
+// final class CustomServerTrustPolicyManager: ServerTrustPolicyManager {
+//    override func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
+//        var policy: ServerTrustPolicy?
+//
+//        // Implement your custom domain matching behavior...
+//
+//        return policy
+//    }
+// }
+// ```
+//
+// should be
+// ```swift
+// public override func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
+//    var evaluator: ServerTrustEvaluating?
+//
+//    // Implement your custom domain matching behavior...
+//
+//    return evaluator
+// }
+// ```

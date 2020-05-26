@@ -5,7 +5,7 @@ install! 'cocoapods', :generate_multiple_pod_projects => true, :incremental_inst
 use_frameworks!
 
 def shared_pods
-    pod 'Alamofire', '~> 4.0'
+    pod 'Alamofire', '~> 5.0'
     pod 'Fuzi', '~> 3.1'
 end
 

@@ -351,12 +351,11 @@ class OpenHABViewController: UIViewController {
             if deviceId != "", deviceToken != "", deviceName != "" {
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
-                    switch response.result {
-                    case .success:
-                        os_log("my.openHAB registration sent", log: .notifications, type: .info)
-                    case let .failure(error):
-                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    guard response.value != nil else {
+                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, response.error?.localizedDescription ?? "", response.response?.statusCode ?? 0)
+                        return
                     }
+                    os_log("my.openHAB registration sent", log: .notifications, type: .info)
                 }
             }
         }
@@ -430,7 +429,7 @@ class OpenHABViewController: UIViewController {
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
                 }
                 var openHABSitemapPage: OpenHABSitemapPage?
-                if let data = response.result.value {
+                if let data = response.value {
                     // If we are talking to openHAB 1.X, talk XML
                     if self.appData?.openHABVersion == 1 {
                         let str = String(decoding: data, as: UTF8.self)
@@ -530,7 +529,7 @@ class OpenHABViewController: UIViewController {
             switch response.result {
             case .success:
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
+                self.sitemaps = deriveSitemaps(response.value, version: self.appData?.openHABVersion)
                 switch self.sitemaps.count {
                 case 2...:
                     if self.defaultSitemap != "" {
@@ -644,14 +643,14 @@ class OpenHABViewController: UIViewController {
         if pageUrl != "" {
             let pageReachability = NetworkReachabilityManager(host: pageUrl)
             if !pageNetworkStatusAvailable {
-                pageNetworkStatus = pageReachability?.networkReachabilityStatus
+                pageNetworkStatus = pageReachability?.status
                 pageNetworkStatusAvailable = true
                 return false
             } else {
-                if pageNetworkStatus == pageReachability?.networkReachabilityStatus {
+                if pageNetworkStatus == pageReachability?.status {
                     return false
                 } else {
-                    pageNetworkStatus = pageReachability?.networkReachabilityStatus
+                    pageNetworkStatus = pageReachability?.status
                     return true
                 }
             }
