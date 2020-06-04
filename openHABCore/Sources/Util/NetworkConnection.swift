@@ -14,10 +14,6 @@ import os.log
 import UIKit
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
-// Transition from AFNetworking to Alamofire 5.0
-// SessionManager --> Session
-// serverTrustPolicyManager --> serverTrustManager
-// ServerTrustPolicyManager --> ServerTrustManager
 public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
@@ -84,16 +80,7 @@ public class NetworkConnection {
         manager = Session(configuration: configuration,
                           delegate: delegate,
                           startRequestsImmediately: startRequestsImmediately,
-                          // interceptor: interceptor,
                           serverTrustManager: serverCertificateManager)
-
-        // startRequestsImmediately : now a parameter in the convenience initializer for Session
-        // self.manager.startRequestsImmediately = false
-
-        // self.manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
-        // self.manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
-        // now a parameter in the convenience initializer
-        // self.manager.adapter = adapter
     }
 
     public class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {

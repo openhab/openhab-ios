@@ -351,11 +351,12 @@ class OpenHABViewController: UIViewController {
             if deviceId != "", deviceToken != "", deviceName != "" {
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
-                    guard response.value != nil else {
-                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, response.error?.localizedDescription ?? "", response.response?.statusCode ?? 0)
-                        return
+                    switch response.result {
+                    case .success:
+                        os_log("my.openHAB registration sent", log: .notifications, type: .info)
+                    case let .failure(error):
+                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     }
-                    os_log("my.openHAB registration sent", log: .notifications, type: .info)
                 }
             }
         }
@@ -420,7 +421,7 @@ class OpenHABViewController: UIViewController {
             guard let self = self else { return }
 
             switch response.result {
-            case .success:
+            case let .success(data):
                 os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
                 let headers = response.response?.allHeaderFields
 
@@ -429,32 +430,30 @@ class OpenHABViewController: UIViewController {
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
                 }
                 var openHABSitemapPage: OpenHABSitemapPage?
-                if let data = response.value {
-                    // If we are talking to openHAB 1.X, talk XML
-                    if self.appData?.openHABVersion == 1 {
-                        let str = String(decoding: data, as: UTF8.self)
-                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+                // If we are talking to openHAB 1.X, talk XML
+                if self.appData?.openHABVersion == 1 {
+                    let str = String(decoding: data, as: UTF8.self)
+                    os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
-                        guard let doc = try? XMLDocument(data: data) else { return }
-                        if let rootElement = doc.root, let name = rootElement.tag {
-                            os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                            if name == "page" {
-                                openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
-                            }
+                    guard let doc = try? XMLDocument(data: data) else { return }
+                    if let rootElement = doc.root, let name = rootElement.tag {
+                        os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                        if name == "page" {
+                            openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                         }
-                    } else {
-                        // Newer versions talk JSON!
-                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                        do {
-                            // Self-executing closure
-                            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                            openHABSitemapPage = try {
-                                let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                                return sitemapPageCodingData.openHABSitemapPage
-                            }()
-                        } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
-                        }
+                    }
+                } else {
+                    // Newer versions talk JSON!
+                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                    do {
+                        // Self-executing closure
+                        // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                        openHABSitemapPage = try {
+                            let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
+                            return sitemapPageCodingData.openHABSitemapPage
+                        }()
+                    } catch {
+                        os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                     }
                 }
                 self.currentPage = openHABSitemapPage

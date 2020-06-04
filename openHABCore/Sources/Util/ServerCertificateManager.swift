@@ -228,28 +228,3 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         self as ServerTrustEvaluating
     }
 }
-
-// Example code on ServerTrustManager
-//
-// ```swift
-// final class CustomServerTrustPolicyManager: ServerTrustPolicyManager {
-//    override func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
-//        var policy: ServerTrustPolicy?
-//
-//        // Implement your custom domain matching behavior...
-//
-//        return policy
-//    }
-// }
-// ```
-//
-// should be
-// ```swift
-// public override func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
-//    var evaluator: ServerTrustEvaluating?
-//
-//    // Implement your custom domain matching behavior...
-//
-//    return evaluator
-// }
-// ```

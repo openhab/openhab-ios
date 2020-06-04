@@ -20,9 +20,6 @@ public class OpenHABAccessTokenAdapter: RequestAdapter {
         appData = data
     }
 
-    // Alamofire 5: new signature of protocol : was public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-    // new return
-
     public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var urlRequest = urlRequest
 
@@ -41,17 +38,20 @@ public class OpenHABAccessTokenAdapter: RequestAdapter {
 
 extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
     public func modified(for urlRequest: URLRequest) -> URLRequest? {
-        var urlRequest = urlRequest
+        guard appData.openHABAlwaysSendCreds else {
+            // The user did not choose for the credentials to be sent with every request.
+            return urlRequest
+        }
 
-        let alwaysSendCreds = appData.openHABAlwaysSendCreds
         let user = appData.openHABUsername
         let password = appData.openHABPassword
-
-        if alwaysSendCreds {
-            if !user.isEmpty || !password.isEmpty {
-                urlRequest.headers.add(.authorization(username: user, password: password))
-            }
+        guard !user.isEmpty, !password.isEmpty else {
+            // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
+            return urlRequest
         }
+
+        var urlRequest = urlRequest
+        urlRequest.headers.add(.authorization(username: user, password: password))
 
         return urlRequest
     }

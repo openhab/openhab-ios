@@ -185,7 +185,8 @@ class VideoUITableViewCell: GenericUITableViewCell {
                         }
                         imageData.append(chunkData)
                     }
-                case let .complete(completion): print(completion)
+                case let .complete(completion):
+                    os_log("%{PUBLIC}@", completion as! CVarArg)
                 }
             }
         mjpegRequest?.resume()
