@@ -8,23 +8,23 @@ PODS:
   - DeviceKit (3.2.0)
   - DynamicButton (6.2.1)
   - Fabric (1.10.2)
-  - Firebase/Analytics (6.25.0):
+  - Firebase/Analytics (6.26.0):
     - Firebase/Core
-  - Firebase/Core (6.25.0):
+  - Firebase/Core (6.26.0):
     - Firebase/CoreOnly
-    - FirebaseAnalytics (= 6.5.1)
-  - Firebase/CoreOnly (6.25.0):
-    - FirebaseCore (= 6.7.1)
-  - FirebaseAnalytics (6.5.1):
+    - FirebaseAnalytics (= 6.6.0)
+  - Firebase/CoreOnly (6.26.0):
+    - FirebaseCore (= 6.7.2)
+  - FirebaseAnalytics (6.6.0):
     - FirebaseCore (~> 6.7)
-    - FirebaseInstallations (~> 1.2)
-    - GoogleAppMeasurement (= 6.5.1)
+    - FirebaseInstallations (~> 1.3)
+    - GoogleAppMeasurement (= 6.6.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
     - GoogleUtilities/MethodSwizzler (~> 6.0)
     - GoogleUtilities/Network (~> 6.0)
     - "GoogleUtilities/NSData+zlib (~> 6.0)"
     - nanopb (~> 1.30905.0)
-  - FirebaseCore (6.7.1):
+  - FirebaseCore (6.7.2):
     - FirebaseCoreDiagnostics (~> 1.3)
     - FirebaseCoreDiagnosticsInterop (~> 1.2)
     - GoogleUtilities/Environment (~> 6.5)
@@ -36,20 +36,20 @@ PODS:
     - GoogleUtilities/Logger (~> 6.5)
     - nanopb (~> 1.30905.0)
   - FirebaseCoreDiagnosticsInterop (1.2.0)
-  - FirebaseInstallations (1.2.0):
+  - FirebaseInstallations (1.3.0):
     - FirebaseCore (~> 6.6)
     - GoogleUtilities/Environment (~> 6.6)
     - GoogleUtilities/UserDefaults (~> 6.6)
     - PromisesObjC (~> 1.2)
   - FlexColorPicker (1.4.2)
   - Fuzi (3.1.2)
-  - GoogleAppMeasurement (6.5.1):
+  - GoogleAppMeasurement (6.6.0):
     - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
     - GoogleUtilities/MethodSwizzler (~> 6.0)
     - GoogleUtilities/Network (~> 6.0)
     - "GoogleUtilities/NSData+zlib (~> 6.0)"
     - nanopb (~> 1.30905.0)
-  - GoogleDataTransport (6.1.1)
+  - GoogleDataTransport (6.2.1)
   - GoogleDataTransportCCTSupport (3.1.0):
     - GoogleDataTransport (~> 6.1)
     - nanopb (~> 1.30905.0)
@@ -86,7 +86,7 @@ PODS:
   - SideMenu (6.4.8)
   - SVGKit (2.1.1):
     - CocoaLumberjack (~> 3.0)
-  - SwiftFormat/CLI (0.44.11)
+  - SwiftFormat/CLI (0.44.13)
   - SwiftLint (0.39.2)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
@@ -145,16 +145,16 @@ SPEC CHECKSUMS:
   DeviceKit: d081659419cce07c0b5239dbc9fb39ed7413c7fe
   DynamicButton: 95f30460793bd3510a5c213ac1b810a5e3d54b6a
   Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
-  Firebase: 5719b4f965f76643241a1bb8244483ff6117db39
-  FirebaseAnalytics: 93565f3f0f0f50a5d8770850bfe6a82eaba5db27
-  FirebaseCore: 6023faeada5afa95a349fccafb40900e32e9ac42
+  Firebase: 7cf5f9c67f03cb3b606d1d6535286e1080e57eb6
+  FirebaseAnalytics: 96634d356482d4f3af8fe459a0ebf19a99c71b75
+  FirebaseCore: f42e5e5f382cdcf6b617ed737bf6c871a6947b17
   FirebaseCoreDiagnostics: 4a773a47bd83bbd5a9b1ccf1ce7caa8b2d535e67
   FirebaseCoreDiagnosticsInterop: 296e2c5f5314500a850ad0b83e9e7c10b011a850
-  FirebaseInstallations: 2119fb3e46b0a88bfdbf12562f855ee3252462fa
+  FirebaseInstallations: 6f5f680e65dc374397a483c32d1799ba822a395b
   FlexColorPicker: d7ed5cfd8ceb936f2930e4e30629f9448967a5f8
   Fuzi: dba7215e52fb39dd7b1a62f69ede1e30edff0ae1
-  GoogleAppMeasurement: 137afe68bfa406c3f4221b9395253d9e5d4654cf
-  GoogleDataTransport: ad884314b81cdb808fb1d23787b367ff8da4e28a
+  GoogleAppMeasurement: 67458367830514fb20fd9e233496f1eef9d90185
+  GoogleDataTransport: 9a8a16f79feffc7f42096743de2a7c4815e84020
   GoogleDataTransportCCTSupport: d70a561f7d236af529fee598835caad5e25f6d3d
   GoogleUtilities: 39530bc0ad980530298e9c4af8549e991fd033b1
   Kingfisher: 7b64389a43139c903ec434788344c288217c792d
@@ -162,7 +162,7 @@ SPEC CHECKSUMS:
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
   SideMenu: 4a891be552d30bb6fa87ad404d62e485f8450c34
   SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftFormat: bb8ccdfcc6d0eb1f061e32d246d3cff12a9b888c
+  SwiftFormat: 87e745cb2f6509894a44ac4f311a8722a9ebcb8b
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
