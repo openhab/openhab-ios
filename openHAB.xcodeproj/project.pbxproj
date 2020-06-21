@@ -129,6 +129,7 @@
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514E2305CDE3003BCB31 /* XMLData.swift */; };
+		DAED69D1249F4029007E0046 /* SVGProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED69D0249F4029007E0046 /* SVGProcessor.swift */; };
 		DAF4578223D630C70018B495 /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578123D630C70018B495 /* IconView.swift */; };
 		DAF4578523D7807A0018B495 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B610B2348D2F9009112D5 /* Color+Extension.swift */; };
 		DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578623D798A50018B495 /* TextLabelView.swift */; };
@@ -432,6 +433,7 @@
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DAED514E2305CDE3003BCB31 /* XMLData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLData.swift; sourceTree = "<group>"; };
+		DAED69D0249F4029007E0046 /* SVGProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGProcessor.swift; sourceTree = "<group>"; };
 		DAF4578123D630C70018B495 /* IconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconView.swift; sourceTree = "<group>"; };
 		DAF4578323D780730018B495 /* UIColorExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		DAF4578623D798A50018B495 /* TextLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLabelView.swift; sourceTree = "<group>"; };
@@ -933,6 +935,7 @@
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 				DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */,
 				DA21EAE12339621C001AB415 /* Throttler.swift */,
+				DAED69D0249F4029007E0046 /* SVGProcessor.swift */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -1732,6 +1735,7 @@
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
 				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
+				DAED69D1249F4029007E0046 /* SVGProcessor.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
