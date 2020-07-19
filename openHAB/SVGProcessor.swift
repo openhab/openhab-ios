@@ -11,9 +11,9 @@
 
 import Foundation
 import Kingfisher
-import PocketSVG
+// import Macaw
 
-struct SVGPocketProcessor: ImageProcessor {
+struct SVGMacawProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
     let identifier = "svgprocessor"
@@ -28,15 +28,18 @@ struct SVGPocketProcessor: ImageProcessor {
         case let .image(image):
             return image
         case let .data(data):
-            if let svgString = String(data: data, encoding: .utf8) {
-                let paths = SVGBezierPath.paths(fromSVGString: svgString)
-                let layer = SVGLayer()
-                layer.paths = paths
-                let frame = CGRect(x: 0, y: 0, width: size.width, height: size.height)
-                layer.frame = frame
-                let img = snapshotImage(for: layer)
-                return img
-            }
+//            if let svgString = String(data: data, encoding: .utf8) {
+//                UIImageView(i)
+//                let node = try! SVGParser.parse(text: svgString)
+//
+//                let paths = SVGBezierPath.paths(fromSVGString: svgString)
+//                let layer = SVGLayer()
+//                layer.paths = paths
+//                let frame = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+//                layer.frame = frame
+//                let img = snapshotImage(for: layer)
+//                return img
+//            }
             return nil
         }
     }

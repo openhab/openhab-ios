@@ -79,12 +79,11 @@ PODS:
     - nanopb/encode (= 1.30905.0)
   - nanopb/decode (1.30905.0)
   - nanopb/encode (1.30905.0)
-  - PocketSVG (2.5.0)
   - PromisesObjC (1.2.9)
   - SideMenu (6.4.8)
-  - SVGKit (2.1.1):
+  - SVGKit (2.1.0):
     - CocoaLumberjack (~> 3.0)
-  - SwiftFormat/CLI (0.44.13)
+  - SwiftFormat/CLI (0.44.14)
   - SwiftLint (0.39.2)
   - SwiftMessages (7.0.1):
     - SwiftMessages/App (= 7.0.1)
@@ -101,9 +100,8 @@ DEPENDENCIES:
   - Fuzi (~> 3.1)
   - Kingfisher (~> 5.0)
   - Kingfisher/SwiftUI (~> 5.0)
-  - PocketSVG (~> 2.0)
   - SideMenu (~> 6.4)
-  - SVGKit
+  - SVGKit (from `https://github.com/SVGKit/SVGKit.git`, branch `3.x`)
   - SwiftFormat/CLI
   - SwiftLint
   - SwiftMessages
@@ -129,13 +127,21 @@ SPEC REPOS:
     - GoogleUtilities
     - Kingfisher
     - nanopb
-    - PocketSVG
     - PromisesObjC
     - SideMenu
-    - SVGKit
     - SwiftFormat
     - SwiftLint
     - SwiftMessages
+
+EXTERNAL SOURCES:
+  SVGKit:
+    :branch: 3.x
+    :git: https://github.com/SVGKit/SVGKit.git
+
+CHECKOUT OPTIONS:
+  SVGKit:
+    :commit: 2a4068f0ea546dcd82f7e4dd9aa9026c0a0a2235
+    :git: https://github.com/SVGKit/SVGKit.git
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
@@ -157,14 +163,13 @@ SPEC CHECKSUMS:
   GoogleUtilities: 39530bc0ad980530298e9c4af8549e991fd033b1
   Kingfisher: 7b64389a43139c903ec434788344c288217c792d
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
-  PocketSVG: 9d9c4bc8e7d8dbbc208bd21e5c92814fd3c6c34d
   PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
   SideMenu: 4a891be552d30bb6fa87ad404d62e485f8450c34
-  SVGKit: 652cdf7bef8bec8564d04a8511d3ab50c7595fac
-  SwiftFormat: 87e745cb2f6509894a44ac4f311a8722a9ebcb8b
+  SVGKit: c6fe3403caafbd20d4ad5a5cc7dcae6115b3c6e1
+  SwiftFormat: a5ab293a7f6a812bec6f4ffc5507b7ed08f7f6e1
   SwiftLint: 22ccbbe3b8008684be5955693bab135e0ed6a447
   SwiftMessages: b577dc7043be8b299857ab35bb663dbff6483bd0
 
-PODFILE CHECKSUM: 06ea1c3791eddb2dd174f3d547559ec7f5a1c4d7
+PODFILE CHECKSUM: c2a5a545af2eb4e0cc66d2ee9aa3b6a5dc5c4512
 
-COCOAPODS: 1.9.2
+COCOAPODS: 1.9.3

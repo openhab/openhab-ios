@@ -1057,14 +1057,14 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 completionHandler: reportOnResults)
                 case .svg:
-//                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-//                                                placeholder: UIImage(named: "blankicon.png"),
-//                                                options: [.processor(SVGProcessor())],
-//                                                completionHandler: reportOnResults)
                     cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                                                 placeholder: UIImage(named: "blankicon.png"),
-                                                options: [.processor(SVGPocketProcessor(size: cell.imageView?.frame.size ?? CGSize(width: 10, height: 10)))],
+                                                options: [.processor(SVGProcessor())],
                                                 completionHandler: reportOnResults)
+//                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+//                                                placeholder: UIImage(named: "blankicon.png"),
+//                                                options: [.processor(SVGPocketProcessor(size: cell.imageView?.frame.size ?? CGSize(width: 10, height: 10)))],
+//                                                completionHandler: reportOnResults)
                 }
             }
         }
