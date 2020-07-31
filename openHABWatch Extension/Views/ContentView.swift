@@ -74,7 +74,7 @@ struct ContentView: View {
                 return AnyView(ImageRow(URL: URL(string: widget.url)))
             }
         case .chart:
-            let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
+            let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type ?? .none, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
             return AnyView(ImageRow(URL: url))
         case .mapview:
             return AnyView(MapViewRow(widget: widget))

@@ -663,7 +663,7 @@ class OpenHABViewController: UIViewController {
         guard let searchText = searchText else { return }
 
         filteredPage = currentPage?.filter {
-            $0.label.lowercased().contains(searchText.lowercased()) && $0.type != "Frame"
+            $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
         }
         filteredPage?.sendCommand = { [weak self] item, command in
             self?.sendCommand(item, commandToSend: command)
@@ -964,14 +964,14 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let widget: OpenHABWidget? = relevantPage?.widgets[indexPath.row]
         switch widget?.type {
-        case "Frame":
+        case .frame:
             return widget?.label.count ?? 0 > 0 ? 35.0 : 0
-        case "Image", "Chart", "Video":
+        case .image, .chart, .video:
             return UITableView.automaticDimension
-        case "Webview", "Mapview":
-            if let height = widget?.height, Int(height) != 0 {
+        case .webview, .mapview:
+            if let height = widget?.height {
                 // calculate webview/mapview height and return it
-                let heightValue = (Double(height) ?? 0.0) * 44
+                let heightValue = height * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
                 return CGFloat(heightValue)
             } else {
@@ -988,44 +988,44 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         let cell: UITableViewCell
 
         switch widget?.type {
-        case "Frame":
+        case .frame:
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
-        case "Switch":
+        case .switchWidget:
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if widget?.mappings.count ?? 0 > 0 {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
                 // RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if let type = widget?.item?.type, type == "Switch" {
+            } else if let type = widget?.item?.type, type == .switchItem {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            } else if let type = widget?.item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && widget?.item?.groupType == "Rollershutter") {
+            } else if let type = widget?.item?.type, type == .rollershutter || (type == .group && widget?.item?.groupType == .rollershutter) {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
             } else if widget?.item?.stateDescription?.options.count ?? 0 > 0 {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
-        case "Setpoint":
+        case .setpoint:
             cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
-        case "Slider":
+        case .slider:
             cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
-        case "Selection":
+        case .selection:
             cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
-        case "Colorpicker":
+        case .colorpicker:
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
-        case "Image", "Chart":
+        case .image, .chart:
             cell = tableView.dequeueReusableCell(withIdentifier: openHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
                 self?.updateWidgetTableView()
             }
-        case "Video":
+        case .video:
             cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
             (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
                 self?.updateWidgetTableView()
             }
-        case "Webview":
+        case .webview:
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
-        case "Mapview":
+        case .mapview:
             cell = (tableView.dequeueReusableCell(withIdentifier: openHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
         default:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
@@ -1083,9 +1083,9 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         // Check if this is not the last row in the widgets list
         if indexPath.row < (relevantPage?.widgets.count ?? 1) - 1 {
             let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
-            if let type = nextWidget?.type, type.isAny(of: "Frame", "Image", "Video", "Webview", "Chart") {
+            if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
                 cell.separatorInset = UIEdgeInsets.zero
-            } else if !(widget?.type == "Frame") {
+            } else if !(widget?.type == .frame) {
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
             }
         }
@@ -1115,7 +1115,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             newViewController.pageUrl = widget?.linkedPage?.link ?? ""
             newViewController.openHABRootUrl = openHABRootUrl
             navigationController?.pushViewController(newViewController, animated: true)
-        } else if widget?.type == "Selection" {
+        } else if widget?.type == .selection {
             os_log("Selected selection widget", log: .viewCycle, type: .info)
 
             selectedWidgetRow = indexPath.row
@@ -1143,7 +1143,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
 
     @available(iOS 13.0, *)
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == "Text", let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
+        if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == .text, let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
                 let copy = UIAction(title: "Copy item label", image: UIImage(systemName: "square.and.arrow.up")) { _ in
                     UIPasteboard.general.string = text

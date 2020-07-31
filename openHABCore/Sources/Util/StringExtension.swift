@@ -11,6 +11,40 @@
 
 import Foundation
 
+public enum ItemType {
+    case color
+    case contact
+    case dateTime
+    case dimmer
+    case group
+    case image
+    case location
+    case number
+    case numberWithDimension
+    case player
+    case rollershutter
+    case stringItem
+    case switchItem
+}
+
+public enum WidgetType {
+    case chart
+    case colorpicker
+    case defaultWidget
+    case frame
+    case group
+    case image
+    case mapview
+    case selection
+    case setpoint
+    case slider
+    case switchWidget
+    case text
+    case video
+    case webview
+    case unknown
+}
+
 extension String {
     var doubleValue: Double {
         let formatter = NumberFormatter()
@@ -40,5 +74,58 @@ extension String {
         formatter.numberStyle = .decimal
         formatter.decimalSeparator = "."
         return formatter.number(from: filter("01234567890.-".contains))
+    }
+
+    func toItemType() -> ItemType? {
+        var typeString: String = self
+        // Earlier OH2 versions returned e.g. 'Switch' as 'SwitchItem'
+        if hasSuffix("Item") {
+            typeString = String(dropLast(4))
+        }
+        // types can have subtypes (e.g. 'Number:Temperature'); split off those
+        let firstColon = firstIndex(of: ":")
+        if let firstColon = firstColon {
+            typeString = String(typeString[..<firstColon])
+        }
+
+        if typeString == "Number", firstColon != nil {
+            return .numberWithDimension
+        }
+        switch typeString {
+        case "Color": return .color
+        case "Contact": return .contact
+        case "DateTime": return .dateTime
+        case "Dimmer": return .dimmer
+        case "Group": return .group
+        case "Image": return .image
+        case "Location": return .location
+        case "Number": return .number
+        case "Player": return .player
+        case "Rollershutter": return .rollershutter
+        case "Switch": return .switchItem
+        case "String": return .stringItem
+        default: return nil
+        }
+    }
+
+    func toWidgetType() -> WidgetType? {
+        switch self {
+        case "Chart": return .chart
+        case "Colorpicker": return .colorpicker
+        case "Default": return .defaultWidget
+        case "Frame": return .frame
+        case "Group": return .group
+        case "Image": return .image
+        case "Mapview": return .mapview
+        case "Selection": return .selection
+        case "Setpoint": return .setpoint
+        case "Slider": return .slider
+        case "Switch": return .switchWidget
+        case "Text": return .text
+        case "Video": return .video
+        case "Webview": return .webview
+        case "Unknown": return .unknown
+        default: return .unknown
+        }
     }
 }

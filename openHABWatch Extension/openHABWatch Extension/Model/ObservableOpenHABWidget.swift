@@ -19,7 +19,7 @@ import MapKit
 import OpenHABCoreWatch
 import os.log
 
-enum StateEnum {
+enum WidgetTypeEnum {
     case switcher(Bool)
     case slider(Double)
     case segmented(Int)
@@ -72,7 +72,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var image: UIImage?
     var widgets: [ObservableOpenHABWidget] = []
 
-    @Published var stateEnumBinding: StateEnum = .unassigned
+    @Published var stateEnumBinding: WidgetTypeEnum = .unassigned
 
     // Text prior to "["
     var labelText: String? {
@@ -109,7 +109,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         }
     }
 
-    var stateEnum: StateEnum {
+    var stateEnum: WidgetTypeEnum {
         switch type {
         case "Frame":
             return .frame
@@ -117,10 +117,9 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if !mappings.isEmpty {
                 return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
-                // RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if let type = item?.type, type == "Switch" {
+            } else if let type = item?.type, type == .switchItem {
                 return .switcher(item?.state == "ON" ? true : false)
-            } else if let type = item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && item?.groupType == "Rollershutter") {
+            } else if let type = item?.type, type == .rollershutter || (type == .group && item?.groupType == .rollershutter) {
                 return .rollershutter
             } else if item?.stateDescription?.options.count ?? 0 > 0 {
                 return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))

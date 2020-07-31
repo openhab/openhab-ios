@@ -13,24 +13,33 @@ import CoreLocation
 import Fuzi
 import os.log
 import UIKit
-
 public final class OpenHABItem: NSObject, CommItem {
-    public var type = ""
-    public var groupType = ""
+    public var type: ItemType?
+    public var groupType: ItemType?
     public var name = ""
-    public var state = ""
+    public var state: String?
     public var link = ""
     public var label = ""
     public var stateDescription: OpenHABStateDescription?
+    public var readOnly = false
+    public var members: [OpenHABItem] = []
+    public var category = ""
 
-    public init(name: String, type: String, state: String, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?) {
+    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, members: [OpenHABItem], category: String?) {
         self.name = name
-        self.type = type
-        self.state = state
+        self.type = type.toItemType()
+        if let state = state, (state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame) {
+            self.state = nil
+        } else {
+            self.state = state
+        }
         self.link = link
         self.label = label ?? ""
-        self.groupType = groupType ?? ""
+        self.groupType = groupType?.toItemType()
         self.stateDescription = stateDescription
+        readOnly = stateDescription?.readOnly ?? false
+        self.members = members
+        self.category = category ?? ""
     }
 
     public init(xml xmlElement: XMLElement) {
@@ -38,8 +47,8 @@ public final class OpenHABItem: NSObject, CommItem {
         for child in xmlElement.children {
             switch child.tag {
             case "name": name = child.stringValue
-            case "type": type = child.stringValue
-            case "groupType": groupType = child.stringValue
+            case "type": type = child.stringValue.toItemType()
+            case "groupType": groupType = child.stringValue.toItemType()
             case "state": state = child.stringValue
             case "link": link = child.stringValue
             default:
@@ -47,22 +56,31 @@ public final class OpenHABItem: NSObject, CommItem {
             }
         }
     }
-}
 
-extension OpenHABItem {
-    public func stateAsDouble() -> Double {
-        state.numberValue?.doubleValue ?? 0
+    func isOfTypeOrGroupType(_ type: ItemType) -> Bool {
+        self.type == type || groupType == type
     }
 
-    public func stateAsInt() -> Int {
-        state.numberValue?.intValue ?? 0
+    var canBeToggled: Bool {
+        isOfTypeOrGroupType(ItemType.color) ||
+            isOfTypeOrGroupType(ItemType.contact) ||
+            isOfTypeOrGroupType(ItemType.dimmer) ||
+            isOfTypeOrGroupType(ItemType.rollershutter) ||
+            isOfTypeOrGroupType(ItemType.switchItem) ||
+            isOfTypeOrGroupType(ItemType.player)
+    }
+}
+
+extension String {
+    public func stateAsDouble() -> Double {
+        numberValue?.doubleValue ?? 0
     }
 
     public func stateAsUIColor() -> UIColor {
-        if state == "Uninitialized" {
+        if self == "Uninitialized" {
             return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
         } else {
-            let values = state.components(separatedBy: ",")
+            let values = components(separatedBy: ",")
             if values.count == 3 {
                 let hue = CGFloat(state: values[0], divisor: 360)
                 let saturation = CGFloat(state: values[1], divisor: 100)
@@ -75,15 +93,58 @@ extension OpenHABItem {
         }
     }
 
-    public func stateAsLocation() -> CLLocation? {
-        if type == "Location" {
-            // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitued>,<altitude>')
-            let locationComponents = state.components(separatedBy: ",")
-            if locationComponents.count >= 2 {
-                let latitude = CLLocationDegrees(Double(locationComponents[0]) ?? 0.0)
-                let longitude = CLLocationDegrees(Double(locationComponents[1]) ?? 0.0)
+    public func stateAsLocation() -> CLLocation {
+        // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitued>,<altitude>')
+        let locationComponents = components(separatedBy: ",")
+        if locationComponents.count >= 2 {
+            let latitude = CLLocationDegrees(Double(locationComponents[0]) ?? 0.0)
+            let longitude = CLLocationDegrees(Double(locationComponents[1]) ?? 0.0)
 
-                return CLLocation(latitude: latitude, longitude: longitude)
+            return CLLocation(latitude: latitude, longitude: longitude)
+        }
+        return CLLocation(latitude: 0.0, longitude: 0.0)
+    }
+}
+
+extension OpenHABItem {
+    public func stateAsDouble() -> Double {
+        state?.numberValue?.doubleValue ?? 0
+    }
+
+    public func stateAsInt() -> Int {
+        state?.numberValue?.intValue ?? 0
+    }
+
+    public func stateAsUIColor() -> UIColor {
+        if let state = state {
+            let values = state.components(separatedBy: ",")
+            if values.count == 3 {
+                let hue = CGFloat(state: values[0], divisor: 360)
+                let saturation = CGFloat(state: values[1], divisor: 100)
+                let brightness = CGFloat(state: values[2], divisor: 100)
+                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
+                return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
+            } else {
+                return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
+            }
+        } else {
+            return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
+        }
+    }
+
+    public func stateAsLocation() -> CLLocation? {
+        if type == .location {
+            // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitude>,<altitude>')
+            if let state = state {
+                let locationComponents = state.components(separatedBy: ",")
+                if locationComponents.count >= 2 {
+                    let latitude = CLLocationDegrees(Double(locationComponents[0]) ?? 0.0)
+                    let longitude = CLLocationDegrees(Double(locationComponents[1]) ?? 0.0)
+
+                    return CLLocation(latitude: latitude, longitude: longitude)
+                }
+            } else {
+                return nil
             }
         }
         return nil
@@ -96,15 +157,19 @@ extension OpenHABItem {
         let groupType: String?
         let name: String
         let link: String
-        let state: String
+        let state: String?
         let label: String?
         let stateDescription: OpenHABStateDescription.CodingData?
+        let members: [OpenHABItem.CodingData]?
+        let category: String?
     }
 }
 
 extension OpenHABItem.CodingData {
     public var openHABItem: OpenHABItem {
-        OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription)
+        let mappedMembers = members?.map { $0.openHABItem } ?? []
+
+        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, members: mappedMembers, category: category)
     }
 }
 
