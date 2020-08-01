@@ -13,40 +13,6 @@ import Foundation
 import MapKit
 import os.log
 
-public enum ItemType: String {
-    case color = "Color"
-    case contact = "Contact"
-    case dateTime = "DateTime"
-    case dimmer = "Dimmer"
-    case group = "Group"
-    case image = "Image"
-    case location = "Location"
-    case number = "Number"
-    case numberWithDimension = "NumberWithDimension"
-    case player = "Player"
-    case rollershutter = "Rollershutter"
-    case stringItem = "String"
-    case switchItem = "Switch"
-}
-
-public enum WidgetType: String {
-    case chart = "Chart"
-    case colorpicker = "Colorpicker"
-    case defaultWidget = "Default"
-    case frame = "Frame"
-    case group = "Group"
-    case image = "Image"
-    case mapview = "Mapview"
-    case selection = "Selection"
-    case setpoint = "Setpoint"
-    case slider = "Slider"
-    case switchWidget = "Switch"
-    case text = "Text"
-    case video = "Video"
-    case webview = "Webview"
-    case unknown = "Unknown"
-}
-
 extension String {
     var doubleValue: Double {
         let formatter = NumberFormatter()

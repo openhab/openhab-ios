@@ -161,12 +161,12 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 
 extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
         self.label = label
-        self.type = type.toWidgetType()
+        self.type = type
         self.icon = icon
         self.url = url ?? ""
         self.period = period ?? ""
@@ -246,7 +246,7 @@ extension OpenHABWidget {
     public struct CodingData: Decodable {
         let widgetId: String
         let label: String
-        let type: String
+        let type: WidgetType
         let icon: String
         let url: String?
         let period: String?
