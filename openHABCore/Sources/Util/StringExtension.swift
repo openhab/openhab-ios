@@ -91,41 +91,11 @@ extension String {
         if typeString == "Number", firstColon != nil {
             return .numberWithDimension
         }
-        switch typeString {
-        case "Color": return .color
-        case "Contact": return .contact
-        case "DateTime": return .dateTime
-        case "Dimmer": return .dimmer
-        case "Group": return .group
-        case "Image": return .image
-        case "Location": return .location
-        case "Number": return .number
-        case "Player": return .player
-        case "Rollershutter": return .rollershutter
-        case "Switch": return .switchItem
-        case "String": return .stringItem
-        default: return nil
-        }
+
+        return ItemType(rawValue: typeString)
     }
 
     func toWidgetType() -> WidgetType? {
-        switch self {
-        case "Chart": return .chart
-        case "Colorpicker": return .colorpicker
-        case "Default": return .defaultWidget
-        case "Frame": return .frame
-        case "Group": return .group
-        case "Image": return .image
-        case "Mapview": return .mapview
-        case "Selection": return .selection
-        case "Setpoint": return .setpoint
-        case "Slider": return .slider
-        case "Switch": return .switchWidget
-        case "Text": return .text
-        case "Video": return .video
-        case "Webview": return .webview
-        case "Unknown": return .unknown
-        default: return .unknown
-        }
+        WidgetType(rawValue: self)
     }
 }
