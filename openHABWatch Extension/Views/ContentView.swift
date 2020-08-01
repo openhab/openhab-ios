@@ -43,12 +43,12 @@ struct ContentView: View {
                         buttons: [.default(Text("Abort")) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
                         },
-                                  .default(Text("Once")) {
+                        .default(Text("Once")) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
                         },
-                                  .default(Text("Always")) {
+                        .default(Text("Always")) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
-                                }])
+                        }])
         }
     }
 

@@ -297,7 +297,7 @@ extension ObservableOpenHABWidget {
 // swiftlint:disable line_length
 extension ObservableOpenHABWidget.CodingData {
     var openHABWidget: ObservableOpenHABWidget {
-        let mappedWidgets = widgets.map { $0.openHABWidget }
+        let mappedWidgets = widgets.map(\.openHABWidget)
         return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets)
     }
 }

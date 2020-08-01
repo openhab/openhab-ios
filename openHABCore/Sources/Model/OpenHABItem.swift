@@ -25,6 +25,15 @@ public final class OpenHABItem: NSObject, CommItem {
     public var members: [OpenHABItem] = []
     public var category = ""
 
+    var canBeToggled: Bool {
+        isOfTypeOrGroupType(ItemType.color) ||
+            isOfTypeOrGroupType(ItemType.contact) ||
+            isOfTypeOrGroupType(ItemType.dimmer) ||
+            isOfTypeOrGroupType(ItemType.rollershutter) ||
+            isOfTypeOrGroupType(ItemType.switchItem) ||
+            isOfTypeOrGroupType(ItemType.player)
+    }
+
     public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, members: [OpenHABItem], category: String?) {
         self.name = name
         self.type = type.toItemType()
@@ -59,15 +68,6 @@ public final class OpenHABItem: NSObject, CommItem {
 
     func isOfTypeOrGroupType(_ type: ItemType) -> Bool {
         self.type == type || groupType == type
-    }
-
-    var canBeToggled: Bool {
-        isOfTypeOrGroupType(ItemType.color) ||
-            isOfTypeOrGroupType(ItemType.contact) ||
-            isOfTypeOrGroupType(ItemType.dimmer) ||
-            isOfTypeOrGroupType(ItemType.rollershutter) ||
-            isOfTypeOrGroupType(ItemType.switchItem) ||
-            isOfTypeOrGroupType(ItemType.player)
     }
 }
 
@@ -167,7 +167,7 @@ extension OpenHABItem {
 
 extension OpenHABItem.CodingData {
     public var openHABItem: OpenHABItem {
-        let mappedMembers = members?.map { $0.openHABItem } ?? []
+        let mappedMembers = members?.map(\.openHABItem) ?? []
 
         return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, members: mappedMembers, category: category)
     }

@@ -23,7 +23,7 @@ struct SliderRow: View {
             guard case let .slider(value) = self.widget.stateEnumBinding else { return 0 }
             return value
         },
-                                           set: {
+        set: {
             os_log("Slider new value = %g", log: .default, type: .info, $0)
             self.widget.sendCommand($0.valueText(step: self.widget.step))
             self.widget.stateEnumBinding = .slider($0)

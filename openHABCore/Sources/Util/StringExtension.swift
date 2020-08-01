@@ -10,6 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import MapKit
+import os.log
 
 public enum ItemType: String {
     case color = "Color"
@@ -97,5 +99,53 @@ extension String {
 
     func toWidgetType() -> WidgetType? {
         WidgetType(rawValue: self)
+    }
+
+    func parseAsBool() -> Bool {
+        if self == "ON" { return true }
+        if let brightness = parseAsBrightness() { return brightness != 0 }
+        if let decimalValue = Int(self) {
+            return decimalValue > 0
+        } else {
+            return false
+        }
+    }
+
+    func parseAsNumber(format: String? = nil) -> NumberState {
+        switch self {
+        case "ON": return NumberState(value: 100.0)
+        case "OFF": return NumberState(value: 0.0)
+        default:
+            let components = split(separator: " ").map { String($0) }
+            let number = String(components[safe: 0] ?? "")
+            let unit = components[safe: 1]
+            return NumberState(value: number.stateAsDouble(), unit: unit, format: format)
+        }
+    }
+
+    func parseAsUIColor() -> UIColor {
+        if self == "Uninitialized" {
+            return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
+        } else {
+            let values = components(separatedBy: ",")
+            if values.count == 3 {
+                let hue = CGFloat(state: values[0], divisor: 360)
+                let saturation = CGFloat(state: values[1], divisor: 100)
+                let brightness = CGFloat(state: values[2], divisor: 100)
+                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
+                return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
+            } else {
+                return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
+            }
+        }
+    }
+
+    func parseAsBrightness() -> Int? {
+        let values = components(separatedBy: ",")
+        if values.count == 3 {
+            return Int(values[2].stateAsDouble().rounded())
+        } else {
+            return nil
+        }
     }
 }

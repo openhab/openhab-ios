@@ -77,22 +77,22 @@ public struct UserDefaultURL {
 }
 
 public struct Preferences {
-    static private let defaults = UserDefaults.standard
+    private static let defaults = UserDefaults.standard
 
-    @UserDefaultURL("localUrl", defaultValue: "") static public var localUrl: String
-    @UserDefaultURL("remoteUrl", defaultValue: "https://openhab.org:8444") static public var remoteUrl: String
+    @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
+    @UserDefaultURL("remoteUrl", defaultValue: "https://openhab.org:8444") public static var remoteUrl: String
 
-    @UserDefault("username", defaultValue: "test") static public var username: String
-    @UserDefault("password", defaultValue: "test") static public var password: String
+    @UserDefault("username", defaultValue: "test") public static var username: String
+    @UserDefault("password", defaultValue: "test") public static var password: String
     @UserDefault("alwaysSendCreds", defaultValue: false) public static var alwaysSendCreds: Bool
-    @UserDefault("ignoreSSL", defaultValue: false) static public var ignoreSSL: Bool
+    @UserDefault("ignoreSSL", defaultValue: false) public static var ignoreSSL: Bool
     // @UserDefault("sitemapName", defaultValue: "watch") static public var sitemapName: String
-    @UserDefault("demomode", defaultValue: true) static public var demomode: Bool
-    @UserDefault("idleOff", defaultValue: false) static public var idleOff: Bool
-    @UserDefault("realTimeSliders", defaultValue: false) static public var realTimeSliders: Bool
-    @UserDefault("iconType", defaultValue: 0) static public var iconType: Int
-    @UserDefault("defaultSitemap", defaultValue: "demo") static public var defaultSitemap: String
-    @UserDefault("sendCrashReports", defaultValue: false) static public var sendCrashReports: Bool
+    @UserDefault("demomode", defaultValue: true) public static var demomode: Bool
+    @UserDefault("idleOff", defaultValue: false) public static var idleOff: Bool
+    @UserDefault("realTimeSliders", defaultValue: false) public static var realTimeSliders: Bool
+    @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
+    @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
+    @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
 
     static func readActiveUrl() -> String {
         if Preferences.remoteUrl != "" {

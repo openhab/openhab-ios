@@ -49,56 +49,6 @@ protocol Widget: AnyObject {
     func flatten(_: [ChildWidget])
 }
 
-extension String {
-    func parseAsBool() -> Bool {
-        if self == "ON" { return true }
-        if let brightness = parseAsBrightness() { return brightness != 0 }
-        if let decimalValue = Int(self) {
-            return decimalValue > 0
-        } else {
-            return false
-        }
-    }
-
-    func parseAsNumber(format: String? = nil) -> NumberState {
-        switch self {
-        case "ON": return NumberState(value: 100.0)
-        case "OFF": return NumberState(value: 0.0)
-        default:
-            let components = split(separator: " ").map { String($0) }
-            let number = String(components[safe: 0] ?? "")
-            let unit = components[safe: 1]
-            return NumberState(value: number.stateAsDouble(), unit: unit, format: format)
-        }
-    }
-
-    func parseAsUIColor() -> UIColor {
-        if self == "Uninitialized" {
-            return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-        } else {
-            let values = components(separatedBy: ",")
-            if values.count == 3 {
-                let hue = CGFloat(state: values[0], divisor: 360)
-                let saturation = CGFloat(state: values[1], divisor: 100)
-                let brightness = CGFloat(state: values[2], divisor: 100)
-                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
-                return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
-            } else {
-                return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-            }
-        }
-    }
-
-    func parseAsBrightness() -> Int? {
-        let values = components(separatedBy: ",")
-        if values.count == 3 {
-            return Int(values[2].stateAsDouble().rounded())
-        } else {
-            return nil
-        }
-    }
-}
-
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var id: String = ""
 
@@ -327,7 +277,7 @@ extension OpenHABWidget {
 // swiftlint:disable line_length
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
-        let mappedWidgets = widgets.map { $0.openHABWidget }
+        let mappedWidgets = widgets.map(\.openHABWidget)
         return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport)
     }
 }

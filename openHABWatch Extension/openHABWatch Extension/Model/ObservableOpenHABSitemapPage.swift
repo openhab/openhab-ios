@@ -102,7 +102,7 @@ extension ObservableOpenHABSitemapPage {
 
 extension ObservableOpenHABSitemapPage.CodingData {
     var openHABSitemapPage: ObservableOpenHABSitemapPage {
-        let mappedWidgets = widgets?.map { $0.openHABWidget } ?? []
+        let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
         return ObservableOpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }

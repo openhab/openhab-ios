@@ -1,11 +1,12 @@
 # file options
---swiftversion 5.1
+--swiftversion 5.2
 --exclude Pods
 --symlinks ignore
 
 # disabled rules
 --disable specifiers # see https://github.com/nicklockwood/SwiftFormat/issues/364
 --disable redundantParens
+--disable wrapMultilineStatementBraces
 
 # opt-in rules
 --enable isEmpty
