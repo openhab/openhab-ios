@@ -17,8 +17,8 @@ public struct NumberState: CustomStringConvertible, Equatable {
     }
 
     public var value: Double
-    var unit: String? = ""
-    var format: String? = ""
+    private(set) var unit: String? = ""
+    private(set) var format: String? = ""
 
     func toString(locale: Locale?) -> String {
         if let format = format, format.isEmpty == false {
