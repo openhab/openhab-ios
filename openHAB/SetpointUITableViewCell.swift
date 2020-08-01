@@ -47,8 +47,10 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         let stateValue = numberState?.value ?? widget.minValue
         let newValue: Double
         switch down {
-        case true: newValue = stateValue - widget.step
-        case false: newValue = stateValue + widget.step
+        case true:
+            newValue = stateValue - widget.step
+        case false:
+            newValue = stateValue + widget.step
         }
         if newValue >= widget.minValue, newValue <= widget.maxValue {
             numberState?.value = newValue

@@ -11,38 +11,38 @@
 
 import Foundation
 
-public enum ItemType {
-    case color
-    case contact
-    case dateTime
-    case dimmer
-    case group
-    case image
-    case location
-    case number
-    case numberWithDimension
-    case player
-    case rollershutter
-    case stringItem
-    case switchItem
+public enum ItemType: String {
+    case color = "Color"
+    case contact = "Contact"
+    case dateTime = "DateTime"
+    case dimmer = "Dimmer"
+    case group = "Group"
+    case image = "Image"
+    case location = "Location"
+    case number = "Number"
+    case numberWithDimension = "NumberWithDimension"
+    case player = "Player"
+    case rollershutter = "Rollershutter"
+    case stringItem = "String"
+    case switchItem = "Switch"
 }
 
-public enum WidgetType {
-    case chart
-    case colorpicker
-    case defaultWidget
-    case frame
-    case group
-    case image
-    case mapview
-    case selection
-    case setpoint
-    case slider
-    case switchWidget
-    case text
-    case video
-    case webview
-    case unknown
+public enum WidgetType: String {
+    case chart = "Chart"
+    case colorpicker = "Colorpicker"
+    case defaultWidget = "Default"
+    case frame = "Frame"
+    case group = "Group"
+    case image = "Image"
+    case mapview = "Mapview"
+    case selection = "Selection"
+    case setpoint = "Setpoint"
+    case slider = "Slider"
+    case switchWidget = "Switch"
+    case text = "Text"
+    case video = "Video"
+    case webview = "Webview"
+    case unknown = "Unknown"
 }
 
 extension String {
@@ -91,41 +91,11 @@ extension String {
         if typeString == "Number", firstColon != nil {
             return .numberWithDimension
         }
-        switch typeString {
-        case "Color": return .color
-        case "Contact": return .contact
-        case "DateTime": return .dateTime
-        case "Dimmer": return .dimmer
-        case "Group": return .group
-        case "Image": return .image
-        case "Location": return .location
-        case "Number": return .number
-        case "Player": return .player
-        case "Rollershutter": return .rollershutter
-        case "Switch": return .switchItem
-        case "String": return .stringItem
-        default: return nil
-        }
+
+        return ItemType(rawValue: typeString)
     }
 
     func toWidgetType() -> WidgetType? {
-        switch self {
-        case "Chart": return .chart
-        case "Colorpicker": return .colorpicker
-        case "Default": return .defaultWidget
-        case "Frame": return .frame
-        case "Group": return .group
-        case "Image": return .image
-        case "Mapview": return .mapview
-        case "Selection": return .selection
-        case "Setpoint": return .setpoint
-        case "Slider": return .slider
-        case "Switch": return .switchWidget
-        case "Text": return .text
-        case "Video": return .video
-        case "Webview": return .webview
-        case "Unknown": return .unknown
-        default: return .unknown
-        }
+        WidgetType(rawValue: self)
     }
 }
