@@ -67,7 +67,7 @@ extension String {
         WidgetType(rawValue: self)
     }
 
-    func parseAsBool() -> Bool {
+    public func parseAsBool() -> Bool {
         if self == "ON" { return true }
         if let brightness = parseAsBrightness() { return brightness != 0 }
         if let decimalValue = Int(self) {

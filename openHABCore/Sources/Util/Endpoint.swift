@@ -100,7 +100,7 @@ extension Endpoint {
         return endpoint
     }
 
-    public static func icon(rootUrl: String, version: Int, icon: String?, value: String, iconType: IconType) -> Endpoint {
+    public static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType) -> Endpoint {
         guard let icon = icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
@@ -109,7 +109,7 @@ extension Endpoint {
         if version == 2 {
             return Endpoint(baseURL: rootUrl,
                             path: "/icon/\(icon)",
-                            queryItems: [URLQueryItem(name: "state", value: value),
+                            queryItems: [URLQueryItem(name: "state", value: state),
                                          URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG")])
         } else {
             return Endpoint(baseURL: rootUrl,

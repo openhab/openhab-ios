@@ -1036,7 +1036,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             if let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
                                         version: appData?.openHABVersion ?? 2,
                                         icon: widget?.icon,
-                                        value: widget?.item?.state ?? "",
+                                        state: widget?.state ?? widget?.item?.state ?? "",
                                         iconType: iconType).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
