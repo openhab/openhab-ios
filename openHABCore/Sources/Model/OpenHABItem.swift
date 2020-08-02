@@ -66,7 +66,7 @@ public final class OpenHABItem: NSObject, CommItem {
         }
     }
 
-    func isOfTypeOrGroupType(_ type: ItemType) -> Bool {
+    public func isOfTypeOrGroupType(_ type: ItemType) -> Bool {
         self.type == type || groupType == type
     }
 }
@@ -176,7 +176,7 @@ extension OpenHABItem.CodingData {
 extension CGFloat {
     init(state string: String, divisor: Float) {
         let numberFormatter = NumberFormatter()
-        numberFormatter.locale = Locale(identifier: "EN")
+        numberFormatter.locale = Locale(identifier: "US")
         if let number = numberFormatter.number(from: string) {
             self.init(number.floatValue / divisor)
         } else {

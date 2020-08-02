@@ -157,6 +157,33 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public func mappingIndex(byCommand command: String?) -> Int? {
         mappingsOrItemOptions.firstIndex { $0.command == command }
     }
+
+    public func iconState() -> String {
+        var iconState = item?.state ?? ""
+        if let item = item, let itemState = item.state {
+            if item.isOfTypeOrGroupType(.color) {
+                // For items that control a color item fetch the correct icon
+                if type == .slider || (type == .switchWidget && mappings.isEmpty) {
+                    if let brightness = itemState.parseAsBrightness() {
+                        iconState = String(brightness)
+                        if type == .switchWidget {
+                            iconState = iconState == "0" ? "OFF" : "ON"
+                        }
+                    } else {
+                        iconState = "OFF"
+                    }
+                } else if let color = itemState.parseAsUIColor() {
+                    iconState = "#\(color.toHex() ?? "000000")"
+                }
+            } else if type == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
+                // For switch items without mappings (just ON and OFF) that control a dimmer item
+                // and which are not ON or OFF already, set the state to "OFF" instead of 0
+                // or to "ON" to fetch the correct icon
+                iconState = (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
+            }
+        }
+        return iconState
+    }
 }
 
 extension OpenHABWidget {

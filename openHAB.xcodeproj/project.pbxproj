@@ -97,6 +97,7 @@
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA2CBDAE24D5FD73003CAE8A /* ItemType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDAD24D5FD73003CAE8A /* ItemType.swift */; };
 		DA2CBDAF24D5FD73003CAE8A /* ItemType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDAD24D5FD73003CAE8A /* ItemType.swift */; };
+		DA2CBDB124D7562C003CAE8A /* ParseAsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */; };
 		DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0D23DCC152009B0A99 /* MapView.swift */; };
@@ -401,6 +402,7 @@
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2CBDAD24D5FD73003CAE8A /* ItemType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemType.swift; sourceTree = "<group>"; };
+		DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseAsTest.swift; sourceTree = "<group>"; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABJSONParserTests.swift; sourceTree = "<group>"; };
 		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -829,6 +831,7 @@
 				DA966477232EDEAD00CB418B /* MockURLProtocol.swift */,
 				DACC72E024CE14FB007EFAE3 /* restAPI.json */,
 				DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */,
+				DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */,
 			);
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
@@ -1730,6 +1733,7 @@
 				DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */,
 				DA966478232EDEAD00CB418B /* MockURLProtocol.swift in Sources */,
 				DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */,
+				DA2CBDB124D7562C003CAE8A /* ParseAsTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

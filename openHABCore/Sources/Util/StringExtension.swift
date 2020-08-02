@@ -89,29 +89,19 @@ extension String {
         }
     }
 
-    func parseAsUIColor() -> UIColor {
-        if self == "Uninitialized" {
-            return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-        } else {
-            let values = components(separatedBy: ",")
-            if values.count == 3 {
-                let hue = CGFloat(state: values[0], divisor: 360)
-                let saturation = CGFloat(state: values[1], divisor: 100)
-                let brightness = CGFloat(state: values[2], divisor: 100)
-                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
-                return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
-            } else {
-                return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-            }
-        }
+    public func parseAsUIColor() -> UIColor? {
+        let values = components(separatedBy: ",")
+        guard values.count == 3 else { return nil }
+        let hue = CGFloat(state: values[0], divisor: 360)
+        let saturation = CGFloat(state: values[1], divisor: 100)
+        let brightness = CGFloat(state: values[2], divisor: 100)
+        os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
+        return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
     }
 
-    func parseAsBrightness() -> Int? {
+    public func parseAsBrightness() -> Int? {
         let values = components(separatedBy: ",")
-        if values.count == 3 {
-            return Int(values[2].stateAsDouble().rounded())
-        } else {
-            return nil
-        }
+        guard values.count == 3 else { return nil }
+        return Int(values[2].stateAsDouble().rounded())
     }
 }
