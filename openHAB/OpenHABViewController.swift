@@ -992,14 +992,13 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case .switchWidget:
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if widget?.mappings.count ?? 0 > 0 {
+            if !(widget?.mappings ?? []).isEmpty {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-                // RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if let type = widget?.item?.type, type == .switchItem {
+            } else if widget?.item?.isOfTypeOrGroupType(.switchItem) ?? false {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            } else if let type = widget?.item?.type, type == .rollershutter || (type == .group && widget?.item?.groupType == .rollershutter) {
+            } else if widget?.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
-            } else if widget?.item?.stateDescription?.options.count ?? 0 > 0 {
+            } else if !(widget?.mappingsOrItemOptions ?? []).isEmpty {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
@@ -1027,6 +1026,8 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case .mapview:
             cell = (tableView.dequeueReusableCell(withIdentifier: openHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
+        case .group, .text:
+            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         default:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }

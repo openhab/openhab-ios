@@ -44,7 +44,11 @@ extension String {
         return formatter.number(from: filter("01234567890.-".contains))
     }
 
-    func toItemType() -> ItemType? {
+    var asDouble: Double {
+        numberValue?.doubleValue ?? 0
+    }
+
+    func toItemType() -> OpenHABItem.ItemType? {
         var typeString: String = self
         // Earlier OH2 versions returned e.g. 'Switch' as 'SwitchItem'
         if hasSuffix("Item") {
@@ -60,11 +64,11 @@ extension String {
             return .numberWithDimension
         }
 
-        return ItemType(rawValue: typeString)
+        return OpenHABItem.ItemType(rawValue: typeString)
     }
 
-    func toWidgetType() -> WidgetType? {
-        WidgetType(rawValue: self)
+    func toWidgetType() -> OpenHABWidget.WidgetType? {
+        OpenHABWidget.WidgetType(rawValue: self)
     }
 
     public func parseAsBool() -> Bool {
@@ -77,7 +81,7 @@ extension String {
         }
     }
 
-    func parseAsNumber(format: String? = nil) -> NumberState {
+    public func parseAsNumber(format: String? = nil) -> NumberState {
         switch self {
         case "ON": return NumberState(value: 100.0)
         case "OFF": return NumberState(value: 0.0)
@@ -85,11 +89,14 @@ extension String {
             let components = split(separator: " ").map { String($0) }
             let number = String(components[safe: 0] ?? "")
             let unit = components[safe: 1]
-            return NumberState(value: number.stateAsDouble(), unit: unit, format: format)
+            return NumberState(value: number.asDouble, unit: unit, format: format)
         }
     }
 
     public func parseAsUIColor() -> UIColor? {
+        guard self != "Uninitialized" else {
+            return .black
+        }
         let values = components(separatedBy: ",")
         guard values.count == 3 else { return nil }
         let hue = CGFloat(state: values[0], divisor: 360)
@@ -102,6 +109,6 @@ extension String {
     public func parseAsBrightness() -> Int? {
         let values = components(separatedBy: ",")
         guard values.count == 3 else { return nil }
-        return Int(values[2].stateAsDouble().rounded())
+        return Int(values[2].asDouble.rounded())
     }
 }

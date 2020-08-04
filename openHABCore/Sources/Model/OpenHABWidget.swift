@@ -50,6 +50,24 @@ protocol Widget: AnyObject {
 }
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
+    public enum WidgetType: String {
+        case chart = "Chart"
+        case colorpicker = "Colorpicker"
+        case defaultWidget = "Default"
+        case frame = "Frame"
+        case group = "Group"
+        case image = "Image"
+        case mapview = "Mapview"
+        case selection = "Selection"
+        case setpoint = "Setpoint"
+        case slider = "Slider"
+        case switchWidget = "Switch"
+        case text = "Text"
+        case video = "Video"
+        case webview = "Webview"
+        case unknown = "Unknown"
+    }
+
     public var id: String = ""
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
@@ -184,6 +202,12 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
         }
         return iconState
     }
+}
+
+extension OpenHABWidget.WidgetType: Decodable {}
+
+extension OpenHABWidget.WidgetType: UnknownCaseRepresentable {
+    static var unknownCase: OpenHABWidget.WidgetType = .unknown
 }
 
 extension OpenHABWidget {

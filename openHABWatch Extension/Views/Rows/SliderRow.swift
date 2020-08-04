@@ -20,13 +20,13 @@ struct SliderRow: View {
 
     var body: some View {
         let valueBinding = Binding<Double>(get: {
-            guard case let .slider(value) = self.widget.stateEnumBinding else { return 0 }
-            return value
+            self.widget.adjustedValue
         },
         set: {
             os_log("Slider new value = %g", log: .default, type: .info, $0)
             self.widget.sendCommand($0.valueText(step: self.widget.step))
-            self.widget.stateEnumBinding = .slider($0)
+
+            // self.widget.stateEnumBinding = .slider($0)
         })
 
         return

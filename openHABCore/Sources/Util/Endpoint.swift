@@ -73,7 +73,7 @@ extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    public static func chart(rootUrl: String, period: String?, type: ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
+    public static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)
         var endpoint = Endpoint(baseURL: rootUrl,
                                 path: "/chart",

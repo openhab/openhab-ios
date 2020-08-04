@@ -15,10 +15,6 @@ import os.log
 import UIKit
 
 class SetpointUITableViewCell: GenericUITableViewCell {
-    private var isIntStep: Bool {
-        widget.step.truncatingRemainder(dividingBy: 1) == 0
-    }
-
     @IBOutlet private var downButton: DynamicButton!
     @IBOutlet private var upButton: DynamicButton!
 

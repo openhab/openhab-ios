@@ -95,8 +95,8 @@
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		DA2CBDAE24D5FD73003CAE8A /* ItemType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDAD24D5FD73003CAE8A /* ItemType.swift */; };
-		DA2CBDAF24D5FD73003CAE8A /* ItemType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDAD24D5FD73003CAE8A /* ItemType.swift */; };
+		DA2CBDAE24D5FD73003CAE8A /* UnknownCaseRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDAD24D5FD73003CAE8A /* UnknownCaseRepresentable.swift */; };
+		DA2CBDAF24D5FD73003CAE8A /* UnknownCaseRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDAD24D5FD73003CAE8A /* UnknownCaseRepresentable.swift */; };
 		DA2CBDB124D7562C003CAE8A /* ParseAsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */; };
@@ -401,7 +401,7 @@
 		DA1C32B92311CCE200FACFB0 /* JSONData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONData.swift; sourceTree = "<group>"; };
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		DA2CBDAD24D5FD73003CAE8A /* ItemType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemType.swift; sourceTree = "<group>"; };
+		DA2CBDAD24D5FD73003CAE8A /* UnknownCaseRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnknownCaseRepresentable.swift; sourceTree = "<group>"; };
 		DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseAsTest.swift; sourceTree = "<group>"; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABJSONParserTests.swift; sourceTree = "<group>"; };
@@ -709,7 +709,7 @@
 				9350F17B2381509300054BA8 /* OSLogExtension.swift */,
 				9350F1812381514E00054BA8 /* ServerCertificateManager.swift */,
 				9350F190238151CE00054BA8 /* StringExtension.swift */,
-				DA2CBDAD24D5FD73003CAE8A /* ItemType.swift */,
+				DA2CBDAD24D5FD73003CAE8A /* UnknownCaseRepresentable.swift */,
 				9350F193238151F100054BA8 /* Preferences.swift */,
 				DAF4578323D780730018B495 /* UIColorExtension.swift */,
 				9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */,
@@ -1631,7 +1631,7 @@
 				9350F1822381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
 				DAF4579D23D904350018B495 /* UIColorExtension.swift in Sources */,
 				9350F16323814EC200054BA8 /* OpenHABSitemap.swift in Sources */,
-				DA2CBDAE24D5FD73003CAE8A /* ItemType.swift in Sources */,
+				DA2CBDAE24D5FD73003CAE8A /* UnknownCaseRepresentable.swift in Sources */,
 				9350F10123814CD500054BA8 /* OpenHABItem.swift in Sources */,
 				9350F10423814CFF00054BA8 /* OpenHABLinkedPage.swift in Sources */,
 				9350F191238151CE00054BA8 /* StringExtension.swift in Sources */,
@@ -1665,7 +1665,7 @@
 				9350F1832381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
 				DAF4579E23D904360018B495 /* UIColorExtension.swift in Sources */,
 				9350F16423814EC200054BA8 /* OpenHABSitemap.swift in Sources */,
-				DA2CBDAF24D5FD73003CAE8A /* ItemType.swift in Sources */,
+				DA2CBDAF24D5FD73003CAE8A /* UnknownCaseRepresentable.swift in Sources */,
 				9350F10223814CD500054BA8 /* OpenHABItem.swift in Sources */,
 				9350F10523814CFF00054BA8 /* OpenHABLinkedPage.swift in Sources */,
 				9350F192238151CE00054BA8 /* StringExtension.swift in Sources */,

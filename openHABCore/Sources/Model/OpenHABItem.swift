@@ -14,6 +14,22 @@ import Fuzi
 import os.log
 import UIKit
 public final class OpenHABItem: NSObject, CommItem {
+    public enum ItemType: String {
+        case color = "Color"
+        case contact = "Contact"
+        case dateTime = "DateTime"
+        case dimmer = "Dimmer"
+        case group = "Group"
+        case image = "Image"
+        case location = "Location"
+        case number = "Number"
+        case numberWithDimension = "NumberWithDimension"
+        case player = "Player"
+        case rollershutter = "Rollershutter"
+        case stringItem = "String"
+        case switchItem = "Switch"
+    }
+
     public var type: ItemType?
     public var groupType: ItemType?
     public var name = ""
@@ -24,6 +40,7 @@ public final class OpenHABItem: NSObject, CommItem {
     public var readOnly = false
     public var members: [OpenHABItem] = []
     public var category = ""
+    public var options: [OpenHABOptions] = []
 
     var canBeToggled: Bool {
         isOfTypeOrGroupType(ItemType.color) ||
@@ -34,7 +51,7 @@ public final class OpenHABItem: NSObject, CommItem {
             isOfTypeOrGroupType(ItemType.player)
     }
 
-    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, members: [OpenHABItem], category: String?) {
+    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?) {
         self.name = name
         self.type = type.toItemType()
         if let state = state, (state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame) {
@@ -49,6 +66,7 @@ public final class OpenHABItem: NSObject, CommItem {
         readOnly = stateDescription?.readOnly ?? false
         self.members = members
         self.category = category ?? ""
+        self.options = options ?? []
     }
 
     public init(xml xmlElement: XMLElement) {
@@ -71,40 +89,7 @@ public final class OpenHABItem: NSObject, CommItem {
     }
 }
 
-extension String {
-    public func stateAsDouble() -> Double {
-        numberValue?.doubleValue ?? 0
-    }
-
-    public func stateAsUIColor() -> UIColor {
-        if self == "Uninitialized" {
-            return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-        } else {
-            let values = components(separatedBy: ",")
-            if values.count == 3 {
-                let hue = CGFloat(state: values[0], divisor: 360)
-                let saturation = CGFloat(state: values[1], divisor: 100)
-                let brightness = CGFloat(state: values[2], divisor: 100)
-                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
-                return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
-            } else {
-                return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
-            }
-        }
-    }
-
-    public func stateAsLocation() -> CLLocation {
-        // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitued>,<altitude>')
-        let locationComponents = components(separatedBy: ",")
-        if locationComponents.count >= 2 {
-            let latitude = CLLocationDegrees(Double(locationComponents[0]) ?? 0.0)
-            let longitude = CLLocationDegrees(Double(locationComponents[1]) ?? 0.0)
-
-            return CLLocation(latitude: latitude, longitude: longitude)
-        }
-        return CLLocation(latitude: 0.0, longitude: 0.0)
-    }
-}
+extension OpenHABItem.ItemType: Decodable {}
 
 extension OpenHABItem {
     public func stateAsDouble() -> Double {
@@ -125,10 +110,10 @@ extension OpenHABItem {
                 os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
-                return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
+                return .black
             }
         } else {
-            return UIColor(hue: 0, saturation: 0, brightness: 0, alpha: 1.0)
+            return .black
         }
     }
 
@@ -162,6 +147,7 @@ extension OpenHABItem {
         let stateDescription: OpenHABStateDescription.CodingData?
         let members: [OpenHABItem.CodingData]?
         let category: String?
+        let options: [OpenHABOptions]?
     }
 }
 
@@ -169,7 +155,7 @@ extension OpenHABItem.CodingData {
     public var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
 
-        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, members: mappedMembers, category: category)
+        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, members: mappedMembers, category: category, options: options)
     }
 }
 
