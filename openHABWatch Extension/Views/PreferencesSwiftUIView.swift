@@ -34,7 +34,8 @@ struct PreferencesSwiftUIView: View {
             PreferencesRowUIView(label: "Sitemap", content: settings.sitemapName).font(.footnote)
             PreferencesRowUIView(label: "Username", content: settings.openHABUsername).font(.footnote)
             HStack {
-                Button(action: { AppMessageService.singleton.requestApplicationContext() }, label: { Text("Sync preferences") })
+                Button(action: { AppMessageService.singleton.requestApplicationContext()
+                }, label: { Text("Sync preferences") })
             }
         }
     }

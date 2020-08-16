@@ -62,7 +62,7 @@ extension Endpoint {
 
     public static func tracker(openHABRootUrl: String) -> Endpoint {
         Endpoint(baseURL: openHABRootUrl,
-                 path: "/rest/bindings",
+                 path: "/rest",
                  queryItems: [])
     }
 

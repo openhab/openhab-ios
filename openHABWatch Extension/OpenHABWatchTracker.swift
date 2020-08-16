@@ -40,6 +40,7 @@ class OpenHABWatchTracker: NSObject {
     }
 
     func start() {
+        #if !os(watchOS)
         oldReachabilityStatus = pathMonitor.currentPath
         pathMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
@@ -47,7 +48,7 @@ class OpenHABWatchTracker: NSObject {
             let nStatus = path
             if nStatus != self.oldReachabilityStatus {
                 if let oldReachabilityStatus = self.oldReachabilityStatus {
-                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
+                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, oldReachabilityStatus.debugDescription, nStatus.debugDescription)
                 }
                 self.oldReachabilityStatus = nStatus
                 (self.delegate as? OpenHABWatchTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
@@ -58,7 +59,7 @@ class OpenHABWatchTracker: NSObject {
             }
         }
         pathMonitor.start(queue: backgroundQueue)
-
+        #endif
         selectUrl()
     }
 
@@ -67,6 +68,31 @@ class OpenHABWatchTracker: NSObject {
     }
 
     func selectUrl() {
+        #if os(watchOS)
+        if ObservableOpenHABDataObject.shared.localUrl.isEmpty {
+            os_log("Starting discovery", log: .default, type: .debug)
+            startDiscovery()
+        } else {
+            if let connectivityTask = connectivityTask {
+                connectivityTask.cancel()
+            }
+            let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+            connectivityTask = NetworkConnection.shared.manager.request(request)
+                .validate(statusCode: 200 ..< 300)
+                .responseData { response in
+                    switch response.result {
+                    case .success:
+                        os_log("Tracking local URL", log: .default, type: .debug)
+                        self.trackedLocalUrl()
+                    case .failure:
+                        os_log("Tracking remote URL", log: .default, type: .debug)
+                        self.trackedRemoteUrl()
+                    }
+                }
+            connectivityTask?.resume()
+        }
+        #else
+
         // Check if any network is available
         if isNetworkConnected() {
             // Check if network is WiFi. If not, go for remote URL
@@ -103,6 +129,7 @@ class OpenHABWatchTracker: NSObject {
             let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
             delegate?.openHABTrackingError(trackingError)
         }
+        #endif
     }
 
     func trackedLocalUrl() {
@@ -113,7 +140,7 @@ class OpenHABWatchTracker: NSObject {
 
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(ObservableOpenHABDataObject.shared.remoteUrl)
-        if (openHABUrl?.count ?? 0) > 0 {
+        if !(openHABUrl ?? "").isEmpty {
             // delegate?.openHABTrackingProgress("Connecting to remote URL")
             trackedUrl(URL(string: openHABUrl!))
         } else {
@@ -253,14 +280,16 @@ class OpenHABWatchTracker: NSObject {
     func isNetworkWiFi() -> Bool {
         (pathMonitor.currentPath.status == .satisfied && !pathMonitor.currentPath.isExpensive)
     }
+}
 
-    func string(from path: NWPath) -> String? {
-        switch path.status {
+extension NWPath: CustomStringConvertible {
+    public var description: String {
+        switch status {
         case .unsatisfied, .requiresConnection:
             return "unreachable"
         case .satisfied:
             var str = "reachable:"
-            for interface in path.availableInterfaces {
+            for interface in availableInterfaces {
                 switch interface.type {
                 case .wifi:
                     str += " wifi"

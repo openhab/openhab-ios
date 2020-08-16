@@ -33,6 +33,8 @@ class NumberStateTest: XCTestCase {
         XCTAssertEqual(NumberState(value: 100.4, unit: "", format: "%.1f %unit%").toString(locale: Locale(identifier: "US")), "100.4 ")
         XCTAssertEqual(NumberState(value: 100.4, unit: "°C", format: nil).toString(locale: Locale(identifier: "US")), "100.4 °C")
         XCTAssertEqual(NumberState(value: 100.4, unit: nil, format: nil).toString(locale: Locale(identifier: "US")), "100.4")
+        XCTAssertEqual(NumberState(value: 100.4, unit: "°C", format: "%.1f %unit%").toString(locale: Locale(identifier: "de")), "100,4 °C")
+        XCTAssertEqual(NumberState(value: 100.4, unit: "°C", format: "%,.1f %unit%").toString(locale: Locale(identifier: "de")), ",.1f °C") // %,.1f is an unvalid format string in Swift
     }
 
     func testToItemType() throws {

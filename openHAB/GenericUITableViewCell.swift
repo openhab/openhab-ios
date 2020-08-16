@@ -36,8 +36,8 @@ class GenericUITableViewCell: UITableViewCell {
                 //        self.userInteractionEnabled = NO;
             }
 
-            customTextLabel?.textColor = _widget.labelcolor != "" ? UIColor(fromString: _widget.labelcolor) : .ohLabel
-            customDetailTextLabel?.textColor = _widget.valuecolor != "" ? UIColor(fromString: _widget.valuecolor) : .ohSecondaryLabel
+            customTextLabel?.textColor = !(_widget.labelcolor.isEmpty) ? UIColor(fromString: _widget.labelcolor) : .ohLabel
+            customDetailTextLabel?.textColor = !(_widget.valuecolor.isEmpty) ? UIColor(fromString: _widget.valuecolor) : .ohSecondaryLabel
         }
     }
 

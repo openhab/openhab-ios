@@ -87,6 +87,7 @@ class OpenHABViewController: UIViewController {
     var iconType: IconType = .png
     let search = UISearchController(searchResultsController: nil)
     var filteredPage: OpenHABSitemapPage?
+    var serverProperties: OpenHABServerProperties?
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
@@ -265,7 +266,7 @@ class OpenHABViewController: UIViewController {
         if idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
         }
-        if isViewLoaded, view.window != nil, pageUrl != "" {
+        if isViewLoaded, view.window != nil, !pageUrl.isEmpty {
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABViewController isViewLoaded, restarting network activity", log: .viewCycle, type: .info)
                 loadPage(false)
@@ -348,7 +349,7 @@ class OpenHABViewController: UIViewController {
     func doRegisterAps() {
         let prefsURL = Preferences.remoteUrl
         if prefsURL.contains("openhab.org") {
-            if deviceId != "", deviceToken != "", deviceName != "" {
+            if !deviceId.isEmpty, !deviceToken.isEmpty, !deviceName.isEmpty {
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
                     switch response.result {
@@ -533,7 +534,7 @@ class OpenHABViewController: UIViewController {
                 self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
                 switch self.sitemaps.count {
                 case 2...:
-                    if self.defaultSitemap != "" {
+                    if !self.defaultSitemap.isEmpty {
                         if let sitemapToOpen = self.sitemap(byName: self.defaultSitemap) {
                             if self.currentPage?.pageId != sitemapToOpen.name {
                                 self.currentPage?.widgets.removeAll() // NOTE: remove all widgets to ensure cells get invalidated
@@ -641,7 +642,7 @@ class OpenHABViewController: UIViewController {
 
     func pageNetworkStatusChanged() -> Bool {
         os_log("OpenHABViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
-        if pageUrl != "" {
+        if !pageUrl.isEmpty {
             let pageReachability = NetworkReachabilityManager(host: pageUrl)
             if !pageNetworkStatusAvailable {
                 pageNetworkStatus = pageReachability?.networkReachabilityStatus
@@ -718,10 +719,21 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             switch response.result {
             case .success:
                 os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
+
                 self.appData?.openHABVersion = 2
+
                 DispatchQueue.main.async {
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
+
+                if let data = response.result.value {
+                    do {
+                        self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+                    } catch {
+                        os_log("Could not decode JSON response", log: .notifications, type: .error, error.localizedDescription)
+                    }
+                }
+
                 self.selectSitemap()
             case let .failure(error):
                 os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)

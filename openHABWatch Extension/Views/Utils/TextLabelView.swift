@@ -19,7 +19,7 @@ struct TextLabelView: View {
         Text(widget.labelText ?? "")
             .font(.caption)
             .lineLimit(2)
-            .foregroundColor(widget.labelcolor != "" ? Color(fromString: widget.labelcolor) : .primary)
+            .foregroundColor(!widget.labelcolor.isEmpty ? Color(fromString: widget.labelcolor) : .primary)
     }
 }
 

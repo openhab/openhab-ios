@@ -97,14 +97,6 @@ final class UserData: ObservableObject {
         refreshUrl()
     }
 
-    func loadPage(urlString: String,
-                  longPolling: Bool,
-                  refresh: Bool,
-                  sitemapName: String = "watch") {
-        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: sitemapName).url
-        loadPage(url: url, longPolling: longPolling, refresh: refresh)
-    }
-
     func request(_ endpoint: Endpoint) -> OpenHABCoreWatch.Future<Data> {
         // Start by constructing a Promise, that will later be
         // returned as a Future
@@ -140,20 +132,6 @@ final class UserData: ObservableObject {
         currentPageOperation?.resume()
 
         return promise
-    }
-
-    func loadPage(_ endpoint: Endpoint) {
-        request(endpoint)
-            .decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-            .trafo()
-            .observe { result in
-                switch result {
-                case let .failure(error):
-                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-                case let .success(page):
-                    self.openHABSitemapPage = page
-                }
-            }
     }
 
     func loadPage(url: URL?,
@@ -226,6 +204,20 @@ final class UserData: ObservableObject {
             tracker?.selectUrl()
         }
     }
+
+    func loadPage(_ endpoint: Endpoint) {
+        request(endpoint)
+            .decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+            .trafo()
+            .observe { result in
+                switch result {
+                case let .failure(error):
+                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+                case let .success(page):
+                    self.openHABSitemapPage = page
+                }
+            }
+    }
 }
 
 extension UserData: OpenHABWatchTrackerDelegate {
@@ -241,10 +233,9 @@ extension UserData: OpenHABWatchTrackerDelegate {
         }
 
         ObservableOpenHABDataObject.shared.openHABRootUrl = urlString
-        loadPage(urlString: urlString,
-                 longPolling: false,
-                 refresh: true,
-                 sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
+
+        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: ObservableOpenHABDataObject.shared.sitemapName).url
+        loadPage(url: url, longPolling: false, refresh: true)
     }
 
     func openHABTrackingProgress(_ message: String?) {

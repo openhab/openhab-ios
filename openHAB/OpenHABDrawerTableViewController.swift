@@ -162,7 +162,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let imageView = UIImageView(frame: cell.customImageView.bounds)
 
             cell.customTextLabel?.text = sitemaps[indexPath.row].label
-            if sitemaps[indexPath.row].icon != "" {
+            if !sitemaps[indexPath.row].icon.isEmpty {
                 if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url {
                     imageView.kf.setImage(with: iconURL,
                                           placeholder: UIImage(named: "openHABIcon"))
