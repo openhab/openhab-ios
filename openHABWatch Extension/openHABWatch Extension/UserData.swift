@@ -55,7 +55,7 @@ final class UserData: ObservableObject {
                 return sitemapPageCodingData.openHABSitemapPage
             }()
         } catch {
-            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+            os_log("Should not throw %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
         }
 
         widgets = openHABSitemapPage?.widgets ?? []
@@ -121,7 +121,7 @@ final class UserData: ObservableObject {
 
                 switch response.result {
                 case .success:
-                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                    os_log("openHAB 2", log: .remoteAccess, type: .info)
                     promise.resolve(with: response.result.value ?? Data())
 
                 case let .failure(error):
@@ -149,11 +149,11 @@ final class UserData: ObservableObject {
 
                 switch response.result {
                 case .success:
-                    os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
+                    os_log("Page loaded with success", log: .remoteAccess, type: .info)
 
                     if let data = response.result.value {
                         // Newer versions talk JSON!
-                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                        os_log("openHAB 2", log: .remoteAccess, type: .info)
                         do {
                             // Self-executing closure
                             // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
@@ -162,7 +162,7 @@ final class UserData: ObservableObject {
                                 return sitemapPageCodingData.openHABSitemapPage
                             }()
                         } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                            os_log("Should not throw %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                         }
                     }
 

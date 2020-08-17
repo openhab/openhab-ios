@@ -163,7 +163,7 @@ public class NetworkConnection {
 
         pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
         if longPolling {
-            os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
+            os_log("long polling, so setting atmosphere transport", log: .remoteAccess, type: .info)
             pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
             pageRequest.timeoutInterval = 300.0
         } else {
@@ -186,7 +186,7 @@ public class NetworkConnection {
         if pageUrl == "" {
             return nil
         }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+        os_log("pageUrl = %{PUBLIC}@", log: .remoteAccess, type: .info, pageUrl)
 
         guard let pageToLoadUrl = URL(string: pageUrl) else { return nil }
 

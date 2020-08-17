@@ -48,7 +48,7 @@ class OpenHABWatchTracker: NSObject {
             let nStatus = path
             if nStatus != self.oldReachabilityStatus {
                 if let oldReachabilityStatus = self.oldReachabilityStatus {
-                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, oldReachabilityStatus.debugDescription, nStatus.debugDescription)
+                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: .remoteAccess, type: .info, oldReachabilityStatus.debugDescription, nStatus.debugDescription)
                 }
                 self.oldReachabilityStatus = nStatus
                 (self.delegate as? OpenHABWatchTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
@@ -212,15 +212,15 @@ class OpenHABWatchTracker: NSObject {
                                 components.host = nil
                             }
                             if components.host == nil {
-                                os_log("OpenHABWatchTracker unable to build URL from discovered endpoint, using remote URL instead", log: OSLog.remoteAccess, type: .info)
+                                os_log("OpenHABWatchTracker unable to build URL from discovered endpoint, using remote URL instead", log: .remoteAccess, type: .info)
                                 self.trackedRemoteUrl()
                             } else {
-                                os_log("OpenHABWatchTracker discovered: %{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, components.url?.description ?? "")
+                                os_log("OpenHABWatchTracker discovered: %{PUBLIC}@ ", log: .remoteAccess, type: .info, components.url?.description ?? "")
                                 self.trackedDiscoveryUrl(components.url)
                             }
                             return
                         default:
-                            os_log("OpenHABWatchTracker unhandled endpoint type", log: OSLog.remoteAccess, type: .info)
+                            os_log("OpenHABWatchTracker unhandled endpoint type", log: .remoteAccess, type: .info)
                             connection.cancel()
                         }
                     case .preparing, .setup, .waiting:
@@ -228,7 +228,7 @@ class OpenHABWatchTracker: NSObject {
                     default:
                         // Error establishing the connection or other unknown condition
                         connection.cancel()
-                        os_log("OpenHABWatchTracker unable establish connection to discovered endpoint, using remote URL instead", log: OSLog.remoteAccess, type: .info)
+                        os_log("OpenHABWatchTracker unable establish connection to discovered endpoint, using remote URL instead", log: .remoteAccess, type: .info)
                         self.trackedRemoteUrl()
                     }
                 }
@@ -236,13 +236,13 @@ class OpenHABWatchTracker: NSObject {
                 connection.start(queue: .main)
                 return
             default:
-                os_log("OpenHABWatchTracker discovered unhandled endpoint type", log: OSLog.remoteAccess, type: .info)
+                os_log("OpenHABWatchTracker discovered unhandled endpoint type", log: .remoteAccess, type: .info)
             }
 
             self.netBrowser!.cancel()
 
             // Unable to discover local endpoint
-            os_log("OpenHABWatchTracker unable to discover local server, using remote URL", log: OSLog.remoteAccess, type: .info)
+            os_log("OpenHABWatchTracker unable to discover local server, using remote URL", log: .remoteAccess, type: .info)
             self.trackedRemoteUrl()
         }
         netBrowser?.start(queue: .main)

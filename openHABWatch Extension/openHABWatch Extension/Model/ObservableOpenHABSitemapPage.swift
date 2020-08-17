@@ -77,7 +77,7 @@ class ObservableOpenHABSitemapPage: NSObject {
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item = item else { return }
 
-        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", item.name)
+        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: .remoteAccess, type: .info, command ?? "", item.name)
         sendCommand?(item, command)
     }
 }

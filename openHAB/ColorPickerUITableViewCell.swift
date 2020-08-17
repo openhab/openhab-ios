@@ -26,7 +26,7 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     @IBOutlet private var downButton: DynamicButton!
 
     required init?(coder: NSCoder) {
-        os_log("ColorPickerUITableViewCell initWithCoder", log: OSLog.viewCycle, type: .info)
+        os_log("ColorPickerUITableViewCell initWithCoder", log: .viewCycle, type: .info)
 
         super.init(coder: coder)
 

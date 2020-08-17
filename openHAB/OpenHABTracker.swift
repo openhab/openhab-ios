@@ -58,7 +58,7 @@ class OpenHABTracker: NSObject {
             let nStatus = status
             if nStatus != self.oldReachabilityStatus {
                 if let oldReachabilityStatus = self.oldReachabilityStatus {
-                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
+                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: .remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
                 }
                 self.oldReachabilityStatus = nStatus
                 (self.delegate as? OpenHABTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
@@ -217,7 +217,7 @@ extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
         }()
 
         let openhabUrl = "\(resolvedComponents.url!)"
-        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
+        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: .remoteAccess, type: .info, openhabUrl)
         trackedDiscoveryUrl(resolvedComponents.url)
     }
 

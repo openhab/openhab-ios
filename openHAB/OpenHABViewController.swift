@@ -408,7 +408,7 @@ class OpenHABViewController: UIViewController {
         if pageUrl == "" {
             return
         }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+        os_log("pageUrl = %{PUBLIC}@", log: .remoteAccess, type: .info, pageUrl)
 
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
@@ -423,7 +423,7 @@ class OpenHABViewController: UIViewController {
 
                 switch response.result {
                 case .success:
-                    os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
+                    os_log("Page loaded with success", log: .remoteAccess, type: .info)
                     let headers = response.response?.allHeaderFields
 
                     NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
@@ -446,7 +446,7 @@ class OpenHABViewController: UIViewController {
                             }
                         } else {
                             // Newer versions talk JSON!
-                            os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                            os_log("openHAB 2", log: .remoteAccess, type: .info)
                             do {
                                 // Self-executing closure
                                 // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
@@ -455,7 +455,7 @@ class OpenHABViewController: UIViewController {
                                     return sitemapPageCodingData.openHABSitemapPage
                                 }()
                             } catch {
-                                os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                                os_log("Should not throw %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
                             }
                         }
                     }
@@ -478,10 +478,10 @@ class OpenHABViewController: UIViewController {
 
                     NetworkConnection.atmosphereTrackingId = ""
                     if (error as NSError?)?.code == -1001, longPolling {
-                        os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
+                        os_log("Timeout, restarting requests", log: .remoteAccess, type: .error)
                         self.loadPage(false)
                     } else if (error as NSError?)?.code == -999 {
-                        os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
+                        os_log("Request was cancelled", log: .remoteAccess, type: .error)
                     } else {
                         // Error
                         DispatchQueue.main.async {
