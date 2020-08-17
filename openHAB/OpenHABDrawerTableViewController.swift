@@ -179,10 +179,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
             if #available(iOS 13, *) {
                 switch drawerItem.tag {
-                case "notifications":
+                case .notifications:
                     cell.customImageView.image = UIImage(systemName: "bell")
-                case "settings":
+                case .settings:
                     cell.customImageView.image = UIImage(systemName: "gear")
+                case .habpanel:
+                    cell.customImageView.image = UIImage(systemName: "rectangle.3.offgrid.fill")
                 default:
                     break
                 }
@@ -194,9 +196,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 buttonIcon.lineWidth = 1
 
                 switch drawerItem.tag {
-                case "notifications":
+                case .notifications:
                     buttonIcon.style = .custom(DynamicButtonStyleBell.self)
-                case "settings":
+                case .settings:
                     buttonIcon.style = .custom(DynamicButtonStyleGear.self)
                 default:
                     break
@@ -241,14 +243,20 @@ class OpenHABDrawerTableViewController: UITableViewController {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]
 
-            if drawerItem.tag == "settings" {
+            switch drawerItem.tag {
+            case .settings:
                 dismiss(animated: true) {
                     self.delegate?.modalDismissed(to: .settings)
                 }
-            } else if drawerItem.tag == "notifications" {
+            case .notifications:
                 dismiss(animated: true) {
                     self.delegate?.modalDismissed(to: .notifications)
                 }
+            case .habpanel:
+                dismiss(animated: true) {
+                    self.delegate?.modalDismissed(to: .habpanel)
+                }
+            default: break
             }
         }
     }
@@ -259,13 +267,21 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
             let notificationsItem = OpenHABDrawerItem()
             notificationsItem.label = "Notifications"
-            notificationsItem.tag = "notifications"
+            notificationsItem.tag = .notifications
             drawerItems.append(notificationsItem)
         }
+
+        if !(appData?.serverProperties?.habPanelUrl ?? "").isEmpty {
+            let notificationsItem = OpenHABDrawerItem()
+            notificationsItem.label = "HABPanel"
+            notificationsItem.tag = .habpanel
+            drawerItems.append(notificationsItem)
+        }
+
         // Settings always go last
         let settingsItem = OpenHABDrawerItem()
         settingsItem.label = "Settings"
-        settingsItem.tag = "settings"
+        settingsItem.tag = .settings
         drawerItems.append(settingsItem)
     }
 

@@ -13,5 +13,5 @@ import Foundation
 
 class OpenHABDrawerItem: NSObject {
     var label = ""
-    var tag = ""
+    var tag: TargetController = .root
 }

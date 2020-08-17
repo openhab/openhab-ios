@@ -19,6 +19,7 @@ class OpenHABDataObject: NSObject, DataObject {
     var openHABAlwaysSendCreds = false
     var rootViewController: OpenHABViewController?
     var openHABVersion: Int = 0
+    var serverProperties: OpenHABServerProperties?
 }
 
 extension OpenHABDataObject {

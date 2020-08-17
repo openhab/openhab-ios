@@ -95,6 +95,7 @@
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
 		DA1EAECF24E94871008A6B22 /* OpenHABServerProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EAECD24E9469E008A6B22 /* OpenHABServerProperties.swift */; };
 		DA1EAED024E94871008A6B22 /* OpenHABServerProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EAECD24E9469E008A6B22 /* OpenHABServerProperties.swift */; };
+		DA1EAED224E986C4008A6B22 /* HABPanelViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EAED124E986C4008A6B22 /* HABPanelViewController.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA2CBDAE24D5FD73003CAE8A /* UnknownCaseRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDAD24D5FD73003CAE8A /* UnknownCaseRepresentable.swift */; };
@@ -403,6 +404,7 @@
 		DA1C2E6E230DC28F00FACFB0 /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
 		DA1C32B92311CCE200FACFB0 /* JSONData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONData.swift; sourceTree = "<group>"; };
 		DA1EAECD24E9469E008A6B22 /* OpenHABServerProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABServerProperties.swift; sourceTree = "<group>"; };
+		DA1EAED124E986C4008A6B22 /* HABPanelViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HABPanelViewController.swift; sourceTree = "<group>"; };
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2CBDAD24D5FD73003CAE8A /* UnknownCaseRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnknownCaseRepresentable.swift; sourceTree = "<group>"; };
@@ -918,6 +920,7 @@
 				DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */,
 				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */,
 				A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */,
+				DA1EAED124E986C4008A6B22 /* HABPanelViewController.swift */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DF4A02291CF3157B006C3456 /* Drawer */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
@@ -1752,6 +1755,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
+				DA1EAED224E986C4008A6B22 /* HABPanelViewController.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,

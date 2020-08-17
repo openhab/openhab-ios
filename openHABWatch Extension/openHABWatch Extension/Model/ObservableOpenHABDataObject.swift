@@ -18,6 +18,8 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
 
     var openHABVersion: Int = 2
 
+    var serverProperties: OpenHABServerProperties?
+
     let objectWillChange = PassthroughSubject<Void, Never>()
     let objectRefreshed = PassthroughSubject<Void, Never>()
 

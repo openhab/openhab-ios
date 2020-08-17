@@ -17,4 +17,5 @@ public protocol DataObject: AnyObject {
     var openHABPassword: String { get set }
     var openHABVersion: Int { get set }
     var openHABAlwaysSendCreds: Bool { get set }
+    var serverProperties: OpenHABServerProperties? { get set }
 }

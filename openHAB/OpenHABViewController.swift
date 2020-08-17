@@ -26,6 +26,7 @@ enum TargetController {
     case root
     case settings
     case notifications
+    case habpanel
 }
 
 enum Action<I, O> {
@@ -87,7 +88,6 @@ class OpenHABViewController: UIViewController {
     var iconType: IconType = .png
     let search = UISearchController(searchResultsController: nil)
     var filteredPage: OpenHABSitemapPage?
-    var serverProperties: OpenHABServerProperties?
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
@@ -728,7 +728,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
 
                 if let data = response.result.value {
                     do {
-                        self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+                        self.appData?.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
                     } catch {
                         os_log("Could not decode JSON response", log: .notifications, type: .error, error.localizedDescription)
                     }
@@ -922,6 +922,10 @@ extension OpenHABViewController: ModalHandler {
                 if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
                     navigationController?.pushViewController(newViewController, animated: true)
                 }
+            }
+        case .habpanel:
+            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "HABPanelViewController") as? HABPanelViewController {
+                navigationController?.pushViewController(newViewController, animated: true)
             }
         }
     }
