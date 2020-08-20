@@ -17,6 +17,7 @@ opt_in_rules:
   - private_outlet
   - private_action
   - prefer_self_type_over_type_of_self
+  - file_name
 
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
@@ -86,3 +87,6 @@ custom_rules:
      regex: '((?:\s*\n){3,})'
      message: "There are too many line breaks"
      severity: error
+
+file_name:
+  suffix_pattern: "Extension?|\\+.*"

@@ -12,6 +12,7 @@
 import AVFoundation
 import Firebase
 import Kingfisher
+import OpenHABCore
 import os.log
 import SwiftMessages
 import UIKit
@@ -25,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static var appDelegate: AppDelegate!
 
     var window: UIWindow?
-    var appData: OpenHABDataObject?
+    var appData: OpenHABDataObject
 
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
@@ -33,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if let session = session {
                 session.delegate = WatchMessageService.singleton
                 session.activate()
+                os_log("Paired watch %{PUBLIC}@, watch app installed %{PUBLIC}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
             }
         }
     }
@@ -46,14 +48,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
 
-        // init Firebase crash reporting
-        FirebaseApp.configure()
+        setupCrashReporting()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
 
         UserDefaults.standard.register(defaults: appDefaults)
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter())
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
 
         registerForPushNotifications()
 
@@ -73,14 +74,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         activateWatchConnectivity()
 
-        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter())]
+        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))]
 
         return true
+    }
+
+    private func setupCrashReporting() {
+        guard Preferences.sendCrashReports else {
+            // The user has not opted-in to crash reporting.
+            return
+        }
+
+        // init Firebase crash reporting
+        FirebaseApp.configure()
     }
 
     func activateWatchConnectivity() {
         if WCSession.isSupported() {
             session = WCSession.default
+        } else {
+            os_log("WCSession is not supported - For instance on iPad", log: .watch, type: .debug)
         }
     }
 

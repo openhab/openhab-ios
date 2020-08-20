@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import MapKit
+import OpenHABCore
 
 class MapViewTableViewCell: GenericUITableViewCell {
     private var mapView: MKMapView!

@@ -10,6 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
+import os.log
 import WatchConnectivity
 
 // This class receives Watch Request for the configuration data like localUrl.
@@ -17,22 +19,51 @@ import WatchConnectivity
 class WatchMessageService: NSObject, WCSessionDelegate {
     static let singleton = WatchMessageService()
 
-    // This method gets called when the watch requests the localUrl
+    // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         // TODO: Use RemoteUrl, TOO
-        if message["requestLocalUrl"] != nil {
-            replyHandler(["baseUri": Preferences.localUrl])
+        os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
+
+        if message["request"] != nil {
+            let applicationDict = buildApplicationDict()
+            replyHandler(applicationDict)
         }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        print("Received message: \(message)")
+        os_log("Received message: %{PUBLIC}@", log: .watch, type: .info, message)
     }
 
-    @available(iOS 9.3, *)
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
+    }
 
-    func sessionDidBecomeInactive(_ session: WCSession) {}
+    func sessionDidBecomeInactive(_ session: WCSession) {
+        os_log("sessionDidBecomeInactive", log: .watch, type: .info)
+    }
 
-    func sessionDidDeactivate(_ session: WCSession) {}
+    func sessionDidDeactivate(_ session: WCSession) {
+        os_log("sessionDidDeactivate", log: .watch, type: .info)
+    }
+
+    func buildApplicationDict() -> [String: Any] {
+        let applicationDict: [String: Any] =
+            ["localUrl": Preferences.localUrl,
+             "remoteUrl": Preferences.remoteUrl,
+             "username": Preferences.username,
+             "password": Preferences.password,
+             "alwaysSendCreds": Preferences.alwaysSendCreds,
+             "defaultSitemap": "watch",
+             "ignoreSSL": Preferences.ignoreSSL,
+             "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates]
+
+        return applicationDict
+    }
+
+    public func syncPreferencesToWatch() {
+        if WCSession.default.activationState == .activated {
+            let applicationDict = buildApplicationDict()
+            try? WCSession.default.updateApplicationContext(applicationDict)
+        }
+    }
 }

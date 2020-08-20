@@ -5,6 +5,7 @@
 
 # disabled rules
 --disable specifiers # see https://github.com/nicklockwood/SwiftFormat/issues/364
+--disable redundantParens
 
 # opt-in rules
 --enable isEmpty

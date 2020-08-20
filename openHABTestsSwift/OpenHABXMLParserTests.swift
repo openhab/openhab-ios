@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Fuzi
-@testable import openHAB
+@testable import OpenHABCore
 import XCTest
 
 enum TestingError: Error {

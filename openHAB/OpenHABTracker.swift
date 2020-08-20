@@ -11,6 +11,7 @@
 
 import Alamofire
 import Foundation
+import OpenHABCore
 import os.log
 import SystemConfiguration
 

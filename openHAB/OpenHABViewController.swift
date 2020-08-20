@@ -15,6 +15,7 @@ import AVKit
 import DynamicButton
 import Fuzi
 import Kingfisher
+import OpenHABCore
 import os.log
 import SideMenu
 import SVGKit
@@ -45,7 +46,7 @@ struct SVGProcessor: ImageProcessor {
     func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
-            print("already an image")
+            os_log("already an image", log: .default, type: .info)
             return image
         case let .data(data):
             if let image = SVGKImage(data: data) {
@@ -449,7 +450,7 @@ class OpenHABViewController: UIViewController {
                             // Self-executing closure
                             // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
                             openHABSitemapPage = try {
-                                let sitemapPageCodingData = try data.decoded() as OpenHABSitemapPage.CodingData
+                                let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
                                 return sitemapPageCodingData.openHABSitemapPage
                             }()
                         } catch {
@@ -706,9 +707,12 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
         DispatchQueue.main.async {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
         }
-        openHABRootUrl = openHABUrl == nil ? "" : "\(openHABUrl!)"
+        if let openHABUrl = openHABUrl {
+            openHABRootUrl = openHABUrl.absoluteString
+        } else {
+            openHABRootUrl = ""
+        }
         appData?.openHABRootUrl = openHABRootUrl
-        NetworkConnection.shared.setRootUrl(openHABRootUrl)
 
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
@@ -826,6 +830,11 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
             alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
             self.present(alertView, animated: true) {}
         }
+    }
+
+    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {
+        // User's decision about trusting server certificates has changed.  Send updates to the paired watch.
+        WatchMessageService.singleton.syncPreferencesToWatch()
     }
 }
 
@@ -960,7 +969,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
         case "Image", "Chart", "Video":
             return UITableView.automaticDimension
         case "Webview", "Mapview":
-            if let height = widget?.height, height.intValue != 0 {
+            if let height = widget?.height, Int(height) != 0 {
                 // calculate webview/mapview height and return it
                 let heightValue = (Double(height) ?? 0.0) * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
@@ -1044,11 +1053,11 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
 
                 switch iconType {
                 case .png:
-                    cell.imageView?.kf.setImage(with: urlc,
+                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 completionHandler: reportOnResults)
                 case .svg:
-                    cell.imageView?.kf.setImage(with: urlc,
+                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                                                 placeholder: UIImage(named: "blankicon.png"),
                                                 options: [.processor(SVGProcessor())],
                                                 completionHandler: reportOnResults)
@@ -1144,13 +1153,15 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// MARK: Kingfisher authentication with NSURLCredential
+
 extension OpenHABViewController: AuthenticationChallengeResponsable {
     // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(), task, challenge)
+        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
         completionHandler(disposition, credential)
     }
 
@@ -1158,7 +1169,7 @@ extension OpenHABViewController: AuthenticationChallengeResponsable {
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(), challenge)
+        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
         completionHandler(disposition, credential)
     }
 }

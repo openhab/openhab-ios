@@ -12,7 +12,6 @@
 import Foundation
 
 // Inspired by http://danielemargutti.com/2017/10/19/throttle-in-swift/
-
 public class Throttler {
     private let queue: DispatchQueue = .global(qos: .background)
 
@@ -30,7 +29,15 @@ public class Throttler {
             self?.previousRun = Date()
             block()
         }
-        let delay = Date().timeIntervalSince(previousRun) > maxInterval ? 0 : maxInterval
-        queue.asyncAfter(deadline: .now() + Double(delay), execute: job)
+        let elapsedTimeInterval = Date().timeIntervalSince(previousRun)
+        let delay = elapsedTimeInterval > maxInterval ? 0 : maxInterval
+        queue.asyncAfter(deadline: .secondsFromNow(delay), execute: job)
+    }
+}
+
+// Inspired by https://ericasadun.com/2017/05/23/5-easy-dispatch-tricks/
+extension DispatchTime {
+    public static func secondsFromNow(_ amount: Double) -> DispatchTime {
+        DispatchTime.now() + amount
     }
 }

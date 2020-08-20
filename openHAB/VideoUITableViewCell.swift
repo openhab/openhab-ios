@@ -12,6 +12,7 @@
 import Alamofire
 import AVFoundation
 import AVKit
+import OpenHABCore
 import os.log
 
 enum VideoEncoding: String {
@@ -19,7 +20,13 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell {
-    private let activityIndicator = UIActivityIndicatorView(style: .gray)
+    private var activityIndicator: UIActivityIndicatorView = {
+        if #available(iOS 13.0, *) {
+            return UIActivityIndicatorView(style: .medium)
+        } else {
+            return UIActivityIndicatorView(style: .gray)
+        }
+    }()
 
     var didLoad: (() -> Void)?
 

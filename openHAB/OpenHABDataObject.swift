@@ -10,12 +10,20 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
 
-class OpenHABDataObject: NSObject {
+class OpenHABDataObject: NSObject, DataObject {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
     var openHABAlwaysSendCreds = false
     var rootViewController: OpenHABViewController?
     var openHABVersion: Int = 0
+}
+
+extension OpenHABDataObject {
+    convenience init(openHABRootUrl: String) {
+        self.init()
+        self.openHABRootUrl = openHABRootUrl
+    }
 }

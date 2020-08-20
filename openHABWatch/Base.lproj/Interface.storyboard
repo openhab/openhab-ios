@@ -1,101 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14490.70" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
-    <device id="watch44" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="15505" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="NBu-mt-KyX">
+    <device id="watch38"/>
     <dependencies>
-        <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14490.21"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15509"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="15501"/>
     </dependencies>
     <scenes>
-        <!--Interface Controller-->
-        <scene sceneID="aou-V4-d1y">
+        <!--openHAB-->
+        <scene sceneID="RUd-og-cv4">
             <objects>
-                <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="openHABWatch" customModuleProvider="target">
-                    <items>
-                        <group width="1" alignment="left" layout="overlap" id="Jg9-7I-sSk">
-                            <items>
-                                <imageView alignment="center" verticalAlignment="center" image="Activity1" id="ASz-Os-ceT"/>
-                                <group width="1" alignment="left" layout="overlap" id="Z3L-Ie-lK8">
-                                    <items>
-                                        <table alignment="left" id="rMX-tM-cm0" userLabel="SwitchTable">
-                                            <items>
-                                                <tableRow identifier="buttonRow" id="fzl-gH-2Zn" customClass="ButtonTableRowController" customModule="openHABWatch_Extension">
-                                                    <group key="rootItem" width="1" alignment="left" layout="overlap" id="Q0J-qh-mPk">
-                                                        <items>
-                                                            <switch width="1" alignment="left" value="YES" title="Switch" id="0id-aE-aUp">
-                                                                <connections>
-                                                                    <action selector="doSwitchButtonPressed:" destination="fzl-gH-2Zn" id="v7Q-Iu-DMg"/>
-                                                                </connections>
-                                                            </switch>
-                                                        </items>
-                                                        <edgeInsets key="margins" left="0.0" right="0.0" top="0.0" bottom="0.0"/>
-                                                    </group>
-                                                    <connections>
-                                                        <outlet property="buttonSwitch" destination="0id-aE-aUp" id="d8H-Mo-N1V"/>
-                                                    </connections>
-                                                </tableRow>
-                                            </items>
-                                        </table>
-                                    </items>
-                                </group>
-                            </items>
-                        </group>
-                    </items>
+                <hostingController id="NBu-mt-KyX" userLabel="openHAB" customClass="HostingController" customModule="openHABWatchSwift" customModuleProvider="target" colorLabel="IBBuiltInLabel-Orange">
                     <connections>
-                        <outlet property="activityImage" destination="ASz-Os-ceT" id="HwF-g6-CZt"/>
-                        <outlet property="buttonTable" destination="rMX-tM-cm0" id="6to-vS-YEh"/>
-                        <segue destination="e7o-Tt-CsM" kind="relationship" relationship="nextPage" id="XLY-Iq-Ok3"/>
+                        <segue destination="PiX-Cb-fwf" kind="relationship" relationship="nextPage" id="vdR-4M-bYa"/>
                     </connections>
-                </controller>
+                </hostingController>
             </objects>
-            <point key="canvasLocation" x="50" y="276"/>
+            <point key="canvasLocation" x="187" y="141"/>
         </scene>
-        <!--Prefs Interface Controller-->
-        <scene sceneID="pwb-Vg-mvC">
+        <!--Preferences-->
+        <scene sceneID="wnv-iI-6rY">
             <objects>
-                <controller id="e7o-Tt-CsM" customClass="PrefsInterfaceController" customModule="openHABWatch_Extension">
-                    <items>
-                        <label alignment="right" text="V0.0.0" textAlignment="right" id="s0F-i0-s3a">
-                            <fontDescription key="font" type="system" pointSize="14"/>
-                        </label>
-                        <label alignment="left" text="Local URL:" id="b9D-rP-m3a">
-                            <fontDescription key="font" type="boldSystem" pointSize="12"/>
-                        </label>
-                        <label alignment="left" id="Kmv-Np-1NA" userLabel="localUrlLabel">
-                            <fontDescription key="font" type="system" pointSize="12"/>
-                        </label>
-                        <label alignment="left" text="Remote URL:" id="qWA-0p-D0o">
-                            <fontDescription key="font" type="boldSystem" pointSize="12"/>
-                        </label>
-                        <label alignment="left" id="Z9M-hk-rHd" userLabel="remoteUrlLabel">
-                            <fontDescription key="font" type="system" pointSize="12"/>
-                        </label>
-                        <label alignment="left" text="Sitemap:" id="Tnv-Ze-AJD">
-                            <fontDescription key="font" type="boldSystem" pointSize="12"/>
-                        </label>
-                        <label alignment="left" id="o8J-0J-WBs" userLabel="sitemapLabel">
-                            <fontDescription key="font" type="system" pointSize="12"/>
-                        </label>
-                        <label alignment="left" text="Username:" id="c5b-VZ-QOY">
-                            <fontDescription key="font" type="boldSystem" pointSize="12"/>
-                        </label>
-                        <label alignment="left" id="o6x-vo-MV1" userLabel="usernameLabel">
-                            <fontDescription key="font" type="system" pointSize="12"/>
-                        </label>
-                    </items>
-                    <connections>
-                        <outlet property="localUrlLabel" destination="Kmv-Np-1NA" id="CS9-hB-jyS"/>
-                        <outlet property="remoteUrlLabel" destination="Z9M-hk-rHd" id="J88-wi-3S5"/>
-                        <outlet property="sitemapLabel" destination="o8J-0J-WBs" id="rI8-am-oUl"/>
-                        <outlet property="usernameLabel" destination="o6x-vo-MV1" id="GRZ-0M-iqS"/>
-                        <outlet property="versionLabel" destination="s0F-i0-s3a" id="10V-zZ-CwK"/>
-                    </connections>
-                </controller>
+                <hostingController id="PiX-Cb-fwf" userLabel="Preferences" customClass="PreferencesHostingController" customModule="openHABWatchSwift" customModuleProvider="target"/>
             </objects>
-            <point key="canvasLocation" x="313" y="288"/>
+            <point key="canvasLocation" x="488" y="141"/>
+        </scene>
+        <!--Static Notification Interface Controller-->
+        <scene sceneID="AEw-b0-oYE">
+            <objects>
+                <notificationController id="YCC-NB-fut">
+                    <items>
+                        <label alignment="left" text="Alert Label" numberOfLines="0" id="IdU-wH-bcW"/>
+                    </items>
+                    <notificationCategory key="notificationCategory" identifier="openHABNotification" id="JfB-70-Muf"/>
+                    <connections>
+                        <outlet property="notificationAlertLabel" destination="IdU-wH-bcW" id="JKC-fr-R95"/>
+                        <segue destination="eXb-UN-Cd0" kind="relationship" relationship="dynamicInteractiveNotificationInterface" id="mpB-YA-K8N"/>
+                    </connections>
+                </notificationController>
+            </objects>
+            <point key="canvasLocation" x="187" y="462"/>
+        </scene>
+        <!--Notification Controller-->
+        <scene sceneID="Niz-AI-uX2">
+            <objects>
+                <controller id="eXb-UN-Cd0" customClass="NotificationController" customModule="openHABWatchSwift" customModuleProvider="target"/>
+            </objects>
+            <point key="canvasLocation" x="488" y="462"/>
         </scene>
     </scenes>
-    <color key="tintColor" red="0.13333333333333333" green="0.13333333333333333" blue="0.13725490196078433" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
 </document>

@@ -9,6 +9,8 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
+import OpenHABCore
 import os.log
 import UIKit
 
@@ -23,6 +25,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsIdleOff = false
     var settingsIconType: IconType = .png
     var settingsRealTimeSliders = false
+    var settingsSendCrashReports = false
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -39,6 +42,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var iconSegmentedControl: UISegmentedControl!
     @IBOutlet private var alwaysSendCredsSwitch: UISwitch!
     @IBOutlet private var realTimeSlidersSwitch: UISwitch!
+    @IBOutlet private var sendCrashReportsSwitch: UISwitch!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -112,9 +116,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                 ret = 6
             }
         case 1:
-            ret = 8
+            ret = 10
         default:
-            ret = 8
+            ret = 10
         }
         return ret
     }
@@ -122,8 +126,11 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         settingsTableView.deselectRow(at: indexPath, animated: true)
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
-        if indexPath.section == 1, indexPath.row == 2 {
+        if tableView.cellForRow(at: indexPath)?.tag == 999 {
             os_log("Clearing image cache", log: .viewCycle, type: .info)
+            KingfisherManager.shared.cache.clearMemoryCache()
+            KingfisherManager.shared.cache.clearDiskCache()
+            KingfisherManager.shared.cache.cleanExpiredDiskCache()
         }
     }
 
@@ -159,6 +166,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         demomodeSwitch?.isOn = settingsDemomode
         idleOffSwitch?.isOn = settingsIdleOff
         realTimeSlidersSwitch?.isOn = settingsRealTimeSliders
+        sendCrashReportsSwitch?.isOn = settingsSendCrashReports
         iconSegmentedControl?.selectedSegmentIndex = settingsIconType.rawValue
         if settingsDemomode == true {
             disableConnectionSettings()
@@ -177,10 +185,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsDemomode = Preferences.demomode
         settingsIdleOff = Preferences.idleOff
         settingsRealTimeSliders = Preferences.realTimeSliders
+        settingsSendCrashReports = Preferences.sendCrashReports
         let rawSettingsIconType = Preferences.iconType
         settingsIconType = IconType(rawValue: rawSettingsIconType) ?? .png
-
-        sendSettingsToWatch()
     }
 
     func updateSettings() {
@@ -194,6 +201,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsDemomode = demomodeSwitch?.isOn ?? false
         settingsIdleOff = idleOffSwitch?.isOn ?? false
         settingsRealTimeSliders = realTimeSlidersSwitch?.isOn ?? false
+        settingsSendCrashReports = sendCrashReportsSwitch?.isOn ?? false
         settingsIconType = IconType(rawValue: iconSegmentedControl.selectedSegmentIndex) ?? .png
     }
 
@@ -208,17 +216,8 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.idleOff = settingsIdleOff
         Preferences.realTimeSliders = settingsRealTimeSliders
         Preferences.iconType = settingsIconType.rawValue
+        Preferences.sendCrashReports = settingsSendCrashReports
 
-        sendSettingsToWatch()
-    }
-
-    func sendSettingsToWatch() {
-        WatchService.singleton.sendToWatch(Preferences.localUrl,
-                                           remoteUrl: Preferences.remoteUrl,
-                                           username: Preferences.username,
-                                           password: Preferences.password,
-                                           alwaysSendCreds: Preferences.alwaysSendCreds,
-                                           sitemapName: "watch",
-                                           ignoreSSL: Preferences.ignoreSSL)
+        WatchMessageService.singleton.syncPreferencesToWatch()
     }
 }

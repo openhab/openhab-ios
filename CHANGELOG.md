@@ -4,6 +4,42 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.3.24, Build 1580410444] - 2020-05-13
+
+### Changed
+- Make crash reporting opt-in in order to comply with GDPR, refs #546
+
+## [Version 2.3.15, Build 1580410435] - 2020-02-20
+
+### Fixed
+-  enable inline and automatic media playback, refs #540
+
+## [Version 2.3.13, Build 1580410433] - 2020-02-15
+
+### Fixed
+- SliderUITableViewCell: if there is a formatted value in widget label, take it. Otherwise display local value. Addresses #534
+- Fix segmented control, closes #538
+- Use same icon cacheKey for local and remote connection, refs #536
+
+### Changed
+- add lane to upload dSYMs to Crashlytics
+
+## [Version 2.3.12, Build 1580410432] - 2020-02-15
+
+### Fixed
+
+
+## [Version 2.3.11, Build 1580410431] - 2020-02-12
+
+### Fixed
+- fix image cache purging, refs #455
+- Backed out capability in Xcode that was not used
+
+## [Version 2.3.8, Build 1580410428] - 2020-02-12
+
+### Fixed
+- fix image cache purging, refs #455
+
 ## [Version 2.2.56, Build 1578225438] - 2020-01-05
 
 ### Fixed 

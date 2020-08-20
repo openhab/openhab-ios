@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
+import OpenHABCore
 import os.log
 import UIKit
 
@@ -17,11 +18,6 @@ enum ImageType {
     case link(url: URL?)
     case embedded(image: UIImage?)
     case empty
-}
-
-enum ChartStyle {
-    case dark
-    case light
 }
 
 class NewImageUITableViewCell: GenericUITableViewCell {
@@ -34,6 +30,10 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     private var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
+    }
+
+    private var shouldCache: Bool {
+        widget?.refresh == 0
     }
 
     private var widgetPayload: ImageType {
@@ -145,6 +145,9 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         var imageRequest = URLRequest(url: url)
         imageRequest.timeoutInterval = 10.0
+        if !shouldCache {
+            imageRequest.cachePolicy = .reloadIgnoringCacheData
+        }
 
         if downloadRequest != nil {
             downloadRequest?.cancel()
