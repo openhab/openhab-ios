@@ -29,7 +29,7 @@ class OpenHABGeneralTests: XCTestCase {
             return String(format: "%.\(digits)f", widgetValue)
         }
 
-        XCTAssertEqual(1000.0.valueText(step: 5.23), "1000.00")
+        XCTAssertEqual(1000.0.valueText(step: 0.01), "1000.00")
         XCTAssertEqual(1000.0.valueText(step: 1), "1000")
         XCTAssertEqual(valueTextWithoutFormatter(1000.0, step: 5.23), "1000.00")
     }
