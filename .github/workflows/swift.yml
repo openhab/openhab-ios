@@ -13,9 +13,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build app
-      run: |
-        fastlane run build_app (scheme: "openHAB", clean: true, export_method: "app-store")
+ #   - name: Build app
+ #     run: |
+ #       fastlane run build_app (scheme: "openHAB", clean: true, export_method: "app-store")
+
+    - name: Start xcodebuild test
+      run: xcodebuild -showBuildSettings -workspace ./openHAB.xcworkspace -scheme openHAB
+   #   run: xcodebuild clean test -project TodoSampleApp.xcodeproj -scheme TodoSampleApp -destination "platform=iOS Simulator,name=iPhone 11 Pro"
 #- name: Build
 #      run: swift build -v
 #    - name: Run tests
