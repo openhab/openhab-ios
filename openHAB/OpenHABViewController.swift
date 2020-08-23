@@ -718,9 +718,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case .success:
-                os_log("This is an openHAB 2.X", log: .remoteAccess, type: .info)
-
-                self.appData?.openHABVersion = 2
 
                 DispatchQueue.main.async {
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -729,21 +726,26 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                 if let data = response.result.value {
                     do {
                         self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+                        os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
+                        self.appData?.openHABVersion = 2
+                        self.selectSitemap()
                     } catch {
-                        os_log("Could not decode JSON response", log: .notifications, type: .error, error.localizedDescription)
+                        os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
+                        let str = String(decoding: data, as: UTF8.self)
+                        if str.hasPrefix("<?xml") {
+                            self.appData?.openHABVersion = 1
+                            self.selectSitemap()
+                        }
                     }
                 }
 
-                self.selectSitemap()
             case let .failure(error):
-                os_log("This is an openHAB 1.X", log: .remoteAccess, type: .info)
-                self.appData?.openHABVersion = 1
+                os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
 
                 DispatchQueue.main.async {
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
-                os_log("On Tracking %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                self.selectSitemap()
+                os_log("On Connecting %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
             }
         }
     }

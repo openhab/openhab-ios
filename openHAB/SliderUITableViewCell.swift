@@ -49,7 +49,11 @@ class SliderUITableViewCell: GenericUITableViewCell {
         selectionStyle = .none
         separatorInset = .zero
         throttlingInterval = 0.1
-        step = Float(widget.step)
+        if let widget = widget {
+            step = Float(widget.step)
+        } else {
+            step = 1.0
+        }
     }
 
     @IBAction private func sliderValueChanged(_ sender: Any) {

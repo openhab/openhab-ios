@@ -1,0 +1,63 @@
+name: Publish on TestFlight
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  publish_app:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache cocoapods dependencies
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-cocoapods-dependencies
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ env.cache-name }}-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-${{ env.cache-name }}-
+
+      - name: Setup Cocoapods
+        uses: maxim-lobanov/setup-cocoapods@v1.1
+        with:
+          podfile-path: Podfile.lock
+
+      - name: Check Pods existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "Pods"
+
+      - name: Install Dependencies
+        if: steps.check_files.outputs.files_exists == 'false'
+        run: |
+          pod install --repo-update
+        shell: bash
+
+      - name: SSH Config
+        run:  echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - name: SSH Keys
+        uses: webfactory/ssh-agent@v0.4.0
+        with:
+          ssh-private-key: |
+            ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+            ${{ secrets.GIT_PRIVATE_KEY }}
+
+      - name: fastlane iOS beta
+        env:
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          SIGNING_IDENTITY: ${{ secrets.SIGNING_IDENTITY }}
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+        uses: maierj/fastlane-action@v1.4.0
+        with:
+          lane: beta
+          skip-tracking: true
