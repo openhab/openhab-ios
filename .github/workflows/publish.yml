@@ -1,6 +1,8 @@
 name: Publish on TestFlight
 
-on: [push]
+on:
+  push:
+    branches: [develop]
 
 jobs:
   publish_app:
@@ -14,7 +16,7 @@ jobs:
         env:
           cache-name: cache-cocoapods-dependencies
         with:
-          path: <project>/Pods
+          path: Pods
           key: ${{ runner.os }}-pods-${{ env.cache-name }}-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-${{ env.cache-name }}-
@@ -22,11 +24,17 @@ jobs:
       - name: Setup Cocoapods
         uses: maxim-lobanov/setup-cocoapods@v1.1
         with:
-          podfile-path: <project>/Podfile.lock
+          podfile-path: Podfile.lock
+
+      - name: Check Pods existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "Pods"
 
       - name: Install Dependencies
+        if: steps.check_files.outputs.files_exists == 'false'
         run: |
-          cd <project>
           pod install --repo-update
         shell: bash
 
@@ -43,12 +51,13 @@ jobs:
       - name: fastlane iOS beta
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           SIGNING_IDENTITY: ${{ secrets.SIGNING_IDENTITY }}
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
         uses: maierj/fastlane-action@v1.4.0
         with:
           lane: beta
-          subdirectory: <project>
           skip-tracking: true
