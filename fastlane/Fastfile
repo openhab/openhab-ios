@@ -135,10 +135,10 @@ platform :ios do
     desc 'Download strings files from Crowdin'
     lane :crowdin do
         if ENV['OH_CROWDIN_PROJECT_ID'] != nil && ENV['OH_CROWDIN_USERNAME'] != nil && ENV['OH_CROWDIN_ACCOUNT_KEY'] != nil
-            unless File.exist?(File.expand_path('..') + '/openHAB/Resources/crowdin.yml')
+            unless File.exist?(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml')
                 UI.user_error!("crowdinfile.yml is required to run this lane! Aborted \u{1F6D1}")
             end
-            config = YAML.load(File.read(File.expand_path('..') + '/openHAB/Resources/crowdin.yml'))
+            config = YAML.load(File.read(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml'))
             build = "https://api.crowdin.com/api/project/#{ENV["OH_CROWDIN_PROJECT_ID"]}/export?login=#{ENV["OH_CROWDIN_USERNAME"]}&account-key=#{ENV["OH_CROWDIN_ACCOUNT_KEY"]}"
             dl = "https://api.crowdin.com/api/project/#{ENV["OH_CROWDIN_PROJECT_ID"]}/download/all.zip?login=#{ENV["OH_CROWDIN_USERNAME"]}&account-key=#{ENV["OH_CROWDIN_ACCOUNT_KEY"]}"
             path = File.expand_path('..') + '/openHAB/Resources/'
