@@ -235,7 +235,7 @@ extension UserData: OpenHABWatchTrackerDelegate {
 
         if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
             AppMessageService.singleton.requestApplicationContext()
-            errorDescription = "Settings not yet received from phone."
+            errorDescription = NSLocalizedString("settings_not_received", comment: "")
             showAlert = true
             return
         }
