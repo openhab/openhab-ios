@@ -1,0 +1,43 @@
+langs:
+  en/Localizable.strings:
+    - en.lproj
+  de/Localizable.strings:
+    - de.lproj
+  es-ES/Localizable.strings:
+    - es.lproj
+  it/Localizable.strings:
+    - it.lproj
+  cs/Localizable.strings:
+    - cs.lproj
+  da/Localizable.strings:
+    - da.lproj
+  el/Localizable.strings:
+    - el.lproj
+  fi/Localizable.strings:
+    - fi.lproj
+  fr/Localizable.strings:
+    - fr.lproj
+  hu/Localizable.strings:
+    - hu.lproj
+  nl/Localizable.strings:
+    - nl.lproj
+  no/Localizable.strings:
+    - nb.lproj
+  pl/Localizable.strings:
+    - pl.lproj
+  pt-PT/Localizable.strings:
+    - pt-PT.lproj
+  pt-BR/Localizable.strings:
+    - pt-BR.lproj
+  ro/Localizable.strings:
+    - ro.lproj
+  ru/Localizable.strings:
+    - ru.lproj
+  sr/Localizable.strings:
+    - sr.lproj
+  sv-SE/Localizable.strings:
+    - sv-SE.lproj
+  tr/Localizable.strings:
+    - tr.lproj
+  uk/Localizable.strings:
+    - uk.lproj

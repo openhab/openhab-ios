@@ -16,115 +16,167 @@
 default_platform(:ios)
 
 platform :ios do
-  desc "Generate new localized screenshots"
-  lane :screenshots do
-    capture_screenshots(workspace: "openHAB.xcworkspace",
-		        scheme: "openHABUITests",
-			dark_mode: true)
-  end
-
-  desc 'Run unit tests.'
-  lane :unittests do
-      run_tests(
-          workspace: 'openHAB.xcworkspace',
-          scheme: 'openHABTestsSwift',
-          devices: ['iPhone 11 Pro']
-      )
-  end
-
-  desc 'Refresh dSYMS.'
-  lane :refresh_dsyms do
-      download_dsyms(
-          version: "latest",
-          wait_for_dsym_processing: true,
-          wait_timeout: 600)
-      upload_symbols_to_crashlytics
-      clean_build_artifacts
-  end
-
-  desc "Build beta"
-  lane :beta do |lane|
-
-    # check the semantic parameter entered
-    if !lane[:bump]
-        raise "No bump type defined! Use one of: patch | minor | major".red
+    desc 'Generate new localized screenshots'
+    lane :screenshots do
+        capture_screenshots(workspace: 'openHAB.xcworkspace',
+                            scheme: 'openHABUITests',
+                            dark_mode: true)
     end
 
-    ensure_git_branch(
-        branch: "(master|develop|release\\S+|hotfix\\S+)"
-    )
+    desc 'Run unit tests.'
+    lane :unittests do
+        run_tests(
+            workspace: 'openHAB.xcworkspace',
+            scheme: 'openHABTestsSwift',
+            devices: ['iPhone 11 Pro']
+        )
+    end
 
-    # ensure that master branch is clean
-    ensure_git_status_clean
+    desc 'Refresh dSYMS.'
+    lane :refresh_dsyms do
+        download_dsyms(
+            version: 'latest',
+            wait_for_dsym_processing: true,
+            wait_timeout: 600
+        )
+        upload_symbols_to_crashlytics
+        clean_build_artifacts
+    end
 
-    # run unit tests
-    #unittests
+    desc 'Build beta'
+    lane :beta do |lane|
+        # check the semantic parameter entered
+        raise 'No bump type defined! Use one of: patch | minor | major'.red unless lane[:bump]
 
-    increment_build_number_in_xcodeproj(
-        xcodeproj: "openHAB.xcodeproj"
-    )
+        ensure_git_branch(
+            branch: '(master|develop|release\\S+|hotfix\\S+)'
+        )
 
-    type = lane[:bump]
+        # ensure that master branch is clean
+        ensure_git_status_clean
 
-    increment_version_number_in_xcodeproj(
-        bump_type: type,
-        xcodeproj: "openHAB.xcodeproj"
-    )
+        # update L10ns
+        crowdin
 
-    build_number = get_build_number
-    version = get_version_number(xcodeproj: "openHAB.xcodeproj",
-                                        target: "openHAB")
+        # run unit tests
+        unittests
 
-    # get the last commit comments from Git history
-    # and creates our changelog
-    comments = changelog_from_git_commits(
-          between: [last_git_tag, "HEAD"],
-          pretty: "- %s",
-          date_format: "short",
-          match_lightweight_tag: false,
-          merge_commit_filtering: "exclude_merges"
-    )
+        increment_build_number_in_xcodeproj(
+            xcodeproj: 'openHAB.xcodeproj'
+        )
 
-    changelog = read_changelog # Read changelog
+        type = lane[:bump]
 
-    stamp_changelog(section_identifier: "Version #{version}, Build #{build_number}") # Stamp Unreleased section with newly released build number
+        increment_version_number_in_xcodeproj(
+            bump_type: type,
+            xcodeproj: 'openHAB.xcodeproj'
+        )
 
-    clean_build_artifacts
+        build_number = get_build_number
+        version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
+                                     target: 'openHAB')
 
-    # commit to git the changes from bumping version number
-    commit_version_bump(message: "Committed version bump",
-                        xcodeproj: "openHAB.xcodeproj",
-                        force: true)
+        # get the last commit comments from Git history
+        # and creates our changelog
+        comments = changelog_from_git_commits(
+            between: [last_git_tag, 'HEAD'],
+            pretty: '- %s',
+            date_format: 'short',
+            match_lightweight_tag: false,
+            merge_commit_filtering: 'exclude_merges'
+        )
 
-    # push bump commit
-    push_to_git_remote
+        changelog = read_changelog # Read changelog
 
-    # create a local tag with the new version
-    add_git_tag(
-        message: changelog,
-        tag: "#{version}")
+        stamp_changelog(section_identifier: "Version #{version}, Build #{build_number}") # Stamp Unreleased section with newly released build number
 
-    # publish a new release into Github
-    github_release = set_github_release(
-    	api_token: ENV["GITHUB_TOKEN"],
-    	repository_name: "openhab/openhab-ios",
-        name: "#{type.capitalize} version #{version}",
-        tag_name: "#{version}",
-        description: changelog,
-        commitish: "master"
-        # upload_assets: no assets supported
-    )
-    build_app(scheme: "openHAB",
-              clean: true,
-              export_method: "app-store")
-    upload_to_testflight(
-        distribute_external: true,
-        notify_external_testers: true,
-        changelog: changelog,
-        groups: ["Beta Testers"]
-    )
-    refresh_dsyms
+        clean_build_artifacts
 
-  end
+        git_add(path: "./openHAB/Resources/*/*.strings", shell_escape: false)
+        # commit to git the changes from bumping version number
+        commit_version_bump(message: 'Committed version bump',
+                            xcodeproj: 'openHAB.xcodeproj',
+                            force: true)
+
+        # push bump commit
+        ensure_git_status_clean
+        push_to_git_remote
+
+        # create a local tag with the new version
+        add_git_tag(
+            message: changelog,
+            tag: version.to_s
+        )
+
+        # publish a new release into Github
+        github_release = set_github_release(
+            api_token: ENV['GITHUB_TOKEN'],
+            repository_name: 'openhab/openhab-ios',
+            name: "#{type.capitalize} version #{version}",
+            tag_name: version.to_s,
+            description: changelog,
+            commitish: 'master'
+            # upload_assets: no assets supported
+        )
+        build_app(scheme: 'openHAB',
+                  clean: true,
+                  export_method: 'app-store')
+        upload_to_testflight(
+            distribute_external: true,
+            notify_external_testers: true,
+            changelog: changelog,
+            groups: ['Beta Testers']
+        )
+        refresh_dsyms
+    end
+
+    # This currently only updates Localizable.strings
+    # Regions.strings and InfoPlist.strings must be done manually
+    desc 'Download strings files from Crowdin'
+    lane :crowdin do
+        if ENV['OH_CROWDIN_PROJECT_ID'] != nil && ENV['OH_CROWDIN_USERNAME'] != nil && ENV['OH_CROWDIN_ACCOUNT_KEY'] != nil
+            unless File.exist?(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml')
+                UI.user_error!("crowdinfile.yml is required to run this lane! Aborted \u{1F6D1}")
+            end
+            config = YAML.load(File.read(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml'))
+            build = "https://api.crowdin.com/api/project/#{ENV["OH_CROWDIN_PROJECT_ID"]}/export?login=#{ENV["OH_CROWDIN_USERNAME"]}&account-key=#{ENV["OH_CROWDIN_ACCOUNT_KEY"]}"
+            dl = "https://api.crowdin.com/api/project/#{ENV["OH_CROWDIN_PROJECT_ID"]}/download/all.zip?login=#{ENV["OH_CROWDIN_USERNAME"]}&account-key=#{ENV["OH_CROWDIN_ACCOUNT_KEY"]}"
+            path = File.expand_path('..') + '/openHAB/Resources/'
+            langs = config['langs']
+            # Expected size of the array, used to check if new languages have been added or not
+            # The size logic can be omitted if needed
+            size = 42
+
+            response = Net::HTTP.get_response(URI(build))
+            if response.is_a? Net::HTTPSuccess
+                puts "Strings project built! \u{1F57A}"
+                puts 'Downloading zip file....'
+                content = open(dl)
+                puts 'Updating files....'
+                Zip::File.open_buffer(content) do |zip|
+                    # The size logic can be omitted if needed
+                    unless zip.entries.count == size
+                        UI.user_error!("Additional languages have been added, please reconfigure yml file!! \u{1F6D1}")
+                    end
+                    zip.each do |entry|
+                        next unless langs.key?(entry.name)
+
+                        # Key found, pull content and write to file
+                        langs[entry.name].each do |lang|
+                            content = entry.get_input_stream.read
+                            full_path = path + lang + '/Localizable.strings'
+                            puts "Updated! \u{1F4AA} " + full_path
+                            File.open(full_path, 'w') { |file| file.write(content) }
+                        end
+                    end
+                    puts "String update complete! \u{1F984}"
+                end
+            else
+                UI.user_error!("Failed to build project strings \u{1F622}")
+            end
+        else
+            UI.important 'Missing credentials, skipping crowdin download.'
+        end
+    end
 
 end
