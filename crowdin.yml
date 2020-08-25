@@ -1,23 +1,7 @@
 files:
   - source: /openHAB/Resources/en.lproj/*.strings
-    translation: /openHAB/Resources/%locale%.lproj/%original_file_name%
+    translation: /openHAB/Resources/%two_letters_code%.lproj/%original_file_name%
     languages_mapping:
-      locale:
-        cs-CZ: cs
-        da-DK: da
-        de-DE: de
-        el-GR: el
-        en-US: en
-        es-ES: es
-        fi-FI: fi
-        fr-FR: fr
-        hu-HU: hu
-        it-IT: it
-        nb-NO: nb
-        nl-NL: nl
-        pl-PL: pl
-        ro-RO: ro
-        ru-RU: ru
-        sr-SP: sr
-        tr-TR: tr
-        uk-UA: uk
+      two_letters_code:
+        pt: pt-PT
+        sv: sv-SE
