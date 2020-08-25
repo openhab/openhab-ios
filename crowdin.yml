@@ -1,3 +1,9 @@
 files:
   - source: /openHAB/Resources/en.lproj/*.strings
     translation: /openHAB/Resources/%two_letters_code%.lproj/%original_file_name%
+    languages_mapping:
+      two_letters_code:
+        es-ES: es
+        no: nb
+        pt-PT: pt-PT
+        sv-SE: sv-SE
