@@ -21,7 +21,7 @@ langs:
     - hu.lproj
   develop/openHAB/Resources/nl.lproj/Localizable.strings:
     - nl.lproj
-  develop/openHAB/Resources/no.lproj/Localizable.strings:
+  develop/openHAB/Resources/nb.lproj/Localizable.strings:
     - nb.lproj
   develop/openHAB/Resources/pl.lproj/Localizable.strings:
     - pl.lproj
