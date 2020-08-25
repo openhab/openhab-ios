@@ -145,7 +145,7 @@ platform :ios do
             langs = config['langs']
             # Expected size of the array, used to check if new languages have been added or not
             # The size logic can be omitted if needed
-            size = 42
+            size = 63
 
             response = Net::HTTP.get_response(URI(build))
             if response.is_a? Net::HTTPSuccess
