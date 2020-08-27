@@ -113,7 +113,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
             widgetSlider?.maximumValue = Float(widget.maxValue)
             let widgetValue = adjustedValue()
             widgetSlider?.value = Float(widgetValue)
-
             step = Float(widget.step)
 
             // if there is a formatted value in widget label, take it. Otherwise display local value

@@ -27,15 +27,14 @@ struct PreferencesSwiftUIView: View {
 
     var body: some View {
         List {
-            PreferencesRowUIView(label: "Version", content: applicationVersionNumber).font(.footnote)
-            PreferencesRowUIView(label: "Active URL", content: settings.openHABRootUrl).font(.footnote)
-            PreferencesRowUIView(label: "Local URL", content: settings.localUrl).font(.footnote)
-            PreferencesRowUIView(label: "Remote URL", content: settings.remoteUrl).font(.footnote)
-            PreferencesRowUIView(label: "Sitemap", content: settings.sitemapName).font(.footnote)
-            PreferencesRowUIView(label: "Username", content: settings.openHABUsername).font(.footnote)
+            PreferencesRowUIView(label: NSLocalizedString("version", comment: ""), content: applicationVersionNumber).font(.footnote)
+            PreferencesRowUIView(label: NSLocalizedString("active_url", comment: ""), content: settings.openHABRootUrl).font(.footnote)
+            PreferencesRowUIView(label: NSLocalizedString("local_url", comment: ""), content: settings.localUrl).font(.footnote)
+            PreferencesRowUIView(label: NSLocalizedString("remote_url", comment: ""), content: settings.remoteUrl).font(.footnote)
+            PreferencesRowUIView(label: NSLocalizedString("sitemap", comment: ""), content: settings.sitemapName).font(.footnote)
+            PreferencesRowUIView(label: NSLocalizedString("username", comment: ""), content: settings.openHABUsername).font(.footnote)
             HStack {
-                Button(action: { AppMessageService.singleton.requestApplicationContext()
-                }, label: { Text("Sync preferences") })
+                Button(action: { AppMessageService.singleton.requestApplicationContext() }, label: { Text(NSLocalizedString("sync_prefs", comment: "")) })
             }
         }
     }

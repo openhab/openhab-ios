@@ -107,14 +107,14 @@ class OpenHABTracker: NSObject {
             }
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
-            errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
+            errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("network_not_available", comment: "")
             let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
             delegate?.openHABTrackingError(trackingError)
         }
     }
 
     func trackedLocalUrl() {
-        delegate?.openHABTrackingProgress("Connecting to local URL")
+        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_local", comment: ""))
         let openHABUrl = normalizeUrl(openHABLocalUrl)
         trackedUrl(URL(string: openHABUrl!))
     }
@@ -126,19 +126,19 @@ class OpenHABTracker: NSObject {
             trackedUrl(URL(string: openHABUrl!))
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
-            errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
+            errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("remote_url_not_configured", comment: "")
             let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String: Any])
             delegate?.openHABTrackingError(trackingError)
         }
     }
 
     func trackedDiscoveryUrl(_ discoveryUrl: URL?) {
-        delegate?.openHABTrackingProgress("Connecting to discovered URL")
+        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_discovered", comment: ""))
         trackedUrl(discoveryUrl)
     }
 
     func trackedDemoMode() {
-        delegate?.openHABTrackingProgress("Running in demo mode. Check settings to disable demo mode.")
+        delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
         trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
     }
 
@@ -149,7 +149,7 @@ class OpenHABTracker: NSObject {
     func startDiscovery() {
         os_log("OpenHABTracking starting Bonjour discovery", log: .default, type: .info)
 
-        delegate?.openHABTrackingProgress("Discovering openHAB")
+        delegate?.openHABTrackingProgress(NSLocalizedString("discovering_oh", comment: ""))
         netService = NetService(domain: "local.", type: "_openhab-server-ssl._tcp.", name: "openHAB-ssl")
         netService!.delegate = self
         netService!.resolve(withTimeout: 5.0)

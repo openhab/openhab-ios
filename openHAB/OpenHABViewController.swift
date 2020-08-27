@@ -159,7 +159,7 @@ class OpenHABViewController: UIViewController {
 
         search.searchResultsUpdater = self
         search.obscuresBackgroundDuringPresentation = false
-        search.searchBar.placeholder = "Search openHAB items"
+        search.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
         definesPresentationContext = true
 
         setupSideMenu()
@@ -495,8 +495,8 @@ class OpenHABViewController: UIViewController {
                                     let view = MessageView.viewFromNib(layout: .cardView)
                                     // ... configure the view
                                     view.configureTheme(.error)
-                                    view.configureContent(title: "Error", body: "SSL Certificate Error")
-                                    view.button?.setTitle("Dismiss", for: .normal)
+                                    view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
+                                    view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                                     view.buttonTapHandler = { _ in SwiftMessages.hide() }
                                     return view
                                 }
@@ -510,19 +510,19 @@ class OpenHABViewController: UIViewController {
                                     let view = MessageView.viewFromNib(layout: .cardView)
                                     // ... configure the view
                                     view.configureTheme(.error)
-                                    view.configureContent(title: "Error", body: error.localizedDescription)
-                                    view.button?.setTitle("Dismiss", for: .normal)
+                                    view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
+                                    view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                                     view.buttonTapHandler = { _ in SwiftMessages.hide() }
                                     return view
                                 }
                             }
                         }
                     }
+                    self.currentPageOperation?.resume()
+
+                    os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
                 }
         }
-        currentPageOperation?.resume()
-
-        os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
     }
 
     // Select sitemap
@@ -560,8 +560,8 @@ class OpenHABViewController: UIViewController {
                         let view = MessageView.viewFromNib(layout: .cardView)
                         // ... configure the view
                         view.configureTheme(.error)
-                        view.configureContent(title: "Error", body: "openHAB returned empty sitemap list")
-                        view.button?.setTitle("Dismiss", for: .normal)
+                        view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("empty_sitemap", comment: ""))
+                        view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                         view.buttonTapHandler = { _ in SwiftMessages.hide() }
                         return view
                     }
@@ -583,8 +583,8 @@ class OpenHABViewController: UIViewController {
                             UIApplication.shared.isNetworkActivityIndicatorVisible = false
                             let view = MessageView.viewFromNib(layout: .cardView)
                             view.configureTheme(.error)
-                            view.configureContent(title: "Error", body: "SSL Certificate Error")
-                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
+                            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                             view.buttonTapHandler = { _ in SwiftMessages.hide() }
                             return view
                         }
@@ -597,8 +597,8 @@ class OpenHABViewController: UIViewController {
                             UIApplication.shared.isNetworkActivityIndicatorVisible = false
                             let view = MessageView.viewFromNib(layout: .cardView)
                             view.configureTheme(.error)
-                            view.configureContent(title: "Error", body: error.localizedDescription)
-                            view.button?.setTitle("Dismiss", for: .normal)
+                            view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
+                            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                             view.buttonTapHandler = { _ in SwiftMessages.hide() }
                             return view
                         }
@@ -760,8 +760,8 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
             let view = MessageView.viewFromNib(layout: .cardView)
             view.configureTheme(.info)
-            view.configureContent(title: "Connecting", body: message ?? "")
-            view.button?.setTitle("Dismiss", for: .normal)
+            view.configureContent(title: NSLocalizedString("connecting", comment: ""), body: message ?? "")
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
             view.buttonTapHandler = { _ in SwiftMessages.hide() }
             return view
         }
@@ -778,8 +778,8 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             let view = MessageView.viewFromNib(layout: .cardView)
             // ... configure the view
             view.configureTheme(.error)
-            view.configureContent(title: "Error", body: error.localizedDescription)
-            view.button?.setTitle("Dismiss", for: .normal)
+            view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
             view.buttonTapHandler = { _ in SwiftMessages.hide() }
             return view
         }
@@ -827,10 +827,12 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
     // delegate should ask user for a decision on what to do with invalid certificate
     func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async {
-            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?", preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+            let message = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
+            let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitAlways })
             self.present(alertView, animated: true) {}
         }
     }
@@ -838,10 +840,12 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
     // certificate received from openHAB doesn't match our record, ask user for a decision
     func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
         DispatchQueue.main.async {
-            let alertView = UIAlertController(title: "SSL Certificate Warning", message: "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?", preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: "Abort", style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: "Once", style: .default) { _ in policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: "Always", style: .default) { _ in policy?.evaluateResult = .permitAlways })
+            let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+            let message = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
+            let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in policy?.evaluateResult = .deny })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitOnce })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitAlways })
             self.present(alertView, animated: true) {}
         }
     }
@@ -858,11 +862,11 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {
         DispatchQueue.main.async {
-            let alertController = UIAlertController(title: "Client Certificate Import", message: "Import client certificate into the keychain?", preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default) { (_: UIAlertAction) in
+            let alertController = UIAlertController(title: NSLocalizedString("certificate_import_title", comment: ""), message: NSLocalizedString("certificate_import_text", comment: ""), preferredStyle: .alert)
+            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { (_: UIAlertAction) in
                 clientCertificateManager!.clientCertificateAccepted(password: nil)
             }
-            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (_: UIAlertAction) in
+            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { (_: UIAlertAction) in
                 clientCertificateManager!.clientCertificateRejected()
             }
             alertController.addAction(okay)
@@ -874,17 +878,17 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     // delegate should ask user for the export password used to decode the PKCS#12
     func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {
         DispatchQueue.main.async {
-            let alertController = UIAlertController(title: "Client Certificate Import", message: "Password required for import.", preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default) { (_: UIAlertAction) in
+            let alertController = UIAlertController(title: NSLocalizedString("certificate_import_title", comment: ""), message: NSLocalizedString("certificate_import_password", comment: ""), preferredStyle: .alert)
+            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default) { (_: UIAlertAction) in
                 let txtField = alertController.textFields?.first
                 let password = txtField?.text
                 clientCertificateManager!.clientCertificateAccepted(password: password)
             }
-            let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (_: UIAlertAction) in
+            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { (_: UIAlertAction) in
                 clientCertificateManager!.clientCertificateRejected()
             }
             alertController.addTextField { textField in
-                textField.placeholder = "Password"
+                textField.placeholder = NSLocalizedString("password", comment: "")
                 textField.isSecureTextEntry = true
             }
             alertController.addAction(okay)
@@ -896,8 +900,8 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     // delegate should alert the user that an error occured importing the certificate
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {
         DispatchQueue.main.async {
-            let alertController = UIAlertController(title: "Client Certificate Import", message: errMsg, preferredStyle: .alert)
-            let okay = UIAlertAction(title: "Okay", style: .default)
+            let alertController = UIAlertController(title: NSLocalizedString("certificate_import_title", comment: ""), message: errMsg, preferredStyle: .alert)
+            let okay = UIAlertAction(title: NSLocalizedString("okay", comment: ""), style: .default)
             alertController.addAction(okay)
             self.present(alertController, animated: true, completion: nil)
         }
@@ -1156,7 +1160,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == .text, let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-                let copy = UIAction(title: "Copy item label", image: UIImage(systemName: "square.and.arrow.up")) { _ in
+                let copy = UIAction(title: NSLocalizedString("copy_label", comment: ""), image: UIImage(systemName: "square.and.arrow.up")) { _ in
                     UIPasteboard.general.string = text
                 }
 

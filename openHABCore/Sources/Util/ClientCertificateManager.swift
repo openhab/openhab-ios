@@ -167,7 +167,7 @@ public class ClientCertificateManager {
                 delegate!.askForCertificatePassword(self)
             }
         } else {
-            let errMsg = "Unable to decode certificate: \(status)."
+            let errMsg = String(format: NSLocalizedString("unable_to_decode_certificate", comment: ""), "\(status)")
             if delegate != nil {
                 delegate!.alertClientCertificateError(self, errMsg: errMsg)
             }
@@ -222,9 +222,9 @@ public class ClientCertificateManager {
         if status != noErr {
             _ = deleteFromKeychain(importingIdentity!)
 
-            var errMsg = "Unable to add certificate to the keychain: \(status)."
+            var errMsg = String(format: NSLocalizedString("unable_to_add_certificate", comment: ""), "\(status)")
             if status == errSecDuplicateItem {
-                errMsg = "Certificate already exists in the keychain."
+                errMsg = NSLocalizedString("certficate_exists", comment: "")
             }
             if delegate != nil {
                 delegate!.alertClientCertificateError(self, errMsg: errMsg)
