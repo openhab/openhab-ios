@@ -19,14 +19,14 @@ struct SliderRow: View {
 
     var body: some View {
         let valueBinding = Binding<Double>(get: {
-            self.widget.adjustedValue
-        },
+                                               self.widget.adjustedValue
+                                           },
                                            set: {
-            os_log("Slider new value = %g", log: .default, type: .info, $0)
-            self.widget.sendCommand($0.valueText(step: self.widget.step))
+                                               os_log("Slider new value = %g", log: .default, type: .info, $0)
+                                               self.widget.sendCommand($0.valueText(step: self.widget.step))
 
-            // self.widget.stateEnumBinding = .slider($0)
-        })
+                                               // self.widget.stateEnumBinding = .slider($0)
+                                           })
 
         return
             VStack(spacing: 3) {
