@@ -56,7 +56,7 @@ extension ObservableOpenHABWidget {
 //                    ContentView(viewModel: UserData(url: URL(string: pageUrl)),
 //                                settings: settings)
                 ) {
-                    Image(systemName: "chevron.right")
+                        Image(systemName: "chevron.right")
                 })
 
         } else {

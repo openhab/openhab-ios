@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import os.log
 import UIKit
 
@@ -38,7 +39,7 @@ class SwitchUITableViewCell: GenericUITableViewCell {
             state = (widget.item?.state) ?? ""
         }
         customDetailTextLabel?.text = widget.labelValue ?? ""
-        widgetSwitch?.isOn = (state == "ON" ? true : false)
+        widgetSwitch?.isOn = state.parseAsBool()
         widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
         super.displayWidget()
     }

@@ -121,7 +121,7 @@ class OpenHABTracker: NSObject {
 
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(openHABRemoteUrl)
-        if (openHABUrl?.count ?? 0) > 0 {
+        if !(openHABUrl ?? "").isEmpty {
             // delegate?.openHABTrackingProgress("Connecting to remote URL")
             trackedUrl(URL(string: openHABUrl!))
         } else {

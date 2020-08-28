@@ -14,7 +14,7 @@ target 'openHAB' do
     shared_pods
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
-    pod 'SVGKit'
+    pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
 
     pod 'Fabric', '~> 1.7'
     pod 'Crashlytics', '~> 3.9'
@@ -26,6 +26,8 @@ target 'openHAB' do
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
     pod 'Kingfisher', '~> 5.0'
+    #pod "Macaw", "0.9.6"
+    #pod 'SwiftSVG', '~> 2.0'
 
     target 'openHABTestsSwift' do
         inherit! :search_paths

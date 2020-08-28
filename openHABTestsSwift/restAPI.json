@@ -1,0 +1,31 @@
+{"name":"testUoM",
+ "label":"testUoM",
+ "link":"http://192.168.2.15:8081/rest/sitemaps/testUoM",
+ "homepage":{
+     "id":"testing",
+     "title":"testUoM","link":"http://192.168.2.15:8081/rest/sitemaps/testing/testing","leaf":false,"timeout":false,
+     "widgets":
+    [{"widgetId":"00",
+        "type":"Frame",
+        "visibility":true,
+        "label":"Statistik",
+        "icon":"frame",
+        "mappings":[],
+        "widgets":
+    [{"widgetId":"0000",
+        "type":"Setpoint",
+        "visibility":true,
+        "label":"Time in minutes for sitemap [40.0 min]",
+        "icon":"number",
+        "mappings":[],
+        "minValue":5,
+        "maxValue":60,
+        "step":5,
+        "item":{"link":"http://192.168.2.15:8081/rest/items/iSomeUoMItem",
+            "state":"40 min",
+            "stateDescription":{
+                "pattern":"%,.1f s",
+                "readOnly":false,
+                "options":[]},
+            "type":"Number:Time",
+            "name":"iSomeUoMItem","label":"Time in seconds from/to actor DPT 7.005","tags":[],"groupNames":[]},"widgets":[]}]}]}}
