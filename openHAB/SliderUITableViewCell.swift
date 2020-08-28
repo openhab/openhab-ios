@@ -15,6 +15,7 @@ import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
     private var isInTransition: Bool = false
+    private var step: Float = 1.0
     private var transitionItem: DispatchWorkItem?
     private var throttler: Throttler?
     private var throttlingInterval: TimeInterval? = 0 {
@@ -48,6 +49,11 @@ class SliderUITableViewCell: GenericUITableViewCell {
         selectionStyle = .none
         separatorInset = .zero
         throttlingInterval = 0.1
+        if let widget = widget {
+            step = Float(widget.step)
+        } else {
+            step = 1.0
+        }
     }
 
     @IBAction private func sliderValueChanged(_ sender: Any) {
@@ -80,7 +86,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     private func adj(_ raw: Double) -> Double {
-        var valueAdjustedToStep = floor((raw - widget.minValue) / widget.step) * widget.step
+        var valueAdjustedToStep = Double(floor(Float(((raw - widget.minValue))) / step) * step)
         valueAdjustedToStep += widget.minValue
         return min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
     }
@@ -96,21 +102,39 @@ class SliderUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         guard !isInTransition else { return }
 
-        customTextLabel?.text = widget.labelText
-        widgetSlider?.minimumValue = Float(widget.minValue)
-        widgetSlider?.maximumValue = Float(widget.maxValue)
-        let widgetValue = adjustedValue()
-        widgetSlider?.value = Float(widgetValue)
-        // if there is a formatted value in widget label, take it. Otherwise display local value
-        if let labelValue = widget?.labelValue {
-            customDetailText?.text = labelValue
+        if let item = widget.item, item.isOfTypeOrGroupType(.color) {
+            widgetSlider?.minimumValue = 0.0
+            widgetSlider?.maximumValue = 100.0
+            step = 1.0
+            widgetSlider.value = Float(item.state?.parseAsBrightness() ?? 0)
         } else {
-            customDetailText?.text = widgetValue.valueText(step: widget.step)
+            // Fix "The stepSize must be 0, or a factor of the valueFrom-valueTo range" exception
+            widgetSlider?.minimumValue = Float(widget.minValue)
+            widgetSlider?.maximumValue = Float(widget.maxValue)
+            let widgetValue = adjustedValue()
+            widgetSlider?.value = Float(widgetValue)
+            step = Float(widget.step)
+
+            // if there is a formatted value in widget label, take it. Otherwise display local value
+            if let labelValue = widget?.labelValue {
+                customDetailText?.text = labelValue
+            } else {
+                customDetailText?.text = widgetValue.valueText(step: Double(step))
+            }
         }
+        customTextLabel?.text = widget.labelText
     }
 
     private func sliderDidChange(toValue value: Double) {
         os_log("Slider new value = %g", log: .default, type: .info, value)
-        widget.sendCommand(value.valueText(step: widget.step))
+
+        if let item = widget.item, item.isOfTypeOrGroupType(.color) {
+            widget.sendCommand(value.valueText(step: Double(step)))
+            // connection.httpClient.sendItemCommand(item, value)
+        } else {
+            widget.sendCommand(value.valueText(step: Double(step)))
+
+            // connection.httpClient.sendItemUpdate(item, item.state?.asNumber.withValue(value.toFloat()))
+        }
     }
 }

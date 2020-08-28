@@ -43,12 +43,12 @@ struct ContentView: View {
                         buttons: [.default(Text(NSLocalizedString("abort", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
                         },
-                                  .default(Text(NSLocalizedString("once", comment: ""))) {
+                        .default(Text(NSLocalizedString("once", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
                         },
-                                  .default(Text(NSLocalizedString("always", comment: ""))) {
+                        .default(Text(NSLocalizedString("always", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
-                                }])
+                        }])
         }
     }
 
@@ -74,7 +74,7 @@ struct ContentView: View {
                 return AnyView(ImageRow(URL: URL(string: widget.url)))
             }
         case .chart:
-            let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
+            let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type ?? .none, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
             return AnyView(ImageRow(URL: url))
         case .mapview:
             return AnyView(MapViewRow(widget: widget))

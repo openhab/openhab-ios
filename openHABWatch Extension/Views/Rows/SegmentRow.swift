@@ -24,7 +24,7 @@ struct SegmentRow: View {
             guard case let .segmented(value) = self.widget.stateEnumBinding else { return 0 }
             return value
         },
-                                        set: {
+        set: {
             os_log("Slider new value = %g", log: .default, type: .info, $0)
             // self.widget.sendCommand($0)
             self.widget.stateEnumBinding = .segmented($0)
