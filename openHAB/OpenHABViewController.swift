@@ -518,11 +518,12 @@ class OpenHABViewController: UIViewController {
                             }
                         }
                     }
-                    self.currentPageOperation?.resume()
-
-                    os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
                 }
         }
+
+        currentPageOperation?.resume()
+
+        os_log("OpenHABViewController request sent", log: .remoteAccess, type: .error)
     }
 
     // Select sitemap
