@@ -23,7 +23,7 @@ struct SwitchRow: View {
         let stateBinding = Binding<Bool>(get: {
             self.widget.stateEnumBinding.boolState
         },
-        set: {
+                                         set: {
             if $0 {
                 os_log("Switch to ON", log: .viewCycle, type: .info)
                 self.widget.sendCommand("ON")

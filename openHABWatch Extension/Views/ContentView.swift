@@ -42,10 +42,10 @@ struct ContentView: View {
                         buttons: [.default(Text(NSLocalizedString("abort", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
                         },
-                        .default(Text(NSLocalizedString("once", comment: ""))) {
+                                  .default(Text(NSLocalizedString("once", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
                         },
-                        .default(Text(NSLocalizedString("always", comment: ""))) {
+                                  .default(Text(NSLocalizedString("always", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
                         }])
         }

@@ -496,6 +496,7 @@
 		DAC9AF4424F9540D006DAE93 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = SOURCE_ROOT; };
 		DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABWidgetExtension.swift; sourceTree = "<group>"; };
 		DAC9AF4824F966FA006DAE93 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
+		DAC9AF4A24F96B1E006DAE93 /* .swiftformat */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
 		DACC72E024CE14FB007EFAE3 /* restAPI.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = restAPI.json; sourceTree = "<group>"; };
 		DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberStateTest.swift; sourceTree = "<group>"; };
 		DADC1EAB24D2CB6D0052B8D4 /* NumberState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberState.swift; sourceTree = "<group>"; };
@@ -1034,6 +1035,7 @@
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DAC9AF4424F9540D006DAE93 /* .swiftlint.yml */,
+				DAC9AF4A24F96B1E006DAE93 /* .swiftformat */,
 				93F38C62238034BD001B1451 /* openHABCore */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,

@@ -419,106 +419,106 @@ class OpenHABViewController: UIViewController {
         currentPageOperation = NetworkConnection.page(pageUrl: pageUrl,
                                                       longPolling: longPolling,
                                                       openHABVersion: appData?.openHABVersion ?? 2) { [weak self] response in
-                guard let self = self else { return }
+            guard let self = self else { return }
 
-                switch response.result {
-                case .success:
-                    os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
-                    let headers = response.response?.allHeaderFields
+            switch response.result {
+            case .success:
+                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
+                let headers = response.response?.allHeaderFields
 
-                    NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
-                    if !NetworkConnection.atmosphereTrackingId.isEmpty {
-                        os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
-                    }
-                    var openHABSitemapPage: OpenHABSitemapPage?
-                    if let data = response.result.value {
-                        // If we are talking to openHAB 1.X, talk XML
-                        if self.appData?.openHABVersion == 1 {
-                            let str = String(decoding: data, as: UTF8.self)
-                            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+                NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+                if !NetworkConnection.atmosphereTrackingId.isEmpty {
+                    os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
+                }
+                var openHABSitemapPage: OpenHABSitemapPage?
+                if let data = response.result.value {
+                    // If we are talking to openHAB 1.X, talk XML
+                    if self.appData?.openHABVersion == 1 {
+                        let str = String(decoding: data, as: UTF8.self)
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
-                            guard let doc = try? XMLDocument(data: data) else { return }
-                            if let rootElement = doc.root, let name = rootElement.tag {
-                                os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                                if name == "page" {
-                                    openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
-                                }
-                            }
-                        } else {
-                            // Newer versions talk JSON!
-                            os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                            do {
-                                // Self-executing closure
-                                // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                                openHABSitemapPage = try {
-                                    let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                                    return sitemapPageCodingData.openHABSitemapPage
-                                }()
-                            } catch {
-                                os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                        guard let doc = try? XMLDocument(data: data) else { return }
+                        if let rootElement = doc.root, let name = rootElement.tag {
+                            os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                            if name == "page" {
+                                openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                             }
                         }
-                    }
-                    self.currentPage = openHABSitemapPage
-                    if self.isFiltering {
-                        self.filterContentForSearchText(self.search.searchBar.text)
-                    }
-
-                    self.currentPage?.sendCommand = { [weak self] item, command in
-                        self?.sendCommand(item, commandToSend: command)
-                    }
-                    self.widgetTableView.reloadData()
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    self.refreshControl?.endRefreshing()
-                    self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
-                    self.loadPage(true)
-                case let .failure(error):
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-
-                    NetworkConnection.atmosphereTrackingId = ""
-                    if (error as NSError?)?.code == -1001, longPolling {
-                        os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                        self.loadPage(false)
-                    } else if (error as NSError?)?.code == -999 {
-                        os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
                     } else {
-                        // Error
-                        DispatchQueue.main.async {
-                            if (error as NSError?)?.code == -1012 {
-                                var config = SwiftMessages.Config()
-                                config.duration = .seconds(seconds: 5)
-                                config.presentationStyle = .bottom
+                        // Newer versions talk JSON!
+                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                        do {
+                            // Self-executing closure
+                            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                            openHABSitemapPage = try {
+                                let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
+                                return sitemapPageCodingData.openHABSitemapPage
+                            }()
+                        } catch {
+                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                        }
+                    }
+                }
+                self.currentPage = openHABSitemapPage
+                if self.isFiltering {
+                    self.filterContentForSearchText(self.search.searchBar.text)
+                }
 
-                                SwiftMessages.show(config: config) {
-                                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                    let view = MessageView.viewFromNib(layout: .cardView)
-                                    // ... configure the view
-                                    view.configureTheme(.error)
-                                    view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
-                                    view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                                    view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                    return view
-                                }
-                            } else {
-                                var config = SwiftMessages.Config()
-                                config.duration = .seconds(seconds: 5)
-                                config.presentationStyle = .bottom
+                self.currentPage?.sendCommand = { [weak self] item, command in
+                    self?.sendCommand(item, commandToSend: command)
+                }
+                self.widgetTableView.reloadData()
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                self.refreshControl?.endRefreshing()
+                self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+                self.loadPage(true)
+            case let .failure(error):
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
 
-                                SwiftMessages.show(config: config) {
-                                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                    let view = MessageView.viewFromNib(layout: .cardView)
-                                    // ... configure the view
-                                    view.configureTheme(.error)
-                                    view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
-                                    view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                                    view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                    return view
-                                }
+                NetworkConnection.atmosphereTrackingId = ""
+                if (error as NSError?)?.code == -1001, longPolling {
+                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
+                    self.loadPage(false)
+                } else if (error as NSError?)?.code == -999 {
+                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
+                } else {
+                    // Error
+                    DispatchQueue.main.async {
+                        if (error as NSError?)?.code == -1012 {
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
+                                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
+                        } else {
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
+                                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
                             }
                         }
                     }
                 }
+            }
         }
 
         currentPageOperation?.resume()

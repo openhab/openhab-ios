@@ -6,7 +6,7 @@
 # disabled rules
 --disable specifiers # see https://github.com/nicklockwood/SwiftFormat/issues/364
 --disable redundantParens
---disable wrapMultilineStatementBraces
+#--disable wrapMultilineStatementBraces
 
 # opt-in rules
 --enable isEmpty
