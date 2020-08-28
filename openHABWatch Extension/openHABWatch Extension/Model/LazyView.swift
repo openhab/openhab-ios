@@ -9,22 +9,18 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
 import SwiftUI
 
-struct PreferencesRowUIView: View {
-    var label: String
-    var content: String
-    var body: some View {
-        HStack {
-            Text("\(label)")
-                .fontWeight(.bold)
-            Text(content)
-        }
-    }
-}
+// https://medium.com/better-programming/swiftui-navigation-links-and-the-common-pitfalls-faced-505cbfd8029b
+struct LazyView<Content: View>: View {
+    let build: () -> Content
 
-struct PreferencesRowUIView_Previews: PreviewProvider {
-    static var previews: some View {
-        PreferencesRowUIView(label: "Label", content: "v02.2002")
+    var body: Content {
+        build()
+    }
+
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
     }
 }

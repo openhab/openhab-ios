@@ -11,7 +11,6 @@
 
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct RollershutterRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared

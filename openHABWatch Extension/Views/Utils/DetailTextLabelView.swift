@@ -11,7 +11,6 @@
 
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct DetailTextLabelView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
 

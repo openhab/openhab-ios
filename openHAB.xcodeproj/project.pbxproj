@@ -137,6 +137,8 @@
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
+		DAC9AF4724F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */; };
+		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
 		DACC72E224D00D59007EFAE3 /* NumberStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */; };
 		DADC1EAD24D2CB8B0052B8D4 /* NumberState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADC1EAB24D2CB6D0052B8D4 /* NumberState.swift */; };
 		DADC1EAE24D2CB8C0052B8D4 /* NumberState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADC1EAB24D2CB6D0052B8D4 /* NumberState.swift */; };
@@ -491,6 +493,9 @@
 		DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesRowUIView.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
+		DAC9AF4424F9540D006DAE93 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = SOURCE_ROOT; };
+		DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABWidgetExtension.swift; sourceTree = "<group>"; };
+		DAC9AF4824F966FA006DAE93 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
 		DACC72E024CE14FB007EFAE3 /* restAPI.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = restAPI.json; sourceTree = "<group>"; };
 		DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberStateTest.swift; sourceTree = "<group>"; };
 		DADC1EAB24D2CB6D0052B8D4 /* NumberState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberState.swift; sourceTree = "<group>"; };
@@ -756,6 +761,8 @@
 				9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */,
 				9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */,
 				DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */,
+				DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */,
+				DAC9AF4824F966FA006DAE93 /* LazyView.swift */,
 			);
 			name = Model;
 			path = "openHABWatch Extension/Model";
@@ -1026,6 +1033,7 @@
 				DA4D4DB4233F9ACB00B37E37 /* README.md */,
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
+				DAC9AF4424F9540D006DAE93 /* .swiftlint.yml */,
 				93F38C62238034BD001B1451 /* openHABCore */,
 				DFB2623018830A3600D3244D /* openHAB */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
@@ -1774,6 +1782,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA7649DE23FC81A20085CE46 /* Unwrap.swift in Sources */,
+				DAC9AF4724F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift in Sources */,
 				DAF4581423DC1F5D0018B495 /* AppState.swift in Sources */,
 				DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */,
 				DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */,
@@ -1800,6 +1809,7 @@
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */,
+				DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
 				DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */,
 				DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */,

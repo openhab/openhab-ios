@@ -14,6 +14,7 @@
 import os.signpost
 import XCTest
 
+// swiftlint:disable type_body_length
 class OpenHABJSONParserTests: XCTestCase {
     let decoder = JSONDecoder()
 
