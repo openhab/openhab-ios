@@ -11,7 +11,27 @@
 
 import Foundation
 
-class OpenHABDrawerItem: NSObject {
-    var label = ""
-    var tag = ""
+enum OpenHABDrawerItem {
+    case settings
+    case notifications
+
+    var localizedString: String {
+        switch self {
+        case .settings:
+            return NSLocalizedString("settings", comment: "")
+        case .notifications:
+            return NSLocalizedString("notifications", comment: "")
+        }
+    }
+
+    static func openHABDrawerItem(localizedString: String) -> OpenHABDrawerItem {
+        switch localizedString {
+        case OpenHABDrawerItem.settings.localizedString:
+            return OpenHABDrawerItem.settings
+        case OpenHABDrawerItem.notifications.localizedString:
+            return OpenHABDrawerItem.notifications
+        default:
+            return OpenHABDrawerItem.settings
+        }
+    }
 }

@@ -13,21 +13,20 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct SliderRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
         let valueBinding = Binding<Double>(get: {
-            self.widget.adjustedValue
-        },
-        set: {
-            os_log("Slider new value = %g", log: .default, type: .info, $0)
-            self.widget.sendCommand($0.valueText(step: self.widget.step))
+                                               self.widget.adjustedValue
+                                           },
+                                           set: {
+                                               os_log("Slider new value = %g", log: .default, type: .info, $0)
+                                               self.widget.sendCommand($0.valueText(step: self.widget.step))
 
-            // self.widget.stateEnumBinding = .slider($0)
-        })
+                                               // self.widget.stateEnumBinding = .slider($0)
+                                           })
 
         return
             VStack(spacing: 3) {

@@ -10,6 +10,7 @@
 
 # opt-in rules
 --enable isEmpty
+--enable typeSugar
 
 # format options
 --allman false

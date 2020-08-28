@@ -14,7 +14,6 @@ import os.log
 import SwiftUI
 import WatchConnectivity
 
-// swiftlint:disable file_types_order
 struct PreferencesSwiftUIView: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 

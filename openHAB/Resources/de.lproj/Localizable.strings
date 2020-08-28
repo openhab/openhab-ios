@@ -56,5 +56,5 @@
 "oh_version" = "openHAB-Version";
 "oh_uuid" = "openHAB-UUID";
 "oh_secret" = "openHAB-Secret";
-"notifications" = "Notifications";
-"settings" = "Settings";
+"notifications" = "Benachrichtigungen";
+"settings" = "Einstellungen";
