@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-// swiftlint:disable file_types_order
 public class Future<Value> {
     public typealias Result = Swift.Result<Value, Error>
 

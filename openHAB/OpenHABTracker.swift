@@ -87,18 +87,25 @@ class OpenHABTracker: NSObject {
                     if openHABLocalUrl.isEmpty {
                         startDiscovery()
                     } else {
-                        let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                        NetworkConnection.shared.manager.request(request)
-                            .validate(statusCode: 200 ..< 300)
-                            .responseData { response in
-                                switch response.result {
-                                case .success:
-                                    self.trackedLocalUrl()
-                                case .failure:
-                                    self.trackedRemoteUrl()
+                        if let url = Endpoint.tracker(openHABRootUrl: openHABLocalUrl).url {
+                            let request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+                            NetworkConnection.shared.manager.request(request)
+                                .validate(statusCode: 200 ..< 300)
+                                .responseData { response in
+                                    switch response.result {
+                                    case .success:
+                                        self.trackedLocalUrl()
+                                    case let .failure(error):
+                                        switch error {
+                                        case let .serverTrustEvaluationFailed(reason):
+                                            self.trackedLocalUrl()
+                                        default:
+                                            self.trackedRemoteUrl()
+                                        }
+                                    }
                                 }
-                            }
-                            .resume()
+                                .resume()
+                        }
                     }
                 }
             }
@@ -175,8 +182,7 @@ class OpenHABTracker: NSObject {
 
     func isNetworkVPN() -> Bool {
         if let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any],
-            let scopes = settings["__SCOPED__"] as? [String: Any]
-        {
+            let scopes = settings["__SCOPED__"] as? [String: Any] {
             for key in scopes.keys where key.contains("tap") || key.contains("tun") || key.contains("ppp") || key.contains("ipsec") || key.contains("ipsec0") {
                 return true
             }

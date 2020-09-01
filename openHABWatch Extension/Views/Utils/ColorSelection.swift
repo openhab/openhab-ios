@@ -48,7 +48,6 @@ enum DragState {
     }
 }
 
-// swiftlint:disable file_types_order
 struct ColorSelection: View {
     @GestureState var thumb: DragState = .inactive
 

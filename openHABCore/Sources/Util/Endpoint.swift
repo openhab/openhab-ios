@@ -46,8 +46,7 @@ extension Endpoint {
     public static func appleRegistration(prefsURL: String,
                                          deviceToken: String,
                                          deviceId: String,
-                                         deviceName: String) -> Endpoint
-    {
+                                         deviceName: String) -> Endpoint {
         Endpoint(baseURL: prefsURL,
                  path: "/addAppleRegistration",
                  queryItems: [URLQueryItem(name: "regId", value: deviceToken),

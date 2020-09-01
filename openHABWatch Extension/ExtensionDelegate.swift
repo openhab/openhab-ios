@@ -104,8 +104,7 @@ extension ExtensionDelegate: AuthenticationChallengeResponsable {
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
-    {
+                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
         completionHandler(disposition, credential)
     }
@@ -113,8 +112,7 @@ extension ExtensionDelegate: AuthenticationChallengeResponsable {
     // sessionDelegate.onReceiveSessionChallenge
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
-    {
+                    completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
         completionHandler(disposition, credential)
     }

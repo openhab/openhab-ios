@@ -14,7 +14,6 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct ImageRow: View {
     @State var URL: URL?
 

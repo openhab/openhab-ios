@@ -239,8 +239,7 @@ class OpenHABViewController: UIViewController {
                         && $0.secondItem == nil
                         && $0.secondAttribute == .notAnAttribute
                         && $0.constant > 0
-                })
-            {
+                }) {
                 UIView.performWithoutAnimation {
                     searchBarHeightConstraint.constant = 0
                     searchBarSuperview.superview?.layoutIfNeeded()
@@ -1036,13 +1035,11 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                                         version: appData?.openHABVersion ?? 2,
                                         icon: widget?.icon,
                                         value: widget?.item?.state ?? "",
-                                        iconType: iconType).url
-            {
+                                        iconType: iconType).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
 
-                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = {
-                    result in
+                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
                     switch result {
                     case let .success(value):
                         os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
@@ -1160,8 +1157,7 @@ extension OpenHABViewController: AuthenticationChallengeResponsable {
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
-    {
+                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
         completionHandler(disposition, credential)
     }
@@ -1169,8 +1165,7 @@ extension OpenHABViewController: AuthenticationChallengeResponsable {
     // sessionDelegate.onReceiveSessionChallenge
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
-    {
+                    completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
         completionHandler(disposition, credential)
     }

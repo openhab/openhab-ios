@@ -16,7 +16,6 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 extension OpenHABCoreWatch.Future where Value == ObservableOpenHABSitemapPage.CodingData {
     func trafo() -> OpenHABCoreWatch.Future<ObservableOpenHABSitemapPage> {
         transformed { data in
@@ -100,8 +99,7 @@ final class UserData: ObservableObject {
     func loadPage(urlString: String,
                   longPolling: Bool,
                   refresh: Bool,
-                  sitemapName: String = "watch")
-    {
+                  sitemapName: String = "watch") {
         let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: sitemapName).url
         loadPage(url: url, longPolling: longPolling, refresh: refresh)
     }
@@ -159,8 +157,7 @@ final class UserData: ObservableObject {
 
     func loadPage(url: URL?,
                   longPolling: Bool,
-                  refresh: Bool)
-    {
+                  refresh: Bool) {
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
