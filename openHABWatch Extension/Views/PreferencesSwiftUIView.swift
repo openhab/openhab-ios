@@ -21,7 +21,7 @@ struct PreferencesSwiftUIView: View {
         let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
         let buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
 
-        return "V\(versionNumber).\(buildNumber)"
+        return "v\(versionNumber)\n\(buildNumber)"
     }()
 
     var body: some View {
@@ -32,10 +32,11 @@ struct PreferencesSwiftUIView: View {
             PreferencesRowUIView(label: "Remote URL", content: settings.remoteUrl).font(.footnote)
             PreferencesRowUIView(label: "Sitemap", content: settings.sitemapName).font(.footnote)
             PreferencesRowUIView(label: "Username", content: settings.openHABUsername).font(.footnote)
+            PreferencesRowUIView(label: "Version", content: applicationVersionNumber).font(.footnote)
             HStack {
                 Button(action: { AppMessageService.singleton.requestApplicationContext() }, label: { Text("Sync preferences") })
             }
-        }
+        }.navigationBarTitle(Text("Preferences"))
     }
 }
 
