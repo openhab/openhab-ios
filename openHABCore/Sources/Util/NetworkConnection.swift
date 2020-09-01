@@ -74,7 +74,8 @@ public class NetworkConnection {
          configuration: URLSessionConfiguration = .default,
          delegate: SessionDelegate = SessionDelegate(),
          startRequestsImmediately: Bool = false,
-         interceptor: RequestAdapter?) {
+         interceptor: RequestAdapter?)
+    {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
         manager = Session(configuration: configuration,
@@ -90,28 +91,32 @@ public class NetworkConnection {
     public static func register(prefsURL: String,
                                 deviceToken: String,
                                 deviceId: String,
-                                deviceName: String, completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
+                                deviceName: String, completionHandler: @escaping (AFDataResponse<Data>) -> Void)
+    {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func sitemaps(openHABRootUrl: String,
-                                completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
+                                completionHandler: @escaping (AFDataResponse<Data>) -> Void)
+    {
         if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func tracker(openHABRootUrl: String,
-                               completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
+                               completionHandler: @escaping (AFDataResponse<Data>) -> Void)
+    {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func notification(urlString: String,
-                                    completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
+                                    completionHandler: @escaping (AFDataResponse<Data>) -> Void)
+    {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
@@ -147,7 +152,8 @@ public class NetworkConnection {
     public static func page(url: URL?,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest?
+    {
         guard let url = url else { return nil }
 
         var pageRequest = URLRequest(url: url)
@@ -178,7 +184,8 @@ public class NetworkConnection {
     public static func page(pageUrl: String,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest?
+    {
         if pageUrl == "" {
             return nil
         }

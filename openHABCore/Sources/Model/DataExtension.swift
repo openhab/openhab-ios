@@ -23,7 +23,8 @@ public extension Data {
     /// If no explicit encoder is passed, then the data is decoded as JSON.
     /// Inspired by https://www.swiftbysundell.com/posts/type-inference-powered-serialization-in-swift
     func decoded<T: Decodable>(as type: T.Type = T.self,
-                               using decoder: AnyDecoder = JSONDecoder()) throws -> T {
+                               using decoder: AnyDecoder = JSONDecoder()) throws -> T
+    {
         try decoder.decode(T.self, from: self)
     }
 }

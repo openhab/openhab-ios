@@ -18,7 +18,8 @@ struct Unwrap<Value, Content: View>: View {
     private let contentProvider: (Value) -> Content
 
     init(_ value: Value?,
-         @ViewBuilder content: @escaping (Value) -> Content) {
+         @ViewBuilder content: @escaping (Value) -> Content)
+    {
         self.value = value
         contentProvider = content
     }

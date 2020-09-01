@@ -73,7 +73,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
                          errorHandler: { (error) in
                              os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
 
-            })
+                         })
     }
 
     @available(watchOSApplicationExtension 2.2, *)

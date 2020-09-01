@@ -31,7 +31,8 @@ extension XCTestCase {
     // the expression took place in our source code.
     func require<T>(_ expression: @autoclosure () -> T?,
                     file: StaticString = #file,
-                    line: UInt = #line) throws -> T {
+                    line: UInt = #line) throws -> T
+    {
         guard let value = expression() else {
             throw RequireError<T>(file: file, line: line)
         }

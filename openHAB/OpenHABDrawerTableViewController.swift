@@ -27,7 +27,8 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
         }
         if let data = response,
             let doc = try? XMLDocument(data: data),
-            let name = doc.root?.tag {
+            let name = doc.root?.tag
+        {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
             if name == "sitemaps" {
                 for element in doc.root?.children(tag: "sitemap") ?? [] {

@@ -117,7 +117,8 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
                                        version: appData!.openHABVersion,
                                        icon: notification.icon,
                                        value: "",
-                                       iconType: .png).url {
+                                       iconType: .png).url
+        {
             cell?.imageView?.kf.setImage(with: iconUrl,
                                          placeholder: UIImage(named: "openHABIcon"))
         }

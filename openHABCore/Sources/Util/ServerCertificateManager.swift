@@ -224,7 +224,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         }
     }
 
-    public override func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
+    override public func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
         self as ServerTrustEvaluating
     }
 }

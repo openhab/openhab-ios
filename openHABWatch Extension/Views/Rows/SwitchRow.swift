@@ -22,18 +22,18 @@ struct SwitchRow: View {
     var body: some View {
         // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
         let stateBinding = Binding<Bool>(get: {
-            self.widget.stateEnumBinding.boolState
-        },
+                                             self.widget.stateEnumBinding.boolState
+                                         },
                                          set: {
-            if $0 {
-                os_log("Switch to ON", log: .viewCycle, type: .info)
-                self.widget.sendCommand("ON")
-            } else {
-                os_log("Switch to OFF", log: .viewCycle, type: .info)
-                self.widget.sendCommand("OFF")
-            }
-            self.widget.stateEnumBinding = .switcher($0)
-        })
+                                             if $0 {
+                                                 os_log("Switch to ON", log: .viewCycle, type: .info)
+                                                 self.widget.sendCommand("ON")
+                                             } else {
+                                                 os_log("Switch to OFF", log: .viewCycle, type: .info)
+                                                 self.widget.sendCommand("OFF")
+                                             }
+                                             self.widget.stateEnumBinding = .switcher($0)
+                                         })
 
         return
             Toggle(isOn: stateBinding) {

@@ -100,7 +100,8 @@ final class UserData: ObservableObject {
     func loadPage(urlString: String,
                   longPolling: Bool,
                   refresh: Bool,
-                  sitemapName: String = "watch") {
+                  sitemapName: String = "watch")
+    {
         let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: sitemapName).url
         loadPage(url: url, longPolling: longPolling, refresh: refresh)
     }
@@ -125,17 +126,17 @@ final class UserData: ObservableObject {
         currentPageOperation = NetworkConnection.page(url: url,
                                                       longPolling: true,
                                                       openHABVersion: 2) { [weak self] response in
-            guard self != nil else { return }
+                guard self != nil else { return }
 
-            switch response.result {
-            case .success:
-                os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                promise.resolve(with: response.value ?? Data())
+                switch response.result {
+                case .success:
+                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                    promise.resolve(with: response.value ?? Data())
 
-            case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                promise.reject(with: error)
-            }
+                case let .failure(error):
+                    os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    promise.reject(with: error)
+                }
         }
         currentPageOperation?.resume()
 
@@ -158,7 +159,8 @@ final class UserData: ObservableObject {
 
     func loadPage(url: URL?,
                   longPolling: Bool,
-                  refresh: Bool) {
+                  refresh: Bool)
+    {
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
@@ -167,44 +169,44 @@ final class UserData: ObservableObject {
         currentPageOperation = NetworkConnection.page(url: url,
                                                       longPolling: longPolling,
                                                       openHABVersion: 2) { [weak self] response in
-            guard let self = self else { return }
+                guard let self = self else { return }
 
-            switch response.result {
-            case .success:
-                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
+                switch response.result {
+                case .success:
+                    os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
 
-                if let data = response.value {
-                    // Newer versions talk JSON!
-                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                    do {
-                        // Self-executing closure
-                        // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                        self.openHABSitemapPage = try {
-                            let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-                            return sitemapPageCodingData.openHABSitemapPage
-                        }()
-                    } catch {
-                        os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                    if let data = response.value {
+                        // Newer versions talk JSON!
+                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                        do {
+                            // Self-executing closure
+                            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                            self.openHABSitemapPage = try {
+                                let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+                                return sitemapPageCodingData.openHABSitemapPage
+                            }()
+                        } catch {
+                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                        }
                     }
+
+                    self.openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                        self?.sendCommand(item, commandToSend: command)
+                    }
+
+                    self.widgets = self.openHABSitemapPage?.widgets ?? []
+
+                    self.showAlert = self.widgets.isEmpty ? true : false
+                    if refresh { self.loadPage(url: url,
+                                               longPolling: true,
+                                               refresh: true) }
+
+                case let .failure(error):
+                    os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    self.errorDescription = error.localizedDescription
+                    self.widgets = []
+                    self.showAlert = true
                 }
-
-                self.openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                    self?.sendCommand(item, commandToSend: command)
-                }
-
-                self.widgets = self.openHABSitemapPage?.widgets ?? []
-
-                self.showAlert = self.widgets.isEmpty ? true : false
-                if refresh { self.loadPage(url: url,
-                                           longPolling: true,
-                                           refresh: true) }
-
-            case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                self.errorDescription = error.localizedDescription
-                self.widgets = []
-                self.showAlert = true
-            }
         }
         currentPageOperation?.resume()
     }
