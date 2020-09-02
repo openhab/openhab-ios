@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
-import Firebase
+import FirebaseCore
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -187,7 +187,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
             os_log("%{PUBLIC}@", log: .notifications, type: .info, aps)
 
-            let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
+            let message = (aps["alert"] as? [String: String])?["body"] ?? NSLocalizedString("message_not_decoded", comment: "")
 
             var config = SwiftMessages.Config()
             config.duration = .seconds(seconds: 5)
@@ -198,8 +198,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let view = MessageView.viewFromNib(layout: .cardView)
                 // ... configure the view
                 view.configureTheme(.info)
-                view.configureContent(title: "Notification", body: message)
-                view.button?.setTitle("Dismiss", for: .normal)
+                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
+                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                 view.buttonTapHandler = { _ in SwiftMessages.hide() }
                 return view
             }

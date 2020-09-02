@@ -194,7 +194,10 @@ public class NetworkConnection {
         request.timeoutInterval = 10.0
 
         os_log("Firing request", log: .viewCycle, type: .debug)
+        let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+
         let task = NetworkConnection.shared.manager.request(request)
+            .authenticate(with: credential)
             .validate(statusCode: 200 ..< 300)
             .responseData(completionHandler: completionHandler)
         task.resume()

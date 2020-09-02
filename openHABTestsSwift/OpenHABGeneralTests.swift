@@ -29,7 +29,7 @@ class OpenHABGeneralTests: XCTestCase {
             return String(format: "%.\(digits)f", widgetValue)
         }
 
-        XCTAssertEqual(1000.0.valueText(step: 5.23), "1000.00")
+        XCTAssertEqual(1000.0.valueText(step: 0.01), "1000.00")
         XCTAssertEqual(1000.0.valueText(step: 1), "1000")
         XCTAssertEqual(valueTextWithoutFormatter(1000.0, step: 5.23), "1000.00")
     }
@@ -44,7 +44,7 @@ class OpenHABGeneralTests: XCTestCase {
         let urlc = Endpoint.icon(rootUrl: "http://192.169.2.1",
                                  version: 2,
                                  icon: "switch",
-                                 value: "OFF",
+                                 state: "OFF",
                                  iconType: .svg).url
         XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }

@@ -27,9 +27,6 @@ class OpenHABXMLParserTests: XCTestCase {
     }
 
     func testFuziParser() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-
         let xml = """
         <item>
                 <type>NumberItem</type>
@@ -43,7 +40,7 @@ class OpenHABXMLParserTests: XCTestCase {
             let document = try XMLDocument(data: xml)
             if let root = document.root {
                 let item = OpenHABItem(xml: root)
-                XCTAssertEqual(item.type, "NumberItem")
+                XCTAssertEqual(item.type, .number)
             } else {
                 throw TestingError.noXMLDocument
             }

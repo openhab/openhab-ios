@@ -93,11 +93,4 @@ public struct Preferences {
     @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
-
-    static func readActiveUrl() -> String {
-        if Preferences.remoteUrl != "" {
-            return Preferences.remoteUrl
-        }
-        return Preferences.localUrl
-    }
 }

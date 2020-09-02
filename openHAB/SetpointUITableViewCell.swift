@@ -15,10 +15,6 @@ import os.log
 import UIKit
 
 class SetpointUITableViewCell: GenericUITableViewCell {
-    private var isIntStep: Bool {
-        widget.step.truncatingRemainder(dividingBy: 1) == 0
-    }
-
     @IBOutlet private var downButton: DynamicButton!
     @IBOutlet private var upButton: DynamicButton!
 
@@ -42,45 +38,29 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         super.displayWidget()
     }
 
-    @objc
-    func decreaseValue(_ sender: Any?) {
-        os_log("down button pressed", log: .viewCycle, type: .info)
-
-        if let item = widget.item {
-            if item.state == "Uninitialized" {
-                widget.sendCommandDouble(widget.minValue)
-            } else {
-                if !isIntStep {
-                    var newValue = item.stateAsDouble() - widget.step
-                    newValue = max(newValue, widget.minValue)
-                    widget.sendCommand(newValue.valueText(step: widget.step))
-                } else {
-                    var newValue = item.stateAsInt() - Int(widget.step)
-                    newValue = max(newValue, Int(widget.minValue))
-                    widget.sendCommand(String(format: "%ld", newValue))
-                }
-            }
+    private func handleUpDown(down: Bool) {
+        var numberState = widget?.stateValueAsNumberState
+        let stateValue = numberState?.value ?? widget.minValue
+        let newValue: Double
+        switch down {
+        case true:
+            newValue = stateValue - widget.step
+        case false:
+            newValue = stateValue + widget.step
+        }
+        if newValue >= widget.minValue, newValue <= widget.maxValue {
+            numberState?.value = newValue
+            widget.sendItemUpdate(state: numberState)
         }
     }
 
     @objc
-    func increaseValue(_ sender: Any?) {
-        os_log("up button pressed", log: .viewCycle, type: .info)
+    func decreaseValue(_ sender: Any?) {
+        handleUpDown(down: true)
+    }
 
-        if let item = widget.item {
-            if item.state == "Uninitialized" {
-                widget.sendCommandDouble(widget.minValue)
-            } else {
-                if !isIntStep {
-                    var newValue = item.stateAsDouble() + widget.step
-                    newValue = min(newValue, widget.maxValue)
-                    widget.sendCommand(newValue.valueText(step: widget.step))
-                } else {
-                    var newValue = item.stateAsInt() + Int(widget.step)
-                    newValue = min(newValue, Int(widget.maxValue))
-                    widget.sendCommand(String(format: "%ld", newValue))
-                }
-            }
-        }
+    @objc
+    func increaseValue(_ sender: Any?) {
+        handleUpDown(down: false)
     }
 }

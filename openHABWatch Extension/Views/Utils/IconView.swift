@@ -22,7 +22,7 @@ struct IconView: View {
         Endpoint.icon(rootUrl: settings.openHABRootUrl,
                       version: 2,
                       icon: widget.icon,
-                      value: widget.item?.state ?? "",
+                      state: widget.item?.state ?? "",
                       iconType: .png).url
     }
 

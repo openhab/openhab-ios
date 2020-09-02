@@ -41,7 +41,7 @@ struct ImageRow_Previews: PreviewProvider {
         let iconURL = Endpoint.icon(rootUrl: PreviewConstants.remoteURLString,
                                     version: 2,
                                     icon: "Switch",
-                                    value: "ON",
+                                    state: "ON",
                                     iconType: .png).url
         // let widget = UserData().widgets[8]
         return ImageRow(URL: iconURL)
