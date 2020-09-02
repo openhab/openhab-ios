@@ -74,16 +74,17 @@ public class NetworkConnection {
          configuration: URLSessionConfiguration = .default,
          delegate: SessionDelegate = SessionDelegate(),
          startRequestsImmediately: Bool = false,
-         interceptor: RequestAdapter?) {
+         interceptor: RequestInterceptor?) {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
         manager = Session(configuration: configuration,
                           delegate: delegate,
                           startRequestsImmediately: startRequestsImmediately,
+                          interceptor: interceptor,
                           serverTrustManager: serverCertificateManager)
     }
 
-    public class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {
+    public class func initialize(ignoreSSL: Bool, adapter: RequestInterceptor?) {
         shared = NetworkConnection(ignoreSSL: ignoreSSL, interceptor: adapter)
     }
 

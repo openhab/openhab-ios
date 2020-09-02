@@ -13,7 +13,7 @@ import Alamofire
 import Foundation
 import Kingfisher
 
-public class OpenHABAccessTokenAdapter: RequestAdapter {
+public class OpenHABAccessTokenAdapter: RequestAdapter, RequestInterceptor {
     var appData: DataObject
 
     public init(appData data: DataObject) {
@@ -33,6 +33,13 @@ public class OpenHABAccessTokenAdapter: RequestAdapter {
             }
         }
         completion(.success(urlRequest))
+    }
+
+    public func retry(_ request: Request,
+                      for session: Session,
+                      dueTo error: Error,
+                      completion: @escaping (RetryResult) -> Void) {
+        completion(.doNotRetry)
     }
 }
 
