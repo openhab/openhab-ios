@@ -1,5 +1,5 @@
 ---
-name: 🐛 Bug Report
+name: 😱 Regression
 about: If a recent release broke a feature
 title: ''
 labels: ''
