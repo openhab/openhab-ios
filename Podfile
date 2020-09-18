@@ -100,7 +100,8 @@ post_install do |installer|
 end
 
 post_integrate do |installer|
-    pbxproj_file = "#{installer.pods_project.path}/project.pbxproj"
-    puts pbxproj_file
-    `sed -i '' 's/LastUpgradeCheck = 1100/LastUpgradeCheck = 1200/' "#{pbxproj_file}"`
+    if defined?(installer.pods_project.path)
+        pbxproj_file = "#{installer.pods_project.path}/project.pbxproj"
+        `sed -i '' 's/LastUpgradeCheck = 1100/LastUpgradeCheck = 1200/' "#{pbxproj_file}"`
+    end
 end
