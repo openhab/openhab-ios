@@ -26,6 +26,7 @@ enum TargetController {
     case root
     case settings
     case notifications
+    case webview
 }
 
 enum Action<I, O> {
@@ -87,6 +88,7 @@ class OpenHABViewController: UIViewController {
     var iconType: IconType = .png
     let search = UISearchController(searchResultsController: nil)
     var filteredPage: OpenHABSitemapPage?
+    var webViewController: OpenHABWebViewController?
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
@@ -909,6 +911,19 @@ extension OpenHABViewController: ModalHandler {
             } else {
                 if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
                     navigationController?.pushViewController(newViewController, animated: true)
+                }
+            }
+        case .webview:
+            if webViewController == nil {
+                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABWebViewController") as? OpenHABWebViewController {
+                    webViewController = newViewController
+                    navigationController?.pushViewController(newViewController, animated: true)
+                }
+            } else {
+                if let newViewController = navigationController?.viewControllers.filter({ $0 is OpenHABWebViewController }).first {
+                    navigationController?.popToViewController(newViewController, animated: true)
+                } else {
+                    navigationController?.pushViewController(webViewController!, animated: true)
                 }
             }
         }

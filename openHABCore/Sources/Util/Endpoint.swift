@@ -72,6 +72,18 @@ extension Endpoint {
                  queryItems: [URLQueryItem(name: "limit", value: "20")])
     }
 
+    public static func uiTiles(openHABRootUrl: String) -> Endpoint {
+        Endpoint(baseURL: openHABRootUrl,
+                 path: "/rest/ui/tiles",
+                 queryItems: [])
+    }
+
+    public static func resource(openHABRootUrl: String, path: String) -> Endpoint {
+        Endpoint(baseURL: openHABRootUrl,
+                 path: path,
+                 queryItems: [])
+    }
+
     // swiftlint:disable:next function_parameter_count
     public static func chart(rootUrl: String, period: String?, type: String?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)

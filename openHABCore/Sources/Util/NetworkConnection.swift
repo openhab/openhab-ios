@@ -107,6 +107,13 @@ public class NetworkConnection {
         }
     }
 
+    public static func uiTiles(openHABRootUrl: String,
+                               completionHandler: @escaping (DataResponse<Data>) -> Void) {
+        if let url = Endpoint.uiTiles(openHABRootUrl: openHABRootUrl).url {
+            load(from: url, completionHandler: completionHandler)
+        }
+    }
+
     public static func tracker(openHABRootUrl: String,
                                completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
