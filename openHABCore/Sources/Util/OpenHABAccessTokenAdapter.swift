@@ -13,7 +13,8 @@ import Alamofire
 import Foundation
 import Kingfisher
 
-public class OpenHABAccessTokenAdapter: RequestAdapter, RequestInterceptor {
+/// Interceptor to always send credentials
+public class OpenHABAccessTokenAdapter: RequestInterceptor {
     var appData: DataObject
 
     public init(appData data: DataObject) {
@@ -22,6 +23,8 @@ public class OpenHABAccessTokenAdapter: RequestAdapter, RequestInterceptor {
 
     public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var urlRequest = urlRequest
+
+        urlRequest.headers.add(.userAgent("openHAB client for iOS"))
 
         let alwaysSendCreds = appData.openHABAlwaysSendCreds
         let user = appData.openHABUsername
@@ -59,6 +62,7 @@ extension OpenHABAccessTokenAdapter: ImageDownloadRequestModifier {
 
         var urlRequest = urlRequest
         urlRequest.headers.add(.authorization(username: user, password: password))
+        urlRequest.headers.add(name: "UserAgent", value: "openHAB client for iOS")
 
         return urlRequest
     }

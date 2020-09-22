@@ -33,6 +33,10 @@ public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, 
     return (disposition, credential)
 }
 
+// In Alamofire 5 in SessionDelegate urlSession(_ session: URLSession,
+// task: URLSessionTask,
+// didReceive challenge: URLAuthenticationChallenge,
+// completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
 public let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
@@ -76,12 +80,13 @@ public class NetworkConnection {
          startRequestsImmediately: Bool = false,
          interceptor: RequestInterceptor?) {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
-        serverCertificateManager.initializeCertificatesStore()
+        let redirectHandler = Redirector.follow
         manager = Session(configuration: configuration,
                           delegate: delegate,
                           startRequestsImmediately: startRequestsImmediately,
                           interceptor: interceptor,
-                          serverTrustManager: serverCertificateManager)
+                          serverTrustManager: serverCertificateManager,
+                          redirectHandler: redirectHandler)
     }
 
     public class func initialize(ignoreSSL: Bool, adapter: RequestInterceptor?) {
@@ -131,7 +136,10 @@ public class NetworkConnection {
             os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command ?? "", link)
             os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
 
+            let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+
             return NetworkConnection.shared.manager.request(commandRequest)
+                .authenticate(with: credential)
                 .validate(statusCode: 200 ..< 300)
                 .responseData { response in
                     switch response.result {
@@ -171,7 +179,10 @@ public class NetworkConnection {
 
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
+        let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+
         return NetworkConnection.shared.manager.request(pageRequest)
+            .authenticate(with: credential)
             .validate(statusCode: 200 ..< 300)
             .responseData(completionHandler: completionHandler)
     }

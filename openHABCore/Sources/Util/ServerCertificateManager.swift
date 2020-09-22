@@ -51,6 +51,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     public init(ignoreSSL: Bool) {
         super.init(evaluators: [:])
         self.ignoreSSL = ignoreSSL
+        initializeCertificatesStore()
     }
 
     func initializeCertificatesStore() {
@@ -59,7 +60,6 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         if trustedCertificates.isEmpty {
             os_log("No cert store, creating", log: .remoteAccess, type: .info)
             trustedCertificates = [:]
-            //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             saveTrustedCertificates()
         } else {
             os_log("Loaded existing cert store", log: .remoteAccess, type: .info)

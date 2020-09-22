@@ -54,7 +54,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UserDefaults.standard.register(defaults: appDefaults)
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
+        let alwaysSendCredsInterceptor = OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData)
+
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: alwaysSendCredsInterceptor)
 
         registerForPushNotifications()
 

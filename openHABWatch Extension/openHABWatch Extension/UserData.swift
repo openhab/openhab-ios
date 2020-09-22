@@ -16,6 +16,7 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
+// swiftlint:disable file_types_order
 extension OpenHABCoreWatch.Future where Value == ObservableOpenHABSitemapPage.CodingData {
     func trafo() -> OpenHABCoreWatch.Future<ObservableOpenHABSitemapPage> {
         transformed { data in

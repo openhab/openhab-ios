@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Alamofire
 import Foundation
 import os.log
 import Security

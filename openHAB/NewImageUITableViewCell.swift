@@ -155,7 +155,10 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             downloadRequest = nil
         }
 
+        let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+
         downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
+            .authenticate(with: credential)
             .validate(statusCode: 200 ..< 300)
             .responseData { [weak self] response in
                 switch response.result {
