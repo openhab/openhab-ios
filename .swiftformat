@@ -1,5 +1,5 @@
 # file options
---swiftversion 5.2
+--swiftversion 5.3
 --exclude Pods
 --symlinks ignore
 

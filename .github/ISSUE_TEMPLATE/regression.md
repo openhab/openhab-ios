@@ -1,12 +1,12 @@
 ---
-name: 🐛 Bug Report
-about: If something isn't working as expected
+name: 😱 Regression
+about: If a recent release broke a feature
 title: ''
 labels: ''
 assignees: ''
 ---
 
-**New bug checklist**
+**New regression checklist**
 
 - [ ] I updated the iOS openHAB app to the latest [TestFlight](https://testflight.apple.com/join/563WBakc) version.
 - [ ] I read the [Contribution Guidelines](https://github.com/openhab/openhab-ios/blob/develop/CONTRIBUTING.md)
@@ -29,7 +29,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **App (please complete the following information):**
- - Version [e.g. `2.1.0 (12)`]
+ - Breaking version: [e.g. `2.1.0 (12)`]
+ - Last working version: [e.g. `2.2.0 (13)`]
 
 **Smartphone (please complete the following information):**
  - Device: [e.g. `iPhoneXR`]

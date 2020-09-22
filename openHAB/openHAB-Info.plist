@@ -112,5 +112,12 @@
 	</array>
 	<key>firebase_crashlytics_collection_enabled</key>
 	<false/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>openHAB needs access to your local network to connect with the openHAB server.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_openhab-server-ssl._tcp</string>
+	</array>
 </dict>
 </plist>

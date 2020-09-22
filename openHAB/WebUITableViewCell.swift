@@ -108,4 +108,9 @@ extension WebUITableViewCell: WKNavigationDelegate {
         os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
         url = nil
     }
+
+    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+        completionHandler(disposition, credential)
+    }
 }

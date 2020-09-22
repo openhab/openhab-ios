@@ -46,7 +46,6 @@ jobs:
         with:
           ssh-private-key: |
             ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
-            ${{ secrets.GIT_PRIVATE_KEY }}
 
       - name: fastlane iOS beta
         env:
