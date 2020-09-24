@@ -26,8 +26,6 @@ target 'openHAB' do
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
     pod 'Kingfisher', '~> 5.0'
-    #pod "Macaw", "0.9.6"
-    #pod 'SwiftSVG', '~> 2.0'
 
     target 'openHABTestsSwift' do
         inherit! :search_paths

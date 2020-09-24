@@ -67,10 +67,10 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (6.7.1):
     - GoogleUtilities/Logger
-  - Kingfisher (5.14.1):
-    - Kingfisher/Core (= 5.14.1)
-  - Kingfisher/Core (5.14.1)
-  - Kingfisher/SwiftUI (5.14.1):
+  - Kingfisher (5.15.4):
+    - Kingfisher/Core (= 5.15.4)
+  - Kingfisher/Core (5.15.4)
+  - Kingfisher/SwiftUI (5.15.4):
     - Kingfisher/Core
   - nanopb (1.30905.0):
     - nanopb/decode (= 1.30905.0)
@@ -137,16 +137,16 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   SVGKit:
-    :commit: 9240977515c04053f8c96c9dfdb764dc7b98b9ba
+    :commit: 58543f3714b34ea66cfe58636d86dcbec3514ccf
     :git: https://github.com/SVGKit/SVGKit.git
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   CocoaLumberjack: bd155f2dd06c0e0b03f876f7a3ee55693122ec94
-  Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
+  Crashlytics: 9220f5bc89e7a618df411b4f639389dbfb0e03d2
   DeviceKit: d081659419cce07c0b5239dbc9fb39ed7413c7fe
   DynamicButton: 95f30460793bd3510a5c213ac1b810a5e3d54b6a
-  Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
+  Fabric: ea977e3cd9c20425516d3dafd3bf8c941c51223f
   Firebase: 57957c8d6eb3d8b80a560b1dc58be24724b89ff2
   FirebaseAnalytics: aa522dce9fd93002ba1554467d23ce7092323000
   FirebaseCore: 7930a1946517d94256d857f97371ed993b55f7bd
@@ -157,7 +157,7 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: 345d365fd105e6682bf5084783a5352a3db26820
   GoogleDataTransport: af0c79193dc59acd37630b4833d0dc6912ae6bd5
   GoogleUtilities: e121a3867449ce16b0e35ddf1797ea7a389ffdf2
-  Kingfisher: 8050bc6f7f68cbf3908bd04df7ccbac188f6d6d6
+  Kingfisher: 657dc1077e5bbbfff864194c79f29e35b722d062
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
   PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
   SideMenu: 8ef57a3cfc024a2d3fc1c036c7fe98537baec9e0
@@ -166,6 +166,6 @@ SPEC CHECKSUMS:
   SwiftLint: bbfed21bf4451dcbd0f5cdbee44a18e06cf91b12
   SwiftMessages: 29e7975b1173fd4e8357600c6518b5a59bc607d6
 
-PODFILE CHECKSUM: 2a92ef8ab608fd27b9db147f23ffb78db541f5a7
+PODFILE CHECKSUM: a3b3c052c977017e5aa90886724865a86c41afbe
 
 COCOAPODS: 1.10.0.rc.1
