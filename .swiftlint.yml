@@ -21,10 +21,10 @@ opt_in_rules:
   - computed_accessors_order
   - empty_enum_arguments
   - prefer_zero_over_explicit_init
-  - tuple_pattern
-  - return_value_from_void_function
-  - void_function_in_ternary
-  - only_after_dot
+#  - tuple_pattern
+#  - return_value_from_void_function
+#  - void_function_in_ternary
+#  - only_after_dot
 
 disabled_rules: # rule identifiers to exclude from running
   - force_cast

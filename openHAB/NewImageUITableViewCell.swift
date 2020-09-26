@@ -162,12 +162,11 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             .validate(statusCode: 200 ..< 300)
             .responseData { [weak self] response in
                 switch response.result {
-                case .success:
-                    if let data = response.data {
-                        self?.mainImageView?.image = UIImage(data: data)
-                        self?.widget?.image = UIImage(data: data)
-                        self?.didLoad?()
-                    }
+                case let .success(data):
+                    self?.mainImageView?.image = UIImage(data: data)
+                    self?.widget?.image = UIImage(data: data)
+                    self?.didLoad?()
+
                 case let .failure(error):
                     os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
                 }

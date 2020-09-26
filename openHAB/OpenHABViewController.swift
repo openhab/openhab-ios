@@ -431,32 +431,30 @@ class OpenHABViewController: UIViewController {
                         os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
                     }
                     var openHABSitemapPage: OpenHABSitemapPage?
-                    if let data = response.value {
-                        // If we are talking to openHAB 1.X, talk XML
-                        if self.appData?.openHABVersion == 1 {
-                            let str = String(decoding: data, as: UTF8.self)
-                            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+                    // If we are talking to openHAB 1.X, talk XML
+                    if self.appData?.openHABVersion == 1 {
+                        let str = String(decoding: data, as: UTF8.self)
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
-                            guard let doc = try? XMLDocument(data: data) else { return }
-                            if let rootElement = doc.root, let name = rootElement.tag {
-                                os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                                if name == "page" {
-                                    openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
-                                }
+                        guard let doc = try? XMLDocument(data: data) else { return }
+                        if let rootElement = doc.root, let name = rootElement.tag {
+                            os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                            if name == "page" {
+                                openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                             }
-                        } else {
-                            // Newer versions talk JSON!
-                            os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                            do {
-                                // Self-executing closure
-                                // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                                openHABSitemapPage = try {
-                                    let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                                    return sitemapPageCodingData.openHABSitemapPage
-                                }()
-                            } catch {
-                                os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
-                            }
+                        }
+                    } else {
+                        // Newer versions talk JSON!
+                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                        do {
+                            // Self-executing closure
+                            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                            openHABSitemapPage = try {
+                                let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
+                                return sitemapPageCodingData.openHABSitemapPage
+                            }()
+                        } catch {
+                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                         }
                     }
                     self.currentPage = openHABSitemapPage
@@ -531,9 +529,9 @@ class OpenHABViewController: UIViewController {
     func selectSitemap() {
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
-            case .success:
+            case let .success(data):
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                self.sitemaps = deriveSitemaps(response.value, version: self.appData?.openHABVersion)
+                self.sitemaps = deriveSitemaps(data, version: self.appData?.openHABVersion)
                 switch self.sitemaps.count {
                 case 2...:
                     if !self.defaultSitemap.isEmpty {
@@ -719,25 +717,23 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
 
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
-            case .success:
+            case let .success(data):
 
                 DispatchQueue.main.async {
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
 
-                if let data = response.value {
-                    do {
-                        self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
-                        os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
-                        self.appData?.openHABVersion = 2
+                do {
+                    self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+                    os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
+                    self.appData?.openHABVersion = 2
+                    self.selectSitemap()
+                } catch {
+                    os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
+                    let str = String(decoding: data, as: UTF8.self)
+                    if str.hasPrefix("<?xml") {
+                        self.appData?.openHABVersion = 1
                         self.selectSitemap()
-                    } catch {
-                        os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
-                        let str = String(decoding: data, as: UTF8.self)
-                        if str.hasPrefix("<?xml") {
-                            self.appData?.openHABVersion = 1
-                            self.selectSitemap()
-                        }
                     }
                 }
 

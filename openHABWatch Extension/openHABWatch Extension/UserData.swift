@@ -120,9 +120,9 @@ final class UserData: ObservableObject {
                 guard self != nil else { return }
 
                 switch response.result {
-                case .success:
+                case let .success(data):
                     os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                    promise.resolve(with: response.value ?? Data())
+                    promise.resolve(with: data)
 
                 case let .failure(error):
                     os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
@@ -148,21 +148,19 @@ final class UserData: ObservableObject {
                 guard let self = self else { return }
 
                 switch response.result {
-                case .success:
+                case let .success(data):
                     os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
-                    if let data = response.value {
-                        // Newer versions talk JSON!
-                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                        do {
-                            // Self-executing closure
-                            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                            self.openHABSitemapPage = try {
-                                let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-                                return sitemapPageCodingData.openHABSitemapPage
-                            }()
-                        } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
-                        }
+                    // Newer versions talk JSON!
+                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                    do {
+                        // Self-executing closure
+                        // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                        self.openHABSitemapPage = try {
+                            let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+                            return sitemapPageCodingData.openHABSitemapPage
+                        }()
+                    } catch {
+                        os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                     }
 
                     self.openHABSitemapPage?.sendCommand = { [weak self] item, command in
