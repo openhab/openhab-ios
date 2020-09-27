@@ -53,16 +53,15 @@ public class ClientCertificateManager {
             let identity = clientIdentities[index]
             var cert: SecCertificate?
             SecIdentityCopyCertificate(identity, &cert)
-            let subject = SecCertificateCopySubjectSummary(cert!)
-            if subject != nil {
-                return subject! as String
+            if let subject = SecCertificateCopySubjectSummary(cert!) {
+                return subject as String
             }
         }
         return ""
     }
 
     public func evaluateTrust(distinguishedNames: [Data]) -> SecIdentity? {
-        // Search the keychain for an identity that matches the DN of the certificate being requested by the server
+        // Search the keychain for an identity that matches the DN (distinguished name) of the certificate being requested by the server
         let getIdentityQuery: [String: Any] = [kSecClass as String: kSecClassIdentity,
                                                kSecReturnRef as String: true,
                                                kSecMatchLimit as String: kSecMatchLimitOne,
@@ -144,12 +143,8 @@ public class ClientCertificateManager {
         do {
             // Import PKCS12 client cert
             importingRawCert = try Data(contentsOf: url)
-
-            if delegate != nil {
-                delegate!.askForClientCertificateImport(self)
-            } else {
-                return false
-            }
+            guard delegate != nil else { return false }
+            delegate?.askForClientCertificateImport(self)
         } catch {
             os_log("Unable to read certificate from URL", log: .default, type: .info)
             return false
@@ -161,17 +156,13 @@ public class ClientCertificateManager {
         // Import PKCS12 client cert
         importingPassword = password
         let status = decodePKCS12()
-        if status == noErr {
-            addClientCertificateToKeychain()
-        } else if status == errSecAuthFailed {
-            if delegate != nil {
-                delegate!.askForCertificatePassword(self)
-            }
-        } else {
+        switch status {
+        case noErr: addClientCertificateToKeychain()
+        case errSecAuthFailed:
+            delegate?.askForCertificatePassword(self)
+        default:
             let errMsg = String(format: NSLocalizedString("unable_to_decode_certificate", comment: ""), "\(status)")
-            if delegate != nil {
-                delegate!.alertClientCertificateError(self, errMsg: errMsg)
-            }
+            delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
 
@@ -182,29 +173,33 @@ public class ClientCertificateManager {
     }
 
     func addClientCertificateToKeychain() {
-        var clientCert: SecCertificate?
+        // https://developer.apple.com/documentation/security/certificate_key_and_trust_services/identities/parsing_an_identity
         var clientKey: SecKey?
         SecIdentityCopyPrivateKey(importingIdentity!, &clientKey)
+
+        var clientCert: SecCertificate?
         SecIdentityCopyCertificate(importingIdentity!, &clientCert)
 
         // Add identity's cert
+        // https://developer.apple.com/documentation/security/certificate_key_and_trust_services/certificates/storing_a_certificate_in_the_keychain
         let addCertQuery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                            kSecValueRef as String: clientCert!]
-        var status = SecItemAdd(addCertQuery as NSDictionary, nil)
+        var status = SecItemAdd(addCertQuery as CFDictionary, nil)
         os_log("SecItemAdd(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
+
         if status == noErr {
             let addKeyQuery: [String: Any] = [kSecClass as String: kSecClassKey,
                                               kSecAttrIsPermanent as String: true,
                                               kSecValueRef as String: clientKey!]
-            status = SecItemAdd(addKeyQuery as NSDictionary, nil)
+            status = SecItemAdd(addKeyQuery as CFDictionary, nil)
             os_log("SecItemAdd(key) result=%{PUBLIC}d", log: .default, type: .info, status)
             if status == noErr {
                 // Add  the cert chain
-                if importingCertChain != nil {
-                    for cert in importingCertChain! where cert != clientCert {
+                if let importingCertChain = importingCertChain {
+                    for cert in importingCertChain where cert != clientCert {
                         let addCertQuery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                            kSecValueRef as String: cert]
-                        status = SecItemAdd(addCertQuery as NSDictionary, nil)
+                        status = SecItemAdd(addCertQuery as CFDictionary, nil)
                         os_log("SecItemAdd(certChain) result=%{PUBLIC}d", log: .default, type: .info, status)
                         if status == errSecDuplicateItem {
                             // Ignore duplicates as there may already be other client certs with an overlapping issuer chain
@@ -227,38 +222,38 @@ public class ClientCertificateManager {
             if status == errSecDuplicateItem {
                 errMsg = NSLocalizedString("certficate_exists", comment: "")
             }
-            if delegate != nil {
-                delegate!.alertClientCertificateError(self, errMsg: errMsg)
-            }
+            delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
 
     private func decodePKCS12() -> OSStatus {
         // Import PKCS12 client cert
+        // https://developer.apple.com/documentation/security/certificate_key_and_trust_services/identities/importing_an_identity
         var importResult: CFArray?
-        let status = SecPKCS12Import(importingRawCert! as CFData, [kSecImportExportPassphrase as String: importingPassword ?? ""] as NSDictionary, &importResult)
-        if status == noErr {
-            // Extract the certifcate and private key
-            let identityDictionaries = importResult as! [[String: Any]]
-            importingIdentity = identityDictionaries[0][kSecImportItemIdentity as String] as! SecIdentity?
-            importingCertChain = identityDictionaries[0][kSecImportItemCertChain as String] as! [SecCertificate]?
-        } else {
-            os_log("SecPKCS12Import failed; result=%{PUBLIC}d", log: .default, type: .info, status)
-        }
+        let options = [kSecImportExportPassphrase as String: importingPassword ?? ""]
+
+        let status = SecPKCS12Import(importingRawCert! as CFData, options as CFDictionary, &importResult)
+
+        guard status == errSecSuccess else { os_log("SecPKCS12Import failed; result=%{PUBLIC}d", log: .default, type: .info, status); return status }
+        // Extract the certifcate and private key
+
+        let identityDictionaries = importResult as! [[String: Any]]
+        let firstItem = identityDictionaries[0]
+        importingIdentity = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
+        importingCertChain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]?
+
         return status
     }
 
+    
+
     func evaluateTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        let dns = challenge.protectionSpace.distinguishedNames
-        if let dns = dns {
-            let identity = evaluateTrust(distinguishedNames: dns)
-            if let identity = identity {
-                var cert: SecCertificate?
-                SecIdentityCopyCertificate(identity, &cert)
-                let certChain = buildIdentityCertChain(cert: cert!)
-                let credential = URLCredential(identity: identity, certificates: certChain, persistence: URLCredential.Persistence.forSession)
-                return (.useCredential, credential)
-            }
+        if let dns = challenge.protectionSpace.distinguishedNames, let identity = evaluateTrust(distinguishedNames: dns) {
+            var cert: SecCertificate?
+            SecIdentityCopyCertificate(identity, &cert)
+            let certChain = buildIdentityCertChain(cert: cert!)
+            let credential = URLCredential(identity: identity, certificates: certChain, persistence: .forSession)
+            return (.useCredential, credential)
         }
         return (.cancelAuthenticationChallenge, nil)
     }
