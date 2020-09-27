@@ -21,7 +21,7 @@ struct PreferencesSwiftUIView: View {
         let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
         let buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
 
-        return "V\(versionNumber).\(buildNumber)"
+        return "v\(versionNumber)\n\(buildNumber)"
     }()
 
     var body: some View {
@@ -35,7 +35,7 @@ struct PreferencesSwiftUIView: View {
             HStack {
                 Button(action: { AppMessageService.singleton.requestApplicationContext() }, label: { Text(NSLocalizedString("sync_prefs", comment: "")) })
             }
-        }
+        }.navigationBarTitle(Text("Preferences"))
     }
 }
 

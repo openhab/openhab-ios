@@ -56,25 +56,27 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     func loadNotifications() {
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         NetworkConnection.notification(urlString: Preferences.remoteUrl) { response in
-            switch response.result {
-            case .success:
-                if let data = response.result.value {
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
-                        for codingDatum in codingDatas {
-                            self.notifications.add(codingDatum.openHABNotification)
-                        }
-                    } catch {
-                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                    }
 
-                    self.refreshControl?.endRefreshing()
-                    self.tableView.reloadData()
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            switch response.result {
+            case let .success(data):
+
+                do {
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                    let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+                    for codingDatum in codingDatas {
+                        self.notifications.add(codingDatum.openHABNotification)
+                    }
+                } catch {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 }
+
+                self.refreshControl?.endRefreshing()
+                self.tableView.reloadData()
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+
             case let .failure(error):
+
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()

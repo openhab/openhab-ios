@@ -104,12 +104,14 @@ class OpenHABDrawerTableViewController: UITableViewController {
         os_log("OpenHABDrawerTableViewController viewWillAppear", log: .viewCycle, type: .info)
 
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
+
             switch response.result {
-            case .success:
+            case let .success(data):
+
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
-                self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
+                self.sitemaps = deriveSitemaps(data, version: self.appData?.openHABVersion)
 
                 if self.sitemaps.last?.name == "_default" {
                     self.sitemaps = Array(self.sitemaps.dropLast())
@@ -122,7 +124,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     self.setStandardDrawerItems()
                 }
                 self.tableView.reloadData()
+
             case let .failure(error):
+
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
@@ -130,6 +134,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     self.setStandardDrawerItems()
                 }
                 self.tableView.reloadData()
+                return
             }
         }
     }

@@ -5,7 +5,7 @@ install! 'cocoapods', :generate_multiple_pod_projects => true, :incremental_inst
 use_frameworks!
 
 def shared_pods
-    pod 'Alamofire', '~> 4.0'
+    pod 'Alamofire', '~> 5.0'
     pod 'Fuzi', '~> 3.1'
 end
 
@@ -14,7 +14,8 @@ target 'openHAB' do
     shared_pods
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
-    pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
+    pod 'SVGKit'
+#, :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
 
     pod 'Fabric', '~> 1.7'
     pod 'Crashlytics', '~> 3.9'

@@ -50,9 +50,9 @@ class OpenHABTracker: NSObject {
     }
 
     func start() {
-        // Start NetworkReachabilityManager.Listener
-        oldReachabilityStatus = reach?.networkReachabilityStatus
-        reach?.listener = { [weak self] status in
+        oldReachabilityStatus = reach?.status
+
+        reach?.startListening { [weak self] status in
             guard let self = self else { return }
 
             let nStatus = status
@@ -67,9 +67,6 @@ class OpenHABTracker: NSObject {
                     self.start()
                 }
             }
-        }
-        if !(reach?.startListening() ?? false) {
-            os_log("Starting NetworkReachabilityManager.Listener failed.", log: .remoteAccess, type: .info)
         }
 
         // Check if any network is available
@@ -90,18 +87,28 @@ class OpenHABTracker: NSObject {
                     if openHABLocalUrl.isEmpty {
                         startDiscovery()
                     } else {
-                        let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                        NetworkConnection.shared.manager.request(request)
-                            .validate(statusCode: 200 ..< 300)
-                            .responseData { response in
-                                switch response.result {
-                                case .success:
-                                    self.trackedLocalUrl()
-                                case .failure:
-                                    self.trackedRemoteUrl()
+                        if let url = Endpoint.tracker(openHABRootUrl: openHABLocalUrl).url {
+                            let request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+                            let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+                            NetworkConnection.shared.manager.request(request)
+                                .authenticate(with: credential)
+                                .validate(statusCode: 200 ..< 300)
+                                .responseData { response in
+                                    switch response.result {
+                                    case .success:
+                                        self.trackedLocalUrl()
+                                    case let .failure(error):
+                                        switch error {
+                                        case .responseValidationFailed, .serverTrustEvaluationFailed:
+                                            os_log("Falling back to local URL: %{PUBLIC}@", log: .remoteAccess, type: .info, error.localizedDescription)
+                                            self.trackedLocalUrl()
+                                        default:
+                                            self.trackedRemoteUrl()
+                                        }
+                                    }
                                 }
-                            }
-                            .resume()
+                                .resume()
+                        }
                     }
                 }
             }

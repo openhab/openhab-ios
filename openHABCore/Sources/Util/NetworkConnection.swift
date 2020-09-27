@@ -14,10 +14,6 @@ import os.log
 import UIKit
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
-// Transition from AFNetworking to Alamofire 5.0
-// SessionManager --> Session
-// serverTrustPolicyManager --> serverTrustManager
-// ServerTrustPolicyManager --> ServerTrustManager
 public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
@@ -37,6 +33,10 @@ public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, 
     return (disposition, credential)
 }
 
+// In Alamofire 5 in SessionDelegate urlSession(_ session: URLSession,
+// task: URLSessionTask,
+// didReceive challenge: URLAuthenticationChallenge,
+// completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
 public let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
@@ -71,51 +71,53 @@ public class NetworkConnection {
 
     public var clientCertificateManager = ClientCertificateManager()
     public var serverCertificateManager: ServerCertificateManager!
-    public var manager: Alamofire.SessionManager!
+    public var manager: Alamofire.Session!
     public var rootUrl: URL?
 
     init(ignoreSSL: Bool,
-         manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
-                                                  delegate: SessionDelegate()),
-         adapter: RequestAdapter?) {
+         configuration: URLSessionConfiguration = .default,
+         delegate: SessionDelegate = SessionDelegate(),
+         startRequestsImmediately: Bool = false,
+         interceptor: RequestInterceptor?) {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
-        serverCertificateManager.initializeCertificatesStore()
-        self.manager = manager
-        self.manager.startRequestsImmediately = false
-        self.manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
-        self.manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
-        self.manager.adapter = adapter
+        let redirectHandler = Redirector.follow
+        manager = Session(configuration: configuration,
+                          delegate: delegate,
+                          startRequestsImmediately: startRequestsImmediately,
+                          interceptor: interceptor,
+                          serverTrustManager: serverCertificateManager,
+                          redirectHandler: redirectHandler)
     }
 
-    public class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {
-        shared = NetworkConnection(ignoreSSL: ignoreSSL, adapter: adapter)
+    public class func initialize(ignoreSSL: Bool, adapter: RequestInterceptor?) {
+        shared = NetworkConnection(ignoreSSL: ignoreSSL, interceptor: adapter)
     }
 
     public static func register(prefsURL: String,
                                 deviceToken: String,
                                 deviceId: String,
-                                deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                deviceName: String, completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func sitemaps(openHABRootUrl: String,
-                                completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func tracker(openHABRootUrl: String,
-                               completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                               completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func notification(urlString: String,
-                                    completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                    completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
@@ -134,7 +136,10 @@ public class NetworkConnection {
             os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command ?? "", link)
             os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
 
+            let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+
             return NetworkConnection.shared.manager.request(commandRequest)
+                .authenticate(with: credential)
                 .validate(statusCode: 200 ..< 300)
                 .responseData { response in
                     switch response.result {
@@ -151,7 +156,7 @@ public class NetworkConnection {
     public static func page(url: URL?,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest? {
         guard let url = url else { return nil }
 
         var pageRequest = URLRequest(url: url)
@@ -174,7 +179,10 @@ public class NetworkConnection {
 
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
+        let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+
         return NetworkConnection.shared.manager.request(pageRequest)
+            .authenticate(with: credential)
             .validate(statusCode: 200 ..< 300)
             .responseData(completionHandler: completionHandler)
     }
@@ -182,7 +190,7 @@ public class NetworkConnection {
     public static func page(pageUrl: String,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (AFDataResponse<Data>) -> Void) -> DataRequest? {
         if pageUrl == "" {
             return nil
         }
@@ -193,12 +201,15 @@ public class NetworkConnection {
         return page(url: pageToLoadUrl, longPolling: longPolling, openHABVersion: openHABVersion, completionHandler: completionHandler)
     }
 
-    static func load(from url: URL, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    static func load(from url: URL, completionHandler: @escaping (AFDataResponse<Data>) -> Void) {
         var request = URLRequest(url: url)
         request.timeoutInterval = 10.0
 
         os_log("Firing request", log: .viewCycle, type: .debug)
+        let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+
         let task = NetworkConnection.shared.manager.request(request)
+            .authenticate(with: credential)
             .validate(statusCode: 200 ..< 300)
             .responseData(completionHandler: completionHandler)
         task.resume()
