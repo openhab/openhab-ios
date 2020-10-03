@@ -1532,7 +1532,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Fabric/run\"\n";
+			shellScript = "${PODS_ROOT}/FirebaseCrashlytics/run\n";
 		};
 		6CFD91FCB0795A11D94FFA99 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

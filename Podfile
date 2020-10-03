@@ -16,9 +16,7 @@ target 'openHAB' do
     pod 'SwiftLint'
     pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
 
-    pod 'Fabric', '~> 1.7'
-    pod 'Crashlytics', '~> 3.9'
-    pod 'Firebase/Analytics'
+    pod 'Firebase/Crashlytics'
 
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
@@ -55,7 +53,7 @@ target 'openHABWatch Extension' do
     inherit! :search_paths
     shared_pods
     pod 'Kingfisher/SwiftUI', '~> 5.0'
-    pod 'DeviceKit', '~> 3.0'
+    pod 'DeviceKit', '~> 4.0'
 end
 
 # Note: `pod install --clean-install` must be used if the post_install hook is changed
