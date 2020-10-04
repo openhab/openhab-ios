@@ -62,32 +62,33 @@ private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewContro
 private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
 
 class OpenHABViewController: UIViewController {
-    var tracker: OpenHABTracker?
-    var hamburgerButton: DynamicButton!
+    var pageUrl = ""
+
+    private var tracker: OpenHABTracker?
+    private var hamburgerButton: DynamicButton!
     private var selectedWidgetRow: Int = 0
     private var currentPageOperation: Alamofire.Request?
     private var commandOperation: Alamofire.Request?
-    var pageUrl = ""
-    var openHABRootUrl = ""
-    var openHABUsername = ""
-    var openHABPassword = ""
-    var openHABAlwaysSendCreds = false
-    var defaultSitemap = ""
-    var idleOff = false
-    var sitemaps: [OpenHABSitemap] = []
-    var currentPage: OpenHABSitemapPage?
-    var selectionPicker: UIPickerView?
-    var pageNetworkStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
-    var pageNetworkStatusAvailable = false
-    var toggle: Int = 0
-    var deviceToken = ""
-    var deviceId = ""
-    var deviceName = ""
-    var refreshControl: UIRefreshControl?
-    var iconType: IconType = .png
-    let search = UISearchController(searchResultsController: nil)
-    var filteredPage: OpenHABSitemapPage?
-    var serverProperties: OpenHABServerProperties?
+    private var iconType: IconType = .png
+    private var openHABRootUrl = ""
+    private var openHABUsername = ""
+    private var openHABPassword = ""
+    private var openHABAlwaysSendCreds = false
+    private var defaultSitemap = ""
+    private var idleOff = false
+    private var sitemaps: [OpenHABSitemap] = []
+    private var currentPage: OpenHABSitemapPage?
+    private var selectionPicker: UIPickerView?
+    private var pageNetworkStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
+    private var pageNetworkStatusAvailable = false
+    private var toggle: Int = 0
+    private var deviceToken = ""
+    private var deviceId = ""
+    private var deviceName = ""
+    private var refreshControl: UIRefreshControl?
+    private var filteredPage: OpenHABSitemapPage?
+    private var serverProperties: OpenHABServerProperties?
+    private let search = UISearchController(searchResultsController: nil)
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
