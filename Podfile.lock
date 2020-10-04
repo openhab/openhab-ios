@@ -106,7 +106,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   SVGKit:
-    :commit: 880c94a5b77b6f22beb491a7a7e02ace220c32af
+    :commit: d1630b5c3771d305ed41de6c9f0f40503e1515d5
     :git: https://github.com/SVGKit/SVGKit.git
 
 SPEC CHECKSUMS:
