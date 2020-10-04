@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://www.bountysource.com/teams/openhab/issues?tracker_ids=860186"><img alt="Bountysource" src="https://www.bountysource.com/badge/tracker?tracker_id=860186"></a> 
+    <a href="https://www.bountysource.com/teams/openhab/issues?tracker_ids=860186"><img alt="Bountysource" src="https://www.bountysource.com/badge/tracker?tracker_id=860186"></a>
     <br>
     <img alt="Logo" src="openHAB/Images.xcassets/AppIcon.appiconset/icon_83.5@2x.png" width="100">
     <br>
@@ -12,7 +12,7 @@ This app is a native client for openHAB which allows easy access to your sitemap
 
 <a href="https://itunes.apple.com/us/app/openhab/id492054521?ls=1&mt=8"><img src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred.png" alt="Download on the App Store"></a>
 
-Beta releases are available on [Test Flight](https://testflight.apple.com/join/563WBakc).
+Beta releases are available on [TestFlight](https://testflight.apple.com/join/563WBakc).
 
 ## Features
 * Control your openHAB server and [openHAB Cloud instance](https://github.com/openhab/openhab-cloud)
