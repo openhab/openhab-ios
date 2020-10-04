@@ -40,9 +40,9 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         guard let widget = widget else { return .empty }
 
         switch widget.type {
-        case "Chart":
+        case .chart:
             return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: chartStyle).url)
-        case "Image":
+        case .image:
             if let item = widget.item {
                 return widgetPayload(fromItem: item)
             }
@@ -52,6 +52,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
     }
 
+    @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -79,7 +80,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
 
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
-        if widget.type == "Chart" {
+        if widget.type == .chart {
             loadImage()
         }
     }
@@ -127,14 +128,14 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     private func widgetPayload(fromItem item: OpenHABItem) -> ImageType {
         switch item.type {
-        case "Image":
+        case .image:
             os_log("Image base64Encoded.", log: .urlComposition, type: .debug)
-            guard let data = item.state.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
+            guard let data = item.state?.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
                 return .empty
             }
             return .embedded(image: UIImage(data: decodedData))
-        case "String":
-            return .link(url: URL(string: item.state))
+        case .stringItem:
+            return .link(url: URL(string: item.state ?? ""))
         default:
             return .empty
         }

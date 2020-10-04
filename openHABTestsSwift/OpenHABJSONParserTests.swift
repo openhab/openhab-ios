@@ -14,6 +14,7 @@
 import os.signpost
 import XCTest
 
+// swiftlint:disable type_body_length
 class OpenHABJSONParserTests: XCTestCase {
     let decoder = JSONDecoder()
 
@@ -529,6 +530,7 @@ class OpenHABJSONParserTests: XCTestCase {
         }
         """
         let data = Data(json.utf8)
+
         do {
             var widget: OpenHABWidget
             widget = try {
@@ -544,8 +546,24 @@ class OpenHABJSONParserTests: XCTestCase {
         }
     }
 
-//    func testUserData() {
-//        let userData = UserData()
-//        XCTAssertEqual(userData.items[0].widgetId, "00")
-//    }
+    func testServerVersion() {
+        let json = """
+        {"version":"3", "links":[{"type":"uuid","url":"http://192.168.2.15:8081/rest/uuid"},
+        {"type":"audio","url":"http://192.168.2.15:8081/rest/audio"},{"type":"bindings","url":"http://192.168.2.15:8081/rest/bindings"},{"type":"channel-types","url":"http://192.168.2.15:8081/rest/channel-types"},{"type":"config-descriptions","url":"http://192.168.2.15:8081/rest/config-descriptions"},{"type":"discovery","url":"http://192.168.2.15:8081/rest/discovery"},
+        {"type":"inbox","url":"http://192.168.2.15:8081/rest/inbox"},{"type":"extensions","url":"http://192.168.2.15:8081/rest/extensions"},{"type":"items","url":"http://192.168.2.15:8081/rest/items"},{"type":"links","url":"http://192.168.2.15:8081/rest/links"},{"type":"persistence","url":"http://192.168.2.15:8081/rest/persistence"},{"type":"profile-types","url":"http://192.168.2.15:8081/rest/profile-types"},{"type":"services","url":"http://192.168.2.15:8081/rest/services"},
+        {"type":"things","url":"http://192.168.2.15:8081/rest/things"},{"type":"thing-types","url":"http://192.168.2.15:8081/rest/thing-types"},{"type":"sitemaps","url":"http://192.168.2.15:8081/rest/sitemaps"},{"type":"voice","url":"http://192.168.2.15:8081/rest/voice"},{"type":"iconsets","url":"http://192.168.2.15:8081/rest/iconsets"},{"type":"habpanel","url":"http://192.168.2.15:8081/rest/habpanel"}]}
+        """
+        let data = Data(json.utf8)
+        do {
+            // var widget: OpenHABServerLinks
+            let properties = try decoder.decode(OpenHABServerProperties.self, from: data)
+
+            XCTAssertEqual(properties.version, "3", "Checking version")
+            XCTAssertEqual(properties.links[0].type, "uuid", "Checking finding links")
+            XCTAssertEqual(properties.linkUrl(byType: "uuid"), "http://192.168.2.15:8081/rest/uuid", "Checking finding link by type")
+
+        } catch {
+            XCTFail("Whoops, an error occured: \(error)")
+        }
+    }
 }

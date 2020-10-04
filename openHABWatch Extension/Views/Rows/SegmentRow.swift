@@ -13,7 +13,6 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct SegmentRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
@@ -21,14 +20,14 @@ struct SegmentRow: View {
     @State private var favoriteColor = 0
     var body: some View {
         let valueBinding = Binding<Int>(get: {
-            guard case let .segmented(value) = self.widget.stateEnumBinding else { return 0 }
-            return value
-        },
+                                            guard case let .segmented(value) = self.widget.stateEnumBinding else { return 0 }
+                                            return value
+                                        },
                                         set: {
-            os_log("Slider new value = %g", log: .default, type: .info, $0)
-            // self.widget.sendCommand($0)
-            self.widget.stateEnumBinding = .segmented($0)
-        })
+                                            os_log("Slider new value = %g", log: .default, type: .info, $0)
+                                            // self.widget.sendCommand($0)
+                                            self.widget.stateEnumBinding = .segmented($0)
+                                        })
         return
             VStack {
                 HStack {

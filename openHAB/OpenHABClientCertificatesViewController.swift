@@ -24,6 +24,7 @@ class OpenHABClientCertificatesViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = NSLocalizedString("client_certificates", comment: "")
         os_log("OpenHABClientCertificatesViewController viewDidLoad", log: .default, type: .info)
 
         tableView.tableFooterView = UIView()

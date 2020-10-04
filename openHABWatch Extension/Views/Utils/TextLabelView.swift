@@ -11,7 +11,6 @@
 
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct TextLabelView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
 
@@ -19,7 +18,7 @@ struct TextLabelView: View {
         Text(widget.labelText ?? "")
             .font(.caption)
             .lineLimit(2)
-            .foregroundColor(widget.labelcolor != "" ? Color(fromString: widget.labelcolor) : .primary)
+            .foregroundColor(!widget.labelcolor.isEmpty ? Color(fromString: widget.labelcolor) : .primary)
     }
 }
 

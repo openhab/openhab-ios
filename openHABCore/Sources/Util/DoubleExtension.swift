@@ -15,6 +15,7 @@ extension Double {
     public func valueText(step: Double) -> String {
         let digits = max(-Decimal(step).exponent, 0)
         let numberFormatter = NumberFormatter()
+        numberFormatter.minimumFractionDigits = digits
         numberFormatter.maximumFractionDigits = digits
         numberFormatter.decimalSeparator = "."
         return numberFormatter.string(from: NSNumber(value: self)) ?? ""

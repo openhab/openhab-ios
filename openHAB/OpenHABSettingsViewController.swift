@@ -134,6 +134,15 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         }
     }
 
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch section {
+        case 0:
+            return NSLocalizedString("openhab_connection", comment: "")
+        default:
+            return NSLocalizedString("application_settings", comment: "")
+        }
+    }
+
     func enableConnectionSettings() {
         settingsTableView.reloadData()
     }

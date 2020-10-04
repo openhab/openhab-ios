@@ -19,9 +19,9 @@ import MapKit
 import OpenHABCoreWatch
 import os.log
 
-enum StateEnum {
+enum WidgetTypeEnum {
     case switcher(Bool)
-    case slider(Double)
+    case slider //
     case segmented(Int)
     case unassigned
     case rollershutter
@@ -71,8 +71,10 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
     var widgets: [ObservableOpenHABWidget] = []
+    public var visibility = true
+    public var switchSupport = false
 
-    @Published var stateEnumBinding: StateEnum = .unassigned
+    @Published var stateEnumBinding: WidgetTypeEnum = .unassigned
 
     // Text prior to "["
     var labelText: String? {
@@ -101,6 +103,22 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         }
     }
 
+    public var stateValueAsBool: Bool? {
+        item?.state?.parseAsBool()
+    }
+
+    public var stateValueAsBrightness: Int? {
+        item?.state?.parseAsBrightness()
+    }
+
+    public var stateValueAsUIColor: UIColor? {
+        item?.state?.parseAsUIColor()
+    }
+
+    public var stateValueAsNumberState: NumberState? {
+        item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
+    }
+
     var adjustedValue: Double {
         if let item = item {
             return adj(item.stateAsDouble())
@@ -109,7 +127,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         }
     }
 
-    var stateEnum: StateEnum {
+    var stateEnum: WidgetTypeEnum {
         switch type {
         case "Frame":
             return .frame
@@ -117,12 +135,11 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if !mappings.isEmpty {
                 return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
-                // RollershutterItem changed to Rollershutter in later builds of OH2
-            } else if let type = item?.type, type == "Switch" {
+            } else if item?.isOfTypeOrGroupType(.switchItem) ?? false {
                 return .switcher(item?.state == "ON" ? true : false)
-            } else if let type = item?.type, type.isAny(of: "RollershutterItem", "Rollershutter") || (type == "Group" && item?.groupType == "Rollershutter") {
+            } else if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 return .rollershutter
-            } else if item?.stateDescription?.options.count ?? 0 > 0 {
+            } else if !mappingsOrItemOptions.isEmpty {
                 return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
             } else {
                 return .switcher(item?.state == "ON" ? true : false)
@@ -130,7 +147,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         case "Setpoint":
             return .setpoint
         case "Slider":
-            return .slider(adjustedValue)
+            return .slider // (adjustedValue)
         case "Selection":
             return .selection
         case "Colorpicker":
@@ -147,6 +164,20 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
             return .mapview
         default:
             return .unassigned
+        }
+    }
+
+    public func sendItemUpdate(state: NumberState?) {
+        guard let item = item, let state = state else {
+            os_log("ItemUpdate for Item or State = nil", log: .default, type: .info)
+            return
+        }
+        if item.isOfTypeOrGroupType(.numberWithDimension) {
+            // For number items, include unit (if present) in command
+            sendCommand(state.toString(locale: Locale(identifier: "US")))
+        } else {
+            // For all other items, send the plain value
+            sendCommand(state.formatValue())
         }
     }
 
@@ -298,7 +329,7 @@ extension ObservableOpenHABWidget {
 // swiftlint:disable line_length
 extension ObservableOpenHABWidget.CodingData {
     var openHABWidget: ObservableOpenHABWidget {
-        let mappedWidgets = widgets.map { $0.openHABWidget }
+        let mappedWidgets = widgets.map(\.openHABWidget)
         return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets)
     }
 }

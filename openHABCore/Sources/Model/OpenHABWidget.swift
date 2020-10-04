@@ -50,20 +50,38 @@ protocol Widget: AnyObject {
 }
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
+    public enum WidgetType: String {
+        case chart = "Chart"
+        case colorpicker = "Colorpicker"
+        case defaultWidget = "Default"
+        case frame = "Frame"
+        case group = "Group"
+        case image = "Image"
+        case mapview = "Mapview"
+        case selection = "Selection"
+        case setpoint = "Setpoint"
+        case slider = "Slider"
+        case switchWidget = "Switch"
+        case text = "Text"
+        case video = "Video"
+        case webview = "Webview"
+        case unknown = "Unknown"
+    }
+
     public var id: String = ""
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
     public var label = ""
     public var icon = ""
-    public var type = ""
+    public var type: WidgetType?
     public var url = ""
     public var period = ""
     public var minValue = 0.0
     public var maxValue = 100.0
     public var step = 1.0
     public var refresh = 0
-    public var height = ""
+    public var height: Double?
     public var isLeaf = false
     public var iconColor = ""
     public var labelcolor = ""
@@ -78,6 +96,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var mappings: [OpenHABWidgetMapping] = []
     public var image: UIImage?
     public var widgets: [OpenHABWidget] = []
+    public var visibility = true
+    public var switchSupport = false
 
     // Text prior to "["
     public var labelText: String? {
@@ -106,6 +126,36 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
         }
     }
 
+    public var stateValueAsBool: Bool? {
+        item?.state?.parseAsBool()
+    }
+
+    public var stateValueAsBrightness: Int? {
+        item?.state?.parseAsBrightness()
+    }
+
+    public var stateValueAsUIColor: UIColor? {
+        item?.state?.parseAsUIColor()
+    }
+
+    public var stateValueAsNumberState: NumberState? {
+        item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
+    }
+
+    public func sendItemUpdate(state: NumberState?) {
+        guard let item = item, let state = state else {
+            os_log("ItemUpdate for Item or State = nil", log: .default, type: .info)
+            return
+        }
+        if item.isOfTypeOrGroupType(.numberWithDimension) {
+            // For number items, include unit (if present) in command
+            sendCommand(state.toString(locale: Locale(identifier: "US")))
+        } else {
+            // For all other items, send the plain value
+            sendCommand(state.formatValue())
+        }
+    }
+
     public func sendCommandDouble(_ command: Double) {
         sendCommand(String(command))
     }
@@ -125,15 +175,44 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public func mappingIndex(byCommand command: String?) -> Int? {
         mappingsOrItemOptions.firstIndex { $0.command == command }
     }
+
+    public func iconState() -> String {
+        var iconState = item?.state ?? ""
+        if let item = item, let itemState = item.state {
+            if item.isOfTypeOrGroupType(.color) {
+                // For items that control a color item fetch the correct icon
+                if type == .slider || (type == .switchWidget && mappings.isEmpty) {
+                    if let brightness = itemState.parseAsBrightness() {
+                        iconState = String(brightness)
+                        if type == .switchWidget {
+                            iconState = iconState == "0" ? "OFF" : "ON"
+                        }
+                    } else {
+                        iconState = "OFF"
+                    }
+                } else if let color = itemState.parseAsUIColor() {
+                    iconState = "#\(color.toHex() ?? "000000")"
+                }
+            } else if type == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
+                // For switch items without mappings (just ON and OFF) that control a dimmer item
+                // and which are not ON or OFF already, set the state to "OFF" instead of 0
+                // or to "ON" to fetch the correct icon
+                iconState = (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
+            }
+        }
+        return iconState
+    }
+}
+
+extension OpenHABWidget.WidgetType: Decodable {}
+
+extension OpenHABWidget.WidgetType: UnknownCaseRepresentable {
+    static var unknownCase: OpenHABWidget.WidgetType = .unknown
 }
 
 extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget]) {
-        func toString(_ with: Double?) -> String {
-            guard let double = with else { return "" }
-            return String(format: "%.1f", double)
-        }
+    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -151,7 +230,7 @@ extension OpenHABWidget {
         } else {
             self.refresh = 0
         }
-        self.height = toString(height)
+        self.height = height
         self.isLeaf = isLeaf ?? false
         self.iconColor = iconColor ?? ""
         labelcolor = labelColor ?? ""
@@ -169,6 +248,8 @@ extension OpenHABWidget {
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
+        self.visibility = visibility ?? true
+        self.switchSupport = switchSupport ?? false
     }
 
     convenience init(xml xmlElement: XMLElement) {
@@ -179,7 +260,7 @@ extension OpenHABWidget {
             switch child.tag {
             case "widgetId": widgetId = child.stringValue
             case "label": label = child.stringValue
-            case "type": type = child.stringValue
+            case "type": type = child.stringValue.toWidgetType()
             case "icon": icon = child.stringValue
             case "url": url = child.stringValue
             case "period": period = child.stringValue
@@ -189,7 +270,7 @@ extension OpenHABWidget {
             case "service": service = child.stringValue
             case "state": state = child.stringValue
             case "text": text = child.stringValue
-            case "height": height = child.stringValue
+            case "height": height = Double(child.stringValue)
             case "encoding": encoding = child.stringValue
             // Double
             case "minValue": minValue = Double(child.stringValue) ?? 0.0
@@ -216,7 +297,7 @@ extension OpenHABWidget {
     public struct CodingData: Decodable {
         let widgetId: String
         let label: String
-        let type: String
+        let type: WidgetType
         let icon: String
         let url: String?
         let period: String?
@@ -239,14 +320,16 @@ extension OpenHABWidget {
         let linkedPage: OpenHABLinkedPage?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [OpenHABWidget.CodingData]
+        let visibility: Bool?
+        let switchSupport: Bool?
     }
 }
 
 // swiftlint:disable line_length
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
-        let mappedWidgets = widgets.map { $0.openHABWidget }
-        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets)
+        let mappedWidgets = widgets.map(\.openHABWidget)
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport)
     }
 }
 

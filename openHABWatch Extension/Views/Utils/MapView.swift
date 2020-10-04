@@ -14,7 +14,6 @@ import OpenHABCoreWatch
 import SwiftUI
 import UIKit
 
-// swiftlint:disable file_types_order
 struct MapView: WKInterfaceObjectRepresentable {
     @ObservedObject var widget: ObservableOpenHABWidget
 

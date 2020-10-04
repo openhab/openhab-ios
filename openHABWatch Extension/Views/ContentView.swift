@@ -13,7 +13,6 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
@@ -28,9 +27,9 @@ struct ContentView: View {
         }
         .navigationBarTitle(Text(title))
         .alert(isPresented: $viewModel.showAlert) {
-            Alert(title: Text("Error"),
+            Alert(title: Text(NSLocalizedString("error", comment: "")),
                   message: Text(viewModel.errorDescription),
-                  dismissButton: .default(Text("Retry")) {
+                  dismissButton: .default(Text(NSLocalizedString("retry", comment: ""))) {
                       DispatchQueue.main.async {
                           self.viewModel.refreshUrl()
                           os_log("reload after alert", log: .default, type: .info)
@@ -38,20 +37,21 @@ struct ContentView: View {
                   })
         }
         .actionSheet(isPresented: $viewModel.showCertificateAlert) {
-            ActionSheet(title: Text("Warning"),
+            ActionSheet(title: Text(NSLocalizedString("warning", comment: "")),
                         message: Text(viewModel.certificateErrorDescription),
-                        buttons: [.default(Text("Abort")) {
+                        buttons: [.default(Text(NSLocalizedString("abort", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
                         },
-                                  .default(Text("Once")) {
+                        .default(Text(NSLocalizedString("once", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
                         },
-                                  .default(Text("Always")) {
+                        .default(Text(NSLocalizedString("always", comment: ""))) {
                             NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
-                                }])
+                        }])
         }
     }
 
+    // swiftlint:enable line_length
     func rowWidget(widget: ObservableOpenHABWidget) -> AnyView? {
         switch widget.stateEnum {
         case .switcher:
@@ -74,7 +74,7 @@ struct ContentView: View {
                 return AnyView(ImageRow(URL: URL(string: widget.url)))
             }
         case .chart:
-            let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
+            let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type ?? .none, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
             return AnyView(ImageRow(URL: url))
         case .mapview:
             return AnyView(MapViewRow(widget: widget))

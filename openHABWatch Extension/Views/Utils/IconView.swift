@@ -14,7 +14,6 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct IconView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
@@ -23,7 +22,7 @@ struct IconView: View {
         Endpoint.icon(rootUrl: settings.openHABRootUrl,
                       version: 2,
                       icon: widget.icon,
-                      value: widget.item?.state ?? "",
+                      state: widget.item?.state ?? "",
                       iconType: .png).url
     }
 

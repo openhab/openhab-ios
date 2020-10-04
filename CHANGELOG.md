@@ -4,6 +4,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.4.5, Build 1580410454] - 2020-10-04
+
+### Fixed
+- SVGKit updated to correctly render SVG - Fix for issue #351 
+- Update to Xcode 12, Swift 5.3
+- Update external dependencies, migrate to FirebaseCrashlytics, remove FirebaseAnalytics
+- Update to Kingfisher 5.15.5 - to resolve clash with Alamofire
+- Respond to authentication challenge in WebView
+
+
 ## [Version 2.3.24, Build 1580410444] - 2020-05-13
 
 ### Changed
