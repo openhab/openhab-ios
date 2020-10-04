@@ -76,9 +76,10 @@ DEPENDENCIES:
   - SwiftMessages
 
 SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - CocoaLumberjack
   trunk:
     - Alamofire
-    - CocoaLumberjack
     - DeviceKit
     - DynamicButton
     - Firebase
@@ -105,7 +106,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   SVGKit:
-    :commit: 58543f3714b34ea66cfe58636d86dcbec3514ccf
+    :commit: 880c94a5b77b6f22beb491a7a7e02ace220c32af
     :git: https://github.com/SVGKit/SVGKit.git
 
 SPEC CHECKSUMS:
@@ -131,6 +132,6 @@ SPEC CHECKSUMS:
   SwiftLint: dfd554ff0dff17288ee574814ccdd5cea85d76f7
   SwiftMessages: 633304165351b8e3dcbb81a71f8efcd86f9c1669
 
-PODFILE CHECKSUM: 8b24d9f55d88a62f1c5b322c170fef2e39a3ecfe
+PODFILE CHECKSUM: d765613b105112f6a6a9e2f26920db7573dcce11
 
 COCOAPODS: 1.10.0.rc.1
