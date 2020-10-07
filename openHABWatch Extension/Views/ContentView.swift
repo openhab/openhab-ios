@@ -52,36 +52,37 @@ struct ContentView: View {
     }
 
     // swiftlint:enable line_length
-    func rowWidget(widget: ObservableOpenHABWidget) -> AnyView? {
+    // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
+    @ViewBuilder func rowWidget(widget: ObservableOpenHABWidget) -> some View {
         switch widget.stateEnum {
         case .switcher:
-            return AnyView(SwitchRow(widget: widget))
+            SwitchRow(widget: widget)
         case .slider:
-            return AnyView(SliderRow(widget: widget))
+            SliderRow(widget: widget)
         case .segmented:
-            return AnyView(SegmentRow(widget: widget))
+            SegmentRow(widget: widget)
         case .rollershutter:
-            return AnyView(RollershutterRow(widget: widget))
+            RollershutterRow(widget: widget)
         case .setpoint:
-            return AnyView(SetpointRow(widget: widget))
+            SetpointRow(widget: widget)
         case .frame:
-            return AnyView(FrameRow(widget: widget))
+            FrameRow(widget: widget)
         case .image:
             // Encoded image
             if widget.item != nil {
-                return AnyView(ImageRawRow(widget: widget))
+                ImageRawRow(widget: widget)
             } else {
-                return AnyView(ImageRow(URL: URL(string: widget.url)))
+                ImageRow(URL: URL(string: widget.url))
             }
         case .chart:
             let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type ?? .none, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
-            return AnyView(ImageRow(URL: url))
+            ImageRow(URL: url)
         case .mapview:
-            return AnyView(MapViewRow(widget: widget))
+            MapViewRow(widget: widget)
         case .colorpicker:
-            return AnyView(ColorPickerRow(widget: widget))
+            ColorPickerRow(widget: widget)
         default:
-            return AnyView(GenericRow(widget: widget))
+            GenericRow(widget: widget)
         }
     }
 }

@@ -19,18 +19,15 @@ struct ImageRawRow: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
-        var imageView: some View {
-            if let data = widget.item?.state?.components(separatedBy: ",")[safe: 1],
-                let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
-                let image = UIImage(data: decodedData) {
-                return AnyView(Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit())
-            } else {
-                return AnyView(EmptyView())
-            }
+        if let data = widget.item?.state?.components(separatedBy: ",")[safe: 1],
+            let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
+            let image = UIImage(data: decodedData) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+        } else {
+            EmptyView()
         }
-        return imageView
     }
 }
 
