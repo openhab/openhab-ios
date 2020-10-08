@@ -51,17 +51,9 @@ class WebUITableViewCell: GenericUITableViewCell {
             return
         }
 
-        let authStr = "\(Preferences.username):\(Preferences.password)"
-
-        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
-            return
-        }
-        let base64LoginString = loginData.base64EncodedString()
-
         if let url = URL(string: urlString) {
             self.url = url
-            var request = URLRequest(url: url)
-            request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+            let request = URLRequest(url: url)
             widgetWebView?.scrollView.isScrollEnabled = false
             widgetWebView?.scrollView.bounces = false
             widgetWebView?.load(request)
