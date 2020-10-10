@@ -1,11 +1,12 @@
 name: Publish on TestFlight
 
 on:
-  push:
-    branches:
-      - develop
-    tags-ignore:
-      - '**'
+  workflow_dispatch
+  # push:
+  #   branches:
+  #     - develop
+  #   tags-ignore:
+  #     - '**'
 
 jobs:
   publish_app:
