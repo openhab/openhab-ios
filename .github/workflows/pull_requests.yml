@@ -30,7 +30,7 @@ jobs:
             ${{ runner.os }}-pods-${{ env.cache-name }}-
 
       - name: Install Bundler
-      - run: gem install bundler
+        run: gem install bundler
 
       - name: Bundle Install
         run: bundle install
