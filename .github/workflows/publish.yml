@@ -29,10 +29,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-${{ env.cache-name }}-
 
-      - name: Setup Cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1.1
-        with:
-          podfile-path: Podfile.lock
+      - name: Install Bundler
+        run: gem install bundler
+
+      - name: Bundle Install
+        run: bundle install
 
       - name: Check Pods existence
         id: check_files

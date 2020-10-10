@@ -1,12 +1,8 @@
-name: Unit Tests
+name: Run Unit Tests
 
 on:
-  workflow_dispatch
-  # push:
-  #   branches:
-  #     - develop
-  #   tags-ignore:
-  #     - '**'
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 jobs:
   build_and_test:
