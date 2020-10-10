@@ -46,14 +46,18 @@ platform :ios do
     desc 'Build beta'
     lane :beta do |lane|
         # check the semantic parameter entered
-        raise 'No bump type defined! Use one of: patch | minor | major'.red unless lane[:bump]
+        unless is_ci?
+            raise 'No bump type defined! Use one of: patch | minor | major'.red unless lane[:bump]
+        end
 
+        # ensure that branch is clean
         ensure_git_branch(
             branch: '(master|develop|release\\S+|hotfix\\S+)'
         )
-
-        # ensure that master branch is clean
         ensure_git_status_clean
+
+        # setup keychain for CI
+        setup_keychain
 
         # update L10ns
         crowdin
@@ -65,16 +69,12 @@ platform :ios do
             xcodeproj: 'openHAB.xcodeproj'
         )
 
-        type = lane[:bump]
+        type = is_ci? ? 'minor' : lane[:bump]
 
         increment_version_number_in_xcodeproj(
             bump_type: type,
             xcodeproj: 'openHAB.xcodeproj'
         )
-
-        build_number = get_build_number
-        version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
-                                     target: 'openHAB')
 
         # get the last commit comments from Git history
         # and creates our changelog
@@ -87,20 +87,42 @@ platform :ios do
         )
 
         changelog = read_changelog # Read changelog
-
         stamp_changelog(section_identifier: "Version #{version}, Build #{build_number}") # Stamp Unreleased section with newly released build number
 
-        clean_build_artifacts
+        build_app(
+            scheme: 'openHAB',
+            clean: true,
+            export_method: 'app-store'
+        )
 
-        git_add(path: "./openHAB/Resources/*/*.strings", shell_escape: false)
-        # commit to git the changes from bumping version number
-        commit_version_bump(message: 'Committed version bump',
-                            xcodeproj: 'openHAB.xcodeproj',
-                            force: true)
+        upload_to_testflight(
+            api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
+            distribute_external: true,
+            notify_external_testers: true,
+            changelog: changelog,
+            groups: ['Beta Testers']
+        )
+        refresh_dsyms
 
-        # push bump commit
-        ensure_git_status_clean
-        push_to_git_remote
+        build_number = get_build_number
+        version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
+                                     target: 'openHAB')
+
+        # commit to git the changes from bumping version number including localizations and CHANGELOG.md
+        strings_base_path = 'openHAB/Resources/'
+        additional_files_paths = []
+        additional_files_paths.push('CHANGELOG.md')
+        Dir.chdir("../#{strings_base_path}") do
+            Dir.glob('**/*.strings') .each do |f|
+                additional_files_paths.push("#{strings_base_path}#{f}")
+            end
+        end
+
+        commit_version_bump(
+            message: 'Committed version bump',
+            xcodeproj: 'openHAB.xcodeproj',
+            include: files_paths
+        )
 
         # create a local tag with the new version
         add_git_tag(
@@ -108,39 +130,32 @@ platform :ios do
             tag: version.to_s
         )
 
+        # push bump commit
+        ensure_git_status_clean
+        push_to_git_remote(tags: true)
+
         # publish a new release into Github
         github_release = set_github_release(
             api_token: ENV['GITHUB_TOKEN'],
             repository_name: 'openhab/openhab-ios',
             name: "#{type.capitalize} version #{version}",
             tag_name: version.to_s,
-            description: changelog,
-            commitish: 'master'
+            description: changelog
             # upload_assets: no assets supported
         )
-        build_app(scheme: 'openHAB',
-                  clean: true,
-                  export_method: 'app-store')
-        upload_to_testflight(
-            distribute_external: true,
-            notify_external_testers: true,
-            changelog: changelog,
-            groups: ['Beta Testers']
-        )
-        refresh_dsyms
     end
 
     # This currently only updates Localizable.strings
     # Regions.strings and InfoPlist.strings must be done manually
     desc 'Download strings files from Crowdin'
     lane :crowdin do
-        if ENV['OH_CROWDIN_PROJECT_ID'] != nil && ENV['OH_CROWDIN_USERNAME'] != nil && ENV['OH_CROWDIN_ACCOUNT_KEY'] != nil
+        if !ENV['OH_CROWDIN_PROJECT_ID'].nil? && !ENV['OH_CROWDIN_USERNAME'].nil? && !ENV['OH_CROWDIN_ACCOUNT_KEY'].nil?
             unless File.exist?(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml')
                 UI.user_error!("crowdinfile.yml is required to run this lane! Aborted \u{1F6D1}")
             end
             config = YAML.load(File.read(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml'))
-            build = "https://api.crowdin.com/api/project/#{ENV["OH_CROWDIN_PROJECT_ID"]}/export?login=#{ENV["OH_CROWDIN_USERNAME"]}&account-key=#{ENV["OH_CROWDIN_ACCOUNT_KEY"]}"
-            dl = "https://api.crowdin.com/api/project/#{ENV["OH_CROWDIN_PROJECT_ID"]}/download/all.zip?login=#{ENV["OH_CROWDIN_USERNAME"]}&account-key=#{ENV["OH_CROWDIN_ACCOUNT_KEY"]}"
+            build = "https://api.crowdin.com/api/project/#{ENV['OH_CROWDIN_PROJECT_ID']}/export?login=#{ENV['OH_CROWDIN_USERNAME']}&account-key=#{ENV['OH_CROWDIN_ACCOUNT_KEY']}"
+            dl = "https://api.crowdin.com/api/project/#{ENV['OH_CROWDIN_PROJECT_ID']}/download/all.zip?login=#{ENV['OH_CROWDIN_USERNAME']}&account-key=#{ENV['OH_CROWDIN_ACCOUNT_KEY']}"
             path = File.expand_path('..') + '/openHAB/Resources/'
             langs = config['langs']
             # Expected size of the array, used to check if new languages have been added or not
@@ -163,9 +178,8 @@ platform :ios do
 
                         # Key found, pull content and write to file
                         langs[entry.name].each do |lang|
-                            #puts File.basename("#{entry}")
                             content = entry.get_input_stream.read
-                            full_path = path + lang + '/' + File.basename("#{entry}")
+                            full_path = path + lang + '/' + File.basename(entry.to_s)
                             puts "Updated! \u{1F4AA} " + full_path
                             File.open(full_path, 'w') { |file| file.write(content) }
                         end
@@ -180,4 +194,31 @@ platform :ios do
         end
     end
 
+    desc 'Setup keychain for CI environment'
+    private_lane :setup_keychain do
+        if is_ci?
+            create_keychain(
+                name: 'action_keychain',
+                password: ENV['KEYCHAIN_PASSWORD'],
+                default_keychain: true,
+                unlock: true,
+                timeout: 3600,
+                lock_when_sleeps: false
+            )
+        end
+    end
+
+    before_all do |lane, options|
+        ensure_env_vars(
+            env_vars: %w[ASC_API_KEY ASC_API_KEY_ID ASC_API_KEY_ISSUER_ID]
+        )
+
+        app_store_connect_api_key(
+            key_id: ENV['ASC_API_KEY_ID'],
+            issuer_id: ENV['ASC_API_KEY_ISSUER_ID'],
+            key_content: ENV['ASC_API_KEY'],
+            duration: 1800,
+            in_house: false
+        )
+    end
 end
