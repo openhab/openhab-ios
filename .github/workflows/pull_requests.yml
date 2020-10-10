@@ -25,15 +25,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-${{ env.cache-name }}-
 
-      - name: Install Bundler
-        run: gem install bundler
-
-      - name: Bundle Install
-        run: bundle install
+      - name: Setup Cocoapods
+        uses: maxim-lobanov/setup-cocoapods@v1.2
+        with:
+          podfile-path: Podfile.lock
 
       - name: Install Dependencies
-        run: |
-          bundle exec pod install --repo-update
+        run: pod install --repo-update
         shell: bash
 
       - name: Fastlane unit tests
