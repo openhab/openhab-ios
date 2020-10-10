@@ -26,7 +26,7 @@ jobs:
             ${{ runner.os }}-pods-${{ env.cache-name }}-
 
       - name: Setup Cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1.2
+        uses: maxim-lobanov/setup-cocoapods@v1
         with:
           podfile-path: Podfile.lock
 
