@@ -11,6 +11,7 @@
 
 import AVFoundation
 import FirebaseCore
+import FirebaseCrashlytics
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -80,13 +81,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func setupCrashReporting() {
-        guard Preferences.sendCrashReports else {
-            // The user has not opted-in to crash reporting.
-            return
-        }
-
         // init Firebase crash reporting
         FirebaseApp.configure()
+        FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
     }
 
     func activateWatchConnectivity() {

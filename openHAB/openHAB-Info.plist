@@ -110,7 +110,9 @@
 			</dict>
 		</dict>
 	</array>
-	<key>firebase_crashlytics_collection_enabled</key>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<false/>
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
 	<false/>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>openHAB needs access to your local network to connect with the openHAB server.</string>

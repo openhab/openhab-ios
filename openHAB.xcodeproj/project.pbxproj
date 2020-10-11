@@ -57,6 +57,7 @@
 		9350F195238151F100054BA8 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F193238151F100054BA8 /* Preferences.swift */; };
 		9350F1972381523700054BA8 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1962381523700054BA8 /* Equatable.swift */; };
 		9350F1982381523700054BA8 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F1962381523700054BA8 /* Equatable.swift */; };
+		935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B484525342B8E00E44CF0 /* URL+Static.swift */; };
 		938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF89524EFBC5400E6B52F /* LocalizationTests.swift */; };
 		938BF9C424EFCB9F00E6B52F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C324EFCB9F00E6B52F /* Main.storyboard */; };
 		938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */; };
@@ -368,6 +369,7 @@
 		9350F190238151CE00054BA8 /* StringExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		9350F193238151F100054BA8 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		9350F1962381523700054BA8 /* Equatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Equatable.swift; sourceTree = "<group>"; };
+		935B484525342B8E00E44CF0 /* URL+Static.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Static.swift"; sourceTree = "<group>"; };
 		938BF89524EFBC5400E6B52F /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		938BF9C324EFCB9F00E6B52F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Localization.swift"; sourceTree = "<group>"; };
@@ -1140,6 +1142,7 @@
 				286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */,
 				938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */,
 				938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */,
+				935B484525342B8E00E44CF0 /* URL+Static.swift */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -1858,6 +1861,7 @@
 				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
+				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
