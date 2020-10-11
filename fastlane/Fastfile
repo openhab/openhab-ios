@@ -46,7 +46,11 @@ platform :ios do
     desc 'Build beta'
     lane :beta do |lane|
         # check the semantic parameter entered
-        unless is_ci?
+        if is_ci?
+            ensure_env_vars(
+                env_vars: %w[GITHUB_TOKEN KEYCHAIN_PASSWORD MATCH_PASSWORD SIGNING_IDENTITY OH_CROWDIN_PROJECT_ID OH_CROWDIN_USERNAME OH_CROWDIN_ACCOUNT_KEY TAG_VERSION]
+            )
+        else
             raise 'No bump type defined! Use one of: patch | minor | major'.red unless lane[:bump]
         end
 
@@ -69,12 +73,23 @@ platform :ios do
             xcodeproj: 'openHAB.xcodeproj'
         )
 
-        type = is_ci? ? 'minor' : lane[:bump]
+        type = lane[:bump]
 
-        increment_version_number_in_xcodeproj(
-            bump_type: type,
-            xcodeproj: 'openHAB.xcodeproj'
-        )
+        if is_ci?
+            increment_version_number_in_xcodeproj(
+                bump_type: lane[:bump],
+                xcodeproj: 'openHAB.xcodeproj'
+            )
+        else
+            increment_version_number_in_xcodeproj(
+                version_number: ENV['TAG_VERSION'],
+                xcodeproj: 'openHAB.xcodeproj'
+            )
+        end
+
+        build_number = get_build_number
+        version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
+                                     target: 'openHAB')
 
         # get the last commit comments from Git history
         # and creates our changelog
@@ -103,10 +118,6 @@ platform :ios do
             groups: ['Beta Testers']
         )
         refresh_dsyms
-
-        build_number = get_build_number
-        version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
-                                     target: 'openHAB')
 
         # commit to git the changes from bumping version number including localizations and CHANGELOG.md
         strings_base_path = 'openHAB/Resources/'
@@ -138,7 +149,7 @@ platform :ios do
         github_release = set_github_release(
             api_token: ENV['GITHUB_TOKEN'],
             repository_name: 'openhab/openhab-ios',
-            name: "#{type.capitalize} version #{version}",
+            name: s_ci? ? "Version #{version}" : "#{type.capitalize} version #{version}",
             tag_name: version.to_s,
             description: changelog
             # upload_assets: no assets supported

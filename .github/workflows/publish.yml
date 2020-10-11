@@ -3,16 +3,19 @@ name: Publish on TestFlight
 on:
   workflow_dispatch
   # push:
-  #   branches:
-  #     - develop
-  #   tags-ignore:
-  #     - '**'
+  #   branches-ignore:
+  #     - master
+  #   tags:
+  #     - '*.*.*'
 
 jobs:
   publish_app:
     runs-on: macos-latest
 
     steps:
+      - uses: olegtarasov/get-tag@v2
+        id: tagName
+
       - uses: maxim-lobanov/setup-xcode@v1.1
         with:
           xcode-version: latest-stable
@@ -29,15 +32,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-${{ env.cache-name }}-
 
-      - name: Install Bundler
-        run: gem install bundler
-
-      - name: Bundle Install
-        run: bundle install
+      - name: Setup Cocoapods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          podfile-path: Podfile.lock
 
       - name: Install Dependencies
         run: |
-          bundle exec pod install --repo-update
+          pod install --repo-update
         shell: bash
 
       - name: SSH Config
@@ -61,6 +63,7 @@ jobs:
           OH_CROWDIN_PROJECT_ID: ${{ secrets.OH_CROWDIN_PROJECT_ID }}
           OH_CROWDIN_USERNAME: ${{ secrets.OH_CROWDIN_USERNAME }}
           OH_CROWDIN_ACCOUNT_KEY: ${{ secrets.OH_CROWDIN_ACCOUNT_KEY }}
+          TAG_VERSION: ${{ steps.tagName.outputs.tag }}
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
