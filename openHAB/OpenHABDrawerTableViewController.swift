@@ -183,6 +183,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     cell.customImageView.image = UIImage(systemName: "bell")
                 case .settings:
                     cell.customImageView.image = UIImage(systemName: "gear")
+                case .habpanel:
+                    cell.customImageView.image = UIImage(systemName: "rectangle.3.offgrid.fill")
                 }
             } else {
                 let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
@@ -196,6 +198,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     buttonIcon.style = .custom(DynamicButtonStyleBell.self)
                 case .settings:
                     buttonIcon.style = .custom(DynamicButtonStyleGear.self)
+                case .habpanel:
+                    buttonIcon.style = .circlePlus
                 }
                 cell.customImageView.addSubview(buttonIcon)
             }
@@ -244,6 +248,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
             case .notifications: dismiss(animated: true) {
                 self.delegate?.modalDismissed(to: .notifications)
             }
+            case .habpanel:
+                delegate?.modalDismissed(to: .habpanel)
             }
         }
     }
@@ -254,6 +260,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
             drawerItems.append(.notifications)
         }
+        drawerItems.append(.habpanel)
         // Settings always go last
         drawerItems.append(.settings)
     }

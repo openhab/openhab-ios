@@ -14,6 +14,7 @@ import Foundation
 enum OpenHABDrawerItem {
     case settings
     case notifications
+    case habpanel
 
     var localizedString: String {
         switch self {
@@ -21,6 +22,8 @@ enum OpenHABDrawerItem {
             return NSLocalizedString("settings", comment: "")
         case .notifications:
             return NSLocalizedString("notifications", comment: "")
+        case .habpanel:
+            return NSLocalizedString("habpanel", comment: "")
         }
     }
 
