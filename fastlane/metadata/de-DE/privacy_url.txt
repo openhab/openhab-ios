@@ -1,1 +1,1 @@
-http://www.openhab.org/imprint.html
+https://www.openhabfoundation.org/privacy.html
