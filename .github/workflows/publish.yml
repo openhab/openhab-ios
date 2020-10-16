@@ -1,14 +1,22 @@
 name: Publish on TestFlight
 
 on:
-  push:
-    branches: [develop]
+  workflow_dispatch
+  # push:
+  #   branches:
+  #     - develop
+  #   tags-ignore:
+  #     - '**'
 
 jobs:
   publish_app:
     runs-on: macos-latest
 
     steps:
+      - uses: maxim-lobanov/setup-xcode@v1.1
+        with:
+          xcode-version: latest-stable
+
       - uses: actions/checkout@v2
 
       - name: Cache cocoapods dependencies
@@ -21,21 +29,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-${{ env.cache-name }}-
 
-      - name: Setup Cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1.1
-        with:
-          podfile-path: Podfile.lock
+      - name: Install Bundler
+        run: gem install bundler
 
-      - name: Check Pods existence
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: "Pods"
+      - name: Bundle Install
+        run: bundle install
 
       - name: Install Dependencies
-        if: steps.check_files.outputs.files_exists == 'false'
         run: |
-          pod install --repo-update
+          bundle exec pod install --repo-update
         shell: bash
 
       - name: SSH Config
@@ -47,10 +49,12 @@ jobs:
           ssh-private-key: |
             ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
 
-      - name: fastlane iOS beta
+      - name: Fastlane iOS beta
         env:
-          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
-          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY: ${{ secrets.ASC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           SIGNING_IDENTITY: ${{ secrets.SIGNING_IDENTITY }}
@@ -59,6 +63,7 @@ jobs:
           OH_CROWDIN_ACCOUNT_KEY: ${{ secrets.OH_CROWDIN_ACCOUNT_KEY }}
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
         uses: maierj/fastlane-action@v1.4.0
         with:
           lane: beta

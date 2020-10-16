@@ -1,1 +1,1 @@
-"NSLocalNetworkUsageDescription" = "openHAB needs access to your local network to connect with the openHAB server.";
+"NSLocalNetworkUsageDescription" = "openHAB benötigt Zugriff auf Ihr lokales Netzwerk, um sich mit dem openHAB Server zu verbinden.";

@@ -1083,14 +1083,21 @@
                                                     <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                     <accessibility key="accessibilityConfiguration" label="Crash reporting"/>
                                                 </switch>
+                                                <button opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Hwl-Ux-Na9">
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="49" height="31.000000000000004"/>
+                                                </button>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="trailingMargin" secondItem="qS5-yP-H2i" secondAttribute="trailing" constant="10" id="22p-Ux-EFs"/>
+                                                <constraint firstItem="Hwl-Ux-Na9" firstAttribute="leading" secondItem="qS5-yP-H2i" secondAttribute="leading" id="2k5-SM-CZA"/>
                                                 <constraint firstItem="qS5-yP-H2i" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ai7-cr-dBg" secondAttribute="trailing" constant="15" id="6pF-f8-Wr8"/>
                                                 <constraint firstItem="Ai7-cr-dBg" firstAttribute="leading" secondItem="AuF-Td-pUt" secondAttribute="leadingMargin" constant="12" id="CZz-JU-M5s"/>
+                                                <constraint firstItem="Hwl-Ux-Na9" firstAttribute="top" secondItem="qS5-yP-H2i" secondAttribute="top" id="K1v-3e-nyy"/>
                                                 <constraint firstItem="Ai7-cr-dBg" firstAttribute="centerY" secondItem="AuF-Td-pUt" secondAttribute="centerY" id="Phc-el-FpD"/>
                                                 <constraint firstItem="qS5-yP-H2i" firstAttribute="centerY" secondItem="AuF-Td-pUt" secondAttribute="centerY" id="XZh-ll-ey8"/>
+                                                <constraint firstItem="Hwl-Ux-Na9" firstAttribute="trailing" secondItem="qS5-yP-H2i" secondAttribute="trailing" id="bMe-qB-Xvb"/>
                                                 <constraint firstItem="qS5-yP-H2i" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ai7-cr-dBg" secondAttribute="trailing" constant="12" id="fTd-fS-wrC"/>
+                                                <constraint firstItem="Hwl-Ux-Na9" firstAttribute="bottom" secondItem="qS5-yP-H2i" secondAttribute="bottom" id="n4t-vC-g88"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <accessibility key="accessibilityConfiguration">
@@ -1128,6 +1135,29 @@
                                             <segue destination="v14-EG-ajz" kind="show" identifier="showLegal" id="UI7-Ps-XIw"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell tag="888" contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="gOB-5d-9fY">
+                                        <rect key="frame" x="0.0" y="807.33333206176758" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="gOB-5d-9fY" id="9lh-Vk-icE">
+                                            <rect key="frame" x="0.0" y="0.0" width="347.66666666666669" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Privacy Policy" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vcs-uN-ETx">
+                                                    <rect key="frame" x="19.999999999999993" y="11.999999999999998" width="105.33333333333331" height="20.333333333333329"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                    <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="privacy_policy"/>
+                                                    </userDefinedRuntimeAttributes>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="Vcs-uN-ETx" firstAttribute="leading" secondItem="9lh-Vk-icE" secondAttribute="leadingMargin" constant="12" id="5Nf-8Q-356"/>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Vcs-uN-ETx" secondAttribute="trailing" id="7y9-et-7NB"/>
+                                                <constraint firstItem="Vcs-uN-ETx" firstAttribute="centerY" secondItem="9lh-Vk-icE" secondAttribute="centerY" id="S7c-ad-fo2"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                         </sections>
@@ -1147,6 +1177,7 @@
                         <outlet property="passwordTextField" destination="3La-Yc-Vmi" id="pPI-mK-EET"/>
                         <outlet property="realTimeSlidersSwitch" destination="8cM-D4-bge" id="jLY-fF-wlf"/>
                         <outlet property="remoteUrlTextField" destination="ppC-da-pKq" id="FyS-4h-tKY"/>
+                        <outlet property="sendCrashReportsDummy" destination="Hwl-Ux-Na9" id="lEi-hM-5GB"/>
                         <outlet property="sendCrashReportsSwitch" destination="qS5-yP-H2i" id="ePn-02-tM8"/>
                         <outlet property="settingsTableView" destination="Gpo-Jj-aMP" id="w5C-jq-jO6"/>
                         <outlet property="usernameTextField" destination="7GO-er-lvr" id="nLw-7S-7YN"/>

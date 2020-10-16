@@ -58,3 +58,7 @@
 "oh_secret" = "openHAB geheim";
 "notifications" = "Notificaties";
 "settings" = "Instellingen";
+"privacy_policy" = "Privacybeleid";
+"crash_reporting_info" = "Door het activeren van crash-rapportage gaat u akkoord dat apparaat- en gebruiksinformatie zal worden verzameld en gedeeld met Crashlytics (een Google-bedrijf). Voor meer informatie bekijk ons privacybeleid.";
+"activate" = "Activeren";
+"crash_detected" = "Crash gedetecteerd";
