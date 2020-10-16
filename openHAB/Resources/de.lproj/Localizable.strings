@@ -62,3 +62,4 @@
 "crash_reporting_info" = "Durch die Aktivierung der Absturzberichterstattung stimmen Sie zu, dass Informationen zu Ihrem Gerät und der Nutzung der App erfasst und mit Crashlytics (einem Unternehmen von Google) geteilt werden. Weitere Informationen finden Sie in unserer Datenschutzerklärung.";
 "activate" = "Aktivieren";
 "crash_detected" = "Absturz festgestellt";
+"habpanel" = "HABPanel";
