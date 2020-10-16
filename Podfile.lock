@@ -77,9 +77,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
-    - CocoaLumberjack
-  trunk:
     - Alamofire
+    - CocoaLumberjack
     - DeviceKit
     - DynamicButton
     - Firebase
