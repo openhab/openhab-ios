@@ -1187,7 +1187,15 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YKX-NL-XyS" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="VQn-En-nLm" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2750.625" y="32.5"/>
+            <point key="canvasLocation" x="2753" y="32"/>
+        </scene>
+        <!--Hab Panel View Controller-->
+        <scene sceneID="NIm-aJ-GJ7">
+            <objects>
+                <hostingController storyboardIdentifier="HabPanelHostingViewController" id="Uvd-z3-Dnk" customClass="HabPanelViewController" customModule="openHAB" customModuleProvider="target" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Cyp-vo-uqJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3511" y="32"/>
         </scene>
         <!--OpenHAB Notifications View Controller-->
         <scene sceneID="rzB-s5-QOg">

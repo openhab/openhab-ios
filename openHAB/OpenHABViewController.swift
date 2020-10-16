@@ -28,6 +28,7 @@ enum TargetController {
     case root
     case settings
     case notifications
+    case habpanel
 }
 
 enum Action<I, O> {
@@ -951,6 +952,10 @@ extension OpenHABViewController: ModalHandler {
                 if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
                     navigationController?.pushViewController(newViewController, animated: true)
                 }
+            }
+        case .habpanel:
+            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "HabPanelHostingViewController") as? HabPanelViewController {
+                navigationController?.pushViewController(newViewController, animated: true)
             }
         }
     }

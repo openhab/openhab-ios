@@ -129,6 +129,12 @@ extension Endpoint {
                             queryItems: [])
         }
     }
+
+    public static func habpanel(rootUrl: String) -> Endpoint {
+        Endpoint(baseURL: rootUrl,
+                 path: "/habpanel/index.html",
+                 queryItems: [])
+    }
 }
 
 extension URL {
