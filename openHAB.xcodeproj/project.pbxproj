@@ -1320,7 +1320,7 @@
 			attributes = {
 				CLASSPREFIX = OpenHAB;
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1200;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "openHAB e.V.";
 				TargetAttributes = {
 					933D7F0322E7015000621A03 = {
