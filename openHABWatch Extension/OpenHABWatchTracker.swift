@@ -252,10 +252,12 @@ class OpenHABWatchTracker: NSObject {
         let data = dataIn! as NSData
         var sockAddr: in_addr = data.castToCPointer()
         var ipAddressString: [CChar] = Array(repeating: 0, count: Int(INET6_ADDRSTRLEN))
-        inet_ntop(addressFamily,
-                  &sockAddr,
-                  &ipAddressString,
-                  socklen_t(INET_ADDRSTRLEN))
+        inet_ntop(
+            addressFamily,
+            &sockAddr,
+            &ipAddressString,
+            socklen_t(INET_ADDRSTRLEN)
+        )
 
         return String(cString: ipAddressString)
     }

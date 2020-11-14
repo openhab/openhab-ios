@@ -37,9 +37,11 @@ public class ClientCertificateManager {
     }
 
     public func loadFromKeychain() {
-        let getIdentityQuery: [String: Any] = [kSecClass as String: kSecClassIdentity,
-                                               kSecReturnRef as String: true,
-                                               kSecMatchLimit as String: kSecMatchLimitAll]
+        let getIdentityQuery: [String: Any] = [
+            kSecClass as String: kSecClassIdentity,
+            kSecReturnRef as String: true,
+            kSecMatchLimit as String: kSecMatchLimitAll
+        ]
         var items: CFTypeRef?
         let status = SecItemCopyMatching(getIdentityQuery as CFDictionary, &items)
         if status == errSecSuccess {
@@ -62,10 +64,12 @@ public class ClientCertificateManager {
 
     public func evaluateTrust(distinguishedNames: [Data]) -> SecIdentity? {
         // Search the keychain for an identity that matches the DN of the certificate being requested by the server
-        let getIdentityQuery: [String: Any] = [kSecClass as String: kSecClassIdentity,
-                                               kSecReturnRef as String: true,
-                                               kSecMatchLimit as String: kSecMatchLimitOne,
-                                               kSecMatchIssuers as String: distinguishedNames]
+        let getIdentityQuery: [String: Any] = [
+            kSecClass as String: kSecClassIdentity,
+            kSecReturnRef as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecMatchIssuers as String: distinguishedNames
+        ]
         var identity: CFTypeRef?
         let status = SecItemCopyMatching(getIdentityQuery as CFDictionary, &identity)
         if status == errSecSuccess {
@@ -90,13 +94,17 @@ public class ClientCertificateManager {
         var key: SecKey?
         SecIdentityCopyPrivateKey(identity, &key)
 
-        let deleteCertQuery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                              kSecValueRef as String: cert!]
+        let deleteCertQuery: [String: Any] = [
+            kSecClass as String: kSecClassCertificate,
+            kSecValueRef as String: cert!
+        ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
         os_log("SecItemDelete(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
         if status == noErr {
-            let deleteKeyQuery: [String: Any] = [kSecClass as String: kSecClassKey,
-                                                 kSecValueRef as String: key!]
+            let deleteKeyQuery: [String: Any] = [
+                kSecClass as String: kSecClassKey,
+                kSecValueRef as String: key!
+            ]
             status = SecItemDelete(deleteKeyQuery as NSDictionary)
             os_log("SecItemDelete(key) result=%{PUBLIC}d", log: .default, type: .info, status)
         }
@@ -111,8 +119,10 @@ public class ClientCertificateManager {
             for ct in certChain {
                 let refCount = refCountMap[ct] ?? 0
                 if refCount == 0 {
-                    let deleteCertQuery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                          kSecValueRef as String: ct]
+                    let deleteCertQuery: [String: Any] = [
+                        kSecClass as String: kSecClassCertificate,
+                        kSecValueRef as String: ct
+                    ]
                     let status = SecItemDelete(deleteCertQuery as NSDictionary)
                     let summary = SecCertificateCopySubjectSummary(ct) as String? ?? ""
                     os_log("SecItemDelete(certChain) %s result=%{PUBLIC}d", log: .default, type: .info, summary, status)
@@ -187,22 +197,28 @@ public class ClientCertificateManager {
         SecIdentityCopyCertificate(importingIdentity!, &clientCert)
 
         // Add identity's cert
-        let addCertQuery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                           kSecValueRef as String: clientCert!]
+        let addCertQuery: [String: Any] = [
+            kSecClass as String: kSecClassCertificate,
+            kSecValueRef as String: clientCert!
+        ]
         var status = SecItemAdd(addCertQuery as NSDictionary, nil)
         os_log("SecItemAdd(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
         if status == noErr {
-            let addKeyQuery: [String: Any] = [kSecClass as String: kSecClassKey,
-                                              kSecAttrIsPermanent as String: true,
-                                              kSecValueRef as String: clientKey!]
+            let addKeyQuery: [String: Any] = [
+                kSecClass as String: kSecClassKey,
+                kSecAttrIsPermanent as String: true,
+                kSecValueRef as String: clientKey!
+            ]
             status = SecItemAdd(addKeyQuery as NSDictionary, nil)
             os_log("SecItemAdd(key) result=%{PUBLIC}d", log: .default, type: .info, status)
             if status == noErr {
                 // Add  the cert chain
                 if importingCertChain != nil {
                     for cert in importingCertChain! where cert != clientCert {
-                        let addCertQuery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                           kSecValueRef as String: cert]
+                        let addCertQuery: [String: Any] = [
+                            kSecClass as String: kSecClassCertificate,
+                            kSecValueRef as String: cert
+                        ]
                         status = SecItemAdd(addCertQuery as NSDictionary, nil)
                         os_log("SecItemAdd(certChain) result=%{PUBLIC}d", log: .default, type: .info, status)
                         if status == errSecDuplicateItem {
@@ -266,9 +282,11 @@ public class ClientCertificateManager {
         let certArray = [cert]
         var optionalTrust: SecTrust?
         let policy = SecPolicyCreateSSL(false, nil)
-        let status = SecTrustCreateWithCertificates(certArray as AnyObject,
-                                                    policy,
-                                                    &optionalTrust)
+        let status = SecTrustCreateWithCertificates(
+            certArray as AnyObject,
+            policy,
+            &optionalTrust
+        )
         guard status == errSecSuccess else { return nil }
         let trust = optionalTrust!
         var trustResult = SecTrustResultType.proceed

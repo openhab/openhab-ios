@@ -75,8 +75,10 @@ public class NetworkConnection {
     public var rootUrl: URL?
 
     init(ignoreSSL: Bool,
-         manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
-                                                  delegate: SessionDelegate()),
+         manager: SessionManager = SessionManager(
+             configuration: URLSessionConfiguration.default,
+             delegate: SessionDelegate()
+         ),
          adapter: RequestAdapter?) {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()

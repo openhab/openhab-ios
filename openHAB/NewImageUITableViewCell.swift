@@ -68,10 +68,12 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
 
-        NSLayoutConstraint.activate([mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
-                                     mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
-                                     mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
-                                     mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
+            mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
+            mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
+            mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)
+        ])
 
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
     }
@@ -106,8 +108,13 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
             if refreshInterval > 0.09 {
                 os_log("Sheduling image refresh every %g seconds", log: .viewCycle, type: .info, refreshInterval)
-                refreshTimer = Timer.scheduledTimer(timeInterval: refreshInterval, target: self,
-                                                    selector: #selector(NewImageUITableViewCell.refreshImage(_:)), userInfo: nil, repeats: true)
+                refreshTimer = Timer.scheduledTimer(
+                    timeInterval: refreshInterval,
+                    target: self,
+                    selector: #selector(NewImageUITableViewCell.refreshImage(_:)),
+                    userInfo: nil,
+                    repeats: true
+                )
             }
         }
     }

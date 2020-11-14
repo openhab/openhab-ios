@@ -61,19 +61,20 @@ class AppMessageService: NSObject, WCSessionDelegate {
     func requestApplicationContext() {
         WCSession
             .default
-            .sendMessage(["request": "Preferences"],
-                         replyHandler: { (response) in
-                             let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-                             os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
+            .sendMessage(
+                ["request": "Preferences"],
+                replyHandler: { (response) in
+                    let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
+                    os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
 
-                             DispatchQueue.main.async { () -> Void in
-                                 AppMessageService.singleton.updateValuesFromApplicationContext(response as [String: AnyObject])
-                             }
-                         },
-                         errorHandler: { (error) in
-                             os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
-
-                         })
+                    DispatchQueue.main.async { () -> Void in
+                        AppMessageService.singleton.updateValuesFromApplicationContext(response as [String: AnyObject])
+                    }
+                },
+                errorHandler: { (error) in
+                    os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
+                }
+            )
     }
 
     @available(watchOSApplicationExtension 2.2, *)

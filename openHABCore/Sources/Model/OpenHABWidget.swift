@@ -293,8 +293,8 @@ extension OpenHABWidget {
     }
 }
 
-extension OpenHABWidget {
-    public struct CodingData: Decodable {
+public extension OpenHABWidget {
+    struct CodingData: Decodable {
         let widgetId: String
         let label: String
         let type: WidgetType

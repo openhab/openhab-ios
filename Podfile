@@ -15,15 +15,13 @@ target 'openHAB' do
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
     pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
-
     pod 'Firebase/Crashlytics'
-
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
-
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
     pod 'Kingfisher', '~> 5.0'
+    pod 'AlamofireNetworkActivityIndicator', '~> 2.4'
 
     target 'openHABTestsSwift' do
         inherit! :search_paths

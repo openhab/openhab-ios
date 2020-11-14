@@ -53,10 +53,15 @@ public class ScaleAspectFitImageView: UIImageView {
 
         if let imageSize = image?.size, imageSize.height != 0 {
             let aspectRatio = imageSize.width / imageSize.height
-            let constraint = NSLayoutConstraint(item: self, attribute: .width,
-                                                relatedBy: .equal,
-                                                toItem: self, attribute: .height,
-                                                multiplier: aspectRatio, constant: 0)
+            let constraint = NSLayoutConstraint(
+                item: self,
+                attribute: .width,
+                relatedBy: .equal,
+                toItem: self,
+                attribute: .height,
+                multiplier: aspectRatio,
+                constant: 0
+            )
 
             constraint.priority = UILayoutPriority(rawValue: 999)
             addConstraint(constraint)

@@ -109,11 +109,13 @@ extension ObservableOpenHABSitemapPage.CodingData {
 
 extension ObservableOpenHABSitemapPage {
     func filter(_ isIncluded: (ObservableOpenHABWidget) throws -> Bool) rethrows -> ObservableOpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = ObservableOpenHABSitemapPage(pageId: pageId,
-                                                                      title: title,
-                                                                      link: link,
-                                                                      leaf: leaf,
-                                                                      expandedWidgets: try widgets.filter(isIncluded))
+        let filteredOpenHABSitemapPage = ObservableOpenHABSitemapPage(
+            pageId: pageId,
+            title: title,
+            link: link,
+            leaf: leaf,
+            expandedWidgets: try widgets.filter(isIncluded)
+        )
         return filteredOpenHABSitemapPage
     }
 }

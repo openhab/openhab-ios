@@ -91,16 +91,16 @@ public final class OpenHABItem: NSObject, CommItem {
 
 extension OpenHABItem.ItemType: Decodable {}
 
-extension OpenHABItem {
-    public func stateAsDouble() -> Double {
+public extension OpenHABItem {
+    func stateAsDouble() -> Double {
         state?.numberValue?.doubleValue ?? 0
     }
 
-    public func stateAsInt() -> Int {
+    func stateAsInt() -> Int {
         state?.numberValue?.intValue ?? 0
     }
 
-    public func stateAsUIColor() -> UIColor {
+    func stateAsUIColor() -> UIColor {
         if let state = state {
             let values = state.components(separatedBy: ",")
             if values.count == 3 {
@@ -117,7 +117,7 @@ extension OpenHABItem {
         }
     }
 
-    public func stateAsLocation() -> CLLocation? {
+    func stateAsLocation() -> CLLocation? {
         if type == .location {
             // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitude>,<altitude>')
             if let state = state {
@@ -136,8 +136,8 @@ extension OpenHABItem {
     }
 }
 
-extension OpenHABItem {
-    public struct CodingData: Decodable {
+public extension OpenHABItem {
+    struct CodingData: Decodable {
         let type: String
         let groupType: String?
         let name: String
@@ -151,8 +151,8 @@ extension OpenHABItem {
     }
 }
 
-extension OpenHABItem.CodingData {
-    public var openHABItem: OpenHABItem {
+public extension OpenHABItem.CodingData {
+    var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
 
         return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, members: mappedMembers, category: category, options: options)

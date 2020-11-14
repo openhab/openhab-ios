@@ -146,9 +146,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
-        let dataDict = ["deviceToken": deviceTokenString,
-                        "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
-                        "deviceName": UIDevice.current.name]
+        let dataDict = [
+            "deviceToken": deviceTokenString,
+            "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
+            "deviceName": UIDevice.current.name
+        ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
 
@@ -192,7 +194,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             config.presentationStyle = .bottom
 
             SwiftMessages.show(config: config) {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 let view = MessageView.viewFromNib(layout: .cardView)
                 // ... configure the view
                 view.configureTheme(.info)

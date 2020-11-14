@@ -33,9 +33,11 @@ class RESTAPITest: XCTestCase {
             }
         }
 
-        NetworkConnection.shared = NetworkConnection(ignoreSSL: true,
-                                                     manager: manager,
-                                                     adapter: MockURLRequestAdapter())
+        NetworkConnection.shared = NetworkConnection(
+            ignoreSSL: true,
+            manager: manager,
+            adapter: MockURLRequestAdapter()
+        )
     }
 
     override func tearDown() {

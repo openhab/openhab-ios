@@ -76,7 +76,7 @@ public struct UserDefaultURL {
     }
 }
 
-public struct Preferences {
+public enum Preferences {
     private static let defaults = UserDefaults.standard
 
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
