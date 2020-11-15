@@ -12,6 +12,7 @@
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
 		4BFA80124CD53614E917544F /* Pods_OpenHABCoreWatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7C18F7BEFBD51AF13F77164 /* Pods_OpenHABCoreWatch.framework */; };
+		4D6470C92561F643007B03FC /* OpenHABItemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470C82561F643007B03FC /* OpenHABItemCache.swift */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		7FC9367CB7380FA8A9AEA922 /* Pods_openHABTestsSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA646789654D6BCEA2EB3BD4 /* Pods_openHABTestsSwift.framework */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
@@ -299,6 +300,7 @@
 		286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicButtonStyleBell.swift; sourceTree = "<group>"; };
 		286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicButtonStyleGear.swift; sourceTree = "<group>"; };
 		2BA451543FFD48B162709ACB /* Pods-openHABWatchSwift Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatchSwift Extension.debug.xcconfig"; path = "Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension.debug.xcconfig"; sourceTree = "<group>"; };
+		4D6470C82561F643007B03FC /* OpenHABItemCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABItemCache.swift; sourceTree = "<group>"; };
 		534A93FB00BC7EDE9C60FE93 /* Pods_openHABUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		536930BAF5AAB33BA805A89F /* Pods-OpenHABCoreWatch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCoreWatch.debug.xcconfig"; path = "Target Support Files/Pods-OpenHABCoreWatch/Pods-OpenHABCoreWatch.debug.xcconfig"; sourceTree = "<group>"; };
 		56964974AB3033D2DD698878 /* Pods-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
@@ -748,6 +750,7 @@
 		93F38D492380379F001B1451 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				4D6470C82561F643007B03FC /* OpenHABItemCache.swift */,
 				DAE249A023EE07C800986877 /* Future.swift */,
 				9350F18A2381519300054BA8 /* ClientCertificateManager.swift */,
 				9350F1842381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift */,
@@ -1681,6 +1684,7 @@
 				9350F17223814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16623814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
 				9350F194238151F100054BA8 /* Preferences.swift in Sources */,
+				4D6470C92561F643007B03FC /* OpenHABItemCache.swift in Sources */,
 				93F38C6C238034DA001B1451 /* DataObject.swift in Sources */,
 				DA1EAECF24E94871008A6B22 /* OpenHABServerProperties.swift in Sources */,
 				9350F16C23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
