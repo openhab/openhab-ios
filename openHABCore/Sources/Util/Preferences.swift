@@ -23,10 +23,10 @@ public struct UserDefault<T> {
 
     public var wrappedValue: T {
         get {
-            UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
+            Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: key)
+            Preferences.sharedDefaults.set(newValue, forKey: key)
         }
     }
 
@@ -46,13 +46,13 @@ public struct UserDefaultURL {
 
     public var wrappedValue: String {
         get {
-            guard let localUrl = UserDefaults.standard.string(forKey: key) else { return defaultValue }
+            guard let localUrl = Preferences.sharedDefaults.string(forKey: key) else { return defaultValue }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if !validateUrl(trimmedUri) { return defaultValue }
             return trimmedUri
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: key)
+            Preferences.sharedDefaults.set(newValue, forKey: key)
         }
     }
 
@@ -77,7 +77,7 @@ public struct UserDefaultURL {
 }
 
 public enum Preferences {
-    private static let defaults = UserDefaults.standard
+    static let sharedDefaults = UserDefaults(suiteName: "group.es.spaphone.openhab")!
 
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
     @UserDefaultURL("remoteUrl", defaultValue: "https://openhab.org:8444") public static var remoteUrl: String

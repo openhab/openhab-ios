@@ -21,7 +21,7 @@
 		4D64717725621AF6007B03FC /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470EA2561FAB0007B03FC /* Intents.intentdefinition */; };
 		4D64718825621B4C007B03FC /* OpenHABCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93F38C4323803499001B1451 /* OpenHABCore.framework */; };
 		4D647221256331B9007B03FC /* SetSwitchStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */; };
-		4D64724D256346BD007B03FC /* SetDimmerRollerValueHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D64724C256346BD007B03FC /* SetDimmerRollerValueHandler.swift */; };
+		4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		7FC9367CB7380FA8A9AEA922 /* Pods_openHABTestsSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA646789654D6BCEA2EB3BD4 /* Pods_openHABTestsSwift.framework */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
@@ -342,7 +342,7 @@
 		4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetItemStateIntentHandler.swift; sourceTree = "<group>"; };
 		4D64720D256315D9007B03FC /* openHABIntents.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHABIntents.entitlements; sourceTree = "<group>"; };
 		4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandler.swift; sourceTree = "<group>"; };
-		4D64724C256346BD007B03FC /* SetDimmerRollerValueHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValueHandler.swift; sourceTree = "<group>"; };
+		4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValueIntentHandler.swift; sourceTree = "<group>"; };
 		534A93FB00BC7EDE9C60FE93 /* Pods_openHABUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_openHABUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		536930BAF5AAB33BA805A89F /* Pods-OpenHABCoreWatch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OpenHABCoreWatch.debug.xcconfig"; path = "Target Support Files/Pods-OpenHABCoreWatch/Pods-OpenHABCoreWatch.debug.xcconfig"; sourceTree = "<group>"; };
 		56964974AB3033D2DD698878 /* Pods-openHAB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHAB.debug.xcconfig"; path = "Target Support Files/Pods-openHAB/Pods-openHAB.debug.xcconfig"; sourceTree = "<group>"; };
@@ -716,7 +716,7 @@
 				4D6470D72561F935007B03FC /* Info.plist */,
 				4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */,
 				4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */,
-				4D64724C256346BD007B03FC /* SetDimmerRollerValueHandler.swift */,
+				4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */,
 			);
 			path = openHABIntents;
 			sourceTree = "<group>";
@@ -1772,7 +1772,7 @@
 				4D647221256331B9007B03FC /* SetSwitchStateIntentHandler.swift in Sources */,
 				4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */,
 				4D6471122561FDA7007B03FC /* GetItemStateIntentHandler.swift in Sources */,
-				4D64724D256346BD007B03FC /* SetDimmerRollerValueHandler.swift in Sources */,
+				4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

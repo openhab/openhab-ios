@@ -736,11 +736,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                         self.appData?.openHABVersion = 2
                         self.selectSitemap()
 
-                        if self.serverProperties != nil {
-                            OpenHABItemCache.instance.url = self.serverProperties!.linkUrl(byType: "items")!
-                            OpenHABItemCache.instance.reload()
-                        }
-
                     } catch {
                         os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
                         let str = String(decoding: data, as: UTF8.self)

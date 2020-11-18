@@ -23,30 +23,19 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: ["Switch"])
-
-        let retItems = INObjectCollection<NSString>(items: items)
-
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: ["Switch"]) { items in
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: ["Switch"])
-
-        let retItems = INObjectCollection<NSString>(items: items)
-
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
-    }
-
-    func defaultItem(for intent: OpenHABSetSwitchStateIntent) -> String? {
-        if OpenHABItemCache.instance.items == nil {
-            OpenHABItemCache.instance.reload()
-            return ""
+        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: ["Switch"]) { items in
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
         }
-
-        return ""
     }
 
     func confirm(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
@@ -56,18 +45,24 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
     func handle(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
         os_log("SetSwitchStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
-        guard let item = OpenHABItemCache.instance.getItem(intent.item ?? "") else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(intent.item!))
-            return
-        }
-
         guard let action = intent.action else {
             completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction("empty"))
             return
         }
 
-        OpenHABItemCache.instance.sendCommand(item, commandToSend: action)
+        guard let itemName = intent.item else {
+            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem("empty"))
+            return
+        }
 
-        completion(OpenHABSetSwitchStateIntentResponse.success(action: action, item: item.name))
+        OpenHABItemCache.instance.getItem(name: itemName) { item in
+            guard let item = item else {
+                completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(itemName))
+                return
+            }
+            OpenHABItemCache.instance.sendCommand(item, commandToSend: action)
+
+            completion(OpenHABSetSwitchStateIntentResponse.success(action: action, item: itemName))
+        }
     }
 }

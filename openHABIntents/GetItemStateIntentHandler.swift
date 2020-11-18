@@ -16,30 +16,19 @@ import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil)
-
-        let retItems = INObjectCollection<NSString>(items: items)
-
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil) { items in
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil)
-
-        let retItems = INObjectCollection<NSString>(items: items)
-
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
-    }
-
-    func defaultItem(for intent: OpenHABGetItemStateIntent) -> String? {
-        if OpenHABItemCache.instance.items == nil {
-            OpenHABItemCache.instance.reload()
-            return ""
+        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil) { items in
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
         }
-
-        return ""
     }
 
     func confirm(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
@@ -49,12 +38,17 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     func handle(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
         os_log("GetItemStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
-//        if OpenHABItemCache.instance.getItem(intent.item ?? "") == nil {
-//            completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(intent.item!))
-//            return
-//        }
+        guard let itemName = intent.item else {
+            completion(OpenHABGetItemStateIntentResponse.failureInvalidItem("empty"))
+            return
+        }
 
-        OpenHABItemCache.instance.getItem(name: intent.item ?? "") { item in completion(OpenHABGetItemStateIntentResponse.success(item: item.name, state: item.state ?? "unknown"))
+        OpenHABItemCache.instance.getItem(name: itemName) { item in
+            guard let item = item else {
+                completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(itemName))
+                return
+            }
+            completion(OpenHABGetItemStateIntentResponse.success(item: itemName, state: item.state ?? "unknown"))
         }
     }
 }

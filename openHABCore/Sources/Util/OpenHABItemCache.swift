@@ -15,45 +15,47 @@ import os.log
 public class OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
-    static let MODE_GET_ITEM = 0
-    static let MODE_FILTER_ITEMS = 1
-
     public var items: [OpenHABItem]?
     public var url = ""
     public var lastLoad = NSDate().timeIntervalSince1970
 
-    public func getItemNames(searchTerm: String?, types: [String]?) -> [NSString] {
+    public func getItemNames(searchTerm: String?, types: [String]?, completion: @escaping ([NSString]) -> Void) {
         var ret = [NSString]()
 
         if items == nil {
-            reload()
-            return ret
+            if #available(iOS 12.0, *) {
+                reload(searchTerm: searchTerm, types: types, completion: completion)
+            } else {
+                // Fallback on earlier versions
+            }
+            return
         }
 
         for item in items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || types!.contains(item.type?.rawValue ?? "unknownsksskl")) {
             ret.append(NSString(string: item.name))
         }
 
-        return ret
+        completion(ret)
     }
 
     @available(iOS 12.0, *)
-    public func getItem(name: String, completion: @escaping (OpenHABItem) -> Void) {
+    public func getItem(name: String, completion: @escaping (OpenHABItem?) -> Void) {
         let now = NSDate().timeIntervalSince1970
 
-        if items == nil || (now - lastLoad) > 5 {
-            reload(mode: OpenHABItemCache.MODE_GET_ITEM, name: name, completion: completion)
+        if items == nil || (now - lastLoad) > 10 { // More than 10 seconds - reload
+            reload(name: name, completion: completion)
             return
         }
 
         for item in items! where item.name == name {
             completion(item)
-
             return
         }
+
+        completion(nil)
     }
 
-    public func getItem(_ name: String) -> OpenHABItem? {
+    func getItem(_ name: String) -> OpenHABItem? {
         if items == nil {
             return nil
         }
@@ -71,31 +73,12 @@ public class OpenHABItemCache {
     }
 
     @available(iOS 12.0, *)
-    public func reload(mode: Int, name: String?, completion: @escaping (OpenHABItem) -> Void) {
+    public func reload(searchTerm: String?, types: [String]?, completion: @escaping ([NSString]) -> Void) {
         lastLoad = NSDate().timeIntervalSince1970
 
-        print("ignoreSSL: \(Preferences.ignoreSSL)")
-        print("localUrl: " + Preferences.localUrl)
-        print("remoteUrl: " + Preferences.remoteUrl)
-        print("username: " + Preferences.username)
-        print("password: " + Preferences.password)
+        let uurl = getURL()
 
-        var uurl = URL(string: url)
-        uurl = Endpoint.items(openHABRootUrl: "http://192.168.0.199:8080").url
-        url = uurl?.absoluteString ?? "unknown"
-
-        if url == "" {
-            if Preferences.demomode {
-                uurl = Endpoint.items(openHABRootUrl: "http://demo.openhab.org:8080").url
-                url = uurl?.absoluteString ?? "unknown"
-                Preferences.ignoreSSL = false
-
-            } else {
-                uurl = Endpoint.items(openHABRootUrl: Preferences.remoteUrl).url
-                url = uurl?.absoluteString ?? "unknown"
-            }
-
-        } else if uurl == nil {
+        if uurl == nil {
             return
         }
 
@@ -110,25 +93,15 @@ public class OpenHABItemCache {
             case .success:
                 if let data = response.result.value {
                     do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let codingDatas = try data.decoded(as: [OpenHABItem.CodingData].self, using: decoder)
+                        try self.decodeItemsData(data)
 
-                        self.items = [OpenHABItem]()
+                        var ret = [NSString]()
 
-                        for codingDatum in codingDatas where codingDatum.openHABItem.type != OpenHABItem.ItemType.group {
-                            self.items!.append(codingDatum.openHABItem)
+                        for item in self.items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || types!.contains(item.type?.rawValue ?? "unknown")) {
+                            ret.append(NSString(string: item.name))
                         }
 
-                        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
-
-                        if mode == OpenHABItemCache.MODE_GET_ITEM {
-                            let item = self.getItem(name!)
-
-                            if item != nil {
-                                completion(item!)
-                            }
-                        }
+                        completion(ret)
                     } catch {
                         os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
@@ -139,30 +112,13 @@ public class OpenHABItemCache {
         }
     }
 
-    public func reload() {
+    @available(iOS 12.0, *)
+    public func reload(name: String, completion: @escaping (OpenHABItem?) -> Void) {
         lastLoad = NSDate().timeIntervalSince1970
 
-        print("ignoreSSL: \(Preferences.ignoreSSL)")
-        print("localUrl: " + Preferences.localUrl)
-        print("remoteUrl: " + Preferences.remoteUrl)
-        print("username: " + Preferences.username)
-        print("password: " + Preferences.password)
+        let uurl = getURL()
 
-        var uurl = URL(string: url)
-        uurl = Endpoint.items(openHABRootUrl: "http://192.168.0.199:8080").url
-        url = uurl?.absoluteString ?? "unknown"
-
-        if url == "" {
-            if Preferences.demomode {
-                uurl = Endpoint.items(openHABRootUrl: "http://demo.openhab.org:8080").url
-                url = uurl?.absoluteString ?? "unknown"
-
-            } else {
-                uurl = Endpoint.items(openHABRootUrl: Preferences.remoteUrl).url
-                url = uurl?.absoluteString ?? "unknown"
-            }
-
-        } else if uurl == nil {
+        if uurl == nil {
             return
         }
 
@@ -177,17 +133,11 @@ public class OpenHABItemCache {
             case .success:
                 if let data = response.result.value {
                     do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let codingDatas = try data.decoded(as: [OpenHABItem.CodingData].self, using: decoder)
+                        try self.decodeItemsData(data)
 
-                        self.items = [OpenHABItem]()
+                        let item = self.getItem(name)
 
-                        for codingDatum in codingDatas where codingDatum.openHABItem.type != OpenHABItem.ItemType.group {
-                            self.items!.append(codingDatum.openHABItem)
-                        }
-
-                        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
+                        completion(item)
 
                     } catch {
                         os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
@@ -197,5 +147,39 @@ public class OpenHABItemCache {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
             }
         }
+    }
+
+    func getURL() -> URL? {
+        var uurl: URL?
+
+        if url == "" {
+            if Preferences.demomode {
+                uurl = Endpoint.items(openHABRootUrl: "http://demo.openhab.org:8080").url
+                url = uurl?.absoluteString ?? "unknown"
+
+            } else {
+                uurl = Endpoint.items(openHABRootUrl: Preferences.remoteUrl).url
+                url = uurl?.absoluteString ?? "unknown"
+            }
+
+        } else {
+            uurl = URL(string: url)
+        }
+
+        return uurl
+    }
+
+    private func decodeItemsData(_ data: Data) throws {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+        let codingDatas = try data.decoded(as: [OpenHABItem.CodingData].self, using: decoder)
+
+        items = [OpenHABItem]()
+
+        for codingDatum in codingDatas where codingDatum.openHABItem.type != OpenHABItem.ItemType.group {
+            self.items!.append(codingDatum.openHABItem)
+        }
+
+        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, items?.count ?? 0)
     }
 }
