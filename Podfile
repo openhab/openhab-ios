@@ -54,6 +54,13 @@ target 'openHABWatch Extension' do
     pod 'DeviceKit', '~> 4.0'
 end
 
+target 'openHABIntents' do
+    platform :ios, '14.0'
+    shared_pods
+    pod 'Kingfisher', '~> 5.0'
+end
+
+
 # Note: `pod install --clean-install` must be used if the post_install hook is changed
 post_install do |installer|
     # temporary workaround for base language setting
