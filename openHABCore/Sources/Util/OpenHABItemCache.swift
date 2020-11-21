@@ -15,8 +15,15 @@ import os.log
 public class OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
+    public static let URL_NONE = 0
+    public static let URL_LOCAL = 1
+    public static let URL_REMOTE = 2
+    public static let URL_DEMO = 3
+
     public var items: [OpenHABItem]?
     public var url = ""
+    public var localUrlFailed = false
+    public var lastUrlConnected = URL_NONE
     public var lastLoad = NSDate().timeIntervalSince1970
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
@@ -93,7 +100,12 @@ public class OpenHABItemCache {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: nil)
         }
 
-        NetworkConnection.load(from: uurl!) { response in
+        var timeout = 10.0
+        if lastUrlConnected == OpenHABItemCache.URL_LOCAL {
+            timeout = 5.0
+        }
+
+        NetworkConnection.load(from: uurl!, timeout: timeout) { response in
             switch response.result {
             case .success:
                 if let data = response.result.value {
@@ -112,7 +124,14 @@ public class OpenHABItemCache {
                     }
                 }
             case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                if self.lastUrlConnected == OpenHABItemCache.URL_LOCAL {
+                    self.localUrlFailed = true
+                    os_log("%{PUBLIC}@ ", log: .default, type: .info, error.localizedDescription)
+                    self.reload(searchTerm: searchTerm, types: types, completion: completion) // try remote
+
+                } else {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                }
             }
         }
     }
@@ -133,7 +152,12 @@ public class OpenHABItemCache {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: nil)
         }
 
-        NetworkConnection.load(from: uurl!) { response in
+        var timeout = 10.0
+        if lastUrlConnected == OpenHABItemCache.URL_LOCAL {
+            timeout = 5.0
+        }
+
+        NetworkConnection.load(from: uurl!, timeout: timeout) { response in
             switch response.result {
             case .success:
                 if let data = response.result.value {
@@ -148,8 +172,16 @@ public class OpenHABItemCache {
                         os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
                 }
+
             case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                if self.lastUrlConnected == OpenHABItemCache.URL_LOCAL {
+                    self.localUrlFailed = true
+                    os_log("%{PUBLIC}@ ", log: .default, type: .info, error.localizedDescription)
+                    self.reload(name: name, completion: completion) // try remote
+
+                } else {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                }
             }
         }
     }
@@ -157,18 +189,22 @@ public class OpenHABItemCache {
     func getURL() -> URL? {
         var uurl: URL?
 
-        if url == "" {
-            if Preferences.demomode {
-                uurl = Endpoint.items(openHABRootUrl: "http://demo.openhab.org:8080").url
-                url = uurl?.absoluteString ?? "unknown"
-
-            } else {
-                uurl = Endpoint.items(openHABRootUrl: Preferences.remoteUrl).url
-                url = uurl?.absoluteString ?? "unknown"
-            }
+        if Preferences.demomode {
+            uurl = Endpoint.items(openHABRootUrl: "http://demo.openhab.org:8080").url
+            url = uurl?.absoluteString ?? "unknown"
+            lastUrlConnected = OpenHABItemCache.URL_DEMO
 
         } else {
-            uurl = URL(string: url)
+            if localUrlFailed {
+                uurl = Endpoint.items(openHABRootUrl: Preferences.remoteUrl).url
+                url = uurl?.absoluteString ?? "unknown"
+                lastUrlConnected = OpenHABItemCache.URL_REMOTE
+
+            } else {
+                uurl = Endpoint.items(openHABRootUrl: Preferences.localUrl).url
+                url = uurl?.absoluteString ?? "unknown"
+                lastUrlConnected = OpenHABItemCache.URL_LOCAL
+            }
         }
 
         return uurl
