@@ -19,7 +19,7 @@ public class OpenHABItemCache {
     public var url = ""
     public var lastLoad = NSDate().timeIntervalSince1970
 
-    public func getItemNames(searchTerm: String?, types: [String]?, completion: @escaping ([NSString]) -> Void) {
+    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         var ret = [NSString]()
 
         if items == nil {
@@ -31,7 +31,7 @@ public class OpenHABItemCache {
             return
         }
 
-        for item in items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || types!.contains(item.type?.rawValue ?? "unknownsksskl")) {
+        for item in items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || (item.type != nil && types!.contains(item.type!))) {
             ret.append(NSString(string: item.name))
         }
 
@@ -72,8 +72,13 @@ public class OpenHABItemCache {
         commandOperation?.resume()
     }
 
+    public func sendState(_ item: OpenHABItem, commandToSend command: String) {
+        let commandOperation = NetworkConnection.sendState(item: item, commandToSend: command)
+        commandOperation?.resume()
+    }
+
     @available(iOS 12.0, *)
-    public func reload(searchTerm: String?, types: [String]?, completion: @escaping ([NSString]) -> Void) {
+    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         lastLoad = NSDate().timeIntervalSince1970
 
         let uurl = getURL()
@@ -97,7 +102,7 @@ public class OpenHABItemCache {
 
                         var ret = [NSString]()
 
-                        for item in self.items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || types!.contains(item.type?.rawValue ?? "unknown")) {
+                        for item in self.items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || (item.type != nil && types!.contains(item.type!))) {
                             ret.append(NSString(string: item.name))
                         }
 

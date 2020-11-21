@@ -23,7 +23,7 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: ["Switch"]) { items in
+        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.switchItem]) { items in
             let retItems = INObjectCollection<NSString>(items: items)
             // Call the completion handler, passing the collection.
             completion(retItems, nil)
@@ -31,7 +31,7 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: ["Switch"]) { items in
+        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.switchItem]) { items in
             let retItems = INObjectCollection<NSString>(items: items)
             // Call the completion handler, passing the collection.
             completion(retItems, nil)
@@ -45,13 +45,13 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
     func handle(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
         os_log("SetSwitchStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
-        guard let action = intent.action else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction("empty"))
+        guard let itemName = intent.item else {
+            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem("empty"))
             return
         }
 
-        guard let itemName = intent.item else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem("empty"))
+        guard let action = intent.action else {
+            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction("empty", item: itemName))
             return
         }
 

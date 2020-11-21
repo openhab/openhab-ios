@@ -18,6 +18,14 @@ class IntentHandler: INExtension {
             return GetItemStateIntentHandler()
         } else if intent is OpenHABSetSwitchStateIntent {
             return SetSwitchStateIntentHandler()
+        } else if intent is OpenHABSetNumberValueIntent {
+            return SetNumberValueIntentHandler()
+        } else if intent is OpenHABSetStringValueIntent {
+            return SetStringValueIntentHandler()
+        } else if intent is OpenHABSetColorValueIntent {
+            return SetColorValueIntentHandler()
+        } else if intent is OpenHABSetContactStateValueIntent {
+            return SetContactStateValueIntentHandler()
         } else {
             return SetDimmerRollerValueIntentHandler()
         }

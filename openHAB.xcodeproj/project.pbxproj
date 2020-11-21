@@ -12,6 +12,10 @@
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
 		4BFA80124CD53614E917544F /* Pods_OpenHABCoreWatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7C18F7BEFBD51AF13F77164 /* Pods_OpenHABCoreWatch.framework */; };
+		4D38D952256897490039DA6E /* SetNumberValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */; };
+		4D38D95A256897770039DA6E /* SetStringValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */; };
+		4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */; };
+		4D38D96A256897AD0039DA6E /* SetContactStateValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */; };
 		4D6470C92561F643007B03FC /* OpenHABItemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470C82561F643007B03FC /* OpenHABItemCache.swift */; };
 		4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470D52561F935007B03FC /* IntentHandler.swift */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -337,6 +341,10 @@
 		286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicButtonStyleGear.swift; sourceTree = "<group>"; };
 		2BA451543FFD48B162709ACB /* Pods-openHABWatchSwift Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABWatchSwift Extension.debug.xcconfig"; path = "Target Support Files/Pods-openHABWatchSwift Extension/Pods-openHABWatchSwift Extension.debug.xcconfig"; sourceTree = "<group>"; };
 		447CFBE864DCFF6B347D0318 /* Pods-openHABIntents.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-openHABIntents.debug.xcconfig"; path = "Target Support Files/Pods-openHABIntents/Pods-openHABIntents.debug.xcconfig"; sourceTree = "<group>"; };
+		4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetNumberValueIntentHandler.swift; sourceTree = "<group>"; };
+		4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntentHandler.swift; sourceTree = "<group>"; };
+		4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValueIntentHandler.swift; sourceTree = "<group>"; };
+		4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetContactStateValueIntentHandler.swift; sourceTree = "<group>"; };
 		4D6470C82561F643007B03FC /* OpenHABItemCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABItemCache.swift; sourceTree = "<group>"; };
 		4D6470D32561F935007B03FC /* openHABIntents.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = openHABIntents.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D6470D52561F935007B03FC /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
@@ -724,6 +732,10 @@
 				4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */,
 				4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */,
 				4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */,
+				4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */,
+				4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */,
+				4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */,
+				4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */,
 			);
 			path = openHABIntents;
 			sourceTree = "<group>";
@@ -1799,10 +1811,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D38D95A256897770039DA6E /* SetStringValueIntentHandler.swift in Sources */,
+				4D38D96A256897AD0039DA6E /* SetContactStateValueIntentHandler.swift in Sources */,
 				4D6470FC2561FACC007B03FC /* Intents.intentdefinition in Sources */,
+				4D38D952256897490039DA6E /* SetNumberValueIntentHandler.swift in Sources */,
 				4D647221256331B9007B03FC /* SetSwitchStateIntentHandler.swift in Sources */,
 				4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */,
 				4D6471122561FDA7007B03FC /* GetItemStateIntentHandler.swift in Sources */,
+				4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */,
 				4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

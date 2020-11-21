@@ -122,11 +122,28 @@ public class NetworkConnection {
         }
     }
 
+    public static func sendState(item: CommItem, commandToSend command: String?) -> DataRequest? {
+        sendCommandOrState(item: item, commandToSend: command, state: true)
+    }
+
     public static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
-        if let commandUrl = URL(string: item.link) {
+        sendCommandOrState(item: item, commandToSend: command, state: false)
+    }
+
+    public static func sendCommandOrState(item: CommItem, commandToSend command: String?, state: Bool) -> DataRequest? {
+        if var commandUrl = URL(string: item.link) {
+            if state {
+                if let commandUrl2 = URL(string: item.link + "/state") {
+                    commandUrl = commandUrl2
+                }
+            }
             var commandRequest = URLRequest(url: commandUrl)
 
             commandRequest.httpMethod = "POST"
+            if state {
+                commandRequest.httpMethod = "PUT"
+            }
+
             commandRequest.httpBody = command?.data(using: .utf8)
             commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
 

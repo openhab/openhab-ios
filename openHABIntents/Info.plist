@@ -36,7 +36,11 @@
 			<key>IntentsSupported</key>
 			<array>
 				<string>OpenHABGetItemStateIntent</string>
+				<string>OpenHABSetColorValueIntent</string>
+				<string>OpenHABSetContactStateValueIntent</string>
 				<string>OpenHABSetDimmerRollerValueIntent</string>
+				<string>OpenHABSetNumberValueIntent</string>
+				<string>OpenHABSetStringValueIntent</string>
 				<string>OpenHABSetSwitchStateIntent</string>
 			</array>
 		</dict>
