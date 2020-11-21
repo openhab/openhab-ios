@@ -16,6 +16,7 @@
 		4D38D95A256897770039DA6E /* SetStringValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */; };
 		4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */; };
 		4D38D96A256897AD0039DA6E /* SetContactStateValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */; };
+		4D38DA302569A58F0039DA6E /* OpenHABItemCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */; };
 		4D6470C92561F643007B03FC /* OpenHABItemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470C82561F643007B03FC /* OpenHABItemCache.swift */; };
 		4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470D52561F935007B03FC /* IntentHandler.swift */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -345,6 +346,7 @@
 		4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntentHandler.swift; sourceTree = "<group>"; };
 		4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValueIntentHandler.swift; sourceTree = "<group>"; };
 		4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetContactStateValueIntentHandler.swift; sourceTree = "<group>"; };
+		4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABItemCacheTests.swift; sourceTree = "<group>"; };
 		4D6470C82561F643007B03FC /* OpenHABItemCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABItemCache.swift; sourceTree = "<group>"; };
 		4D6470D32561F935007B03FC /* openHABIntents.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = openHABIntents.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D6470D52561F935007B03FC /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
@@ -968,6 +970,7 @@
 				DACC72E024CE14FB007EFAE3 /* restAPI.json */,
 				DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */,
 				DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */,
+				4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */,
 			);
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
@@ -1960,6 +1963,7 @@
 				DA96647A232EE3C200CB418B /* RESTAPITest.swift in Sources */,
 				DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
+				4D38DA302569A58F0039DA6E /* OpenHABItemCacheTests.swift in Sources */,
 				DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */,
 				DACC72E224D00D59007EFAE3 /* NumberStateTest.swift in Sources */,
 				938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */,
