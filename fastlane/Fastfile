@@ -28,7 +28,8 @@ platform :ios do
         run_tests(
             workspace: 'openHAB.xcworkspace',
             scheme: 'openHABTestsSwift',
-            devices: ['iPhone 11 Pro']
+            devices: ['iPhone 12 Pro'],
+            clean: true
         )
     end
 
@@ -145,7 +146,7 @@ platform :ios do
             langs = config['langs']
             # Expected size of the array, used to check if new languages have been added or not
             # The size logic can be omitted if needed
-            size = 66
+            size = 27
 
             response = Net::HTTP.get_response(URI(build))
             if response.is_a? Net::HTTPSuccess
@@ -163,7 +164,6 @@ platform :ios do
 
                         # Key found, pull content and write to file
                         langs[entry.name].each do |lang|
-                            #puts File.basename("#{entry}")
                             content = entry.get_input_stream.read
                             full_path = path + lang + '/' + File.basename("#{entry}")
                             puts "Updated! \u{1F4AA} " + full_path
