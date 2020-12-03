@@ -97,33 +97,33 @@ public class NetworkConnection {
                                 deviceId: String,
                                 deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-            load(from: url, timeout: nil, completionHandler: completionHandler)
+            load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func sitemaps(openHABRootUrl: String,
                                 completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
-            load(from: url, timeout: nil, completionHandler: completionHandler)
+            load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func tracker(openHABRootUrl: String,
                                completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
-            load(from: url, timeout: nil, completionHandler: completionHandler)
+            load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func notification(urlString: String,
                                     completionHandler: @escaping (DataResponse<Data>) -> Void) {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
-            load(from: notificationsUrl, timeout: nil, completionHandler: completionHandler)
+            load(from: notificationsUrl, completionHandler: completionHandler)
         }
     }
 
-    public static func sendState(item: CommItem, commandToSend command: String?) -> DataRequest? {
-        sendCommandOrState(item: item, commandToSend: command, state: true)
+    public static func sendState(item: CommItem, stateToSend state: String?) -> DataRequest? {
+        sendCommandOrState(item: item, commandToSend: state, state: true)
     }
 
     public static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
@@ -133,15 +133,15 @@ public class NetworkConnection {
     public static func sendCommandOrState(item: CommItem, commandToSend command: String?, state: Bool) -> DataRequest? {
         if var commandUrl = URL(string: item.link) {
             if state {
-                if let commandUrl2 = URL(string: item.link + "/state") {
-                    commandUrl = commandUrl2
-                }
+                commandUrl = commandUrl.appendingPathComponent("/state")
             }
+
             var commandRequest = URLRequest(url: commandUrl)
 
-            commandRequest.httpMethod = "POST"
             if state {
                 commandRequest.httpMethod = "PUT"
+            } else {
+                commandRequest.httpMethod = "POST"
             }
 
             commandRequest.httpBody = command?.data(using: .utf8)
@@ -211,7 +211,7 @@ public class NetworkConnection {
         return page(url: pageToLoadUrl, longPolling: longPolling, openHABVersion: openHABVersion, completionHandler: completionHandler)
     }
 
-    static func load(from url: URL, timeout: Double?, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data>) -> Void) {
         var request = URLRequest(url: url)
         request.timeoutInterval = timeout ?? 10.0
 

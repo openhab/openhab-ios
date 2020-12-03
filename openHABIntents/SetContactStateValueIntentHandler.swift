@@ -60,7 +60,7 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
                 completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(itemName))
                 return
             }
-            OpenHABItemCache.instance.sendState(item, commandToSend: state)
+            OpenHABItemCache.instance.sendState(item, stateToSend: state)
 
             completion(OpenHABSetContactStateValueIntentResponse.success(item: itemName, state: state))
         }

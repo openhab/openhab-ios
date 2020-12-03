@@ -76,7 +76,7 @@ public class OpenHABSitemapPage: NSObject {
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item = item else { return }
 
-        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", item.name)
+        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command.orEmpty, item.name)
         sendCommand?(item, command)
     }
 }
@@ -115,6 +115,6 @@ public extension OpenHABSitemapPage {
 public extension OpenHABSitemapPage.CodingData {
     var openHABSitemapPage: OpenHABSitemapPage {
         let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
-        return OpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
+        return OpenHABSitemapPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }

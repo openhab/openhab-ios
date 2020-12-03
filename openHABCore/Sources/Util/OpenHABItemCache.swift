@@ -24,12 +24,12 @@ public class OpenHABItemCache {
     public var url = ""
     public var localUrlFailed = false
     public var lastUrlConnected = URL_NONE
-    public var lastLoad = NSDate().timeIntervalSince1970
+    public var lastLoad = Date().timeIntervalSince1970
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         var ret = [NSString]()
 
-        if items == nil {
+        guard let items = items else {
             if #available(iOS 12.0, *) {
                 reload(searchTerm: searchTerm, types: types, completion: completion)
             } else {
@@ -38,40 +38,24 @@ public class OpenHABItemCache {
             return
         }
 
-        for item in items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || (item.type != nil && types!.contains(item.type!))) {
-            ret.append(NSString(string: item.name))
-        }
+        ret.append(contentsOf: items.filter { searchTerm == nil || $0.name.contains(searchTerm.orEmpty) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.map { NSString(string: $0.name) })
 
         completion(ret)
     }
 
     @available(iOS 12.0, *)
     public func getItem(name: String, completion: @escaping (OpenHABItem?) -> Void) {
-        let now = NSDate().timeIntervalSince1970
+        let now = Date().timeIntervalSince1970
 
         if items == nil || (now - lastLoad) > 10 { // More than 10 seconds - reload
             reload(name: name, completion: completion)
             return
         }
-
-        for item in items! where item.name == name {
-            completion(item)
-            return
-        }
-
-        completion(nil)
+        completion(getItem(name))
     }
 
     func getItem(_ name: String) -> OpenHABItem? {
-        if items == nil {
-            return nil
-        }
-
-        for item in items! where item.name == name {
-            return item
-        }
-
-        return nil
+        items?.first { $0.name == name }
     }
 
     public func sendCommand(_ item: OpenHABItem, commandToSend command: String) {
@@ -79,20 +63,16 @@ public class OpenHABItemCache {
         commandOperation?.resume()
     }
 
-    public func sendState(_ item: OpenHABItem, commandToSend command: String) {
-        let commandOperation = NetworkConnection.sendState(item: item, commandToSend: command)
+    public func sendState(_ item: OpenHABItem, stateToSend command: String) {
+        let commandOperation = NetworkConnection.sendState(item: item, stateToSend: command)
         commandOperation?.resume()
     }
 
     @available(iOS 12.0, *)
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
-        lastLoad = NSDate().timeIntervalSince1970
+        lastLoad = Date().timeIntervalSince1970
 
-        let uurl = getURL()
-
-        if uurl == nil {
-            return
-        }
+        guard let uurl = getURL() else { return }
 
         os_log("Loading items from %{PUBLIC}@", log: .default, type: .info, url)
 
@@ -100,23 +80,16 @@ public class OpenHABItemCache {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: nil)
         }
 
-        var timeout = 10.0
-        if lastUrlConnected == OpenHABItemCache.URL_LOCAL {
-            timeout = 5.0
-        }
+        let timeout = lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 5.0 : 10.0
 
-        NetworkConnection.load(from: uurl!, timeout: timeout) { response in
+        NetworkConnection.load(from: uurl, timeout: timeout) { response in
             switch response.result {
             case .success:
                 if let data = response.result.value {
                     do {
                         try self.decodeItemsData(data)
 
-                        var ret = [NSString]()
-
-                        for item in self.items! where (searchTerm == nil || item.name.contains(searchTerm ?? "")) && (types == nil || (item.type != nil && types!.contains(item.type!))) {
-                            ret.append(NSString(string: item.name))
-                        }
+                        let ret = self.items?.filter { searchTerm == nil || $0.name.contains(searchTerm.orEmpty) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.map(\.name).map { NSString(string: $0) } ?? []
 
                         completion(ret)
                     } catch {
@@ -138,13 +111,9 @@ public class OpenHABItemCache {
 
     @available(iOS 12.0, *)
     public func reload(name: String, completion: @escaping (OpenHABItem?) -> Void) {
-        lastLoad = NSDate().timeIntervalSince1970
+        lastLoad = Date().timeIntervalSince1970
 
-        let uurl = getURL()
-
-        if uurl == nil {
-            return
-        }
+        guard let uurl = getURL() else { return }
 
         os_log("Loading items from %{PUBLIC}@", log: .default, type: .info, url)
 
@@ -152,12 +121,9 @@ public class OpenHABItemCache {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: nil)
         }
 
-        var timeout = 10.0
-        if lastUrlConnected == OpenHABItemCache.URL_LOCAL {
-            timeout = 5.0
-        }
+        let timeout = lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 5.0 : 10.0
 
-        NetworkConnection.load(from: uurl!, timeout: timeout) { response in
+        NetworkConnection.load(from: uurl, timeout: timeout) { response in
             switch response.result {
             case .success:
                 if let data = response.result.value {
@@ -218,7 +184,7 @@ public class OpenHABItemCache {
         items = [OpenHABItem]()
 
         for codingDatum in codingDatas where codingDatum.openHABItem.type != OpenHABItem.ItemType.group {
-            self.items!.append(codingDatum.openHABItem)
+            self.items?.append(codingDatum.openHABItem)
         }
 
         os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, items?.count ?? 0)
