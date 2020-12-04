@@ -465,54 +465,57 @@ class OpenHABJSONParserTests: XCTestCase {
             subsystem: "org.openhab.app",
             category: "RecordDecoding"
         )
-        let signpostID = OSSignpostID(log: log)
 
-        do {
-            let jsonFile = "LargeSitemap"
-            os_signpost(
-                .begin,
-                log: log,
-                name: "Read File",
-                signpostID: signpostID,
-                "%{public}s",
-                jsonFile
-            )
-            let testBundle = Bundle(for: Self.self)
-            let url = testBundle.url(forResource: jsonFile, withExtension: "json")
-            let contents = try Data(contentsOf: url!)
-            os_signpost(
-                .end,
-                log: log,
-                name: "Read File",
-                signpostID: signpostID,
-                "%{public}s",
-                jsonFile
-            )
+        if #available(iOS 12, *) {
+            let signpostID = OSSignpostID(log: log)
 
-            os_signpost(
-                .begin,
-                log: log,
-                name: "Decode JSON",
-                signpostID: signpostID,
-                "Begin"
-            )
-            let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: contents)
-            os_signpost(
-                .end,
-                log: log,
-                name: "Decode JSON",
-                signpostID: signpostID,
-                "End"
-            )
+            do {
+                let jsonFile = "LargeSitemap"
+                os_signpost(
+                    .begin,
+                    log: log,
+                    name: "Read File",
+                    signpostID: signpostID,
+                    "%{public}s",
+                    jsonFile
+                )
+                let testBundle = Bundle(for: Self.self)
+                let url = testBundle.url(forResource: jsonFile, withExtension: "json")
+                let contents = try Data(contentsOf: url!)
+                os_signpost(
+                    .end,
+                    log: log,
+                    name: "Read File",
+                    signpostID: signpostID,
+                    "%{public}s",
+                    jsonFile
+                )
 
-            let widget = codingData.page.widgets?[0]
-            XCTAssertEqual(widget?.label, "Flat Scenes")
-            XCTAssertEqual(widget?.widgets[0].label, "Scenes")
-            XCTAssertEqual(codingData.page.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
-            let widget2 = codingData.page.widgets?[10]
-            XCTAssertEqual(widget2?.widgets[0].label, "Admin Items")
-        } catch {
-            XCTFail("Failed parsing")
+                os_signpost(
+                    .begin,
+                    log: log,
+                    name: "Decode JSON",
+                    signpostID: signpostID,
+                    "Begin"
+                )
+                let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: contents)
+                os_signpost(
+                    .end,
+                    log: log,
+                    name: "Decode JSON",
+                    signpostID: signpostID,
+                    "End"
+                )
+
+                let widget = codingData.page.widgets?[0]
+                XCTAssertEqual(widget?.label, "Flat Scenes")
+                XCTAssertEqual(widget?.widgets[0].label, "Scenes")
+                XCTAssertEqual(codingData.page.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
+                let widget2 = codingData.page.widgets?[10]
+                XCTAssertEqual(widget2?.widgets[0].label, "Admin Items")
+            } catch {
+                XCTFail("Failed parsing")
+            }
         }
     }
 
