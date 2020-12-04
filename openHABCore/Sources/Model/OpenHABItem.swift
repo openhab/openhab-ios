@@ -60,12 +60,12 @@ public final class OpenHABItem: NSObject, CommItem {
             self.state = state
         }
         self.link = link
-        self.label = label ?? ""
+        self.label = label.orEmpty
         self.groupType = groupType?.toItemType()
         self.stateDescription = stateDescription
         readOnly = stateDescription?.readOnly ?? false
         self.members = members
-        self.category = category ?? ""
+        self.category = category.orEmpty
         self.options = options ?? []
     }
 

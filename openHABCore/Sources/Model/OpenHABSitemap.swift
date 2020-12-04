@@ -134,7 +134,7 @@ public extension OpenHABSitemap.CodingData {
     var openHABSitemap: OpenHABSitemap {
         OpenHABSitemap(
             name: name,
-            icon: icon ?? "",
+            icon: icon.orEmpty,
             label: label,
             link: link,
             leaf: page.leaf,

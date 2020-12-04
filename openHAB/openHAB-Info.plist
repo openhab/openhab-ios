@@ -48,6 +48,10 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
@@ -61,6 +65,23 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_openhab-server-ssl._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>openHAB needs access to your local network to connect with the openHAB server.</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>OpenHABGetItemStateIntent</string>
+		<string>OpenHABSetColorValueIntent</string>
+		<string>OpenHABSetContactStateValueIntent</string>
+		<string>OpenHABSetDimmerRollerValueIntent</string>
+		<string>OpenHABSetNumberValueIntent</string>
+		<string>OpenHABSetStringValueIntent</string>
+		<string>OpenHABSetSwitchStateIntent</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
@@ -110,18 +131,7 @@
 			</dict>
 		</dict>
 	</array>
-	<key>FirebaseCrashlyticsCollectionEnabled</key>
-	<false/>
-	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
-	<false/>
 	<key>firebase_performance_collection_enabled</key>
 	<false/>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>openHAB needs access to your local network to connect with the openHAB server.</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_http._tcp</string>
-		<string>_openhab-server-ssl._tcp</string>
-	</array>
 </dict>
 </plist>

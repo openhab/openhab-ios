@@ -112,3 +112,14 @@ extension String {
         return Int(values[2].asDouble.rounded())
     }
 }
+
+extension Optional where Wrapped == String {
+    var orEmpty: String {
+        switch self {
+        case let .some(value):
+            return value
+        case .none:
+            return ""
+        }
+    }
+}

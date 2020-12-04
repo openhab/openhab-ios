@@ -735,6 +735,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                         os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
                         self.appData?.openHABVersion = 2
                         self.selectSitemap()
+
                     } catch {
                         os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
                         let str = String(decoding: data, as: UTF8.self)
