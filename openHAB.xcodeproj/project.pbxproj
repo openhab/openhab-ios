@@ -12,23 +12,18 @@
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
 		4BFA80124CD53614E917544F /* Pods_OpenHABCoreWatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7C18F7BEFBD51AF13F77164 /* Pods_OpenHABCoreWatch.framework */; };
-		4D38D952256897490039DA6E /* SetNumberValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */; };
 		4D38D95A256897770039DA6E /* SetStringValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */; };
-		4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */; };
 		4D38D96A256897AD0039DA6E /* SetContactStateValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */; };
 		4D38DA302569A58F0039DA6E /* OpenHABItemCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */; };
 		4D6470C92561F643007B03FC /* OpenHABItemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470C82561F643007B03FC /* OpenHABItemCache.swift */; };
-		4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470D52561F935007B03FC /* IntentHandler.swift */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4D6470EB2561FAB0007B03FC /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470EA2561FAB0007B03FC /* Intents.intentdefinition */; settings = {ATTRIBUTES = (no_codegen, ); }; };
-		4D6470FC2561FACC007B03FC /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470EA2561FAB0007B03FC /* Intents.intentdefinition */; settings = {ATTRIBUTES = (no_codegen, ); }; };
-		4D6471122561FDA7007B03FC /* GetItemStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */; };
-		4D64717725621AF6007B03FC /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470EA2561FAB0007B03FC /* Intents.intentdefinition */; };
 		4D64718825621B4C007B03FC /* OpenHABCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93F38C4323803499001B1451 /* OpenHABCore.framework */; };
-		4D647221256331B9007B03FC /* SetSwitchStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */; };
-		4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		7FC9367CB7380FA8A9AEA922 /* Pods_openHABTestsSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA646789654D6BCEA2EB3BD4 /* Pods_openHABTestsSwift.framework */; };
+		9312E209257AB7AC003E10B2 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470EA2561FAB0007B03FC /* Intents.intentdefinition */; };
+		9312E21C257AB7D8003E10B2 /* SetNumberValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */; };
+		9312E250257AB8CA003E10B2 /* SetSwitchStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
@@ -1814,22 +1809,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9312E250257AB8CA003E10B2 /* SetSwitchStateIntentHandler.swift in Sources */,
+				9312E21C257AB7D8003E10B2 /* SetNumberValueIntentHandler.swift in Sources */,
 				4D38D95A256897770039DA6E /* SetStringValueIntentHandler.swift in Sources */,
 				4D38D96A256897AD0039DA6E /* SetContactStateValueIntentHandler.swift in Sources */,
-				4D6470FC2561FACC007B03FC /* Intents.intentdefinition in Sources */,
-				4D38D952256897490039DA6E /* SetNumberValueIntentHandler.swift in Sources */,
-				4D647221256331B9007B03FC /* SetSwitchStateIntentHandler.swift in Sources */,
-				4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */,
-				4D6471122561FDA7007B03FC /* GetItemStateIntentHandler.swift in Sources */,
-				4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */,
-				4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */,
-				4D6470FC2561FACC007B03FC /* Intents.intentdefinition in Sources */,
-				4D38D952256897490039DA6E /* SetNumberValueIntentHandler.swift in Sources */,
-				4D647221256331B9007B03FC /* SetSwitchStateIntentHandler.swift in Sources */,
-				4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */,
-				4D6471122561FDA7007B03FC /* GetItemStateIntentHandler.swift in Sources */,
-				4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */,
-				4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1846,6 +1829,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9312E209257AB7AC003E10B2 /* Intents.intentdefinition in Sources */,
 				DA773DF523E8C32400C16246 /* DoubleExtension.swift in Sources */,
 				9350F17223814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16623814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
@@ -1864,7 +1848,6 @@
 				9350F18E238151AD00054BA8 /* NetworkConnection.swift in Sources */,
 				9350F16F23814F2500054BA8 /* OpenHABStateDescription.swift in Sources */,
 				9350F17C2381509300054BA8 /* OSLogExtension.swift in Sources */,
-				4D64717725621AF6007B03FC /* Intents.intentdefinition in Sources */,
 				9350F1882381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1822381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
 				DAF4579D23D904350018B495 /* UIColorExtension.swift in Sources */,
@@ -2780,7 +2763,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MARKETING_VERSION = 2.2.56;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -2833,7 +2816,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
 				MARKETING_VERSION = 2.2.56;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;

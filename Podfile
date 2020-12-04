@@ -55,7 +55,7 @@ target 'openHABWatch Extension' do
 end
 
 target 'openHABIntents' do
-    platform :ios, '14.0'
+    platform :ios, '11.1'
     shared_pods
     pod 'Kingfisher', '~> 5.0'
 end
