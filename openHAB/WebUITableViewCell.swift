@@ -31,10 +31,12 @@ class WebUITableViewCell: GenericUITableViewCell {
         contentView.addSubview(widgetWebView)
 
         widgetWebView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([widgetWebView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-                                     widgetWebView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
-                                     widgetWebView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                                     widgetWebView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            widgetWebView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
+            widgetWebView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+            widgetWebView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            widgetWebView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
     }
 
     override func awakeFromNib() {

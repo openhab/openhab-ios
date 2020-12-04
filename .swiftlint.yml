@@ -97,3 +97,6 @@ custom_rules:
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"
+
+opening_brace:
+  allow_multiline_func: true

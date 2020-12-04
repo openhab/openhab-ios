@@ -21,10 +21,12 @@ class LocalizationTests: XCTestCase {
 
     private static let falsePositives: [String] = []
 
-    private static let localizedFormatStrings: [(key: String, arguments: [CVarArg])] = [(key: "unable_to_decode_certificate", arguments: ["CERTIFICATE_PLACEHOLDER"]),
-                                                                                        (key: "unable_to_add_certificate", arguments: ["CERTIFICATE_PLACEHOLDER"]),
-                                                                                        (key: "ssl_certificate_invalid", arguments: ["PRESENTER", "SITE"]),
-                                                                                        (key: "ssl_certificate_no_match", arguments: ["PRESENTER", "SITE"])]
+    private static let localizedFormatStrings: [(key: String, arguments: [CVarArg])] = [
+        (key: "unable_to_decode_certificate", arguments: ["CERTIFICATE_PLACEHOLDER"]),
+        (key: "unable_to_add_certificate", arguments: ["CERTIFICATE_PLACEHOLDER"]),
+        (key: "ssl_certificate_invalid", arguments: ["PRESENTER", "SITE"]),
+        (key: "ssl_certificate_no_match", arguments: ["PRESENTER", "SITE"])
+    ]
 
     func testFormatStrings() {
         guard validateFormatStringsCompleteness() else {
@@ -60,8 +62,8 @@ class LocalizationTests: XCTestCase {
             print("Testing language: '\(language)'.")
 
             guard let path = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "en"),
-                let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
-                !localizableStrings.isEmpty
+                  let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
+                  !localizableStrings.isEmpty
             else {
                 XCTFail("Failed to load bundle.")
                 return
@@ -81,10 +83,10 @@ class LocalizationTests: XCTestCase {
         let mandatoryKeys: [String] = []
 
         if let referencePath = Bundle.main.paths(forResourcesOfType: "strings", inDirectory: "en.lproj").first(where: { $0.contains("InfoPlist.strings") }),
-            let referenceDictionary = NSDictionary(contentsOfFile: referencePath) as? [String: String] {
+           let referenceDictionary = NSDictionary(contentsOfFile: referencePath) as? [String: String] {
             for language in LocalizationTests.localizations {
                 if let path = Bundle.main.paths(forResourcesOfType: "strings", inDirectory: "\(language).lproj").first(where: { $0.contains("InfoPlist.strings") }),
-                    let dictionary = NSDictionary(contentsOfFile: path) as? [String: String] {
+                   let dictionary = NSDictionary(contentsOfFile: path) as? [String: String] {
                     for key in mandatoryKeys {
                         XCTAssertNotNil(dictionary[key], "Missing entry '\(key)' in InfoPlist.strings for language '\(language)'.")
                         XCTAssertTrue(dictionary[key]?.isEmpty == false, "Missing value for '\(key)' in InfoPlist.strings for language '\(language)'.")
@@ -100,8 +102,8 @@ class LocalizationTests: XCTestCase {
 
     private func validateFormatStringsCompleteness() -> Bool {
         guard let path = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "en"),
-            let localizableStrings = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ !LocalizationTests.falsePositives.contains($0.key) }),
-            !localizableStrings.isEmpty
+              let localizableStrings = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ !LocalizationTests.falsePositives.contains($0.key) }),
+              !localizableStrings.isEmpty
         else {
             XCTFail("Failed to load bundle.")
             return false

@@ -13,8 +13,8 @@ import Foundation
 
 // Custom DateFormatter to handle fractional seconds
 // Inspired by https://useyourloaf.com/blog/swift-codable-with-custom-dates/
-extension DateFormatter {
-    public static let iso8601Full: DateFormatter = {
+public extension DateFormatter {
+    static let iso8601Full: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
         formatter.calendar = Calendar(identifier: .iso8601)

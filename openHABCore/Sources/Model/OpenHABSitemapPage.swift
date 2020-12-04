@@ -81,19 +81,21 @@ public class OpenHABSitemapPage: NSObject {
     }
 }
 
-extension OpenHABSitemapPage {
-    public func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: pageId,
-                                                            title: title,
-                                                            link: link,
-                                                            leaf: leaf,
-                                                            expandedWidgets: try widgets.filter(isIncluded))
+public extension OpenHABSitemapPage {
+    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+        let filteredOpenHABSitemapPage = OpenHABSitemapPage(
+            pageId: pageId,
+            title: title,
+            link: link,
+            leaf: leaf,
+            expandedWidgets: try widgets.filter(isIncluded)
+        )
         return filteredOpenHABSitemapPage
     }
 }
 
-extension OpenHABSitemapPage {
-    public struct CodingData: Decodable {
+public extension OpenHABSitemapPage {
+    struct CodingData: Decodable {
         let pageId: String?
         let title: String?
         let link: String?
@@ -110,8 +112,8 @@ extension OpenHABSitemapPage {
     }
 }
 
-extension OpenHABSitemapPage.CodingData {
-    public var openHABSitemapPage: OpenHABSitemapPage {
+public extension OpenHABSitemapPage.CodingData {
+    var openHABSitemapPage: OpenHABSitemapPage {
         let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
         return OpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }

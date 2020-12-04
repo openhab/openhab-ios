@@ -15,24 +15,24 @@ import Foundation
 
 import os.log
 
-extension OSLog {
+public extension OSLog {
     private static var subsystem = Bundle.main.bundleIdentifier!
 
     /// Logs the view cycles like viewDidLoad.
-    public static let viewCycle = OSLog(subsystem: subsystem, category: "viewcycle")
+    static let viewCycle = OSLog(subsystem: subsystem, category: "viewcycle")
 
     /// Logs the remote accesses
-    public static let remoteAccess = OSLog(subsystem: subsystem, category: "remoteAccess")
+    static let remoteAccess = OSLog(subsystem: subsystem, category: "remoteAccess")
 
     /// Logs the URL composition
-    public static let urlComposition = OSLog(subsystem: subsystem, category: "urlComposition")
+    static let urlComposition = OSLog(subsystem: subsystem, category: "urlComposition")
 
     /// Logs the notifications
-    public static let notifications = OSLog(subsystem: subsystem, category: "notifications")
+    static let notifications = OSLog(subsystem: subsystem, category: "notifications")
 
     /// Logs watch connectivity
-    public static let watch = OSLog(subsystem: subsystem, category: "watch")
+    static let watch = OSLog(subsystem: subsystem, category: "watch")
 
     /// Logs commands
-    public static let command = OSLog(subsystem: subsystem, category: "command")
+    static let command = OSLog(subsystem: subsystem, category: "command")
 }

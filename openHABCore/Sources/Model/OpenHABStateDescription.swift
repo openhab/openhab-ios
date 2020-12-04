@@ -47,8 +47,8 @@ public class OpenHABStateDescription {
     }
 }
 
-extension OpenHABStateDescription {
-    public struct CodingData: Decodable {
+public extension OpenHABStateDescription {
+    struct CodingData: Decodable {
         let minimum: Double?
         let maximum: Double?
         let step: Double?

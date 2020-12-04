@@ -26,8 +26,8 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
         }
         if let data = response,
-            let doc = try? XMLDocument(data: data),
-            let name = doc.root?.tag {
+           let doc = try? XMLDocument(data: data),
+           let name = doc.root?.tag {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
             if name == "sitemaps" {
                 for element in doc.root?.children(tag: "sitemap") ?? [] {
@@ -106,7 +106,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case .success:
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
                 self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
@@ -123,7 +122,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 }
                 self.tableView.reloadData()
             case let .failure(error):
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
                 if self.drawerTableType == .withStandardMenuEntries {
@@ -164,8 +162,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell.customTextLabel?.text = sitemaps[indexPath.row].label
             if !sitemaps[indexPath.row].icon.isEmpty {
                 if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url {
-                    imageView.kf.setImage(with: iconURL,
-                                          placeholder: UIImage(named: "openHABIcon"))
+                    imageView.kf.setImage(
+                        with: iconURL,
+                        placeholder: UIImage(named: "openHABIcon")
+                    )
                 }
             } else {
                 imageView.image = UIImage(named: "openHABIcon")
@@ -238,12 +238,14 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let drawerItem = drawerItems[indexPath.row - sitemaps.count]
 
             switch drawerItem {
-            case .settings: dismiss(animated: true) {
-                self.delegate?.modalDismissed(to: .settings)
-            }
-            case .notifications: dismiss(animated: true) {
-                self.delegate?.modalDismissed(to: .notifications)
-            }
+            case .settings:
+                dismiss(animated: true) {
+                    self.delegate?.modalDismissed(to: .settings)
+                }
+            case .notifications:
+                dismiss(animated: true) {
+                    self.delegate?.modalDismissed(to: .notifications)
+                }
             }
         }
     }

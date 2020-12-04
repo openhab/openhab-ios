@@ -41,11 +41,13 @@ class OpenHABGeneralTests: XCTestCase {
     }
 
     func testEndPoints() {
-        let urlc = Endpoint.icon(rootUrl: "http://192.169.2.1",
-                                 version: 2,
-                                 icon: "switch",
-                                 state: "OFF",
-                                 iconType: .svg).url
+        let urlc = Endpoint.icon(
+            rootUrl: "http://192.169.2.1",
+            version: 2,
+            icon: "switch",
+            state: "OFF",
+            iconType: .svg
+        ).url
         XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }
 

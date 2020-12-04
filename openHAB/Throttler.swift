@@ -36,8 +36,8 @@ public class Throttler {
 }
 
 // Inspired by https://ericasadun.com/2017/05/23/5-easy-dispatch-tricks/
-extension DispatchTime {
-    public static func secondsFromNow(_ amount: Double) -> DispatchTime {
+public extension DispatchTime {
+    static func secondsFromNow(_ amount: Double) -> DispatchTime {
         DispatchTime.now() + amount
     }
 }
