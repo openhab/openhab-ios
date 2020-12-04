@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Support for Shortcuts 
+
 ## [Version 2.4.5, Build 1580410454] - 2020-10-04
 
 ### Fixed
