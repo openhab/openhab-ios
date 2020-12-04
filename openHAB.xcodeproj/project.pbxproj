@@ -1823,6 +1823,13 @@
 				4D6471122561FDA7007B03FC /* GetItemStateIntentHandler.swift in Sources */,
 				4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */,
 				4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */,
+				4D6470FC2561FACC007B03FC /* Intents.intentdefinition in Sources */,
+				4D38D952256897490039DA6E /* SetNumberValueIntentHandler.swift in Sources */,
+				4D647221256331B9007B03FC /* SetSwitchStateIntentHandler.swift in Sources */,
+				4D6470D62561F935007B03FC /* IntentHandler.swift in Sources */,
+				4D6471122561FDA7007B03FC /* GetItemStateIntentHandler.swift in Sources */,
+				4D38D9622568978E0039DA6E /* SetColorValueIntentHandler.swift in Sources */,
+				4D64724D256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
