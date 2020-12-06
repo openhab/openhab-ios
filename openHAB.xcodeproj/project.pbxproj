@@ -23,6 +23,10 @@
 		9312E21C257AB7D8003E10B2 /* SetNumberValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */; };
 		9312E250257AB8CA003E10B2 /* SetSwitchStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
+		9328FCE8257CD9D10019F69D /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470D52561F935007B03FC /* IntentHandler.swift */; };
+		9328FCEF257CD9D90019F69D /* GetItemStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */; };
+		9328FD03257CD9F40019F69D /* SetDimmerRollerValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */; };
+		9328FD0A257CD9FC0019F69D /* SetColorValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */; };
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
 		9350F10123814CD500054BA8 /* OpenHABItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F0FF23814CD500054BA8 /* OpenHABItem.swift */; };
@@ -1818,8 +1822,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				9312E250257AB8CA003E10B2 /* SetSwitchStateIntentHandler.swift in Sources */,
+				9328FCE8257CD9D10019F69D /* IntentHandler.swift in Sources */,
+				9328FCEF257CD9D90019F69D /* GetItemStateIntentHandler.swift in Sources */,
+				9328FD03257CD9F40019F69D /* SetDimmerRollerValueIntentHandler.swift in Sources */,
 				9312E21C257AB7D8003E10B2 /* SetNumberValueIntentHandler.swift in Sources */,
 				4D38D95A256897770039DA6E /* SetStringValueIntentHandler.swift in Sources */,
+				9328FD0A257CD9FC0019F69D /* SetColorValueIntentHandler.swift in Sources */,
 				4D38D96A256897AD0039DA6E /* SetContactStateValueIntentHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
