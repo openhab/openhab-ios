@@ -63,3 +63,9 @@
 "activate" = "Aktivieren";
 "crash_detected" = "Absturz festgestellt";
 "habpanel" = "HABPanel";
+"open" = "offen";
+"closed" = "geschlossen";
+"unknown" = "unbekannt";
+"on" = "an";
+"off" = "aus";
+"empty" = "leer";
