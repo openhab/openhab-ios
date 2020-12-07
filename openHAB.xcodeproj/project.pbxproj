@@ -74,6 +74,8 @@
 		935D3408257B7DC00020A404 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		938620C0257E223C00A63200 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C824EFCCC000E6B52F /* Localizable.strings */; };
 		93862119257E2C9700A63200 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
+		938621E8257E3D6900A63200 /* Sequence+KeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938621E7257E3D6900A63200 /* Sequence+KeyPath.swift */; };
+		938621E9257E3D6900A63200 /* Sequence+KeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938621E7257E3D6900A63200 /* Sequence+KeyPath.swift */; };
 		938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF89524EFBC5400E6B52F /* LocalizationTests.swift */; };
 		938BF9C424EFCB9F00E6B52F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C324EFCB9F00E6B52F /* Main.storyboard */; };
 		938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */; };
@@ -410,6 +412,7 @@
 		935D3447257B7EA40020A404 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = Resources/it.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3449257B7EA50020A404 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = Resources/ru.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3451257B7EA60020A404 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Resources/es.lproj/Intents.strings; sourceTree = "<group>"; };
+		938621E7257E3D6900A63200 /* Sequence+KeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+KeyPath.swift"; sourceTree = "<group>"; };
 		938BF89524EFBC5400E6B52F /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		938BF9C324EFCB9F00E6B52F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Localization.swift"; sourceTree = "<group>"; };
@@ -822,6 +825,7 @@
 				9350F16B23814F0D00054BA8 /* OpenHABWidgetMapping.swift */,
 				DADC1EAB24D2CB6D0052B8D4 /* NumberState.swift */,
 				DA1EAECD24E9469E008A6B22 /* OpenHABServerProperties.swift */,
+				938621E7257E3D6900A63200 /* Sequence+KeyPath.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1876,6 +1880,7 @@
 				9350F10123814CD500054BA8 /* OpenHABItem.swift in Sources */,
 				9350F10423814CFF00054BA8 /* OpenHABLinkedPage.swift in Sources */,
 				9350F191238151CE00054BA8 /* StringExtension.swift in Sources */,
+				938621E8257E3D6900A63200 /* Sequence+KeyPath.swift in Sources */,
 				9350F18B2381519300054BA8 /* ClientCertificateManager.swift in Sources */,
 				DADC1EAD24D2CB8B0052B8D4 /* NumberState.swift in Sources */,
 				9350F1852381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift in Sources */,
@@ -1889,6 +1894,7 @@
 				DA773DF623E8C32400C16246 /* DoubleExtension.swift in Sources */,
 				9350F17323814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16723814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
+				938621E9257E3D6900A63200 /* Sequence+KeyPath.swift in Sources */,
 				9350F195238151F100054BA8 /* Preferences.swift in Sources */,
 				93F38C6D238034DA001B1451 /* DataObject.swift in Sources */,
 				DA1EAED024E94871008A6B22 /* OpenHABServerProperties.swift in Sources */,
