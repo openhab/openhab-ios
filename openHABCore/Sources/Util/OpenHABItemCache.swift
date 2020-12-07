@@ -89,7 +89,7 @@ public class OpenHABItemCache {
                     do {
                         try self.decodeItemsData(data)
 
-                        let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.map(\.name).map { NSString(string: $0) } ?? []
+                        let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) } ?? []
 
                         completion(ret)
                     } catch {
