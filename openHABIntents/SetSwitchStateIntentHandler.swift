@@ -15,8 +15,13 @@ import OpenHABCore
 import os.log
 
 class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling {
+    static let ON = NSLocalizedString("on", comment: "").capitalized // User language
+    static let OFF = NSLocalizedString("off", comment: "").capitalized // User language
+    static let ACTION_NAMES = [ON, OFF]
+    static let ACTION_MAP = [ON: "ON", OFF: "OFF"] // these are the sent items - do not translate this text
+
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let actions = INObjectCollection<NSString>(items: ["ON", "OFF"])
+        let actions = INObjectCollection<NSString>(items: SetSwitchStateIntentHandler.ACTION_NAMES as [NSString])
 
         // Call the completion handler, passing the collection.
         completion(actions, nil)
@@ -46,12 +51,18 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
         os_log("SetSwitchStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem("empty"))
+            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
         guard let action = intent.action else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction("empty", item: itemName))
+            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction(NSLocalizedString("empty", comment: "empty action"), item: itemName))
+            return
+        }
+
+        // Map user language to real action
+        guard let realAction = SetSwitchStateIntentHandler.ACTION_MAP[action] else {
+            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction(action, item: itemName))
             return
         }
 
@@ -60,7 +71,7 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
                 completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(itemName))
                 return
             }
-            OpenHABItemCache.instance.sendCommand(item, commandToSend: action)
+            OpenHABItemCache.instance.sendCommand(item, commandToSend: realAction)
 
             completion(OpenHABSetSwitchStateIntentResponse.success(action: action, item: itemName))
         }

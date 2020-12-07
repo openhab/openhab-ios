@@ -39,7 +39,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
         os_log("SetDimmerRollerValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidItem("empty"))
+            completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 

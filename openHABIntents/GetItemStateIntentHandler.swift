@@ -39,7 +39,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
         os_log("GetItemStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABGetItemStateIntentResponse.failureInvalidItem("empty"))
+            completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
@@ -48,7 +48,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
                 completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(itemName))
                 return
             }
-            completion(OpenHABGetItemStateIntentResponse.success(item: itemName, state: item.state ?? "unknown"))
+            completion(OpenHABGetItemStateIntentResponse.success(item: itemName, state: item.state ?? NSLocalizedString("unknown", comment: "unknown item")))
         }
     }
 }

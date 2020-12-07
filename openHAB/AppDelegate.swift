@@ -52,8 +52,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         setupCrashReporting()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
-
         UserDefaults.standard.register(defaults: appDefaults)
+
+        Preferences.migrateUserDefaultsIfRequired()
 
         NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
 

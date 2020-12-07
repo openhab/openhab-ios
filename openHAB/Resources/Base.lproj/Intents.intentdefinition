@@ -9,7 +9,7 @@
 	<key>INIntentDefinitionNamespace</key>
 	<string>aK4nIm</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>19H2</string>
+	<string>20B29</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
 	<string>12B45b</string>
 	<key>INIntentDefinitionToolsVersion</key>
@@ -172,7 +172,7 @@
 			<key>INIntentConfigurable</key>
 			<true/>
 			<key>INIntentDescription</key>
-			<string>Set the state of a swith on or off</string>
+			<string>Set the state of a switch on or off</string>
 			<key>INIntentDescriptionID</key>
 			<string>oOjAU0</string>
 			<key>INIntentKeyParameter</key>
@@ -907,7 +907,7 @@
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>None</string>
 						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>uGsyyj</string>
+						<string>m4EqGd</string>
 						<key>INIntentParameterMetadataDisableAutocorrect</key>
 						<true/>
 						<key>INIntentParameterMetadataDisableSmartDashes</key>

@@ -58,16 +58,16 @@ class LocalizationTests: XCTestCase {
     }
 
     func testLocalizations() {
+        guard let path = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "en"),
+              let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
+              !localizableStrings.isEmpty
+        else {
+            XCTFail("Failed to load bundle.")
+            return
+        }
+
         for language in LocalizationTests.localizations {
             print("Testing language: '\(language)'.")
-
-            guard let path = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "en"),
-                  let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
-                  !localizableStrings.isEmpty
-            else {
-                XCTFail("Failed to load bundle.")
-                return
-            }
 
             for localizableString in localizableStrings {
                 let translation = localizableString.key.localized(for: language)
@@ -80,23 +80,81 @@ class LocalizationTests: XCTestCase {
     }
 
     func testInfoPlistLocalizations() {
-        let mandatoryKeys: [String] = []
+        let mandatoryKeys: [String] = ["NSLocalNetworkUsageDescription"]
 
-        if let referencePath = Bundle.main.paths(forResourcesOfType: "strings", inDirectory: "en.lproj").first(where: { $0.contains("InfoPlist.strings") }),
-           let referenceDictionary = NSDictionary(contentsOfFile: referencePath) as? [String: String] {
-            for language in LocalizationTests.localizations {
-                if let path = Bundle.main.paths(forResourcesOfType: "strings", inDirectory: "\(language).lproj").first(where: { $0.contains("InfoPlist.strings") }),
-                   let dictionary = NSDictionary(contentsOfFile: path) as? [String: String] {
-                    for key in mandatoryKeys {
-                        XCTAssertNotNil(dictionary[key], "Missing entry '\(key)' in InfoPlist.strings for language '\(language)'.")
-                        XCTAssertTrue(dictionary[key]?.isEmpty == false, "Missing value for '\(key)' in InfoPlist.strings for language '\(language)'.")
-                        print("\(key) = \(dictionary[key] ?? "MISSING")")
-                        XCTAssertTrue((referenceDictionary[key] ?? "" != dictionary[key] ?? "") || language[0 ..< 2] == "en", "'\(key)' in InfoPlist.strings for language '\(language)' is not properly translated (it is similar to the English term).")
-                    }
+        for language in LocalizationTests.localizations {
+            print("Testing language: '\(language)'.")
+            if let path = Bundle.main.paths(forResourcesOfType: "strings", inDirectory: "\(language).lproj").first(where: { $0.contains("InfoPlist.strings") }),
+               let dictionary = NSDictionary(contentsOfFile: path) as? [String: String] {
+                for key in mandatoryKeys {
+                    XCTAssertNotNil(dictionary[key], "Missing entry '\(key)' in InfoPlist.strings for language '\(language)'.")
+                    XCTAssertTrue(dictionary[key]?.isEmpty == false, "Missing value for '\(key)' in InfoPlist.strings for language '\(language)'.")
+                    print("\(key) = \(dictionary[key] ?? "MISSING")")
                 }
             }
-        } else {
-            XCTFail("Failed to load reference InfoPlist.strings.")
+        }
+    }
+
+    func testIntentsLocalizations() {
+        guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
+              let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
+              !localizableStrings.isEmpty
+        else {
+            XCTFail("Failed to load bundle.")
+            return
+        }
+
+        for language in LocalizationTests.localizations {
+            print("Testing language: '\(language)'.")
+
+            for localizableString in localizableStrings {
+                let translation = localizableString.key.localized(for: language, with: "Intents")
+                XCTAssertNotNil(translation, "Failed to get translation for key '\(localizableString.key)' in language '\(language)'.")
+                XCTAssertNotEqual(translation, "__MISSING__", "Missing translation for key '\(localizableString.key)' in language '\(language)'.")
+                XCTAssertFalse(translation?.isEmpty ?? true, "Translation for key '\(localizableString.key)' in language '\(language)' is empty.")
+                print("Translation: \(localizableString.key) = \(translation ?? "FAILED")")
+            }
+        }
+    }
+
+    func testIntentsPlaceholders() {
+        guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
+              let placeholderTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
+              !placeholderTuples.isEmpty,
+              let regex = try? NSRegularExpression(pattern: "\\$\\{([a-z0-9]*)\\}", options: .caseInsensitive)
+        else {
+            XCTFail("Failed to load bundle.")
+            return
+        }
+
+        for language in LocalizationTests.localizations {
+            print("Testing language: '\(language)'.")
+
+            guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: language),
+                  let languageTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
+                  !languageTuples.isEmpty
+            else {
+                XCTFail("Failed to load Intents.strings for language '\(language)'.")
+                continue
+            }
+
+            XCTAssertEqual(placeholderTuples.count, languageTuples.count, "Number of strings with placeholders in language '\(language)' doesn't match. Translations to check: \(languageTuples.filter { !placeholderTuples.keys.contains($0.key) }).")
+
+            for placeholderTuple in placeholderTuples {
+                let placeholderString = placeholderTuple.value
+                guard let translation = placeholderTuple.key.localized(for: language, with: "Intents") else {
+                    continue
+                }
+
+                let numberOfOccurrencesInPlaceholder = regex.numberOfMatches(in: placeholderString, range: NSRange(placeholderString.startIndex..., in: placeholderString))
+                let numberOfOccurrencesInTranslation = regex.numberOfMatches(in: translation, range: NSRange(translation.startIndex..., in: translation))
+                XCTAssertEqual(numberOfOccurrencesInPlaceholder, numberOfOccurrencesInTranslation, "Number of placeholders for key '\(placeholderTuple.key)' in language '\(language)' does not match.")
+
+                let matchesPlaceholder = regex.matches(in: placeholderString, options: [], range: NSRange(location: 0, length: placeholderString.utf16.count)).compactMap { Range($0.range, in: placeholderString).map { String(placeholderString[$0]) } }
+                let matchesTranslation = regex.matches(in: translation, options: [], range: NSRange(location: 0, length: translation.utf16.count)).compactMap { Range($0.range, in: translation).map { String(translation[$0]) } }
+                XCTAssertTrue(matchesPlaceholder.elementsEqual(matchesTranslation), "Placeholders do not match for key '\(placeholderTuple.key)' in language '\(language)'.")
+                print("Placeholders: \(matchesPlaceholder) == \(matchesTranslation)")
+            }
         }
     }
 
@@ -122,12 +180,12 @@ class LocalizationTests: XCTestCase {
 }
 
 private extension String {
-    func localized(for language: String) -> String? {
+    func localized(for language: String, with table: String? = nil) -> String? {
         guard let path = Bundle.main.path(forResource: language, ofType: "lproj") else {
             return nil
         }
 
-        return Bundle(path: path)?.localizedString(forKey: self, value: "__MISSING__", table: nil)
+        return Bundle(path: path)?.localizedString(forKey: self, value: "__MISSING__", table: table)
     }
 
     func localizedWithFormat(for language: String, arguments: [CVarArg]) -> String? {

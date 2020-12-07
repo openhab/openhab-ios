@@ -31,3 +31,19 @@ langs:
     - nl.lproj
   develop/openHAB/Resources/ru.lproj/InfoPlist.strings:
     - ru.lproj
+  develop/openHAB/Resources/en.lproj/Intents.strings:
+    - en.lproj
+  develop/openHAB/Resources/de.lproj/Intents.strings:
+    - de.lproj
+  develop/openHAB/Resources/es.lproj/Intents.strings:
+    - es.lproj
+  develop/openHAB/Resources/it.lproj/Intents.strings:
+    - it.lproj
+  develop/openHAB/Resources/fi.lproj/Intents.strings:
+    - fi.lproj
+  develop/openHAB/Resources/fr.lproj/Intents.strings:
+    - fr.lproj
+  develop/openHAB/Resources/nl.lproj/Intents.strings:
+    - nl.lproj
+  develop/openHAB/Resources/ru.lproj/Intents.strings:
+    - ru.lproj
