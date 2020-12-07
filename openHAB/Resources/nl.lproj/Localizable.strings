@@ -63,3 +63,9 @@
 "activate" = "Activeren";
 "crash_detected" = "Crash gedetecteerd";
 "habpanel" = "HABPanel";
+"open" = "open";
+"closed" = "closed";
+"unknown" = "unknown";
+"on" = "on";
+"off" = "off";
+"empty" = "empty";
