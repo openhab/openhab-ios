@@ -1,0 +1,157 @@
+"1GaCDV" = "Action";
+
+"1Kf0qe" = "Set Color Control Value";
+
+"1SeS3V" = "Set ${item} to ${value} (HSB)";
+
+"1USOx9" = "Item";
+
+"2q0TdY" = "Sorry can't find ${item}";
+
+"3evvza" = "Value";
+
+"5B4e9l" = "Set the string of a string control item";
+
+"5Uu4bK" = "Get Item State";
+
+"67qFTP" = "Invalid empty value for ${item}";
+
+"68Y2Ya" = "Dimmer/Roller Name";
+
+"6hUiXZ" = "The state of ${item} is ${state}";
+
+"80K2Dt" = "Sorry can't find ${item}";
+
+"8OBnvT" = "Invalid empty value for ${item}";
+
+"8dhboX" = "Value";
+
+"B2I9b5" = "Item";
+
+"CZfT5a" = "Sent the number ${value} to ${item}";
+
+"Cdg015" = "Set ${item} to ${value}";
+
+"DxO2wk" = "Set the color of a color control item";
+
+"E291x3" = "Value";
+
+"EEj00Q" = "Set ${item} to ${value}";
+
+"Fb0pUB" = "Sent the action of ${action} to switch ${item}";
+
+"GD4RTw" = "Retrieve the current state of an item";
+
+"GI0faP" = "State invalid: ${state} for ${item}";
+
+"Gjd9MH" = "Set ${item} to ${value}";
+
+"H26PEQ" = "The state of ${item} was set to ${state}";
+
+"HGbUGw" = "Value";
+
+"IpbXHW" = "Send ${action} to ${item}";
+
+"JUznKl" = "Sent the string ${value} to ${item}";
+
+"KXqi2s" = "Item";
+
+"M8mX5O" = "Item";
+
+"MCp4x6" = "Item";
+
+"MGYSky" = "Set ${item} to ${value}";
+
+"N5YsnB" = "Sorry can't find ${item}";
+
+"NehcMF" = "Item Name";
+
+"NjP70V" = "Sorry can't find ${item}";
+
+"Nqxuw0" = "State";
+
+"Nuhhxp" = "Item";
+
+"Oazi8d" = "Sorry can't find ${item}";
+
+"SMYYBh" = "Set ${item} to ${value}";
+
+"TJ1p5Y" = "Action";
+
+"TK8Rrn" = "Sent the color value of ${value} to ${item}";
+
+"UZYwuH" = "Set Dimmer or Roller Shutter Value";
+
+"V0QsN4" = "Invalid value ${value} for ${item} (0-100)";
+
+"VTeXc1" = "Item";
+
+"VmFkwo" = "Set ${item} to ${value} (HSB)";
+
+"XMNs7r" = "Set Switch State";
+
+"cBrxnz" = "Item";
+
+"dtRamI" = "Value";
+
+"eFb7vM" = "Set the state of a contact open or closed";
+
+"gBn7U6" = "Set String Control Value";
+
+"gQzHiG" = "Item";
+
+"hflKDd" = "Sorry can't find ${item}";
+
+"i8fP5e" = "Action";
+
+"iCUEet" = "Action invalid: ${action} for ${item}";
+
+"iRjffC" = "Invalid empty value for ${item}";
+
+"k0eXWc" = "Item";
+
+"llL4sP" = "Value";
+
+"lqlrGx" = "Switch name";
+
+"m5DFXq" = "State";
+
+"m9yAKr" = "Get ${item} State";
+
+"mAKsWc" = "Value";
+
+"mVz5mJ" = "Set ${item} to ${value}";
+
+"mpxNDZ" = "Item";
+
+"n7cmvU" = "State";
+
+"nzw2UT" = "Set Contact State Value";
+
+"o35DYr" = "Set Number Control Value";
+
+"oOjAU0" = "Set the state of a switch on or off";
+
+"oUolm5" = "Send ${action} to ${item}";
+
+"pg4Bec" = "Set the integer value of a dimmer or roller shutter";
+
+"pptfkD" = "Set the decimal value of a number control item";
+
+"ptGHON" = "Sorry can't find ${item}";
+
+"qu9K9v" = "Set the state of ${item} to ${state}";
+
+"raIAR6" = "Invalid value: ${value} for ${item} must be HSB (0-360,0-100,0-100)";
+
+"skEQxZ" = "Item";
+
+"tclrCp" = "Item";
+
+"ttiBzN" = "Set the state of ${item} to ${state}";
+
+"tuvmDw" = "Value";
+
+"uGsyyj" = "240,100,100";
+
+"wm0fqx" = "Sent the value of ${value} to ${item}";
