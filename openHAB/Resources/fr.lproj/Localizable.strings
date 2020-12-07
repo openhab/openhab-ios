@@ -5,7 +5,7 @@
 "search_items" = "Search openHAB items";
 "error" = "Error";
 "ssl_certificate_error" = "SSL Certificate Error";
-"empty_sitemap" = "openHAB returned empty sitemap list";
+"empty_sitemap" = "openHAB a renvoyé une liste vide de sitemaps";
 "connecting" = "Connecting";
 "ssl_certificate_warning" = "SSL Certificate Warning";
 "unable_to_decode_certificate" = "Unable to decode certificate: %@.";
@@ -55,7 +55,7 @@
 "app_version" = "App Version";
 "oh_version" = "openHAB Version";
 "oh_uuid" = "openHAB UUID";
-"oh_secret" = "openHAB Secret";
+"oh_secret" = "Phrase secrète openHAB";
 "notifications" = "Notifications";
 "settings" = "Settings";
 "privacy_policy" = "Privacy Policy";
