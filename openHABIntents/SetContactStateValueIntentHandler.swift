@@ -15,8 +15,13 @@ import OpenHABCore
 import os.log
 
 class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIntentHandling {
+    static let OPEN = NSLocalizedString("open", comment: "").capitalized // User language
+    static let CLOSED = NSLocalizedString("closed", comment: "").capitalized // User language
+    static let ACTION_NAMES = [OPEN, CLOSED]
+    static let ACTION_MAP = [OPEN: "OPEN", CLOSED: "CLOSED"] // these are the sent items - do not translate this text
+
     func provideStateOptionsCollection(for intent: OpenHABSetContactStateValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let actions = INObjectCollection<NSString>(items: ["OPEN", "CLOSED"])
+        let actions = INObjectCollection<NSString>(items: SetContactStateValueIntentHandler.ACTION_NAMES as [NSString])
 
         // Call the completion handler, passing the collection.
         completion(actions, nil)
@@ -46,12 +51,18 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
         os_log("SetContactStateValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem("empty"))
+            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
         guard let state = intent.state else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: "empty", item: itemName))
+            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: NSLocalizedString("empty", comment: "empty value"), item: itemName))
+            return
+        }
+
+        // Map user language to real action
+        guard let realState = SetContactStateValueIntentHandler.ACTION_MAP[state] else {
+            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: state, item: itemName))
             return
         }
 
@@ -60,7 +71,7 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
                 completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(itemName))
                 return
             }
-            OpenHABItemCache.instance.sendState(item, stateToSend: state)
+            OpenHABItemCache.instance.sendState(item, stateToSend: realState)
 
             completion(OpenHABSetContactStateValueIntentResponse.success(item: itemName, state: state))
         }

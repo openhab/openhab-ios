@@ -1,58 +1,58 @@
-"1GaCDV" = "Action";
+"1GaCDV" = "Aktion";
 
-"1Kf0qe" = "Set Color Control Value";
+"1Kf0qe" = "Farbwert festlegen";
 
-"1SeS3V" = "Set ${item} to ${value} (HSB)";
+"1SeS3V" = "${item} auf ${value} (HSB) setzen";
 
 "1USOx9" = "Item";
 
-"2q0TdY" = "Sorry can't find ${item}";
+"2q0TdY" = "${item} kann nicht gefunden werden";
 
-"3evvza" = "Value";
+"3evvza" = "Wert";
 
-"5B4e9l" = "Set the string of a string control item";
+"5B4e9l" = "Setze die Zeichenkette eines String-Kontrollelements";
 
-"5Uu4bK" = "Get Item State";
+"5Uu4bK" = "Erhalte Status von ${item}";
 
-"67qFTP" = "Invalid empty value for ${item}";
+"67qFTP" = "Ungültiger leerer Wert für ${item}";
 
-"68Y2Ya" = "Dimmer/Roller Name";
+"68Y2Ya" = "Dimmer/Rollladen Name";
 
-"6hUiXZ" = "The state of ${item} is ${state}";
+"6hUiXZ" = "Der Status von ${item} ist ${state}";
 
-"80K2Dt" = "Sorry can't find ${item}";
+"80K2Dt" = "${item} kann nicht gefunden werden";
 
-"8OBnvT" = "Invalid empty value for ${item}";
+"8OBnvT" = "Ungültiger leerer Wert für ${item}";
 
-"8dhboX" = "Value";
+"8dhboX" = "Wert";
 
 "B2I9b5" = "Item";
 
-"CZfT5a" = "Sent the number ${value} to ${item}";
+"CZfT5a" = "Der Wert ${value} wurde an ${item} gesendet";
 
-"Cdg015" = "Set ${item} to ${value}";
+"Cdg015" = "${item} auf ${value} setzen";
 
-"DxO2wk" = "Set the color of a color control item";
+"DxO2wk" = "Farbe eines Kontrollelements festlegen";
 
-"E291x3" = "Value";
+"E291x3" = "Wert";
 
-"EEj00Q" = "Set ${item} to ${value}";
+"EEj00Q" = "${item} auf ${value} setzen";
 
-"Fb0pUB" = "Sent the action of ${action} to switch ${item}";
+"Fb0pUB" = "Aktion ${action} gesendet um ${item} zu schalten";
 
-"GD4RTw" = "Retrieve the current state of an item";
+"GD4RTw" = "Aktuellen Status von ${item} abrufen";
 
-"GI0faP" = "State invalid: ${state} for ${item}";
+"GI0faP" = "Status ungültig: ${state} für ${item}";
 
-"Gjd9MH" = "Set ${item} to ${value}";
+"Gjd9MH" = "${item} auf ${value} setzen";
 
-"H26PEQ" = "The state of ${item} was set to ${state}";
+"H26PEQ" = "Der Status von ${item} wurde auf ${state} gesetzt";
 
-"HGbUGw" = "Value";
+"HGbUGw" = "Wert";
 
-"IpbXHW" = "Send ${action} to ${item}";
+"IpbXHW" = "${action} an ${item} senden";
 
-"JUznKl" = "Sent the string ${value} to ${item}";
+"JUznKl" = "Der String ${value} wurde an ${item} gesendet";
 
 "KXqi2s" = "Item";
 
@@ -60,98 +60,98 @@
 
 "MCp4x6" = "Item";
 
-"MGYSky" = "Set ${item} to ${value}";
+"MGYSky" = "${item} auf ${value} setzen";
 
-"N5YsnB" = "Sorry can't find ${item}";
+"N5YsnB" = "${item} kann nicht gefunden werden";
 
-"NehcMF" = "Item Name";
+"NehcMF" = "Objektname";
 
-"NjP70V" = "Sorry can't find ${item}";
+"NjP70V" = "${item} kann nicht gefunden werden";
 
-"Nqxuw0" = "State";
+"Nqxuw0" = "Status";
 
 "Nuhhxp" = "Item";
 
-"Oazi8d" = "Sorry can't find ${item}";
+"Oazi8d" = "${item} kann nicht gefunden werden";
 
-"SMYYBh" = "Set ${item} to ${value}";
+"SMYYBh" = "${item} auf ${value} setzen";
 
-"TJ1p5Y" = "Action";
+"TJ1p5Y" = "Aktion";
 
-"TK8Rrn" = "Sent the color value of ${value} to ${item}";
+"TK8Rrn" = "Der Farbwert ${value} wurde an ${item} gesendet";
 
-"UZYwuH" = "Set Dimmer or Roller Shutter Value";
+"UZYwuH" = "Wert eines Dimmers oder Rolladens festlegen";
 
-"V0QsN4" = "Invalid value ${value} for ${item} (0-100)";
+"V0QsN4" = "Ungültiger Wert ${value} für ${item} (0-100)";
 
 "VTeXc1" = "Item";
 
-"VmFkwo" = "Set ${item} to ${value} (HSB)";
+"VmFkwo" = "${item} auf ${value} (HSB) setzen";
 
-"XMNs7r" = "Set Switch State";
+"XMNs7r" = "Schalterzustand setzen";
 
 "cBrxnz" = "Item";
 
-"dtRamI" = "Value";
+"dtRamI" = "Wert";
 
-"eFb7vM" = "Set the state of a contact open or closed";
+"eFb7vM" = "Status eines Kontakts öffnen oder schließen";
 
-"gBn7U6" = "Set String Control Value";
+"gBn7U6" = "String Kontrollwert setzen";
 
 "gQzHiG" = "Item";
 
-"hflKDd" = "Sorry can't find ${item}";
+"hflKDd" = "${item} kann nicht gefunden werden";
 
-"i8fP5e" = "Action";
+"i8fP5e" = "Aktion";
 
-"iCUEet" = "Action invalid: ${action} for ${item}";
+"iCUEet" = "Aktion ungültig: ${action} für ${item}";
 
-"iRjffC" = "Invalid empty value for ${item}";
+"iRjffC" = "Ungültiger leerer Wert für ${item}";
 
 "k0eXWc" = "Item";
 
-"llL4sP" = "Value";
+"llL4sP" = "Wert";
 
-"lqlrGx" = "Switch name";
+"lqlrGx" = "Name wechseln";
 
-"m5DFXq" = "State";
+"m5DFXq" = "Status";
 
-"m9yAKr" = "Get ${item} State";
+"m9yAKr" = "Erhalte Status von ${item}";
 
-"mAKsWc" = "Value";
+"mAKsWc" = "Wert";
 
-"mVz5mJ" = "Set ${item} to ${value}";
+"mVz5mJ" = "${item} auf ${value} setzen";
 
 "mpxNDZ" = "Item";
 
-"n7cmvU" = "State";
+"n7cmvU" = "Status";
 
-"nzw2UT" = "Set Contact State Value";
+"nzw2UT" = "Wert des Kontaktstatus festlegen";
 
-"o35DYr" = "Set Number Control Value";
+"o35DYr" = "Wert eines numerischen Kontrollelements setzen";
 
-"oOjAU0" = "Set the state of a swith on or off";
+"oOjAU0" = "Setze den Status eines Schalters ein oder aus";
 
-"oUolm5" = "Send ${action} to ${item}";
+"oUolm5" = "${action} an ${item} senden";
 
-"pg4Bec" = "Set the integer value of a dimmer or roller shutter";
+"pg4Bec" = "Festlegen des Wertes eines Dimmers oder Rollladens";
 
-"pptfkD" = "Set the decimal value of a number control item";
+"pptfkD" = "Dezimalwert eines numerischen Kontrollelements setzen";
 
-"ptGHON" = "Sorry can't find ${item}";
+"ptGHON" = "${item} kann nicht gefunden werden";
 
-"qu9K9v" = "Set the state of ${item} to ${state}";
+"qu9K9v" = "Setze den Status von ${item} auf ${state}";
 
-"raIAR6" = "Invalid value: ${value} for ${item} must be HSB (0-360,0-100,0-100)";
+"raIAR6" = "Ungültiger Wert: ${value} für ${item} muss HSB sein (0-360,0-100,0-100)";
 
 "skEQxZ" = "Item";
 
 "tclrCp" = "Item";
 
-"ttiBzN" = "Set the state of ${item} to ${state}";
+"ttiBzN" = "Setze den Status von ${item} auf ${state}";
 
-"tuvmDw" = "Value";
+"tuvmDw" = "Wert";
 
 "uGsyyj" = "240,100,100";
 
-"wm0fqx" = "Sent the value of ${value} to ${item}";
+"wm0fqx" = "Der Farbwert ${value} wurde an ${item} gesendet";

@@ -39,7 +39,7 @@ class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling
         os_log("SetNumberValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetNumberValueIntentResponse.failureInvalidItem("empty"))
+            completion(OpenHABSetNumberValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
