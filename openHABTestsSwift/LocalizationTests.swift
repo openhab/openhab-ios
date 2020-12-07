@@ -130,6 +130,16 @@ class LocalizationTests: XCTestCase {
         for language in LocalizationTests.localizations {
             print("Testing language: '\(language)'.")
 
+            guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: language),
+                  let languageTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
+                  !languageTuples.isEmpty
+            else {
+                XCTFail("Failed to load Intents.strings for language '\(language)'.")
+                continue
+            }
+
+            XCTAssertEqual(placeholderTuples.count, languageTuples.count, "Number of strings with placeholders in language '\(language)' doesn't match. Translations to check: \(languageTuples.filter { !placeholderTuples.keys.contains($0.key) }).")
+
             for placeholderTuple in placeholderTuples {
                 let placeholderString = placeholderTuple.value
                 guard let translation = placeholderTuple.key.localized(for: language, with: "Intents") else {
