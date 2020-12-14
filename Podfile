@@ -1,7 +1,7 @@
-install! 'cocoapods', :generate_multiple_pod_projects => true, :incremental_installation => true
+source 'https://github.com/CocoaPods/Specs.git'
 
-#platform :ios, '11.0'
-#
+install! 'cocoapods', :generate_multiple_pod_projects => true, :incremental_installation => true
+inhibit_all_warnings!
 use_frameworks!
 
 def shared_pods
@@ -14,18 +14,14 @@ target 'openHAB' do
     shared_pods
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
-    pod 'SVGKit'
-
-    pod 'Fabric', '~> 1.7'
-    pod 'Crashlytics', '~> 3.9'
-    pod 'Firebase/Analytics'
-
+    pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
+    pod 'Firebase/Crashlytics'
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
-
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
     pod 'Kingfisher', '~> 5.0'
+    pod 'AlamofireNetworkActivityIndicator', '~> 2.4'
 
     target 'openHABTestsSwift' do
         inherit! :search_paths
@@ -55,7 +51,7 @@ target 'openHABWatch Extension' do
     inherit! :search_paths
     shared_pods
     pod 'Kingfisher/SwiftUI', '~> 5.0'
-    pod 'DeviceKit', '~> 3.0'
+    pod 'DeviceKit', '~> 4.0'
 end
 
 # Note: `pod install --clean-install` must be used if the post_install hook is changed
@@ -75,5 +71,31 @@ post_install do |installer|
                 config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'org.cocoapods.${PRODUCT_NAME:rfc1034identifier}.${PLATFORM_NAME}'
             end
         end
+    end
+
+    # workaround for Xcode 12 warnings
+    installer.generated_projects.each do |project|
+        project.root_object.attributes['LastUpgradeCheck'] = 1220
+        project.build_configurations.each do |config|
+            if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8.0' || config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8'
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+            end
+        end
+
+        user_data_dir = Xcodeproj::XCScheme.user_data_dir(project.path)
+        project.targets.each do |target|
+            target.build_configurations.each do |config|
+                config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+                scheme_filename = "#{user_data_dir}/#{target}.xcscheme"
+                `sed -i '' 's/LastUpgradeVersion = \"1100\"/LastUpgradeVersion = \"1220\"/' "#{scheme_filename}"`
+            end
+        end
+    end
+end
+
+post_integrate do |installer|
+    if defined?(installer.pods_project.path)
+        pbxproj_file = "#{installer.pods_project.path}/project.pbxproj"
+        `sed -i '' 's/LastUpgradeCheck = 1100/LastUpgradeCheck = 1220/' "#{pbxproj_file}"`
     end
 end

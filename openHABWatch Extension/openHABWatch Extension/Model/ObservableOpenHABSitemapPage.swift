@@ -102,18 +102,20 @@ extension ObservableOpenHABSitemapPage {
 
 extension ObservableOpenHABSitemapPage.CodingData {
     var openHABSitemapPage: ObservableOpenHABSitemapPage {
-        let mappedWidgets = widgets?.map { $0.openHABWidget } ?? []
+        let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
         return ObservableOpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }
 
 extension ObservableOpenHABSitemapPage {
     func filter(_ isIncluded: (ObservableOpenHABWidget) throws -> Bool) rethrows -> ObservableOpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = ObservableOpenHABSitemapPage(pageId: pageId,
-                                                                      title: title,
-                                                                      link: link,
-                                                                      leaf: leaf,
-                                                                      expandedWidgets: try widgets.filter(isIncluded))
+        let filteredOpenHABSitemapPage = ObservableOpenHABSitemapPage(
+            pageId: pageId,
+            title: title,
+            link: link,
+            leaf: leaf,
+            expandedWidgets: try widgets.filter(isIncluded)
+        )
         return filteredOpenHABSitemapPage
     }
 }

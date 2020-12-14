@@ -1,22 +1,24 @@
 # file options
---swiftversion 5.1
+--swiftversion 5.3
 --exclude Pods
 --symlinks ignore
 
 # disabled rules
 --disable specifiers # see https://github.com/nicklockwood/SwiftFormat/issues/364
 --disable redundantParens
+--disable wrapMultilineStatementBraces
 
 # opt-in rules
 --enable isEmpty
+--enable typeSugar
 
 # format options
 --allman false
 --binarygrouping none
---closingparen same-line
+--closingparen balanced
 --commas inline
 --conflictmarkers reject
---decimalgrouping none
+--decimalgrouping 3,6
 --elseposition same-line
 --empty void
 --exponentcase lowercase
@@ -25,7 +27,6 @@
 --fragment false
 --header ignore
 --hexgrouping none
---hexliteralcase lowercase
 --ifdef no-indent
 --importgrouping alphabetized
 --indent 4
@@ -41,7 +42,8 @@
 --stripunusedargs closure-only
 --trailingclosures 
 --trimwhitespace always
---wraparguments after-first
---wrapcollections after-first
+--wraparguments before-first
+--wrapcollections before-first
+--wrapparameters after-first
 --xcodeindentation disabled
 --header "// Copyright (c) 2010-{year} Contributors to the openHAB project\n//\n// See the NOTICE file(s) distributed with this work for additional\n// information.\n//\n// This program and the accompanying materials are made available under the\n// terms of the Eclipse Public License 2.0 which is available at\n// http://www.eclipse.org/legal/epl-2.0\n//\n// SPDX-License-Identifier: EPL-2.0"

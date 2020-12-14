@@ -54,7 +54,6 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     }
 
     func loadNotifications() {
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
         NetworkConnection.notification(urlString: Preferences.remoteUrl) { response in
             switch response.result {
             case .success:
@@ -72,10 +71,8 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
 
                     self.refreshControl?.endRefreshing()
                     self.tableView.reloadData()
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
             case let .failure(error):
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
             }
@@ -111,13 +108,17 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
             cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
         }
 
-        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl,
-                                       version: appData!.openHABVersion,
-                                       icon: notification.icon,
-                                       value: "",
-                                       iconType: .png).url {
-            cell?.imageView?.kf.setImage(with: iconUrl,
-                                         placeholder: UIImage(named: "openHABIcon"))
+        if let iconUrl = Endpoint.icon(
+            rootUrl: appData!.openHABRootUrl,
+            version: appData!.openHABVersion,
+            icon: notification.icon,
+            state: "",
+            iconType: .png
+        ).url {
+            cell?.imageView?.kf.setImage(
+                with: iconUrl,
+                placeholder: UIImage(named: "openHABIcon")
+            )
         }
 
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {

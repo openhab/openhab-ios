@@ -13,28 +13,6 @@ import Combine
 import Foundation
 import OpenHABCoreWatch
 
-@propertyWrapper
-struct UserDefault<T> {
-    let key: String
-    let defaultValue: T
-    // https://www.swiftbysundell.com/articles/property-wrappers-in-swift/
-    var storage: UserDefaults = .standard
-
-    public var wrappedValue: T {
-        get {
-            storage.object(forKey: key) as? T ?? defaultValue
-        }
-        set {
-            storage.set(newValue, forKey: key)
-        }
-    }
-
-    init(_ key: String, defaultValue: T) {
-        self.key = key
-        self.defaultValue = defaultValue
-    }
-}
-
 final class ObservableOpenHABDataObject: DataObject, ObservableObject {
     static let shared = ObservableOpenHABDataObject()
 
@@ -43,49 +21,49 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
     let objectWillChange = PassthroughSubject<Void, Never>()
     let objectRefreshed = PassthroughSubject<Void, Never>()
 
-    @UserDefault("rootUrl", defaultValue: "")
+    @UserDefaultsBacked(key: "rootUrl", defaultValue: "")
     var openHABRootUrl: String {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @UserDefault("localUrl", defaultValue: "")
+    @UserDefaultsBacked(key: "localUrl", defaultValue: "")
     var localUrl: String {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @UserDefault("remoteUrl", defaultValue: "")
+    @UserDefaultsBacked(key: "remoteUrl", defaultValue: "")
     var remoteUrl: String {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @UserDefault("sitemapName", defaultValue: "")
+    @UserDefaultsBacked(key: "sitemapName", defaultValue: "")
     var sitemapName: String {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @UserDefault("username", defaultValue: "")
+    @UserDefaultsBacked(key: "username", defaultValue: "")
     var openHABUsername: String {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @UserDefault("password", defaultValue: "")
+    @UserDefaultsBacked(key: "password", defaultValue: "")
     var openHABPassword: String {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @UserDefault("ignoreSSL", defaultValue: true)
+    @UserDefaultsBacked(key: "ignoreSSL", defaultValue: true)
     var ignoreSSL: Bool {
         willSet {
             objectWillChange.send()
@@ -93,14 +71,14 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
         }
     }
 
-    @UserDefault("alwaysSendCreds", defaultValue: false)
+    @UserDefaultsBacked(key: "alwaysSendCreds", defaultValue: false)
     var openHABAlwaysSendCreds: Bool {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @UserDefault("haveReceivedAppContext", defaultValue: false)
+    @UserDefaultsBacked(key: "haveReceivedAppContext", defaultValue: false)
     var haveReceivedAppContext: Bool {
         didSet {
             objectRefreshed.send()

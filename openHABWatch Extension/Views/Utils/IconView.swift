@@ -14,22 +14,25 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct IconView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var iconURL: URL? {
-        Endpoint.icon(rootUrl: settings.openHABRootUrl,
-                      version: 2,
-                      icon: widget.icon,
-                      value: widget.item?.state ?? "",
-                      iconType: .png).url
+        Endpoint.icon(
+            rootUrl: settings.openHABRootUrl,
+            version: 2,
+            icon: widget.icon,
+            state: widget.item?.state ?? "",
+            iconType: .png
+        ).url
     }
 
     var body: some View {
-        let image = iconURL != nil ? KFImage(source: .network(ImageResource(downloadURL: iconURL!,
-                                                                            cacheKey: iconURL!.path + (iconURL!.query ?? "")))) : KFImage(iconURL)
+        let image = iconURL != nil ? KFImage(source: .network(ImageResource(
+            downloadURL: iconURL!,
+            cacheKey: iconURL!.path + (iconURL!.query ?? "")
+        ))) : KFImage(iconURL)
         return image
             .onSuccess { retrieveImageResult in
                 os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")

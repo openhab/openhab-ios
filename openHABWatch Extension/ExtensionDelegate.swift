@@ -129,7 +129,7 @@ extension ExtensionDelegate: ServerCertificateManagerDelegate {
         }
         DispatchQueue.main.async {
             self.viewModel?.showCertificateAlert = true
-            self.viewModel?.certificateErrorDescription = "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") is invalid. Do you want to proceed?"
+            self.viewModel?.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
         }
     }
 
@@ -141,7 +141,7 @@ extension ExtensionDelegate: ServerCertificateManagerDelegate {
         }
         DispatchQueue.main.async {
             self.viewModel?.showCertificateAlert = true
-            self.viewModel?.certificateErrorDescription = "SSL Certificate presented by \(certificateSummary ?? "") for \(domain ?? "") doesn't match the record. Do you want to proceed?"
+            self.viewModel?.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
         }
     }
 

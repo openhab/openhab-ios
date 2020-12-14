@@ -19,27 +19,47 @@ public class OpenHABStateDescription {
 
     public var options: [OpenHABOptions] = []
 
-    init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?) {
+    public var numberPattern: String?
+
+    init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?, pattern: String?) {
         self.minimum = minimum ?? 0.0
         self.maximum = maximum ?? 100.0
         self.step = step ?? 1.0
         self.readOnly = readOnly ?? false
         self.options = options ?? []
+
+        // Remove transformation instructions (e.g. for 'MAP(foo.map):%s' keep only '%s')
+
+        let regexPattern = #"^[A-Z]+(\(.*\))?:(.*)$"#
+        let regex = try? NSRegularExpression(pattern: regexPattern, options: .caseInsensitive)
+        if let pattern = pattern {
+            let nsrange = NSRange(pattern.startIndex ..< pattern.endIndex, in: pattern)
+            if let match = regex?.firstMatch(in: pattern, options: [], range: nsrange) {
+                if let range = Range(match.range(at: 2), in: pattern) {
+                    numberPattern = String(pattern[range])
+                }
+            } else {
+                numberPattern = pattern
+            }
+        } else {
+            numberPattern = nil
+        }
     }
 }
 
-extension OpenHABStateDescription {
-    public struct CodingData: Decodable {
+public extension OpenHABStateDescription {
+    struct CodingData: Decodable {
         let minimum: Double?
         let maximum: Double?
         let step: Double?
         let readOnly: Bool?
         let options: [OpenHABOptions]?
+        let pattern: String?
     }
 }
 
 extension OpenHABStateDescription.CodingData {
     var openHABStateDescription: OpenHABStateDescription {
-        OpenHABStateDescription(minimum: minimum, maximum: maximum, step: step, readOnly: readOnly, options: options)
+        OpenHABStateDescription(minimum: minimum, maximum: maximum, step: step, readOnly: readOnly, options: options, pattern: pattern)
     }
 }

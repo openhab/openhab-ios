@@ -28,9 +28,11 @@ class OpenHabService {
         guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
         let request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
         // let session = URLSession.shared
-        let session = URLSession(configuration: URLSessionConfiguration.ephemeral,
-                                 delegate: CertificatePinningURLSessionDelegate(),
-                                 delegateQueue: nil)
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: CertificatePinningURLSessionDelegate(),
+            delegateQueue: nil
+        )
         let task = session.dataTask(with: request) { (data, _, error) -> Void in
 
             guard error == nil else {
@@ -62,9 +64,11 @@ class OpenHabService {
         request.httpMethod = "POST"
         let postString = command
         request.httpBody = postString.data(using: .utf8)
-        let session = URLSession(configuration: URLSessionConfiguration.ephemeral,
-                                 delegate: CertificatePinningURLSessionDelegate(),
-                                 delegateQueue: nil)
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: CertificatePinningURLSessionDelegate(),
+            delegateQueue: nil
+        )
         let task = session.dataTask(with: request) { data, response, error in
             DispatchQueue.main.sync {
                 resultHandler(data, response, error)

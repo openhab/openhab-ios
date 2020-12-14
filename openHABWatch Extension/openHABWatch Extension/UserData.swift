@@ -66,9 +66,24 @@ final class UserData: ObservableObject {
     }
 
     init(url: URL?, refresh: Bool = true) {
-        loadPage(url: url,
-                 longPolling: true,
-                 refresh: refresh)
+        loadPage(
+            url: url,
+            longPolling: true,
+            refresh: refresh
+        )
+    }
+
+    init(url: URL?) {
+        tracker = OpenHABWatchTracker()
+        tracker?.delegate = self
+        tracker?.trackedUrl(url)
+
+//        dataObjectCancellable = ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
+//            // New settings updates from the phone app to start a reconnect
+//            os_log("Settings update received, starting reconnect", log: .remoteAccess, type: .info)
+//            self.refreshUrl()
+//        }
+//        refreshUrl()
     }
 
     init(sitemapName: String = "watch") {
@@ -82,14 +97,6 @@ final class UserData: ObservableObject {
             self.refreshUrl()
         }
         refreshUrl()
-    }
-
-    func loadPage(urlString: String,
-                  longPolling: Bool,
-                  refresh: Bool,
-                  sitemapName: String = "watch") {
-        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: sitemapName).url
-        loadPage(url: url, longPolling: longPolling, refresh: refresh)
     }
 
     func request(_ endpoint: Endpoint) -> OpenHABCoreWatch.Future<Data> {
@@ -109,9 +116,11 @@ final class UserData: ObservableObject {
             currentPageOperation = nil
         }
 
-        currentPageOperation = NetworkConnection.page(url: url,
-                                                      longPolling: true,
-                                                      openHABVersion: 2) { [weak self] response in
+        currentPageOperation = NetworkConnection.page(
+            url: url,
+            longPolling: true,
+            openHABVersion: 2
+        ) { [weak self] response in
             guard self != nil else { return }
 
             switch response.result {
@@ -129,20 +138,6 @@ final class UserData: ObservableObject {
         return promise
     }
 
-    func loadPage(_ endpoint: Endpoint) {
-        request(endpoint)
-            .decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-            .trafo()
-            .observe { result in
-                switch result {
-                case let .failure(error):
-                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-                case let .success(page):
-                    self.openHABSitemapPage = page
-                }
-            }
-    }
-
     func loadPage(url: URL?,
                   longPolling: Bool,
                   refresh: Bool) {
@@ -151,9 +146,11 @@ final class UserData: ObservableObject {
             currentPageOperation = nil
         }
 
-        currentPageOperation = NetworkConnection.page(url: url,
-                                                      longPolling: longPolling,
-                                                      openHABVersion: 2) { [weak self] response in
+        currentPageOperation = NetworkConnection.page(
+            url: url,
+            longPolling: longPolling,
+            openHABVersion: 2
+        ) { [weak self] response in
             guard let self = self else { return }
 
             switch response.result {
@@ -182,9 +179,11 @@ final class UserData: ObservableObject {
                 self.widgets = self.openHABSitemapPage?.widgets ?? []
 
                 self.showAlert = self.widgets.isEmpty ? true : false
-                if refresh { self.loadPage(url: url,
-                                           longPolling: true,
-                                           refresh: true) }
+                if refresh { self.loadPage(
+                    url: url,
+                    longPolling: true,
+                    refresh: true
+                ) }
 
             case let .failure(error):
                 os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
@@ -213,6 +212,20 @@ final class UserData: ObservableObject {
             tracker?.selectUrl()
         }
     }
+
+    func loadPage(_ endpoint: Endpoint) {
+        request(endpoint)
+            .decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+            .trafo()
+            .observe { result in
+                switch result {
+                case let .failure(error):
+                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+                case let .success(page):
+                    self.openHABSitemapPage = page
+                }
+            }
+    }
 }
 
 extension UserData: OpenHABWatchTrackerDelegate {
@@ -222,16 +235,15 @@ extension UserData: OpenHABWatchTrackerDelegate {
 
         if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
             AppMessageService.singleton.requestApplicationContext()
-            errorDescription = "Settings not yet received from phone."
+            errorDescription = NSLocalizedString("settings_not_received", comment: "")
             showAlert = true
             return
         }
 
         ObservableOpenHABDataObject.shared.openHABRootUrl = urlString
-        loadPage(urlString: urlString,
-                 longPolling: false,
-                 refresh: true,
-                 sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
+
+        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: ObservableOpenHABDataObject.shared.sitemapName).url
+        loadPage(url: url, longPolling: false, refresh: true)
     }
 
     func openHABTrackingProgress(_ message: String?) {

@@ -23,8 +23,8 @@ public class OpenHABUiTile: Decodable {
     }
 }
 
-extension OpenHABUiTile {
-    public struct CodingData: Decodable {
+public extension OpenHABUiTile {
+    struct CodingData: Decodable {
         public let name: String
         public let url: String
         public let imageUrl: String

@@ -18,6 +18,13 @@ opt_in_rules:
   - private_action
   - prefer_self_type_over_type_of_self
   - file_name
+  - computed_accessors_order
+  - empty_enum_arguments
+  - prefer_zero_over_explicit_init
+  - tuple_pattern
+  - return_value_from_void_function
+  - void_function_in_ternary
+  - only_after_dot
 
 disabled_rules: # rule identifiers to exclude from running
   - force_cast
@@ -90,3 +97,6 @@ custom_rules:
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"
+
+opening_brace:
+  allow_multiline_func: true

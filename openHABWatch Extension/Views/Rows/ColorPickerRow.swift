@@ -12,7 +12,6 @@
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct ColorPickerRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
@@ -28,8 +27,10 @@ struct ColorPickerRow: View {
                 }
                 HStack {
                     Spacer()
-                    EncircledIconWithAction(systemName: "chevron.down.circle.fill",
-                                            action: self.downButtonPressed)
+                    EncircledIconWithAction(
+                        systemName: "chevron.down.circle.fill",
+                        action: self.downButtonPressed
+                    )
 
                     Spacer()
 
@@ -41,8 +42,10 @@ struct ColorPickerRow: View {
 
                     Spacer()
 
-                    EncircledIconWithAction(systemName: "chevron.up.circle.fill",
-                                            action: self.upButtonPressed)
+                    EncircledIconWithAction(
+                        systemName: "chevron.up.circle.fill",
+                        action: self.upButtonPressed
+                    )
                     Spacer()
                 }
             }

@@ -11,8 +11,8 @@
 
 import Foundation
 
-extension Equatable {
-    public func isAny(of candidates: Self...) -> Bool {
+public extension Equatable {
+    func isAny(of candidates: Self...) -> Bool {
         candidates.contains(self)
     }
 }

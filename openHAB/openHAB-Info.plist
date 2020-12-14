@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>firebase_crashlytics_collection_enabled</key>
-	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -111,6 +109,19 @@
 				</array>
 			</dict>
 		</dict>
+	</array>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<false/>
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
+	<key>firebase_performance_collection_enabled</key>
+	<false/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>openHAB needs access to your local network to connect with the openHAB server.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_openhab-server-ssl._tcp</string>
 	</array>
 </dict>
 </plist>

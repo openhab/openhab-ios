@@ -40,6 +40,7 @@ class OpenHABWatchTracker: NSObject {
     }
 
     func start() {
+        #if !os(watchOS)
         oldReachabilityStatus = pathMonitor.currentPath
         pathMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
@@ -47,7 +48,7 @@ class OpenHABWatchTracker: NSObject {
             let nStatus = path
             if nStatus != self.oldReachabilityStatus {
                 if let oldReachabilityStatus = self.oldReachabilityStatus {
-                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
+                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, oldReachabilityStatus.debugDescription, nStatus.debugDescription)
                 }
                 self.oldReachabilityStatus = nStatus
                 (self.delegate as? OpenHABWatchTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
@@ -58,11 +59,40 @@ class OpenHABWatchTracker: NSObject {
             }
         }
         pathMonitor.start(queue: backgroundQueue)
-
+        #endif
         selectUrl()
     }
 
+    func start(URL: URL?) {
+        trackedUrl(URL)
+    }
+
     func selectUrl() {
+        #if os(watchOS)
+        if ObservableOpenHABDataObject.shared.localUrl.isEmpty {
+            os_log("Starting discovery", log: .default, type: .debug)
+            startDiscovery()
+        } else {
+            if let connectivityTask = connectivityTask {
+                connectivityTask.cancel()
+            }
+            let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+            connectivityTask = NetworkConnection.shared.manager.request(request)
+                .validate(statusCode: 200 ..< 300)
+                .responseData { response in
+                    switch response.result {
+                    case .success:
+                        os_log("Tracking local URL", log: .default, type: .debug)
+                        self.trackedLocalUrl()
+                    case .failure:
+                        os_log("Tracking remote URL", log: .default, type: .debug)
+                        self.trackedRemoteUrl()
+                    }
+                }
+            connectivityTask?.resume()
+        }
+        #else
+
         // Check if any network is available
         if isNetworkConnected() {
             // Check if network is WiFi. If not, go for remote URL
@@ -95,38 +125,39 @@ class OpenHABWatchTracker: NSObject {
             }
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
-            errorDetail[NSLocalizedDescriptionKey] = "Network is not available."
+            errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("network_not_available", comment: "")
             let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
             delegate?.openHABTrackingError(trackingError)
         }
+        #endif
     }
 
     func trackedLocalUrl() {
-        delegate?.openHABTrackingProgress("Connecting to local URL")
+        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_local", comment: ""))
         let openHABUrl = normalizeUrl(ObservableOpenHABDataObject.shared.localUrl)
         trackedUrl(URL(string: openHABUrl!))
     }
 
     func trackedRemoteUrl() {
         let openHABUrl = normalizeUrl(ObservableOpenHABDataObject.shared.remoteUrl)
-        if (openHABUrl?.count ?? 0) > 0 {
+        if !(openHABUrl ?? "").isEmpty {
             // delegate?.openHABTrackingProgress("Connecting to remote URL")
             trackedUrl(URL(string: openHABUrl!))
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
-            errorDetail[NSLocalizedDescriptionKey] = "Remote URL is not configured."
+            errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("remote_url_not_configured", comment: "")
             let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String: Any])
             delegate?.openHABTrackingError(trackingError)
         }
     }
 
     func trackedDiscoveryUrl(_ discoveryUrl: URL?) {
-        delegate?.openHABTrackingProgress("Connecting to discovered URL")
+        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_discovered", comment: ""))
         trackedUrl(discoveryUrl)
     }
 
     func trackedDemoMode() {
-        delegate?.openHABTrackingProgress("Running in demo mode. Check settings to disable demo mode.")
+        delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
         trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
     }
 
@@ -137,7 +168,7 @@ class OpenHABWatchTracker: NSObject {
     func startDiscovery() {
         os_log("OpenHABTracking starting Bonjour discovery", log: .default, type: .info)
 
-        delegate?.openHABTrackingProgress("Discovering openHAB")
+        delegate?.openHABTrackingProgress(NSLocalizedString("discovering_oh", comment: ""))
         let parameters = NWParameters()
         netBrowser = NWBrowser(for: .bonjour(type: "_openhab-server-ssl._tcp.", domain: "local."), using: parameters)
         netBrowser?.stateUpdateHandler = { state in
@@ -221,10 +252,12 @@ class OpenHABWatchTracker: NSObject {
         let data = dataIn! as NSData
         var sockAddr: in_addr = data.castToCPointer()
         var ipAddressString: [CChar] = Array(repeating: 0, count: Int(INET6_ADDRSTRLEN))
-        inet_ntop(addressFamily,
-                  &sockAddr,
-                  &ipAddressString,
-                  socklen_t(INET_ADDRSTRLEN))
+        inet_ntop(
+            addressFamily,
+            &sockAddr,
+            &ipAddressString,
+            socklen_t(INET_ADDRSTRLEN)
+        )
 
         return String(cString: ipAddressString)
     }
@@ -249,14 +282,16 @@ class OpenHABWatchTracker: NSObject {
     func isNetworkWiFi() -> Bool {
         (pathMonitor.currentPath.status == .satisfied && !pathMonitor.currentPath.isExpensive)
     }
+}
 
-    func string(from path: NWPath) -> String? {
-        switch path.status {
+extension NWPath: CustomStringConvertible {
+    public var description: String {
+        switch status {
         case .unsatisfied, .requiresConnection:
             return "unreachable"
         case .satisfied:
             var str = "reachable:"
-            for interface in path.availableInterfaces {
+            for interface in availableInterfaces {
                 switch interface.type {
                 case .wifi:
                     str += " wifi"

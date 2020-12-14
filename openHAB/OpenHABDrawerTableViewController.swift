@@ -27,8 +27,8 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
         }
         if let data = response,
-            let doc = try? XMLDocument(data: data),
-            let name = doc.root?.tag {
+           let doc = try? XMLDocument(data: data),
+           let name = doc.root?.tag {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
             if name == "sitemaps" {
                 for element in doc.root?.children(tag: "sitemap") ?? [] {
@@ -108,7 +108,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case .success:
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
                 self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
@@ -125,7 +124,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 }
                 self.tableView.reloadData()
             case let .failure(error):
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
                 if self.drawerTableType == .withStandardMenuEntries {
@@ -226,12 +224,23 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell.customImageView.image = UIImage(named: "openHABIcon")
         case 1:
             let imageView = UIImageView(frame: cell.customImageView.bounds)
+            // <<<<<<< HEAD
             let tile = uiTiles[indexPath.row]
             cell.customTextLabel?.text = tile.name
             if tile.imageUrl != "" {
                 print("Loading   \(openHABRootUrl) \(tile.imageUrl)")
                 if let iconURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: tile.imageUrl).url {
                     imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
+                    //=======
+//
+//            cell.customTextLabel?.text = sitemaps[indexPath.row].label
+//            if !sitemaps[indexPath.row].icon.isEmpty {
+//                if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url {
+//                    imageView.kf.setImage(
+//                        with: iconURL,
+//                        placeholder: UIImage(named: "openHABIcon")
+//                    )
+                    // >>>>>>> develop
                 }
             } else {
                 imageView.image = UIImage(named: "openHABIcon")
@@ -256,16 +265,14 @@ class OpenHABDrawerTableViewController: UITableViewController {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row]
 
-            cell.customTextLabel?.text = drawerItem.label
+            cell.customTextLabel?.text = drawerItem.localizedString
 
             if #available(iOS 13, *) {
-                switch drawerItem.tag {
-                case "notifications":
+                switch drawerItem {
+                case .notifications:
                     cell.customImageView.image = UIImage(systemName: "bell")
-                case "settings":
+                case .settings:
                     cell.customImageView.image = UIImage(systemName: "gear")
-                default:
-                    break
                 }
             } else {
                 let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
@@ -274,13 +281,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 buttonIcon.strokeColor = .black
                 buttonIcon.lineWidth = 1
 
-                switch drawerItem.tag {
-                case "notifications":
+                switch drawerItem {
+                case .notifications:
                     buttonIcon.style = .custom(DynamicButtonStyleBell.self)
-                case "settings":
+                case .settings:
                     buttonIcon.style = .custom(DynamicButtonStyleGear.self)
-                default:
-                    break
                 }
                 cell.customImageView.addSubview(buttonIcon)
             }
@@ -332,11 +337,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
             // Then menu items
             let drawerItem = drawerItems[indexPath.row]
 
-            if drawerItem.tag == "settings" {
+            switch drawerItem {
+            case .settings:
                 dismiss(animated: true) {
                     self.delegate?.modalDismissed(to: .settings)
                 }
-            } else if drawerItem.tag == "notifications" {
+            case .notifications:
                 dismiss(animated: true) {
                     self.delegate?.modalDismissed(to: .notifications)
                 }
@@ -350,16 +356,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
         // check if we are using my.openHAB, add notifications menu item then
         // Actually this should better test whether the host of the remoteUrl is on openhab.org
         if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
-            let notificationsItem = OpenHABDrawerItem()
-            notificationsItem.label = "Notifications"
-            notificationsItem.tag = "notifications"
-            drawerItems.append(notificationsItem)
+            drawerItems.append(.notifications)
         }
         // Settings always go last
-        let settingsItem = OpenHABDrawerItem()
-        settingsItem.label = "Settings"
-        settingsItem.tag = "settings"
-        drawerItems.append(settingsItem)
+        drawerItems.append(.settings)
     }
 
     func loadSettings() {

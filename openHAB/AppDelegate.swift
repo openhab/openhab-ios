@@ -10,7 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
-import Firebase
+import FirebaseCore
+import FirebaseCrashlytics
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -80,13 +81,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func setupCrashReporting() {
-        guard Preferences.sendCrashReports else {
-            // The user has not opted-in to crash reporting.
-            return
-        }
-
         // init Firebase crash reporting
         FirebaseApp.configure()
+        FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
     }
 
     func activateWatchConnectivity() {
@@ -148,9 +146,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
-        let dataDict = ["deviceToken": deviceTokenString,
-                        "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
-                        "deviceName": UIDevice.current.name]
+        let dataDict = [
+            "deviceToken": deviceTokenString,
+            "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
+            "deviceName": UIDevice.current.name
+        ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
 
@@ -187,19 +187,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
             os_log("%{PUBLIC}@", log: .notifications, type: .info, aps)
 
-            let message = (aps["alert"] as? [String: String])?["body"] ?? "Message could not be decoded"
+            let message = (aps["alert"] as? [String: String])?["body"] ?? NSLocalizedString("message_not_decoded", comment: "")
 
             var config = SwiftMessages.Config()
             config.duration = .seconds(seconds: 5)
             config.presentationStyle = .bottom
 
             SwiftMessages.show(config: config) {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 let view = MessageView.viewFromNib(layout: .cardView)
                 // ... configure the view
                 view.configureTheme(.info)
-                view.configureContent(title: "Notification", body: message)
-                view.button?.setTitle("Dismiss", for: .normal)
+                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
+                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                 view.buttonTapHandler = { _ in SwiftMessages.hide() }
                 return view
             }

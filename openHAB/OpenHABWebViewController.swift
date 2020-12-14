@@ -58,7 +58,6 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
-    // Equivalent of shouldStartLoadWithRequest:
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         var action: WKNavigationActionPolicy?
 
@@ -75,12 +74,19 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         }
     }
 
-    // Equivalent of webViewDidStartLoad:
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if let response = navigationResponse.response as? HTTPURLResponse {
+            dump(response.allHeaderFields)
+            print("navigationResponse: \(String(response.statusCode))")
+        }
+        decisionHandler(.allow)
+    }
+
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         print("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
     }
 
-    // Equivalent of didFailLoadWithError:
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         let nserror = error as NSError
         if nserror.code != NSURLErrorCancelled {
@@ -88,34 +94,39 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         }
     }
 
-    // Equivalent of webViewDidFinishLoad:
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("didFinish - webView.url: \(String(describing: webView.url?.description))")
     }
 
+    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
+                 completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let credential = URLCredential(
+            user: Preferences.username,
+            password: Preferences.password,
+            persistence: .forSession
+        )
+        completionHandler(.useCredential, credential)
+    }
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-//        if let data = message.body as? [String : String], let name = data["name"], let email = data["email"] {
-//            showUser(email: email, name: name)
-//        }
         print("WKScriptMessage \(message.name) \(message.body)")
     }
 
     func loadWebView(force: Bool = false) {
-        let urlString = Preferences.localUrl
-//        let urlString = "http://192.168.90.167:8080"
+        let urlString = Preferences.remoteUrl
         let authStr = "\(Preferences.username):\(Preferences.password)"
         let newTarget = "\(urlString):\(authStr)"
         if !force, currentTarget == newTarget {
             return
         }
         currentTarget = newTarget
-        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
-            return
-        }
-        let base64LoginString = loginData.base64EncodedString()
+//        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
+//            return
+//        }
+        //let base64LoginString = loginData.base64EncodedString()
         if let url = URL(string: urlString) {
-            var request = URLRequest(url: url)
-            request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+            let  request = URLRequest(url: url)
+            // request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
             webView?.load(request)
         }
     }

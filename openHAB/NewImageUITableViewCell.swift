@@ -40,9 +40,9 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         guard let widget = widget else { return .empty }
 
         switch widget.type {
-        case "Chart":
+        case .chart:
             return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: chartStyle).url)
-        case "Image":
+        case .image:
             if let item = widget.item {
                 return widgetPayload(fromItem: item)
             }
@@ -52,6 +52,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         }
     }
 
+    @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -67,10 +68,12 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
 
-        NSLayoutConstraint.activate([mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
-                                     mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
-                                     mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
-                                     mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            mainImageView.leftAnchor.constraint(equalTo: positionGuide.leftAnchor),
+            mainImageView.rightAnchor.constraint(equalTo: positionGuide.rightAnchor),
+            mainImageView.topAnchor.constraint(equalTo: positionGuide.topAnchor),
+            mainImageView.bottomAnchor.constraint(equalTo: positionGuide.bottomAnchor)
+        ])
 
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
     }
@@ -79,7 +82,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
 
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
-        if widget.type == "Chart" {
+        if widget.type == .chart {
             loadImage()
         }
     }
@@ -105,8 +108,13 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
             if refreshInterval > 0.09 {
                 os_log("Sheduling image refresh every %g seconds", log: .viewCycle, type: .info, refreshInterval)
-                refreshTimer = Timer.scheduledTimer(timeInterval: refreshInterval, target: self,
-                                                    selector: #selector(NewImageUITableViewCell.refreshImage(_:)), userInfo: nil, repeats: true)
+                refreshTimer = Timer.scheduledTimer(
+                    timeInterval: refreshInterval,
+                    target: self,
+                    selector: #selector(NewImageUITableViewCell.refreshImage(_:)),
+                    userInfo: nil,
+                    repeats: true
+                )
             }
         }
     }
@@ -127,14 +135,14 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     private func widgetPayload(fromItem item: OpenHABItem) -> ImageType {
         switch item.type {
-        case "Image":
+        case .image:
             os_log("Image base64Encoded.", log: .urlComposition, type: .debug)
-            guard let data = item.state.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
+            guard let data = item.state?.components(separatedBy: ",")[safe: 1], let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters) else {
                 return .empty
             }
             return .embedded(image: UIImage(data: decodedData))
-        case "String":
-            return .link(url: URL(string: item.state))
+        case .stringItem:
+            return .link(url: URL(string: item.state ?? ""))
         default:
             return .empty
         }

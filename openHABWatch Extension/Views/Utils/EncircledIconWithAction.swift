@@ -11,7 +11,6 @@
 
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct EncircledIconWithAction: View {
     var systemName: String
     var action: () -> Void

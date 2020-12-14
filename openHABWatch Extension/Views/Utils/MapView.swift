@@ -14,7 +14,6 @@ import OpenHABCoreWatch
 import SwiftUI
 import UIKit
 
-// swiftlint:disable file_types_order
 struct MapView: WKInterfaceObjectRepresentable {
     @ObservedObject var widget: ObservableOpenHABWidget
 
@@ -26,17 +25,23 @@ struct MapView: WKInterfaceObjectRepresentable {
         if widget.item?.stateAsLocation() != nil {
             map.addAnnotation(widget.coordinate, with: WKInterfaceMapPinColor.red)
 
-            let region = MKCoordinateRegion(center: widget.coordinate,
-                                            latitudinalMeters: 1000.0,
-                                            longitudinalMeters: 1000.0)
+            let region = MKCoordinateRegion(
+                center: widget.coordinate,
+                latitudinalMeters: 1000.0,
+                longitudinalMeters: 1000.0
+            )
             map.setRegion(region)
 
         } else {
-            let span = MKCoordinateSpan(latitudeDelta: 0.02,
-                                        longitudeDelta: 0.02)
+            let span = MKCoordinateSpan(
+                latitudeDelta: 0.02,
+                longitudeDelta: 0.02
+            )
 
-            let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 40, longitude: -5),
-                                            span: span)
+            let region = MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 40, longitude: -5),
+                span: span
+            )
 
             map.setRegion(region)
         }

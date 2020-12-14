@@ -13,21 +13,22 @@ import OpenHABCoreWatch
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct SliderRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
-        let valueBinding = Binding<Double>(get: {
-            guard case let .slider(value) = self.widget.stateEnumBinding else { return 0 }
-            return value
-        },
-                                           set: {
-            os_log("Slider new value = %g", log: .default, type: .info, $0)
-            self.widget.sendCommand($0.valueText(step: self.widget.step))
-            self.widget.stateEnumBinding = .slider($0)
-        })
+        let valueBinding = Binding<Double>(
+            get: {
+                self.widget.adjustedValue
+            },
+            set: {
+                os_log("Slider new value = %g", log: .default, type: .info, $0)
+                self.widget.sendCommand($0.valueText(step: self.widget.step))
+
+                // self.widget.stateEnumBinding = .slider($0)
+            }
+        )
 
         return
             VStack(spacing: 3) {
@@ -41,12 +42,14 @@ struct SliderRow: View {
                 Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
                     .labelsHidden()
                     .focusable(true)
-                    .digitalCrownRotation(valueBinding,
-                                          from: widget.minValue,
-                                          through: widget.maxValue,
-                                          by: widget.step,
-                                          sensitivity: .medium,
-                                          isHapticFeedbackEnabled: true)
+                    .digitalCrownRotation(
+                        valueBinding,
+                        from: widget.minValue,
+                        through: widget.maxValue,
+                        by: widget.step,
+                        sensitivity: .medium,
+                        isHapticFeedbackEnabled: true
+                    )
             }
     }
 }

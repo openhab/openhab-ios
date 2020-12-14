@@ -156,23 +156,25 @@ public extension UIColor {
 
 public extension UIColor {
     convenience init(fromString string: String) {
-        let namedColors = ["maroon": UIColor.ohMaroon,
-                           "red": UIColor.ohRed,
-                           "orange": UIColor.ohOrange,
-                           "olive": UIColor.ohOlive,
-                           "yellow": UIColor.ohYellow,
-                           "purple": UIColor.ohPurple,
-                           "fuchsia": UIColor.ohFuchsia,
-                           "white": UIColor.ohWhite,
-                           "lime": UIColor.ohLime,
-                           "green": UIColor.ohGreen,
-                           "navy": UIColor.ohNavy,
-                           "blue": UIColor.ohBlue,
-                           "teal": UIColor.ohTeal,
-                           "aqua": UIColor.ohAqua,
-                           "black": UIColor.ohBlack,
-                           "silver": UIColor.ohSilver,
-                           "gray": UIColor.ohGray]
+        let namedColors = [
+            "maroon": UIColor.ohMaroon,
+            "red": UIColor.ohRed,
+            "orange": UIColor.ohOrange,
+            "olive": UIColor.ohOlive,
+            "yellow": UIColor.ohYellow,
+            "purple": UIColor.ohPurple,
+            "fuchsia": UIColor.ohFuchsia,
+            "white": UIColor.ohWhite,
+            "lime": UIColor.ohLime,
+            "green": UIColor.ohGreen,
+            "navy": UIColor.ohNavy,
+            "blue": UIColor.ohBlue,
+            "teal": UIColor.ohTeal,
+            "aqua": UIColor.ohAqua,
+            "black": UIColor.ohBlack,
+            "silver": UIColor.ohSilver,
+            "gray": UIColor.ohGray
+        ]
 
         self.init(cgColor: namedColors.first { $0.key == string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }?.value.cgColor ?? UIColor(hex: string).cgColor)
     }
@@ -190,7 +192,7 @@ public extension UIColor {
         var color: UInt64 = 0
         scanner.scanHexInt64(&color)
 
-        let mask = 0x000000ff
+        let mask = 0x000000FF
         let aRed = Int(color >> 16) & mask
         let aGreen = Int(color >> 8) & mask
         let aBlue = Int(color) & mask
@@ -200,5 +202,30 @@ public extension UIColor {
         let blue = CGFloat(aBlue) / 255.0
 
         self.init(red: red, green: green, blue: blue, alpha: 1)
+    }
+
+    // Inspired by https://cocoacasts.com/from-hex-to-uicolor-and-back-in-swift
+
+    // MARK: - From UIColor to String
+
+    func toHex(alpha: Bool = false) -> String? {
+        guard let components = cgColor.components, components.count >= 3 else {
+            return nil
+        }
+
+        let red = Float(components[0])
+        let green = Float(components[1])
+        let blue = Float(components[2])
+        var a = Float(1.0)
+
+        if components.count >= 4 {
+            a = Float(components[3])
+        }
+
+        if alpha {
+            return String(format: "%02lX%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255), lroundf(a * 255))
+        } else {
+            return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
+        }
     }
 }

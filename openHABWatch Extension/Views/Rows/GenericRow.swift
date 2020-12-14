@@ -12,7 +12,6 @@
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct GenericRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
@@ -28,31 +27,9 @@ struct GenericRow: View {
     }
 }
 
-extension ObservableOpenHABWidget {
-    func makeView(settings: ObservableOpenHABDataObject) -> AnyView {
-        if linkedPage != nil {
-            let title = linkedPage?.title.components(separatedBy: "[")[0] ?? ""
-            let pageUrl = linkedPage?.link ?? ""
-            os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
-            return AnyView(
-                NavigationLink(destination:
-                    ContentView(viewModel: UserData(sitemapName: settings.sitemapName), settings:
-                        settings, title: title)
-//                    ContentView(viewModel: UserData(url: URL(string: pageUrl)),
-//                                settings: settings)
-                ) {
-                    Image(systemName: "chevron.right")
-                })
-
-        } else {
-            return AnyView(EmptyView())
-        }
-    }
-}
-
 struct GenericRow_Previews: PreviewProvider {
     static var previews: some View {
-        let widget = UserData().widgets[7]
+        let widget = UserData().widgets[6]
         return GenericRow(widget: widget)
     }
 }

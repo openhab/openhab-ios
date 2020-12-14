@@ -12,7 +12,6 @@
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
 struct SetpointRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
@@ -35,9 +34,11 @@ struct SetpointRow: View {
             HStack {
                 Spacer()
 
-                EncircledIconWithAction(systemName:
+                EncircledIconWithAction(
+                    systemName:
                     "chevron.down.circle.fill",
-                                        action: self.decreaseValue)
+                    action: self.decreaseValue
+                )
 
                 Spacer()
 
@@ -46,51 +47,38 @@ struct SetpointRow: View {
 
                 Spacer()
 
-                EncircledIconWithAction(systemName: "chevron.up.circle.fill",
-                                        action: self.increaseValue)
+                EncircledIconWithAction(
+                    systemName: "chevron.up.circle.fill",
+                    action: self.increaseValue
+                )
 
                 Spacer()
             }
         }
     }
 
-    func decreaseValue() {
-        os_log("down button pressed", log: .viewCycle, type: .info)
-        if let item = widget.item {
-            if item.state == "Uninitialized" {
-                widget.sendCommandDouble(widget.minValue)
-            } else {
-                if !isIntStep {
-                    var newValue = item.stateAsDouble() - widget.step
-                    newValue = max(newValue, widget.minValue)
-                    widget.sendCommand(newValue.valueText(step: widget.step))
-                } else {
-                    var newValue = item.stateAsInt() - Int(widget.step)
-                    newValue = max(newValue, Int(widget.minValue))
-                    widget.sendCommand(String(format: "%ld", newValue))
-                }
-            }
+    private func handleUpDown(down: Bool) {
+        var numberState = widget.stateValueAsNumberState
+        let stateValue = numberState?.value ?? widget.minValue
+        let newValue: Double
+        switch down {
+        case true:
+            newValue = stateValue - widget.step
+        case false:
+            newValue = stateValue + widget.step
+        }
+        if newValue >= widget.minValue, newValue <= widget.maxValue {
+            numberState?.value = newValue
+            widget.sendItemUpdate(state: numberState)
         }
     }
 
-    func increaseValue() {
-        os_log("up button pressed", log: .viewCycle, type: .info)
+    func decreaseValue() {
+        handleUpDown(down: true)
+    }
 
-        if let item = widget.item {
-            if item.state == "Uninitialized" {
-                widget.sendCommandDouble(widget.minValue)
-            } else {
-                if !isIntStep {
-                    var newValue = item.stateAsDouble() + widget.step
-                    newValue = min(newValue, widget.maxValue)
-                    widget.sendCommand(newValue.valueText(step: widget.step))
-                } else {
-                    var newValue = item.stateAsInt() + Int(widget.step)
-                    newValue = min(newValue, Int(widget.maxValue))
-                    widget.sendCommand(String(format: "%ld", newValue))
-                }
-            }
-        }
+    func increaseValue() {
+        handleUpDown(down: false)
     }
 }
 
