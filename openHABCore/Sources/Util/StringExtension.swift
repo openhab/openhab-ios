@@ -39,9 +39,9 @@ extension String {
      */
     var numberValue: NSNumber? {
         let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
+        formatter.numberStyle = .scientific
         formatter.decimalSeparator = "."
-        return formatter.number(from: filter("01234567890.-".contains))
+        return formatter.number(from: filter("01234567890E.+-".contains))
     }
 
     var asDouble: Double {
