@@ -42,6 +42,9 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         // webView?.scrollView.isScrollEnabled = false
         webView?.scrollView.bounces = false
         webView?.navigationDelegate = self
+        // support dark mode and avoid white flashing when loading
+        webView?.isOpaque = false
+        webView?.backgroundColor = UIColor.clear
         view.addSubview(webView!)
     }
 
@@ -49,7 +52,7 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         super.viewWillAppear(animated)
         // Hide the navigation bar on the this view controller
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        loadWebView(force: true)
+        loadWebView(force: false)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -123,9 +126,9 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
 //        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
 //            return
 //        }
-        //let base64LoginString = loginData.base64EncodedString()
+        // let base64LoginString = loginData.base64EncodedString()
         if let url = URL(string: urlString) {
-            let  request = URLRequest(url: url)
+            let request = URLRequest(url: url)
             // request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
             webView?.load(request)
         }
