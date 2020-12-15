@@ -82,7 +82,7 @@ post_install do |installer|
 
     # workaround for Xcode 12 warnings
     installer.generated_projects.each do |project|
-        project.root_object.attributes['LastUpgradeCheck'] = 1220
+        project.root_object.attributes['LastUpgradeCheck'] = 1230
         project.build_configurations.each do |config|
             if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8.0' || config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8'
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
@@ -94,7 +94,7 @@ post_install do |installer|
             target.build_configurations.each do |config|
                 config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
                 scheme_filename = "#{user_data_dir}/#{target}.xcscheme"
-                `sed -i '' 's/LastUpgradeVersion = \"1100\"/LastUpgradeVersion = \"1220\"/' "#{scheme_filename}"`
+                `sed -i '' 's/LastUpgradeVersion = \"1100\"/LastUpgradeVersion = \"1230\"/' "#{scheme_filename}"`
             end
         end
     end
@@ -103,6 +103,6 @@ end
 post_integrate do |installer|
     if defined?(installer.pods_project.path)
         pbxproj_file = "#{installer.pods_project.path}/project.pbxproj"
-        `sed -i '' 's/LastUpgradeCheck = 1100/LastUpgradeCheck = 1220/' "#{pbxproj_file}"`
+        `sed -i '' 's/LastUpgradeCheck = 1100/LastUpgradeCheck = 1230/' "#{pbxproj_file}"`
     end
 end
