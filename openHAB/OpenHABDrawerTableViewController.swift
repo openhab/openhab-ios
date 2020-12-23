@@ -241,7 +241,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 let imageView = UIImageView(frame: cell.customImageView.bounds)
 
                 cell.customTextLabel?.text = sitemaps[siteMapIndex].label
-                if sitemaps[siteMapIndex].icon != "" {
+                if !sitemaps[siteMapIndex].icon.isEmpty {
                     if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[siteMapIndex].icon).url {
                         imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
                     }
@@ -364,14 +364,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
             present(vc, animated: true)
         }
     }
-
-//    private func cleanTilePath(path: String){
-//    let newPath = path.replacingOccurrences(of: "^\\.\\.", with: "", options: [.regularExpression])
-//       if !newPath.starts(with: "/") {
-//           newPath.insert("/", at: newPath.startIndex)
-//       }
-//        return newPath
-//    }
 }
 
 struct UiTile: Decodable {

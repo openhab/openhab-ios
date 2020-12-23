@@ -31,10 +31,3 @@ public extension OpenHABUiTile {
     }
 }
 
-// extension OpenHABUiTile.CodingData {
-// public var OpenHABUiTile: OpenHABUiTile {
-//    OpenHABUiTile(name: name,
-//                   url: url,
-//                   imageUrl : imageUrl)
-//    }
-// }
