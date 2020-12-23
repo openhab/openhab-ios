@@ -224,23 +224,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell.customImageView.image = UIImage(named: "openHABIcon")
         case 1:
             let imageView = UIImageView(frame: cell.customImageView.bounds)
-            // <<<<<<< HEAD
             let tile = uiTiles[indexPath.row]
             cell.customTextLabel?.text = tile.name
-            if tile.imageUrl != "" {
+            if !tile.imageUrl.isEmpty {
                 print("Loading   \(openHABRootUrl) \(tile.imageUrl)")
                 if let iconURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: tile.imageUrl).url {
                     imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
-                    //=======
-//
-//            cell.customTextLabel?.text = sitemaps[indexPath.row].label
-//            if !sitemaps[indexPath.row].icon.isEmpty {
-//                if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url {
-//                    imageView.kf.setImage(
-//                        with: iconURL,
-//                        placeholder: UIImage(named: "openHABIcon")
-//                    )
-                    // >>>>>>> develop
                 }
             } else {
                 imageView.image = UIImage(named: "openHABIcon")
