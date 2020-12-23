@@ -934,6 +934,7 @@ extension OpenHABViewController: ModalHandler {
         case .webview:
             if webViewController == nil {
                 if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABWebViewController") as? OpenHABWebViewController {
+                    newViewController.openHABRootUrl = openHABRootUrl
                     webViewController = newViewController
                     navigationController?.pushViewController(newViewController, animated: true)
                 }
@@ -943,6 +944,9 @@ extension OpenHABViewController: ModalHandler {
                 } else {
                     navigationController?.pushViewController(webViewController!, animated: true)
                 }
+            }
+            if webViewController != nil {
+                webViewController?.openHABRootUrl = openHABRootUrl
             }
         }
     }

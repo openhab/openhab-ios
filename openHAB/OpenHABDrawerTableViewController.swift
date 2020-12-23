@@ -306,7 +306,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // open a alert with an OK and cancel button
-        os_log("Clicked on drawer row %d", log: .viewCycle, type: .info, indexPath.row)
+        os_log("Clicked on drawer section %d row %d", log: .viewCycle, type: .info, indexPath.section, indexPath.row)
 
         tableView.deselectRow(at: indexPath, animated: false)
         // First sitemaps

@@ -17,12 +17,12 @@ import WebKit
 class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
     @IBOutlet var webView: WKWebView?
     private var currentTarget = ""
-
     private var js = """
     window.$ohwebui.$f7.on('routeChanged', function (newRoute, prevRoute) {
         window.webkit.messageHandlers.events.postMessage(newRoute.path)
     })
     """
+    var openHABRootUrl = ""
     override open var shouldAutorotate: Bool {
         true
     }
@@ -116,20 +116,16 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
     }
 
     func loadWebView(force: Bool = false) {
-        let urlString = Preferences.remoteUrl
         let authStr = "\(Preferences.username):\(Preferences.password)"
-        let newTarget = "\(urlString):\(authStr)"
+        let newTarget = "\(openHABRootUrl):\(authStr)"
         if !force, currentTarget == newTarget {
             return
         }
         currentTarget = newTarget
-//        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
-//            return
-//        }
-        // let base64LoginString = loginData.base64EncodedString()
-        if let url = URL(string: urlString) {
+        if let url = URL(string: openHABRootUrl) {
             let request = URLRequest(url: url)
-            // request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+            // clear out existing page while we load.
+            webView?.evaluateJavaScript("document.body.remove()")
             webView?.load(request)
         }
     }
