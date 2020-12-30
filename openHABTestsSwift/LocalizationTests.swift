@@ -59,8 +59,8 @@ class LocalizationTests: XCTestCase {
 
     func testLocalizations() {
         guard let path = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "en"),
-              let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
-              !localizableStrings.isEmpty
+            let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
+            !localizableStrings.isEmpty
         else {
             XCTFail("Failed to load bundle.")
             return
@@ -85,7 +85,7 @@ class LocalizationTests: XCTestCase {
         for language in LocalizationTests.localizations {
             print("Testing language: '\(language)'.")
             if let path = Bundle.main.paths(forResourcesOfType: "strings", inDirectory: "\(language).lproj").first(where: { $0.contains("InfoPlist.strings") }),
-               let dictionary = NSDictionary(contentsOfFile: path) as? [String: String] {
+                let dictionary = NSDictionary(contentsOfFile: path) as? [String: String] {
                 for key in mandatoryKeys {
                     XCTAssertNotNil(dictionary[key], "Missing entry '\(key)' in InfoPlist.strings for language '\(language)'.")
                     XCTAssertTrue(dictionary[key]?.isEmpty == false, "Missing value for '\(key)' in InfoPlist.strings for language '\(language)'.")
@@ -97,8 +97,8 @@ class LocalizationTests: XCTestCase {
 
     func testIntentsLocalizations() {
         guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
-              let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
-              !localizableStrings.isEmpty
+            let localizableStrings = NSDictionary(contentsOf: path) as? [String: String],
+            !localizableStrings.isEmpty
         else {
             XCTFail("Failed to load bundle.")
             return
@@ -119,9 +119,9 @@ class LocalizationTests: XCTestCase {
 
     func testIntentsPlaceholders() {
         guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: "en"),
-              let placeholderTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
-              !placeholderTuples.isEmpty,
-              let regex = try? NSRegularExpression(pattern: "\\$\\{([a-z0-9]*)\\}", options: .caseInsensitive)
+            let placeholderTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
+            !placeholderTuples.isEmpty,
+            let regex = try? NSRegularExpression(pattern: "\\$\\{([a-z0-9]*)\\}", options: .caseInsensitive)
         else {
             XCTFail("Failed to load bundle.")
             return
@@ -131,8 +131,8 @@ class LocalizationTests: XCTestCase {
             print("Testing language: '\(language)'.")
 
             guard let path = Bundle.main.url(forResource: "Intents", withExtension: "strings", subdirectory: nil, localization: language),
-                  let languageTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
-                  !languageTuples.isEmpty
+                let languageTuples = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ $0.value.contains("${") }),
+                !languageTuples.isEmpty
             else {
                 XCTFail("Failed to load Intents.strings for language '\(language)'.")
                 continue
@@ -160,8 +160,8 @@ class LocalizationTests: XCTestCase {
 
     private func validateFormatStringsCompleteness() -> Bool {
         guard let path = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "en"),
-              let localizableStrings = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ !LocalizationTests.falsePositives.contains($0.key) }),
-              !localizableStrings.isEmpty
+            let localizableStrings = (NSDictionary(contentsOf: path) as? [String: String])?.filter({ !LocalizationTests.falsePositives.contains($0.key) }),
+            !localizableStrings.isEmpty
         else {
             XCTFail("Failed to load bundle.")
             return false

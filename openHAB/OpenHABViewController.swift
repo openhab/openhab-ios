@@ -257,13 +257,13 @@ class OpenHABViewController: UIViewController {
             // do nothing
         } else {
             if animated, !search.isActive, !search.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
-               let searchBarSuperview = search.searchBar.superview,
-               let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
-                   $0.firstAttribute == .height
-                       && $0.secondItem == nil
-                       && $0.secondAttribute == .notAnAttribute
-                       && $0.constant > 0
-               }) {
+                let searchBarSuperview = search.searchBar.superview,
+                let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
+                    $0.firstAttribute == .height
+                        && $0.secondItem == nil
+                        && $0.secondAttribute == .notAnAttribute
+                        && $0.constant > 0
+                }) {
                 UIView.performWithoutAnimation {
                     searchBarHeightConstraint.constant = 0
                     searchBarSuperview.superview?.layoutIfNeeded()
@@ -971,7 +971,7 @@ extension OpenHABViewController: SideMenuNavigationControllerDelegate {
         }
 
         guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
-              drawer.delegate == nil || drawer.openHABRootUrl.isEmpty
+            drawer.delegate == nil || drawer.openHABRootUrl.isEmpty
         else {
             return
         }
