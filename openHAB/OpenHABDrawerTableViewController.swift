@@ -13,6 +13,7 @@ import DynamicButton
 import Fuzi
 import OpenHABCore
 import os.log
+import SafariServices
 import UIKit
 
 func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
@@ -66,6 +67,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "DrawerCell"
 
     var sitemaps: [OpenHABSitemap] = []
+    var uiTiles: [OpenHABUiTile] = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
@@ -110,7 +112,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
                 self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
 
-                if self.sitemaps.last?.name == "_default" {
+                if self.sitemaps.last?.name == "_default", self.sitemaps.count > 1 {
                     self.sitemaps = Array(self.sitemaps.dropLast())
                 }
 
@@ -130,6 +132,31 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.tableView.reloadData()
             }
         }
+
+        NetworkConnection.uiTiles(openHABRootUrl: openHABRootUrl) { response in
+            switch response.result {
+            case .success:
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("ui tiles response", log: .viewCycle, type: .info)
+                guard let responseData = response.data else {
+                    print("Error: did not receive data")
+                    return
+                }
+                do {
+                    self.uiTiles = try JSONDecoder().decode([OpenHABUiTile].self, from: responseData)
+                    for tile in self.uiTiles {
+                        tile.imageUrl.prepare()
+                        tile.url.prepare()
+                    }
+                    self.tableView.reloadData()
+                } catch {
+                    print("Error: could not decode data \(error.localizedDescription)")
+                }
+            case let .failure(error):
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            }
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -147,33 +174,78 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        4
+    }
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        sitemaps.count + drawerItems.count
+        switch section {
+        case 0:
+            return 1
+        case 1:
+            return uiTiles.count
+        case 2:
+            return sitemaps.count
+        case 3:
+            return drawerItems.count
+        default:
+            return 0
+        }
+    }
+
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch section {
+        case 0:
+            return "Main"
+        case 1:
+            return "Tiles"
+        case 2:
+            return "Sitemaps"
+        case 3:
+            return "System"
+        default:
+            return "Unknown"
+        }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell)!
-
         cell.customImageView.subviews.forEach { $0.removeFromSuperview() }
-
-        if indexPath.row < sitemaps.count, !sitemaps.isEmpty {
+        switch indexPath.section {
+        case 0:
+            cell.customTextLabel?.text = "Home"
+            cell.customImageView.image = UIImage(named: "openHABIcon")
+        case 1:
             let imageView = UIImageView(frame: cell.customImageView.bounds)
-
-            cell.customTextLabel?.text = sitemaps[indexPath.row].label
-            if !sitemaps[indexPath.row].icon.isEmpty {
-                if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[indexPath.row].icon).url {
-                    imageView.kf.setImage(
-                        with: iconURL,
-                        placeholder: UIImage(named: "openHABIcon")
-                    )
+            let tile = uiTiles[indexPath.row]
+            cell.customTextLabel?.text = tile.name
+            if !tile.imageUrl.isEmpty {
+                if let iconURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: tile.imageUrl).url {
+                    os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: iconURL))
+                    imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
                 }
             } else {
                 imageView.image = UIImage(named: "openHABIcon")
             }
             cell.customImageView.image = imageView.image
-        } else {
+        case 2:
+            if !sitemaps.isEmpty {
+                let siteMapIndex = indexPath.row
+                let imageView = UIImageView(frame: cell.customImageView.bounds)
+
+                cell.customTextLabel?.text = sitemaps[siteMapIndex].label
+                if !sitemaps[siteMapIndex].icon.isEmpty {
+                    if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[siteMapIndex].icon).url {
+                        imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
+                    }
+                } else {
+                    imageView.image = UIImage(named: "openHABIcon")
+                }
+                cell.customImageView.image = imageView.image
+            }
+        case 3:
             // Then menu items
-            let drawerItem = drawerItems[indexPath.row - sitemaps.count]
+            let drawerItem = drawerItems[indexPath.row]
 
             cell.customTextLabel?.text = drawerItem.localizedString
 
@@ -199,6 +271,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 }
                 cell.customImageView.addSubview(buttonIcon)
             }
+        default:
+            break
         }
         cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
 
@@ -214,28 +288,36 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // open a alert with an OK and cancel button
-        os_log("Clicked on drawer row %d", log: .viewCycle, type: .info, indexPath.row)
+        os_log("Clicked on drawer section %d row %d", log: .viewCycle, type: .info, indexPath.section, indexPath.row)
 
         tableView.deselectRow(at: indexPath, animated: false)
         // First sitemaps
-        if indexPath.row < sitemaps.count, !sitemaps.isEmpty {
-            let sitemap = sitemaps[indexPath.row]
-            Preferences.defaultSitemap = sitemap.name
-            appData?.rootViewController?.pageUrl = ""
-            switch drawerTableType {
-            case .withStandardMenuEntries?:
-                dismiss(animated: true) {
-                    self.delegate?.modalDismissed(to: .root)
-                }
-            case .withoutStandardMenuEntries?:
-                navigationController?.popToRootViewController(animated: true)
-            case .none:
-                break
+        switch indexPath.section {
+        case 0:
+            dismiss(animated: true) {
+                self.delegate?.modalDismissed(to: .webview)
             }
-
-        } else {
+        case 1:
+            openURL(url: Endpoint.resource(openHABRootUrl: openHABRootUrl, path: uiTiles[indexPath.row].url).url)
+        case 2:
+            if !sitemaps.isEmpty {
+                let sitemap = sitemaps[indexPath.row]
+                Preferences.defaultSitemap = sitemap.name
+                appData?.rootViewController?.pageUrl = ""
+                switch drawerTableType {
+                case .withStandardMenuEntries?:
+                    dismiss(animated: true) {
+                        self.delegate?.modalDismissed(to: .root)
+                    }
+                case .withoutStandardMenuEntries?:
+                    navigationController?.popToRootViewController(animated: true)
+                case .none:
+                    break
+                }
+            }
+        case 3:
             // Then menu items
-            let drawerItem = drawerItems[indexPath.row - sitemaps.count]
+            let drawerItem = drawerItems[indexPath.row]
 
             switch drawerItem {
             case .settings:
@@ -247,6 +329,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     self.delegate?.modalDismissed(to: .notifications)
                 }
             }
+        default:
+            break
         }
     }
 
@@ -264,4 +348,19 @@ class OpenHABDrawerTableViewController: UITableViewController {
         openHABUsername = Preferences.username
         openHABPassword = Preferences.password
     }
+
+    private func openURL(url: URL?) {
+        if let url = url {
+            let config = SFSafariViewController.Configuration()
+            config.entersReaderIfAvailable = true
+            let vc = SFSafariViewController(url: url, configuration: config)
+            present(vc, animated: true)
+        }
+    }
+}
+
+struct UiTile: Decodable {
+    var name: String
+    var url: String
+    var imageUrl: String
 }

@@ -111,6 +111,13 @@ extension String {
         guard values.count == 3 else { return nil }
         return Int(values[2].asDouble.rounded())
     }
+
+    mutating func prepare() {
+        self = replacingOccurrences(of: "^\\.\\.", with: "", options: [.regularExpression])
+        if !starts(with: "/") {
+            insert("/", at: startIndex)
+        }
+    }
 }
 
 extension Optional where Wrapped == String {
