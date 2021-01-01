@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2021 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -112,7 +112,7 @@ extension String {
         return Int(values[2].asDouble.rounded())
     }
 
-    mutating func prepare() {
+    public mutating func prepare() {
         self = replacingOccurrences(of: "^\\.\\.", with: "", options: [.regularExpression])
         if !starts(with: "/") {
             insert("/", at: startIndex)
