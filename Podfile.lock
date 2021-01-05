@@ -33,7 +33,7 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 7.0)
     - PromisesObjC (~> 1.2)
   - FlexColorPicker (1.4.2)
-  - Fuzi (3.1.2)
+  - Fuzi (3.1.3)
   - GoogleDataTransport (8.0.1):
     - nanopb (~> 2.30906.0)
   - GoogleUtilities/Environment (7.1.0):
@@ -58,9 +58,9 @@ PODS:
     - CocoaLumberjack (~> 3.0)
   - SwiftFormat/CLI (0.47.8)
   - SwiftLint (0.42.0)
-  - SwiftMessages (8.0.3):
-    - SwiftMessages/App (= 8.0.3)
-  - SwiftMessages/App (8.0.3)
+  - SwiftMessages (8.0.5):
+    - SwiftMessages/App (= 8.0.5)
+  - SwiftMessages/App (8.0.5)
 
 DEPENDENCIES:
   - Alamofire (~> 4.0)
@@ -124,7 +124,7 @@ SPEC CHECKSUMS:
   FirebaseCrashlytics: c722e4ca283272eb90eb5bc245fdc6588e2f22c2
   FirebaseInstallations: 3de38553e86171b5f81d83cdeef63473d37bfdb0
   FlexColorPicker: d7ed5cfd8ceb936f2930e4e30629f9448967a5f8
-  Fuzi: dba7215e52fb39dd7b1a62f69ede1e30edff0ae1
+  Fuzi: 4c10d6449c0b49a85cd75b13844c559c0fc71220
   GoogleDataTransport: e4085e6762f36a6141738f46b0153473ce57fb18
   GoogleUtilities: f734da554aade8cc7928a31c2f3311897933a1bd
   Kingfisher: 6e1a13523fcb1c86924ce53affe4ac957e544d59
@@ -134,7 +134,7 @@ SPEC CHECKSUMS:
   SVGKit: 132b010efbf57ec345309fe4a7f627c0a40c5d63
   SwiftFormat: 30c4c1b17a6c0c911760ada94b1bdb40769c95b9
   SwiftLint: 4fa9579c63416865179bc416f0a92d55f009600d
-  SwiftMessages: 063ec9ffea3ffa7d17ba595157a9ec78e4fe045f
+  SwiftMessages: 539fd54a766bf08ec667e90aa141c44b8b8aaa55
 
 PODFILE CHECKSUM: c82739ebdfa4f6aab5819a3018aec18a82539aa2
 
