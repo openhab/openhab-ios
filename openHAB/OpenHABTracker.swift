@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2021 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -178,7 +178,7 @@ class OpenHABTracker: NSObject {
 
     func isNetworkVPN() -> Bool {
         if let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any],
-           let scopes = settings["__SCOPED__"] as? [String: Any] {
+            let scopes = settings["__SCOPED__"] as? [String: Any] {
             for key in scopes.keys where key.contains("tap") || key.contains("tun") || key.contains("ppp") || key.contains("ipsec") || key.contains("ipsec0") {
                 return true
             }

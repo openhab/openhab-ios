@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2021 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -20,8 +20,8 @@ struct ImageRawRow: View {
 
     var body: some View {
         if let data = widget.item?.state?.components(separatedBy: ",")[safe: 1],
-           let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
-           let image = UIImage(data: decodedData) {
+            let decodedData = Data(base64Encoded: data, options: .ignoreUnknownCharacters),
+            let image = UIImage(data: decodedData) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
