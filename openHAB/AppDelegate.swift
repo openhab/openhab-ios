@@ -10,8 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
-import FirebaseCore
-import FirebaseCrashlytics
+import Firebase
 import Kingfisher
 import OpenHABCore
 import os.log
