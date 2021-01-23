@@ -57,7 +57,7 @@ platform :ios do
         ensure_git_status_clean
 
         # update L10ns
-        #crowdin
+        crowdin
 
         # run unit tests
         unittests
