@@ -111,7 +111,7 @@ platform :ios do
 
         # publish a new release into Github
         github_release = set_github_release(
-            api_token: ENV['GITHUB_TOKEN'],
+            api_token: ENV['GITHUB_API_TOKEN'],
             repository_name: 'openhab/openhab-ios',
             name: "#{type.capitalize} version #{version}",
             tag_name: version.to_s,
