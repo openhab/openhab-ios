@@ -60,7 +60,7 @@ platform :ios do
         crowdin
 
         # run unit tests
-        unittests
+        # unittests
 
         increment_build_number_in_xcodeproj(
             xcodeproj: 'openHAB.xcodeproj'
