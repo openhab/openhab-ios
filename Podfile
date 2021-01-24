@@ -15,7 +15,7 @@ target 'openHAB' do
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
     pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
-    pod 'Firebase/Crashlytics'
+    #pod 'Firebase/Crashlytics'
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
     pod 'DynamicButton', '~> 6.2'
