@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
-import Firebase
+// import Firebase
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -82,9 +82,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private func setupCrashReporting() {
         // init Firebase crash reporting
-        FirebaseApp.configure()
-        FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
+//        FirebaseApp.configure()
+//        FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
+//        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
     }
 
     func activateWatchConnectivity() {
