@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2021 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -16,10 +16,17 @@ import WebKit
 
 class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
     private var currentTarget = ""
+
+    // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
-    window.$ohwebui.$f7.on('routeChanged', function (newRoute, prevRoute) {
-        window.webkit.messageHandlers.events.postMessage(newRoute.path)
-    })
+    window.OHApp = {
+        exitToApp : function(){
+            window.webkit.messageHandlers.Native.postMessage('exitToApp');
+        },
+        goFullscreen : function(){
+            window.webkit.messageHandlers.Native.postMessage('goFullscreen');
+        }
+    }
     """
     var openHABRootUrl = ""
     override open var shouldAutorotate: Bool {
@@ -35,7 +42,7 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
-        config.userContentController.add(self, name: "events")
+        config.userContentController.add(self, name: "Native")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
         webView = WKWebView(frame: view.bounds, configuration: config)
         // Alow rotation of webview
@@ -114,6 +121,14 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         print("WKScriptMessage \(message.name) \(message.body)")
+        if let callbackName = message.body as? String {
+            switch callbackName {
+            case "exitToApp":
+                _ = navigationController?.popViewController(animated: true)
+            case "goFullScreen": break
+            default: break
+            }
+        }
     }
 
     func loadWebView(force: Bool = false) {
