@@ -92,6 +92,22 @@ public extension Endpoint {
         )
     }
 
+    static func uiTiles(openHABRootUrl: String) -> Endpoint {
+        Endpoint(
+            baseURL: openHABRootUrl,
+            path: "/rest/ui/tiles",
+            queryItems: []
+        )
+    }
+
+    static func resource(openHABRootUrl: String, path: String) -> Endpoint {
+        Endpoint(
+            baseURL: openHABRootUrl,
+            path: path,
+            queryItems: []
+        )
+    }
+
     // swiftlint:disable:next function_parameter_count
     static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)
