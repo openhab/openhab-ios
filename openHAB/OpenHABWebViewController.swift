@@ -43,7 +43,7 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
         config.userContentController.add(self, name: "Native")
-        config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
+        config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
         webView = WKWebView(frame: view.bounds, configuration: config)
         // Alow rotation of webview
         webView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -138,11 +138,19 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
             return
         }
         currentTarget = newTarget
-        if let url = URL(string: openHABRootUrl) {
-            let request = URLRequest(url: url)
+        let url = URL(string: openHABRootUrl)
+        if let modifiedUrl = modifyUrl(orig: url) {
+            let request = URLRequest(url: modifiedUrl)
             // clear out existing page while we load.
             webView?.evaluateJavaScript("document.body.remove()")
             webView?.load(request)
         }
+    }
+
+    func modifyUrl(orig: URL?) -> URL? {
+        if orig?.host == "myopenhab.org" {
+            return URL(string: "https://home.myopenhab.org")
+        }
+        return orig
     }
 }
