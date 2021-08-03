@@ -14,6 +14,8 @@ jobs:
           xcode-version: latest-stable
 
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Cache cocoapods dependencies
         uses: actions/cache@v2
@@ -39,7 +41,7 @@ jobs:
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
-        uses: maierj/fastlane-action@v1.4.0
+        uses: maierj/fastlane-action@v2.0.1
         with:
           lane: unittests
           skip-tracking: true
