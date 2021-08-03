@@ -14,8 +14,8 @@ target 'openHAB' do
     shared_pods
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
-    pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '3.x'
-    #pod 'Firebase/Crashlytics'
+    pod 'SVGKit'
+    pod 'Firebase/Crashlytics'
     pod 'SwiftMessages'
     pod 'FlexColorPicker'
     pod 'DynamicButton', '~> 6.2'
@@ -82,7 +82,7 @@ post_install do |installer|
 
     # workaround for Xcode 12 warnings
     installer.generated_projects.each do |project|
-        project.root_object.attributes['LastUpgradeCheck'] = 1230
+        project.root_object.attributes['LastUpgradeCheck'] = 1250
         project.build_configurations.each do |config|
             if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8.0' || config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8'
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'

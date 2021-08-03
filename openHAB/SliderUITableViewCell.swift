@@ -14,7 +14,7 @@ import os.log
 import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
-    private var isInTransition: Bool = false
+    private var isInTransition = false
     private var step: Float = 1.0
     private var transitionItem: DispatchWorkItem?
     private var throttler: Throttler?

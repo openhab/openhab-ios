@@ -167,7 +167,7 @@ class LocalizationTests: XCTestCase {
             return false
         }
 
-        var retVal: Bool = true
+        var retVal = true
         for localizableString in localizableStrings where localizableString.value.range(of: "%") != nil {
             if !LocalizationTests.localizedFormatStrings.contains(where: { $0.key == localizableString.key }) {
                 retVal = false
