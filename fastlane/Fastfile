@@ -172,7 +172,7 @@ platform :ios do
 
         # merge into master and tag if not a feature build
         if !options[:isfeaturebuild]
-            sh 'git checkout mater && git merge develop --no-ff'
+            sh 'git checkout master && git merge develop --no-ff'
             add_git_tag(
                 message: changelog,
                 tag: version.to_s
