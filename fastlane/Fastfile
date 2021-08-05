@@ -107,11 +107,13 @@ platform :ios do
 
         type = options[:bump]
 
-        increment_version_number_in_xcodeproj(
-            bump_type: type,
-            xcodeproj: 'openHAB.xcodeproj',
-            scheme: 'openHAB'
-        )
+        if !options[:isfeaturebuild]
+            increment_version_number_in_xcodeproj(
+                bump_type: type,
+                xcodeproj: 'openHAB.xcodeproj',
+                scheme: 'openHAB'
+            )
+        end
 
         build_number = get_build_number
         version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
@@ -154,11 +156,15 @@ platform :ios do
         git_add(path: './openHAB/Resources/*/*.strings', shell_escape: false)
         # commit to git the changes from bumping version number
         commit_version_bump(
-            message: "committed version bump: #{version}",
+            message: "committed version bump: #{version} (#{build_number})",
             xcodeproj: 'openHAB.xcodeproj',
             include: %w[CHANGELOG.md]
         )
-        sh 'git commit --amend --no-edit --signoff'
+        if is_ci?
+            sh 'git commit --amend --no-edit --signoff --author="openhab-bot <info@openhabfoundation.org>"'
+        else
+            sh 'git commit --amend --no-edit --signoff'
+        end
 
         # push bump commit
         ensure_git_status_clean
