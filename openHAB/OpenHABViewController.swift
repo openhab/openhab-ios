@@ -13,7 +13,7 @@ import Alamofire
 import AVFoundation
 import AVKit
 import DynamicButton
-// import FirebaseCrashlytics
+import FirebaseCrashlytics
 import Fuzi
 import Kingfisher
 import OpenHABCore
@@ -167,24 +167,24 @@ class OpenHABViewController: UIViewController {
 
         setupSideMenu()
 
-//        if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.sendCrashReports {
-//            let alertController = UIAlertController(title: NSLocalizedString("crash_detected", comment: "").capitalized, message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .alert)
-//            alertController.addAction(
-//                UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
-//                    Preferences.sendCrashReports = true
-//                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
-//                }
-//            )
-//            alertController.addAction(
-//                UIAlertAction(title: NSLocalizedString("privacy_policy", comment: ""), style: .default) { [weak self] _ in
-//                    let webViewController = SFSafariViewController(url: URL.privacyPolicy)
-//                    webViewController.configuration.barCollapsingEnabled = true
-//                    self?.present(webViewController, animated: true)
-//                }
-//            )
-//            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default))
-//            present(alertController, animated: true)
-//        }
+        if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.sendCrashReports {
+            let alertController = UIAlertController(title: NSLocalizedString("crash_detected", comment: "").capitalized, message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .alert)
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
+                    Preferences.sendCrashReports = true
+                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+                }
+            )
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("privacy_policy", comment: ""), style: .default) { [weak self] _ in
+                    let webViewController = SFSafariViewController(url: URL.privacyPolicy)
+                    webViewController.configuration.barCollapsingEnabled = true
+                    self?.present(webViewController, animated: true)
+                }
+            )
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default))
+            present(alertController, animated: true)
+        }
 
         #if DEBUG
         // setup accessibilityIdentifiers for UITest

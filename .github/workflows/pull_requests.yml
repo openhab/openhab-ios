@@ -14,6 +14,9 @@ jobs:
           xcode-version: latest-stable
 
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Cache cocoapods dependencies
         uses: actions/cache@v2
@@ -36,10 +39,19 @@ jobs:
 
       - name: Fastlane unit tests
         env:
+          OH_CROWDIN_PROJECT_ID: openhab-ios
+          OH_CROWDIN_USERNAME: ${{ secrets.OH_CROWDIN_USERNAME }}
+          OH_CROWDIN_ACCOUNT_KEY: ${{ secrets.OH_CROWDIN_ACCOUNT_KEY }}
+          BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY: ${{ secrets.ASC_API_KEY }}
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
-        uses: maierj/fastlane-action@v1.4.0
+        uses: maierj/fastlane-action@v2.0.1
         with:
           lane: unittests
           skip-tracking: true

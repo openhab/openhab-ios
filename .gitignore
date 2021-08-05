@@ -2,6 +2,7 @@ Pods
 xcuserdata
 git-template
 .DS_Store
+.bundle/
 
 # fastlane
 fastlane/README.md

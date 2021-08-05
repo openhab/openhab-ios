@@ -44,7 +44,7 @@ public class ServerCertificateManager {
 
     weak var delegate: ServerCertificateManagerDelegate?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
-    public var ignoreSSL: Bool = false
+    public var ignoreSSL = false
     public var trustedCertificates: [String: Any] = [:]
 
     // Init a ServerCertificateManager and set ignore certificates setting
