@@ -139,7 +139,7 @@ class OpenHABTracker: NSObject {
 
     func trackedDemoMode() {
         delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
-        trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
+        trackedUrl(URL(staticString: "https://demo.openhab.org"))
     }
 
     func trackedUrl(_ trackedUrl: URL?) {
