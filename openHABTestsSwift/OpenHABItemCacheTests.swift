@@ -54,7 +54,7 @@ class OpenHABItemCacheTests: XCTestCase {
 
         url = instance.getURL()
         XCTAssert(instance.lastUrlConnected == OpenHABItemCache.URL_DEMO)
-        expected = "http://demo.openhab.org:8080" + OpenHABItemCacheTests.ITEMS_URL
+        expected = "https://demo.openhab.org" + OpenHABItemCacheTests.ITEMS_URL
         result = url?.absoluteString ?? ""
         XCTAssert(expected == result)
     }
