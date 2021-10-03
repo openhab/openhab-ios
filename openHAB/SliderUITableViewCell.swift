@@ -45,6 +45,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
         initialize()
     }
 
+    // swiftlint:disable:next type_contents_order
     override public func initialize() {
         selectionStyle = .none
         separatorInset = .zero
