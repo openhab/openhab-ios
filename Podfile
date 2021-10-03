@@ -10,7 +10,7 @@ def shared_pods
 end
 
 target 'openHAB' do
-    platform :ios, '11.1'
+    platform :ios, '12.0'
     shared_pods
     pod 'SwiftFormat/CLI'
     pod 'SwiftLint'
@@ -20,7 +20,7 @@ target 'openHAB' do
     pod 'FlexColorPicker'
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
-    pod 'Kingfisher', '~> 5.0'
+    pod 'Kingfisher', '~> 6.0'
     pod 'AlamofireNetworkActivityIndicator', '~> 2.4'
 
     target 'openHABTestsSwift' do
@@ -30,34 +30,34 @@ target 'openHAB' do
 end
 
 target 'openHABUITests' do
-    platform :ios, '11.1'
+    platform :ios, '12.0'
     inherit! :search_paths
 end
 
 target 'OpenHABCore' do
-    platform :ios, '11.1'
+    platform :ios, '12.0'
     shared_pods
-    pod 'Kingfisher', '~> 5.0'
+    pod 'Kingfisher', '~> 6.0'
 end
 
 target 'OpenHABCoreWatch' do
     platform :watchos, '6.0'
     shared_pods
-    pod 'Kingfisher/SwiftUI', '~> 5.0'
+    pod 'Kingfisher', '~> 6.0'
 end
 
 target 'openHABWatch Extension' do
     platform :watchos, '6.0'
     inherit! :search_paths
     shared_pods
-    pod 'Kingfisher/SwiftUI', '~> 5.0'
+    pod 'Kingfisher', '~> 6.0'
     pod 'DeviceKit', '~> 4.0'
 end
 
 target 'openHABIntents' do
-    platform :ios, '11.1'
+    platform :ios, '12.0'
     shared_pods
-    pod 'Kingfisher', '~> 5.0'
+    pod 'Kingfisher', '~> 6.0'
 end
 
 
@@ -82,7 +82,7 @@ post_install do |installer|
 
     # workaround for Xcode 12 warnings
     installer.generated_projects.each do |project|
-        project.root_object.attributes['LastUpgradeCheck'] = 1250
+        project.root_object.attributes['LastUpgradeCheck'] = 1300
         project.build_configurations.each do |config|
             if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8.0' || config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] == '8'
                 config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
@@ -94,7 +94,7 @@ post_install do |installer|
             target.build_configurations.each do |config|
                 config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
                 scheme_filename = "#{user_data_dir}/#{target}.xcscheme"
-                `sed -i '' 's/LastUpgradeVersion = \"1100\"/LastUpgradeVersion = \"1230\"/' "#{scheme_filename}"`
+                `sed -i '' 's/LastUpgradeVersion = \"1100\"/LastUpgradeVersion = \"1300\"/' "#{scheme_filename}"`
             end
         end
     end
