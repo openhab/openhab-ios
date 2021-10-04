@@ -42,6 +42,7 @@ class WebUITableViewCell: GenericUITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         widgetWebView.navigationDelegate = self
+        widgetWebView.uiDelegate = self
     }
 
     override func displayWidget() {
@@ -106,5 +107,16 @@ extension WebUITableViewCell: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
         completionHandler(disposition, credential)
+    }
+}
+
+extension WebUITableViewCell: WKUIDelegate {
+    @available(iOS 15, *)
+    func webView(_ webView: WKWebView,
+                 requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+                 initiatedByFrame frame: WKFrameInfo,
+                 type: WKMediaCaptureType,
+                 decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(.grant)
     }
 }
