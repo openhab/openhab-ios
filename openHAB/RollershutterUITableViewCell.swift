@@ -22,11 +22,6 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     @IBOutlet private var upButton: DynamicButton!
     @IBOutlet private var customDetailText: UILabel!
 
-    override func initialize() {
-        selectionStyle = .none
-        separatorInset = .zero
-    }
-
     required init?(coder: NSCoder) {
         os_log("RollershutterUITableViewCell initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
@@ -37,6 +32,11 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
         os_log("RollershutterUITableViewCell initWithStyle", log: .viewCycle, type: .info)
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
+    }
+
+    override func initialize() {
+        selectionStyle = .none
+        separatorInset = .zero
     }
 
     override func displayWidget() {
