@@ -1,6 +1,7 @@
 # file options
---swiftversion 5.3
+--swiftversion 5.5
 --exclude Pods
+--exclude fastlane
 --symlinks ignore
 
 # disabled rules
