@@ -156,7 +156,7 @@ public class OpenHABItemCache {
         var uurl: URL?
 
         if Preferences.demomode {
-            uurl = Endpoint.items(openHABRootUrl: "http://demo.openhab.org:8080").url
+            uurl = Endpoint.items(openHABRootUrl: "https://demo.openhab.org").url
             url = uurl?.absoluteString ?? "unknown"
             lastUrlConnected = OpenHABItemCache.URL_DEMO
 

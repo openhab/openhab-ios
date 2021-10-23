@@ -1,1 +1,3 @@
 "NSLocalNetworkUsageDescription" = "openHAB needs access to your local network to connect with the openHAB server.";
+"NSCameraUsageDescription" = "openHAB needs access to your camera.";
+"NSMicrophoneUsageDescription" = "openHAB needs access to your microphone.";

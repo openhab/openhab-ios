@@ -117,7 +117,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 }
 
                 // Sort the sitemaps alphabetically.
-                self.sitemaps.sort { $0.name < $1.name }
+                self.sitemaps.sort { $0.label < $1.label }
                 self.drawerItems.removeAll()
                 if self.drawerTableType == .withStandardMenuEntries {
                     self.setStandardDrawerItems()

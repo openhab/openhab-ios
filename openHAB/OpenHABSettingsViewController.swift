@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-// import FirebaseCrashlytics
+import FirebaseCrashlytics
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -122,13 +122,13 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     private func crashReportingDummyPressed(_ sender: Any?) {
         if sendCrashReportsSwitch.isOn {
             sendCrashReportsSwitch.setOn(!sendCrashReportsSwitch.isOn, animated: true)
-//            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
+            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
         } else {
             let alertController = UIAlertController(title: NSLocalizedString("crash_reporting", comment: ""), message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .actionSheet)
             alertController.addAction(
                 UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { [weak self] _ in
                     self?.sendCrashReportsSwitch.setOn(true, animated: true)
-//                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
                 }
             )
             alertController.addAction(
