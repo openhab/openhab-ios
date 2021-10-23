@@ -19,9 +19,9 @@ PODS:
     - CocoaLumberjack (~> 3.0)
   - SwiftFormat/CLI (0.47.8)
   - SwiftLint (0.42.0)
-  - SwiftMessages (8.0.5):
-    - SwiftMessages/App (= 8.0.5)
-  - SwiftMessages/App (8.0.5)
+  - SwiftMessages (9.0.5):
+    - SwiftMessages/App (= 9.0.5)
+  - SwiftMessages/App (9.0.5)
 
 DEPENDENCIES:
   - Alamofire (~> 4.0)
@@ -76,8 +76,8 @@ SPEC CHECKSUMS:
   SVGKit: 132b010efbf57ec345309fe4a7f627c0a40c5d63
   SwiftFormat: 30c4c1b17a6c0c911760ada94b1bdb40769c95b9
   SwiftLint: 4fa9579c63416865179bc416f0a92d55f009600d
-  SwiftMessages: 539fd54a766bf08ec667e90aa141c44b8b8aaa55
+  SwiftMessages: 9cca50659fa22bb523b4dd2a958d4442e843a354
 
 PODFILE CHECKSUM: d8e33407d5947696f40697e8ae38ea490e0bfa73
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2
