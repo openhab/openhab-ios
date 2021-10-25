@@ -20,7 +20,7 @@ target 'openHAB' do
     pod 'FlexColorPicker'
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
-    pod 'Kingfisher', '~> 6.0'
+    pod 'Kingfisher', '~> 7.0'
     pod 'AlamofireNetworkActivityIndicator', '~> 2.4'
 
     target 'openHABTestsSwift' do
@@ -37,27 +37,27 @@ end
 target 'OpenHABCore' do
     platform :ios, '12.0'
     shared_pods
-    pod 'Kingfisher', '~> 6.0'
+    pod 'Kingfisher', '~> 7.0'
 end
 
 target 'OpenHABCoreWatch' do
-    platform :watchos, '6.0'
+    platform :watchos, '7.0'
     shared_pods
-    pod 'Kingfisher', '~> 6.0'
+    pod 'Kingfisher', '~> 7.0'
 end
 
 target 'openHABWatch Extension' do
-    platform :watchos, '6.0'
+    platform :watchos, '7.0'
     inherit! :search_paths
     shared_pods
-    pod 'Kingfisher', '~> 6.0'
+    pod 'Kingfisher', '~> 7.0'
     pod 'DeviceKit', '~> 4.0'
 end
 
 target 'openHABIntents' do
     platform :ios, '12.0'
     shared_pods
-    pod 'Kingfisher', '~> 6.0'
+    pod 'Kingfisher', '~> 7.0'
 end
 
 
