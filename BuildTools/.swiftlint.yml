@@ -1,4 +1,4 @@
-opt_in_rules: 
+opt_in_rules:
   - sorted_imports
   - empty_count
   - redundant_type_annotation
@@ -8,7 +8,7 @@ opt_in_rules:
   - multiline_function_chains
   - anyobject_protocol
   - array_init
-  - attributes 
+  - attributes
   - closure_end_indentation
   - closure_spacing
   - reduce_boolean
@@ -26,11 +26,12 @@ disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
 
-excluded: 
-  - Pods
-  - fastlane
+excluded:
+  - ../Pods
+  - ../fastlane
+  - ../BuildTools
 
-nesting: 
+nesting:
     type_level: 2
 
 function_body_length:
@@ -61,7 +62,7 @@ line_length:
 identifier_name:
   allowed_symbols: "_"
   min_length: 2
-  max_length: 
+  max_length:
     warning: 90
     error: 1000
   excluded:

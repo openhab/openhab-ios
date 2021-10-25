@@ -77,24 +77,22 @@ public class OpenHABItemCache {
         os_log("Loading items from %{PUBLIC}@", log: .default, type: .info, url)
 
         if NetworkConnection.shared == nil {
-            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: nil)
+            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
         }
 
         let timeout = lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 5.0 : 10.0
 
         NetworkConnection.load(from: uurl, timeout: timeout) { response in
             switch response.result {
-            case .success:
-                if let data = response.result.value {
-                    do {
-                        try self.decodeItemsData(data)
+            case let .success(data):
+                do {
+                    try self.decodeItemsData(data)
 
-                        let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) } ?? []
+                    let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) } ?? []
 
-                        completion(ret)
-                    } catch {
-                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                    }
+                    completion(ret)
+                } catch {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 }
             case let .failure(error):
                 if self.lastUrlConnected == OpenHABItemCache.URL_LOCAL {
@@ -118,27 +116,24 @@ public class OpenHABItemCache {
         os_log("Loading items from %{PUBLIC}@", log: .default, type: .info, url)
 
         if NetworkConnection.shared == nil {
-            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: nil)
+            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
         }
 
         let timeout = lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 5.0 : 10.0
 
         NetworkConnection.load(from: uurl, timeout: timeout) { response in
             switch response.result {
-            case .success:
-                if let data = response.result.value {
-                    do {
-                        try self.decodeItemsData(data)
+            case let .success(data):
+                do {
+                    try self.decodeItemsData(data)
 
-                        let item = self.getItem(name)
+                    let item = self.getItem(name)
 
-                        completion(item)
+                    completion(item)
 
-                    } catch {
-                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                    }
+                } catch {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 }
-
             case let .failure(error):
                 if self.lastUrlConnected == OpenHABItemCache.URL_LOCAL {
                     self.localUrlFailed = true

@@ -67,7 +67,9 @@ platform :ios do
             wait_for_dsym_processing: true,
             wait_timeout: 600
         )
-        upload_symbols_to_crashlytics
+        upload_symbols_to_crashlytics(
+            binary_path: "BuildTools/upload-symbols"
+        )
         clean_build_artifacts
     end
 

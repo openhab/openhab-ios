@@ -11,7 +11,7 @@
 
 import Foundation
 import Fuzi
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 
 class ObservableOpenHABSitemapPage: NSObject {

@@ -82,7 +82,7 @@ public enum Preferences {
     // MARK: - Public
 
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
-    @UserDefaultURL("remoteUrl", defaultValue: "https://openhab.org:8444") public static var remoteUrl: String
+    @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org") public static var remoteUrl: String
 
     @UserDefault("username", defaultValue: "test") public static var username: String
     @UserDefault("password", defaultValue: "test") public static var password: String

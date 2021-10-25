@@ -1,7 +1,8 @@
 # file options
 --swiftversion 5.5
---exclude Pods
---exclude fastlane
+--exclude ../Pods
+--exclude ../BuildTools
+--exclude ../fastlane
 --symlinks ignore
 
 # disabled rules
@@ -38,10 +39,10 @@
 --patternlet hoist
 --ranges spaced
 --self remove
---selfrequired 
+--selfrequired
 --semicolons inline
 --stripunusedargs closure-only
---trailingclosures 
+--trailingclosures
 --trimwhitespace always
 --wraparguments before-first
 --wrapcollections before-first

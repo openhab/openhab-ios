@@ -54,9 +54,8 @@ public class ClientCertificateManager {
             let identity = clientIdentities[index]
             var cert: SecCertificate?
             SecIdentityCopyCertificate(identity, &cert)
-            let subject = SecCertificateCopySubjectSummary(cert!)
-            if subject != nil {
-                return subject! as String
+            if let subject = SecCertificateCopySubjectSummary(cert!) {
+                return subject as String
             }
         }
         return ""
@@ -154,8 +153,8 @@ public class ClientCertificateManager {
             // Import PKCS12 client cert
             importingRawCert = try Data(contentsOf: url)
 
-            if delegate != nil {
-                delegate!.askForClientCertificateImport(self)
+            if let delegate = delegate {
+                delegate.askForClientCertificateImport(self)
             } else {
                 return false
             }
@@ -170,17 +169,14 @@ public class ClientCertificateManager {
         // Import PKCS12 client cert
         importingPassword = password
         let status = decodePKCS12()
-        if status == noErr {
+        switch status {
+        case noErr:
             addClientCertificateToKeychain()
-        } else if status == errSecAuthFailed {
-            if delegate != nil {
-                delegate!.askForCertificatePassword(self)
-            }
-        } else {
+        case errSecAuthFailed:
+            delegate?.askForCertificatePassword(self)
+        default:
             let errMsg = String(format: NSLocalizedString("unable_to_decode_certificate", comment: ""), "\(status)")
-            if delegate != nil {
-                delegate!.alertClientCertificateError(self, errMsg: errMsg)
-            }
+            delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
 
@@ -211,22 +207,21 @@ public class ClientCertificateManager {
             ]
             status = SecItemAdd(addKeyQuery as NSDictionary, nil)
             os_log("SecItemAdd(key) result=%{PUBLIC}d", log: .default, type: .info, status)
-            if status == noErr {
-                // Add  the cert chain
-                if importingCertChain != nil {
-                    for cert in importingCertChain! where cert != clientCert {
-                        let addCertQuery: [String: Any] = [
-                            kSecClass as String: kSecClassCertificate,
-                            kSecValueRef as String: cert
-                        ]
-                        status = SecItemAdd(addCertQuery as NSDictionary, nil)
-                        os_log("SecItemAdd(certChain) result=%{PUBLIC}d", log: .default, type: .info, status)
-                        if status == errSecDuplicateItem {
-                            // Ignore duplicates as there may already be other client certs with an overlapping issuer chain
-                            status = noErr
-                        } else if status != noErr {
-                            break
-                        }
+
+            // Add  the cert chain
+            if let importingCertChain = importingCertChain {
+                for cert in importingCertChain where cert != clientCert {
+                    let addCertQuery: [String: Any] = [
+                        kSecClass as String: kSecClassCertificate,
+                        kSecValueRef as String: cert
+                    ]
+                    status = SecItemAdd(addCertQuery as NSDictionary, nil)
+                    os_log("SecItemAdd(certChain) result=%{PUBLIC}d", log: .default, type: .info, status)
+                    if status == errSecDuplicateItem {
+                        // Ignore duplicates as there may already be other client certs with an overlapping issuer chain
+                        status = noErr
+                    } else if status != noErr {
+                        break
                     }
                 }
             }
@@ -242,9 +237,7 @@ public class ClientCertificateManager {
             if status == errSecDuplicateItem {
                 errMsg = NSLocalizedString("certficate_exists", comment: "")
             }
-            if delegate != nil {
-                delegate!.alertClientCertificateError(self, errMsg: errMsg)
-            }
+            delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
 
@@ -263,7 +256,7 @@ public class ClientCertificateManager {
         return status
     }
 
-    func evaluateTrust(challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+    func evaluateTrust(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let dns = challenge.protectionSpace.distinguishedNames
         if let dns = dns {
             let identity = evaluateTrust(distinguishedNames: dns)

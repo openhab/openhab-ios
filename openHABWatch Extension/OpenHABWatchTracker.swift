@@ -12,7 +12,7 @@
 import Alamofire
 import Foundation
 import Network
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 
 protocol OpenHABWatchTrackerDelegate: AnyObject {
@@ -78,7 +78,7 @@ class OpenHABWatchTracker: NSObject {
             }
             let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
             connectivityTask = NetworkConnection.shared.manager.request(request)
-                .validate(statusCode: 200 ..< 300)
+                .validate()
                 .responseData { response in
                     switch response.result {
                     case .success:
@@ -111,7 +111,7 @@ class OpenHABWatchTracker: NSObject {
                     }
                     let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
                     connectivityTask = NetworkConnection.shared.manager.request(request)
-                        .validate(statusCode: 200 ..< 300)
+                        .validate()
                         .responseData { response in
                             switch response.result {
                             case .success:
@@ -158,7 +158,7 @@ class OpenHABWatchTracker: NSObject {
 
     func trackedDemoMode() {
         delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
-        trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
+        trackedUrl(URL(staticString: "https://demo.openhab.org:8443"))
     }
 
     func trackedUrl(_ trackedUrl: URL?) {

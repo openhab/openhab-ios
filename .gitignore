@@ -12,3 +12,7 @@ fastlane/test_output
 
 openHAB.app.dSYM.zip
 openHAB.ipa
+
+# spm
+build/
+BuildTools/.build

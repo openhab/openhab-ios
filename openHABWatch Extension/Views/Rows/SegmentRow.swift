@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 import SwiftUI
 

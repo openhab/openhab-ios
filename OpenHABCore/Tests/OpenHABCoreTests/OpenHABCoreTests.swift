@@ -9,12 +9,14 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenHABCore
-import SwiftUI
-import WatchKit
+@testable import OpenHABCore
+import XCTest
 
-class PreferencesHostingController: WKHostingController<PreferencesSwiftUIView> {
-    override var body: PreferencesSwiftUIView {
-        PreferencesSwiftUIView()
+final class OpenHABCoreTests: XCTestCase {
+    func testExample() throws {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct
+        // results.
+        XCTAssertEqual(OpenHABCore().text, "Hello, World!")
     }
 }
