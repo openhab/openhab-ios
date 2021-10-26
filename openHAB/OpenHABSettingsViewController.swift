@@ -189,6 +189,11 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         }
     }
 
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let version = appData?.openHABVersion ?? 2
+        return version >= 3 && indexPath == IndexPath(row: 5, section: 1) ? .zero : UITableView.automaticDimension
+    }
+
     func enableConnectionSettings() {
         settingsTableView.reloadData()
     }
