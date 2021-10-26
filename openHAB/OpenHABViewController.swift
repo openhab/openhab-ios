@@ -54,7 +54,7 @@ struct SVGProcessor: ImageProcessor {
             if let image = SVGKImage(data: data) {
                 return image.uiImage
             } else {
-                return nil
+                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
             }
         }
     }
@@ -733,7 +733,12 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                     do {
                         self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
                         os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
-                        self.appData?.openHABVersion = 2
+                        let version = Int(self.serverProperties?.version ?? "2") ?? 2
+                        self.appData?.openHABVersion = version
+                        if version >= 3 {
+                            self.iconType = .svg
+                            Preferences.iconType = IconType.svg.rawValue
+                        }
                         self.selectSitemap()
 
                     } catch {
@@ -1072,21 +1077,12 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                 }
 
-                switch iconType {
-                case .png:
-                    cell.imageView?.kf.setImage(
-                        with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                        placeholder: UIImage(named: "blankicon.png"),
-                        completionHandler: reportOnResults
-                    )
-                case .svg:
-                    cell.imageView?.kf.setImage(
-                        with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                        placeholder: UIImage(named: "blankicon.png"),
-                        options: [.processor(SVGProcessor())],
-                        completionHandler: reportOnResults
-                    )
-                }
+                cell.imageView?.kf.setImage(
+                    with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                    placeholder: UIImage(named: "blankicon.png"),
+                    options: [.processor(SVGProcessor())],
+                    completionHandler: reportOnResults
+                )
             }
         }
 
