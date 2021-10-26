@@ -17,7 +17,7 @@ public class OpenHABServerProperties: Decodable {
         public var url = ""
     }
 
-    let version: String
+    public let version: String
     let links: [OpenHABLink]
 
     public var habPanelUrl: String? {
