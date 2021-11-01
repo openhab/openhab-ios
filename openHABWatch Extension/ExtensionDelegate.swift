@@ -99,7 +99,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
 // MARK: Kingfisher authentication with NSURLCredential
 
-extension ExtensionDelegate: AuthenticationChallengeResponsable {
+extension ExtensionDelegate: AuthenticationChallengeResponsible {
     // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
