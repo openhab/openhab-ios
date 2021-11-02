@@ -130,14 +130,25 @@ public extension Endpoint {
         }
 
         // determineOH2IconPath
-        if version == 2 {
+        if version >= 2 {
+            var queryItems = [
+                URLQueryItem(name: "state", value: state)
+            ]
+            if version >= 3 {
+                queryItems.append(contentsOf: [
+                    URLQueryItem(name: "format", value: "SVG"),
+                    URLQueryItem(name: "anyFormat", value: "true")
+                ])
+            } else {
+                queryItems.append(
+                    URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG")
+                )
+            }
+
             return Endpoint(
                 baseURL: rootUrl,
                 path: "/icon/\(icon)",
-                queryItems: [
-                    URLQueryItem(name: "state", value: state),
-                    URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG")
-                ]
+                queryItems: queryItems
             )
         } else {
             return Endpoint(
