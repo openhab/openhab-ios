@@ -130,6 +130,8 @@
 		DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */; };
 		DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0D23DCC152009B0A99 /* MapView.swift */; };
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
+		DA3C1AC42782026F0096FFB1 /* OpenHABSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3C1AC32782026F0096FFB1 /* OpenHABSessionDelegate.swift */; };
+		DA3C1AC52782026F0096FFB1 /* OpenHABSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3C1AC32782026F0096FFB1 /* OpenHABSessionDelegate.swift */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
@@ -512,6 +514,7 @@
 		DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncircledIconWithAction.swift; sourceTree = "<group>"; };
 		DA2E0B0D23DCC152009B0A99 /* MapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewRow.swift; sourceTree = "<group>"; };
+		DA3C1AC32782026F0096FFB1 /* OpenHABSessionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSessionDelegate.swift; sourceTree = "<group>"; };
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
@@ -866,6 +869,7 @@
 				DAF4578323D780730018B495 /* UIColorExtension.swift */,
 				9394102522CB5CDB00EB4255 /* Collection+SafeAccess.swift */,
 				DA773DF323E8C2D400C16246 /* DoubleExtension.swift */,
+				DA3C1AC32782026F0096FFB1 /* OpenHABSessionDelegate.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -1861,6 +1865,7 @@
 				9350F18E238151AD00054BA8 /* NetworkConnection.swift in Sources */,
 				9350F16F23814F2500054BA8 /* OpenHABStateDescription.swift in Sources */,
 				9350F17C2381509300054BA8 /* OSLogExtension.swift in Sources */,
+				DA3C1AC42782026F0096FFB1 /* OpenHABSessionDelegate.swift in Sources */,
 				9350F1882381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1822381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
 				DAF4579D23D904350018B495 /* UIColorExtension.swift in Sources */,
@@ -1883,6 +1888,7 @@
 				DA773DF623E8C32400C16246 /* DoubleExtension.swift in Sources */,
 				9350F17323814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16723814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
+				DA3C1AC52782026F0096FFB1 /* OpenHABSessionDelegate.swift in Sources */,
 				938621E9257E3D6900A63200 /* Sequence+KeyPath.swift in Sources */,
 				9350F195238151F100054BA8 /* Preferences.swift in Sources */,
 				93F38C6D238034DA001B1451 /* DataObject.swift in Sources */,

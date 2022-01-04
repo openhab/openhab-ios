@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1300"
+   LastUpgradeVersion = "1320"
    version = "2.0">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -56,8 +56,10 @@
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "8"
       notificationPayloadFile = "openHABWatch Extension/PushNotificationPayload.apns">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/openHAB">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA0775142346705D0086C685"
@@ -65,7 +67,7 @@
             BlueprintName = "openHABWatch"
             ReferencedContainer = "container:openHAB.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -75,8 +77,10 @@
       debugDocumentVersioning = "YES"
       launchAutomaticallySubstyle = "8"
       notificationPayloadFile = "openHABWatch Extension/PushNotificationPayload.apns">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/openHAB">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA0775142346705D0086C685"
@@ -84,7 +88,16 @@
             BlueprintName = "openHABWatch"
             ReferencedContainer = "container:openHAB.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "DA0775142346705D0086C685"
+            BuildableName = "openHABWatch.app"
+            BlueprintName = "openHABWatch"
+            ReferencedContainer = "container:openHAB.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

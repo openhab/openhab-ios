@@ -1,7 +1,7 @@
 PODS:
-  - Alamofire (4.9.1)
-  - AlamofireNetworkActivityIndicator (2.4.0):
-    - Alamofire (~> 4.8)
+  - Alamofire (5.4.4)
+  - AlamofireNetworkActivityIndicator (3.1.0):
+    - Alamofire (~> 5.1)
   - CocoaLumberjack (3.7.2):
     - CocoaLumberjack/Core (= 3.7.2)
   - CocoaLumberjack/Core (3.7.2)
@@ -62,8 +62,8 @@ PODS:
   - SwiftMessages/App (9.0.5)
 
 DEPENDENCIES:
-  - Alamofire (~> 4.0)
-  - AlamofireNetworkActivityIndicator (~> 2.4)
+  - Alamofire (~> 5.0)
+  - AlamofireNetworkActivityIndicator (~> 3.1)
   - DeviceKit (~> 4.0)
   - DynamicButton (~> 6.2)
   - Firebase/Crashlytics
@@ -102,8 +102,8 @@ SPEC REPOS:
     - SwiftMessages
 
 SPEC CHECKSUMS:
-  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  AlamofireNetworkActivityIndicator: 9acc3de3ca6645bf0efed462396b0df13dd3e7b8
+  Alamofire: f3b09a368f1582ab751b3fff5460276e0d2cf5c9
+  AlamofireNetworkActivityIndicator: 6564782bd7b9e6c430ae67d9277af01907b01ca4
   CocoaLumberjack: b7e05132ff94f6ae4dfa9d5bce9141893a21d9da
   DeviceKit: c622fc19f795f3e0b4d75d6d11b26604338cdab3
   DynamicButton: 95f30460793bd3510a5c213ac1b810a5e3d54b6a
@@ -125,6 +125,6 @@ SPEC CHECKSUMS:
   SwiftLint: e5c7f1fba68eccfc51509d5b2ce1699f5502e0c7
   SwiftMessages: 9cca50659fa22bb523b4dd2a958d4442e843a354
 
-PODFILE CHECKSUM: 4897db1aa73de9479221469a73b476d9e802f5ef
+PODFILE CHECKSUM: f5782c608276cd318b1b8e297afc9ae9842ad76e
 
 COCOAPODS: 1.11.2

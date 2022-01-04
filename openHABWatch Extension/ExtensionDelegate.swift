@@ -43,7 +43,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
         // Perform any final initialization of your application.
         activateWatchConnectivity()
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))
 
         NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
 

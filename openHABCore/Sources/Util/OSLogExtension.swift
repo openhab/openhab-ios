@@ -35,4 +35,7 @@ public extension OSLog {
 
     /// Logs commands
     static let command = OSLog(subsystem: subsystem, category: "command")
+
+    /// Logs decoding errors
+    static let decoding = OSLog(subsystem: subsystem, category: "decoding")
 }

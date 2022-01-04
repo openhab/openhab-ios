@@ -5,7 +5,7 @@ inhibit_all_warnings!
 use_frameworks!
 
 def shared_pods
-    pod 'Alamofire', '~> 4.0'
+    pod 'Alamofire', '~> 5.0'
     pod 'Fuzi', '~> 3.1'
 end
 
@@ -21,7 +21,7 @@ target 'openHAB' do
     pod 'DynamicButton', '~> 6.2'
     pod 'SideMenu', '~> 6.4'
     pod 'Kingfisher', '~> 7.0'
-    pod 'AlamofireNetworkActivityIndicator', '~> 2.4'
+    pod 'AlamofireNetworkActivityIndicator', '~> 3.1'
 
     target 'openHABTestsSwift' do
         inherit! :search_paths

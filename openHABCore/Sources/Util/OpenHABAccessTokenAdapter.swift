@@ -13,28 +13,47 @@ import Alamofire
 import Foundation
 import Kingfisher
 
-public class OpenHABAccessTokenAdapter: RequestAdapter {
+public class OpenHABAccessTokenAdapter: RequestInterceptor {
     var appData: DataObject
 
     public init(appData data: DataObject) {
         appData = data
     }
 
-    public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-        var urlRequest = urlRequest
-
-        let alwaysSendCreds = appData.openHABAlwaysSendCreds
-        let user = appData.openHABUsername
-        let password = appData.openHABPassword // else { return urlRequest }
-
-        if alwaysSendCreds {
-            if !user.isEmpty || !password.isEmpty {
-                if let authorizationHeader = Request.authorizationHeader(user: user, password: password) {
-                    urlRequest.setValue(authorizationHeader.value, forHTTPHeaderField: authorizationHeader.key)
-                }
-            }
+    public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+        guard appData.openHABAlwaysSendCreds else {
+            // The user did not choose for the credentials to be sent with every request.
+            return completion(.success(urlRequest))
         }
 
+        let user = appData.openHABUsername
+        let password = appData.openHABPassword
+
+        guard !user.isEmpty, !password.isEmpty else {
+            // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
+            return completion(.success(urlRequest))
+        }
+
+        var urlRequest = urlRequest
+        urlRequest.headers.add(.authorization(username: user, password: password))
+        completion(.success(urlRequest))
+    }
+
+    public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
+        guard appData.openHABAlwaysSendCreds else {
+            // The user did not choose for the credentials to be sent with every request.
+            return urlRequest
+        }
+
+        let user = appData.openHABUsername
+        let password = appData.openHABPassword
+        guard !user.isEmpty, !password.isEmpty else {
+            // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
+            return urlRequest
+        }
+
+        var urlRequest = urlRequest
+        urlRequest.headers.add(.authorization(username: user, password: password))
         return urlRequest
     }
 }

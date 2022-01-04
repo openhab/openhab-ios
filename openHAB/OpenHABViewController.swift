@@ -445,7 +445,7 @@ class OpenHABViewController: UIViewController {
             guard let self = self else { return }
 
             switch response.result {
-            case .success:
+            case let .success(data):
                 os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
                 let headers = response.response?.allHeaderFields
 
@@ -454,34 +454,34 @@ class OpenHABViewController: UIViewController {
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
                 }
                 var openHABSitemapPage: OpenHABSitemapPage?
-                if let data = response.result.value {
-                    // If we are talking to openHAB 1.X, talk XML
-                    if self.appData?.openHABVersion == 1 {
-                        let str = String(decoding: data, as: UTF8.self)
-                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
-                        guard let doc = try? XMLDocument(data: data) else { return }
-                        if let rootElement = doc.root, let name = rootElement.tag {
-                            os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                            if name == "page" {
-                                openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
-                            }
-                        }
-                    } else {
-                        // Newer versions talk JSON!
-                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                        do {
-                            // Self-executing closure
-                            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                            openHABSitemapPage = try {
-                                let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                                return sitemapPageCodingData.openHABSitemapPage
-                            }()
-                        } catch {
-                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                // If we are talking to openHAB 1.X, talk XML
+                if self.appData?.openHABVersion == 1 {
+                    let str = String(decoding: data, as: UTF8.self)
+                    os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+
+                    guard let doc = try? XMLDocument(data: data) else { return }
+                    if let rootElement = doc.root, let name = rootElement.tag {
+                        os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                        if name == "page" {
+                            openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                         }
                     }
+                } else {
+                    // Newer versions talk JSON!
+                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                    do {
+                        // Self-executing closure
+                        // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                        openHABSitemapPage = try {
+                            let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
+                            return sitemapPageCodingData.openHABSitemapPage
+                        }()
+                    } catch {
+                        os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                    }
                 }
+
                 self.currentPage = openHABSitemapPage
                 if self.isFiltering {
                     self.filterContentForSearchText(self.search.searchBar.text)
@@ -549,8 +549,8 @@ class OpenHABViewController: UIViewController {
     func selectSitemap() {
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
-            case .success:
-                self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
+            case let .success(data):
+                self.sitemaps = deriveSitemaps(data, version: self.appData?.openHABVersion)
                 switch self.sitemaps.count {
                 case 2...:
                     if !self.defaultSitemap.isEmpty {
@@ -658,14 +658,14 @@ class OpenHABViewController: UIViewController {
         if !pageUrl.isEmpty {
             let pageReachability = NetworkReachabilityManager(host: pageUrl)
             if !pageNetworkStatusAvailable {
-                pageNetworkStatus = pageReachability?.networkReachabilityStatus
+                pageNetworkStatus = pageReachability?.status
                 pageNetworkStatusAvailable = true
                 return false
             } else {
-                if pageNetworkStatus == pageReachability?.networkReachabilityStatus {
+                if pageNetworkStatus == pageReachability?.status {
                     return false
                 } else {
-                    pageNetworkStatus = pageReachability?.networkReachabilityStatus
+                    pageNetworkStatus = pageReachability?.status
                     return true
                 }
             }
@@ -727,30 +727,26 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
 
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
-            case .success:
+            case let .success(data):
+                do {
+                    self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+                    os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
+                    let version = Int(self.serverProperties?.version ?? "2") ?? 2
+                    self.appData?.openHABVersion = version
+                    if version >= 3 {
+                        self.iconType = .svg
+                        Preferences.iconType = IconType.svg.rawValue
+                    }
+                    self.selectSitemap()
 
-                if let data = response.result.value {
-                    do {
-                        self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
-                        os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
-                        let version = Int(self.serverProperties?.version ?? "2") ?? 2
-                        self.appData?.openHABVersion = version
-                        if version >= 3 {
-                            self.iconType = .svg
-                            Preferences.iconType = IconType.svg.rawValue
-                        }
+                } catch {
+                    os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
+                    let str = String(decoding: data, as: UTF8.self)
+                    if str.hasPrefix("<?xml") {
+                        self.appData?.openHABVersion = 1
                         self.selectSitemap()
-
-                    } catch {
-                        os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
-                        let str = String(decoding: data, as: UTF8.self)
-                        if str.hasPrefix("<?xml") {
-                            self.appData?.openHABVersion = 1
-                            self.selectSitemap()
-                        }
                     }
                 }
-
             case let .failure(error):
                 os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
                 os_log("On Connecting %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
@@ -775,7 +771,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
     }
 
     func openHABTrackingError(_ error: Error) {
-        os_log("OpenHABViewController discovery error", log: .viewCycle, type: .info)
+        os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: 60)
         config.presentationStyle = .bottom

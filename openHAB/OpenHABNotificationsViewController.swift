@@ -56,22 +56,21 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     func loadNotifications() {
         NetworkConnection.notification(urlString: Preferences.remoteUrl) { response in
             switch response.result {
-            case .success:
-                if let data = response.result.value {
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
-                        for codingDatum in codingDatas {
-                            self.notifications.add(codingDatum.openHABNotification)
-                        }
-                    } catch {
-                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+            case let .success(data):
+                do {
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                    let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+                    for codingDatum in codingDatas {
+                        self.notifications.add(codingDatum.openHABNotification)
                     }
-
-                    self.refreshControl?.endRefreshing()
-                    self.tableView.reloadData()
+                } catch {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 }
+
+                self.refreshControl?.endRefreshing()
+                self.tableView.reloadData()
+
             case let .failure(error):
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()

@@ -13,10 +13,7 @@ import Alamofire
 import os.log
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
-// Transition from AFNetworking to Alamofire 5.0
-// SessionManager --> Session
-// serverTrustPolicyManager --> serverTrustManager
-// ServerTrustPolicyManager --> ServerTrustManager
+
 public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
 
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
@@ -43,9 +40,10 @@ public let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthentic
 
     switch challenge.protectionSpace.authenticationMethod {
     case NSURLAuthenticationMethodServerTrust:
-        return NetworkConnection.shared.serverCertificateManager.evaluateTrust(challenge: challenge)
+        return NetworkConnection.shared.serverCertificateManager.evaluateTrust(with: challenge)
     case NSURLAuthenticationMethodClientCertificate:
-        return NetworkConnection.shared.clientCertificateManager.evaluateTrust(challenge: challenge)
+        return NetworkConnection.shared.clientCertificateManager.evaluateTrust(with: challenge)
+    // attemptCredentialAuthentication
     default:
         if challenge.previousFailureCount > 0 {
             disposition = .cancelAuthenticationChallenge
@@ -70,53 +68,53 @@ public class NetworkConnection {
 
     public var clientCertificateManager = ClientCertificateManager()
     public var serverCertificateManager: ServerCertificateManager!
-    public var manager: Alamofire.SessionManager!
+    public var manager: Alamofire.Session
     public var rootUrl: URL?
 
-    init(ignoreSSL: Bool,
-         manager: SessionManager = SessionManager(
-             configuration: URLSessionConfiguration.default,
-             delegate: SessionDelegate()
-         ),
-         adapter: RequestAdapter?) {
+    init(ignoreSSL: Bool, manager: Session) {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
         self.manager = manager
-        self.manager.startRequestsImmediately = false
-        self.manager.delegate.sessionDidReceiveChallenge = onReceiveSessionChallenge
-        self.manager.delegate.taskDidReceiveChallenge = onReceiveSessionTaskChallenge
-        self.manager.adapter = adapter
     }
 
-    public class func initialize(ignoreSSL: Bool, adapter: RequestAdapter?) {
-        shared = NetworkConnection(ignoreSSL: ignoreSSL, adapter: adapter)
+    public class func initialize(ignoreSSL: Bool, interceptor: RequestInterceptor?) {
+        shared = NetworkConnection(
+            ignoreSSL: ignoreSSL,
+            manager: Session(
+                configuration: URLSessionConfiguration.default,
+                delegate: OpenHABSessionDelegate(),
+                startRequestsImmediately: false,
+                interceptor: interceptor,
+                serverTrustManager: ServerCertificateManager(ignoreSSL: ignoreSSL)
+            )
+        )
     }
 
     public static func register(prefsURL: String,
                                 deviceToken: String,
                                 deviceId: String,
-                                deviceName: String, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                deviceName: String, completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func sitemaps(openHABRootUrl: String,
-                                completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
         if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func tracker(openHABRootUrl: String,
-                               completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                               completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             load(from: url, completionHandler: completionHandler)
         }
     }
 
     public static func notification(urlString: String,
-                                    completionHandler: @escaping (DataResponse<Data>) -> Void) {
+                                    completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
             load(from: notificationsUrl, completionHandler: completionHandler)
         }
@@ -169,7 +167,7 @@ public class NetworkConnection {
     public static func page(url: URL?,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
         guard let url = url else { return nil }
 
         var pageRequest = URLRequest(url: url)
@@ -200,7 +198,7 @@ public class NetworkConnection {
     public static func page(pageUrl: String,
                             longPolling: Bool,
                             openHABVersion: Int,
-                            completionHandler: @escaping (DataResponse<Data>) -> Void) -> DataRequest? {
+                            completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
         if pageUrl == "" {
             return nil
         }
@@ -211,7 +209,7 @@ public class NetworkConnection {
         return page(url: pageToLoadUrl, longPolling: longPolling, openHABVersion: openHABVersion, completionHandler: completionHandler)
     }
 
-    static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
         var request = URLRequest(url: url)
         request.timeoutInterval = timeout ?? 10.0
 
