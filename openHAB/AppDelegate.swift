@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import AlamofireNetworkActivityIndicator
 import AVFoundation
 import Firebase
 import Kingfisher
@@ -56,6 +57,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Preferences.migrateUserDefaultsIfRequired()
 
         NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
+
+        NetworkActivityIndicatorManager.shared.isEnabled = true
+        NetworkActivityIndicatorManager.shared.startDelay = 1.0
 
         registerForPushNotifications()
 

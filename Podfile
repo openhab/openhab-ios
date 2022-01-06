@@ -5,7 +5,7 @@ inhibit_all_warnings!
 use_frameworks!
 
 def shared_pods
-    pod 'Alamofire', '~> 5.0'
+    pod 'Alamofire', '~> 5.5'
     pod 'Fuzi', '~> 3.1'
 end
 
