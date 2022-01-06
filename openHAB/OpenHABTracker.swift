@@ -94,7 +94,7 @@ class OpenHABTracker: NSObject {
                     } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
                         NetworkConnection.shared.manager.request(request)
-                            .validate(statusCode: 200 ..< 300)
+                            .validate()
                             .responseData { response in
                                 switch response.result {
                                 case .success:

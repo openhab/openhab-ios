@@ -78,6 +78,7 @@ public class NetworkConnection {
     }
 
     public class func initialize(ignoreSSL: Bool, interceptor: RequestInterceptor?) {
+        let logger = OpenHABLogger()
         shared = NetworkConnection(
             ignoreSSL: ignoreSSL,
             manager: Session(
@@ -85,7 +86,8 @@ public class NetworkConnection {
                 delegate: OpenHABSessionDelegate(),
                 startRequestsImmediately: false,
                 interceptor: interceptor,
-                serverTrustManager: ServerCertificateManager(ignoreSSL: ignoreSSL)
+                serverTrustManager: ServerCertificateManager(ignoreSSL: ignoreSSL),
+                eventMonitors: [logger]
             )
         )
     }
@@ -143,6 +145,7 @@ public class NetworkConnection {
             }
 
             commandRequest.httpBody = command?.data(using: .utf8)
+
             commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
 
             os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
@@ -151,7 +154,7 @@ public class NetworkConnection {
             os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
 
             return NetworkConnection.shared.manager.request(commandRequest)
-                .validate(statusCode: 200 ..< 300)
+                .validate()
                 .responseData { response in
                     switch response.result {
                     case .success:
@@ -191,7 +194,7 @@ public class NetworkConnection {
         os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
         return NetworkConnection.shared.manager.request(pageRequest)
-            .validate(statusCode: 200 ..< 300)
+            .validate()
             .responseData(completionHandler: completionHandler)
     }
 
@@ -215,7 +218,7 @@ public class NetworkConnection {
 
         os_log("Firing request", log: .viewCycle, type: .debug)
         let task = NetworkConnection.shared.manager.request(request)
-            .validate(statusCode: 200 ..< 300)
+            .validate()
             .responseData(completionHandler: completionHandler)
         task.resume()
     }

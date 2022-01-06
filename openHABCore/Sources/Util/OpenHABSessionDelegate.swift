@@ -12,19 +12,6 @@
 import Alamofire
 import Foundation
 
-/// Type which provides various `Session` state values.
-protocol SessionStateProvider: AnyObject {
-    var serverTrustManager: ServerTrustManager? { get }
-    var redirectHandler: RedirectHandler? { get }
-    var cachedResponseHandler: CachedResponseHandler? { get }
-
-    func request(for task: URLSessionTask) -> Request?
-    func didGatherMetricsForTask(_ task: URLSessionTask)
-    func didCompleteTask(_ task: URLSessionTask, completion: @escaping () -> Void)
-    func credential(for task: URLSessionTask, in protectionSpace: URLProtectionSpace) -> URLCredential?
-    func cancelRequestsForSessionInvalidation(with error: Error?)
-}
-
 // Alamofire 5 does not provide client certificate handling via a taskDidReceiveChallenge closure:
 // The alternative method is explained by jshier in https://github.com/Alamofire/Alamofire/issues/2886#issuecomment-517951747
 
@@ -32,7 +19,6 @@ class OpenHABSessionDelegate: SessionDelegate {
     typealias ChallengeEvaluation = (disposition: URLSession.AuthChallengeDisposition, credential: URLCredential?, error: AFError?)
 
     var eventMonitor: EventMonitor?
-    weak var stateProvider: SessionStateProvider?
 
     override func urlSession(_ session: URLSession,
                              task: URLSessionTask,

@@ -65,17 +65,15 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         }
     }
 
-    func getPersistensePath() -> String? {
-        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
-        let documentsDirectory = paths[0]
-        let filePath = URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates").absoluteString
-        return filePath
+    func getPersistensePath() -> URL {
+        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
     }
 
     public func saveTrustedCertificates() {
         do {
             let data = try NSKeyedArchiver.archivedData(withRootObject: trustedCertificates, requiringSecureCoding: false)
-            try data.write(to: URL(string: getPersistensePath() ?? "")!)
+            try data.write(to: getPersistensePath())
         } catch {
             os_log("Could not save trusted certificates", log: .default)
         }
@@ -94,7 +92,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
 
     func loadTrustedCertificates() {
         do {
-            let rawdata = try Data(contentsOf: URL(string: getPersistensePath() ?? "")!)
+            let rawdata = try Data(contentsOf: getPersistensePath())
             if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String: Any] {
                 trustedCertificates = unarchive
             }
@@ -153,9 +151,9 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
                 // We have a certificate for this domain in our memory of decisions, but the certificate we've got now
                 // differs. We need to warn user about possible MiM attack and wait for users decision.
                 // TODO: notify user and wait for decision
-                if delegate != nil {
+                if let delegate = delegate {
                     self.evaluateResult = .undecided
-                    delegate?.evaluateCertificateMismatch(self, summary: certificateSummary as String?, forDomain: domain)
+                    delegate.evaluateCertificateMismatch(self, summary: certificateSummary as String?, forDomain: domain)
                     evaluateResultSemaphore.wait()
                     switch self.evaluateResult {
                     case .deny:
@@ -168,7 +166,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
                         // User decided to accept invalid certificate and remember decision
                         // Add certificate to storage
                         storeCertificateData(certificateData, forDomain: domain)
-                        delegate?.acceptedServerCertificatesChanged(self)
+                        delegate.acceptedServerCertificatesChanged(self)
                         return
                     case .undecided:
                         // Something went wrong, abort connection
@@ -179,10 +177,10 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
             }
         }
         // Warn user about invalid certificate and wait for user's decision
-        if delegate != nil {
+        if let delegate = delegate {
             // Delegate should ask user for decision
             self.evaluateResult = .undecided
-            delegate?.evaluateServerTrust(self, summary: certificateSummary as String?, forDomain: domain)
+            delegate.evaluateServerTrust(self, summary: certificateSummary as String?, forDomain: domain)
             // Wait until we get response from delegate with user's decision
             evaluateResultSemaphore.wait()
             switch self.evaluateResult {
@@ -196,7 +194,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
                 // User decided to accept invalid certificate and remember decision
                 // Add certificate to storage
                 storeCertificateData(certificateData, forDomain: domain)
-                delegate?.acceptedServerCertificatesChanged(self)
+                delegate.acceptedServerCertificatesChanged(self)
                 return
             case .undecided:
                 throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)

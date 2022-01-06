@@ -168,7 +168,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         let streamImageInitialBytePattern = Data([255, 216])
         var imageData = Data()
         mjpegRequest = NetworkConnection.shared.manager.streamRequest(streamRequest)
-            .validate(statusCode: 200 ..< 300)
+            .validate()
             .responseStream { stream in
                 switch stream.event {
                 case let .stream(result):

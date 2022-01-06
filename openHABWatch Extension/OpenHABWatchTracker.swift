@@ -78,7 +78,7 @@ class OpenHABWatchTracker: NSObject {
             }
             let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
             connectivityTask = NetworkConnection.shared.manager.request(request)
-                .validate(statusCode: 200 ..< 300)
+                .validate()
                 .responseData { response in
                     switch response.result {
                     case .success:
@@ -111,7 +111,7 @@ class OpenHABWatchTracker: NSObject {
                     }
                     let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
                     connectivityTask = NetworkConnection.shared.manager.request(request)
-                        .validate(statusCode: 200 ..< 300)
+                        .validate()
                         .responseData { response in
                             switch response.result {
                             case .success:

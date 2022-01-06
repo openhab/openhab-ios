@@ -38,4 +38,7 @@ public extension OSLog {
 
     /// Logs decoding errors
     static let decoding = OSLog(subsystem: subsystem, category: "decoding")
+
+    /// Logs Alamofire events
+    static let alamofire = OSLog(subsystem: subsystem, category: "alamofire")
 }
