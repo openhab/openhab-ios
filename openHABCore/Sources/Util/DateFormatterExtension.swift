@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -13,8 +13,8 @@ import Foundation
 
 // Custom DateFormatter to handle fractional seconds
 // Inspired by https://useyourloaf.com/blog/swift-codable-with-custom-dates/
-extension DateFormatter {
-    public static let iso8601Full: DateFormatter = {
+public extension DateFormatter {
+    static let iso8601Full: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
         formatter.calendar = Calendar(identifier: .iso8601)

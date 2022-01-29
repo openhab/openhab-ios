@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -20,9 +20,11 @@ class OpenHABLegalViewController: UIViewController {
         let legalPath = Bundle.main.url(forResource: "legal", withExtension: "rtf")
         var legalAttributedString: NSAttributedString?
         if let legalPath = legalPath {
-            legalAttributedString = try? NSAttributedString(url: legalPath,
-                                                            options: [.characterEncoding: String.Encoding.utf8.rawValue],
-                                                            documentAttributes: nil)
+            legalAttributedString = try? NSAttributedString(
+                url: legalPath,
+                options: [.characterEncoding: String.Encoding.utf8.rawValue],
+                documentAttributes: nil
+            )
         }
         if let legalAttributedString = legalAttributedString {
             legalTextView.attributedText = legalAttributedString

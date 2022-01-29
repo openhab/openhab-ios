@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -293,8 +293,8 @@ extension OpenHABWidget {
     }
 }
 
-extension OpenHABWidget {
-    public struct CodingData: Decodable {
+public extension OpenHABWidget {
+    struct CodingData: Decodable {
         let widgetId: String
         let label: String
         let type: WidgetType

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -47,8 +47,8 @@ public class OpenHABStateDescription {
     }
 }
 
-extension OpenHABStateDescription {
-    public struct CodingData: Decodable {
+public extension OpenHABStateDescription {
+    struct CodingData: Decodable {
         let minimum: Double?
         let maximum: Double?
         let step: Double?

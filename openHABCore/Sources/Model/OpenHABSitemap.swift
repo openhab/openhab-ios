@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -68,8 +68,8 @@ public final class OpenHABSitemap: NSObject {
     }
 }
 
-extension OpenHABSitemap {
-    public struct CodingData: Decodable {
+public extension OpenHABSitemap {
+    struct CodingData: Decodable {
         public let name: String
         public let label: String
         public let page: HomePage
@@ -95,7 +95,7 @@ extension OpenHABSitemap {
         }
     }
 
-    enum PageType: Decodable {
+    internal enum PageType: Decodable {
         case homepage(HomePage)
         case linkedPage(HomePage)
 
@@ -122,7 +122,7 @@ extension OpenHABSitemap {
         }
     }
 
-    public struct HomePage: Decodable {
+    struct HomePage: Decodable {
         public let link: String
         public let leaf: Bool
         public let timeout: ValueOrFalse<String>?
@@ -130,13 +130,15 @@ extension OpenHABSitemap {
     }
 }
 
-extension OpenHABSitemap.CodingData {
-    public var openHABSitemap: OpenHABSitemap {
-        OpenHABSitemap(name: name,
-                       icon: icon ?? "",
-                       label: label,
-                       link: link,
-                       leaf: page.leaf,
-                       homepageLink: page.link)
+public extension OpenHABSitemap.CodingData {
+    var openHABSitemap: OpenHABSitemap {
+        OpenHABSitemap(
+            name: name,
+            icon: icon.orEmpty,
+            label: label,
+            link: link,
+            leaf: page.leaf,
+            homepageLink: page.link
+        )
     }
 }

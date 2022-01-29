@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -139,7 +139,7 @@ class OpenHABTracker: NSObject {
 
     func trackedDemoMode() {
         delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
-        trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
+        trackedUrl(URL(staticString: "https://demo.openhab.org"))
     }
 
     func trackedUrl(_ trackedUrl: URL?) {
@@ -178,7 +178,7 @@ class OpenHABTracker: NSObject {
 
     func isNetworkVPN() -> Bool {
         if let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any],
-            let scopes = settings["__SCOPED__"] as? [String: Any] {
+           let scopes = settings["__SCOPED__"] as? [String: Any] {
             for key in scopes.keys where key.contains("tap") || key.contains("tun") || key.contains("ppp") || key.contains("ipsec") || key.contains("ipsec0") {
                 return true
             }

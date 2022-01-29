@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -11,7 +11,6 @@
 
 import Alamofire
 import os.log
-import UIKit
 
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
 // Transition from AFNetworking to Alamofire 5.0
@@ -75,8 +74,10 @@ public class NetworkConnection {
     public var rootUrl: URL?
 
     init(ignoreSSL: Bool,
-         manager: SessionManager = SessionManager(configuration: URLSessionConfiguration.default,
-                                                  delegate: SessionDelegate()),
+         manager: SessionManager = SessionManager(
+             configuration: URLSessionConfiguration.default,
+             delegate: SessionDelegate()
+         ),
          adapter: RequestAdapter?) {
         serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
         serverCertificateManager.initializeCertificatesStore()
@@ -121,11 +122,28 @@ public class NetworkConnection {
         }
     }
 
+    public static func sendState(item: CommItem, stateToSend state: String?) -> DataRequest? {
+        sendCommandOrState(item: item, commandToSend: state, state: true)
+    }
+
     public static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
-        if let commandUrl = URL(string: item.link) {
+        sendCommandOrState(item: item, commandToSend: command, state: false)
+    }
+
+    public static func sendCommandOrState(item: CommItem, commandToSend command: String?, state: Bool) -> DataRequest? {
+        if var commandUrl = URL(string: item.link) {
+            if state {
+                commandUrl = commandUrl.appendingPathComponent("/state")
+            }
+
             var commandRequest = URLRequest(url: commandUrl)
 
-            commandRequest.httpMethod = "POST"
+            if state {
+                commandRequest.httpMethod = "PUT"
+            } else {
+                commandRequest.httpMethod = "POST"
+            }
+
             commandRequest.httpBody = command?.data(using: .utf8)
             commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
 
@@ -193,9 +211,9 @@ public class NetworkConnection {
         return page(url: pageToLoadUrl, longPolling: longPolling, openHABVersion: openHABVersion, completionHandler: completionHandler)
     }
 
-    static func load(from url: URL, completionHandler: @escaping (DataResponse<Data>) -> Void) {
+    static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data>) -> Void) {
         var request = URLRequest(url: url)
-        request.timeoutInterval = 10.0
+        request.timeoutInterval = timeout ?? 10.0
 
         os_log("Firing request", log: .viewCycle, type: .debug)
         let task = NetworkConnection.shared.manager.request(request)

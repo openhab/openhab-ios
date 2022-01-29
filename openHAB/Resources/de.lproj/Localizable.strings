@@ -48,7 +48,7 @@
 "icon_type" = "Icon-Typ";
 "info" = "Info";
 "select_sitemap" = "Sitemap auswählen";
-"crash_reporting" = "Absturzberichte";
+"crash_reporting" = "Absturzberichterstattung";
 "legal" = "Rechtliches";
 "openhab_connection" = "openHAB Verbindung";
 "application_settings" = "Anwendungseinstellungen";
@@ -58,3 +58,14 @@
 "oh_secret" = "openHAB-Secret";
 "notifications" = "Benachrichtigungen";
 "settings" = "Einstellungen";
+"privacy_policy" = "Datenschutzerklärung";
+"crash_reporting_info" = "Durch die Aktivierung der Absturzberichterstattung stimmen Sie zu, dass Informationen zu Ihrem Gerät und der Nutzung der App erfasst und mit Crashlytics (einem Unternehmen von Google) geteilt werden. Weitere Informationen finden Sie in unserer Datenschutzerklärung.";
+"activate" = "Aktivieren";
+"crash_detected" = "Absturz festgestellt";
+"habpanel" = "HABPanel";
+"open" = "offen";
+"closed" = "geschlossen";
+"unknown" = "unbekannt";
+"on" = "an";
+"off" = "aus";
+"empty" = "leer";

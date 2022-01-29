@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -9,9 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import FirebaseCrashlytics
 import Kingfisher
 import OpenHABCore
 import os.log
+import SafariServices
 import UIKit
 
 class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate {
@@ -43,6 +45,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var alwaysSendCredsSwitch: UISwitch!
     @IBOutlet private var realTimeSlidersSwitch: UISwitch!
     @IBOutlet private var sendCrashReportsSwitch: UISwitch!
+    @IBOutlet private var sendCrashReportsDummy: UIButton!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -63,6 +66,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         usernameTextField?.delegate = self
         passwordTextField?.delegate = self
         demomodeSwitch?.addTarget(self, action: #selector(OpenHABSettingsViewController.demomodeSwitchChange(_:)), for: .valueChanged)
+        sendCrashReportsDummy.addTarget(self, action: #selector(crashReportingDummyPressed(_:)), for: .touchUpInside)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -79,13 +83,13 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     @objc
-    func cancelButtonPressed(_ sender: Any?) {
+    private func cancelButtonPressed(_ sender: Any?) {
         navigationController?.popViewController(animated: true)
         os_log("Cancel button pressed", log: .viewCycle, type: .info)
     }
 
     @objc
-    func saveButtonPressed(_ sender: Any?) {
+    private func saveButtonPressed(_ sender: Any?) {
         // TODO: Make a check if any of the preferences has changed
         os_log("Save button pressed", log: .viewCycle, type: .info)
 
@@ -96,13 +100,51 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     @objc
-    func demomodeSwitchChange(_ sender: Any?) {
+    private func demomodeSwitchChange(_ sender: Any?) {
         if demomodeSwitch!.isOn {
             os_log("Demo is ON", log: .viewCycle, type: .info)
             disableConnectionSettings()
         } else {
             os_log("Demo is OFF", log: .viewCycle, type: .info)
             enableConnectionSettings()
+        }
+    }
+
+    @objc
+    private func privacyButtonPressed(_ sender: Any?) {
+        let webViewController = SFSafariViewController(url: URL.privacyPolicy)
+        webViewController.configuration.barCollapsingEnabled = true
+
+        present(webViewController, animated: true)
+    }
+
+    @objc
+    private func crashReportingDummyPressed(_ sender: Any?) {
+        if sendCrashReportsSwitch.isOn {
+            sendCrashReportsSwitch.setOn(!sendCrashReportsSwitch.isOn, animated: true)
+            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
+        } else {
+            let alertController = UIAlertController(title: NSLocalizedString("crash_reporting", comment: ""), message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .actionSheet)
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { [weak self] _ in
+                    self?.sendCrashReportsSwitch.setOn(true, animated: true)
+                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+                }
+            )
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("privacy_policy", comment: ""), style: .default) { [weak self] _ in
+                    self?.privacyButtonPressed(nil)
+                }
+            )
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default)
+            )
+
+            if let popOver = alertController.popoverPresentationController {
+                popOver.sourceView = sendCrashReportsSwitch
+                popOver.sourceRect = sendCrashReportsSwitch.bounds
+            }
+            present(alertController, animated: true)
         }
     }
 
@@ -116,7 +158,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                 ret = 6
             }
         case 1:
-            ret = 10
+            ret = 11
         default:
             ret = 10
         }
@@ -126,11 +168,15 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         settingsTableView.deselectRow(at: indexPath, animated: true)
         os_log("Row selected %d %d", log: .notifications, type: .info, indexPath.section, indexPath.row)
-        if tableView.cellForRow(at: indexPath)?.tag == 999 {
+        switch tableView.cellForRow(at: indexPath)?.tag {
+        case 888:
+            privacyButtonPressed(nil)
+        case 999:
             os_log("Clearing image cache", log: .viewCycle, type: .info)
             KingfisherManager.shared.cache.clearMemoryCache()
             KingfisherManager.shared.cache.clearDiskCache()
             KingfisherManager.shared.cache.cleanExpiredDiskCache()
+        default: break
         }
     }
 
@@ -141,6 +187,11 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         default:
             return NSLocalizedString("application_settings", comment: "")
         }
+    }
+
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let version = appData?.openHABVersion ?? 2
+        return version >= 3 && indexPath == IndexPath(row: 5, section: 1) ? .zero : UITableView.automaticDimension
     }
 
     func enableConnectionSettings() {

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -62,23 +62,29 @@ class VideoUITableViewCell: GenericUITableViewCell {
         playerView.contentMode = .scaleAspectFit
 
         let marginGuide = contentView // contentView.layoutMarginsGuide if more margin would be appreciated
-        NSLayoutConstraint.activate([playerView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
-                                     playerView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
-                                     playerView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
-                                     playerView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            playerView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
+            playerView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
+            playerView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
+            playerView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
+        ])
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
-        NSLayoutConstraint.activate([mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
-                                     mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
-                                     mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
-                                     mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
+            mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
+            mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
+            mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
+        ])
 
         let bottomSpacingConstraint = activityIndicator.bottomAnchor.constraint(greaterThanOrEqualTo: marginGuide.bottomAnchor, constant: 15)
         bottomSpacingConstraint.priority = UILayoutPriority.defaultHigh
-        NSLayoutConstraint.activate([activityIndicator.centerXAnchor.constraint(equalTo: marginGuide.centerXAnchor),
-                                     activityIndicator.centerYAnchor.constraint(equalTo: marginGuide.centerYAnchor),
-                                     activityIndicator.topAnchor.constraint(greaterThanOrEqualTo: marginGuide.topAnchor, constant: 15),
-                                     bottomSpacingConstraint])
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: marginGuide.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: marginGuide.centerYAnchor),
+            activityIndicator.topAnchor.constraint(greaterThanOrEqualTo: marginGuide.topAnchor, constant: 15),
+            bottomSpacingConstraint
+        ])
 
         NotificationCenter.default.addObserver(self, selector: #selector(stopPlayback), name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
@@ -193,10 +199,15 @@ class VideoUITableViewCell: GenericUITableViewCell {
         }
         aspectRatioConstraint = nil
 
-        let constraint = NSLayoutConstraint(item: view, attribute: .width,
-                                            relatedBy: .equal,
-                                            toItem: view, attribute: .height,
-                                            multiplier: aspectRatio, constant: 0)
+        let constraint = NSLayoutConstraint(
+            item: view,
+            attribute: .width,
+            relatedBy: .equal,
+            toItem: view,
+            attribute: .height,
+            multiplier: aspectRatio,
+            constant: 0
+        )
 
         constraint.priority = UILayoutPriority(rawValue: 999)
         view.addConstraint(constraint)

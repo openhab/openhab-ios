@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -156,23 +156,25 @@ public extension UIColor {
 
 public extension UIColor {
     convenience init(fromString string: String) {
-        let namedColors = ["maroon": UIColor.ohMaroon,
-                           "red": UIColor.ohRed,
-                           "orange": UIColor.ohOrange,
-                           "olive": UIColor.ohOlive,
-                           "yellow": UIColor.ohYellow,
-                           "purple": UIColor.ohPurple,
-                           "fuchsia": UIColor.ohFuchsia,
-                           "white": UIColor.ohWhite,
-                           "lime": UIColor.ohLime,
-                           "green": UIColor.ohGreen,
-                           "navy": UIColor.ohNavy,
-                           "blue": UIColor.ohBlue,
-                           "teal": UIColor.ohTeal,
-                           "aqua": UIColor.ohAqua,
-                           "black": UIColor.ohBlack,
-                           "silver": UIColor.ohSilver,
-                           "gray": UIColor.ohGray]
+        let namedColors = [
+            "maroon": UIColor.ohMaroon,
+            "red": UIColor.ohRed,
+            "orange": UIColor.ohOrange,
+            "olive": UIColor.ohOlive,
+            "yellow": UIColor.ohYellow,
+            "purple": UIColor.ohPurple,
+            "fuchsia": UIColor.ohFuchsia,
+            "white": UIColor.ohWhite,
+            "lime": UIColor.ohLime,
+            "green": UIColor.ohGreen,
+            "navy": UIColor.ohNavy,
+            "blue": UIColor.ohBlue,
+            "teal": UIColor.ohTeal,
+            "aqua": UIColor.ohAqua,
+            "black": UIColor.ohBlack,
+            "silver": UIColor.ohSilver,
+            "gray": UIColor.ohGray
+        ]
 
         self.init(cgColor: namedColors.first { $0.key == string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }?.value.cgColor ?? UIColor(hex: string).cgColor)
     }
@@ -190,7 +192,7 @@ public extension UIColor {
         var color: UInt64 = 0
         scanner.scanHexInt64(&color)
 
-        let mask = 0x000000ff
+        let mask = 0x000000FF
         let aRed = Int(color >> 16) & mask
         let aGreen = Int(color >> 8) & mask
         let aBlue = Int(color) & mask

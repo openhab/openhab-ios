@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -27,61 +27,68 @@ struct ContentView: View {
         }
         .navigationBarTitle(Text(title))
         .alert(isPresented: $viewModel.showAlert) {
-            Alert(title: Text(NSLocalizedString("error", comment: "")),
-                  message: Text(viewModel.errorDescription),
-                  dismissButton: .default(Text(NSLocalizedString("retry", comment: ""))) {
-                      DispatchQueue.main.async {
-                          self.viewModel.refreshUrl()
-                          os_log("reload after alert", log: .default, type: .info)
-                      }
-                  })
+            Alert(
+                title: Text(NSLocalizedString("error", comment: "")),
+                message: Text(viewModel.errorDescription),
+                dismissButton: .default(Text(NSLocalizedString("retry", comment: ""))) {
+                    DispatchQueue.main.async {
+                        self.viewModel.refreshUrl()
+                        os_log("reload after alert", log: .default, type: .info)
+                    }
+                }
+            )
         }
         .actionSheet(isPresented: $viewModel.showCertificateAlert) {
-            ActionSheet(title: Text(NSLocalizedString("warning", comment: "")),
-                        message: Text(viewModel.certificateErrorDescription),
-                        buttons: [.default(Text(NSLocalizedString("abort", comment: ""))) {
-                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
-                        },
-                        .default(Text(NSLocalizedString("once", comment: ""))) {
-                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
-                        },
-                        .default(Text(NSLocalizedString("always", comment: ""))) {
-                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
-                        }])
+            ActionSheet(
+                title: Text(NSLocalizedString("warning", comment: "")),
+                message: Text(viewModel.certificateErrorDescription),
+                buttons: [
+                    .default(Text(NSLocalizedString("abort", comment: ""))) {
+                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
+                    },
+                    .default(Text(NSLocalizedString("once", comment: ""))) {
+                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
+                    },
+                    .default(Text(NSLocalizedString("always", comment: ""))) {
+                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
+                    }
+                ]
+            )
         }
     }
 
     // swiftlint:enable line_length
-    func rowWidget(widget: ObservableOpenHABWidget) -> AnyView? {
+    // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
+    @ViewBuilder func rowWidget(widget: ObservableOpenHABWidget) -> some View {
         switch widget.stateEnum {
         case .switcher:
-            return AnyView(SwitchRow(widget: widget))
+            SwitchRow(widget: widget)
         case .slider:
-            return AnyView(SliderRow(widget: widget))
+            SliderRow(widget: widget)
         case .segmented:
-            return AnyView(SegmentRow(widget: widget))
+            SegmentRow(widget: widget)
         case .rollershutter:
-            return AnyView(RollershutterRow(widget: widget))
+            RollershutterRow(widget: widget)
         case .setpoint:
-            return AnyView(SetpointRow(widget: widget))
+            SetpointRow(widget: widget)
         case .frame:
-            return AnyView(FrameRow(widget: widget))
+            FrameRow(widget: widget)
         case .image:
             // Encoded image
             if widget.item != nil {
-                return AnyView(ImageRawRow(widget: widget))
+                ImageRawRow(widget: widget)
             } else {
-                return AnyView(ImageRow(URL: URL(string: widget.url)))
+                ImageRow(URL: URL(string: widget.url))
             }
         case .chart:
             let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type ?? .none, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
-            return AnyView(ImageRow(URL: url))
+            ImageRow(URL: url)
         case .mapview:
-            return AnyView(MapViewRow(widget: widget))
+            MapViewRow(widget: widget)
         case .colorpicker:
-            return AnyView(ColorPickerRow(widget: widget))
+            ColorPickerRow(widget: widget)
         default:
-            return AnyView(GenericRow(widget: widget))
+            GenericRow(widget: widget)
         }
     }
 }

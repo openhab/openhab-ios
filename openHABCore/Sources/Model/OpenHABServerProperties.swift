@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -17,7 +17,7 @@ public class OpenHABServerProperties: Decodable {
         public var url = ""
     }
 
-    let version: String
+    public let version: String
     let links: [OpenHABLink]
 
     public var habPanelUrl: String? {

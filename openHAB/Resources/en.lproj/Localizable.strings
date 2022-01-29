@@ -58,4 +58,14 @@
 "oh_secret" = "openHAB Secret";
 "notifications" = "Notifications";
 "settings" = "Settings";
-
+"privacy_policy" = "Privacy Policy";
+"crash_reporting_info" = "By activating crash reporting you agree that device and usage information will be collected and shared with Crashlytics (a Google company). For further information view our privacy policy.";
+"activate" = "Activate";
+"crash_detected" = "Crash detected";
+"habpanel" = "HABPanel";
+"open" = "open";
+"closed" = "closed";
+"unknown" = "unknown";
+"on" = "on";
+"off" = "off";
+"empty" = "empty";

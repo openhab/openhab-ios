@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -96,8 +96,8 @@ extension Future {
     }
 }
 
-extension Future {
-    public func transformed<T>(with closure: @escaping (Value) throws -> T) -> Future<T> {
+public extension Future {
+    func transformed<T>(with closure: @escaping (Value) throws -> T) -> Future<T> {
         chained { value in
             try Promise(value: closure(value))
         }
@@ -110,8 +110,8 @@ extension Future {
 //    }
 // }
 
-extension Future where Value == Data {
-    public func decoded<T: Decodable>(as type: T.Type = T.self, using decoder: JSONDecoder = .init()) -> Future<T> {
+public extension Future where Value == Data {
+    func decoded<T: Decodable>(as type: T.Type = T.self, using decoder: JSONDecoder = .init()) -> Future<T> {
         transformed { data in
             try decoder.decode(T.self, from: data)
         }

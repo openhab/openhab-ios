@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -76,24 +76,26 @@ public class OpenHABSitemapPage: NSObject {
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item = item else { return }
 
-        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command ?? "", item.name)
+        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command.orEmpty, item.name)
         sendCommand?(item, command)
     }
 }
 
-extension OpenHABSitemapPage {
-    public func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = OpenHABSitemapPage(pageId: pageId,
-                                                            title: title,
-                                                            link: link,
-                                                            leaf: leaf,
-                                                            expandedWidgets: try widgets.filter(isIncluded))
+public extension OpenHABSitemapPage {
+    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+        let filteredOpenHABSitemapPage = OpenHABSitemapPage(
+            pageId: pageId,
+            title: title,
+            link: link,
+            leaf: leaf,
+            expandedWidgets: try widgets.filter(isIncluded)
+        )
         return filteredOpenHABSitemapPage
     }
 }
 
-extension OpenHABSitemapPage {
-    public struct CodingData: Decodable {
+public extension OpenHABSitemapPage {
+    struct CodingData: Decodable {
         let pageId: String?
         let title: String?
         let link: String?
@@ -110,9 +112,9 @@ extension OpenHABSitemapPage {
     }
 }
 
-extension OpenHABSitemapPage.CodingData {
-    public var openHABSitemapPage: OpenHABSitemapPage {
+public extension OpenHABSitemapPage.CodingData {
+    var openHABSitemapPage: OpenHABSitemapPage {
         let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
-        return OpenHABSitemapPage(pageId: pageId ?? "", title: title ?? "", link: link ?? "", leaf: leaf ?? false, widgets: mappedWidgets)
+        return OpenHABSitemapPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets)
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -18,15 +18,17 @@ struct SliderRow: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {
-        let valueBinding = Binding<Double>(get: {
-                                               self.widget.adjustedValue
-                                           },
-                                           set: {
-                                               os_log("Slider new value = %g", log: .default, type: .info, $0)
-                                               self.widget.sendCommand($0.valueText(step: self.widget.step))
+        let valueBinding = Binding<Double>(
+            get: {
+                self.widget.adjustedValue
+            },
+            set: {
+                os_log("Slider new value = %g", log: .default, type: .info, $0)
+                self.widget.sendCommand($0.valueText(step: self.widget.step))
 
-                                               // self.widget.stateEnumBinding = .slider($0)
-                                           })
+                // self.widget.stateEnumBinding = .slider($0)
+            }
+        )
 
         return
             VStack(spacing: 3) {
@@ -40,12 +42,14 @@ struct SliderRow: View {
                 Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
                     .labelsHidden()
                     .focusable(true)
-                    .digitalCrownRotation(valueBinding,
-                                          from: widget.minValue,
-                                          through: widget.maxValue,
-                                          by: widget.step,
-                                          sensitivity: .medium,
-                                          isHapticFeedbackEnabled: true)
+                    .digitalCrownRotation(
+                        valueBinding,
+                        from: widget.minValue,
+                        through: widget.maxValue,
+                        by: widget.step,
+                        sensitivity: .medium,
+                        isHapticFeedbackEnabled: true
+                    )
             }
     }
 }

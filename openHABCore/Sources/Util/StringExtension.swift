@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -39,9 +39,9 @@ extension String {
      */
     var numberValue: NSNumber? {
         let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
+        formatter.numberStyle = .scientific
         formatter.decimalSeparator = "."
-        return formatter.number(from: filter("01234567890.-".contains))
+        return formatter.number(from: filter("01234567890E.+-".contains))
     }
 
     var asDouble: Double {
@@ -110,5 +110,16 @@ extension String {
         let values = components(separatedBy: ",")
         guard values.count == 3 else { return nil }
         return Int(values[2].asDouble.rounded())
+    }
+}
+
+extension Optional where Wrapped == String {
+    var orEmpty: String {
+        switch self {
+        case let .some(value):
+            return value
+        case .none:
+            return ""
+        }
     }
 }

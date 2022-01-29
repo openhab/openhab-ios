@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -11,8 +11,8 @@
 
 import Foundation
 
-extension Double {
-    public func valueText(step: Double) -> String {
+public extension Double {
+    func valueText(step: Double) -> String {
         let digits = max(-Decimal(step).exponent, 0)
         let numberFormatter = NumberFormatter()
         numberFormatter.minimumFractionDigits = digits

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -23,10 +23,10 @@ public struct UserDefault<T> {
 
     public var wrappedValue: T {
         get {
-            UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
+            Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: key)
+            Preferences.sharedDefaults.set(newValue, forKey: key)
         }
     }
 
@@ -46,13 +46,13 @@ public struct UserDefaultURL {
 
     public var wrappedValue: String {
         get {
-            guard let localUrl = UserDefaults.standard.string(forKey: key) else { return defaultValue }
+            guard let localUrl = Preferences.sharedDefaults.string(forKey: key) else { return defaultValue }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if !validateUrl(trimmedUri) { return defaultValue }
             return trimmedUri
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: key)
+            Preferences.sharedDefaults.set(newValue, forKey: key)
         }
     }
 
@@ -76,8 +76,10 @@ public struct UserDefaultURL {
     }
 }
 
-public struct Preferences {
-    private static let defaults = UserDefaults.standard
+public enum Preferences {
+    fileprivate static let sharedDefaults = UserDefaults(suiteName: "group.es.spaphone.openhab")!
+
+    // MARK: - Public
 
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
     @UserDefaultURL("remoteUrl", defaultValue: "https://openhab.org:8444") public static var remoteUrl: String
@@ -93,4 +95,28 @@ public struct Preferences {
     @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
+
+    // MARK: - Private
+
+    @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
+}
+
+public extension Preferences {
+    static func migrateUserDefaultsIfRequired() {
+        guard !didMigrateToSharedDefaults else { return }
+
+        didMigrateToSharedDefaults = true
+        Preferences.localUrl = UserDefaults.standard.string(forKey: "localUrl") ?? Preferences.localUrl
+        Preferences.remoteUrl = UserDefaults.standard.string(forKey: "remoteUrl") ?? Preferences.remoteUrl
+        Preferences.username = UserDefaults.standard.string(forKey: "username") ?? Preferences.username
+        Preferences.password = UserDefaults.standard.string(forKey: "password") ?? Preferences.password
+        Preferences.alwaysSendCreds = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? Preferences.alwaysSendCreds
+        Preferences.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? Preferences.ignoreSSL
+        Preferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? Preferences.demomode
+        Preferences.idleOff = UserDefaults.standard.object(forKey: "idleOff") as? Bool ?? Preferences.idleOff
+        Preferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? Preferences.realTimeSliders
+        Preferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? Preferences.iconType
+        Preferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? Preferences.defaultSitemap
+        Preferences.sendCrashReports = UserDefaults.standard.object(forKey: "sendCrashReports") as? Bool ?? Preferences.sendCrashReports
+    }
 }

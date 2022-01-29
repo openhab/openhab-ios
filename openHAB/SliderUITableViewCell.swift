@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -14,7 +14,7 @@ import os.log
 import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
-    private var isInTransition: Bool = false
+    private var isInTransition = false
     private var step: Float = 1.0
     private var transitionItem: DispatchWorkItem?
     private var throttler: Throttler?
@@ -45,6 +45,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
         initialize()
     }
 
+    // swiftlint:disable:next type_contents_order
     override public func initialize() {
         selectionStyle = .none
         separatorInset = .zero

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -17,14 +17,14 @@ public class OpenHABWidgetMapping: NSObject, Decodable {
     public var label = ""
 }
 
-extension OpenHABWidgetMapping {
-    public convenience init(command: String, label: String) {
+public extension OpenHABWidgetMapping {
+    convenience init(command: String, label: String) {
         self.init()
         self.command = command
         self.label = label
     }
 
-    public convenience init(xml xmlElement: XMLElement) {
+    convenience init(xml xmlElement: XMLElement) {
         self.init()
         for child in xmlElement.children {
             switch child.tag {

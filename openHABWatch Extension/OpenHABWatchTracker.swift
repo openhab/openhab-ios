@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -252,10 +252,12 @@ class OpenHABWatchTracker: NSObject {
         let data = dataIn! as NSData
         var sockAddr: in_addr = data.castToCPointer()
         var ipAddressString: [CChar] = Array(repeating: 0, count: Int(INET6_ADDRSTRLEN))
-        inet_ntop(addressFamily,
-                  &sockAddr,
-                  &ipAddressString,
-                  socklen_t(INET_ADDRSTRLEN))
+        inet_ntop(
+            addressFamily,
+            &sockAddr,
+            &ipAddressString,
+            socklen_t(INET_ADDRSTRLEN)
+        )
 
         return String(cString: ipAddressString)
     }

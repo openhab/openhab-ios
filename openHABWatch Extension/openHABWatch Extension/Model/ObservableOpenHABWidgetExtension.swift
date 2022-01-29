@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -14,22 +14,19 @@ import os.log
 import SwiftUI
 
 extension ObservableOpenHABWidget {
-    func makeView(settings: ObservableOpenHABDataObject) -> AnyView {
-        if linkedPage != nil {
-            let title = linkedPage?.title.components(separatedBy: "[")[0] ?? ""
-            let pageUrl = linkedPage?.link ?? ""
-            os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
-            return AnyView(
-                NavigationLink(destination:
-                    LazyView(
-                        ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings:
-                            settings, title: title))
-                ) {
-                        Image(systemName: "chevron.right")
-                })
-
+    @ViewBuilder func makeView(settings: ObservableOpenHABDataObject) -> some View {
+        if let linkedPage = linkedPage {
+            let title = linkedPage.title.components(separatedBy: "[")[0]
+            let pageUrl = linkedPage.link
+            // os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
+            NavigationLink(destination:
+                LazyView(
+                    ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings: settings, title: title))
+            ) {
+                Image(systemName: "chevron.right")
+            }
         } else {
-            return AnyView(EmptyView())
+            EmptyView()
         }
     }
 }

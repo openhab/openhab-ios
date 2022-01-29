@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -13,10 +13,12 @@ import Alamofire
 import AVFoundation
 import AVKit
 import DynamicButton
+import FirebaseCrashlytics
 import Fuzi
 import Kingfisher
 import OpenHABCore
 import os.log
+import SafariServices
 import SideMenu
 import SVGKit
 import SwiftMessages
@@ -52,7 +54,7 @@ struct SVGProcessor: ImageProcessor {
             if let image = SVGKImage(data: data) {
                 return image.uiImage
             } else {
-                return nil
+                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
             }
         }
     }
@@ -165,6 +167,25 @@ class OpenHABViewController: UIViewController {
 
         setupSideMenu()
 
+        if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.sendCrashReports {
+            let alertController = UIAlertController(title: NSLocalizedString("crash_detected", comment: "").capitalized, message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .alert)
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
+                    Preferences.sendCrashReports = true
+                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+                }
+            )
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("privacy_policy", comment: ""), style: .default) { [weak self] _ in
+                    let webViewController = SFSafariViewController(url: URL.privacyPolicy)
+                    webViewController.configuration.barCollapsingEnabled = true
+                    self?.present(webViewController, animated: true)
+                }
+            )
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default))
+            present(alertController, animated: true)
+        }
+
         #if DEBUG
         // setup accessibilityIdentifiers for UITest
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
@@ -206,7 +227,6 @@ class OpenHABViewController: UIViewController {
                 widgetTableView.reloadData()
             }
             os_log("OpenHABViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
             tracker = OpenHABTracker()
             tracker?.delegate = self
             tracker?.start()
@@ -235,13 +255,13 @@ class OpenHABViewController: UIViewController {
             // do nothing
         } else {
             if animated, !search.isActive, !search.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
-                let searchBarSuperview = search.searchBar.superview,
-                let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
-                    $0.firstAttribute == .height
-                        && $0.secondItem == nil
-                        && $0.secondAttribute == .notAnAttribute
-                        && $0.constant > 0
-                }) {
+               let searchBarSuperview = search.searchBar.superview,
+               let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
+                   $0.firstAttribute == .height
+                       && $0.secondItem == nil
+                       && $0.secondAttribute == .notAnAttribute
+                       && $0.constant > 0
+               }) {
                 UIView.performWithoutAnimation {
                     searchBarHeightConstraint.constant = 0
                     searchBarSuperview.superview?.layoutIfNeeded()
@@ -417,109 +437,107 @@ class OpenHABViewController: UIViewController {
             _ = pageNetworkStatusChanged()
         }
 
-        currentPageOperation = NetworkConnection.page(pageUrl: pageUrl,
-                                                      longPolling: longPolling,
-                                                      openHABVersion: appData?.openHABVersion ?? 2) { [weak self] response in
-                guard let self = self else { return }
+        currentPageOperation = NetworkConnection.page(
+            pageUrl: pageUrl,
+            longPolling: longPolling,
+            openHABVersion: appData?.openHABVersion ?? 2
+        ) { [weak self] response in
+            guard let self = self else { return }
 
-                switch response.result {
-                case .success:
-                    os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
-                    let headers = response.response?.allHeaderFields
+            switch response.result {
+            case .success:
+                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
+                let headers = response.response?.allHeaderFields
 
-                    NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
-                    if !NetworkConnection.atmosphereTrackingId.isEmpty {
-                        os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
-                    }
-                    var openHABSitemapPage: OpenHABSitemapPage?
-                    if let data = response.result.value {
-                        // If we are talking to openHAB 1.X, talk XML
-                        if self.appData?.openHABVersion == 1 {
-                            let str = String(decoding: data, as: UTF8.self)
-                            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+                NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
+                if !NetworkConnection.atmosphereTrackingId.isEmpty {
+                    os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
+                }
+                var openHABSitemapPage: OpenHABSitemapPage?
+                if let data = response.result.value {
+                    // If we are talking to openHAB 1.X, talk XML
+                    if self.appData?.openHABVersion == 1 {
+                        let str = String(decoding: data, as: UTF8.self)
+                        os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
-                            guard let doc = try? XMLDocument(data: data) else { return }
-                            if let rootElement = doc.root, let name = rootElement.tag {
-                                os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                                if name == "page" {
-                                    openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
-                                }
-                            }
-                        } else {
-                            // Newer versions talk JSON!
-                            os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                            do {
-                                // Self-executing closure
-                                // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                                openHABSitemapPage = try {
-                                    let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                                    return sitemapPageCodingData.openHABSitemapPage
-                                }()
-                            } catch {
-                                os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                        guard let doc = try? XMLDocument(data: data) else { return }
+                        if let rootElement = doc.root, let name = rootElement.tag {
+                            os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                            if name == "page" {
+                                openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                             }
                         }
-                    }
-                    self.currentPage = openHABSitemapPage
-                    if self.isFiltering {
-                        self.filterContentForSearchText(self.search.searchBar.text)
-                    }
-
-                    self.currentPage?.sendCommand = { [weak self] item, command in
-                        self?.sendCommand(item, commandToSend: command)
-                    }
-                    self.widgetTableView.reloadData()
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    self.refreshControl?.endRefreshing()
-                    self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
-                    self.loadPage(true)
-                case let .failure(error):
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-
-                    NetworkConnection.atmosphereTrackingId = ""
-                    if (error as NSError?)?.code == -1001, longPolling {
-                        os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                        self.loadPage(false)
-                    } else if (error as NSError?)?.code == -999 {
-                        os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
                     } else {
-                        // Error
-                        DispatchQueue.main.async {
-                            if (error as NSError?)?.code == -1012 {
-                                var config = SwiftMessages.Config()
-                                config.duration = .seconds(seconds: 5)
-                                config.presentationStyle = .bottom
+                        // Newer versions talk JSON!
+                        os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
+                        do {
+                            // Self-executing closure
+                            // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                            openHABSitemapPage = try {
+                                let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
+                                return sitemapPageCodingData.openHABSitemapPage
+                            }()
+                        } catch {
+                            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                        }
+                    }
+                }
+                self.currentPage = openHABSitemapPage
+                if self.isFiltering {
+                    self.filterContentForSearchText(self.search.searchBar.text)
+                }
 
-                                SwiftMessages.show(config: config) {
-                                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                    let view = MessageView.viewFromNib(layout: .cardView)
-                                    // ... configure the view
-                                    view.configureTheme(.error)
-                                    view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
-                                    view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                                    view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                    return view
-                                }
-                            } else {
-                                var config = SwiftMessages.Config()
-                                config.duration = .seconds(seconds: 5)
-                                config.presentationStyle = .bottom
+                self.currentPage?.sendCommand = { [weak self] item, command in
+                    self?.sendCommand(item, commandToSend: command)
+                }
+                self.widgetTableView.reloadData()
+                self.refreshControl?.endRefreshing()
+                self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+                self.loadPage(true)
+            case let .failure(error):
+                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
 
-                                SwiftMessages.show(config: config) {
-                                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                                    let view = MessageView.viewFromNib(layout: .cardView)
-                                    // ... configure the view
-                                    view.configureTheme(.error)
-                                    view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
-                                    view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                                    view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                    return view
-                                }
+                NetworkConnection.atmosphereTrackingId = ""
+                if (error as NSError?)?.code == -1001, longPolling {
+                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
+                    self.loadPage(false)
+                } else if (error as NSError?)?.code == -999 {
+                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
+                } else {
+                    // Error
+                    DispatchQueue.main.async {
+                        if (error as NSError?)?.code == -1012 {
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
+                                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
+                            }
+                        } else {
+                            var config = SwiftMessages.Config()
+                            config.duration = .seconds(seconds: 5)
+                            config.presentationStyle = .bottom
+
+                            SwiftMessages.show(config: config) {
+                                let view = MessageView.viewFromNib(layout: .cardView)
+                                // ... configure the view
+                                view.configureTheme(.error)
+                                view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
+                                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                                return view
                             }
                         }
                     }
                 }
+            }
         }
 
         currentPageOperation?.resume()
@@ -532,7 +550,6 @@ class OpenHABViewController: UIViewController {
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case .success:
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
                 switch self.sitemaps.count {
                 case 2...:
@@ -558,7 +575,6 @@ class OpenHABViewController: UIViewController {
                     config.presentationStyle = .bottom
 
                     SwiftMessages.show(config: config) {
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
                         let view = MessageView.viewFromNib(layout: .cardView)
                         // ... configure the view
                         view.configureTheme(.error)
@@ -570,11 +586,9 @@ class OpenHABViewController: UIViewController {
                 default: break
                 }
                 self.widgetTableView.reloadData()
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
             case let .failure(error):
                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                 DispatchQueue.main.async {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
                     // Error
                     if (error as NSError?)?.code == -1012 {
                         var config = SwiftMessages.Config()
@@ -582,7 +596,6 @@ class OpenHABViewController: UIViewController {
                         config.presentationStyle = .bottom
 
                         SwiftMessages.show(config: config) {
-                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
                             let view = MessageView.viewFromNib(layout: .cardView)
                             view.configureTheme(.error)
                             view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
@@ -596,7 +609,6 @@ class OpenHABViewController: UIViewController {
                         config.presentationStyle = .bottom
 
                         SwiftMessages.show(config: config) {
-                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
                             let view = MessageView.viewFromNib(layout: .cardView)
                             view.configureTheme(.error)
                             view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
@@ -606,7 +618,6 @@ class OpenHABViewController: UIViewController {
                         }
                     }
                 }
-                UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
         }
     }
@@ -707,9 +718,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
     func openHABTracked(_ openHABUrl: URL?) {
         os_log("OpenHABViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
 
-        DispatchQueue.main.async {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        }
         if let openHABUrl = openHABUrl {
             openHABRootUrl = openHABUrl.absoluteString
         } else {
@@ -721,16 +729,18 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
             switch response.result {
             case .success:
 
-                DispatchQueue.main.async {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                }
-
                 if let data = response.result.value {
                     do {
                         self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
                         os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
-                        self.appData?.openHABVersion = 2
+                        let version = Int(self.serverProperties?.version ?? "2") ?? 2
+                        self.appData?.openHABVersion = version
+                        if version >= 3 {
+                            self.iconType = .svg
+                            Preferences.iconType = IconType.svg.rawValue
+                        }
                         self.selectSitemap()
+
                     } catch {
                         os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
                         let str = String(decoding: data, as: UTF8.self)
@@ -743,10 +753,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
 
             case let .failure(error):
                 os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
-
-                DispatchQueue.main.async {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                }
                 os_log("On Connecting %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
             }
         }
@@ -759,7 +765,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
         config.presentationStyle = .bottom
 
         SwiftMessages.show(config: config) {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
             let view = MessageView.viewFromNib(layout: .cardView)
             view.configureTheme(.info)
             view.configureContent(title: NSLocalizedString("connecting", comment: ""), body: message ?? "")
@@ -776,7 +781,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
         config.presentationStyle = .bottom
 
         SwiftMessages.show(config: config) {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
             let view = MessageView.viewFromNib(layout: .cardView)
             // ... configure the view
             view.configureTheme(.error)
@@ -953,7 +957,7 @@ extension OpenHABViewController: SideMenuNavigationControllerDelegate {
         }
 
         guard let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController,
-            drawer.delegate == nil || drawer.openHABRootUrl.isEmpty
+              drawer.delegate == nil || drawer.openHABRootUrl.isEmpty
         else {
             return
         }
@@ -1054,11 +1058,13 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
 
         // No icon is needed for image, video, frame and web widgets
         if widget?.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
-            if let urlc = Endpoint.icon(rootUrl: openHABRootUrl,
-                                        version: appData?.openHABVersion ?? 2,
-                                        icon: widget?.icon,
-                                        state: widget?.iconState() ?? "",
-                                        iconType: iconType).url {
+            if let urlc = Endpoint.icon(
+                rootUrl: openHABRootUrl,
+                version: appData?.openHABVersion ?? 2,
+                icon: widget?.icon,
+                state: widget?.iconState() ?? "",
+                iconType: iconType
+            ).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
 
@@ -1071,17 +1077,12 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                     }
                 }
 
-                switch iconType {
-                case .png:
-                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                                                placeholder: UIImage(named: "blankicon.png"),
-                                                completionHandler: reportOnResults)
-                case .svg:
-                    cell.imageView?.kf.setImage(with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                                                placeholder: UIImage(named: "blankicon.png"),
-                                                options: [.processor(SVGProcessor())],
-                                                completionHandler: reportOnResults)
-                }
+                cell.imageView?.kf.setImage(
+                    with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                    placeholder: UIImage(named: "blankicon.png"),
+                    options: [.processor(SVGProcessor())],
+                    completionHandler: reportOnResults
+                )
             }
         }
 
@@ -1175,7 +1176,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
 
 // MARK: Kingfisher authentication with NSURLCredential
 
-extension OpenHABViewController: AuthenticationChallengeResponsable {
+extension OpenHABViewController: AuthenticationChallengeResponsible {
     // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,

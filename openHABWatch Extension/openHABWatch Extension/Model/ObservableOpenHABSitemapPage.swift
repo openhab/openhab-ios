@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -109,11 +109,13 @@ extension ObservableOpenHABSitemapPage.CodingData {
 
 extension ObservableOpenHABSitemapPage {
     func filter(_ isIncluded: (ObservableOpenHABWidget) throws -> Bool) rethrows -> ObservableOpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = ObservableOpenHABSitemapPage(pageId: pageId,
-                                                                      title: title,
-                                                                      link: link,
-                                                                      leaf: leaf,
-                                                                      expandedWidgets: try widgets.filter(isIncluded))
+        let filteredOpenHABSitemapPage = ObservableOpenHABSitemapPage(
+            pageId: pageId,
+            title: title,
+            link: link,
+            leaf: leaf,
+            expandedWidgets: try widgets.filter(isIncluded)
+        )
         return filteredOpenHABSitemapPage
     }
 }
