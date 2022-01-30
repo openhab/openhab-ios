@@ -29,7 +29,7 @@ class InterfaceController: WKInterfaceController {
 
         refresh(Preferences.sitemap)
         // load the current Sitemap
-        OpenHabService.singleton.readSitemap { (sitemap, errorString) -> Void in
+        OpenHabService.singleton.readSitemap { (sitemap, errorString) in
 
             if errorString != "" {
                 // Timeouts happen when the app is in background state.

@@ -80,7 +80,7 @@ class LocalizationTests: XCTestCase {
     }
 
     func testInfoPlistLocalizations() {
-        let mandatoryKeys: [String] = ["NSLocalNetworkUsageDescription"]
+        let mandatoryKeys = ["NSLocalNetworkUsageDescription"]
 
         for language in LocalizationTests.localizations {
             print("Testing language: '\(language)'.")

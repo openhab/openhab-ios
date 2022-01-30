@@ -43,7 +43,7 @@ class ButtonTableRowController: NSObject {
 
     private func switchOpenHabItem(for item: Item, command: String) {
         interfaceController!.displayActivityImage()
-        OpenHabService.singleton.switchOpenHabItem(for: item, command: command) { (data, response, error) -> Void in
+        OpenHabService.singleton.switchOpenHabItem(for: item, command: command) { (data, response, error) in
 
             self.interfaceController!.hideActivityImage()
             guard let data = data, error == nil else { // check for fundamental networking error
