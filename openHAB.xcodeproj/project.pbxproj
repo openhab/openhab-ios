@@ -15,7 +15,6 @@
 		4D38D95A256897770039DA6E /* SetStringValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */; };
 		4D38D96A256897AD0039DA6E /* SetContactStateValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */; };
 		4D38DA302569A58F0039DA6E /* OpenHABItemCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */; };
-		4D6470C92561F643007B03FC /* OpenHABItemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470C82561F643007B03FC /* OpenHABItemCache.swift */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4D64718825621B4C007B03FC /* OpenHABCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93F38C4323803499001B1451 /* OpenHABCore.framework */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
@@ -120,6 +119,9 @@
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA1B8C48278630F0000A6DAE /* OpenHABLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1B8C47278630F0000A6DAE /* OpenHABLogger.swift */; };
 		DA1B8C49278630F0000A6DAE /* OpenHABLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1B8C47278630F0000A6DAE /* OpenHABLogger.swift */; };
+		DA1B8C4F278A2D22000A6DAE /* OpenHABItemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470C82561F643007B03FC /* OpenHABItemCache.swift */; };
+		DA1B8C50278A2D31000A6DAE /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE249A023EE07C800986877 /* Future.swift */; };
+		DA1B8C51278A2D31000A6DAE /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE249A023EE07C800986877 /* Future.swift */; };
 		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
 		DA1EAECF24E94871008A6B22 /* OpenHABServerProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EAECD24E9469E008A6B22 /* OpenHABServerProperties.swift */; };
 		DA1EAED024E94871008A6B22 /* OpenHABServerProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1EAECD24E9469E008A6B22 /* OpenHABServerProperties.swift */; };
@@ -154,7 +156,6 @@
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
 		DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */; };
-		DAB2438C23EF4E1F00C9C68E /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE249A023EE07C800986877 /* Future.swift */; };
 		DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
@@ -165,7 +166,6 @@
 		DACC72E224D00D59007EFAE3 /* NumberStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */; };
 		DADC1EAD24D2CB8B0052B8D4 /* NumberState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADC1EAB24D2CB6D0052B8D4 /* NumberState.swift */; };
 		DADC1EAE24D2CB8C0052B8D4 /* NumberState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADC1EAB24D2CB6D0052B8D4 /* NumberState.swift */; };
-		DAE249A223EE07C800986877 /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE249A023EE07C800986877 /* Future.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
@@ -1855,12 +1855,10 @@
 				9350F17223814F4400054BA8 /* OpenHABOptions.swift in Sources */,
 				9350F16623814ED700054BA8 /* OpenHABSitemapPage.swift in Sources */,
 				9350F194238151F100054BA8 /* Preferences.swift in Sources */,
-				4D6470C92561F643007B03FC /* OpenHABItemCache.swift in Sources */,
 				93F38C6C238034DA001B1451 /* DataObject.swift in Sources */,
 				DA1EAECF24E94871008A6B22 /* OpenHABServerProperties.swift in Sources */,
 				9350F16C23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
 				93F38D4B238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */,
-				DAB2438C23EF4E1F00C9C68E /* Future.swift in Sources */,
 				DAF4581F23DC62F10018B495 /* Collection+SafeAccess.swift in Sources */,
 				9350F1972381523700054BA8 /* Equatable.swift in Sources */,
 				9350F17F2381513200054BA8 /* DateFormatterExtension.swift in Sources */,
@@ -1869,6 +1867,7 @@
 				9350F18E238151AD00054BA8 /* NetworkConnection.swift in Sources */,
 				9350F16F23814F2500054BA8 /* OpenHABStateDescription.swift in Sources */,
 				9350F17C2381509300054BA8 /* OSLogExtension.swift in Sources */,
+				DA1B8C4F278A2D22000A6DAE /* OpenHABItemCache.swift in Sources */,
 				DA3C1AC42782026F0096FFB1 /* OpenHABSessionDelegate.swift in Sources */,
 				9350F1882381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1822381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
@@ -1881,6 +1880,7 @@
 				938621E8257E3D6900A63200 /* Sequence+KeyPath.swift in Sources */,
 				9350F18B2381519300054BA8 /* ClientCertificateManager.swift in Sources */,
 				DADC1EAD24D2CB8B0052B8D4 /* NumberState.swift in Sources */,
+				DA1B8C50278A2D31000A6DAE /* Future.swift in Sources */,
 				9350F1852381516300054BA8 /* KeyedDecodingContainerProtocolExtension.swift in Sources */,
 				DA1B8C48278630F0000A6DAE /* OpenHABLogger.swift in Sources */,
 			);
@@ -1900,7 +1900,6 @@
 				DA1EAED024E94871008A6B22 /* OpenHABServerProperties.swift in Sources */,
 				9350F16D23814F0D00054BA8 /* OpenHABWidgetMapping.swift in Sources */,
 				93F38D4C238037E3001B1451 /* OpenHABAccessTokenAdapter.swift in Sources */,
-				DAE249A223EE07C800986877 /* Future.swift in Sources */,
 				DAF4582023DC62F10018B495 /* Collection+SafeAccess.swift in Sources */,
 				9350F1982381523700054BA8 /* Equatable.swift in Sources */,
 				9350F1802381513200054BA8 /* DateFormatterExtension.swift in Sources */,
@@ -1912,6 +1911,7 @@
 				9350F1892381517D00054BA8 /* Endpoint.swift in Sources */,
 				9350F1832381514E00054BA8 /* ServerCertificateManager.swift in Sources */,
 				DA1B8C49278630F0000A6DAE /* OpenHABLogger.swift in Sources */,
+				DA1B8C51278A2D31000A6DAE /* Future.swift in Sources */,
 				DAF4579E23D904360018B495 /* UIColorExtension.swift in Sources */,
 				9350F16423814EC200054BA8 /* OpenHABSitemap.swift in Sources */,
 				DA2CBDAF24D5FD73003CAE8A /* UnknownCaseRepresentable.swift in Sources */,
