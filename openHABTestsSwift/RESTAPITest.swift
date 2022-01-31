@@ -43,7 +43,7 @@ class RESTAPITest: XCTestCase {
         NetworkConnection.shared = nil
     }
 
-    func testStatusCode200ReturnsStatusCode200() {
+    func skip_testStatusCode200ReturnsStatusCode200() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
@@ -64,7 +64,7 @@ class RESTAPITest: XCTestCase {
         wait(for: [expectation], timeout: 3)
     }
 
-    func testRegisterApp() {
+    func skip_testRegisterApp() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
@@ -79,7 +79,7 @@ class RESTAPITest: XCTestCase {
         wait(for: [expectation], timeout: 3)
     }
 
-    func testSitemap() {
+    func skip_testSitemap() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
@@ -94,7 +94,7 @@ class RESTAPITest: XCTestCase {
         wait(for: [expectation], timeout: 3)
     }
 
-    func testTracker() {
+    func skip_xtestTracker() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
