@@ -94,7 +94,7 @@ post_install do |installer|
             target.build_configurations.each do |config|
                 config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
                 scheme_filename = "#{user_data_dir}/#{target}.xcscheme"
-                `sed -i '' 's/LastUpgradeVersion = \"1100\"/LastUpgradeVersion = \"1300\"/' "#{scheme_filename}"`
+                `sed -i '' 's/LastUpgradeVersion = \"1240\"/LastUpgradeVersion = \"1320\"/' "#{scheme_filename}"`
             end
         end
     end
