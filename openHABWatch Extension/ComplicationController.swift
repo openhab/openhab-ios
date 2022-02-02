@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2021 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -14,6 +14,21 @@ import DeviceKit
 import WatchKit
 
 class ComplicationController: NSObject, CLKComplicationDataSource {
+    // MARK: - Complication Configuration
+
+    func getComplicationDescriptors(handler: @escaping ([CLKComplicationDescriptor]) -> Void) {
+        // watchOS7: replacing depreciated CLKComplicationSupportedFamilies
+        let descriptors = [
+            CLKComplicationDescriptor(identifier: "complication", displayName: Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as! String, supportedFamilies: CLKComplicationFamily.allCases)
+            // Multiple complication support can be added here with more descriptors
+        ]
+        handler(descriptors)
+    }
+
+    func handleSharedComplicationDescriptors(_ complicationDescriptors: [CLKComplicationDescriptor]) {
+        // Do any necessary work to support these newly shared complication descriptors
+    }
+
     // MARK: - Timeline Configuration
 
     func getSupportedTimeTravelDirections(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimeTravelDirections) -> Void) {
@@ -69,37 +84,20 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
 
         switch complication.family {
         case .modularSmall:
-            template = CLKComplicationTemplateModularSmallRingImage()
-            (template as! CLKComplicationTemplateModularSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
+            template = CLKComplicationTemplateModularSmallRingImage(imageProvider: CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage()), fillFraction: 1, ringStyle: CLKComplicationRingStyle.closed)
         case .utilitarianSmall:
-            template = CLKComplicationTemplateUtilitarianSmallRingImage()
-            (template as! CLKComplicationTemplateUtilitarianSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
+            template = CLKComplicationTemplateUtilitarianSmallRingImage(imageProvider: CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage()), fillFraction: 1, ringStyle: CLKComplicationRingStyle.closed)
         case .circularSmall:
-            template = CLKComplicationTemplateCircularSmallRingImage()
-            (template as! CLKComplicationTemplateCircularSmallRingImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
+            template = CLKComplicationTemplateCircularSmallRingImage(imageProvider: CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage()), fillFraction: 1, ringStyle: CLKComplicationRingStyle.closed)
         case .extraLarge:
-            template = CLKComplicationTemplateExtraLargeSimpleImage()
-            (template as! CLKComplicationTemplateExtraLargeSimpleImage).imageProvider =
-                CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage())
+            template = CLKComplicationTemplateExtraLargeSimpleImage(imageProvider: CLKImageProvider(onePieceImage: UIImage(named: "OHTemplateIcon") ?? UIImage()))
         case .graphicCorner:
-            let modTemplate = CLKComplicationTemplateGraphicCornerTextImage()
-            modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: getGraphicCornerImage())
-            modTemplate.textProvider = CLKSimpleTextProvider(text: "openHAB")
-            template = modTemplate
+            template = CLKComplicationTemplateGraphicCornerTextImage(textProvider: CLKSimpleTextProvider(text: "openHAB"), imageProvider: CLKFullColorImageProvider(fullColorImage: getGraphicCornerImage()))
         case .graphicBezel:
-            let modTemplate = CLKComplicationTemplateGraphicBezelCircularText()
-            let image = CLKComplicationTemplateGraphicCircularImage()
-            image.imageProvider = CLKFullColorImageProvider(fullColorImage: getGraphicCircularImage())
-            modTemplate.circularTemplate = image
-            modTemplate.textProvider = CLKSimpleTextProvider(text: "openHAB")
-            template = modTemplate
+            let modTemplate = CLKComplicationTemplateGraphicCircularImage(imageProvider: CLKFullColorImageProvider(fullColorImage: getGraphicCornerImage()))
+            template = CLKComplicationTemplateGraphicBezelCircularText(circularTemplate: modTemplate, textProvider: CLKSimpleTextProvider(text: "openHAB"))
         case .graphicCircular:
-            let modTemplate = CLKComplicationTemplateGraphicCircularImage()
-            modTemplate.imageProvider = CLKFullColorImageProvider(fullColorImage: getGraphicCircularImage())
-            template = modTemplate
+            template = CLKComplicationTemplateGraphicCircularImage(imageProvider: CLKFullColorImageProvider(fullColorImage: getGraphicCircularImage()))
         default: break
         }
 
