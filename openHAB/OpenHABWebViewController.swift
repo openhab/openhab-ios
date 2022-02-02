@@ -14,7 +14,7 @@ import SafariServices
 import UIKit
 import WebKit
 
-class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
+class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
     private var currentTarget = ""
 
     // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
@@ -33,27 +33,30 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         true
     }
 
-    @IBOutlet private var webView: WKWebView?
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+    private lazy var webView: WKWebView = {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
         config.userContentController.add(self, name: "Native")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
-        webView = WKWebView(frame: view.bounds, configuration: config)
+        let webView = WKWebView(frame: view.bounds, configuration: config)
         // Alow rotation of webview
-        webView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         // webView?.scrollView.isScrollEnabled = false
-        webView?.scrollView.bounces = false
-        webView?.navigationDelegate = self
+        webView.scrollView.bounces = false
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
         // support dark mode and avoid white flashing when loading
-        webView?.isOpaque = false
-        webView?.backgroundColor = UIColor.clear
-        view.addSubview(webView!)
+        webView.isOpaque = false
+        webView.backgroundColor = UIColor.clear
+        return webView
+    }()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        view.addSubview(webView)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -111,12 +114,20 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let credential = URLCredential(
-            user: Preferences.username,
-            password: Preferences.password,
-            persistence: .forSession
-        )
-        completionHandler(.useCredential, credential)
+        if let url = modifyUrl(orig: URL(string: openHABRootUrl)), challenge.protectionSpace.host == url.host {
+            guard challenge.previousFailureCount == 0 else {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+                return
+            }
+            let credential = URLCredential(
+                user: Preferences.username,
+                password: Preferences.password,
+                persistence: .forSession
+            )
+            completionHandler(.useCredential, credential)
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -131,6 +142,22 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         }
     }
 
+    func webView(_ webView: WKWebView,
+                 createWebViewWith configuration: WKWebViewConfiguration,
+                 for navigationAction: WKNavigationAction,
+                 windowFeatures: WKWindowFeatures) -> WKWebView? {
+        let schemes = ["http", "https"]
+        if navigationAction.targetFrame == nil,
+           let url = navigationAction.request.url,
+           let scheme = url.scheme,
+           schemes.contains(scheme) {
+            let svc = SFSafariViewController(url: url)
+            present(svc, animated: true, completion: nil)
+        }
+
+        return nil
+    }
+
     func loadWebView(force: Bool = false) {
         let authStr = "\(Preferences.username):\(Preferences.password)"
         let newTarget = "\(openHABRootUrl):\(authStr)"
@@ -142,8 +169,8 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
             // clear out existing page while we load.
-            webView?.evaluateJavaScript("document.body.remove()")
-            webView?.load(request)
+            webView.evaluateJavaScript("document.body.remove()")
+            webView.load(request)
         }
     }
 
