@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2021 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
+import os.log
 import SafariServices
 import UIKit
 import WebKit
@@ -80,7 +81,7 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
         }
 
         guard let url = navigationAction.request.url else { return }
-        print("decidePolicyFor - url: \(url)")
+        os_log("decidePolicyFor - url: %{PUBLIC}@", log: .urlComposition, type: .info, url.absoluteString)
 
         if navigationAction.navigationType == .linkActivated {
             action = .cancel // Stop in WebView
@@ -92,13 +93,13 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if let response = navigationResponse.response as? HTTPURLResponse {
             dump(response.allHeaderFields)
-            print("navigationResponse: \(String(response.statusCode))")
+            os_log("navigationResponse: %{PUBLIC}@", log: .urlComposition, type: .info, String(response.statusCode))
         }
         decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        print("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
+        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -109,7 +110,7 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("didFinish - webView.url: \(String(describing: webView.url?.description))")
+        os_log("didFinish - webView.url %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
@@ -131,7 +132,7 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        print("WKScriptMessage \(message.name) \(message.body)")
+        os_log("WKScriptMessage %{PUBLIC}@ %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
         if let callbackName = message.body as? String {
             switch callbackName {
             case "exitToApp":

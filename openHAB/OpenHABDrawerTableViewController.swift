@@ -139,7 +139,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("ui tiles response", log: .viewCycle, type: .info)
                 guard let responseData = response.data else {
-                    print("Error: did not receive data")
+                    os_log("Error: did not receive data", log: OSLog.remoteAccess, type: .info)
                     return
                 }
                 do {
@@ -150,7 +150,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     }
                     self.tableView.reloadData()
                 } catch {
-                    print("Error: could not decode data \(error.localizedDescription)")
+                    os_log("Error: did not receive data %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, error.localizedDescription)
                 }
             case let .failure(error):
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
