@@ -185,9 +185,9 @@
         "package": "SVGKit",
         "repositoryURL": "https://github.com/SVGKit/SVGKit.git",
         "state": {
-          "branch": null,
-          "revision": "58152b9f7c85eab239160b36ffdfd364aa43d666",
-          "version": "3.0.0"
+          "branch": "3.x",
+          "revision": "2da1c89055cc1afe7e447c1cb02ec69d3f904e82",
+          "version": null
         }
       },
       {
