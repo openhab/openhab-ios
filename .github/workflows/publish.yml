@@ -25,6 +25,16 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
           fetch-depth: 0
 
+      - name: Cache BuildTools
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-buildtools-dependencies
+        with:
+          path: BuildTools/.build
+          key: ${{ runner.os }}-buildtools-${{ env.cache-name }}-${{ hashFiles('../Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-buildtools-${{ env.cache-name }}-
+
       - name: Install dependencies
         run: |
             bundle install --redownload
