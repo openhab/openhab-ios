@@ -14,7 +14,7 @@
 import Alamofire
 import XCTest
 
-final class RESTAPITest: XCTestCase {
+final class RESTAPITests: XCTestCase {
     override func setUp() {
         super.setUp()
 
