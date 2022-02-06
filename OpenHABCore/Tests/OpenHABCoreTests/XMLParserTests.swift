@@ -9,15 +9,16 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Fuzi
 @testable import OpenHABCore
+
+import Fuzi
 import XCTest
 
 enum TestingError: Error {
     case noXMLDocument
 }
 
-class OpenHABXMLParserTests: XCTestCase {
+final class XMLParserTests: XCTestCase {
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }

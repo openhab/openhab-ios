@@ -32,7 +32,10 @@ let package = Package(
         ),
         .testTarget(
             name: "OpenHABCoreTests",
-            dependencies: ["OpenHABCore"]
+            dependencies: ["OpenHABCore"],
+            resources: [
+                .process("Resources")
+            ]
         )
     ]
 )

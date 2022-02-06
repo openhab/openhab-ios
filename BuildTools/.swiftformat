@@ -3,6 +3,7 @@
 --exclude ../Pods
 --exclude ../BuildTools
 --exclude ../fastlane
+--exclude ../OpenHABCore/.build
 --symlinks ignore
 
 # disabled rules

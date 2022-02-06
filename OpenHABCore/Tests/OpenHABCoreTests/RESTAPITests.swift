@@ -9,11 +9,12 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@testable import Alamofire
 @testable import OpenHABCore
+
+import Alamofire
 import XCTest
 
-class RESTAPITest: XCTestCase {
+final class RESTAPITest: XCTestCase {
     override func setUp() {
         super.setUp()
 
@@ -43,7 +44,7 @@ class RESTAPITest: XCTestCase {
         NetworkConnection.shared = nil
     }
 
-    func skip_testStatusCode200ReturnsStatusCode200() {
+    func testStatusCode200ReturnsStatusCode200() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
@@ -64,7 +65,7 @@ class RESTAPITest: XCTestCase {
         wait(for: [expectation], timeout: 3)
     }
 
-    func skip_testRegisterApp() {
+    func testRegisterApp() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
@@ -79,7 +80,7 @@ class RESTAPITest: XCTestCase {
         wait(for: [expectation], timeout: 3)
     }
 
-    func skip_testSitemap() {
+    func testSitemap() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 
@@ -94,7 +95,7 @@ class RESTAPITest: XCTestCase {
         wait(for: [expectation], timeout: 3)
     }
 
-    func skip_xtestTracker() {
+    func testTracker() {
         // given
         MockURLProtocol.responseWithStatusCode(code: 200)
 

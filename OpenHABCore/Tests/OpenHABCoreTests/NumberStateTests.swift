@@ -9,12 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import XCTest
-
-@testable import openHAB
 @testable import OpenHABCore
 
-class NumberStateTest: XCTestCase {
+import XCTest
+
+final class NumberStateTest: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
@@ -68,7 +67,7 @@ class NumberStateTest: XCTestCase {
     }
 }
 
-extension UIColor {
+private extension UIColor {
     func equals(_ rhs: UIColor) -> Bool {
         var lhsR: CGFloat = 0
         var lhsG: CGFloat = 0

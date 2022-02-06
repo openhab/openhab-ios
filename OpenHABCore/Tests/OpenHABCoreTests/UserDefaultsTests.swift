@@ -10,14 +10,15 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import OpenHABCore
+
 import XCTest
 
-class OpenHABUserDefaultsTests: XCTestCase {
+final class UserDefaultsTests: XCTestCase {
     let data = UserDefaults(suiteName: "group.es.spaphone.openhab")!
 
-    override func setUp() {
+    override func setUpWithError() throws {
         super.setUp()
-        let defaultsName = Bundle.main.bundleIdentifier!
+        let defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
         data.removePersistentDomain(forName: defaultsName)
 
         Preferences.username = Preferences.username

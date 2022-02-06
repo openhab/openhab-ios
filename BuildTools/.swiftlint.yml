@@ -30,6 +30,7 @@ excluded:
   - ../Pods
   - ../fastlane
   - ../BuildTools
+  - ../OpenHABCore/.build
 
 nesting:
     type_level: 2

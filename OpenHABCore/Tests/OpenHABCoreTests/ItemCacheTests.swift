@@ -10,11 +10,12 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import OpenHABCore
+
 import XCTest
 
-class OpenHABItemCacheTests: XCTestCase {
-    static let ITEMS_URL = "/rest/items?"
-    let instance = OpenHABItemCache.instance
+final class ItemCacheTests: XCTestCase {
+    private static let ITEMS_URL = "/rest/items?"
+    private let instance = OpenHABItemCache.instance
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -38,7 +39,7 @@ class OpenHABItemCacheTests: XCTestCase {
 
         var url = instance.getURL()
         XCTAssert(instance.lastUrlConnected == OpenHABItemCache.URL_LOCAL)
-        var expected = Preferences.localUrl + OpenHABItemCacheTests.ITEMS_URL
+        var expected = Preferences.localUrl + ItemCacheTests.ITEMS_URL
         var result = url?.absoluteString ?? ""
         XCTAssert(expected == result)
 
@@ -46,7 +47,7 @@ class OpenHABItemCacheTests: XCTestCase {
 
         url = instance.getURL()
         XCTAssert(instance.lastUrlConnected == OpenHABItemCache.URL_REMOTE)
-        expected = Preferences.remoteUrl + OpenHABItemCacheTests.ITEMS_URL
+        expected = Preferences.remoteUrl + ItemCacheTests.ITEMS_URL
         result = url?.absoluteString ?? ""
         XCTAssert(expected == result)
 
@@ -54,7 +55,7 @@ class OpenHABItemCacheTests: XCTestCase {
 
         url = instance.getURL()
         XCTAssert(instance.lastUrlConnected == OpenHABItemCache.URL_DEMO)
-        expected = "https://demo.openhab.org" + OpenHABItemCacheTests.ITEMS_URL
+        expected = "https://demo.openhab.org" + ItemCacheTests.ITEMS_URL
         result = url?.absoluteString ?? ""
         XCTAssert(expected == result)
     }

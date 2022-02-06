@@ -10,7 +10,6 @@
 		1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78D228A89FC00750965 /* WatchMessageService.swift */; };
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
-		4D38DA302569A58F0039DA6E /* OpenHABItemCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
@@ -71,10 +70,8 @@
 		DA0F37D023D4ACC7007EAB48 /* SliderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */; };
 		DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
-		DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C32B92311CCE200FACFB0 /* JSONData.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		DA2CBDB124D7562C003CAE8A /* ParseAsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */; };
 		DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0D23DCC152009B0A99 /* MapView.swift */; };
@@ -89,26 +86,19 @@
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
-		DA966478232EDEAD00CB418B /* MockURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA966477232EDEAD00CB418B /* MockURLProtocol.swift */; };
-		DA96647A232EE3C200CB418B /* RESTAPITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA966479232EE3C200CB418B /* RESTAPITest.swift */; };
 		DA9721C324E29A8F0092CCFD /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */; };
-		DA97BB072329902100AAE470 /* LargeSitemap.json in Resources */ = {isa = PBXBuildFile; fileRef = DA97BB062329902000AAE470 /* LargeSitemap.json */; };
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
-		DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */; };
-		DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
 		DAC9AF4724F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */; };
 		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
-		DACC72E224D00D59007EFAE3 /* NumberStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
-		DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAED514E2305CDE3003BCB31 /* XMLData.swift */; };
 		DAF4578223D630C70018B495 /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578123D630C70018B495 /* IconView.swift */; };
 		DAF4578523D7807A0018B495 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B610B2348D2F9009112D5 /* Color+Extension.swift */; };
 		DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578623D798A50018B495 /* TextLabelView.swift */; };
@@ -256,7 +246,6 @@
 		4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStringValueIntentHandler.swift; sourceTree = "<group>"; };
 		4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetColorValueIntentHandler.swift; sourceTree = "<group>"; };
 		4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetContactStateValueIntentHandler.swift; sourceTree = "<group>"; };
-		4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABItemCacheTests.swift; sourceTree = "<group>"; };
 		4D6470D32561F935007B03FC /* openHABIntents.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = openHABIntents.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D6470D52561F935007B03FC /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
 		4D6470D72561F935007B03FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -361,10 +350,8 @@
 		DA1C2E6C230DC28F00FACFB0 /* description.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
 		DA1C2E6D230DC28F00FACFB0 /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
 		DA1C2E6E230DC28F00FACFB0 /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
-		DA1C32B92311CCE200FACFB0 /* JSONData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONData.swift; sourceTree = "<group>"; };
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseAsTest.swift; sourceTree = "<group>"; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABJSONParserTests.swift; sourceTree = "<group>"; };
 		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -384,15 +371,10 @@
 		DA7EB1C4259BC9230072A7D9 /* openHABWatch Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "openHABWatch Extension.entitlements"; sourceTree = "<group>"; };
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
-		DA966477232EDEAD00CB418B /* MockURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockURLProtocol.swift; sourceTree = "<group>"; };
-		DA966479232EE3C200CB418B /* RESTAPITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RESTAPITest.swift; sourceTree = "<group>"; };
 		DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
-		DA97BB062329902000AAE470 /* LargeSitemap.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = LargeSitemap.json; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
-		DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABUserDefaultsTests.swift; sourceTree = "<group>"; };
-		DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABXMLParserTests.swift; sourceTree = "<group>"; };
 		DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		DAC6608B236F6F4200F4501E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSwiftUIView.swift; sourceTree = "<group>"; };
@@ -401,12 +383,9 @@
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
 		DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABWidgetExtension.swift; sourceTree = "<group>"; };
 		DAC9AF4824F966FA006DAE93 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
-		DACC72E024CE14FB007EFAE3 /* restAPI.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = restAPI.json; sourceTree = "<group>"; };
-		DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberStateTest.swift; sourceTree = "<group>"; };
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
-		DAED514E2305CDE3003BCB31 /* XMLData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLData.swift; sourceTree = "<group>"; };
 		DAF4578123D630C70018B495 /* IconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconView.swift; sourceTree = "<group>"; };
 		DAF4578623D798A50018B495 /* TextLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLabelView.swift; sourceTree = "<group>"; };
 		DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailTextLabelView.swift; sourceTree = "<group>"; };
@@ -711,23 +690,12 @@
 		DA2DC23021F2736C00830730 /* openHABTestsSwift */ = {
 			isa = PBXGroup;
 			children = (
-				DA966479232EE3C200CB418B /* RESTAPITest.swift */,
 				DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */,
 				DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */,
 				938BF89524EFBC5400E6B52F /* LocalizationTests.swift */,
-				DA97BB062329902000AAE470 /* LargeSitemap.json */,
-				DA1C32B92311CCE200FACFB0 /* JSONData.swift */,
-				DAB9C7B0230B323000A7DB6E /* OpenHABXMLParserTests.swift */,
-				DAED514E2305CDE3003BCB31 /* XMLData.swift */,
-				DAAB598523187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift */,
 				DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */,
 				DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */,
 				DA2DC23321F2736C00830730 /* Info.plist */,
-				DA966477232EDEAD00CB418B /* MockURLProtocol.swift */,
-				DACC72E024CE14FB007EFAE3 /* restAPI.json */,
-				DACC72E124D00D59007EFAE3 /* NumberStateTest.swift */,
-				DA2CBDB024D7562C003CAE8A /* ParseAsTest.swift */,
-				4D38DA2F2569A58F0039DA6E /* OpenHABItemCacheTests.swift */,
 			);
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
@@ -1231,7 +1199,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA97BB072329902100AAE470 /* LargeSitemap.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1363,19 +1330,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAAB598623187CFB007CC3D3 /* OpenHABUserDefaultsTests.swift in Sources */,
-				DA1C32BA2311CCE200FACFB0 /* JSONData.swift in Sources */,
-				DA96647A232EE3C200CB418B /* RESTAPITest.swift in Sources */,
-				DAB9C7B1230B323000A7DB6E /* OpenHABXMLParserTests.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
-				4D38DA302569A58F0039DA6E /* OpenHABItemCacheTests.swift in Sources */,
 				DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */,
-				DACC72E224D00D59007EFAE3 /* NumberStateTest.swift in Sources */,
 				938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */,
 				DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */,
-				DA966478232EDEAD00CB418B /* MockURLProtocol.swift in Sources */,
-				DAED514F2305CDE3003BCB31 /* XMLData.swift in Sources */,
-				DA2CBDB124D7562C003CAE8A /* ParseAsTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

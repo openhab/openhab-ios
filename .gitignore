@@ -16,3 +16,4 @@ openHAB.ipa
 # spm
 build/
 BuildTools/.build
+OpenHABCore/Package.resolved
