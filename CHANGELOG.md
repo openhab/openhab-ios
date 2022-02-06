@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Changed
+- Fixed connection to myopenhab.org
 - OpenHABCore swift package
 - Migrate to Alamofire 5
 - Move external dependencies to SPM

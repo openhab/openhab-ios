@@ -748,6 +748,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                     }
                 }
             case let .failure(error):
+                self.openHABTrackingError(error)
                 os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
                 os_log("On Connecting %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
             }

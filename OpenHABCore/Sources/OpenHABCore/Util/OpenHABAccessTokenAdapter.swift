@@ -21,7 +21,7 @@ public class OpenHABAccessTokenAdapter: RequestInterceptor {
     }
 
     public func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
-        guard appData.openHABAlwaysSendCreds else {
+        guard appData.openHABAlwaysSendCreds || urlRequest.url?.host == "myopenhab.org" else {
             // The user did not choose for the credentials to be sent with every request.
             return completion(.success(urlRequest))
         }
@@ -40,7 +40,7 @@ public class OpenHABAccessTokenAdapter: RequestInterceptor {
     }
 
     public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-        guard appData.openHABAlwaysSendCreds else {
+        guard appData.openHABAlwaysSendCreds || urlRequest.url?.host == "myopenhab.org" else {
             // The user did not choose for the credentials to be sent with every request.
             return urlRequest
         }
