@@ -1,3 +1,3 @@
 # OpenHABCore
 
-A description of this package.
+This package contains code shared between the main openHAB app and its extensions.
