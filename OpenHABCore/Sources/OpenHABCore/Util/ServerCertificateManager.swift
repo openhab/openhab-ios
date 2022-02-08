@@ -39,7 +39,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         }
     }
 
-    var evaluateResultSemaphore = DispatchSemaphore(value: 1)
+    private let evaluateResultSemaphore = DispatchSemaphore(value: 0)
 
     weak var delegate: ServerCertificateManagerDelegate?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
