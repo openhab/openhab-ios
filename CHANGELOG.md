@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Re-enable icon type setting
+- Fix certificate issues
 - Fixed connection to myopenhab.org
 - OpenHABCore swift package
 - Migrate to Alamofire 5
