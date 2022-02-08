@@ -136,7 +136,7 @@ public extension Endpoint {
             ]
             if version >= 3 {
                 queryItems.append(contentsOf: [
-                    URLQueryItem(name: "format", value: "SVG"),
+                    URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
                     URLQueryItem(name: "anyFormat", value: "true")
                 ])
             } else {

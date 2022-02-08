@@ -629,8 +629,7 @@ class OpenHABViewController: UIViewController {
         openHABAlwaysSendCreds = Preferences.alwaysSendCreds
         defaultSitemap = Preferences.defaultSitemap
         idleOff = Preferences.idleOff
-        let rawIconType = Preferences.iconType
-        iconType = IconType(rawValue: rawIconType) ?? .png
+        iconType = IconType(rawValue: Preferences.iconType) ?? .png
 
         appData?.openHABUsername = openHABUsername
         appData?.openHABPassword = openHABPassword
@@ -733,10 +732,6 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                     os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
                     let version = Int(self.serverProperties?.version ?? "2") ?? 2
                     self.appData?.openHABVersion = version
-                    if version >= 3 {
-                        self.iconType = .svg
-                        Preferences.iconType = IconType.svg.rawValue
-                    }
                     self.selectSitemap()
 
                 } catch {
