@@ -400,7 +400,7 @@ class OpenHABViewController: UIViewController {
     }
 
     func relevantWidget(indexPath: IndexPath) -> OpenHABWidget? {
-        relevantPage?.widgets[indexPath.row]
+        relevantPage?.widgets[safe: indexPath.row]
     }
 
     private func updateWidgetTableView() {
