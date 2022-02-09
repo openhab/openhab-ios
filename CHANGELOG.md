@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Delete unsent crashlytics reports if permission dialog is canceled
 - Re-enable icon type setting
 - Fix certificate issues
 - Fixed connection to myopenhab.org

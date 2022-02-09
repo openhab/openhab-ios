@@ -173,6 +173,7 @@ class OpenHABViewController: UIViewController {
                 UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
                     Preferences.sendCrashReports = true
                     Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+                    Crashlytics.crashlytics().sendUnsentReports()
                 }
             )
             alertController.addAction(
@@ -182,7 +183,11 @@ class OpenHABViewController: UIViewController {
                     self?.present(webViewController, animated: true)
                 }
             )
-            alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default))
+            alertController.addAction(
+                UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default) { _ in
+                    Crashlytics.crashlytics().deleteUnsentReports()
+                }
+            )
             present(alertController, animated: true)
         }
 
