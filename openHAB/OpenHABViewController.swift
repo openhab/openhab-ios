@@ -991,10 +991,10 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableView.automaticDimension
         case .webview, .mapview:
             if let height = widget?.height {
-                // calculate webview/mapview height and return it
+                // calculate webview/mapview height and return it. Limited to UIScreen.main.bounds.height
                 let heightValue = height * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
-                return CGFloat(heightValue)
+                return min(UIScreen.main.bounds.height, CGFloat(heightValue))
             } else {
                 // return default height for webview/mapview as 8 rows
                 return 44.0 * 8
