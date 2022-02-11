@@ -49,16 +49,12 @@ jobs:
           ssh-private-key: |
             ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
 
-      - name: Get the current branch name
-        run: echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
-        id: extract_branch
-
       - name: Deploy on TestFlight
         env:
           OH_CROWDIN_PROJECT_ID: openhab-ios
           OH_CROWDIN_USERNAME: ${{ secrets.OH_CROWDIN_USERNAME }}
           OH_CROWDIN_ACCOUNT_KEY: ${{ secrets.OH_CROWDIN_ACCOUNT_KEY }}
-          BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
+          BRANCH_NAME: ${{ github.head_ref }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
