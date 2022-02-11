@@ -16,7 +16,7 @@ import Combine
 import Foundation
 import Fuzi
 import MapKit
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 
 enum WidgetTypeEnum {

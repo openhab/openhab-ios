@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import MapKit
-import OpenHABCoreWatch
+import OpenHABCore
 import SwiftUI
 
 struct MapView: View {
