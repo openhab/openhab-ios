@@ -51,7 +51,9 @@ struct SVGProcessor: ImageProcessor {
             os_log("already an image", log: .default, type: .info)
             return image
         case let .data(data):
-            if let image = SVGKImage(data: data) {
+            let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
+            let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
+            if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData) {
                 return image.uiImage
             } else {
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
