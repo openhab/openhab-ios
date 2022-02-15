@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-
+- More robust SVG rendering - Should not crash anymore / unit tests included
 - Delete unsent crashlytics reports if permission dialog is canceled
 - Re-enable icon type setting
 - Fix certificate issues

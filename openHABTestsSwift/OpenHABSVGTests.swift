@@ -21,6 +21,7 @@ class OpenHABSVGTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    /// Invalid SVG
     func testInvalidXMLNS() throws {
         let svgTestFile = "invalid_xmlns"
         // xmlns is defined by referring to DTD ENTITY.
@@ -38,8 +39,28 @@ class OpenHABSVGTests: XCTestCase {
         }
     }
 
-    func testValidXMLNS() throws {
-        let svgTestFile = "valid_xmlns"
+    func testUseTagPoints2NonExistentElement() throws {
+        let svgTestFile = "pantryUseTagPoints2NonExistentElement"
+
+        do {
+            let url = Bundle(for: Self.self).url(forResource: svgTestFile, withExtension: "svg")
+            let data = try Data(contentsOf: url!)
+            let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
+            let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
+            XCTAssertNotEqual(parseResults?.parsedDocument, nil, "Non nil parsedDocument expected")
+            XCTAssertNotEqual(parseResults?.errorsFatal.count, 0, "errorsFatal are 0")
+            let fatalError = parseResults?.errorsFatal[0] as! NSError
+            XCTAssertEqual(fatalError.localizedDescription, "Exception = Found an SVG <use> tag that points to a non-existent element. Missing element: id = e")
+        } catch {
+            XCTFail("Whoops, an unexpected error occured while unit testing SVG rendering")
+        }
+    }
+
+    /// Valid SVG
+    ///
+
+    func testValidEmbeddedPNG() throws {
+        let svgTestFile = "embeddedpng_valid"
 
         do {
             let url = Bundle(for: Self.self).url(forResource: svgTestFile, withExtension: "svg")
@@ -55,18 +76,18 @@ class OpenHABSVGTests: XCTestCase {
         }
     }
 
-    func testUseTagPoints2NonExistentElement() throws {
-        let svgTestFile = "pantryUseTagPoints2NonExistentElement"
+    func testValidXMLNS() throws {
+        let svgTestFile = "valid_xmlns"
 
         do {
             let url = Bundle(for: Self.self).url(forResource: svgTestFile, withExtension: "svg")
             let data = try Data(contentsOf: url!)
             let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
             let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
+            let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData)
             XCTAssertNotEqual(parseResults?.parsedDocument, nil, "Non nil parsedDocument expected")
-            XCTAssertNotEqual(parseResults?.errorsFatal.count, 0, "errorsFatal are 0")
-            let fatalError = parseResults?.errorsFatal[0] as! NSError
-            XCTAssertEqual(fatalError.localizedDescription, "Exception = Found an SVG <use> tag that points to a non-existent element. Missing element: id = e")
+            XCTAssertEqual(parseResults?.errorsFatal.count, 0, "No errorsFatal expected")
+            XCTAssertNotEqual(image, nil, "Conversion to image not feasible")
         } catch {
             XCTFail("Whoops, an unexpected error occured while unit testing SVG rendering")
         }

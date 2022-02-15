@@ -99,6 +99,11 @@
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
+		DAF231D227BB6EEA00AB916C /* OpenHABSVGTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF231D127BB6EEA00AB916C /* OpenHABSVGTests.swift */; };
+		DAF231D827BB702500AB916C /* valid_xmlns.svg in Resources */ = {isa = PBXBuildFile; fileRef = DAF231D527BB702400AB916C /* valid_xmlns.svg */; };
+		DAF231D927BB702500AB916C /* invalid_xmlns.svg in Resources */ = {isa = PBXBuildFile; fileRef = DAF231D627BB702500AB916C /* invalid_xmlns.svg */; };
+		DAF231DB27BB828000AB916C /* pantryUseTagPoints2NonExistentElement.svg in Resources */ = {isa = PBXBuildFile; fileRef = DAF231DA27BB828000AB916C /* pantryUseTagPoints2NonExistentElement.svg */; };
+		DAF231E327BBD1A000AB916C /* embeddedpng_valid.svg in Resources */ = {isa = PBXBuildFile; fileRef = DAF231E227BBD1A000AB916C /* embeddedpng_valid.svg */; };
 		DAF4578223D630C70018B495 /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578123D630C70018B495 /* IconView.swift */; };
 		DAF4578523D7807A0018B495 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B610B2348D2F9009112D5 /* Color+Extension.swift */; };
 		DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4578623D798A50018B495 /* TextLabelView.swift */; };
@@ -386,6 +391,11 @@
 		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
+		DAF231D127BB6EEA00AB916C /* OpenHABSVGTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABSVGTests.swift; sourceTree = "<group>"; };
+		DAF231D527BB702400AB916C /* valid_xmlns.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = valid_xmlns.svg; sourceTree = "<group>"; };
+		DAF231D627BB702500AB916C /* invalid_xmlns.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = invalid_xmlns.svg; sourceTree = "<group>"; };
+		DAF231DA27BB828000AB916C /* pantryUseTagPoints2NonExistentElement.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = pantryUseTagPoints2NonExistentElement.svg; sourceTree = "<group>"; };
+		DAF231E227BBD1A000AB916C /* embeddedpng_valid.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = embeddedpng_valid.svg; sourceTree = "<group>"; };
 		DAF4578123D630C70018B495 /* IconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconView.swift; sourceTree = "<group>"; };
 		DAF4578623D798A50018B495 /* TextLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLabelView.swift; sourceTree = "<group>"; };
 		DAF4578823D79AA50018B495 /* DetailTextLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailTextLabelView.swift; sourceTree = "<group>"; };
@@ -690,11 +700,13 @@
 		DA2DC23021F2736C00830730 /* openHABTestsSwift */ = {
 			isa = PBXGroup;
 			children = (
+				DAF231D327BB6F5C00AB916C /* Ressources */,
 				DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */,
 				DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */,
 				938BF89524EFBC5400E6B52F /* LocalizationTests.swift */,
 				DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */,
 				DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */,
+				DAF231D127BB6EEA00AB916C /* OpenHABSVGTests.swift */,
 				DA2DC23321F2736C00830730 /* Info.plist */,
 			);
 			path = openHABTestsSwift;
@@ -709,6 +721,17 @@
 				DAF457A723DBA2C40018B495 /* Utils */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		DAF231D327BB6F5C00AB916C /* Ressources */ = {
+			isa = PBXGroup;
+			children = (
+				DAF231DA27BB828000AB916C /* pantryUseTagPoints2NonExistentElement.svg */,
+				DAF231D627BB702500AB916C /* invalid_xmlns.svg */,
+				DAF231D527BB702400AB916C /* valid_xmlns.svg */,
+				DAF231E227BBD1A000AB916C /* embeddedpng_valid.svg */,
+			);
+			path = Ressources;
 			sourceTree = "<group>";
 		};
 		DAF457A323DB7A820018B495 /* Rows */ = {
@@ -1133,17 +1156,17 @@
 			);
 			mainGroup = DFB2621E18830A3600D3244D;
 			packageReferences = (
-				937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */,
-				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */,
-				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */,
-				93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
-				93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */,
-				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */,
-				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */,
-				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */,
-				93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */,
-				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */,
-				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */,
+				937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */,
+				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */,
+				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */,
+				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */,
+				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */,
+				93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */,
+				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */,
+				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1199,6 +1222,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAF231DB27BB828000AB916C /* pantryUseTagPoints2NonExistentElement.svg in Resources */,
+				DAF231E327BBD1A000AB916C /* embeddedpng_valid.svg in Resources */,
+				DAF231D827BB702500AB916C /* valid_xmlns.svg in Resources */,
+				DAF231D927BB702500AB916C /* invalid_xmlns.svg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1330,6 +1357,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAF231D227BB6EEA00AB916C /* OpenHABSVGTests.swift in Sources */,
 				DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */,
 				DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */,
 				938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */,
@@ -2165,7 +2193,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */ = {
+		937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/cezheng/Fuzi.git";
 			requirement = {
@@ -2173,7 +2201,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */ = {
+		937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/devicekit/DeviceKit.git";
 			requirement = {
@@ -2181,7 +2209,7 @@
 				minimumVersion = 4.0.0;
 			};
 		};
-		937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */ = {
+		937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
@@ -2189,7 +2217,7 @@
 				minimumVersion = 7.0.0;
 			};
 		};
-		93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */ = {
+		93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -2197,7 +2225,7 @@
 				version = 5.4.4;
 			};
 		};
-		93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */ = {
+		93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/AlamofireNetworkActivityIndicator.git";
 			requirement = {
@@ -2205,7 +2233,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */ = {
+		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
 			requirement = {
@@ -2213,7 +2241,7 @@
 				minimumVersion = 8.0.0;
 			};
 		};
-		93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */ = {
+		93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SwiftKickMobile/SwiftMessages.git";
 			requirement = {
@@ -2221,7 +2249,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */ = {
+		93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RastislavMirek/FlexColorPicker.git";
 			requirement = {
@@ -2229,7 +2257,7 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */ = {
+		93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/yannickl/DynamicButton.git";
 			requirement = {
@@ -2237,7 +2265,7 @@
 				minimumVersion = 6.0.0;
 			};
 		};
-		93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */ = {
+		93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jonkykong/SideMenu.git";
 			requirement = {
@@ -2245,7 +2273,7 @@
 				minimumVersion = 6.0.0;
 			};
 		};
-		93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */ = {
+		93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
 			requirement = {
@@ -2266,37 +2294,37 @@
 		};
 		937E4481270B378F00A98C26 /* Fuzi */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */;
+			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */;
 			productName = Fuzi;
 		};
 		937E4484270B379900A98C26 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
 		937E4487270B37A600A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E448B270B37CA00A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E448D270B37D200A98C26 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
 		937E4491270B37FE00A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E4493270B380500A98C26 /* Fuzi */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */;
+			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */;
 			productName = Fuzi;
 		};
 		937E44E1270B393C00A98C26 /* OpenHABCore */ = {
@@ -2305,47 +2333,47 @@
 		};
 		93F8061A27AE615D0035A6B0 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 		93F8062E27AE63620035A6B0 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 		93F8063127AE6B940035A6B0 /* AlamofireNetworkActivityIndicator */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */;
+			package = 93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */;
 			productName = AlamofireNetworkActivityIndicator;
 		};
 		93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */;
+			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
 		};
 		93F8064627AE7A050035A6B0 /* SwiftMessages */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */;
+			package = 93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */;
 			productName = SwiftMessages;
 		};
 		93F8064927AE7A2E0035A6B0 /* FlexColorPicker */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */;
+			package = 93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */;
 			productName = FlexColorPicker;
 		};
 		93F8064C27AE7A4D0035A6B0 /* DynamicButton */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */;
+			package = 93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */;
 			productName = DynamicButton;
 		};
 		93F8064F27AE7A830035A6B0 /* SideMenu */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */;
+			package = 93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */;
 			productName = SideMenu;
 		};
 		93F8065227AE7B580035A6B0 /* SVGKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */;
+			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */;
 			productName = SVGKit;
 		};
 /* End XCSwiftPackageProductDependency section */
