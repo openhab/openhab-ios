@@ -52,18 +52,10 @@ platform :ios do
 
     desc 'Run unit tests.'
     lane :unittests do
-        begin
-            sh("cd ../OpenHABCore && xcodebuild test -scheme OpenHABCore -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 13 Pro'")
-
-            clean_spm
-        rescue => ex
-            clean_spm
-            UI.user_error! "OpenHABCore tests failed."
-        end
-
         run_tests(
             workspace: 'openHAB.xcworkspace',
             scheme: 'openHABTestsSwift',
+            testplan: 'openHABTests',
             devices: ['iPhone 13 Pro'],
             clean: true
         )

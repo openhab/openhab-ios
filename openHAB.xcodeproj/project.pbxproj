@@ -298,6 +298,7 @@
 		938BF9CF24EFCCC000E6B52F /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Localization.swift"; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
+		93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = openHABTests.xctestplan; sourceTree = "<group>"; };
 		A07ED02D2402EE6E006588FE /* OpenHABWatchTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OpenHABWatchTracker.swift; path = "openHABWatch Extension/OpenHABWatchTracker.swift"; sourceTree = SOURCE_ROOT; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
@@ -585,6 +586,14 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		93A4A7C827CA23FD0060AF5F /* TestPlans */ = {
+			isa = PBXGroup;
+			children = (
+				93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */,
+			);
+			path = TestPlans;
+			sourceTree = "<group>";
+		};
 		93F38D4623803731001B1451 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -847,6 +856,7 @@
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DFB2623018830A3600D3244D /* openHAB */,
+				93A4A7C827CA23FD0060AF5F /* TestPlans */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				933D7F0522E7015000621A03 /* openHABUITests */,
 				DA0775162346705D0086C685 /* openHABWatch */,
