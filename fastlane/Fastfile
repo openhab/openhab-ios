@@ -122,6 +122,8 @@ platform :ios do
                 xcodeproj: 'openHAB.xcodeproj',
                 scheme: 'openHAB'
             )
+        else
+            increment_version_if_required
         end
 
         build_number = get_build_number
@@ -266,7 +268,7 @@ platform :ios do
     end
 
     desc 'Increment the build number.'
-    lane :increment_build do
+    private_lane :increment_build do
         xcode_build = get_build_number.to_i
         testflight_build = latest_testflight_build_number
         build_no = (xcode_build > testflight_build ? xcode_build : testflight_build) + 1
@@ -274,5 +276,34 @@ platform :ios do
         increment_build_number_in_xcodeproj(
             build_number: "#{build_no}"
         )
+    end
+
+    desc 'Increment the version number if required.'
+    private_lane :increment_version_if_required do
+        if !is_ci?
+            Spaceship::ConnectAPI::login(portal_team_id: "PBAPXHRAM9", tunes_team_id: "118429042")
+        end
+
+        app = Spaceship::ConnectAPI::App.find("es.spaphone.openhab")
+        UI.message("Found app: #{app.name}")
+
+        platform = Spaceship::ConnectAPI::Platform::IOS
+        liveVersion = app.get_live_app_store_version(platform: platform).version_string
+        UI.message("Found live version: #{liveVersion}")
+
+        projectVersion = get_version_number(xcodeproj: "openHAB.xcodeproj", target: "openHAB")
+        UI.message("Found project version: #{projectVersion}")
+
+        if Gem::Version.new(liveVersion) > Gem::Version.new(projectVersion)
+            UI.message("Pre-release train is closed. Bumping patch version.")
+
+            increment_version_number_in_xcodeproj(
+                bump_type: 'patch',
+                xcodeproj: 'openHAB.xcodeproj',
+                scheme: 'openHAB'
+            )
+        else
+            UI.message("Pre-release train is open. No action required.")
+        end
     end
 end
