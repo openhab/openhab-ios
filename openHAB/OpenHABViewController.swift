@@ -738,7 +738,7 @@ extension OpenHABViewController: OpenHABTrackerDelegate {
                     self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
                     os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
                     let version = Int(self.serverProperties?.version ?? "2") ?? 2
-                    self.appData?.openHABVersion = version
+                    self.appData?.openHABVersion = max(2, version)
                     self.selectSitemap()
 
                 } catch {
