@@ -294,7 +294,7 @@ platform :ios do
         projectVersion = get_version_number(xcodeproj: "openHAB.xcodeproj", target: "openHAB")
         UI.message("Found project version: #{projectVersion}")
 
-        if Gem::Version.new(liveVersion) == Gem::Version.new(projectVersion)
+        if Gem::Version.new(liveVersion) >= Gem::Version.new(projectVersion)
             UI.message("Pre-release train is closed. Bumping patch version.")
 
             increment_version_number_in_xcodeproj(
