@@ -39,7 +39,7 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
-struct SVGProcessor: ImageProcessor {
+struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
     let identifier = "org.openhab.svgprocessor"
@@ -51,11 +51,20 @@ struct SVGProcessor: ImageProcessor {
             os_log("already an image", log: .default, type: .info)
             return image
         case let .data(data):
-            let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
-            let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
-            if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData) {
-                return image.uiImage
-            } else {
+            switch data[0] {
+            case 0x89: // png
+                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
+            case 0x3C: // svg
+                // <?xml version="1.0" encoding="UTF-8"?>
+                // <svg
+                let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
+                let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
+                if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData) {
+                    return image.uiImage
+                } else {
+                    return UIImage(named: "error.png")
+                }
+            default:
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
             }
         }
@@ -1079,7 +1088,7 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.imageView?.kf.setImage(
                     with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                     placeholder: UIImage(named: "blankicon.png"),
-                    options: [.processor(SVGProcessor())],
+                    options: [.processor(OpenHABImageProcessor())],
                     completionHandler: reportOnResults
                 )
             }
