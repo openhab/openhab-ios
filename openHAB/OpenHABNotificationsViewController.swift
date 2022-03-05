@@ -45,6 +45,7 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
 
         let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
         navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
+        navigationItem.largeTitleDisplayMode = .never
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -61,6 +62,7 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
                     let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+                    self.notifications = []
                     for codingDatum in codingDatas {
                         self.notifications.add(codingDatum.openHABNotification)
                     }
