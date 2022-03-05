@@ -152,7 +152,8 @@ platform :ios do
         build_app(
             scheme: 'openHAB',
             clean: true,
-            export_method: 'app-store'
+            export_method: 'app-store',
+            disable_package_automatic_updates: true
         )
 
         upload_to_testflight(
