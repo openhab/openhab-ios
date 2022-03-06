@@ -125,6 +125,8 @@ platform :ios do
         else
             increment_version_if_required
         end
+        # NOTE: this resolves packages of the project so need to clean
+        sh("cd .. && git clean -fd")
 
         build_number = get_build_number
         version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
