@@ -24,7 +24,7 @@ jobs:
           cache-name: cache-buildtools-dependencies
         with:
           path: BuildTools/.build
-          key: ${{ runner.os }}-buildtools-${{ env.cache-name }}-${{ hashFiles('../Package.resolved') }}
+          key: ${{ runner.os }}-buildtools-${{ env.cache-name }}-${{ hashFiles('BuildTools/Package.resolved') }}
           restore-keys: |
             ${{ runner.os }}-buildtools-${{ env.cache-name }}-
 
