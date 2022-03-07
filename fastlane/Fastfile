@@ -122,9 +122,8 @@ platform :ios do
                 xcodeproj: 'openHAB.xcodeproj',
                 scheme: 'openHAB'
             )
-        else
-            increment_version_if_required
         end
+        increment_version_if_required
         # NOTE: this resolves packages of the project so need to clean
         sh("cd .. && git clean -fd")
 
