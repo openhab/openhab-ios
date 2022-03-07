@@ -291,20 +291,23 @@ platform :ios do
         UI.message("Found app: #{app.name}")
 
         platform = Spaceship::ConnectAPI::Platform::IOS
-        liveVersion = app.get_live_app_store_version(platform: platform).version_string
-        UI.message("Found live version: #{liveVersion}")
+        liveVersion = Gem::Version.new(app.get_live_app_store_version(platform: platform).version_string)
+        UI.message("Found live version: #{liveVersion.version()}")
 
-        projectVersion = get_version_number(xcodeproj: "openHAB.xcodeproj", target: "openHAB")
-        UI.message("Found project version: #{projectVersion}")
+        projectVersion = Gem::Version.new(get_version_number(xcodeproj: "openHAB.xcodeproj", target: "openHAB"))
+        UI.message("Found project version: #{projectVersion.version()}")
 
-        if Gem::Version.new(liveVersion) >= Gem::Version.new(projectVersion)
+        if liveVersion >= projectVersion
             UI.message("Pre-release train is closed. Bumping patch version.")
 
-            increment_version_number_in_xcodeproj(
-                bump_type: 'patch',
-                xcodeproj: 'openHAB.xcodeproj',
-                scheme: 'openHAB'
-            )
+            while liveVersion >= projectVersion
+                increment_version_number_in_xcodeproj(
+                    bump_type: "patch",
+                    xcodeproj: 'openHAB.xcodeproj',
+                    scheme: 'openHAB'
+                )
+                projectVersion = Gem::Version.new(get_version_number(xcodeproj: "openHAB.xcodeproj", target: "openHAB"))
+            end
         else
             UI.message("Pre-release train is open. No action required.")
         end
