@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [Version 2.4.44, Build 1580410502] - 2022-03-07Z
 - Fix basic auth (#656)
 - Show error image if SVG parsing fails (#652)
 - More robust SVG rendering - Should not crash anymore / unit tests included
