@@ -16,8 +16,8 @@
 default_platform(:ios)
 
 platform :ios do
-    before_all do |_lane, _options|
-        if is_ci?
+    before_all do |lane, options|
+        if is_ci? && "#{lane}" != "unittests"
             ensure_env_vars(
                 env_vars: %w[ASC_API_KEY ASC_API_KEY_ID ASC_API_KEY_ISSUER_ID]
             )
@@ -55,8 +55,17 @@ platform :ios do
         run_tests(
             workspace: 'openHAB.xcworkspace',
             scheme: 'openHABTestsSwift',
-            devices: ['iPhone 12 Pro'],
+            testplan: 'openHABTests',
+            devices: ['iPhone 13 Pro'],
             clean: true
+        )
+    end
+
+    desc 'Clean spm build artifacts.'
+    private_lane :clean_spm do
+        spm(
+            command: "clean",
+            package_path: "OpenHABCore"
         )
     end
 
@@ -67,7 +76,9 @@ platform :ios do
             wait_for_dsym_processing: true,
             wait_timeout: 600
         )
-        upload_symbols_to_crashlytics
+        upload_symbols_to_crashlytics(
+            binary_path: "BuildTools/upload-symbols"
+        )
         clean_build_artifacts
     end
 
@@ -112,6 +123,9 @@ platform :ios do
                 scheme: 'openHAB'
             )
         end
+        increment_version_if_required
+        # NOTE: this resolves packages of the project so need to clean
+        sh("cd .. && git clean -fd")
 
         build_number = get_build_number
         version = get_version_number(xcodeproj: 'openHAB.xcodeproj',
@@ -139,7 +153,8 @@ platform :ios do
         build_app(
             scheme: 'openHAB',
             clean: true,
-            export_method: 'app-store'
+            export_method: 'app-store',
+            disable_package_automatic_updates: true
         )
 
         upload_to_testflight(
@@ -255,7 +270,7 @@ platform :ios do
     end
 
     desc 'Increment the build number.'
-    lane :increment_build do
+    private_lane :increment_build do
         xcode_build = get_build_number.to_i
         testflight_build = latest_testflight_build_number
         build_no = (xcode_build > testflight_build ? xcode_build : testflight_build) + 1
@@ -263,5 +278,37 @@ platform :ios do
         increment_build_number_in_xcodeproj(
             build_number: "#{build_no}"
         )
+    end
+
+    desc 'Increment the version number if required.'
+    private_lane :increment_version_if_required do
+        if !is_ci?
+            Spaceship::ConnectAPI::login(portal_team_id: "PBAPXHRAM9", tunes_team_id: "118429042")
+        end
+
+        app = Spaceship::ConnectAPI::App.find("es.spaphone.openhab")
+        UI.message("Found app: #{app.name}")
+
+        platform = Spaceship::ConnectAPI::Platform::IOS
+        liveVersion = Gem::Version.new(app.get_live_app_store_version(platform: platform).version_string)
+        UI.message("Found live version: #{liveVersion.version()}")
+
+        projectVersion = Gem::Version.new(get_version_number(xcodeproj: "openHAB.xcodeproj", target: "openHAB"))
+        UI.message("Found project version: #{projectVersion.version()}")
+
+        if liveVersion >= projectVersion
+            UI.message("Pre-release train is closed. Bumping patch version.")
+
+            while liveVersion >= projectVersion
+                increment_version_number_in_xcodeproj(
+                    bump_type: "patch",
+                    xcodeproj: 'openHAB.xcodeproj',
+                    scheme: 'openHAB'
+                )
+                projectVersion = Gem::Version.new(get_version_number(xcodeproj: "openHAB.xcodeproj", target: "openHAB"))
+            end
+        else
+            UI.message("Pre-release train is open. No action required.")
+        end
     end
 end

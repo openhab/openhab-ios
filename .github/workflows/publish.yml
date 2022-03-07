@@ -4,9 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       bump_type:
-        description: 'Version bump type (major|minor|patch):'
-        required: false
-        default: 'patch'
+        type: choice
+        description: 'Select version bump type:'
+        options:
+        - patch
+        - minor
+        - major
 
 jobs:
   build_and_deploy:
@@ -22,24 +25,17 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
           fetch-depth: 0
 
-      - name: Cache cocoapods dependencies
+      - name: Cache BuildTools
         uses: actions/cache@v2
         env:
-          cache-name: cache-cocoapods-dependencies
+          cache-name: cache-buildtools-dependencies
         with:
-          path: Pods
-          key: ${{ runner.os }}-pods-${{ env.cache-name }}-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-${{ env.cache-name }}-
+          path: BuildTools/.build
+          key: ${{ runner.os }}-buildtools-${{ env.cache-name }}-${{ hashFiles('BuildTools/Package.resolved') }}
 
-      - name: Setup Cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          podfile-path: Podfile.lock
-
-      - name: Install Dependencies
-        run: pod install --repo-update
-        shell: bash
+      - name: Install dependencies
+        run: |
+            bundle install --redownload
 
       - name: SSH Config
         run: |
