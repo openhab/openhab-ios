@@ -18,7 +18,6 @@
 		9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */; };
 		9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */; };
 		935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B484525342B8E00E44CF0 /* URL+Static.swift */; };
-		935D3407257B7DC00020A404 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; settings = {ATTRIBUTES = (no_codegen, ); }; };
 		937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4470270B36D000A98C26 /* OpenHABCore */; };
 		937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4472270B36DD00A98C26 /* OpenHABCore */; };
 		937E4482270B378F00A98C26 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4481270B378F00A98C26 /* Fuzi */; };
@@ -42,6 +41,22 @@
 		938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */; };
 		9397ED452587820700F266E1 /* openHABWatch Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DA0775212346705F0086C685 /* openHABWatch Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9397EDEC2587837000F266E1 /* openHABWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA0775152346705D0086C685 /* openHABWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		93AEE42427D9D76B008EB207 /* GetItemStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6471112561FDA7007B03FC /* GetItemStateIntentHandler.swift */; };
+		93AEE42527D9D76E008EB207 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6470D52561F935007B03FC /* IntentHandler.swift */; };
+		93AEE42627D9D785008EB207 /* SetSwitchStateIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */; };
+		93AEE42727D9D788008EB207 /* SetDimmerRollerValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */; };
+		93AEE42827D9D78B008EB207 /* SetNumberValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D951256897490039DA6E /* SetNumberValueIntentHandler.swift */; };
+		93AEE42927D9D790008EB207 /* SetStringValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */; };
+		93AEE42A27D9D792008EB207 /* SetColorValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */; };
+		93AEE42B27D9D796008EB207 /* SetContactStateValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */; };
+		93AEE46F27D9E704008EB207 /* OpenHABSetStringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46827D9E704008EB207 /* OpenHABSetStringValueIntent.swift */; };
+		93AEE47027D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46927D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift */; };
+		93AEE47127D9E704008EB207 /* OpenHABSetNumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46A27D9E704008EB207 /* OpenHABSetNumberValueIntent.swift */; };
+		93AEE47227D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46B27D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift */; };
+		93AEE47327D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46C27D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift */; };
+		93AEE47427D9E704008EB207 /* OpenHABSetColorValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46D27D9E704008EB207 /* OpenHABSetColorValueIntent.swift */; };
+		93AEE47527D9E704008EB207 /* OpenHABGetItemStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46E27D9E704008EB207 /* OpenHABGetItemStateIntent.swift */; };
+		93AEE47627D9E922008EB207 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		93F8061B27AE615D0035A6B0 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8061A27AE615D0035A6B0 /* Alamofire */; };
 		93F8062F27AE63620035A6B0 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8062E27AE63620035A6B0 /* Alamofire */; };
 		93F8063227AE6B940035A6B0 /* AlamofireNetworkActivityIndicator in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8063127AE6B940035A6B0 /* AlamofireNetworkActivityIndicator */; };
@@ -301,6 +316,13 @@
 		938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Localization.swift"; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
 		93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = openHABTests.xctestplan; sourceTree = "<group>"; };
+		93AEE46827D9E704008EB207 /* OpenHABSetStringValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetStringValueIntent.swift; sourceTree = "<group>"; };
+		93AEE46927D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetSwitchStateIntent.swift; sourceTree = "<group>"; };
+		93AEE46A27D9E704008EB207 /* OpenHABSetNumberValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetNumberValueIntent.swift; sourceTree = "<group>"; };
+		93AEE46B27D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetContactStateValueIntent.swift; sourceTree = "<group>"; };
+		93AEE46C27D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetDimmerRollerValueIntent.swift; sourceTree = "<group>"; };
+		93AEE46D27D9E704008EB207 /* OpenHABSetColorValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetColorValueIntent.swift; sourceTree = "<group>"; };
+		93AEE46E27D9E704008EB207 /* OpenHABGetItemStateIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABGetItemStateIntent.swift; sourceTree = "<group>"; };
 		A07ED02D2402EE6E006588FE /* OpenHABWatchTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OpenHABWatchTracker.swift; path = "openHABWatch Extension/OpenHABWatchTracker.swift"; sourceTree = SOURCE_ROOT; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
@@ -566,6 +588,7 @@
 				4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */,
 				4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */,
 				4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */,
+				93AEE44A27D9E247008EB207 /* AutoGenerated */,
 			);
 			path = openHABIntents;
 			sourceTree = "<group>";
@@ -595,6 +618,20 @@
 				93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */,
 			);
 			path = TestPlans;
+			sourceTree = "<group>";
+		};
+		93AEE44A27D9E247008EB207 /* AutoGenerated */ = {
+			isa = PBXGroup;
+			children = (
+				93AEE46E27D9E704008EB207 /* OpenHABGetItemStateIntent.swift */,
+				93AEE46D27D9E704008EB207 /* OpenHABSetColorValueIntent.swift */,
+				93AEE46B27D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift */,
+				93AEE46C27D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift */,
+				93AEE46A27D9E704008EB207 /* OpenHABSetNumberValueIntent.swift */,
+				93AEE46827D9E704008EB207 /* OpenHABSetStringValueIntent.swift */,
+				93AEE46927D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift */,
+			);
+			path = AutoGenerated;
 			sourceTree = "<group>";
 		};
 		93F38D4623803731001B1451 /* Model */ = {
@@ -967,6 +1004,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4D6470DB2561F935007B03FC /* Build configuration list for PBXNativeTarget "openHABIntents" */;
 			buildPhases = (
+				93AEE42C27D9DE58008EB207 /* ShellScript */,
 				4D6470CF2561F935007B03FC /* Sources */,
 				4D6470D02561F935007B03FC /* Frameworks */,
 				4D6470D12561F935007B03FC /* Resources */,
@@ -1248,6 +1286,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				93AEE47627D9E922008EB207 /* Intents.intentdefinition in Resources */,
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				938BF9D024EFCCC000E6B52F /* Localizable.strings in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
@@ -1267,6 +1306,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		93AEE42C27D9DE58008EB207 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "xcrun intentbuilderc generate -input ${SRCROOT}/openHAB/Resources/Base.lproj/Intents.intentdefinition intentdefinition -output ${SRCROOT}/openHABIntents/AutoGenerated -classPrefix \"OpenHAB\" -language Swift -swiftVersion 5.5\n";
+		};
 		93F8063627AE76AF0035A6B0 /* Crashlytics Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1310,6 +1366,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				93AEE42B27D9D796008EB207 /* SetContactStateValueIntentHandler.swift in Sources */,
+				93AEE42927D9D790008EB207 /* SetStringValueIntentHandler.swift in Sources */,
+				93AEE47427D9E704008EB207 /* OpenHABSetColorValueIntent.swift in Sources */,
+				93AEE47527D9E704008EB207 /* OpenHABGetItemStateIntent.swift in Sources */,
+				93AEE47027D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift in Sources */,
+				93AEE46F27D9E704008EB207 /* OpenHABSetStringValueIntent.swift in Sources */,
+				93AEE42527D9D76E008EB207 /* IntentHandler.swift in Sources */,
+				93AEE47327D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift in Sources */,
+				93AEE47127D9E704008EB207 /* OpenHABSetNumberValueIntent.swift in Sources */,
+				93AEE42727D9D788008EB207 /* SetDimmerRollerValueIntentHandler.swift in Sources */,
+				93AEE47227D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift in Sources */,
+				93AEE42A27D9D792008EB207 /* SetColorValueIntentHandler.swift in Sources */,
+				93AEE42427D9D76B008EB207 /* GetItemStateIntentHandler.swift in Sources */,
+				93AEE42627D9D785008EB207 /* SetSwitchStateIntentHandler.swift in Sources */,
+				93AEE42827D9D78B008EB207 /* SetNumberValueIntentHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1385,7 +1456,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				935D3407257B7DC00020A404 /* Intents.intentdefinition in Sources */,
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
@@ -2056,6 +2126,7 @@
 		DFB2625D18830A3600D3244D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
@@ -2100,6 +2171,7 @@
 		DFB2625E18830A3600D3244D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
