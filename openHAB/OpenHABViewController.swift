@@ -51,15 +51,15 @@ struct OpenHABImageProcessor: ImageProcessor {
             os_log("already an image", log: .default, type: .info)
             return image
         case let .data(data):
+            guard !data.isEmpty else { return nil }
+
             switch data[0] {
-            case 0x89: // png
-                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
             case 0x3C: // svg
                 // <?xml version="1.0" encoding="UTF-8"?>
                 // <svg
                 let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
                 let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
-                if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData) {
+                if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData), image.hasSize() {
                     return image.uiImage
                 } else {
                     return UIImage(named: "error.png")
