@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Fixed some crashes during image processing
+
 ## [Version 2.4.44, Build 1580410502] - 2022-03-07Z
 - Fix basic auth (#656)
 - Show error image if SVG parsing fails (#652)
