@@ -66,8 +66,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     }
 
     func getPersistensePath() -> URL {
-        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.es.spaphone.openhab")!.appendingPathComponent("trustedCertificates")
     }
 
     public func saveTrustedCertificates() {

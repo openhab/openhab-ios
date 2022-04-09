@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
--  Fix intents (#657)
+- Test intents (#657)
 
 ## [Version 2.4.45, Build 1580410503] - 2022-03-12Z
 
