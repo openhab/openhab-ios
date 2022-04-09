@@ -18,6 +18,7 @@
 		9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */; };
 		9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */; };
 		935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B484525342B8E00E44CF0 /* URL+Static.swift */; };
+		937C8B0C2800A738009C055E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4470270B36D000A98C26 /* OpenHABCore */; };
 		937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4472270B36DD00A98C26 /* OpenHABCore */; };
 		937E4482270B378F00A98C26 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4481270B378F00A98C26 /* Fuzi */; };
@@ -29,7 +30,6 @@
 		937E4494270B380500A98C26 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4493270B380500A98C26 /* Fuzi */; };
 		937E44E2270B393C00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E44E1270B393C00A98C26 /* OpenHABCore */; };
 		938620C0257E223C00A63200 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C824EFCCC000E6B52F /* Localizable.strings */; };
-		93862119257E2C9700A63200 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		938BF89624EFBC5400E6B52F /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF89524EFBC5400E6B52F /* LocalizationTests.swift */; };
 		938BF9C424EFCB9F00E6B52F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 938BF9C324EFCB9F00E6B52F /* Main.storyboard */; };
 		938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */; };
@@ -49,14 +49,7 @@
 		93AEE42927D9D790008EB207 /* SetStringValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */; };
 		93AEE42A27D9D792008EB207 /* SetColorValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */; };
 		93AEE42B27D9D796008EB207 /* SetContactStateValueIntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */; };
-		93AEE46F27D9E704008EB207 /* OpenHABSetStringValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46827D9E704008EB207 /* OpenHABSetStringValueIntent.swift */; };
-		93AEE47027D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46927D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift */; };
-		93AEE47127D9E704008EB207 /* OpenHABSetNumberValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46A27D9E704008EB207 /* OpenHABSetNumberValueIntent.swift */; };
-		93AEE47227D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46B27D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift */; };
-		93AEE47327D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46C27D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift */; };
-		93AEE47427D9E704008EB207 /* OpenHABSetColorValueIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46D27D9E704008EB207 /* OpenHABSetColorValueIntent.swift */; };
-		93AEE47527D9E704008EB207 /* OpenHABGetItemStateIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AEE46E27D9E704008EB207 /* OpenHABGetItemStateIntent.swift */; };
-		93AEE47627D9E922008EB207 /* Intents.intentdefinition in Resources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
+		93B7B33128018301009EB296 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		93F8061B27AE615D0035A6B0 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8061A27AE615D0035A6B0 /* Alamofire */; };
 		93F8062F27AE63620035A6B0 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8062E27AE63620035A6B0 /* Alamofire */; };
 		93F8063227AE6B940035A6B0 /* AlamofireNetworkActivityIndicator in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8063127AE6B940035A6B0 /* AlamofireNetworkActivityIndicator */; };
@@ -218,14 +211,14 @@
 		};
 		4D6470DE2561F935007B03FC /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
 				4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		93F38C4C23803499001B1451 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -316,13 +309,6 @@
 		938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Localization.swift"; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
 		93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = openHABTests.xctestplan; sourceTree = "<group>"; };
-		93AEE46827D9E704008EB207 /* OpenHABSetStringValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetStringValueIntent.swift; sourceTree = "<group>"; };
-		93AEE46927D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetSwitchStateIntent.swift; sourceTree = "<group>"; };
-		93AEE46A27D9E704008EB207 /* OpenHABSetNumberValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetNumberValueIntent.swift; sourceTree = "<group>"; };
-		93AEE46B27D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetContactStateValueIntent.swift; sourceTree = "<group>"; };
-		93AEE46C27D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetDimmerRollerValueIntent.swift; sourceTree = "<group>"; };
-		93AEE46D27D9E704008EB207 /* OpenHABSetColorValueIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSetColorValueIntent.swift; sourceTree = "<group>"; };
-		93AEE46E27D9E704008EB207 /* OpenHABGetItemStateIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABGetItemStateIntent.swift; sourceTree = "<group>"; };
 		A07ED02D2402EE6E006588FE /* OpenHABWatchTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OpenHABWatchTracker.swift; path = "openHABWatch Extension/OpenHABWatchTracker.swift"; sourceTree = SOURCE_ROOT; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
@@ -588,7 +574,6 @@
 				4D38D959256897770039DA6E /* SetStringValueIntentHandler.swift */,
 				4D38D9612568978E0039DA6E /* SetColorValueIntentHandler.swift */,
 				4D38D969256897AD0039DA6E /* SetContactStateValueIntentHandler.swift */,
-				93AEE44A27D9E247008EB207 /* AutoGenerated */,
 			);
 			path = openHABIntents;
 			sourceTree = "<group>";
@@ -618,20 +603,6 @@
 				93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */,
 			);
 			path = TestPlans;
-			sourceTree = "<group>";
-		};
-		93AEE44A27D9E247008EB207 /* AutoGenerated */ = {
-			isa = PBXGroup;
-			children = (
-				93AEE46E27D9E704008EB207 /* OpenHABGetItemStateIntent.swift */,
-				93AEE46D27D9E704008EB207 /* OpenHABSetColorValueIntent.swift */,
-				93AEE46B27D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift */,
-				93AEE46C27D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift */,
-				93AEE46A27D9E704008EB207 /* OpenHABSetNumberValueIntent.swift */,
-				93AEE46827D9E704008EB207 /* OpenHABSetStringValueIntent.swift */,
-				93AEE46927D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift */,
-			);
-			path = AutoGenerated;
 			sourceTree = "<group>";
 		};
 		93F38D4623803731001B1451 /* Model */ = {
@@ -1004,7 +975,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4D6470DB2561F935007B03FC /* Build configuration list for PBXNativeTarget "openHABIntents" */;
 			buildPhases = (
-				93AEE42C27D9DE58008EB207 /* ShellScript */,
 				4D6470CF2561F935007B03FC /* Sources */,
 				4D6470D02561F935007B03FC /* Frameworks */,
 				4D6470D12561F935007B03FC /* Resources */,
@@ -1208,17 +1178,17 @@
 			);
 			mainGroup = DFB2621E18830A3600D3244D;
 			packageReferences = (
-				937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */,
-				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */,
-				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */,
-				93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
-				93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */,
-				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */,
-				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */,
-				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */,
-				93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */,
-				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */,
-				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */,
+				937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */,
+				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */,
+				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */,
+				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */,
+				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */,
+				93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */,
+				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */,
+				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1239,7 +1209,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93862119257E2C9700A63200 /* Intents.intentdefinition in Resources */,
 				938620C0257E223C00A63200 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1286,7 +1255,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93AEE47627D9E922008EB207 /* Intents.intentdefinition in Resources */,
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				938BF9D024EFCCC000E6B52F /* Localizable.strings in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
@@ -1306,23 +1274,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		93AEE42C27D9DE58008EB207 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "xcrun intentbuilderc generate -input ${SRCROOT}/openHAB/Resources/Base.lproj/Intents.intentdefinition intentdefinition -output ${SRCROOT}/openHABIntents/AutoGenerated -classPrefix \"OpenHAB\" -language Swift -swiftVersion 5.5\n";
-		};
 		93F8063627AE76AF0035A6B0 /* Crashlytics Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1366,17 +1317,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				937C8B0C2800A738009C055E /* Intents.intentdefinition in Sources */,
 				93AEE42B27D9D796008EB207 /* SetContactStateValueIntentHandler.swift in Sources */,
 				93AEE42927D9D790008EB207 /* SetStringValueIntentHandler.swift in Sources */,
-				93AEE47427D9E704008EB207 /* OpenHABSetColorValueIntent.swift in Sources */,
-				93AEE47527D9E704008EB207 /* OpenHABGetItemStateIntent.swift in Sources */,
-				93AEE47027D9E704008EB207 /* OpenHABSetSwitchStateIntent.swift in Sources */,
-				93AEE46F27D9E704008EB207 /* OpenHABSetStringValueIntent.swift in Sources */,
 				93AEE42527D9D76E008EB207 /* IntentHandler.swift in Sources */,
-				93AEE47327D9E704008EB207 /* OpenHABSetDimmerRollerValueIntent.swift in Sources */,
-				93AEE47127D9E704008EB207 /* OpenHABSetNumberValueIntent.swift in Sources */,
 				93AEE42727D9D788008EB207 /* SetDimmerRollerValueIntentHandler.swift in Sources */,
-				93AEE47227D9E704008EB207 /* OpenHABSetContactStateValueIntent.swift in Sources */,
 				93AEE42A27D9D792008EB207 /* SetColorValueIntentHandler.swift in Sources */,
 				93AEE42427D9D76B008EB207 /* GetItemStateIntentHandler.swift in Sources */,
 				93AEE42627D9D785008EB207 /* SetSwitchStateIntentHandler.swift in Sources */,
@@ -1456,6 +1401,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				93B7B33128018301009EB296 /* Intents.intentdefinition in Sources */,
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
@@ -2281,7 +2227,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */ = {
+		937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/cezheng/Fuzi.git";
 			requirement = {
@@ -2289,7 +2235,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */ = {
+		937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/devicekit/DeviceKit.git";
 			requirement = {
@@ -2297,7 +2243,7 @@
 				minimumVersion = 4.0.0;
 			};
 		};
-		937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */ = {
+		937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
@@ -2305,7 +2251,7 @@
 				minimumVersion = 7.0.0;
 			};
 		};
-		93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */ = {
+		93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -2313,7 +2259,7 @@
 				version = 5.4.4;
 			};
 		};
-		93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */ = {
+		93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/AlamofireNetworkActivityIndicator.git";
 			requirement = {
@@ -2321,7 +2267,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */ = {
+		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
 			requirement = {
@@ -2329,7 +2275,7 @@
 				minimumVersion = 8.0.0;
 			};
 		};
-		93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */ = {
+		93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SwiftKickMobile/SwiftMessages.git";
 			requirement = {
@@ -2337,7 +2283,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */ = {
+		93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RastislavMirek/FlexColorPicker.git";
 			requirement = {
@@ -2345,7 +2291,7 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */ = {
+		93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/yannickl/DynamicButton.git";
 			requirement = {
@@ -2353,7 +2299,7 @@
 				minimumVersion = 6.0.0;
 			};
 		};
-		93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */ = {
+		93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jonkykong/SideMenu.git";
 			requirement = {
@@ -2361,7 +2307,7 @@
 				minimumVersion = 6.0.0;
 			};
 		};
-		93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */ = {
+		93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
 			requirement = {
@@ -2382,37 +2328,37 @@
 		};
 		937E4481270B378F00A98C26 /* Fuzi */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */;
+			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */;
 			productName = Fuzi;
 		};
 		937E4484270B379900A98C26 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
 		937E4487270B37A600A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E448B270B37CA00A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E448D270B37D200A98C26 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
 		937E4491270B37FE00A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E4493270B380500A98C26 /* Fuzi */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */;
+			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */;
 			productName = Fuzi;
 		};
 		937E44E1270B393C00A98C26 /* OpenHABCore */ = {
@@ -2421,47 +2367,47 @@
 		};
 		93F8061A27AE615D0035A6B0 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 		93F8062E27AE63620035A6B0 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 		93F8063127AE6B940035A6B0 /* AlamofireNetworkActivityIndicator */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */;
+			package = 93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */;
 			productName = AlamofireNetworkActivityIndicator;
 		};
 		93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */;
+			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
 		};
 		93F8064627AE7A050035A6B0 /* SwiftMessages */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */;
+			package = 93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */;
 			productName = SwiftMessages;
 		};
 		93F8064927AE7A2E0035A6B0 /* FlexColorPicker */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */;
+			package = 93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */;
 			productName = FlexColorPicker;
 		};
 		93F8064C27AE7A4D0035A6B0 /* DynamicButton */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */;
+			package = 93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */;
 			productName = DynamicButton;
 		};
 		93F8064F27AE7A830035A6B0 /* SideMenu */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */;
+			package = 93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */;
 			productName = SideMenu;
 		};
 		93F8065227AE7B580035A6B0 /* SVGKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */;
+			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */;
 			productName = SVGKit;
 		};
 /* End XCSwiftPackageProductDependency section */

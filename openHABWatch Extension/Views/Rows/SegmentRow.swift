@@ -39,7 +39,7 @@ struct SegmentRow: View {
                     DetailTextLabelView(widget: widget)
                 }
                 Picker("Picker", selection: valueBinding) {
-                    ForEach(0 ..< widget.mappingsOrItemOptions.count) {
+                    ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) {
                         Text(self.widget.mappingsOrItemOptions[$0].label).tag($0)
                     }
                 }
