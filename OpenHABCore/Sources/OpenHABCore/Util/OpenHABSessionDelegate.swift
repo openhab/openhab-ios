@@ -29,14 +29,7 @@ class OpenHABSessionDelegate: SessionDelegate {
         let evaluation: ChallengeEvaluation
         switch challenge.protectionSpace.authenticationMethod {
         case NSURLAuthenticationMethodHTTPBasic:
-            let localUrl = URL(string: Preferences.localUrl)
-            let remoteUrl = URL(string: Preferences.remoteUrl)
-            if challenge.protectionSpace.host == localUrl?.host || challenge.protectionSpace.host == remoteUrl?.host {
-                let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
-                evaluation = (.useCredential, credential, nil)
-            } else {
-                evaluation = (.performDefaultHandling, nil, nil)
-            }
+            evaluation = determineEvaluation(with: challenge.protectionSpace.host)
         case NSURLAuthenticationMethodHTTPDigest, NSURLAuthenticationMethodNTLM,
              NSURLAuthenticationMethodNegotiate:
             (evaluation.disposition, evaluation.credential) = NetworkConnection.shared.clientCertificateManager.evaluateTrust(with: challenge)
@@ -51,9 +44,20 @@ class OpenHABSessionDelegate: SessionDelegate {
             evaluation.error = nil
         #endif
         default:
-            evaluation = (.performDefaultHandling, nil, nil)
+            evaluation = determineEvaluation(with: challenge.protectionSpace.host)
         }
 
         completionHandler(evaluation.disposition, evaluation.credential)
+    }
+
+    private func determineEvaluation(with host: String) -> ChallengeEvaluation {
+        let localUrl = URL(string: Preferences.localUrl)
+        let remoteUrl = URL(string: Preferences.remoteUrl)
+        if host == localUrl?.host || host == remoteUrl?.host {
+            let credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+            return (.useCredential, credential, nil)
+        } else {
+            return (.performDefaultHandling, nil, nil)
+        }
     }
 }
