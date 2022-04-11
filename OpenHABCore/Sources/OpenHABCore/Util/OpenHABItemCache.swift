@@ -15,16 +15,18 @@ import os.log
 public class OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
-    public static let URL_NONE = 0
-    public static let URL_LOCAL = 1
-    public static let URL_REMOTE = 2
-    public static let URL_DEMO = 3
+    private static let URL_NONE = 0
+    private static let URL_LOCAL = 1
+    private static let URL_REMOTE = 2
+    private static let URL_DEMO = 3
 
     public var items: [OpenHABItem]?
-    public var url = ""
-    public var localUrlFailed = false
-    public var lastUrlConnected = URL_NONE
-    public var lastLoad = Date().timeIntervalSince1970
+
+    private var timeout: Double { lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 10.0 : 20.0 }
+    private var url = ""
+    private var localUrlFailed = false
+    private var lastUrlConnected = URL_NONE
+    private var lastLoad = Date().timeIntervalSince1970
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         var ret = [NSString]()
@@ -80,8 +82,6 @@ public class OpenHABItemCache {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
         }
 
-        let timeout = lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 5.0 : 10.0
-
         NetworkConnection.load(from: uurl, timeout: timeout) { response in
             switch response.result {
             case let .success(data):
@@ -118,8 +118,6 @@ public class OpenHABItemCache {
         if NetworkConnection.shared == nil {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
         }
-
-        let timeout = lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 5.0 : 10.0
 
         NetworkConnection.load(from: uurl, timeout: timeout) { response in
             switch response.result {
