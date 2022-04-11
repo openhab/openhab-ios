@@ -15,18 +15,18 @@ import os.log
 public class OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
-    private static let URL_NONE = 0
-    private static let URL_LOCAL = 1
-    private static let URL_REMOTE = 2
-    private static let URL_DEMO = 3
+    static let URL_NONE = 0
+    static let URL_LOCAL = 1
+    static let URL_REMOTE = 2
+    static let URL_DEMO = 3
 
     public var items: [OpenHABItem]?
 
-    private var timeout: Double { lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 10.0 : 20.0 }
-    private var url = ""
-    private var localUrlFailed = false
-    private var lastUrlConnected = URL_NONE
-    private var lastLoad = Date().timeIntervalSince1970
+    var timeout: Double { lastUrlConnected == OpenHABItemCache.URL_LOCAL ? 10.0 : 20.0 }
+    var url = ""
+    var localUrlFailed = false
+    var lastUrlConnected = URL_NONE
+    var lastLoad = Date().timeIntervalSince1970
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         var ret = [NSString]()
