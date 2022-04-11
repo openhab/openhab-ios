@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Fix watch app (#665)
+
 ## [Version 2.4.46, Build 1580410506] - 2022-04-09Z
 
 - Fix intents (#657)
