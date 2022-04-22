@@ -11,7 +11,7 @@
 
 import Combine
 import Foundation
-import OpenHABCoreWatch
+import OpenHABCore
 
 final class ObservableOpenHABDataObject: DataObject, ObservableObject {
     static let shared = ObservableOpenHABDataObject()

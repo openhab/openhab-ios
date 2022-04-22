@@ -4,6 +4,32 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.4.47, Build 1580410507] - 2022-04-11Z
+
+- Fix watch app (#665)
+
+## [Version 2.4.46, Build 1580410506] - 2022-04-09Z
+
+- Fix intents (#657)
+
+## [Version 2.4.45, Build 1580410503] - 2022-03-12Z
+
+- Fixed some crashes during image processing
+
+## [Version 2.4.44, Build 1580410502] - 2022-03-07Z
+
+- Fix basic auth (#656)
+- Show error image if SVG parsing fails (#652)
+- More robust SVG rendering - Should not crash anymore / unit tests included
+- Delete unsent crashlytics reports if permission dialog is canceled
+- Re-enable icon type setting
+- Fix certificate issues
+- Fixed connection to myopenhab.org
+- OpenHABCore swift package
+- Migrate to Alamofire 5
+- Move external dependencies to SPM
+- Remove cocoapods
+
 ## [Version 2.4.15, Build 1580410464] - 2020-12-04
 
 ### Added

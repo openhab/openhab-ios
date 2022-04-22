@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Foundation
 @testable import openHAB
-@testable import OpenHABCore
+
+import Foundation
 import XCTest
 
 class LocalizationTests: XCTestCase {

@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Kingfisher
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 import SwiftUI
 

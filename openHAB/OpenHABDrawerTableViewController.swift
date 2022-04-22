@@ -107,10 +107,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
-            case .success:
+            case let .success(data):
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
-                self.sitemaps = deriveSitemaps(response.result.value, version: self.appData?.openHABVersion)
+                self.sitemaps = deriveSitemaps(data, version: self.appData?.openHABVersion)
 
                 if self.sitemaps.last?.name == "_default", self.sitemaps.count > 1 {
                     self.sitemaps = Array(self.sitemaps.dropLast())

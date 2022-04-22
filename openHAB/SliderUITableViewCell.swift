@@ -128,14 +128,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     private func sliderDidChange(toValue value: Double) {
         os_log("Slider new value = %g", log: .default, type: .info, value)
-
-        if let item = widget.item, item.isOfTypeOrGroupType(.color) {
-            widget.sendCommand(value.valueText(step: Double(step)))
-            // connection.httpClient.sendItemCommand(item, value)
-        } else {
-            widget.sendCommand(value.valueText(step: Double(step)))
-
-            // connection.httpClient.sendItemUpdate(item, item.state?.asNumber.withValue(value.toFloat()))
-        }
+        widget.sendCommand(value.valueText(step: Double(step)))
     }
 }
