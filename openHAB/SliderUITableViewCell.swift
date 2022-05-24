@@ -14,19 +14,7 @@ import os.log
 import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
-    private var isInTransition = false
     private var step: Float = 1.0
-    private var transitionItem: DispatchWorkItem?
-    private var throttler: Throttler?
-    private var throttlingInterval: TimeInterval? = 0 {
-        didSet {
-            guard let interval = throttlingInterval else {
-                throttler = nil
-                return
-            }
-            throttler = Throttler(maxInterval: interval)
-        }
-    }
 
     private var widgetValue: Double {
         adj(Double(widgetSlider?.value ?? Float(widget.minValue)))
@@ -49,7 +37,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
     override public func initialize() {
         selectionStyle = .none
         separatorInset = .zero
-        throttlingInterval = 0.1
         if let widget = widget {
             step = Float(widget.step)
         } else {
@@ -57,33 +44,18 @@ class SliderUITableViewCell: GenericUITableViewCell {
         }
     }
 
-    @IBAction private func sliderValueChanged(_ sender: Any) {
+    @IBAction private func sliderValueChanged(_ sender: UISlider) {
         customDetailText?.text = widgetValue.valueText(step: widget.step)
-
-        if Preferences.realTimeSliders {
-            transitionItem?.cancel()
-            isInTransition = true
-            throttler?.throttle { DispatchQueue.main.async { self.sliderDidChange(toValue: self.widgetValue) } }
-        }
+        // Calling sliderDidChange leads to interference with other cells.
+        // sliderDidChange(toValue: widgetValue)
     }
 
-    @IBAction private func sliderTouchUp(_ sender: Any) {
-        if Preferences.realTimeSliders {
-            stopTransitionDelayed()
-        } else {
-            sliderDidChange(toValue: widgetValue)
-        }
+    @IBAction private func sliderTouchUp(_ sender: UISlider) {
+        sliderDidChange(toValue: widgetValue)
     }
 
-    @IBAction private func sliderTouchOutside(_ sender: Any) {
+    @IBAction private func sliderTouchOutside(_ sender: UISlider) {
         sliderTouchUp(sender)
-    }
-
-    private func stopTransitionDelayed() {
-        transitionItem = DispatchWorkItem { [weak self] in
-            self?.isInTransition = false
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: transitionItem!)
     }
 
     private func adj(_ raw: Double) -> Double {
@@ -101,7 +73,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        guard !isInTransition else { return }
+        // guard !isInTransition else { return }
 
         if let item = widget.item, item.isOfTypeOrGroupType(.color) {
             widgetSlider?.minimumValue = 0.0
