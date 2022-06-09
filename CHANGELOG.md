@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Fix OH3 UI integration for iOS app (#605)
+
 ## [Version 2.4.47, Build 1580410507] - 2022-04-11Z
 
 - Fix watch app (#665)
