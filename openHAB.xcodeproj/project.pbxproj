@@ -11,6 +11,7 @@
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
@@ -269,6 +270,7 @@
 		4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandler.swift; sourceTree = "<group>"; };
 		4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValueIntentHandler.swift; sourceTree = "<group>"; };
 		653C09D41EAD691A00BA4C4A /* openHAB.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHAB.entitlements; sourceTree = "<group>"; };
+		65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWebViewController.swift; sourceTree = "<group>"; };
 		656916D81FCB82BC00667B2A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "openHAB/GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		931384B324F259BC00A73AB5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		931384B424F259BD00A73AB5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -597,12 +599,12 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		93A4A7C827CA23FD0060AF5F /* TestPlans */ = {
+		93A4A7C827CA23FD0060AF5F /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */,
 			);
-			path = TestPlans;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		93F38D4623803731001B1451 /* Model */ = {
@@ -743,6 +745,13 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		DAE238252806E5C800196467 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		DAF231D327BB6F5C00AB916C /* Ressources */ = {
 			isa = PBXGroup;
 			children = (
@@ -810,6 +819,7 @@
 		DF4B83FD18857FA100F34902 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABViewController.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
 				DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */,
@@ -868,7 +878,7 @@
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DFB2623018830A3600D3244D /* openHAB */,
-				93A4A7C827CA23FD0060AF5F /* TestPlans */,
+				93A4A7C827CA23FD0060AF5F /* Sources */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				933D7F0522E7015000621A03 /* openHABUITests */,
 				DA0775162346705D0086C685 /* openHABWatch */,
@@ -877,6 +887,7 @@
 				DFB2622818830A3600D3244D /* Products */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				DA1C2E4A230DC28F00FACFB0 /* fastlane */,
+				DAE238252806E5C800196467 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1178,17 +1189,17 @@
 			);
 			mainGroup = DFB2621E18830A3600D3244D;
 			packageReferences = (
-				937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */,
-				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */,
-				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */,
-				93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */,
-				93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */,
-				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */,
-				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */,
-				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */,
-				93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */,
-				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */,
-				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */,
+				937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */,
+				937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */,
+				937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */,
+				93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */,
+				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */,
+				93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */,
+				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */,
+				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1405,6 +1416,7 @@
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
+				65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
@@ -2227,7 +2239,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */ = {
+		937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/cezheng/Fuzi.git";
 			requirement = {
@@ -2235,7 +2247,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */ = {
+		937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/devicekit/DeviceKit.git";
 			requirement = {
@@ -2243,7 +2255,7 @@
 				minimumVersion = 4.0.0;
 			};
 		};
-		937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */ = {
+		937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
@@ -2251,7 +2263,7 @@
 				minimumVersion = 7.0.0;
 			};
 		};
-		93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */ = {
+		93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -2259,7 +2271,7 @@
 				version = 5.4.4;
 			};
 		};
-		93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */ = {
+		93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/AlamofireNetworkActivityIndicator.git";
 			requirement = {
@@ -2267,7 +2279,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */ = {
+		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
 			requirement = {
@@ -2275,7 +2287,7 @@
 				minimumVersion = 8.0.0;
 			};
 		};
-		93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */ = {
+		93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SwiftKickMobile/SwiftMessages.git";
 			requirement = {
@@ -2283,7 +2295,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */ = {
+		93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RastislavMirek/FlexColorPicker.git";
 			requirement = {
@@ -2291,7 +2303,7 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */ = {
+		93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/yannickl/DynamicButton.git";
 			requirement = {
@@ -2299,7 +2311,7 @@
 				minimumVersion = 6.0.0;
 			};
 		};
-		93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */ = {
+		93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jonkykong/SideMenu.git";
 			requirement = {
@@ -2307,7 +2319,7 @@
 				minimumVersion = 6.0.0;
 			};
 		};
-		93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */ = {
+		93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
 			requirement = {
@@ -2328,37 +2340,37 @@
 		};
 		937E4481270B378F00A98C26 /* Fuzi */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */;
+			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */;
 			productName = Fuzi;
 		};
 		937E4484270B379900A98C26 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
 		937E4487270B37A600A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E448B270B37CA00A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E448D270B37D200A98C26 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit.git" */;
+			package = 937E4483270B379900A98C26 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
 		};
 		937E4491270B37FE00A98C26 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher.git" */;
+			package = 937E4486270B37A600A98C26 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
 		};
 		937E4493270B380500A98C26 /* Fuzi */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi.git" */;
+			package = 937E4480270B378F00A98C26 /* XCRemoteSwiftPackageReference "Fuzi" */;
 			productName = Fuzi;
 		};
 		937E44E1270B393C00A98C26 /* OpenHABCore */ = {
@@ -2367,47 +2379,47 @@
 		};
 		93F8061A27AE615D0035A6B0 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 		93F8062E27AE63620035A6B0 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire.git" */;
+			package = 93F8061927AE615D0035A6B0 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
 		93F8063127AE6B940035A6B0 /* AlamofireNetworkActivityIndicator */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator.git" */;
+			package = 93F8063027AE6B940035A6B0 /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityIndicator" */;
 			productName = AlamofireNetworkActivityIndicator;
 		};
 		93F8063427AE6C620035A6B0 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk.git" */;
+			package = 93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
 		};
 		93F8064627AE7A050035A6B0 /* SwiftMessages */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages.git" */;
+			package = 93F8064527AE7A050035A6B0 /* XCRemoteSwiftPackageReference "SwiftMessages" */;
 			productName = SwiftMessages;
 		};
 		93F8064927AE7A2E0035A6B0 /* FlexColorPicker */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker.git" */;
+			package = 93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */;
 			productName = FlexColorPicker;
 		};
 		93F8064C27AE7A4D0035A6B0 /* DynamicButton */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton.git" */;
+			package = 93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */;
 			productName = DynamicButton;
 		};
 		93F8064F27AE7A830035A6B0 /* SideMenu */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu.git" */;
+			package = 93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */;
 			productName = SideMenu;
 		};
 		93F8065227AE7B580035A6B0 /* SVGKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit.git" */;
+			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */;
 			productName = SVGKit;
 		};
 /* End XCSwiftPackageProductDependency section */
