@@ -72,9 +72,6 @@ struct OpenHABImageProcessor: ImageProcessor {
     }
 }
 
-private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
-private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
-
 class OpenHABViewController: UIViewController {
     var pageUrl = ""
 
@@ -348,9 +345,8 @@ class OpenHABViewController: UIViewController {
     }
 
     func registerTableViewCells() {
-        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: openHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
-        widgetTableView.register(NewImageUITableViewCell.self, forCellReuseIdentifier: openHABViewControllerImageViewCellReuseIdentifier)
+        widgetTableView.register(cellType: NewImageUITableViewCell.self)
         widgetTableView.register(cellType: VideoUITableViewCell.self)
     }
 
@@ -1064,19 +1060,19 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case .image, .chart:
-            cell = tableView.dequeueReusableCell(withIdentifier: openHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
+            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
                 self?.updateWidgetTableView()
             }
         case .video:
-            cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
+            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
             (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
                 self?.updateWidgetTableView()
             }
         case .webview:
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case .mapview:
-            cell = (tableView.dequeueReusableCell(withIdentifier: openHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
         case .group, .text:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         default:
