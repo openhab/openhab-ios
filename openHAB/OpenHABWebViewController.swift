@@ -115,24 +115,12 @@ class OpenHABWebViewController: UIViewController, WKNavigationDelegate, WKScript
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        if let url = modifyUrl(orig: URL(string: openHABRootUrl)), challenge.protectionSpace.host == url.host {
-            guard challenge.previousFailureCount == 0 else {
-                completionHandler(.cancelAuthenticationChallenge, nil)
-                return
-            }
-            let credential = URLCredential(
-                user: Preferences.username,
-                password: Preferences.password,
-                persistence: .forSession
-            )
-            completionHandler(.useCredential, credential)
-        } else {
-            completionHandler(.performDefaultHandling, nil)
-        }
+        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+        completionHandler(disposition, credential)
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("WKScriptMessage %{PUBLIC}@ %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
+        os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
         if let callbackName = message.body as? String {
             switch callbackName {
             case "exitToApp":
