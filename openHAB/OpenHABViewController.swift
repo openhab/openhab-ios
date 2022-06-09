@@ -28,6 +28,7 @@ enum TargetController {
     case root
     case settings
     case notifications
+    case webview
 }
 
 enum Action<I, O> {
@@ -71,9 +72,6 @@ struct OpenHABImageProcessor: ImageProcessor {
     }
 }
 
-private let openHABViewControllerMapViewCellReuseIdentifier = "OpenHABViewControllerMapViewCellReuseIdentifier"
-private let openHABViewControllerImageViewCellReuseIdentifier = "OpenHABViewControllerImageViewCellReuseIdentifier"
-
 class OpenHABViewController: UIViewController {
     var pageUrl = ""
 
@@ -102,6 +100,7 @@ class OpenHABViewController: UIViewController {
     private var filteredPage: OpenHABSitemapPage?
     private var serverProperties: OpenHABServerProperties?
     private let search = UISearchController(searchResultsController: nil)
+    private var webViewController: OpenHABWebViewController?
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
@@ -346,9 +345,8 @@ class OpenHABViewController: UIViewController {
     }
 
     func registerTableViewCells() {
-        widgetTableView.register(MapViewTableViewCell.self, forCellReuseIdentifier: openHABViewControllerMapViewCellReuseIdentifier)
         widgetTableView.register(cellType: MapViewTableViewCell.self)
-        widgetTableView.register(NewImageUITableViewCell.self, forCellReuseIdentifier: openHABViewControllerImageViewCellReuseIdentifier)
+        widgetTableView.register(cellType: NewImageUITableViewCell.self)
         widgetTableView.register(cellType: VideoUITableViewCell.self)
     }
 
@@ -943,6 +941,23 @@ extension OpenHABViewController: ModalHandler {
                     navigationController?.pushViewController(newViewController, animated: true)
                 }
             }
+        case .webview:
+            if webViewController == nil {
+                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABWebViewController") as? OpenHABWebViewController {
+                    newViewController.openHABRootUrl = openHABRootUrl
+                    webViewController = newViewController
+                    navigationController?.pushViewController(newViewController, animated: true)
+                }
+            } else {
+                if let newViewController = navigationController?.viewControllers.filter({ $0 is OpenHABWebViewController }).first {
+                    navigationController?.popToViewController(newViewController, animated: true)
+                } else {
+                    navigationController?.pushViewController(webViewController!, animated: true)
+                }
+            }
+            if webViewController != nil {
+                webViewController?.openHABRootUrl = openHABRootUrl
+            }
         }
     }
 }
@@ -1045,19 +1060,19 @@ extension OpenHABViewController: UITableViewDelegate, UITableViewDataSource {
             cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
             (cell as? ColorPickerUITableViewCell)?.delegate = self
         case .image, .chart:
-            cell = tableView.dequeueReusableCell(withIdentifier: openHABViewControllerImageViewCellReuseIdentifier, for: indexPath) as! NewImageUITableViewCell
+            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
                 self?.updateWidgetTableView()
             }
         case .video:
-            cell = tableView.dequeueReusableCell(withIdentifier: "VideoUITableViewCell", for: indexPath) as! VideoUITableViewCell
+            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
             (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
                 self?.updateWidgetTableView()
             }
         case .webview:
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case .mapview:
-            cell = (tableView.dequeueReusableCell(withIdentifier: openHABViewControllerMapViewCellReuseIdentifier) as? MapViewTableViewCell)!
+            cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
         case .group, .text:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         default:

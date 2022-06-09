@@ -11,6 +11,7 @@
 		286F556F22EA062700AECC5C /* DynamicButtonStyleBell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */; };
 		286F557122EA3D4E00AECC5C /* DynamicButtonStyleGear.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */; };
 		4D6470DA2561F935007B03FC /* openHABIntents.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4D6470D32561F935007B03FC /* openHABIntents.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */; };
 		656916D91FCB82BC00667B2A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 656916D81FCB82BC00667B2A /* GoogleService-Info.plist */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
@@ -269,6 +270,7 @@
 		4D647220256331B9007B03FC /* SetSwitchStateIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSwitchStateIntentHandler.swift; sourceTree = "<group>"; };
 		4D64724C256346BD007B03FC /* SetDimmerRollerValueIntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDimmerRollerValueIntentHandler.swift; sourceTree = "<group>"; };
 		653C09D41EAD691A00BA4C4A /* openHAB.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = openHAB.entitlements; sourceTree = "<group>"; };
+		65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWebViewController.swift; sourceTree = "<group>"; };
 		656916D81FCB82BC00667B2A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "openHAB/GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		931384B324F259BC00A73AB5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		931384B424F259BD00A73AB5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -597,12 +599,12 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		93A4A7C827CA23FD0060AF5F /* TestPlans */ = {
+		93A4A7C827CA23FD0060AF5F /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */,
 			);
-			path = TestPlans;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		93F38D4623803731001B1451 /* Model */ = {
@@ -743,6 +745,13 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		DAE238252806E5C800196467 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		DAF231D327BB6F5C00AB916C /* Ressources */ = {
 			isa = PBXGroup;
 			children = (
@@ -810,6 +819,7 @@
 		DF4B83FD18857FA100F34902 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABViewController.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
 				DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */,
@@ -868,7 +878,7 @@
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DFB2623018830A3600D3244D /* openHAB */,
-				93A4A7C827CA23FD0060AF5F /* TestPlans */,
+				93A4A7C827CA23FD0060AF5F /* Sources */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				933D7F0522E7015000621A03 /* openHABUITests */,
 				DA0775162346705D0086C685 /* openHABWatch */,
@@ -877,6 +887,7 @@
 				DFB2622818830A3600D3244D /* Products */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				DA1C2E4A230DC28F00FACFB0 /* fastlane */,
+				DAE238252806E5C800196467 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1405,6 +1416,7 @@
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				DF06F1F918FEA8420011E7B9 /* ColorPickerUITableViewCell.swift in Sources */,
+				65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
@@ -1550,7 +1562,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1564,7 +1576,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.openHABIntents;
@@ -1593,7 +1605,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1606,7 +1618,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.openHABIntents;
@@ -1642,6 +1654,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1661,6 +1674,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openHABUITests;
@@ -1700,6 +1714,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1719,6 +1734,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openHABUITests;
@@ -1984,7 +2000,7 @@
 				CURRENT_PROJECT_VERSION = 1580410446;
 				CURRENT_PROJECT_VERSION = 1580410455;
 				"CODE_SIGN_STYLE[sdk=*]" = Automatic;
-				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
@@ -1994,7 +2010,7 @@
 				MARKETING_VERSION = 2.4.0;
 				MARKETING_VERSION = 2.4.6;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp;
@@ -2036,6 +2052,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
@@ -2045,7 +2062,7 @@
 				MARKETING_VERSION = 2.4.0;
 				MARKETING_VERSION = 2.4.6;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp;
@@ -2086,6 +2103,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				ENABLE_PREVIEWS = YES;
@@ -2106,6 +2124,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp.watchkitextension;
@@ -2146,6 +2165,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				ENABLE_PREVIEWS = YES;
@@ -2166,6 +2186,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp.watchkitextension;
@@ -2204,6 +2225,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2223,6 +2245,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
@@ -2263,6 +2286,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2282,6 +2306,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
@@ -2433,6 +2458,7 @@
 				CURRENT_PROJECT_VERSION = 1580410503;
 				CURRENT_PROJECT_VERSION = 1580410506;
 				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2457,6 +2483,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG -Xfrontend -warn-long-expression-type-checking=200 -Xfrontend -warn-long-function-bodies=200";
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2490,7 +2517,7 @@
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1580410507;
+				CURRENT_PROJECT_VERSION = 1580410508;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2515,6 +2542,7 @@
 				MARKETING_VERSION = 2.4.45;
 				MARKETING_VERSION = 2.4.46;
 				MARKETING_VERSION = 2.4.47;
+				MARKETING_VERSION = 2.4.48;
 				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
