@@ -128,7 +128,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         }
     }
 
-    // WKNavigationDelegate
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if let response = navigationResponse.response as? HTTPURLResponse {
@@ -138,12 +137,10 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         decisionHandler(.allow)
     }
 
-    // WKNavigationDelegate
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
     }
 
-    // WKNavigationDelegate
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         let nserror = error as NSError
         if nserror.code != NSURLErrorCancelled {
@@ -151,17 +148,18 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         }
     }
 
-    // WKNavigationDelegate
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         os_log("didFinish - webView.url %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
     }
 
-    // WKNavigationDelegate
-
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
-        completionHandler(disposition, credential)
+        if let url = modifyUrl(orig: URL(string: openHABRootUrl)), challenge.protectionSpace.host == url.host {
+            let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+            completionHandler(disposition, credential)
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
     }
 }
 
