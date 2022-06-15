@@ -34,6 +34,9 @@ class OpenHABWebViewController: UIViewController {
         true
     }
 
+    private var observation: NSKeyValueObservation?
+    private var progressView: UIProgressView!
+
     private lazy var webView: WKWebView = {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
@@ -58,6 +61,11 @@ class OpenHABWebViewController: UIViewController {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         view.addSubview(webView)
+        progressView = UIProgressView(progressViewStyle: .default)
+        progressView.sizeToFit()
+        observation = webView.observe(\.estimatedProgress, options: [.new]) { _, _ in
+            self.progressView.progress = Float(self.webView.estimatedProgress)
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -94,6 +102,10 @@ class OpenHABWebViewController: UIViewController {
             return URL(string: "https://home.myopenhab.org")
         }
         return orig
+    }
+
+    deinit {
+        observation = nil
     }
 }
 

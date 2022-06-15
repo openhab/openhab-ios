@@ -48,7 +48,7 @@ public struct UserDefaultURL {
         get {
             guard let localUrl = Preferences.sharedDefaults.string(forKey: key) else { return defaultValue }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if !validateUrl(trimmedUri) { return defaultValue }
+            if !trimmedUri.isValidURL { return defaultValue }
             return trimmedUri
         }
         set {
@@ -59,12 +59,6 @@ public struct UserDefaultURL {
     init(_ key: String, defaultValue: String) {
         self.key = key
         self.defaultValue = defaultValue
-    }
-
-    private func validateUrl(_ stringURL: String) -> Bool {
-        // return nil if the URL has not a valid format
-        let url: URL? = URL(string: stringURL)
-        return url != nil
     }
 
     func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
