@@ -41,4 +41,7 @@ public extension OSLog {
 
     /// Logs Alamofire events
     static let alamofire = OSLog(subsystem: subsystem, category: "alamofire")
+
+    /// Logs WkWebView events
+    static let wkwebview = OSLog(subsystem: subsystem, category: "wkwebview")
 }

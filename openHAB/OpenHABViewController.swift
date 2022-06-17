@@ -509,7 +509,7 @@ class OpenHABViewController: UIViewController {
                 self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
                 self.loadPage(true)
             case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
 
                 NetworkConnection.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001, longPolling {

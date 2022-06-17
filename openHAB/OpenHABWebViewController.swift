@@ -87,7 +87,7 @@ class OpenHABWebViewController: UIViewController {
         if !force, currentTarget == newTarget {
             return
         }
-        currentTarget = newTarget
+        // currentTarget = newTarget
         let url = URL(string: openHABRootUrl)
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
@@ -132,7 +132,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         }
 
         guard let url = navigationAction.request.url else { return }
-        os_log("decidePolicyFor - url: %{PUBLIC}@", log: .urlComposition, type: .info, url.absoluteString)
+        os_log("decidePolicyFor - url: %{PUBLIC}@", log: .wkwebview, type: .info, url.absoluteString)
 
         if navigationAction.navigationType == .linkActivated {
             action = .cancel // Stop in WebView
@@ -144,13 +144,13 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if let response = navigationResponse.response as? HTTPURLResponse {
             dump(response.allHeaderFields)
-            os_log("navigationResponse: %{PUBLIC}@", log: .urlComposition, type: .info, String(response.statusCode))
+            os_log("navigationResponse: %{PUBLIC}@", log: .wkwebview, type: .info, String(response.statusCode))
         }
         decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
+        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -161,13 +161,22 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        os_log("didFinish - webView.url %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
+        os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+
+        os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
+
         if let url = modifyUrl(orig: URL(string: openHABRootUrl)), challenge.protectionSpace.host == url.host {
-            let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+            var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+            var credential: URLCredential?
+            if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
+                (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), URLSessionDataTask(), challenge)
+            } else {
+                (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+            }
             completionHandler(disposition, credential)
         } else {
             completionHandler(.performDefaultHandling, nil)
