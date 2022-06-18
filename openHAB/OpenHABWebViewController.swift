@@ -12,11 +12,14 @@
 import OpenHABCore
 import os.log
 import SafariServices
+import SideMenu
+import SwiftMessages
 import UIKit
 import WebKit
 
-class OpenHABWebViewController: UIViewController {
+class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
+    private var tracker: OpenHABTracker?
 
     // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
@@ -29,7 +32,11 @@ class OpenHABWebViewController: UIViewController {
         }
     }
     """
-    var openHABRootUrl = ""
+
+    var appData: OpenHABDataObject? {
+        AppDelegate.appDelegate.appData
+    }
+
     override open var shouldAutorotate: Bool {
         true
     }
@@ -72,7 +79,9 @@ class OpenHABWebViewController: UIViewController {
         super.viewWillAppear(animated)
         // Hide the navigation bar on the this view controller
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        loadWebView(force: false)
+        tracker = OpenHABTracker()
+        tracker?.delegate = self
+        tracker?.start()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -82,13 +91,15 @@ class OpenHABWebViewController: UIViewController {
     }
 
     func loadWebView(force: Bool = false) {
+        os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, appData?.openHABRootUrl ?? "nil")
+
         let authStr = "\(Preferences.username):\(Preferences.password)"
-        let newTarget = "\(openHABRootUrl):\(authStr)"
+        let newTarget = "\(appData?.openHABRootUrl ?? ""):\(authStr)"
         if !force, currentTarget == newTarget {
             return
         }
         currentTarget = newTarget
-        let url = URL(string: openHABRootUrl)
+        let url = URL(string: appData?.openHABRootUrl ?? "")
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
             // clear out existing page while we load.
@@ -107,6 +118,14 @@ class OpenHABWebViewController: UIViewController {
     deinit {
         observation = nil
     }
+
+    override func reloadView() {
+        loadWebView(force: true)
+    }
+
+    override func viewName() -> String {
+        "web"
+    }
 }
 
 extension OpenHABWebViewController: WKScriptMessageHandler {
@@ -115,7 +134,13 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
         if let callbackName = message.body as? String {
             switch callbackName {
             case "exitToApp":
-                _ = navigationController?.popViewController(animated: true)
+                // _ = navigationController?.popViewController(animated: true)
+                guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
+
+                let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
+                drawer?.drawerTableType = .withStandardMenuEntries
+                drawer?.delegate = appData?.rootViewController
+                present(menu, animated: true)
             case "goFullScreen": break
             default: break
             }
@@ -166,7 +191,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        if let url = modifyUrl(orig: URL(string: openHABRootUrl)), challenge.protectionSpace.host == url.host {
+        if let url = modifyUrl(orig: URL(string: appData?.openHABRootUrl ?? "")), challenge.protectionSpace.host == url.host {
             let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
             completionHandler(disposition, credential)
         } else {
@@ -190,5 +215,64 @@ extension OpenHABWebViewController: WKUIDelegate {
         }
 
         return nil
+    }
+}
+
+// MARK: - OpenHABTrackerDelegate
+
+extension OpenHABWebViewController: OpenHABTrackerDelegate {
+    func openHABTracked(_ openHABUrl: URL?) {
+        os_log("OpenHABWebViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
+
+        var openHABRootUrl = ""
+        if let openHABUrl = openHABUrl {
+            openHABRootUrl = openHABUrl.absoluteString
+        }
+
+        appData?.openHABRootUrl = openHABRootUrl
+
+        NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
+            switch response.result {
+            case let .success(data):
+                self.loadWebView(force: true)
+            case let .failure(error):
+                self.openHABTrackingError(error)
+                os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
+                os_log("On Connecting %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+            }
+        }
+    }
+
+    func openHABTrackingProgress(_ message: String?) {
+        os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 1.5)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            let view = MessageView.viewFromNib(layout: .cardView)
+            view.configureTheme(.info)
+            view.configureContent(title: NSLocalizedString("connecting", comment: ""), body: message ?? "")
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
+        }
+    }
+
+    func openHABTrackingError(_ error: Error) {
+        os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 60)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            let view = MessageView.viewFromNib(layout: .cardView)
+            // ... configure the view
+            view.configureTheme(.error)
+            view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
+        }
     }
 }

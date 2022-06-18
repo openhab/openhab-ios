@@ -40,7 +40,8 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
 
         hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
         hamburgerButton.setStyle(.hamburger, animated: true)
-        hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+        // TODO: for Dan, fix this
+//        hamburgerButton.addTarget(self, action: #selector(OpenHABSitemapViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
         hamburgerButton.strokeColor = view.tintColor
 
         let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)

@@ -74,7 +74,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
     var sitemaps: [OpenHABSitemap] = []
     var uiTiles: [OpenHABUiTile] = []
-    var openHABRootUrl = ""
+//    var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
     var drawerItems: [OpenHABDrawerItem] = []
@@ -111,7 +111,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         os_log("OpenHABDrawerTableViewController viewWillAppear", log: .viewCycle, type: .info)
 
-        NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
+        NetworkConnection.sitemaps(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
             switch response.result {
             case let .success(data):
                 os_log("Sitemap response", log: .viewCycle, type: .info)
@@ -139,7 +139,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             }
         }
 
-        NetworkConnection.uiTiles(openHABRootUrl: openHABRootUrl) { response in
+        NetworkConnection.uiTiles(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
             switch response.result {
             case .success:
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -234,7 +234,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: passedURL))
                     imageView.kf.setImage(with: URL(string: passedURL), placeholder: UIImage(named: "openHABIcon"))
                 default:
-                    if let builtURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: passedURL.prepare()).url {
+                    if let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: passedURL.prepare()).url {
                         os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: builtURL))
                         imageView.kf.setImage(with: builtURL, placeholder: UIImage(named: "openHABIcon"))
                     }
@@ -250,7 +250,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
                 cell.customTextLabel?.text = sitemaps[siteMapIndex].label
                 if !sitemaps[siteMapIndex].icon.isEmpty {
-                    if let iconURL = Endpoint.iconForDrawer(rootUrl: openHABRootUrl, version: appData?.openHABVersion ?? 2, icon: sitemaps[siteMapIndex].icon).url {
+                    if let iconURL = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", version: appData?.openHABVersion ?? 2, icon: sitemaps[siteMapIndex].icon).url {
                         imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
                     }
                 } else {
@@ -321,7 +321,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 case _ where passedURL.hasPrefix("http"):
                     openURL(url: URL(string: passedURL))
                 default:
-                    let builtURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: passedURL.prepare())
+                    let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: passedURL.prepare())
                     openURL(url: builtURL.url)
                 }
             }
@@ -329,10 +329,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
             if !sitemaps.isEmpty {
                 let sitemap = sitemaps[indexPath.row]
                 Preferences.defaultSitemap = sitemap.name
-                appData?.rootViewController?.pageUrl = ""
+                appData?.sitemapViewController?.pageUrl = ""
                 switch drawerTableType {
                 case .withStandardMenuEntries?:
                     dismiss(animated: true) {
+                        os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
                         self.delegate?.modalDismissed(to: .root)
                     }
                 case .withoutStandardMenuEntries?:

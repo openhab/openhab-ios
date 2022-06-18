@@ -1,15 +1,17 @@
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
-//  OpenHABEndPoint.swift
-//  openHABTestsSwift
+// See the NOTICE file(s) distributed with this work for additional
+// information.
 //
-//  Created by Tim Müller-Seydlitz on 10.06.22.
-//  Copyright © 2022 openHAB e.V. All rights reserved.
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
 //
+// SPDX-License-Identifier: EPL-2.0
 
 import XCTest
 
 class OpenHABEndPoint: XCTestCase {
-
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
@@ -28,9 +30,8 @@ class OpenHABEndPoint: XCTestCase {
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
-        self.measure {
+        measure {
             // Put the code you want to measure the time of here.
         }
     }
-
 }

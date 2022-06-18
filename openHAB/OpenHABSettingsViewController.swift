@@ -95,7 +95,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
 
         updateSettings()
         saveSettings()
-        appData?.rootViewController?.pageUrl = ""
+        appData?.sitemapViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
     }
 
@@ -208,7 +208,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
             os_log("OpenHABSettingsViewController showSelectSitemap", log: .viewCycle, type: .info)
             let dest = segue.destination as! OpenHABDrawerTableViewController
             dest.drawerTableType = .withoutStandardMenuEntries
-            dest.openHABRootUrl = appData?.openHABRootUrl ?? ""
+            // dest.openHABRootUrl = appData?.openHABRootUrl ?? ""
             dest.delegate = appData?.rootViewController
             updateSettings()
             saveSettings()

@@ -11,13 +11,16 @@
 
 import Foundation
 import OpenHABCore
+import UIKit
 
 class OpenHABDataObject: NSObject, DataObject {
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
     var openHABAlwaysSendCreds = false
-    var rootViewController: OpenHABViewController?
+    var sitemapViewController: OpenHABSitemapViewController?
+    var rootViewController: OpenHABRootViewController?
+    var currentViewController: OpenHABViewController?
     var openHABVersion: Int = 0
 }
 

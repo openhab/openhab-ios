@@ -75,6 +75,7 @@ public enum Preferences {
 
     // MARK: - Public
 
+    @UserDefaultURL("defaultView", defaultValue: "web") public static var defaultView: String
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
     @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org") public static var remoteUrl: String
 
