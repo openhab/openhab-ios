@@ -203,19 +203,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsTableView.reloadData()
     }
 
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        os_log("OpenHABSettingsViewController prepareForSegue", log: .viewCycle, type: .info)
-//
-//        if segue.identifier == "showSelectSitemap" {
-//            os_log("OpenHABSettingsViewController showSelectSitemap", log: .viewCycle, type: .info)
-//            let dest = segue.destination as! OpenHABDrawerTableViewController
-    ////            dest.drawerTableType = .withoutStandardMenuEntries
-//            dest.delegate = appData?.rootViewController
-//            updateSettings()
-//            saveSettings()
-//        }
-//    }
-
     func updateSettingsUi() {
         localUrlTextField?.text = settingsLocalUrl
         remoteUrlTextField?.text = settingsRemoteUrl
