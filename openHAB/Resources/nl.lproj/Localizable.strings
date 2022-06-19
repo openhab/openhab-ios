@@ -3,7 +3,7 @@
 "notification" = "Notificatie";
 "dismiss" = "Afwijzen";
 "search_items" = "Zoek openHAB items";
-"error" = "Fout";
+"error" = "Error";
 "ssl_certificate_error" = "SSL-certificaat fout";
 "empty_sitemap" = "openHAB heeft een lege Sitemap geladen";
 "connecting" = "Verbinden";
@@ -69,4 +69,4 @@
 "on" = "on";
 "off" = "off";
 "empty" = "empty";
-"sortSitemapsBy" = "Sort sitemaps by";
+"sortSitemapsBy" = "Sorteer sitemaps op";
