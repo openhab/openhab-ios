@@ -98,7 +98,7 @@ class OpenHABWebViewController: OpenHABViewController {
             return
         }
 
-        // currentTarget = newTarget
+        currentTarget = newTarget
         let url = URL(string: appData?.openHABRootUrl ?? "")
 
         if let modifiedUrl = modifyUrl(orig: url) {
@@ -169,7 +169,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if let response = navigationResponse.response as? HTTPURLResponse {
             dump(response.allHeaderFields)
-            os_log("navigationResponse: %{PUBLIC}@", log: .urlComposition, type: .info, String(response.statusCode))
+            os_log("navigationResponse: %{PUBLIC}@", log: .wkwebview, type: .info, String(response.statusCode))
             if response.statusCode >= 400 {
                 showActivityIndicator(show: false)
                 webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
@@ -180,13 +180,13 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
+        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: true)
         navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        os_log("didFail - webView.url %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
+        os_log("didFail - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         let nserror = error as NSError
         if nserror.code != NSURLErrorCancelled {
             webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
@@ -196,7 +196,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        os_log("didFinish - webView.url %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
+        os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: false)
         // Hide the navigation bar on the this view controller
         navigationController?.setNavigationBarHidden(true, animated: true)

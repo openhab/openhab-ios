@@ -120,17 +120,6 @@ class OpenHABRootViewController: OpenHABViewController {
     }
 
     @objc
-    func setDrawerDefaultsAndPresent(presentMenu: Bool) {
-        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-        let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
-        drawer?.delegate = self
-        // drawer?.drawerTableType = .withStandardMenuEntries
-        if presentMenu {
-            present(menu, animated: true)
-        }
-    }
-
-    @objc
     func handleApsRegistration(_ note: Notification?) {
         os_log("handleApsRegistration", log: .notifications, type: .info)
         let theData = note?.userInfo
