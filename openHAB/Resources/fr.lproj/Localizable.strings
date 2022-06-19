@@ -1,7 +1,7 @@
-"certficate_exists" = "Certificate already exists in the keychain.";
+"certficate_exists" = "Le certificat existe déjà dans le trousseau.";
 "message_not_decoded" = "Message could not be decoded";
 "notification" = "Notification";
-"dismiss" = "Dismiss";
+"dismiss" = "Ignorer";
 "search_items" = "Search openHAB items";
 "error" = "Error";
 "ssl_certificate_error" = "SSL Certificate Error";
@@ -69,4 +69,4 @@
 "on" = "on";
 "off" = "off";
 "empty" = "empty";
-"sortSitemapsBy" = "Sort sitemaps by";
+"sortSitemapsBy" = "Trier les sitemaps par";
