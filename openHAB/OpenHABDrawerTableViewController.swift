@@ -127,7 +127,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 case .label: self.sitemaps.sort { $0.label < $1.label }
                 case .name: self.sitemaps.sort { $0.name < $1.name }
                 }
-                
+
                 self.drawerItems.removeAll()
                 if self.drawerTableType == .withStandardMenuEntries {
                     self.setStandardDrawerItems()
