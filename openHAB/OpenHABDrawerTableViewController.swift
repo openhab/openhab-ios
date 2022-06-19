@@ -64,11 +64,6 @@ struct UiTile: Decodable {
     var imageUrl: String
 }
 
-// enum DrawerTableType {
-//    case withStandardMenuEntries
-//    case withoutStandardMenuEntries
-// }
-
 class OpenHABDrawerTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "DrawerCell"
 
@@ -78,17 +73,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
     var openHABPassword = ""
     var drawerItems: [OpenHABDrawerItem] = []
     weak var delegate: ModalHandler?
-    // var drawerTableType: DrawerTableType!
 
     // App wide data access
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
     }
 
-//    init(drawerTableType: DrawerTableType?) {
-//        super.init(nibName: nil, bundle: nil)
-//        self.drawerTableType = drawerTableType
-//    }
     init() {
         super.init(nibName: nil, bundle: nil)
     }
@@ -104,9 +94,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
         sitemaps = []
         loadSettings()
         setStandardDrawerItems()
-//        if drawerTableType == .withStandardMenuEntries {
-//            setStandardDrawerItems()
-//        }
         os_log("OpenHABDrawerTableViewController did load", log: .viewCycle, type: .info)
     }
 
@@ -133,17 +120,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
                 self.drawerItems.removeAll()
                 self.setStandardDrawerItems()
-//                if self.drawerTableType == .withStandardMenuEntries {
-//                    self.setStandardDrawerItems()
-//                }
                 self.tableView.reloadData()
             case let .failure(error):
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
                 self.setStandardDrawerItems()
-//                if self.drawerTableType == .withStandardMenuEntries {
-//                    self.setStandardDrawerItems()
-//                }
                 self.tableView.reloadData()
             }
         }
@@ -343,17 +324,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
                     self.delegate?.modalDismissed(to: .root)
                 }
-//                switch drawerTableType {
-//                case .withStandardMenuEntries?:
-//                    dismiss(animated: true) {
-//                        os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
-//                        self.delegate?.modalDismissed(to: .root)
-//                    }
-//                case .withoutStandardMenuEntries?:
-//                    navigationController?.popToRootViewController(animated: true)
-//                case .none:
-//                    break
-//                }
             }
         case 3:
             // Then menu items
