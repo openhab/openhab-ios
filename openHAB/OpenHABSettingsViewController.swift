@@ -28,6 +28,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsIconType: IconType = .png
     var settingsRealTimeSliders = false
     var settingsSendCrashReports = false
+    var settingsSortSitemapsBy: SortSitemapsOrder = .label
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -46,6 +47,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var realTimeSlidersSwitch: UISwitch!
     @IBOutlet private var sendCrashReportsSwitch: UISwitch!
     @IBOutlet private var sendCrashReportsDummy: UIButton!
+    @IBOutlet private var sortSitemapsBy: UISegmentedControl!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -158,7 +160,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
                 ret = 6
             }
         case 1:
-            ret = 10
+            ret = 11
         default:
             ret = 10
         }
@@ -226,6 +228,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         realTimeSlidersSwitch?.isOn = settingsRealTimeSliders
         sendCrashReportsSwitch?.isOn = settingsSendCrashReports
         iconSegmentedControl?.selectedSegmentIndex = settingsIconType.rawValue
+        sortSitemapsBy?.selectedSegmentIndex = settingsSortSitemapsBy.rawValue
         if settingsDemomode == true {
             disableConnectionSettings()
         } else {
@@ -244,8 +247,8 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsIdleOff = Preferences.idleOff
         settingsRealTimeSliders = Preferences.realTimeSliders
         settingsSendCrashReports = Preferences.sendCrashReports
-        let rawSettingsIconType = Preferences.iconType
-        settingsIconType = IconType(rawValue: rawSettingsIconType) ?? .png
+        settingsIconType = IconType(rawValue: Preferences.iconType) ?? .png
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
     }
 
     func updateSettings() {
@@ -261,6 +264,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsRealTimeSliders = realTimeSlidersSwitch?.isOn ?? false
         settingsSendCrashReports = sendCrashReportsSwitch?.isOn ?? false
         settingsIconType = IconType(rawValue: iconSegmentedControl.selectedSegmentIndex) ?? .png
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: sortSitemapsBy.selectedSegmentIndex) ?? .label
     }
 
     func saveSettings() {
@@ -275,6 +279,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.realTimeSliders = settingsRealTimeSliders
         Preferences.iconType = settingsIconType.rawValue
         Preferences.sendCrashReports = settingsSendCrashReports
+        Preferences.sortSitemapsby = settingsSortSitemapsBy.rawValue
 
         WatchMessageService.singleton.syncPreferencesToWatch()
     }

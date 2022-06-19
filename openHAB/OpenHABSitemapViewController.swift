@@ -12,8 +12,6 @@
 import Alamofire
 import AVFoundation
 import AVKit
-import DynamicButton
-// import FirebaseCrashlytics
 import Fuzi
 import Kingfisher
 import OpenHABCore
@@ -65,7 +63,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
     var pageUrl = ""
 
     private var tracker: OpenHABTracker?
-    private var hamburgerButton: DynamicButton!
+    // private var hamburgerButton: DynamicButton!
     private var selectedWidgetRow: Int = 0
     private var currentPageOperation: Alamofire.Request?
     private var commandOperation: Alamofire.Request?
@@ -135,26 +133,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
         if let refreshControl = refreshControl {
             widgetTableView.refreshControl = refreshControl
         }
-
-        let hamburgerButtonItem: UIBarButtonItem
-        if #available(iOS 13.0, *) {
-            let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
-            let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
-            let button = UIButton(type: .custom)
-            button.setImage(buttonImage, for: .normal)
-            button.addTarget(self, action: #selector(OpenHABSitemapViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-            hamburgerButtonItem = UIBarButtonItem(customView: button)
-            hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        } else {
-            hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
-            hamburgerButton.setStyle(.hamburger, animated: true)
-            hamburgerButton.addTarget(self, action: #selector(OpenHABSitemapViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-            hamburgerButton.strokeColor = view.tintColor
-            hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
-        }
-        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
-
-        navigationController?.navigationBar.prefersLargeTitles = true
 
         search.searchResultsUpdater = self
         search.obscuresBackgroundDuringPresentation = false
@@ -292,12 +270,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
         loadPage(false)
         widgetTableView.reloadData()
         widgetTableView.layoutIfNeeded()
-    }
-
-    @objc
-    func rightDrawerButtonPress(_ sender: Any?) {
-        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-        present(menu, animated: true)
     }
 
     func restart() {
@@ -660,7 +632,7 @@ extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: "connecting", message:  message ?? "")
+        showPopupMessage(seconds: 1.5, title: "connecting", message: message ?? "")
     }
 
     func openHABTrackingError(_ error: Error) {

@@ -129,12 +129,6 @@ class OpenHABRootViewController: OpenHABViewController {
     }
 
     @objc
-    func rightDrawerButtonPress(_ sender: Any?) {
-        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-        present(menu, animated: true)
-    }
-
-    @objc
     func handleApsRegistration(_ note: Notification?) {
         os_log("handleApsRegistration", log: .notifications, type: .info)
         let theData = note?.userInfo

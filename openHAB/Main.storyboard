@@ -57,7 +57,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fxA-Sy-xY6">
-                                                    <rect key="frame" x="324" y="13.666666666666664" width="21.333333333333314" height="17"/>
+                                                    <rect key="frame" x="323.66666666666669" y="13.666666666666664" width="21.666666666666686" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                                     <nil key="highlightedColor"/>
@@ -91,7 +91,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Label lslslslsld  sllslsls sllslsls lslls" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2yW-44-jR4">
-                                                    <rect key="frame" x="61.999999999999986" y="13.666666666666664" width="217.66666666666663" height="17"/>
+                                                    <rect key="frame" x="62.000000000000014" y="13.666666666666664" width="217.33333333333337" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -100,7 +100,7 @@
                                                     <rect key="frame" x="306" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                 </switch>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" horizontalCompressionResistancePriority="748" text="Label lllls  slllsl slllslls" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="quj-Al-Pni">
-                                                    <rect key="frame" x="287.66666666666669" y="13.666666666666664" width="10.333333333333314" height="17"/>
+                                                    <rect key="frame" x="287.33333333333331" y="13.666666666666664" width="10.666666666666686" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.66274982690811157" green="0.66671860218048096" blue="0.66274511814117432" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                     <nil key="highlightedColor"/>
@@ -281,7 +281,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rCE-g4-UjE">
-                                                    <rect key="frame" x="175.66666666666666" y="13.666666666666664" width="21.333333333333343" height="17"/>
+                                                    <rect key="frame" x="175.33333333333334" y="13.666666666666664" width="21.666666666666657" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                                     <nil key="highlightedColor"/>
@@ -567,7 +567,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1973.5999999999999" y="31.773399014778327"/>
+            <point key="canvasLocation" x="3511" y="44"/>
         </scene>
         <!--Settings-->
         <scene sceneID="bFA-oT-thf">
@@ -588,7 +588,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Demo mode" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dn3-BH-eJh">
-                                                    <rect key="frame" x="28.000000000000007" y="13.666666666666664" width="78.666666666666686" height="17"/>
+                                                    <rect key="frame" x="27.999999999999993" y="13.666666666666664" width="78.333333333333314" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -664,7 +664,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote URL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3fe-eg-ODI">
-                                                    <rect key="frame" x="28.000000000000007" y="13.666666666666664" width="80.666666666666686" height="17"/>
+                                                    <rect key="frame" x="27.999999999999993" y="13.666666666666664" width="80.333333333333314" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -712,7 +712,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="left" contentVerticalAlignment="center" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7GO-er-lvr">
-                                                    <rect key="frame" x="114" y="12.666666666666664" width="235" height="19"/>
+                                                    <rect key="frame" x="114" y="12.666666666666666" width="235" height="18.666666666666671"/>
                                                     <accessibility key="accessibilityConfiguration" label="Username"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done" textContentType="username"/>
@@ -743,7 +743,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I0L-Yz-WXB">
-                                                    <rect key="frame" x="27.999999999999996" y="13.666666666666664" width="62.666666666666657" height="17"/>
+                                                    <rect key="frame" x="28.000000000000004" y="13.666666666666664" width="62.333333333333343" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -751,7 +751,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalCompressionResistancePriority="740" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="lsllslslslllsllllllslslslsllllsllllsllllllslslsllslsl" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="3La-Yc-Vmi">
-                                                    <rect key="frame" x="110.66666666666667" y="13.666666666666664" width="238.33333333333331" height="17"/>
+                                                    <rect key="frame" x="110.33333333333333" y="13.666666666666664" width="238.66666666666669" height="17"/>
                                                     <accessibility key="accessibilityConfiguration" label="Password"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <textInputTraits key="textInputTraits" returnKeyType="done" secureTextEntry="YES" textContentType="password"/>
@@ -782,7 +782,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Always send credentials" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Dn3-BH-eJh">
-                                                    <rect key="frame" x="28" y="13.666666666666664" width="155.66666666666666" height="17"/>
+                                                    <rect key="frame" x="28" y="13.666666666666664" width="155.33333333333334" height="17"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1132,6 +1132,38 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="CqY-mr-f6U">
+                                        <rect key="frame" x="0.0" y="794.66666603088379" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="CqY-mr-f6U" id="fEM-FO-78N">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sort sitemaps by" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DBh-1C-8du">
+                                                    <rect key="frame" x="28" y="13.666666666666664" width="109" height="17"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                    <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="sortSitemapsBy"/>
+                                                    </userDefinedRuntimeAttributes>
+                                                </label>
+                                                <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="lJ2-r3-KIv">
+                                                    <rect key="frame" x="240" y="6.6666666666666679" width="109" height="32"/>
+                                                    <segments>
+                                                        <segment title="Label"/>
+                                                        <segment title="Name"/>
+                                                    </segments>
+                                                </segmentedControl>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="DBh-1C-8du" firstAttribute="centerY" secondItem="fEM-FO-78N" secondAttribute="centerY" id="HhF-CB-0w9"/>
+                                                <constraint firstItem="DBh-1C-8du" firstAttribute="leading" secondItem="fEM-FO-78N" secondAttribute="leadingMargin" constant="12" id="Jdj-v0-5sq"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="lJ2-r3-KIv" secondAttribute="trailing" constant="10" id="N5J-9i-shY"/>
+                                                <constraint firstItem="lJ2-r3-KIv" firstAttribute="centerY" secondItem="fEM-FO-78N" secondAttribute="centerY" id="hc4-AC-h3H"/>
+                                                <constraint firstItem="lJ2-r3-KIv" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="DBh-1C-8du" secondAttribute="trailing" constant="8" id="k6A-ie-StE"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                         </sections>
@@ -1154,6 +1186,7 @@
                         <outlet property="sendCrashReportsDummy" destination="Hwl-Ux-Na9" id="lEi-hM-5GB"/>
                         <outlet property="sendCrashReportsSwitch" destination="qS5-yP-H2i" id="ePn-02-tM8"/>
                         <outlet property="settingsTableView" destination="Gpo-Jj-aMP" id="w5C-jq-jO6"/>
+                        <outlet property="sortSitemapsBy" destination="lJ2-r3-KIv" id="c4A-1e-xpx"/>
                         <outlet property="usernameTextField" destination="7GO-er-lvr" id="nLw-7S-7YN"/>
                         <segue destination="VQn-En-nLm" kind="unwind" identifier="unwindToRoot" unwindAction="unwindToRootViewController:" id="Ez7-Nt-ZRa"/>
                     </connections>
@@ -1161,7 +1194,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YKX-NL-XyS" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="VQn-En-nLm" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2750.625" y="32.5"/>
+            <point key="canvasLocation" x="4230" y="32"/>
         </scene>
         <!--OpenHAB Notifications View Controller-->
         <scene sceneID="rzB-s5-QOg">
@@ -1186,7 +1219,7 @@
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" tag="102" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uwJ-PQ-XzZ">
-                                            <rect key="frame" x="66" y="27.000000000000004" width="40.666666666666657" height="13.666666666666668"/>
+                                            <rect key="frame" x="66" y="26.999999999999996" width="40.666666666666657" height="13.333333333333332"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                             <color key="textColor" systemColor="secondaryLabelColor"/>
                                             <nil key="highlightedColor"/>
@@ -1239,7 +1272,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ADu-zQ-8sO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4231" y="1660"/>
+            <point key="canvasLocation" x="2719" y="32"/>
         </scene>
         <!--Side Menu Navigation Controller-->
         <scene sceneID="fYt-Mu-4Xr">
@@ -1542,25 +1575,6 @@
             </objects>
             <point key="canvasLocation" x="2753" y="875"/>
         </scene>
-        <!--OpenHAB Root View Controller-->
-        <scene sceneID="VEB-gb-QA4">
-            <objects>
-                <viewController storyboardIdentifier="OpenHABRootViewController" id="JN9-jV-91l" customClass="OpenHABRootViewController" customModule="openHAB" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="slG-rV-lM4"/>
-                        <viewControllerLayoutGuide type="bottom" id="NLV-7k-mNs"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="npO-NF-CVE" customClass="OpenHabRoot">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="OHa-FB-6Ac"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="5tz-WS-0Hh" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1974" y="-739"/>
-        </scene>
         <!--Navigation Controller-->
         <scene sceneID="T9Q-vI-vaw">
             <objects>
@@ -1572,7 +1586,7 @@
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
-                        <segue destination="JN9-jV-91l" kind="relationship" relationship="rootViewController" id="YBr-UB-ahg"/>
+                        <segue destination="43k-eW-OFY" kind="relationship" relationship="rootViewController" id="uD4-qD-OAq"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tXU-MG-NDv" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1638,7 +1652,26 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d5Y-bl-XKC" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1103" y="1653"/>
+            <point key="canvasLocation" x="1974" y="875"/>
+        </scene>
+        <!--OpenHAB Root View Controller-->
+        <scene sceneID="JIR-SC-6mc">
+            <objects>
+                <viewController storyboardIdentifier="OpenHABRootViewController" id="43k-eW-OFY" customClass="OpenHABRootViewController" customModule="openHAB" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="nwY-wA-Xam"/>
+                        <viewControllerLayoutGuide type="bottom" id="saB-Cd-OC0"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="dTz-22-LVX">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="TlL-z3-KJ5"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="2oB-9R-OQr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1890" y="32"/>
         </scene>
     </scenes>
     <designables>

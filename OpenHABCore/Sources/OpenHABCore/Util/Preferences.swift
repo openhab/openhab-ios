@@ -78,7 +78,6 @@ public enum Preferences {
     @UserDefaultURL("defaultView", defaultValue: "web") public static var defaultView: String
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
     @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org") public static var remoteUrl: String
-
     @UserDefault("username", defaultValue: "test") public static var username: String
     @UserDefault("password", defaultValue: "test") public static var password: String
     @UserDefault("alwaysSendCreds", defaultValue: false) public static var alwaysSendCreds: Bool
@@ -90,6 +89,7 @@ public enum Preferences {
     @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
+    @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
 
     // MARK: - Private
 
