@@ -3,7 +3,7 @@
 "notification" = "Notificatie";
 "dismiss" = "Afwijzen";
 "search_items" = "Zoek openHAB items";
-"error" = "Error";
+"error" = "Fout";
 "ssl_certificate_error" = "SSL-certificaat fout";
 "empty_sitemap" = "openHAB heeft een lege Sitemap geladen";
 "connecting" = "Verbinden";
@@ -64,9 +64,9 @@
 "crash_detected" = "Crash gedetecteerd";
 "habpanel" = "HABPanel";
 "open" = "open";
-"closed" = "closed";
-"unknown" = "unknown";
-"on" = "on";
-"off" = "off";
-"empty" = "empty";
+"closed" = "gesloten";
+"unknown" = "onbekend";
+"on" = "aan";
+"off" = "uit";
+"empty" = "leeg";
 "sortSitemapsBy" = "Sorteer sitemaps op";
