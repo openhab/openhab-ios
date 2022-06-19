@@ -1,7 +1,7 @@
-"certficate_exists" = "Certificate already exists in the keychain.";
-"message_not_decoded" = "Message could not be decoded";
-"notification" = "Notification";
-"dismiss" = "Dismiss";
+"certficate_exists" = "Il certificato esiste già nel portachiavi.";
+"message_not_decoded" = "Il messaggio non può essere decodificato";
+"notification" = "Notifica";
+"dismiss" = "Ignora";
 "search_items" = "Search openHAB items";
 "error" = "Error";
 "ssl_certificate_error" = "SSL Certificate Error";
