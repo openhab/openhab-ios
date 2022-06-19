@@ -142,6 +142,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
         #if DEBUG
         // setup accessibilityIdentifiers for UITest
         widgetTableView.accessibilityIdentifier = "OpenHABSitemapViewControllerWidgetTableView"
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
     }
 

@@ -79,8 +79,10 @@ class OpenHABRootViewController: OpenHABViewController {
         appData?.currentViewController = self
 
         #if DEBUG
-        // setup accessibilityIdentifiers for UITest
-        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
+        if ProcessInfo.processInfo.environment["UITest"] != nil {
+            // this is here to continue to make existing tests work, need to look at this later
+            Preferences.defaultView = "sitemap"
+        }
         #endif
     }
 

@@ -30,7 +30,7 @@ class OpenHABUITests: XCTestCase {
         sleep(5)
         snapshot("0_MainScreen")
 
-        let widgetTable = app.tables["OpenHABViewControllerWidgetTableView"]
+        let widgetTable = app.tables["OpenHABSitemapViewControllerWidgetTableView"]
 
         widgetTable.staticTexts["Widget Overview"].tap()
         sleep(3)
