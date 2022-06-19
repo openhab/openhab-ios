@@ -123,12 +123,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 }
 
                 // Sort the sitemaps according to Settings selection.
-                let sortSitemapsOrder = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
-                if case .label = sortSitemapsOrder {
-                    self.sitemaps.sort { $0.label < $1.label }
-                } else {
-                    self.sitemaps.sort { $0.name < $1.name }
+                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+                case .label: self.sitemaps.sort { $0.label < $1.label }
+                case .name: self.sitemaps.sort { $0.name < $1.name }
                 }
+                
                 self.drawerItems.removeAll()
                 if self.drawerTableType == .withStandardMenuEntries {
                     self.setStandardDrawerItems()
