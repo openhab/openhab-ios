@@ -297,13 +297,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
         guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-
-        let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
-        // drawer?.openHABRootUrl = openHABRootUrl
-        // drawer?.delegate = self
-        drawer?.drawerTableType = .withStandardMenuEntries
-        drawer?.delegate = appData?.rootViewController
-
         present(menu, animated: true)
     }
 
@@ -335,8 +328,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
         case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
         case "showSelectSitemap":
             let dest = segue.destination as! OpenHABDrawerTableViewController
-            // dest.openHABRootUrl = openHABRootUrl
-            dest.drawerTableType = .withoutStandardMenuEntries
             dest.delegate = appData?.rootViewController
         default: break
         }
@@ -418,7 +409,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
                 self.loadPage(true)
             case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
 
                 NetworkConnection.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001, longPolling {
@@ -669,35 +660,12 @@ extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 1.5)
-        config.presentationStyle = .bottom
-
-        SwiftMessages.show(config: config) {
-            let view = MessageView.viewFromNib(layout: .cardView)
-            view.configureTheme(.info)
-            view.configureContent(title: NSLocalizedString("connecting", comment: ""), body: message ?? "")
-            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-            return view
-        }
+        showPopupMessage(seconds: 1.5, title: "connecting", message:  message ?? "")
     }
 
     func openHABTrackingError(_ error: Error) {
         os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 60)
-        config.presentationStyle = .bottom
-
-        SwiftMessages.show(config: config) {
-            let view = MessageView.viewFromNib(layout: .cardView)
-            // ... configure the view
-            view.configureTheme(.error)
-            view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
-            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-            return view
-        }
+        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription)
     }
 }
 

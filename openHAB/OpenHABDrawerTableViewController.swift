@@ -64,31 +64,33 @@ struct UiTile: Decodable {
     var imageUrl: String
 }
 
-enum DrawerTableType {
-    case withStandardMenuEntries
-    case withoutStandardMenuEntries
-}
+// enum DrawerTableType {
+//    case withStandardMenuEntries
+//    case withoutStandardMenuEntries
+// }
 
 class OpenHABDrawerTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "DrawerCell"
 
     var sitemaps: [OpenHABSitemap] = []
     var uiTiles: [OpenHABUiTile] = []
-//    var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
     var drawerItems: [OpenHABDrawerItem] = []
     weak var delegate: ModalHandler?
-    var drawerTableType: DrawerTableType!
+    // var drawerTableType: DrawerTableType!
 
     // App wide data access
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
     }
 
-    init(drawerTableType: DrawerTableType?) {
+//    init(drawerTableType: DrawerTableType?) {
+//        super.init(nibName: nil, bundle: nil)
+//        self.drawerTableType = drawerTableType
+//    }
+    init() {
         super.init(nibName: nil, bundle: nil)
-        self.drawerTableType = drawerTableType
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -101,9 +103,10 @@ class OpenHABDrawerTableViewController: UITableViewController {
         drawerItems = []
         sitemaps = []
         loadSettings()
-        if drawerTableType == .withStandardMenuEntries {
-            setStandardDrawerItems()
-        }
+        setStandardDrawerItems()
+//        if drawerTableType == .withStandardMenuEntries {
+//            setStandardDrawerItems()
+//        }
         os_log("OpenHABDrawerTableViewController did load", log: .viewCycle, type: .info)
     }
 
@@ -125,16 +128,18 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 // Sort the sitemaps alphabetically.
                 self.sitemaps.sort { $0.label < $1.label }
                 self.drawerItems.removeAll()
-                if self.drawerTableType == .withStandardMenuEntries {
-                    self.setStandardDrawerItems()
-                }
+                self.setStandardDrawerItems()
+//                if self.drawerTableType == .withStandardMenuEntries {
+//                    self.setStandardDrawerItems()
+//                }
                 self.tableView.reloadData()
             case let .failure(error):
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
-                if self.drawerTableType == .withStandardMenuEntries {
-                    self.setStandardDrawerItems()
-                }
+                self.setStandardDrawerItems()
+//                if self.drawerTableType == .withStandardMenuEntries {
+//                    self.setStandardDrawerItems()
+//                }
                 self.tableView.reloadData()
             }
         }
@@ -330,17 +335,21 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 let sitemap = sitemaps[indexPath.row]
                 Preferences.defaultSitemap = sitemap.name
                 appData?.sitemapViewController?.pageUrl = ""
-                switch drawerTableType {
-                case .withStandardMenuEntries?:
-                    dismiss(animated: true) {
-                        os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
-                        self.delegate?.modalDismissed(to: .root)
-                    }
-                case .withoutStandardMenuEntries?:
-                    navigationController?.popToRootViewController(animated: true)
-                case .none:
-                    break
+                dismiss(animated: true) {
+                    os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
+                    self.delegate?.modalDismissed(to: .root)
                 }
+//                switch drawerTableType {
+//                case .withStandardMenuEntries?:
+//                    dismiss(animated: true) {
+//                        os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
+//                        self.delegate?.modalDismissed(to: .root)
+//                    }
+//                case .withoutStandardMenuEntries?:
+//                    navigationController?.popToRootViewController(animated: true)
+//                case .none:
+//                    break
+//                }
             }
         case 3:
             // Then menu items

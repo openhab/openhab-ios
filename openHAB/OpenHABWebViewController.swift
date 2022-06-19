@@ -20,6 +20,7 @@ import WebKit
 class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var tracker: OpenHABTracker?
+    var activityIndicator: UIActivityIndicatorView!
 
     // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
@@ -40,10 +41,7 @@ class OpenHABWebViewController: OpenHABViewController {
     override open var shouldAutorotate: Bool {
         true
     }
-
-    private var observation: NSKeyValueObservation?
-    private var progressView: UIProgressView!
-
+    
     private lazy var webView: WKWebView = {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
@@ -68,11 +66,11 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         view.addSubview(webView)
-        progressView = UIProgressView(progressViewStyle: .default)
-        progressView.sizeToFit()
-        observation = webView.observe(\.estimatedProgress, options: [.new]) { _, _ in
-            self.progressView.progress = Float(self.webView.estimatedProgress)
-        }
+        activityIndicator = UIActivityIndicatorView()
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.style = UIActivityIndicatorView.Style.gray
+        view.addSubview(activityIndicator)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -98,7 +96,7 @@ class OpenHABWebViewController: OpenHABViewController {
         if !force, currentTarget == newTarget {
             return
         }
-        currentTarget = newTarget
+        //currentTarget = newTarget
         let url = URL(string: appData?.openHABRootUrl ?? "")
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
@@ -119,6 +117,14 @@ class OpenHABWebViewController: OpenHABViewController {
         observation = nil
     }
 
+    func showActivityIndicator(show: Bool) {
+        if show {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
+    }
+
     override func reloadView() {
         loadWebView(force: true)
     }
@@ -134,12 +140,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
         if let callbackName = message.body as? String {
             switch callbackName {
             case "exitToApp":
-                // _ = navigationController?.popViewController(animated: true)
                 guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-
-                let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
-                drawer?.drawerTableType = .withStandardMenuEntries
-                drawer?.delegate = appData?.rootViewController
                 present(menu, animated: true)
             case "goFullScreen": break
             default: break
@@ -170,23 +171,34 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         if let response = navigationResponse.response as? HTTPURLResponse {
             dump(response.allHeaderFields)
             os_log("navigationResponse: %{PUBLIC}@", log: .urlComposition, type: .info, String(response.statusCode))
+            if response.statusCode >= 400 {
+                webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
+                var config = SwiftMessages.Config()
+                config.duration = .seconds(seconds: 60)
+                config.presentationStyle = .bottom
+                showPopupMessage(seconds: 60, title:"error", message: "Could not connect to openHAB: \(response.statusCode)")
+            }
         }
         decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
+        showActivityIndicator(show: true)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        os_log("didFail - webView.url %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
         let nserror = error as NSError
         if nserror.code != NSURLErrorCancelled {
             webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
         }
+        showActivityIndicator(show: false)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         os_log("didFinish - webView.url %{PUBLIC}@", log: .urlComposition, type: .info, String(describing: webView.url?.description))
+        showActivityIndicator(show: false)
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
@@ -234,7 +246,14 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case let .success(data):
-                self.loadWebView(force: true)
+                do {
+                    let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+                    os_log("openHAB version %@", log: .remoteAccess, type: .info, serverProperties.version)
+                    self.loadWebView(force: true)
+                } catch {
+                    os_log("Could not decode response as JSON, %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    self.openHABTrackingError(error)
+                }
             case let .failure(error):
                 self.openHABTrackingError(error)
                 os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
@@ -245,34 +264,11 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 1.5)
-        config.presentationStyle = .bottom
-
-        SwiftMessages.show(config: config) {
-            let view = MessageView.viewFromNib(layout: .cardView)
-            view.configureTheme(.info)
-            view.configureContent(title: NSLocalizedString("connecting", comment: ""), body: message ?? "")
-            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-            return view
-        }
+        showPopupMessage(seconds: 1.5, title: "connecting", message:  message ?? "")
     }
 
     func openHABTrackingError(_ error: Error) {
         os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        var config = SwiftMessages.Config()
-        config.duration = .seconds(seconds: 60)
-        config.presentationStyle = .bottom
-
-        SwiftMessages.show(config: config) {
-            let view = MessageView.viewFromNib(layout: .cardView)
-            // ... configure the view
-            view.configureTheme(.error)
-            view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
-            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-            return view
-        }
+        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription)
     }
 }
