@@ -166,7 +166,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-
         os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
 
         if let url = modifyUrl(orig: URL(string: openHABRootUrl)), challenge.protectionSpace.host == url.host {
