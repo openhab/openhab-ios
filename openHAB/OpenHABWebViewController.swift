@@ -80,6 +80,7 @@ class OpenHABWebViewController: OpenHABViewController {
         tracker = OpenHABTracker()
         tracker?.delegate = self
         tracker?.start()
+        clearExistingPage()
         showActivityIndicator(show: true)
     }
 
@@ -103,8 +104,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
-            // clear out existing page while we load.
-            webView.evaluateJavaScript("document.body.remove()")
+            clearExistingPage()
             webView.load(request)
         }
     }
@@ -122,6 +122,11 @@ class OpenHABWebViewController: OpenHABViewController {
         } else {
             activityIndicator.stopAnimating()
         }
+    }
+
+    func clearExistingPage() {
+        // clear out existing page while we load.
+        webView.evaluateJavaScript("document.body.remove()")
     }
 
     override func reloadView() {
