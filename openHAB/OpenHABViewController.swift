@@ -45,16 +45,16 @@ class OpenHABViewController: UIViewController {
         present(menu, animated: true)
     }
 
-    func showPopupMessage(seconds: Double, title: String, message: String) {
+    func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: seconds)
         config.presentationStyle = .bottom
         SwiftMessages.show(config: config) {
             let view = MessageView.viewFromNib(layout: .cardView)
             // ... configure the view
-            view.configureTheme(.error)
-            view.configureContent(title: NSLocalizedString("error", comment: ""), body: message)
-            view.button?.setTitle(NSLocalizedString(title, comment: ""), for: .normal)
+            view.configureTheme(theme)
+            view.configureContent(title: NSLocalizedString(title, comment: ""), body: message)
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
             view.buttonTapHandler = { _ in SwiftMessages.hide() }
             return view
         }

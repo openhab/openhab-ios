@@ -632,12 +632,12 @@ extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: "connecting", message: message ?? "")
+        showPopupMessage(seconds: 1.5, title: "connecting", message: message ?? "", theme: .info)
     }
 
     func openHABTrackingError(_ error: Error) {
         os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription)
+        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription, theme: .error)
     }
 }
 

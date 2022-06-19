@@ -173,7 +173,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             if response.statusCode >= 400 {
                 showActivityIndicator(show: false)
                 webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
-                showPopupMessage(seconds: 60, title: "error", message: "Could not connect to openHAB: \(response.statusCode)")
+                showPopupMessage(seconds: 60, title: "error", message: "Could not connect to openHAB: \(response.statusCode)", theme: .error)
             }
         }
         decisionHandler(.allow)
@@ -273,11 +273,11 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: "connecting", message: message ?? "")
+        showPopupMessage(seconds: 1.5, title: "connecting", message: message ?? "", theme: .info)
     }
 
     func openHABTrackingError(_ error: Error) {
         os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription)
+        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription, theme: .error)
     }
 }
