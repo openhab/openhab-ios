@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import OpenHABCore
 import os.log
 import SideMenu
@@ -22,7 +21,6 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-    var hamburgerButton: DynamicButton!
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -38,14 +36,6 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
             tableView.refreshControl = refreshControl
         }
 
-        hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
-        hamburgerButton.setStyle(.hamburger, animated: true)
-        // TODO: for Dan, fix this
-//        hamburgerButton.addTarget(self, action: #selector(OpenHABSitemapViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-        hamburgerButton.strokeColor = view.tintColor
-
-        let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
-        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
         navigationItem.largeTitleDisplayMode = .never
     }
 

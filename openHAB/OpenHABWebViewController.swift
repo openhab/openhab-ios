@@ -52,7 +52,6 @@ class OpenHABWebViewController: OpenHABViewController {
         let webView = WKWebView(frame: view.bounds, configuration: config)
         // Alow rotation of webview
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        // webView?.scrollView.isScrollEnabled = false
         webView.scrollView.bounces = false
         webView.navigationDelegate = self
         webView.uiDelegate = self
@@ -77,11 +76,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        tracker = OpenHABTracker()
-        tracker?.delegate = self
-        tracker?.start()
-        clearExistingPage()
-        showActivityIndicator(show: true)
+        reloadView()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -90,12 +85,19 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
+    func startTracker() {
+        tracker = OpenHABTracker()
+        tracker?.delegate = self
+        tracker?.start()
+    }
+
     func loadWebView(force: Bool = false) {
         os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, appData?.openHABRootUrl ?? "nil")
 
         let authStr = "\(Preferences.username):\(Preferences.password)"
         let newTarget = "\(appData?.openHABRootUrl ?? ""):\(authStr)"
         if !force, currentTarget == newTarget {
+            showActivityIndicator(show: false)
             return
         }
 
@@ -129,8 +131,19 @@ class OpenHABWebViewController: OpenHABViewController {
         webView.evaluateJavaScript("document.body.remove()")
     }
 
+    func pageLoadError(message: String) {
+        os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
+        showActivityIndicator(show: false)
+        // webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
+        showPopupMessage(seconds: 60, title: "error", message: "Could not connect to openHAB. \(message)", theme: .error)
+        currentTarget = ""
+    }
+
     override func reloadView() {
-        loadWebView(force: true)
+        currentTarget = ""
+        clearExistingPage()
+        startTracker()
+        showActivityIndicator(show: true)
     }
 
     override func viewName() -> String {
@@ -142,11 +155,13 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
         if let callbackName = message.body as? String {
+            os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, callbackName)
             switch callbackName {
             case "exitToApp":
                 guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
                 present(menu, animated: true)
-            case "goFullScreen": break
+            case "goFullscreen":
+                navigationController?.setNavigationBarHidden(true, animated: true)
             default: break
             }
         }
@@ -176,9 +191,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             dump(response.allHeaderFields)
             os_log("navigationResponse: %{PUBLIC}@", log: .wkwebview, type: .info, String(response.statusCode))
             if response.statusCode >= 400 {
-                showActivityIndicator(show: false)
-                webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
-                showPopupMessage(seconds: 60, title: "error", message: "Could not connect to openHAB: \(response.statusCode)", theme: .error)
+                pageLoadError(message: "\(response.statusCode)")
+                decisionHandler(.cancel)
+                return
             }
         }
         decisionHandler(.allow)
@@ -187,24 +202,19 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: true)
-        navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         os_log("didFail - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         let nserror = error as NSError
         if nserror.code != NSURLErrorCancelled {
-            webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
+            pageLoadError(message: nserror.localizedDescription)
         }
-        showActivityIndicator(show: false)
-        navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: false)
-        // Hide the navigation bar on the this view controller
-        navigationController?.setNavigationBarHidden(true, animated: true)
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
@@ -212,14 +222,24 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
 
         if let url = modifyUrl(orig: URL(string: appData?.openHABRootUrl ?? "")), challenge.protectionSpace.host == url.host {
-            var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-            var credential: URLCredential?
-            if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), URLSessionDataTask(), challenge)
+            // openHABTracker takes care of triggering server trust prompts
+            if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+                guard let serverTrust = challenge.protectionSpace.serverTrust else {
+                    completionHandler(.performDefaultHandling, nil)
+                    return
+                }
+                let credential = URLCredential(trust: serverTrust)
+                completionHandler(.useCredential, credential)
             } else {
-                (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+                var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
+                var credential: URLCredential?
+                if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
+                    (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), URLSessionDataTask(), challenge)
+                } else {
+                    (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+                }
+                completionHandler(disposition, credential)
             }
-            completionHandler(disposition, credential)
         } else {
             completionHandler(.performDefaultHandling, nil)
         }
@@ -283,6 +303,6 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingError(_ error: Error) {
         os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription, theme: .error)
+        pageLoadError(message: error.localizedDescription)
     }
 }
