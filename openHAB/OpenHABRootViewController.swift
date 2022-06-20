@@ -30,9 +30,6 @@ protocol ModalHandler: AnyObject {
 }
 
 class OpenHABRootViewController: UIViewController {
-    private var deviceToken = ""
-    private var deviceId = ""
-    private var deviceName = ""
     var hamburgerButton: DynamicButton!
     var currentView: OpenHABViewController!
 
@@ -154,17 +151,9 @@ class OpenHABRootViewController: UIViewController {
         os_log("handleApsRegistration", log: .notifications, type: .info)
         let theData = note?.userInfo
         if theData != nil {
-            deviceId = theData?["deviceId"] as? String ?? ""
-            deviceToken = theData?["deviceToken"] as? String ?? ""
-            deviceName = theData?["deviceName"] as? String ?? ""
-            doRegisterAps()
-        }
-    }
-
-    func doRegisterAps() {
-        let prefsURL = Preferences.remoteUrl
-        if prefsURL.contains("openhab.org") {
-            if !deviceId.isEmpty, !deviceToken.isEmpty, !deviceName.isEmpty {
+            let prefsURL = Preferences.remoteUrl
+            if prefsURL.contains("openhab.org") {
+                guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
                     switch response.result {
