@@ -39,14 +39,12 @@ class OpenHABRootViewController: UIViewController {
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
-        self.addView(viewController: viewController)
         return viewController
     }()
 
     private lazy var sitemapViewController: OpenHABSitemapViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABPageViewController") as! OpenHABSitemapViewController
-        self.addView(viewController: viewController)
         return viewController
     }()
 
