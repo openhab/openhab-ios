@@ -20,7 +20,8 @@ import WebKit
 class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var tracker: OpenHABTracker?
-    var activityIndicator: UIActivityIndicatorView!
+    private var activityIndicator: UIActivityIndicatorView!
+    private var hideNavBar = false
 
     // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
@@ -76,7 +77,8 @@ class OpenHABWebViewController: OpenHABViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        reloadView()
+        navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
+        startTracker()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -86,6 +88,9 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func startTracker() {
+        if currentTarget == "" {
+            showActivityIndicator(show: true)
+        }
         tracker = OpenHABTracker()
         tracker?.delegate = self
         tracker?.start()
@@ -126,7 +131,13 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
+    func setHideNavBar(shouldHide: Bool) {
+        hideNavBar = shouldHide
+        navigationController?.setNavigationBarHidden(hideNavBar, animated: true)
+    }
+
     func clearExistingPage() {
+        setHideNavBar(shouldHide: false)
         // clear out existing page while we load.
         webView.evaluateJavaScript("document.body.remove()")
     }
@@ -143,7 +154,6 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = ""
         clearExistingPage()
         startTracker()
-        showActivityIndicator(show: true)
     }
 
     override func viewName() -> String {
@@ -161,7 +171,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
                 present(menu, animated: true)
             case "goFullscreen":
-                navigationController?.setNavigationBarHidden(true, animated: true)
+                setHideNavBar(shouldHide: true)
             default: break
             }
         }
@@ -275,15 +285,14 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
             openHABRootUrl = openHABUrl.absoluteString
         }
 
-        appData?.openHABRootUrl = openHABRootUrl
-
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case let .success(data):
                 do {
                     let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
                     os_log("openHAB version %@", log: .remoteAccess, type: .info, serverProperties.version)
-                    self.loadWebView(force: true)
+                    self.appData?.openHABRootUrl = openHABRootUrl
+                    self.loadWebView(force: false)
                 } catch {
                     os_log("Could not decode response as JSON, %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     self.openHABTrackingError(error)

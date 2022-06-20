@@ -35,19 +35,19 @@ class OpenHABRootViewController: OpenHABViewController {
     private var deviceName = ""
     private var sitemapViewController: OpenHABSitemapViewController!
     private var webViewController: OpenHABWebViewController!
-
+    
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABRootViewController viewDidLoad", log: .default, type: .info)
-
+        
         setupSideMenu()
-
+        
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
-
+        
         if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.sendCrashReports {
             let alertController = UIAlertController(title: NSLocalizedString("crash_detected", comment: "").capitalized, message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .alert)
             alertController.addAction(
@@ -71,21 +71,21 @@ class OpenHABRootViewController: OpenHABViewController {
             )
             present(alertController, animated: true)
         }
-
+        
         sitemapViewController = storyboard!.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController
         webViewController = storyboard!.instantiateViewController(withIdentifier: "OpenHABWebViewController") as? OpenHABWebViewController
-
+        
         appData?.rootViewController = self
         appData?.currentViewController = self
-
-        #if DEBUG
+        
+#if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
             Preferences.defaultView = "sitemap"
         }
-        #endif
+#endif
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         os_log("OpenHABRootController viewWillAppear", log: .viewCycle, type: .info)
         super.viewWillAppear(animated)
@@ -95,30 +95,30 @@ class OpenHABRootViewController: OpenHABViewController {
             setOrReloadRootViewController(vc: webViewController)
         }
     }
-
+    
     fileprivate func setupSideMenu() {
         // Define the menus
-
+        
         SideMenuManager.default.rightMenuNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? SideMenuNavigationController
-
+        
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
         SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
         SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
-
+        
         let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
         presentationStyle.presentingEndAlpha = 1
         presentationStyle.onTopShadowOpacity = 0.5
         var settings = SideMenuSettings()
         settings.presentationStyle = presentationStyle
         settings.statusBarEndAlpha = 0
-
+        
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
         guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
         let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
         drawer?.delegate = self
     }
-
+    
     @objc
     func handleApsRegistration(_ note: Notification?) {
         os_log("handleApsRegistration", log: .notifications, type: .info)
@@ -130,7 +130,7 @@ class OpenHABRootViewController: OpenHABViewController {
             doRegisterAps()
         }
     }
-
+    
     func doRegisterAps() {
         let prefsURL = Preferences.remoteUrl
         if prefsURL.contains("openhab.org") {
@@ -147,7 +147,7 @@ class OpenHABRootViewController: OpenHABViewController {
             }
         }
     }
-
+    
     func setOrReloadRootViewController(vc: OpenHABViewController) {
         if appData?.currentViewController != vc {
             appData?.currentViewController?.navigationController?.setViewControllers([vc], animated: true)
@@ -157,7 +157,7 @@ class OpenHABRootViewController: OpenHABViewController {
             appData?.currentViewController?.reloadView()
         }
     }
-
+    
     func pushViewController(vc: UIViewController) {
         appData?.currentViewController?.navigationController?.pushViewController(vc, animated: true)
     }
