@@ -35,33 +35,33 @@ class OpenHABRootViewController: UIViewController {
     private var deviceName = ""
     var hamburgerButton: DynamicButton!
     var currentView: OpenHABViewController!
-    
+
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
         self.addView(viewController: viewController)
         return viewController
     }()
-    
+
     private lazy var sitemapViewController: OpenHABSitemapViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABPageViewController") as! OpenHABSitemapViewController
         self.addView(viewController: viewController)
         return viewController
     }()
-    
+
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABRootViewController viewDidLoad", log: .default, type: .info)
-        
+
         setupSideMenu()
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
-        
+
         if Crashlytics.crashlytics().didCrashDuringPreviousExecution(), !Preferences.sendCrashReports {
             let alertController = UIAlertController(title: NSLocalizedString("crash_detected", comment: "").capitalized, message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .alert)
             alertController.addAction(
@@ -85,24 +85,25 @@ class OpenHABRootViewController: UIViewController {
             )
             present(alertController, animated: true)
         }
-        
-#if DEBUG
+
+        #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
             Preferences.defaultView = "sitemap"
         }
+        // setup accessibilityIdentifiers for UITest
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
-#endif
-        
+        #endif
+
         switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         os_log("OpenHABRootController viewWillAppear", log: .viewCycle, type: .info)
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
     }
-    
+
     fileprivate func setupSideMenu() {
         let hamburgerButtonItem: UIBarButtonItem
         if #available(iOS 13.0, *) {
@@ -121,35 +122,35 @@ class OpenHABRootViewController: UIViewController {
             hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
         }
         navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
-        
+
         // Define the menus
-        
+
         SideMenuManager.default.rightMenuNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? SideMenuNavigationController
-        
+
         // Enable gestures. The left and/or right menus must be set up above for these to work.
         // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
         SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
         SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
-        
+
         let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
         presentationStyle.presentingEndAlpha = 1
         presentationStyle.onTopShadowOpacity = 0.5
         var settings = SideMenuSettings()
         settings.presentationStyle = presentationStyle
         settings.statusBarEndAlpha = 0
-        
+
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
         guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
         let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
         drawer?.delegate = self
     }
-    
+
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
         guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
         present(menu, animated: true)
     }
-    
+
     @objc
     func handleApsRegistration(_ note: Notification?) {
         os_log("handleApsRegistration", log: .notifications, type: .info)
@@ -161,7 +162,7 @@ class OpenHABRootViewController: UIViewController {
             doRegisterAps()
         }
     }
-    
+
     func doRegisterAps() {
         let prefsURL = Preferences.remoteUrl
         if prefsURL.contains("openhab.org") {
@@ -178,8 +179,7 @@ class OpenHABRootViewController: UIViewController {
             }
         }
     }
-    
-    
+
     private func addView(viewController: UIViewController) {
         addChild(viewController)
         view.addSubview(viewController.view)
@@ -187,16 +187,16 @@ class OpenHABRootViewController: UIViewController {
         viewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         viewController.didMove(toParent: self)
     }
-    
+
     private func removeView(viewController: UIViewController) {
         viewController.willMove(toParent: nil)
         viewController.view.removeFromSuperview()
         viewController.removeFromParent()
     }
-    
+
     private func switchView(target: TargetController) {
         let targetView = target == .sitemap ? sitemapViewController : webViewController
-        
+
         if currentView != targetView {
             if currentView != nil {
                 removeView(viewController: currentView)
@@ -209,7 +209,7 @@ class OpenHABRootViewController: UIViewController {
             currentView.reloadView()
         }
     }
-    
+
     func pushViewController(vc: UIViewController) {
         navigationController?.pushViewController(vc, animated: true)
     }

@@ -75,6 +75,8 @@ class OpenHABUITests: XCTestCase {
         widgetTable.staticTexts["Astronomical Data"].tap()
         sleep(5)
         snapshot("6_AstronomicalData")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        sleep(2)
 
         let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
         hamburgerButton.tap()
