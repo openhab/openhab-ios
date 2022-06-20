@@ -5,7 +5,7 @@ on:
 
 jobs:
   synchronize-with-crowdin:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
 
