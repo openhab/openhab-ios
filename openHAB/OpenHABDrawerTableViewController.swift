@@ -322,7 +322,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 appData?.sitemapViewController?.pageUrl = ""
                 dismiss(animated: true) {
                     os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
-                    self.delegate?.modalDismissed(to: .root)
+                    self.delegate?.modalDismissed(to: .sitemap)
                 }
             }
         case 3:

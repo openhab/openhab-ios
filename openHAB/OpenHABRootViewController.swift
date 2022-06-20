@@ -19,7 +19,7 @@ import SideMenu
 import UIKit
 
 enum TargetController {
-    case root
+    case sitemap
     case settings
     case notifications
     case webview
@@ -29,12 +29,26 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
-class OpenHABRootViewController: OpenHABViewController {
+class OpenHABRootViewController: UIViewController {
     private var deviceToken = ""
     private var deviceId = ""
     private var deviceName = ""
-    private var sitemapViewController: OpenHABSitemapViewController!
-    private var webViewController: OpenHABWebViewController!
+    var hamburgerButton: DynamicButton!
+    var currentView: OpenHABViewController!
+    
+    private lazy var webViewController: OpenHABWebViewController = {
+        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+        var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
+        self.addView(viewController: viewController)
+        return viewController
+    }()
+    
+    private lazy var sitemapViewController: OpenHABSitemapViewController = {
+        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+        var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABPageViewController") as! OpenHABSitemapViewController
+        self.addView(viewController: viewController)
+        return viewController
+    }()
     
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -72,31 +86,42 @@ class OpenHABRootViewController: OpenHABViewController {
             present(alertController, animated: true)
         }
         
-        sitemapViewController = storyboard!.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController
-        webViewController = storyboard!.instantiateViewController(withIdentifier: "OpenHABWebViewController") as? OpenHABWebViewController
-        
-        appData?.rootViewController = self
-        appData?.currentViewController = self
-        
 #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
             Preferences.defaultView = "sitemap"
         }
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
 #endif
+        
+        switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         os_log("OpenHABRootController viewWillAppear", log: .viewCycle, type: .info)
         super.viewWillAppear(animated)
-        if Preferences.defaultView == "sitemap" {
-            setOrReloadRootViewController(vc: sitemapViewController)
-        } else {
-            setOrReloadRootViewController(vc: webViewController)
-        }
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
     
     fileprivate func setupSideMenu() {
+        let hamburgerButtonItem: UIBarButtonItem
+        if #available(iOS 13.0, *) {
+            let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
+            let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
+            let button = UIButton(type: .custom)
+            button.setImage(buttonImage, for: .normal)
+            button.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+            hamburgerButtonItem = UIBarButtonItem(customView: button)
+            hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        } else {
+            hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
+            hamburgerButton.setStyle(.hamburger, animated: true)
+            hamburgerButton.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+            hamburgerButton.strokeColor = view.tintColor
+            hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
+        }
+        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
+        
         // Define the menus
         
         SideMenuManager.default.rightMenuNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? SideMenuNavigationController
@@ -117,6 +142,12 @@ class OpenHABRootViewController: OpenHABViewController {
         guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
         let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
         drawer?.delegate = self
+    }
+    
+    @objc
+    func rightDrawerButtonPress(_ sender: Any?) {
+        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
+        present(menu, animated: true)
     }
     
     @objc
@@ -148,18 +179,39 @@ class OpenHABRootViewController: OpenHABViewController {
         }
     }
     
-    func setOrReloadRootViewController(vc: OpenHABViewController) {
-        if appData?.currentViewController != vc {
-            appData?.currentViewController?.navigationController?.setViewControllers([vc], animated: true)
-            appData?.currentViewController = vc
-            Preferences.defaultView = vc.viewName()
+    
+    private func addView(viewController: UIViewController) {
+        addChild(viewController)
+        view.addSubview(viewController.view)
+        viewController.view.frame = view.bounds
+        viewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        viewController.didMove(toParent: self)
+    }
+    
+    private func removeView(viewController: UIViewController) {
+        viewController.willMove(toParent: nil)
+        viewController.view.removeFromSuperview()
+        viewController.removeFromParent()
+    }
+    
+    private func switchView(target: TargetController) {
+        let targetView = target == .sitemap ? sitemapViewController : webViewController
+        
+        if currentView != targetView {
+            if currentView != nil {
+                removeView(viewController: currentView)
+            }
+            addView(viewController: targetView)
+            currentView = targetView
+            Preferences.defaultView = currentView.viewName()
         } else {
-            appData?.currentViewController?.reloadView()
+            // if we hit the menu item again while on the view, trigger a reload
+            currentView.reloadView()
         }
     }
     
     func pushViewController(vc: UIViewController) {
-        appData?.currentViewController?.navigationController?.pushViewController(vc, animated: true)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -176,14 +228,14 @@ extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
 extension OpenHABRootViewController: ModalHandler {
     func modalDismissed(to: TargetController) {
         switch to {
-        case .root:
-            setOrReloadRootViewController(vc: sitemapViewController)
+        case .sitemap:
+            switchView(target: to)
         case .settings:
             if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
                 pushViewController(vc: newViewController)
             }
         case .notifications:
-            if appData?.currentViewController?.navigationController?.visibleViewController is OpenHABNotificationsViewController {
+            if navigationController?.visibleViewController is OpenHABNotificationsViewController {
                 os_log("Notifications are already open", log: .notifications, type: .info)
             } else {
                 if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
@@ -191,7 +243,7 @@ extension OpenHABRootViewController: ModalHandler {
                 }
             }
         case .webview:
-            setOrReloadRootViewController(vc: webViewController)
+            switchView(target: to)
         }
     }
 }

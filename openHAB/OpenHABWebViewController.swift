@@ -78,6 +78,8 @@ class OpenHABWebViewController: OpenHABViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
+        parent?.navigationItem.title = "Main View"
         startTracker()
     }
 
@@ -85,6 +87,7 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewWillDisappear(animated)
         // Show the navigation bar on other view controllers
         navigationController?.setNavigationBarHidden(false, animated: animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
 
     func startTracker() {

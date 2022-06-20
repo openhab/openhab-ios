@@ -19,8 +19,6 @@ class OpenHABDataObject: NSObject, DataObject {
     var openHABPassword = ""
     var openHABAlwaysSendCreds = false
     var sitemapViewController: OpenHABSitemapViewController?
-    var rootViewController: OpenHABRootViewController?
-    var currentViewController: OpenHABViewController?
     var openHABVersion: Int = 0
 }
 

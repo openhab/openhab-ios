@@ -142,7 +142,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
         #if DEBUG
         // setup accessibilityIdentifiers for UITest
         widgetTableView.accessibilityIdentifier = "OpenHABSitemapViewControllerWidgetTableView"
-        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
     }
 
@@ -151,9 +150,9 @@ class OpenHABSitemapViewController: OpenHABViewController {
         super.viewDidAppear(animated)
 
         // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
-        if navigationItem.searchController == nil {
+        if parent?.navigationItem.searchController == nil {
             DispatchQueue.main.async {
-                self.navigationItem.searchController = self.search
+                self.parent?.navigationItem.searchController = self.search
             }
         }
     }
@@ -161,6 +160,9 @@ class OpenHABSitemapViewController: OpenHABViewController {
     override func viewWillAppear(_ animated: Bool) {
         os_log("OpenHABSitemapViewController viewWillAppear", log: .viewCycle, type: .info)
         super.viewWillAppear(animated)
+
+        navigationController?.navigationBar.prefersLargeTitles = true
+
         // Load settings into local properties
         loadSettings()
         // Disable idle timeout if configured in settings
@@ -217,6 +219,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 }
             }
         }
+        parent?.navigationItem.searchController = nil
     }
 
     @objc
@@ -289,18 +292,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
         UIView.performWithoutAnimation {
             widgetTableView.beginUpdates()
             widgetTableView.endUpdates()
-        }
-    }
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        os_log("OpenHABSitemapViewController prepareForSegue %{PUBLIC}@", log: .viewCycle, type: .info, segue.identifier ?? "")
-
-        switch segue.identifier {
-        case "showSelectionView": os_log("Selection seague", log: .viewCycle, type: .info)
-        case "showSelectSitemap":
-            let dest = segue.destination as! OpenHABDrawerTableViewController
-            dest.delegate = appData?.rootViewController
-        default: break
         }
     }
 
@@ -377,7 +368,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 }
                 self.widgetTableView.reloadData()
                 self.refreshControl?.endRefreshing()
-                self.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+                self.parent?.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+
                 self.loadPage(true)
             case let .failure(error):
                 os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
