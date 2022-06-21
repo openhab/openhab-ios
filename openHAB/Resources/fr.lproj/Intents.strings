@@ -1,14 +1,14 @@
 "1GaCDV" = "Action";
 
-"1Kf0qe" = "Set Color Control Value";
+"1Kf0qe" = "Définir la valeur de contrôle de couleur";
 
-"1SeS3V" = "Set ${item} to ${value} (HSB)";
+"1SeS3V" = "Définir ${item} à ${value} (HSB)";
 
 "1USOx9" = "Item";
 
-"2q0TdY" = "Sorry can't find ${item}";
+"2q0TdY" = "Désolé impossible de trouver ${item}";
 
-"3evvza" = "Value";
+"3evvza" = "Valeur";
 
 "5B4e9l" = "Set the string of a string control item";
 
