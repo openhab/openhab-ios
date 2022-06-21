@@ -2,12 +2,12 @@
 "message_not_decoded" = "Il messaggio non può essere decodificato";
 "notification" = "Notifica";
 "dismiss" = "Ignora";
-"search_items" = "Search openHAB items";
+"search_items" = "Cerca Item openHAB";
 "error" = "Errore";
 "ssl_certificate_error" = "Errore certificato SSL";
 "empty_sitemap" = "openHAB ha ritornato una lista vuota di sitemap";
 "connecting" = "Connessione";
-"ssl_certificate_warning" = "SSL Certificate Warning";
+"ssl_certificate_warning" = "Avviso Certificato SSL";
 "unable_to_decode_certificate" = "Impossibile decodificare il certificato: %@.";
 "unable_to_add_certificate" = "Impossibile aggiungere il certificato al portachiavi: %@.";
 "ssl_certificate_invalid" = "Il certificato SSL presentato da %1$@ per %2$@ non è valido. Vuoi procedere?";
@@ -15,7 +15,7 @@
 "abort" = "Interrompi";
 "once" = "Una volta";
 "always" = "Sempre";
-"certificate_import_title" = "Client Certificate Import";
+"certificate_import_title" = "Importazione Certificato Client";
 "certificate_import_text" = "Importare il certificato client nel portachiavi?";
 "certificate_import_password" = "Password richiesta per l'importazione.";
 "okay" = "Ok";
@@ -69,4 +69,4 @@
 "on" = "acceso";
 "off" = "spento";
 "empty" = "vuoto";
-"sortSitemapsBy" = "Sort sitemaps by";
+"sortSitemapsBy" = "Ordina le Sitemaps per";

@@ -1,15 +1,15 @@
 "certficate_exists" = "Le certificat existe déjà dans le trousseau.";
-"message_not_decoded" = "Message could not be decoded";
+"message_not_decoded" = "Le message n'a pas pu être décodé";
 "notification" = "Notification";
 "dismiss" = "Ignorer";
-"search_items" = "Search openHAB items";
+"search_items" = "Rechercher des items openHAB";
 "error" = "Erreur";
 "ssl_certificate_error" = "Erreur de certificat SSL";
 "empty_sitemap" = "openHAB a renvoyé une liste vide de sitemaps";
 "connecting" = "Connexion en cours";
 "ssl_certificate_warning" = "Avertissement de certificat SSL";
 "unable_to_decode_certificate" = "Impossible de décoder le certificat : %@.";
-"unable_to_add_certificate" = "Unable to add certificate to the keychain: %@.";
+"unable_to_add_certificate" = "Impossible d'ajouter le certificat au trousseau : %@.";
 "ssl_certificate_invalid" = "Le certificat SSL présenté par %1$@ pour %2$@ n'est pas valide. Voulez-vous continuer?";
 "ssl_certificate_no_match" = "Le certificat SSL présenté par %1$@ pour %2$@ ne correspond pas à l'enregistrement. Voulez-vous continuer?";
 "abort" = "Abandonner";
@@ -66,7 +66,7 @@
 "open" = "ouvert";
 "closed" = "fermé";
 "unknown" = "inconnu";
-"on" = "on";
+"on" = "allumé";
 "off" = "éteint";
 "empty" = "vide";
 "sortSitemapsBy" = "Trier les sitemaps par";
