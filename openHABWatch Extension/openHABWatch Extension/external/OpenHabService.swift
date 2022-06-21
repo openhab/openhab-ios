@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -28,10 +28,12 @@ class OpenHabService {
         guard let requestUrl = Endpoint.watchSitemap(openHABRootUrl: baseUrl, sitemapName: sitemapName).url else { return }
         let request = URLRequest(url: requestUrl, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 20)
         // let session = URLSession.shared
-        let session = URLSession(configuration: URLSessionConfiguration.ephemeral,
-                                 delegate: CertificatePinningURLSessionDelegate(),
-                                 delegateQueue: nil)
-        let task = session.dataTask(with: request) { (data, _, error) -> Void in
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: CertificatePinningURLSessionDelegate(),
+            delegateQueue: nil
+        )
+        let task = session.dataTask(with: request) { (data, _, error) in
 
             guard error == nil else {
                 resultHandler(Sitemap(frames: []), "Can't read the sitemap from '\(requestUrl)'. Message is '\(String(describing: error))'")
@@ -62,9 +64,11 @@ class OpenHabService {
         request.httpMethod = "POST"
         let postString = command
         request.httpBody = postString.data(using: .utf8)
-        let session = URLSession(configuration: URLSessionConfiguration.ephemeral,
-                                 delegate: CertificatePinningURLSessionDelegate(),
-                                 delegateQueue: nil)
+        let session = URLSession(
+            configuration: URLSessionConfiguration.ephemeral,
+            delegate: CertificatePinningURLSessionDelegate(),
+            delegateQueue: nil
+        )
         let task = session.dataTask(with: request) { data, response, error in
             DispatchQueue.main.sync {
                 resultHandler(data, response, error)

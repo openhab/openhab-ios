@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -34,9 +34,11 @@ struct SetpointRow: View {
             HStack {
                 Spacer()
 
-                EncircledIconWithAction(systemName:
+                EncircledIconWithAction(
+                    systemName:
                     "chevron.down.circle.fill",
-                    action: self.decreaseValue)
+                    action: self.decreaseValue
+                )
 
                 Spacer()
 
@@ -45,8 +47,10 @@ struct SetpointRow: View {
 
                 Spacer()
 
-                EncircledIconWithAction(systemName: "chevron.up.circle.fill",
-                                        action: self.increaseValue)
+                EncircledIconWithAction(
+                    systemName: "chevron.up.circle.fill",
+                    action: self.increaseValue
+                )
 
                 Spacer()
             }

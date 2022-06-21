@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 import WatchConnectivity
 import WatchKit
@@ -61,25 +61,26 @@ class AppMessageService: NSObject, WCSessionDelegate {
     func requestApplicationContext() {
         WCSession
             .default
-            .sendMessage(["request": "Preferences"],
-                         replyHandler: { (response) in
-                             let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-                             os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
+            .sendMessage(
+                ["request": "Preferences"],
+                replyHandler: { (response) in
+                    let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
+                    os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
 
-                             DispatchQueue.main.async { () -> Void in
-                                 AppMessageService.singleton.updateValuesFromApplicationContext(response as [String: AnyObject])
-                             }
-                         },
-                         errorHandler: { (error) in
-                             os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
-
-                         })
+                    DispatchQueue.main.async { () in
+                        AppMessageService.singleton.updateValuesFromApplicationContext(response as [String: AnyObject])
+                    }
+                },
+                errorHandler: { (error) in
+                    os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
+                }
+            )
     }
 
     @available(watchOSApplicationExtension 2.2, *)
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
-        DispatchQueue.main.async { () -> Void in
+        DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(session.receivedApplicationContext as [String: AnyObject])
         }
     }
@@ -88,7 +89,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         os_log("didReceiveApplicationContext %{PUBLIC}@", log: .watch, type: .info, "\(applicationContext)")
-        DispatchQueue.main.async { () -> Void in
+        DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(applicationContext as [String: AnyObject])
         }
     }
@@ -97,7 +98,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
         os_log("didReceiveUserInfo %{PUBLIC}@", log: .watch, type: .info, "\(userInfo)")
-        DispatchQueue.main.async { () -> Void in
+        DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(userInfo as [String: AnyObject])
         }
     }
@@ -106,7 +107,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
         os_log("didReceiveMessage some filtered messages: %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
-        DispatchQueue.main.async { () -> Void in
+        DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }
     }
@@ -116,7 +117,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username", "defaultSitemap"].contains($0.key) }
         os_log("didReceiveMessage some filtered messages: %{PUBLIC}@ with reply handler", log: .watch, type: .info, "\(filteredMessages)")
 
-        DispatchQueue.main.async { () -> Void in
+        DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -11,7 +11,7 @@
 
 import Combine
 import Foundation
-import OpenHABCoreWatch
+import OpenHABCore
 
 final class ObservableOpenHABDataObject: DataObject, ObservableObject {
     static let shared = ObservableOpenHABDataObject()

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -63,9 +63,7 @@ class OpenHABSelectionTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         os_log("Selected mapping %d", log: .viewCycle, type: .info, indexPath.row)
 
-        if delegate != nil {
-            delegate?.didSelectWidgetMapping(indexPath.row)
-        }
+        delegate?.didSelectWidgetMapping(indexPath.row)
         navigationController?.popViewController(animated: true)
     }
 }

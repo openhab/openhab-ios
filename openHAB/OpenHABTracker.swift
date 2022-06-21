@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -51,8 +51,8 @@ class OpenHABTracker: NSObject {
 
     func start() {
         // Start NetworkReachabilityManager.Listener
-        oldReachabilityStatus = reach?.networkReachabilityStatus
-        reach?.listener = { [weak self] status in
+        oldReachabilityStatus = reach?.status
+        reach?.startListening { [weak self] status in
             guard let self = self else { return }
 
             let nStatus = status
@@ -68,9 +68,10 @@ class OpenHABTracker: NSObject {
                 }
             }
         }
-        if !(reach?.startListening() ?? false) {
-            os_log("Starting NetworkReachabilityManager.Listener failed.", log: .remoteAccess, type: .info)
-        }
+        // TODO:
+//        if !(reach?.startListening() ?? false) {
+//            os_log("Starting NetworkReachabilityManager.Listener failed.", log: .remoteAccess, type: .info)
+//        }
 
         // Check if any network is available
         if isNetworkConnected() {
@@ -92,7 +93,7 @@ class OpenHABTracker: NSObject {
                     } else {
                         let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
                         NetworkConnection.shared.manager.request(request)
-                            .validate(statusCode: 200 ..< 300)
+                            .validate()
                             .responseData { response in
                                 switch response.result {
                                 case .success:
@@ -139,7 +140,7 @@ class OpenHABTracker: NSObject {
 
     func trackedDemoMode() {
         delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
-        trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
+        trackedUrl(URL(staticString: "https://demo.openhab.org"))
     }
 
     func trackedUrl(_ trackedUrl: URL?) {
@@ -162,12 +163,6 @@ class OpenHABTracker: NSObject {
         return url
     }
 
-    func validateUrl(_ url: String?) -> Bool {
-        let theURL = "(http|https)://((\\w)*|([0-9]*)|([-|_])*)+([\\.|/]((\\w)*|([0-9]*)|([-|_])*))+"
-        let urlTest = NSPredicate(format: "SELF MATCHES %@", theURL)
-        return urlTest.evaluate(with: url)
-    }
-
     func isNetworkConnected() -> Bool {
         reach?.isReachable ?? false
     }
@@ -178,7 +173,7 @@ class OpenHABTracker: NSObject {
 
     func isNetworkVPN() -> Bool {
         if let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any],
-            let scopes = settings["__SCOPED__"] as? [String: Any] {
+           let scopes = settings["__SCOPED__"] as? [String: Any] {
             for key in scopes.keys where key.contains("tap") || key.contains("tun") || key.contains("ppp") || key.contains("ipsec") || key.contains("ipsec0") {
                 return true
             }

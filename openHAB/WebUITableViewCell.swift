@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -31,15 +31,18 @@ class WebUITableViewCell: GenericUITableViewCell {
         contentView.addSubview(widgetWebView)
 
         widgetWebView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([widgetWebView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-                                     widgetWebView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
-                                     widgetWebView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                                     widgetWebView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            widgetWebView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
+            widgetWebView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+            widgetWebView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            widgetWebView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
     }
 
     override func awakeFromNib() {
         super.awakeFromNib()
         widgetWebView.navigationDelegate = self
+        widgetWebView.uiDelegate = self
     }
 
     override func displayWidget() {
@@ -51,17 +54,9 @@ class WebUITableViewCell: GenericUITableViewCell {
             return
         }
 
-        let authStr = "\(Preferences.username):\(Preferences.password)"
-
-        guard let loginData = authStr.data(using: String.Encoding.utf8) else {
-            return
-        }
-        let base64LoginString = loginData.base64EncodedString()
-
         if let url = URL(string: urlString) {
             self.url = url
-            var request = URLRequest(url: url)
-            request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+            let request = URLRequest(url: url)
             widgetWebView?.scrollView.isScrollEnabled = false
             widgetWebView?.scrollView.bounces = false
             widgetWebView?.load(request)
@@ -107,5 +102,21 @@ extension WebUITableViewCell: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
         url = nil
+    }
+
+    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+        completionHandler(disposition, credential)
+    }
+}
+
+extension WebUITableViewCell: WKUIDelegate {
+    @available(iOS 15, *)
+    func webView(_ webView: WKWebView,
+                 requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+                 initiatedByFrame frame: WKFrameInfo,
+                 type: WKMediaCaptureType,
+                 decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(.grant)
     }
 }

@@ -1,0 +1,41 @@
+name: Run Unit Tests
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  build_and_test:
+    runs-on: macos-11
+    if: ${{ github.event.pull_request.draft == false }}
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1.1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ github.token }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Cache BuildTools
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-buildtools-dependencies
+        with:
+          path: BuildTools/.build
+          key: ${{ runner.os }}-buildtools-${{ env.cache-name }}-${{ hashFiles('BuildTools/Package.resolved') }}
+
+      - name: Install dependencies
+        run: |
+            bundle install --redownload
+
+      - name: Fastlane unit tests
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
+        uses: maierj/fastlane-action@v2.0.1
+        with:
+          lane: unittests
+          skip-tracking: true

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -36,8 +36,8 @@ public class Throttler {
 }
 
 // Inspired by https://ericasadun.com/2017/05/23/5-easy-dispatch-tricks/
-extension DispatchTime {
-    public static func secondsFromNow(_ amount: Double) -> DispatchTime {
+public extension DispatchTime {
+    static func secondsFromNow(_ amount: Double) -> DispatchTime {
         DispatchTime.now() + amount
     }
 }

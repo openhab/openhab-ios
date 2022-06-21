@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -48,14 +48,16 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     func buildApplicationDict() -> [String: Any] {
         let applicationDict: [String: Any] =
-            ["localUrl": Preferences.localUrl,
-             "remoteUrl": Preferences.remoteUrl,
-             "username": Preferences.username,
-             "password": Preferences.password,
-             "alwaysSendCreds": Preferences.alwaysSendCreds,
-             "defaultSitemap": "watch",
-             "ignoreSSL": Preferences.ignoreSSL,
-             "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates]
+            [
+                "localUrl": Preferences.localUrl,
+                "remoteUrl": Preferences.remoteUrl,
+                "username": Preferences.username,
+                "password": Preferences.password,
+                "alwaysSendCreds": Preferences.alwaysSendCreds,
+                "defaultSitemap": "watch",
+                "ignoreSSL": Preferences.ignoreSSL,
+                "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates
+            ]
 
         return applicationDict
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,35 +10,31 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import MapKit
-import OpenHABCoreWatch
+import OpenHABCore
 import SwiftUI
-import UIKit
 
-struct MapView: WKInterfaceObjectRepresentable {
+struct MapView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
+    @State private var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(
+            latitude: 40,
+            longitude: -5
+        ),
+        span: MKCoordinateSpan(
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02
+        )
+    )
 
-    func makeWKInterfaceObject(context: WKInterfaceObjectRepresentableContext<MapView>) -> WKInterfaceMap {
-        WKInterfaceMap()
-    }
-
-    func updateWKInterfaceObject(_ map: WKInterfaceMap, context: WKInterfaceObjectRepresentableContext<MapView>) {
-        if widget.item?.stateAsLocation() != nil {
-            map.addAnnotation(widget.coordinate, with: WKInterfaceMapPinColor.red)
-
-            let region = MKCoordinateRegion(center: widget.coordinate,
-                                            latitudinalMeters: 1000.0,
-                                            longitudinalMeters: 1000.0)
-            map.setRegion(region)
-
-        } else {
-            let span = MKCoordinateSpan(latitudeDelta: 0.02,
-                                        longitudeDelta: 0.02)
-
-            let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 40, longitude: -5),
-                                            span: span)
-
-            map.setRegion(region)
-        }
+    var body: some View {
+        Map(coordinateRegion: .constant(
+            MKCoordinateRegion(
+                center: widget.coordinate,
+                latitudinalMeters: 1000.0,
+                longitudinalMeters: 1000.0
+            )
+        )
+        )
     }
 }
 

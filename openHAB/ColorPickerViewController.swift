@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -77,7 +77,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
 extension ColorPickerViewController: ColorPickerDelegate {
     func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: ColorControl) {
-        if let throttler = self.throttler {
+        if let throttler = throttler {
             throttler.throttle { DispatchQueue.main.async { self.sendColorUpdate(color: selectedColor) } }
         } else {
             sendColorUpdate(color: selectedColor)

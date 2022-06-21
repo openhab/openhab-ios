@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -29,7 +29,7 @@ class InterfaceController: WKInterfaceController {
 
         refresh(Preferences.sitemap)
         // load the current Sitemap
-        OpenHabService.singleton.readSitemap { (sitemap, errorString) -> Void in
+        OpenHabService.singleton.readSitemap { (sitemap, errorString) in
 
             if errorString != "" {
                 // Timeouts happen when the app is in background state.

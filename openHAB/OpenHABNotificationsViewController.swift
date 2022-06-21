@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -45,6 +45,7 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
 
         let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
         navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
+        navigationItem.largeTitleDisplayMode = .never
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -54,28 +55,25 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     }
 
     func loadNotifications() {
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
         NetworkConnection.notification(urlString: Preferences.remoteUrl) { response in
             switch response.result {
-            case .success:
-                if let data = response.result.value {
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
-                        for codingDatum in codingDatas {
-                            self.notifications.add(codingDatum.openHABNotification)
-                        }
-                    } catch {
-                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+            case let .success(data):
+                do {
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                    let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+                    self.notifications = []
+                    for codingDatum in codingDatas {
+                        self.notifications.add(codingDatum.openHABNotification)
                     }
-
-                    self.refreshControl?.endRefreshing()
-                    self.tableView.reloadData()
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                } catch {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                 }
+
+                self.refreshControl?.endRefreshing()
+                self.tableView.reloadData()
+
             case let .failure(error):
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
             }
@@ -111,13 +109,17 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
             cell?.customDetailTextLabel?.text = dateFormatter.string(from: timeStamp)
         }
 
-        if let iconUrl = Endpoint.icon(rootUrl: appData!.openHABRootUrl,
-                                       version: appData!.openHABVersion,
-                                       icon: notification.icon,
-                                       state: "",
-                                       iconType: .png).url {
-            cell?.imageView?.kf.setImage(with: iconUrl,
-                                         placeholder: UIImage(named: "openHABIcon"))
+        if let iconUrl = Endpoint.icon(
+            rootUrl: appData!.openHABRootUrl,
+            version: appData!.openHABVersion,
+            icon: notification.icon,
+            state: "",
+            iconType: .png
+        ).url {
+            cell?.imageView?.kf.setImage(
+                with: iconUrl,
+                placeholder: UIImage(named: "openHABIcon")
+            )
         }
 
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {

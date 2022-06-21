@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import openHAB
-@testable import OpenHABCore
 import XCTest
 
 class OpenHABGeneralTests: XCTestCase {
@@ -38,22 +37,5 @@ class OpenHABGeneralTests: XCTestCase {
         let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
         let hexWithReduce = iPhoneData.reduce("") { $0 + String(format: "%02X", $1) }
         XCTAssertEqual(hexWithReduce, "54696D206950686F6E65", "hex properly calculated with reduce")
-    }
-
-    func testEndPoints() {
-        let urlc = Endpoint.icon(rootUrl: "http://192.169.2.1",
-                                 version: 2,
-                                 icon: "switch",
-                                 state: "OFF",
-                                 iconType: .svg).url
-        XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
-    }
-
-    func testLabelVale() {
-        let widget = OpenHABWidget()
-        widget.label = "llldl [llsl]"
-        XCTAssertEqual(widget.labelValue, "llsl")
-        widget.label = "llllsl[kkks] llls"
-        XCTAssertEqual(widget.labelValue, "kkks")
     }
 }

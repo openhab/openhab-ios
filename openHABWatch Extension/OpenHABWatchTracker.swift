@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -12,7 +12,7 @@
 import Alamofire
 import Foundation
 import Network
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 
 protocol OpenHABWatchTrackerDelegate: AnyObject {
@@ -78,7 +78,7 @@ class OpenHABWatchTracker: NSObject {
             }
             let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
             connectivityTask = NetworkConnection.shared.manager.request(request)
-                .validate(statusCode: 200 ..< 300)
+                .validate()
                 .responseData { response in
                     switch response.result {
                     case .success:
@@ -111,7 +111,7 @@ class OpenHABWatchTracker: NSObject {
                     }
                     let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
                     connectivityTask = NetworkConnection.shared.manager.request(request)
-                        .validate(statusCode: 200 ..< 300)
+                        .validate()
                         .responseData { response in
                             switch response.result {
                             case .success:
@@ -158,7 +158,7 @@ class OpenHABWatchTracker: NSObject {
 
     func trackedDemoMode() {
         delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
-        trackedUrl(URL(staticString: "http://demo.openhab.org:8080"))
+        trackedUrl(URL(staticString: "https://demo.openhab.org:8443"))
     }
 
     func trackedUrl(_ trackedUrl: URL?) {
@@ -252,10 +252,12 @@ class OpenHABWatchTracker: NSObject {
         let data = dataIn! as NSData
         var sockAddr: in_addr = data.castToCPointer()
         var ipAddressString: [CChar] = Array(repeating: 0, count: Int(INET6_ADDRSTRLEN))
-        inet_ntop(addressFamily,
-                  &sockAddr,
-                  &ipAddressString,
-                  socklen_t(INET_ADDRSTRLEN))
+        inet_ntop(
+            addressFamily,
+            &sockAddr,
+            &ipAddressString,
+            socklen_t(INET_ADDRSTRLEN)
+        )
 
         return String(cString: ipAddressString)
     }
@@ -265,12 +267,6 @@ class OpenHABWatchTracker: NSObject {
             return String(url.dropLast())
         }
         return url
-    }
-
-    func validateUrl(_ url: String?) -> Bool {
-        let theURL = "(http|https)://((\\w)*|([0-9]*)|([-|_])*)+([\\.|/]((\\w)*|([0-9]*)|([-|_])*))+"
-        let urlTest = NSPredicate(format: "SELF MATCHES %@", theURL)
-        return urlTest.evaluate(with: url)
     }
 
     func isNetworkConnected() -> Bool {

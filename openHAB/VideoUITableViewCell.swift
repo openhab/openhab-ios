@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -62,23 +62,29 @@ class VideoUITableViewCell: GenericUITableViewCell {
         playerView.contentMode = .scaleAspectFit
 
         let marginGuide = contentView // contentView.layoutMarginsGuide if more margin would be appreciated
-        NSLayoutConstraint.activate([playerView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
-                                     playerView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
-                                     playerView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
-                                     playerView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            playerView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
+            playerView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
+            playerView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
+            playerView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
+        ])
 
         mainImageView.translatesAutoresizingMaskIntoConstraints = false // enable autolayout
-        NSLayoutConstraint.activate([mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
-                                     mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
-                                     mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
-                                     mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)])
+        NSLayoutConstraint.activate([
+            mainImageView.leftAnchor.constraint(equalTo: marginGuide.leftAnchor),
+            mainImageView.rightAnchor.constraint(equalTo: marginGuide.rightAnchor),
+            mainImageView.topAnchor.constraint(equalTo: marginGuide.topAnchor),
+            mainImageView.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
+        ])
 
         let bottomSpacingConstraint = activityIndicator.bottomAnchor.constraint(greaterThanOrEqualTo: marginGuide.bottomAnchor, constant: 15)
         bottomSpacingConstraint.priority = UILayoutPriority.defaultHigh
-        NSLayoutConstraint.activate([activityIndicator.centerXAnchor.constraint(equalTo: marginGuide.centerXAnchor),
-                                     activityIndicator.centerYAnchor.constraint(equalTo: marginGuide.centerYAnchor),
-                                     activityIndicator.topAnchor.constraint(greaterThanOrEqualTo: marginGuide.topAnchor, constant: 15),
-                                     bottomSpacingConstraint])
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: marginGuide.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: marginGuide.centerYAnchor),
+            activityIndicator.topAnchor.constraint(greaterThanOrEqualTo: marginGuide.topAnchor, constant: 15),
+            bottomSpacingConstraint
+        ])
 
         NotificationCenter.default.addObserver(self, selector: #selector(stopPlayback), name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
@@ -161,27 +167,36 @@ class VideoUITableViewCell: GenericUITableViewCell {
 
         let streamImageInitialBytePattern = Data([255, 216])
         var imageData = Data()
-        mjpegRequest = NetworkConnection.shared.manager.request(streamRequest)
-            .validate(statusCode: 200 ..< 300)
-            .stream { [weak self] chunkData in
-                if chunkData.starts(with: streamImageInitialBytePattern) {
-                    if let image = UIImage(data: imageData) {
-                        DispatchQueue.main.async {
-                            if self?.mainImageView?.image == nil {
-                                let aspectRatio = image.size.width / image.size.height
-                                self?.activityIndicator.isHidden = true
-                                self?.updateAspectRatio(forView: self?.mainImageView, aspectRatio: aspectRatio)
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                    self?.didLoad?()
+        mjpegRequest = NetworkConnection.shared.manager.streamRequest(streamRequest)
+            .validate()
+            .responseStream { stream in
+                switch stream.event {
+                case let .stream(result):
+                    switch result {
+                    case let .success(data):
+                        if data.starts(with: streamImageInitialBytePattern) {
+                            if let image = UIImage(data: imageData) {
+                                DispatchQueue.main.async {
+                                    if self.mainImageView?.image == nil {
+                                        let aspectRatio = image.size.width / image.size.height
+                                        self.activityIndicator.isHidden = true
+                                        self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                            self.didLoad?()
+                                        }
+                                    }
+                                    self.mainImageView?.image = image
                                 }
                             }
-                            self?.mainImageView?.image = image
+                            imageData = Data()
                         }
+                        imageData.append(data)
                     }
-                    imageData = Data()
+                case let .complete(completion):
+                    os_log("Failed to decode stream", log: .decoding, type: .debug, completion.error?.localizedDescription ?? "")
                 }
-                imageData.append(chunkData)
             }
+
         mjpegRequest?.resume()
     }
 
@@ -193,10 +208,15 @@ class VideoUITableViewCell: GenericUITableViewCell {
         }
         aspectRatioConstraint = nil
 
-        let constraint = NSLayoutConstraint(item: view, attribute: .width,
-                                            relatedBy: .equal,
-                                            toItem: view, attribute: .height,
-                                            multiplier: aspectRatio, constant: 0)
+        let constraint = NSLayoutConstraint(
+            item: view,
+            attribute: .width,
+            relatedBy: .equal,
+            toItem: view,
+            attribute: .height,
+            multiplier: aspectRatio,
+            constant: 0
+        )
 
         constraint.priority = UILayoutPriority(rawValue: 999)
         view.addConstraint(constraint)

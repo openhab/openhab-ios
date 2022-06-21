@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Kingfisher
-import OpenHABCoreWatch
+import OpenHABCore
 import os.log
 import WatchConnectivity
 import WatchKit
@@ -43,7 +43,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
         // Perform any final initialization of your application.
         activateWatchConnectivity()
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))
 
         NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
 
@@ -99,7 +99,7 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
 // MARK: Kingfisher authentication with NSURLCredential
 
-extension ExtensionDelegate: AuthenticationChallengeResponsable {
+extension ExtensionDelegate: AuthenticationChallengeResponsible {
     // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,

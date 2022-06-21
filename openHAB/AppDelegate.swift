@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -9,8 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import AlamofireNetworkActivityIndicator
 import AVFoundation
-import FirebaseCore
+import Firebase
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -51,10 +52,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         setupCrashReporting()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
-
         UserDefaults.standard.register(defaults: appDefaults)
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, adapter: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
+        Preferences.migrateUserDefaultsIfRequired()
+
+        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
+
+        NetworkActivityIndicatorManager.shared.isEnabled = true
+        NetworkActivityIndicatorManager.shared.startDelay = 1.0
 
         registerForPushNotifications()
 
@@ -80,13 +85,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func setupCrashReporting() {
-        guard Preferences.sendCrashReports else {
-            // The user has not opted-in to crash reporting.
-            return
-        }
-
         // init Firebase crash reporting
         FirebaseApp.configure()
+        FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
     }
 
     func activateWatchConnectivity() {
@@ -148,9 +150,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
 
-        let dataDict = ["deviceToken": deviceTokenString,
-                        "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
-                        "deviceName": UIDevice.current.name]
+        let dataDict = [
+            "deviceToken": deviceTokenString,
+            "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
+            "deviceName": UIDevice.current.name
+        ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
 
@@ -194,7 +198,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             config.presentationStyle = .bottom
 
             SwiftMessages.show(config: config) {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 let view = MessageView.viewFromNib(layout: .cardView)
                 // ... configure the view
                 view.configureTheme(.info)

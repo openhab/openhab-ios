@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2020 Contributors to the openHAB project
+// Copyright (c) 2010-2022 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -24,6 +24,7 @@ class OpenHABClientCertificatesViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = NSLocalizedString("client_certificates", comment: "")
         os_log("OpenHABClientCertificatesViewController viewDidLoad", log: .default, type: .info)
 
         tableView.tableFooterView = UIView()

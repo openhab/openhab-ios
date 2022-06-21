@@ -1,11 +1,16 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: 🐛 Bug Report
+about: If something isn't working as expected
 title: ''
 labels: ''
 assignees: ''
-
 ---
+
+**New bug checklist**
+
+- [ ] I updated the iOS openHAB app to the latest [TestFlight](https://testflight.apple.com/join/563WBakc) version.
+- [ ] I read the [Contribution Guidelines](https://github.com/openhab/openhab-ios/blob/develop/CONTRIBUTING.md)
+- [ ] I searched for [existing GitHub issues](https://github.com/openhab/openhab-ios/issues)
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -24,10 +29,13 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **App (please complete the following information):**
- - Version [e.g. 2.1.0(12)]
+ - Version [e.g. `2.1.0 (12)`]
 
 **Smartphone (please complete the following information):**
- - Device: [e.g. iPhoneXR]
+ - Device: [e.g. `iPhoneXR`]
+
+**openHAB (please complete the following information):**
+- Version [e.g. `2.5.8`]
 
 **Additional context**
 Add any other context about the problem here.
