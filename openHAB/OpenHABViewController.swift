@@ -266,9 +266,7 @@ class OpenHABViewController: UIViewController {
         super.viewWillDisappear(animated)
 
         // workaround for #309 (see: https://stackoverflow.com/questions/46301813/broken-uisearchbar-animation-embedded-in-navigationitem)
-        if #available(iOS 13.0, *) {
-            // do nothing
-        } else {
+        if #unavailable(iOS 13.0) {
             if animated, !search.isActive, !search.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
                let searchBarSuperview = search.searchBar.superview,
                let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {

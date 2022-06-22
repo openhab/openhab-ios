@@ -6,17 +6,14 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: macos-11
+    runs-on: macos-12
     if: ${{ github.event.pull_request.draft == false }}
     steps:
       - uses: maxim-lobanov/setup-xcode@v1.1
         with:
           xcode-version: latest-stable
 
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ github.token }}
-          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/checkout@v3
 
       - name: Cache BuildTools
         uses: actions/cache@v2
