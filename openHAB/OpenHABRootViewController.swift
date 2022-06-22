@@ -195,7 +195,7 @@ class OpenHABRootViewController: UIViewController {
             // if we hit the menu item again while on the view, trigger a reload
             currentView.reloadView()
         }
-        //make sure we reset any views that may be pushed
+        // make sure we reset any views that may be pushed
         currentView.navigationController?.popToRootViewController(animated: true)
     }
 

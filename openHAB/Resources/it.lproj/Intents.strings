@@ -1,58 +1,58 @@
-"1GaCDV" = "Action";
+"1GaCDV" = "Azione";
 
-"1Kf0qe" = "Set Color Control Value";
+"1Kf0qe" = "Imposta Valore Controllo Colore";
 
-"1SeS3V" = "Set ${item} to ${value} (HSB)";
+"1SeS3V" = "Imposta ${item} a ${value} (HSB)";
 
 "1USOx9" = "Item";
 
-"2q0TdY" = "Sorry can't find ${item}";
+"2q0TdY" = "Spiacente non posso trovare ${item}";
 
-"3evvza" = "Value";
+"3evvza" = "Valore";
 
-"5B4e9l" = "Set the string of a string control item";
+"5B4e9l" = "Imposta il valore di una item di controllo di tipo stringa";
 
-"5Uu4bK" = "Get Item State";
+"5Uu4bK" = "Leggi lo stato dell’Item";
 
-"67qFTP" = "Invalid empty value for ${item}";
+"67qFTP" = "Valore vuoto non valido per ${item}";
 
-"68Y2Ya" = "Dimmer/Roller Name";
+"68Y2Ya" = "Nome Dimmer/Roller";
 
-"6hUiXZ" = "The state of ${item} is ${state}";
+"6hUiXZ" = "Lo stato di ${item} è ${state}";
 
-"80K2Dt" = "Sorry can't find ${item}";
+"80K2Dt" = "Spiacente non posso trovare ${item}";
 
-"8OBnvT" = "Invalid empty value for ${item}";
+"8OBnvT" = "Valore vuoto non valido per ${item}";
 
-"8dhboX" = "Value";
+"8dhboX" = "Valore";
 
 "B2I9b5" = "Item";
 
-"CZfT5a" = "Sent the number ${value} to ${item}";
+"CZfT5a" = "Inviato il numero ${value} a ${item}";
 
-"Cdg015" = "Set ${item} to ${value}";
+"Cdg015" = "Imposta ${item} a ${value}";
 
-"DxO2wk" = "Set the color of a color control item";
+"DxO2wk" = "Imposta il colore di un Item di controllo colore";
 
-"E291x3" = "Value";
+"E291x3" = "Valore";
 
-"EEj00Q" = "Set ${item} to ${value}";
+"EEj00Q" = "Imposta ${item} a ${value}";
 
-"Fb0pUB" = "Sent the action of ${action} to switch ${item}";
+"Fb0pUB" = "Inviata l'azione di ${action} per cambiare ${item}";
 
-"GD4RTw" = "Retrieve the current state of an item";
+"GD4RTw" = "Recupera lo stato attuale di un Item";
 
-"GI0faP" = "State invalid: ${state} for ${item}";
+"GI0faP" = "Stato non valido: ${state} per ${item}";
 
-"Gjd9MH" = "Set ${item} to ${value}";
+"Gjd9MH" = "Imposta ${item} a ${value}";
 
-"H26PEQ" = "The state of ${item} was set to ${state}";
+"H26PEQ" = "Lo stato di ${item} è stato impostato su ${state}";
 
-"HGbUGw" = "Value";
+"HGbUGw" = "Valore";
 
-"IpbXHW" = "Send ${action} to ${item}";
+"IpbXHW" = "Invia ${action} a ${item}";
 
-"JUznKl" = "Sent the string ${value} to ${item}";
+"JUznKl" = "Inviata la stringa ${value} a ${item}";
 
 "KXqi2s" = "Item";
 
@@ -60,98 +60,98 @@
 
 "MCp4x6" = "Item";
 
-"MGYSky" = "Set ${item} to ${value}";
+"MGYSky" = "Imposta ${item} a ${value}";
 
-"N5YsnB" = "Sorry can't find ${item}";
+"N5YsnB" = "Spiacente non posso trovare ${item}";
 
-"NehcMF" = "Item Name";
+"NehcMF" = "Nome Item";
 
-"NjP70V" = "Sorry can't find ${item}";
+"NjP70V" = "Spiacente non posso trovare ${item}";
 
-"Nqxuw0" = "State";
+"Nqxuw0" = "Stato";
 
 "Nuhhxp" = "Item";
 
-"Oazi8d" = "Sorry can't find ${item}";
+"Oazi8d" = "Spiacente non posso trovare ${item}";
 
-"SMYYBh" = "Set ${item} to ${value}";
+"SMYYBh" = "Imposta ${item} a ${value}";
 
-"TJ1p5Y" = "Action";
+"TJ1p5Y" = "Azione";
 
-"TK8Rrn" = "Sent the color value of ${value} to ${item}";
+"TK8Rrn" = "Inviato il valore di colore di ${value} a ${item}";
 
-"UZYwuH" = "Set Dimmer or Roller Shutter Value";
+"UZYwuH" = "Imposta il valore di Dimmer o Tapparella";
 
-"V0QsN4" = "Invalid value ${value} for ${item} (0-100)";
+"V0QsN4" = "Valore non valido ${value} per ${item} (0-100)";
 
 "VTeXc1" = "Item";
 
-"VmFkwo" = "Set ${item} to ${value} (HSB)";
+"VmFkwo" = "Imposta ${item} a ${value} (HSB)";
 
-"XMNs7r" = "Set Switch State";
+"XMNs7r" = "Imposta stato Interruttore";
 
 "cBrxnz" = "Item";
 
-"dtRamI" = "Value";
+"dtRamI" = "Valore";
 
-"eFb7vM" = "Set the state of a contact open or closed";
+"eFb7vM" = "Imposta lo stato di un contatto aperto o chiuso";
 
-"gBn7U6" = "Set String Control Value";
+"gBn7U6" = "Imposta Valore della Stringa di Controllo";
 
 "gQzHiG" = "Item";
 
-"hflKDd" = "Sorry can't find ${item}";
+"hflKDd" = "Spiacente non posso trovare ${item}";
 
-"i8fP5e" = "Action";
+"i8fP5e" = "Azione";
 
-"iCUEet" = "Action invalid: ${action} for ${item}";
+"iCUEet" = "Azione non valida: ${action} per ${item}";
 
-"iRjffC" = "Invalid empty value for ${item}";
+"iRjffC" = "Valore vuoto non valido per ${item}";
 
 "k0eXWc" = "Item";
 
-"llL4sP" = "Value";
+"llL4sP" = "Valore";
 
-"lqlrGx" = "Switch name";
+"lqlrGx" = "Cambia nome";
 
-"m5DFXq" = "State";
+"m5DFXq" = "Stato";
 
-"m9yAKr" = "Get ${item} State";
+"m9yAKr" = "Leggi lo stato di ${item}";
 
-"mAKsWc" = "Value";
+"mAKsWc" = "Valore";
 
-"mVz5mJ" = "Set ${item} to ${value}";
+"mVz5mJ" = "Imposta ${item} a ${value}";
 
 "mpxNDZ" = "Item";
 
-"n7cmvU" = "State";
+"n7cmvU" = "Stato";
 
-"nzw2UT" = "Set Contact State Value";
+"nzw2UT" = "Imposta lo Stato del Contatto";
 
-"o35DYr" = "Set Number Control Value";
+"o35DYr" = "Imposta Valore del Numero di Controllo";
 
-"oOjAU0" = "Set the state of a switch on or off";
+"oOjAU0" = "Imposta lo stato di un interruttore ad acceso o spento";
 
-"oUolm5" = "Send ${action} to ${item}";
+"oUolm5" = "Invia ${action} a ${item}";
 
-"pg4Bec" = "Set the integer value of a dimmer or roller shutter";
+"pg4Bec" = "Imposta il valore intero di un dimmer o una tapparella";
 
-"pptfkD" = "Set the decimal value of a number control item";
+"pptfkD" = "Imposta il valore decimale di un Item di controllo numerico";
 
-"ptGHON" = "Sorry can't find ${item}";
+"ptGHON" = "Spiacente non posso trovare ${item}";
 
-"qu9K9v" = "Set the state of ${item} to ${state}";
+"qu9K9v" = "Imposta lo stato di ${item} a ${state}";
 
-"raIAR6" = "Invalid value: ${value} for ${item} must be HSB (0-360,0-100,0-100)";
+"raIAR6" = "Valore non valido: ${value} per ${item} deve essere HSB (0-360,0-100,0-100)";
 
 "skEQxZ" = "Item";
 
 "tclrCp" = "Item";
 
-"ttiBzN" = "Set the state of ${item} to ${state}";
+"ttiBzN" = "Imposta lo stato di ${item} a ${state}";
 
-"tuvmDw" = "Value";
+"tuvmDw" = "Valore";
 
 "uGsyyj" = "240,100,100";
 
-"wm0fqx" = "Sent the value of ${value} to ${item}";
+"wm0fqx" = "Imposta il valore di ${value} a ${item}";
