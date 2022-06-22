@@ -269,12 +269,6 @@ class OpenHABWatchTracker: NSObject {
         return url
     }
 
-    func validateUrl(_ url: String?) -> Bool {
-        let theURL = "(http|https)://((\\w)*|([0-9]*)|([-|_])*)+([\\.|/]((\\w)*|([0-9]*)|([-|_])*))+"
-        let urlTest = NSPredicate(format: "SELF MATCHES %@", theURL)
-        return urlTest.evaluate(with: url)
-    }
-
     func isNetworkConnected() -> Bool {
         pathMonitor.currentPath.status == .satisfied
     }

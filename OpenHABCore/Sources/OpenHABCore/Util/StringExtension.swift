@@ -12,9 +12,10 @@
 import Foundation
 import MapKit
 import os.log
+import UIKit
 
-extension String {
-    var doubleValue: Double {
+public extension String {
+    internal var doubleValue: Double {
         let formatter = NumberFormatter()
         formatter.decimalSeparator = "."
         if let asNumber = formatter.number(from: self) {
@@ -24,7 +25,7 @@ extension String {
         }
     }
 
-    var intValue: Int {
+    internal var intValue: Int {
         if let asNumber = NumberFormatter().number(from: self) {
             return asNumber.intValue
         } else {
@@ -37,18 +38,27 @@ extension String {
      Independent of locale's decimal separator
 
      */
-    var numberValue: NSNumber? {
+    internal var numberValue: NSNumber? {
         let formatter = NumberFormatter()
         formatter.numberStyle = .scientific
         formatter.decimalSeparator = "."
         return formatter.number(from: filter("01234567890E.+-".contains))
     }
 
-    var asDouble: Double {
+    internal var asDouble: Double {
         numberValue?.doubleValue ?? 0
     }
 
-    func toItemType() -> OpenHABItem.ItemType? {
+    var isValidURL: Bool {
+        // return nil if the URL has not a valid format
+        URL(string: self) != nil
+    }
+
+    var isAbsoluteURL: Bool {
+        URL(string: self) == URL(string: self)?.absoluteURL
+    }
+
+    internal func toItemType() -> OpenHABItem.ItemType? {
         var typeString: String = self
         // Earlier OH2 versions returned e.g. 'Switch' as 'SwitchItem'
         if hasSuffix("Item") {
@@ -67,11 +77,11 @@ extension String {
         return OpenHABItem.ItemType(rawValue: typeString)
     }
 
-    func toWidgetType() -> OpenHABWidget.WidgetType? {
+    internal func toWidgetType() -> OpenHABWidget.WidgetType? {
         OpenHABWidget.WidgetType(rawValue: self)
     }
 
-    public func parseAsBool() -> Bool {
+    func parseAsBool() -> Bool {
         if self == "ON" { return true }
         if let brightness = parseAsBrightness() { return brightness != 0 }
         if let decimalValue = Int(self) {
@@ -81,7 +91,7 @@ extension String {
         }
     }
 
-    public func parseAsNumber(format: String? = nil) -> NumberState {
+    func parseAsNumber(format: String? = nil) -> NumberState {
         switch self {
         case "ON": return NumberState(value: 100.0)
         case "OFF": return NumberState(value: 0.0)
@@ -93,7 +103,7 @@ extension String {
         }
     }
 
-    public func parseAsUIColor() -> UIColor? {
+    func parseAsUIColor() -> UIColor? {
         guard self != "Uninitialized" else {
             return .black
         }
@@ -106,17 +116,23 @@ extension String {
         return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
     }
 
-    public func parseAsBrightness() -> Int? {
+    func parseAsBrightness() -> Int? {
         let values = components(separatedBy: ",")
         guard values.count == 3 else { return nil }
         return Int(values[2].asDouble.rounded())
     }
 
-    public mutating func prepare() {
-        self = replacingOccurrences(of: "^\\.\\.", with: "", options: [.regularExpression])
-        if !starts(with: "/") {
-            insert("/", at: startIndex)
+    func prepare() -> String {
+        var input = replacingOccurrences(of: "^\\.\\.", with: "", options: [.regularExpression])
+        if !input.starts(with: "/") {
+            input.insert("/", at: startIndex)
         }
+        return input
+    }
+
+    func deletingPrefix(_ prefix: String) -> String {
+        guard hasPrefix(prefix) else { return self }
+        return String(dropFirst(prefix.count))
     }
 }
 

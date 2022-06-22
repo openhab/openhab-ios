@@ -107,7 +107,7 @@ platform :ios do
         certificates
 
         # update L10ns
-        crowdin
+        # crowdin
 
         # run unit tests
         unittests

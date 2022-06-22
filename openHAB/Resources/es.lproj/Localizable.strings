@@ -2,7 +2,7 @@
 "message_not_decoded" = "Message could not be decoded";
 "notification" = "Notification";
 "dismiss" = "Dismiss";
-"search_items" = "Search openHAB items";
+"search_items" = "Buscar ítems en openHAB";
 "error" = "Error";
 "ssl_certificate_error" = "SSL Certificate Error";
 "empty_sitemap" = "openHAB returned empty sitemap list";
@@ -69,3 +69,4 @@
 "on" = "on";
 "off" = "off";
 "empty" = "empty";
+"sortSitemapsBy" = "Sort sitemaps by";

@@ -58,6 +58,12 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
     return sitemaps
 }
 
+struct UiTile: Decodable {
+    var name: String
+    var url: String
+    var imageUrl: String
+}
+
 enum DrawerTableType {
     case withStandardMenuEntries
     case withoutStandardMenuEntries
@@ -116,8 +122,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     self.sitemaps = Array(self.sitemaps.dropLast())
                 }
 
-                // Sort the sitemaps alphabetically.
-                self.sitemaps.sort { $0.label < $1.label }
+                // Sort the sitemaps according to Settings selection.
+                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+                case .label: self.sitemaps.sort { $0.label < $1.label }
+                case .name: self.sitemaps.sort { $0.name < $1.name }
+                }
+
                 self.drawerItems.removeAll()
                 if self.drawerTableType == .withStandardMenuEntries {
                     self.setStandardDrawerItems()
@@ -144,10 +154,6 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 }
                 do {
                     self.uiTiles = try JSONDecoder().decode([OpenHABUiTile].self, from: responseData)
-                    for tile in self.uiTiles {
-                        tile.imageUrl.prepare()
-                        tile.url.prepare()
-                    }
                     self.tableView.reloadData()
                 } catch {
                     os_log("Error: did not receive data %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, error.localizedDescription)
@@ -219,10 +225,23 @@ class OpenHABDrawerTableViewController: UITableViewController {
             let imageView = UIImageView(frame: cell.customImageView.bounds)
             let tile = uiTiles[indexPath.row]
             cell.customTextLabel?.text = tile.name
-            if !tile.imageUrl.isEmpty {
-                if let iconURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: tile.imageUrl).url {
-                    os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: iconURL))
-                    imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
+            let passedURL = tile.imageUrl
+            // Dependent on $OPENHAB_CONF/services/runtime.cfg
+            // Can either be an absolute URL, a path (sometimes malformed) or the content to be displayed (for imageURL)
+            if !passedURL.isEmpty {
+                switch passedURL {
+                case _ where passedURL.hasPrefix("data:image"):
+                    if let imageData = Data(base64Encoded: passedURL.deletingPrefix("data:image/png;base64,"), options: .ignoreUnknownCharacters) {
+                        imageView.image = UIImage(data: imageData)
+                    } // data;image/png;base64,
+                case _ where passedURL.hasPrefix("http"):
+                    os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: passedURL))
+                    imageView.kf.setImage(with: URL(string: passedURL), placeholder: UIImage(named: "openHABIcon"))
+                default:
+                    if let builtURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: passedURL.prepare()).url {
+                        os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: builtURL))
+                        imageView.kf.setImage(with: builtURL, placeholder: UIImage(named: "openHABIcon"))
+                    }
                 }
             } else {
                 imageView.image = UIImage(named: "openHABIcon")
@@ -298,7 +317,18 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.delegate?.modalDismissed(to: .webview)
             }
         case 1:
-            openURL(url: Endpoint.resource(openHABRootUrl: openHABRootUrl, path: uiTiles[indexPath.row].url).url)
+            let passedURL = uiTiles[indexPath.row].url
+            // Dependent on $OPENHAB_CONF/services/runtime.cfg
+            // Can either be an absolute URL, a path (sometimes malformed)
+            if !passedURL.isEmpty {
+                switch passedURL {
+                case _ where passedURL.hasPrefix("http"):
+                    openURL(url: URL(string: passedURL))
+                default:
+                    let builtURL = Endpoint.resource(openHABRootUrl: openHABRootUrl, path: passedURL.prepare())
+                    openURL(url: builtURL.url)
+                }
+            }
         case 2:
             if !sitemaps.isEmpty {
                 let sitemap = sitemaps[indexPath.row]
@@ -357,10 +387,4 @@ class OpenHABDrawerTableViewController: UITableViewController {
             present(vc, animated: true)
         }
     }
-}
-
-struct UiTile: Decodable {
-    var name: String
-    var url: String
-    var imageUrl: String
 }

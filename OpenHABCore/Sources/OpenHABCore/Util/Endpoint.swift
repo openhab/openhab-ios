@@ -22,6 +22,11 @@ public enum IconType: Int {
     case svg
 }
 
+public enum SortSitemapsOrder: Int {
+    case label
+    case name
+}
+
 public struct Endpoint {
     let baseURL: String
     let path: String

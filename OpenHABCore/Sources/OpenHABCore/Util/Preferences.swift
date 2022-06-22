@@ -48,7 +48,7 @@ public struct UserDefaultURL {
         get {
             guard let localUrl = Preferences.sharedDefaults.string(forKey: key) else { return defaultValue }
             let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if !validateUrl(trimmedUri) { return defaultValue }
+            if !trimmedUri.isValidURL { return defaultValue }
             return trimmedUri
         }
         set {
@@ -59,12 +59,6 @@ public struct UserDefaultURL {
     init(_ key: String, defaultValue: String) {
         self.key = key
         self.defaultValue = defaultValue
-    }
-
-    private func validateUrl(_ stringURL: String) -> Bool {
-        // return nil if the URL has not a valid format
-        let url: URL? = URL(string: stringURL)
-        return url != nil
     }
 
     func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
@@ -83,7 +77,6 @@ public enum Preferences {
 
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
     @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org") public static var remoteUrl: String
-
     @UserDefault("username", defaultValue: "test") public static var username: String
     @UserDefault("password", defaultValue: "test") public static var password: String
     @UserDefault("alwaysSendCreds", defaultValue: false) public static var alwaysSendCreds: Bool
@@ -95,6 +88,7 @@ public enum Preferences {
     @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
+    @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
 
     // MARK: - Private
 
