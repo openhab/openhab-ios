@@ -64,9 +64,9 @@
 "crash_detected" = "Crash gedetecteerd";
 "habpanel" = "HABPanel";
 "open" = "open";
-"closed" = "closed";
-"unknown" = "unknown";
-"on" = "on";
-"off" = "off";
-"empty" = "empty";
-"sortSitemapsBy" = "Sort sitemaps by";
+"closed" = "gesloten";
+"unknown" = "onbekend";
+"on" = "aan";
+"off" = "uit";
+"empty" = "leeg";
+"sortSitemapsBy" = "Sorteer sitemaps op";

@@ -1,58 +1,58 @@
-"1GaCDV" = "Action";
+"1GaCDV" = "Actie";
 
-"1Kf0qe" = "Set Color Control Value";
+"1Kf0qe" = "Kleurwaarde instellen";
 
-"1SeS3V" = "Set ${item} to ${value} (HSB)";
+"1SeS3V" = "Stel ${item} in op ${value} (HSB)";
 
 "1USOx9" = "Item";
 
-"2q0TdY" = "Sorry can't find ${item}";
+"2q0TdY" = "Sorry kan ${item} niet vinden";
 
-"3evvza" = "Value";
+"3evvza" = "Waarde";
 
-"5B4e9l" = "Set the string of a string control item";
+"5B4e9l" = "De tekenreeks van een string controle item instellen";
 
-"5Uu4bK" = "Get Item State";
+"5Uu4bK" = "Haal item state op";
 
-"67qFTP" = "Invalid empty value for ${item}";
+"67qFTP" = "Ongeldige lege waarde voor ${item}";
 
-"68Y2Ya" = "Dimmer/Roller Name";
+"68Y2Ya" = "Dimmer/Roller Naam";
 
-"6hUiXZ" = "The state of ${item} is ${state}";
+"6hUiXZ" = "De staat van ${item} is ${state}";
 
-"80K2Dt" = "Sorry can't find ${item}";
+"80K2Dt" = "Sorry kan ${item} niet vinden";
 
-"8OBnvT" = "Invalid empty value for ${item}";
+"8OBnvT" = "Ongeldige lege waarde voor ${item}";
 
-"8dhboX" = "Value";
+"8dhboX" = "Waarde";
 
 "B2I9b5" = "Item";
 
-"CZfT5a" = "Sent the number ${value} to ${item}";
+"CZfT5a" = "De waarde ${value} is verzonden naar ${item}";
 
-"Cdg015" = "Set ${item} to ${value}";
+"Cdg015" = "Stel ${item} in op ${value}";
 
-"DxO2wk" = "Set the color of a color control item";
+"DxO2wk" = "Stel de kleur van een kleurbesturingsitem in";
 
-"E291x3" = "Value";
+"E291x3" = "Waarde";
 
-"EEj00Q" = "Set ${item} to ${value}";
+"EEj00Q" = "Stel ${item} in op ${value}";
 
-"Fb0pUB" = "Sent the action of ${action} to switch ${item}";
+"Fb0pUB" = "Actie ${action} verzonden om ${item} om te zetten";
 
-"GD4RTw" = "Retrieve the current state of an item";
+"GD4RTw" = "Haal de huidige status van een item op";
 
-"GI0faP" = "State invalid: ${state} for ${item}";
+"GI0faP" = "Status ongeldig: ${state} voor ${item}";
 
-"Gjd9MH" = "Set ${item} to ${value}";
+"Gjd9MH" = "Stel ${item} in op ${value}";
 
-"H26PEQ" = "The state of ${item} was set to ${state}";
+"H26PEQ" = "De status van ${item} is ingesteld op ${state}";
 
-"HGbUGw" = "Value";
+"HGbUGw" = "Waarde";
 
-"IpbXHW" = "Send ${action} to ${item}";
+"IpbXHW" = "${action} verzenden naar ${item}";
 
-"JUznKl" = "Sent the string ${value} to ${item}";
+"JUznKl" = "De waarde ${value} is verzonden naar ${item}";
 
 "KXqi2s" = "Item";
 
@@ -60,98 +60,98 @@
 
 "MCp4x6" = "Item";
 
-"MGYSky" = "Set ${item} to ${value}";
+"MGYSky" = "Stel ${item} in op ${value}";
 
-"N5YsnB" = "Sorry can't find ${item}";
+"N5YsnB" = "Sorry kan ${item} niet vinden";
 
-"NehcMF" = "Item Name";
+"NehcMF" = "Item Naam";
 
-"NjP70V" = "Sorry can't find ${item}";
+"NjP70V" = "Sorry kan ${item} niet vinden";
 
-"Nqxuw0" = "State";
+"Nqxuw0" = "Status";
 
 "Nuhhxp" = "Item";
 
-"Oazi8d" = "Sorry can't find ${item}";
+"Oazi8d" = "Sorry kan ${item} niet vinden";
 
-"SMYYBh" = "Set ${item} to ${value}";
+"SMYYBh" = "Stel ${item} in op ${value}";
 
-"TJ1p5Y" = "Action";
+"TJ1p5Y" = "Actie";
 
-"TK8Rrn" = "Sent the color value of ${value} to ${item}";
+"TK8Rrn" = "De kleurwaarde van ${value} is verzonden naar ${item}";
 
-"UZYwuH" = "Set Dimmer or Roller Shutter Value";
+"UZYwuH" = "Stel Dimmer of Rolluik waarde in";
 
-"V0QsN4" = "Invalid value ${value} for ${item} (0-100)";
+"V0QsN4" = "Ongeldige waarde ${value} voor ${item} (0-100)";
 
 "VTeXc1" = "Item";
 
-"VmFkwo" = "Set ${item} to ${value} (HSB)";
+"VmFkwo" = "Stel ${item} in op ${value} (HSB)";
 
-"XMNs7r" = "Set Switch State";
+"XMNs7r" = "Stel schakelstatus in";
 
 "cBrxnz" = "Item";
 
-"dtRamI" = "Value";
+"dtRamI" = "Waarde";
 
-"eFb7vM" = "Set the state of a contact open or closed";
+"eFb7vM" = "Zet de status van een contact open of gesloten";
 
-"gBn7U6" = "Set String Control Value";
+"gBn7U6" = "Zet String Control Waarde in";
 
 "gQzHiG" = "Item";
 
-"hflKDd" = "Sorry can't find ${item}";
+"hflKDd" = "Sorry kan ${item} niet vinden";
 
-"i8fP5e" = "Action";
+"i8fP5e" = "Actie";
 
-"iCUEet" = "Action invalid: ${action} for ${item}";
+"iCUEet" = "Status ongeldig: ${action} voor ${item}";
 
-"iRjffC" = "Invalid empty value for ${item}";
+"iRjffC" = "Ongeldige lege waarde voor ${item}";
 
 "k0eXWc" = "Item";
 
-"llL4sP" = "Value";
+"llL4sP" = "Waarde";
 
-"lqlrGx" = "Switch name";
+"lqlrGx" = "Wissel naam";
 
-"m5DFXq" = "State";
+"m5DFXq" = "Status";
 
-"m9yAKr" = "Get ${item} State";
+"m9yAKr" = "Haal ${item} state op";
 
-"mAKsWc" = "Value";
+"mAKsWc" = "Waarde";
 
-"mVz5mJ" = "Set ${item} to ${value}";
+"mVz5mJ" = "Stel ${item} in op ${value}";
 
 "mpxNDZ" = "Item";
 
-"n7cmvU" = "State";
+"n7cmvU" = "Status";
 
-"nzw2UT" = "Set Contact State Value";
+"nzw2UT" = "Stel contact status waarde in";
 
-"o35DYr" = "Set Number Control Value";
+"o35DYr" = "Zet Nummer Control Waarde";
 
-"oOjAU0" = "Set the state of a switch on or off";
+"oOjAU0" = "Zet de status van een schakelaar aan of uit";
 
-"oUolm5" = "Send ${action} to ${item}";
+"oUolm5" = "${action} verzenden naar ${item}";
 
-"pg4Bec" = "Set the integer value of a dimmer or roller shutter";
+"pg4Bec" = "Zet de integerwaarde van een dimmer of rolluik";
 
-"pptfkD" = "Set the decimal value of a number control item";
+"pptfkD" = "Stel de decimale waarde van een nummer control item in";
 
-"ptGHON" = "Sorry can't find ${item}";
+"ptGHON" = "Sorry kan ${item} niet vinden";
 
-"qu9K9v" = "Set the state of ${item} to ${state}";
+"qu9K9v" = "Zet de status van ${item} op ${state}";
 
-"raIAR6" = "Invalid value: ${value} for ${item} must be HSB (0-360,0-100,0-100)";
+"raIAR6" = "Ongeldige waarde: ${value} voor ${item} moet HSB zijn (0-360,0-100,0-100)";
 
 "skEQxZ" = "Item";
 
 "tclrCp" = "Item";
 
-"ttiBzN" = "Set the state of ${item} to ${state}";
+"ttiBzN" = "Zet de status van ${item} op ${state}";
 
-"tuvmDw" = "Value";
+"tuvmDw" = "Waarde";
 
 "uGsyyj" = "240,100,100";
 
-"wm0fqx" = "Sent the value of ${value} to ${item}";
+"wm0fqx" = "De waarde van ${value} is verzonden naar ${item}";
