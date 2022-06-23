@@ -106,9 +106,6 @@ platform :ios do
         setup_keychain
         certificates
 
-        # update L10ns
-        # crowdin
-
         # run unit tests
         unittests
 
@@ -166,7 +163,6 @@ platform :ios do
         )
         refresh_dsyms
 
-        git_add(path: './openHAB/Resources/*/*.strings', shell_escape: false)
         # commit to git the changes from bumping version number
         commit_version_bump(
             message: "committed version bump: #{version} (#{build_number})",
@@ -204,55 +200,6 @@ platform :ios do
         #     commitish: 'main'
         #     # upload_assets: no assets supported
         # )
-    end
-
-    # This currently only updates Localizable.strings
-    # Regions.strings and InfoPlist.strings must be done manually
-    desc 'Download strings files from Crowdin'
-    lane :crowdin do
-        if !ENV['OH_CROWDIN_PROJECT_ID'].nil? && !ENV['OH_CROWDIN_USERNAME'].nil? && !ENV['OH_CROWDIN_ACCOUNT_KEY'].nil?
-            unless File.exist?(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml')
-                UI.user_error!("crowdinfile.yml is required to run this lane! Aborted \u{1F6D1}")
-            end
-            config = YAML.load(File.read(File.expand_path('..') + '/openHAB/Resources/crowdinfiles.yml'))
-            build = "https://api.crowdin.com/api/project/#{ENV['OH_CROWDIN_PROJECT_ID']}/export?login=#{ENV['OH_CROWDIN_USERNAME']}&account-key=#{ENV['OH_CROWDIN_ACCOUNT_KEY']}"
-            dl = "https://api.crowdin.com/api/project/#{ENV['OH_CROWDIN_PROJECT_ID']}/download/all.zip?login=#{ENV['OH_CROWDIN_USERNAME']}&account-key=#{ENV['OH_CROWDIN_ACCOUNT_KEY']}"
-            path = File.expand_path('..') + '/openHAB/Resources/'
-            langs = config['langs']
-            # Expected size of the array, used to check if new languages have been added or not
-            # The size logic can be omitted if needed
-            size = 35
-
-            response = Net::HTTP.get_response(URI(build))
-            if response.is_a? Net::HTTPSuccess
-                puts "Strings project built! \u{1F57A}"
-                puts 'Downloading zip file....'
-                content = open(dl)
-                puts 'Updating files....'
-                Zip::File.open_buffer(content) do |zip|
-                    # The size logic can be omitted if needed
-                    unless zip.entries.count == size
-                        UI.user_error!("Additional languages have been added, please reconfigure yml file!! Current count: #{zip.entries.count}. \u{1F6D1}")
-                    end
-                    zip.each do |entry|
-                        next unless langs.key?(entry.name)
-
-                        # Key found, pull content and write to file
-                        langs[entry.name].each do |lang|
-                            content = entry.get_input_stream.read
-                            full_path = path + lang + '/' + File.basename(entry.to_s)
-                            puts "Updated! \u{1F4AA} " + full_path
-                            File.open(full_path, 'w') { |file| file.write(content) }
-                        end
-                    end
-                    puts "String update complete! \u{1F984}"
-                end
-            else
-                UI.user_error!("Failed to build project strings \u{1F622}")
-            end
-        else
-            UI.important 'Missing credentials, skipping crowdin download.'
-        end
     end
 
     desc 'Setup keychain for CI environment'
