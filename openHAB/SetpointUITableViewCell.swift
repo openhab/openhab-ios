@@ -49,7 +49,12 @@ class SetpointUITableViewCell: GenericUITableViewCell {
             newValue = stateValue + widget.step
         }
         if newValue >= widget.minValue, newValue <= widget.maxValue {
-            numberState?.value = newValue
+            if numberState != nil {
+                numberState?.value = newValue
+            } else {
+                numberState = NumberState(value: newValue)
+            }
+
             widget.sendItemUpdate(state: numberState)
         }
     }

@@ -12,6 +12,14 @@
 import Foundation
 
 public struct NumberState: CustomStringConvertible, Equatable {
+    // Access to default memberwise initializer not permitted outside of package
+
+    public init(value: Double, unit: String? = "", format: String? = "") {
+        self.value = value
+        self.unit = unit
+        self.format = format
+    }
+
     public var description: String {
         toString(locale: Locale.current)
     }
