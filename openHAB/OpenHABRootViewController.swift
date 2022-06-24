@@ -84,13 +84,17 @@ class OpenHABRootViewController: UIViewController {
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
-            Preferences.defaultView = "sitemap"
+            Preferences.demomode = true
         }
         // setup accessibilityIdentifiers for UITest
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
 
-        switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
+        if Preferences.demomode {
+            switchView(target: .sitemap)
+        } else {
+            switchToSavedView()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -135,15 +139,15 @@ class OpenHABRootViewController: UIViewController {
         settings.statusBarEndAlpha = 0
 
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
-        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-        let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
-        drawer?.delegate = self
+        if let menu = SideMenuManager.default.rightMenuNavigationController {
+            let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
+            drawer?.delegate = self
+        }
     }
 
     @objc
     func rightDrawerButtonPress(_ sender: Any?) {
-        guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-        present(menu, animated: true)
+        showSideMenu()
     }
 
     @objc
@@ -163,6 +167,16 @@ class OpenHABRootViewController: UIViewController {
                         os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     }
                 }
+            }
+        }
+    }
+
+    func showSideMenu() {
+        os_log("OpenHABRootViewController showSideMenu", log: .viewCycle, type: .info)
+        if let menu = SideMenuManager.default.rightMenuNavigationController {
+            // don't try and push an already visible menu less you crash the app
+            dismiss(animated: false) {
+                self.present(menu, animated: true)
             }
         }
     }
@@ -199,7 +213,11 @@ class OpenHABRootViewController: UIViewController {
         currentView.navigationController?.popToRootViewController(animated: true)
     }
 
-    func pushViewController(vc: UIViewController) {
+    private func switchToSavedView() {
+        switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
+    }
+
+    private func pushViewController(vc: UIViewController) {
         navigationController?.pushViewController(vc, animated: true)
     }
 }
@@ -208,7 +226,7 @@ class OpenHABRootViewController: UIViewController {
 
 extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
     func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
-        os_log("OpenHABRootViewController sideMenuWillAppear", log: .notifications, type: .info)
+        os_log("OpenHABRootViewController sideMenuWillAppear", log: .viewCycle, type: .info)
     }
 }
 

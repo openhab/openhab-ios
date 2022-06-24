@@ -562,12 +562,11 @@
                     <navigationItem key="navigationItem" id="N7h-KT-EtL"/>
                     <connections>
                         <outlet property="widgetTableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
-                        <segue destination="MPp-H6-Zce" kind="show" identifier="showSelectSitemap" id="t07-wP-hEy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3511" y="44"/>
+            <point key="canvasLocation" x="3511" y="32"/>
         </scene>
         <!--Settings-->
         <scene sceneID="bFA-oT-thf">
@@ -1697,9 +1696,6 @@
             <size key="intrinsicContentSize" width="30" height="34"/>
         </designable>
     </designables>
-    <inferredMetricsTieBreakers>
-        <segue reference="b2Z-Bc-osE"/>
-    </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

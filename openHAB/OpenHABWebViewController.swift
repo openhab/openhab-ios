@@ -149,7 +149,7 @@ class OpenHABWebViewController: OpenHABViewController {
         os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
         showActivityIndicator(show: false)
         // webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
-        showPopupMessage(seconds: 60, title: "error", message: "Could not connect to openHAB. \(message)", theme: .error)
+        showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
         currentTarget = ""
     }
 
@@ -171,8 +171,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
             os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, callbackName)
             switch callbackName {
             case "exitToApp":
-                guard let menu = SideMenuManager.default.rightMenuNavigationController else { return }
-                present(menu, animated: true)
+                showSideMenu()
             case "goFullscreen":
                 setHideNavBar(shouldHide: true)
             default: break
@@ -310,7 +309,7 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: "connecting", message: message ?? "", theme: .info)
+        showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message ?? "", theme: .info)
     }
 
     func openHABTrackingError(_ error: Error) {

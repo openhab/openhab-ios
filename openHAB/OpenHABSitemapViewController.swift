@@ -17,9 +17,7 @@ import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
-import SideMenu
 import SVGKit
-import SwiftMessages
 import UIKit
 
 enum Action<I, O> {
@@ -381,33 +379,9 @@ class OpenHABSitemapViewController: OpenHABViewController {
                     // Error
                     DispatchQueue.main.async {
                         if (error as NSError?)?.code == -1012 {
-                            var config = SwiftMessages.Config()
-                            config.duration = .seconds(seconds: 5)
-                            config.presentationStyle = .bottom
-
-                            SwiftMessages.show(config: config) {
-                                let view = MessageView.viewFromNib(layout: .cardView)
-                                // ... configure the view
-                                view.configureTheme(.error)
-                                view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
-                                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                return view
-                            }
+                            self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
                         } else {
-                            var config = SwiftMessages.Config()
-                            config.duration = .seconds(seconds: 5)
-                            config.presentationStyle = .bottom
-
-                            SwiftMessages.show(config: config) {
-                                let view = MessageView.viewFromNib(layout: .cardView)
-                                // ... configure the view
-                                view.configureTheme(.error)
-                                view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
-                                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                                return view
-                            }
+                            self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
                         }
                     }
                 }
@@ -435,28 +409,17 @@ class OpenHABSitemapViewController: OpenHABViewController {
                             self.pageUrl = sitemapToOpen.homepageLink
                             self.loadPage(false)
                         } else {
-                            self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
+                            self.showSideMenu()
                         }
                     } else {
-                        self.performSegue(withIdentifier: "showSelectSitemap", sender: self)
+                        self.showSideMenu()
                     }
                 case 1:
                     self.pageUrl = self.sitemaps[0].homepageLink
                     self.loadPage(false)
                 case ...0:
-                    var config = SwiftMessages.Config()
-                    config.duration = .seconds(seconds: 5)
-                    config.presentationStyle = .bottom
-
-                    SwiftMessages.show(config: config) {
-                        let view = MessageView.viewFromNib(layout: .cardView)
-                        // ... configure the view
-                        view.configureTheme(.error)
-                        view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("empty_sitemap", comment: ""))
-                        view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                        view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                        return view
-                    }
+                    self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .error)
+                    self.showSideMenu()
                 default: break
                 }
                 self.widgetTableView.reloadData()
@@ -465,31 +428,9 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 DispatchQueue.main.async {
                     // Error
                     if (error as NSError?)?.code == -1012 {
-                        var config = SwiftMessages.Config()
-                        config.duration = .seconds(seconds: 5)
-                        config.presentationStyle = .bottom
-
-                        SwiftMessages.show(config: config) {
-                            let view = MessageView.viewFromNib(layout: .cardView)
-                            view.configureTheme(.error)
-                            view.configureContent(title: NSLocalizedString("error", comment: ""), body: NSLocalizedString("ssl_certificate_error", comment: ""))
-                            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                            return view
-                        }
+                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
                     } else {
-                        var config = SwiftMessages.Config()
-                        config.duration = .seconds(seconds: 5)
-                        config.presentationStyle = .bottom
-
-                        SwiftMessages.show(config: config) {
-                            let view = MessageView.viewFromNib(layout: .cardView)
-                            view.configureTheme(.error)
-                            view.configureContent(title: NSLocalizedString("error", comment: ""), body: error.localizedDescription)
-                            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                            return view
-                        }
+                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
                     }
                 }
             }
@@ -620,12 +561,12 @@ extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
 
     func openHABTrackingProgress(_ message: String?) {
         os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: "connecting", message: message ?? "", theme: .info)
+        showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message ?? "", theme: .info)
     }
 
     func openHABTrackingError(_ error: Error) {
         os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        showPopupMessage(seconds: 60, title: "error", message: error.localizedDescription, theme: .error)
+        showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
     }
 }
 

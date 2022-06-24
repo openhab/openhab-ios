@@ -33,10 +33,16 @@ class OpenHABViewController: UIViewController {
             let view = MessageView.viewFromNib(layout: .cardView)
             // ... configure the view
             view.configureTheme(theme)
-            view.configureContent(title: NSLocalizedString(title, comment: ""), body: message)
+            view.configureContent(title: title, body: message)
             view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
             view.buttonTapHandler = { _ in SwiftMessages.hide() }
             return view
+        }
+    }
+
+    func showSideMenu() {
+        if let rc = parent as? OpenHABRootViewController {
+            rc.showSideMenu()
         }
     }
 
