@@ -35,7 +35,7 @@ You are ready to contribute!
 
 Before producing any amount of code please have a look at the [contribution guidelines](https://github.com/openhab/openhab.ios/blob/master/CONTRIBUTING.md).
 
-And also please support with the localization
+And also please support with the localization of openhab-ios:
 
 [![Crowdin](https://badges.crowdin.net/openhab-ios/localized.svg)](https://crowdin.com/project/openhab-ios)
 
