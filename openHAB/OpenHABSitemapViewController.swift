@@ -418,7 +418,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
                     self.pageUrl = self.sitemaps[0].homepageLink
                     self.loadPage(false)
                 case ...0:
-                    self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .error)
+                    self.showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
                     self.showSideMenu()
                 default: break
                 }

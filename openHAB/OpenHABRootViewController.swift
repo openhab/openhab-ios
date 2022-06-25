@@ -32,6 +32,7 @@ protocol ModalHandler: AnyObject {
 class OpenHABRootViewController: UIViewController {
     var hamburgerButton: DynamicButton!
     var currentView: OpenHABViewController!
+    var isDemoMode = false
 
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
@@ -89,18 +90,20 @@ class OpenHABRootViewController: UIViewController {
         // setup accessibilityIdentifiers for UITest
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
-
-        if Preferences.demomode {
-            switchView(target: .sitemap)
-        } else {
-            switchToSavedView()
-        }
+        // save this so we know if its changed later
+        isDemoMode = Preferences.demomode
+        switchToSavedView()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         os_log("OpenHABRootController viewWillAppear", log: .viewCycle, type: .info)
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
+        // if we have turned demo mode off/on, reset view
+        if isDemoMode != Preferences.demomode {
+            switchToSavedView()
+            isDemoMode = Preferences.demomode
+        }
     }
 
     fileprivate func setupSideMenu() {
@@ -204,7 +207,10 @@ class OpenHABRootViewController: UIViewController {
             }
             addView(viewController: targetView)
             currentView = targetView
-            Preferences.defaultView = currentView.viewName()
+            // Don't save our view in demo mode
+            if !Preferences.demomode {
+                Preferences.defaultView = currentView.viewName()
+            }
         } else {
             // if we hit the menu item again while on the view, trigger a reload
             currentView.reloadView()
@@ -214,11 +220,12 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchToSavedView() {
-        switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
-    }
-
-    private func pushViewController(vc: UIViewController) {
-        navigationController?.pushViewController(vc, animated: true)
+        if Preferences.demomode {
+            switchView(target: .sitemap)
+        } else {
+            os_log("OpenHABRootViewController switchToSavedView %@", log: .viewCycle, type: .info, Preferences.defaultView == "sitemap" ? "sitemap" : "web")
+            switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
+        }
     }
 }
 
@@ -239,14 +246,14 @@ extension OpenHABRootViewController: ModalHandler {
             switchView(target: to)
         case .settings:
             if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
-                pushViewController(vc: newViewController)
+                navigationController?.pushViewController(newViewController, animated: true)
             }
         case .notifications:
             if navigationController?.visibleViewController is OpenHABNotificationsViewController {
                 os_log("Notifications are already open", log: .notifications, type: .info)
             } else {
                 if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
-                    pushViewController(vc: newViewController)
+                    navigationController?.pushViewController(newViewController, animated: true)
                 }
             }
         case .webview:
