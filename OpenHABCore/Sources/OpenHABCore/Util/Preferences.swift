@@ -90,6 +90,7 @@ public enum Preferences {
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
     @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
+    @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
 
     // MARK: - Private
 

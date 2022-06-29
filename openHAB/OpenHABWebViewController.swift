@@ -19,9 +19,11 @@ import WebKit
 
 class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
+    private var openHABTrackedRootUrl = ""
+    private var hideNavBar = false
     private var tracker: OpenHABTracker?
     private var activityIndicator: UIActivityIndicatorView!
-    private var hideNavBar = false
+    private var observation: NSKeyValueObservation?
 
     // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
@@ -59,6 +61,15 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
+        observation = webView.observe(\.url, options: [.new]) { _, _ in
+            if let webviewURL = webView.url {
+                let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
+                if let path = url?.path {
+                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
+                    self.appData?.currentWebViewPath = path
+                }
+            }
+        }
         return webView
     }()
 
@@ -100,17 +111,17 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func loadWebView(force: Bool = false) {
-        os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, appData?.openHABRootUrl ?? "nil")
+        os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl)
 
         let authStr = "\(Preferences.username):\(Preferences.password)"
-        let newTarget = "\(appData?.openHABRootUrl ?? ""):\(authStr)"
+        let newTarget = "\(openHABTrackedRootUrl):\(authStr)"
         if !force, currentTarget == newTarget {
             showActivityIndicator(show: false)
             return
         }
 
         currentTarget = newTarget
-        let url = URL(string: appData?.openHABRootUrl ?? "")
+        let url = URL(string: openHABTrackedRootUrl)
 
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
@@ -120,10 +131,16 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func modifyUrl(orig: URL?) -> URL? {
-        if orig?.host == "myopenhab.org" {
-            return URL(string: "https://home.myopenhab.org")
+        // better way to cone/copy ?
+        guard let urlString = orig?.absoluteString, var url = URL(string: urlString) else { return orig }
+        if url.host == "myopenhab.org" {
+            url = URL(string: "https://home.myopenhab.org") ?? url
         }
-        return orig
+
+        if !Preferences.defaultMainUIPath.isEmpty {
+            url.appendPathComponent(Preferences.defaultMainUIPath)
+        }
+        return url
     }
 
     func showActivityIndicator(show: Bool) {
@@ -161,6 +178,10 @@ class OpenHABWebViewController: OpenHABViewController {
 
     override func viewName() -> String {
         "web"
+    }
+
+    deinit {
+        observation = nil
     }
 }
 
@@ -227,13 +248,14 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: false)
+        hidePopupMessages()
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
 
-        if let url = modifyUrl(orig: URL(string: appData?.openHABRootUrl ?? "")), challenge.protectionSpace.host == url.host {
+        if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             // openHABTracker takes care of triggering server trust prompts
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
@@ -293,6 +315,7 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
                 do {
                     let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
                     os_log("openHAB version %@", log: .remoteAccess, type: .info, serverProperties.version)
+                    self.openHABTrackedRootUrl = openHABRootUrl
                     self.appData?.openHABRootUrl = openHABRootUrl
                     self.loadWebView(force: false)
                 } catch {

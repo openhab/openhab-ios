@@ -20,6 +20,7 @@ class OpenHABDataObject: NSObject, DataObject {
     var openHABAlwaysSendCreds = false
     var sitemapViewController: OpenHABSitemapViewController?
     var openHABVersion: Int = 0
+    var currentWebViewPath = ""
 }
 
 extension OpenHABDataObject {

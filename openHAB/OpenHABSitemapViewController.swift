@@ -119,8 +119,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
-        NotificationCenter.default.addObserver(self, selector: #selector(OpenHABSitemapViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(OpenHABSitemapViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
 
         registerTableViewCells()
         configureTableView()
@@ -218,22 +216,19 @@ class OpenHABSitemapViewController: OpenHABViewController {
     }
 
     @objc
-    func didEnterBackground(_ notification: Notification?) {
+    override func didEnterBackground(_ notification: Notification?) {
+        super.didEnterBackground(notification)
         os_log("OpenHABSitemapViewController didEnterBackground", log: .viewCycle, type: .info)
         if currentPageOperation != nil {
             currentPageOperation?.cancel()
             currentPageOperation = nil
         }
-        UIApplication.shared.isIdleTimerDisabled = false
     }
 
     @objc
-    func didBecomeActive(_ notification: Notification?) {
+    override func didBecomeActive(_ notification: Notification?) {
+        super.didBecomeActive(notification)
         os_log("OpenHABSitemapViewController didBecomeActive", log: .viewCycle, type: .info)
-        // re disable idle off timer
-        if idleOff {
-            UIApplication.shared.isIdleTimerDisabled = true
-        }
         if isViewLoaded, view.window != nil, !pageUrl.isEmpty {
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController isViewLoaded, restarting network activity", log: .viewCycle, type: .info)

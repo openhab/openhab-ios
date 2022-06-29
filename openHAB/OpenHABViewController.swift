@@ -17,6 +17,8 @@ import UIKit
 class OpenHABViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -40,9 +42,26 @@ class OpenHABViewController: UIViewController {
         }
     }
 
+    func hidePopupMessages() {
+        SwiftMessages.hideAll()
+    }
+
     func showSideMenu() {
         if let rc = parent as? OpenHABRootViewController {
             rc.showSideMenu()
+        }
+    }
+
+    @objc
+    func didEnterBackground(_ notification: Notification?) {
+        UIApplication.shared.isIdleTimerDisabled = false
+    }
+
+    @objc
+    func didBecomeActive(_ notification: Notification?) {
+        // re disable idle off timer
+        if Preferences.idleOff {
+            UIApplication.shared.isIdleTimerDisabled = true
         }
     }
 
