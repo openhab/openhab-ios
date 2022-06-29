@@ -51,6 +51,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var sortSitemapsBy: UISegmentedControl!
     @IBOutlet private var useCurrentMainUIPathButton: UIButton!
     @IBOutlet private var defaultMainUIPathTextField: UITextField!
+    @IBOutlet private var appVersionLabel: UILabel!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -70,6 +71,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         remoteUrlTextField?.delegate = self
         usernameTextField?.delegate = self
         passwordTextField?.delegate = self
+        defaultMainUIPathTextField.delegate = self
         demomodeSwitch?.addTarget(self, action: #selector(OpenHABSettingsViewController.demomodeSwitchChange(_:)), for: .valueChanged)
         sendCrashReportsDummy.addTarget(self, action: #selector(crashReportingDummyPressed(_:)), for: .touchUpInside)
         useCurrentMainUIPathButton?.addTarget(self, action: #selector(currentMainUIPathButtonPressed(_:)), for: .touchUpInside)
@@ -160,31 +162,11 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        var ret: Int
-        switch section {
-        // Connection
-        case 0:
-            if demomodeSwitch!.isOn {
-                ret = 1
-            } else {
-                ret = 6
-            }
-        // Application
-        case 1:
-            ret = 4
-        // Main UI
-        case 2:
-            ret = 1
-        // Sitemaps
-        case 3:
-            ret = 4
-        // About
-        case 4:
-            ret = 3
-        default:
-            ret = 0
+        // hide connection options when in demo mode
+        if section == 0, demomodeSwitch!.isOn {
+            return 1
         }
-        return ret
+        return super.tableView(tableView, numberOfRowsInSection: section)
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -250,6 +232,10 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         } else {
             enableConnectionSettings()
         }
+
+        let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+        let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        appVersionLabel?.text = "\(appVersionString ?? "") (\(appBuildString ?? ""))"
     }
 
     func loadSettings() {

@@ -61,6 +61,7 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
+        // watch for URL changes so we can store the last visited path
         observation = webView.observe(\.url, options: [.new]) { _, _ in
             if let webviewURL = webView.url {
                 let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
