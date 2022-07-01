@@ -291,7 +291,11 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     func promptForDefaultWebView() {
         DispatchQueue.main.async {
             let alertController = UIAlertController(title: NSLocalizedString("uselastpath_settings", comment: ""), message: self.appData?.currentWebViewPath ?? "/", preferredStyle: .actionSheet)
-
+            // popover cords needed for iPad
+            if let ppc = alertController.popoverPresentationController {
+                ppc.sourceView = self.useCurrentMainUIPathButton as UIView
+                ppc.sourceRect = (self.useCurrentMainUIPathButton as UIView).bounds
+            }
             let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { (_: UIAlertAction) in
             }
             let currentPath = UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { (_: UIAlertAction) in

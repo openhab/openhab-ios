@@ -195,7 +195,10 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
             case "exitToApp":
                 showSideMenu()
             case "goFullscreen":
-                setHideNavBar(shouldHide: true)
+                // check to make sure we are actually the top view before hiding the nav button
+                if isViewLoaded, view.window != nil {
+                    setHideNavBar(shouldHide: true)
+                }
             default: break
             }
         }
