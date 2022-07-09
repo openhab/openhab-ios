@@ -27,12 +27,12 @@ class OpenHABUITests: XCTestCase {
 
     func testShots() {
         let app = XCUIApplication()
-        let hamburgerButton = app.navigationBars/*@START_MENU_TOKEN@*/ .buttons["HamburgerButton"]/*[[".buttons[\"drag\"]",".buttons[\"HamburgerButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
         hamburgerButton.tap()
         sleep(3)
 
         let tablesQuery = app.tables
-        tablesQuery/*@START_MENU_TOKEN@*/ .staticTexts["Home"]/*[[".cells.staticTexts[\"Home\"]",".staticTexts[\"Home\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
+        tablesQuery.staticTexts["Home"].tap()
         sleep(10)
         snapshot("0_MainUI")
 
@@ -50,7 +50,7 @@ class OpenHABUITests: XCTestCase {
         sleep(2)
 
         // Left side menu in webUI
-        let menuStaticText = webViewsQuery/*@START_MENU_TOKEN@*/ .staticTexts["menu"]/*[[".otherElements[\"openHAB\"]",".links.matching(identifier: \"menu\").staticTexts[\"menu\"]",".staticTexts[\"menu\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
+        let menuStaticText = webViewsQuery.staticTexts["menu"]
         menuStaticText.tap()
         sleep(1)
         webViewsQuery.staticTexts["Floorplans"].tap()
@@ -64,7 +64,7 @@ class OpenHABUITests: XCTestCase {
         sleep(2)
 
         // right menu in webUI
-        webViewsQuery/*@START_MENU_TOKEN@*/ .staticTexts["square_arrow_right"]/*[[".otherElements[\"openHAB\"]",".links.matching(identifier: \"square_arrow_right\").staticTexts[\"square_arrow_right\"]",".staticTexts[\"square_arrow_right\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/ .tap()
+        webViewsQuery.staticTexts["square_arrow_right"].tap()
         tablesQuery.staticTexts["Main Menu"].tap()
         sleep(5)
         snapshot("4_MainSitemap")
@@ -73,17 +73,18 @@ class OpenHABUITests: XCTestCase {
 
         widgetTable.staticTexts["Widget Overview"].tap()
         sleep(3)
-        widgetTable/*@START_MENU_TOKEN@*/ .staticTexts["BINARY WIDGETS"]/*[[".cells.staticTexts[\"BINARY WIDGETS\"]",".staticTexts[\"BINARY WIDGETS\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .swipeDown()
+        widgetTable.staticTexts["BINARY WIDGETS"].swipeDown()
         sleep(6)
         snapshot("5_WidgetOverview")
+
         app.navigationBars.buttons.element(boundBy: 0).tap()
         sleep(2)
-
         widgetTable.staticTexts["Ground Floor"].tap()
         sleep(5)
         widgetTable.staticTexts["Kitchen"].tap()
         sleep(5)
         snapshot("6_Kitchen")
+
         app.navigationBars.buttons.element(boundBy: 0).tap()
         sleep(2)
         app.navigationBars.buttons.element(boundBy: 0).tap()
