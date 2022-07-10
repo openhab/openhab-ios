@@ -70,3 +70,7 @@
 "off" = "off";
 "empty" = "empty";
 "sortSitemapsBy" = "Sort sitemaps by";
+"mainui_settings" = "Main UI Settings";
+"sitemap_settings" = "Sitemap Settings";
+"about_settings" = "About";
+"uselastpath_settings" = "Use Last Visited Path ?";
