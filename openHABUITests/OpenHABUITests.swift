@@ -49,15 +49,19 @@ class OpenHABUITests: XCTestCase {
         webViewsQuery.otherElements["openHAB"].children(matching: .link).matching(identifier: "multiply_circle_fill").element(boundBy: 0).staticTexts["multiply_circle_fill"].tap()
         sleep(2)
 
-        // Left side menu in webUI
-        let menuStaticText = webViewsQuery.staticTexts["menu"]
-        menuStaticText.tap()
-        sleep(1)
+        var menuStaticText: XCUIElement?
+        // if we have a left side menu, then use it (large screens like 12.9 inch iPad will not)
+        if !webViewsQuery.staticTexts["Floorplans"].exists {
+            // Left side menu in webUI
+            menuStaticText = webViewsQuery.staticTexts["menu"]
+            menuStaticText?.tap()
+            sleep(1)
+        }
         webViewsQuery.staticTexts["Floorplans"].tap()
         sleep(2)
         snapshot("3_Floorplans")
 
-        menuStaticText.tap()
+        menuStaticText?.tap()
         sleep(1)
         // openHAB logo in left menu
         webViewsQuery.otherElements["openHAB"].children(matching: .other).element(boundBy: 0).children(matching: .link).element.children(matching: .link).element.children(matching: .image).element.tap()
