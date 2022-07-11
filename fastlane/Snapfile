@@ -31,7 +31,7 @@ skip_open_summary true
 override_status_bar(true)
 
 # Do not check for most recent SnapshotHelper code
-skip_helper_version_check
+skip_helper_version_check true
 
 # Arguments to pass to the app on launch. See https://docs.fastlane.tools/actions/snapshot/#launch-arguments
 # launch_arguments(["-favColor red"])

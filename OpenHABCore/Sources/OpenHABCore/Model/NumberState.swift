@@ -12,7 +12,6 @@
 import Foundation
 
 public struct NumberState: CustomStringConvertible, Equatable {
-
     public var description: String {
         toString(locale: Locale.current)
     }
