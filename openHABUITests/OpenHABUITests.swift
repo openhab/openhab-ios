@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import os.log
 import XCTest
 
 class OpenHABUITests: XCTestCase {
@@ -26,59 +27,77 @@ class OpenHABUITests: XCTestCase {
 
     func testShots() {
         let app = XCUIApplication()
+        let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
+        hamburgerButton.tap()
+        sleep(3)
 
+        let tablesQuery = app.tables
+        tablesQuery.staticTexts["Home"].tap()
+        sleep(10)
+        snapshot("0_MainUI")
+
+        // Locations Tab
+        let webViewsQuery = app.webViews.webViews.webViews
+        webViewsQuery.links["placemark_fill Locations"].tap()
+        sleep(2)
+        snapshot("1_Locations")
+
+        webViewsQuery.staticTexts["Living Room"].tap()
+        sleep(2)
+        snapshot("2_LivingRoom")
+        // Close button on Living Room view
+        webViewsQuery.otherElements["openHAB"].children(matching: .link).matching(identifier: "multiply_circle_fill").element(boundBy: 0).staticTexts["multiply_circle_fill"].tap()
+        sleep(2)
+
+        var menuStaticText: XCUIElement?
+        // if we have a left side menu, then use it (large screens like 12.9 inch iPad will not)
+        if !webViewsQuery.staticTexts["Floorplans"].exists {
+            // Left side menu in webUI
+            menuStaticText = webViewsQuery.staticTexts["menu"]
+            menuStaticText?.tap()
+            sleep(1)
+        }
+        webViewsQuery.staticTexts["Floorplans"].tap()
+        sleep(2)
+        snapshot("3_Floorplans")
+
+        menuStaticText?.tap()
+        sleep(1)
+        // openHAB logo in left menu
+        webViewsQuery.otherElements["openHAB"].children(matching: .other).element(boundBy: 0).children(matching: .link).element.children(matching: .link).element.children(matching: .image).element.tap()
+        sleep(2)
+
+        // right menu in webUI
+        webViewsQuery.staticTexts["square_arrow_right"].tap()
+        tablesQuery.staticTexts["Main Menu"].tap()
         sleep(5)
-        snapshot("0_MainScreen")
+        snapshot("4_MainSitemap")
 
-        let widgetTable = app.tables["OpenHABViewControllerWidgetTableView"]
+        let widgetTable = app.tables["OpenHABSitemapViewControllerWidgetTableView"]
 
         widgetTable.staticTexts["Widget Overview"].tap()
         sleep(3)
-        widgetTable/*@START_MENU_TOKEN@*/ .staticTexts["BINARY WIDGETS"]/*[[".cells.staticTexts[\"BINARY WIDGETS\"]",".staticTexts[\"BINARY WIDGETS\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .swipeDown()
+        widgetTable.staticTexts["BINARY WIDGETS"].swipeDown()
         sleep(6)
-        snapshot("1_WidgetOverview")
+        snapshot("5_WidgetOverview")
+
         app.navigationBars.buttons.element(boundBy: 0).tap()
         sleep(2)
-
         widgetTable.staticTexts["Ground Floor"].tap()
         sleep(5)
         widgetTable.staticTexts["Kitchen"].tap()
         sleep(5)
-        snapshot("2_Kitchen")
+        snapshot("6_Kitchen")
+
         app.navigationBars.buttons.element(boundBy: 0).tap()
         sleep(2)
         app.navigationBars.buttons.element(boundBy: 0).tap()
         sleep(2)
 
-        widgetTable.staticTexts["First Floor"].tap()
-        sleep(5)
-        widgetTable.staticTexts["Office"].tap()
-        sleep(5)
-        snapshot("3_Office")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(2)
-
-        widgetTable.staticTexts["Bathroom"].tap()
-        sleep(5)
-        snapshot("4_Batchroom")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(2)
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(2)
-
-        widgetTable.staticTexts["Group Demo"].tap()
-        sleep(5)
-        snapshot("5_GroupDemo")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(2)
-
-        widgetTable.staticTexts["Astronomical Data"].tap()
-        sleep(5)
-        snapshot("6_AstronomicalData")
-
-        let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
         hamburgerButton.tap()
-        sleep(1)
+        sleep(2)
+        tablesQuery.staticTexts["Settings"].tap()
+        sleep(2)
         snapshot("7_Settings")
     }
 }

@@ -9,20 +9,18 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import OpenHABCore
 import os.log
 import SideMenu
 import UIKit
 
-class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigationControllerDelegate {
+class OpenHABNotificationsViewController: UITableViewController {
     static let tableViewCellIdentifier = "NotificationCell"
 
     var notifications: NSMutableArray = []
     var openHABRootUrl = ""
     var openHABUsername = ""
     var openHABPassword = ""
-    var hamburgerButton: DynamicButton!
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -38,13 +36,6 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
             tableView.refreshControl = refreshControl
         }
 
-        hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
-        hamburgerButton.setStyle(.hamburger, animated: true)
-        hamburgerButton.addTarget(self, action: #selector(OpenHABViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-        hamburgerButton.strokeColor = view.tintColor
-
-        let hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
-        navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
         navigationItem.largeTitleDisplayMode = .never
     }
 
@@ -84,11 +75,6 @@ class OpenHABNotificationsViewController: UITableViewController, SideMenuNavigat
     func handleRefresh(_ refreshControl: UIRefreshControl?) {
         os_log("Refresh pulled", log: .default, type: .info)
         loadNotifications()
-    }
-
-    @objc
-    func rightDrawerButtonPress(_ sender: Any?) {
-        present(SideMenuManager.default.rightMenuNavigationController!, animated: true, completion: nil)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
