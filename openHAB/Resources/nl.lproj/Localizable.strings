@@ -70,8 +70,7 @@
 "off" = "uit";
 "empty" = "leeg";
 "sortSitemapsBy" = "Sorteer sitemaps op";
-"mainui_settings" = "Main UI Settings";
-"sitemap_settings" = "Sitemap Settings";
-"about_settings" = "About";
-"uselastpath_settings" = "Use Last Visited Path ?";
-
+"mainui_settings" = "Main UI Instellingen";
+"sitemap_settings" = "Sitemap instellingen";
+"about_settings" = "Over";
+"uselastpath_settings" = "Laatst bezochte pad gebruiken?";
