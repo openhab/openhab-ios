@@ -55,8 +55,10 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "32">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/openHAB">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA0775142346705D0086C685"
@@ -64,7 +66,7 @@
             BlueprintName = "openHABWatch"
             ReferencedContainer = "container:openHAB.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -73,8 +75,10 @@
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES"
       launchAutomaticallySubstyle = "32">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.Carousel"
+         RemotePath = "/openHAB">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA0775142346705D0086C685"
@@ -82,7 +86,16 @@
             BlueprintName = "openHABWatch"
             ReferencedContainer = "container:openHAB.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "DA0775142346705D0086C685"
+            BuildableName = "openHABWatch.app"
+            BlueprintName = "openHABWatch"
+            ReferencedContainer = "container:openHAB.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
