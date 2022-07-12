@@ -29,6 +29,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsRealTimeSliders = false
     var settingsSendCrashReports = false
     var settingsSortSitemapsBy: SortSitemapsOrder = .label
+    var settingsDefaultMainUIPath = ""
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -48,6 +49,9 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var sendCrashReportsSwitch: UISwitch!
     @IBOutlet private var sendCrashReportsDummy: UIButton!
     @IBOutlet private var sortSitemapsBy: UISegmentedControl!
+    @IBOutlet private var useCurrentMainUIPathButton: UIButton!
+    @IBOutlet private var defaultMainUIPathTextField: UITextField!
+    @IBOutlet private var appVersionLabel: UILabel!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -67,8 +71,10 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         remoteUrlTextField?.delegate = self
         usernameTextField?.delegate = self
         passwordTextField?.delegate = self
+        defaultMainUIPathTextField.delegate = self
         demomodeSwitch?.addTarget(self, action: #selector(OpenHABSettingsViewController.demomodeSwitchChange(_:)), for: .valueChanged)
         sendCrashReportsDummy.addTarget(self, action: #selector(crashReportingDummyPressed(_:)), for: .touchUpInside)
+        useCurrentMainUIPathButton?.addTarget(self, action: #selector(currentMainUIPathButtonPressed(_:)), for: .touchUpInside)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -97,7 +103,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
 
         updateSettings()
         saveSettings()
-        appData?.rootViewController?.pageUrl = ""
+        appData?.sitemapViewController?.pageUrl = ""
         navigationController?.popToRootViewController(animated: true)
     }
 
@@ -150,21 +156,17 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         }
     }
 
+    @objc
+    private func currentMainUIPathButtonPressed(_ sender: Any?) {
+        promptForDefaultWebView()
+    }
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        var ret: Int
-        switch section {
-        case 0:
-            if demomodeSwitch!.isOn {
-                ret = 1
-            } else {
-                ret = 6
-            }
-        case 1:
-            ret = 12
-        default:
-            ret = 10
+        // hide connection options when in demo mode
+        if section == 0, demomodeSwitch!.isOn {
+            return 1
         }
-        return ret
+        return super.tableView(tableView, numberOfRowsInSection: section)
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -186,8 +188,16 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         switch section {
         case 0:
             return NSLocalizedString("openhab_connection", comment: "")
-        default:
+        case 1:
             return NSLocalizedString("application_settings", comment: "")
+        case 2:
+            return NSLocalizedString("mainui_settings", comment: "")
+        case 3:
+            return NSLocalizedString("sitemap_settings", comment: "")
+        case 4:
+            return NSLocalizedString("about_settings", comment: "")
+        default:
+            return ""
         }
     }
 
@@ -203,20 +213,6 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsTableView.reloadData()
     }
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        os_log("OpenHABSettingsViewController prepareForSegue", log: .viewCycle, type: .info)
-
-        if segue.identifier == "showSelectSitemap" {
-            os_log("OpenHABSettingsViewController showSelectSitemap", log: .viewCycle, type: .info)
-            let dest = segue.destination as! OpenHABDrawerTableViewController
-            dest.drawerTableType = .withoutStandardMenuEntries
-            dest.openHABRootUrl = appData?.openHABRootUrl ?? ""
-            dest.delegate = appData?.rootViewController
-            updateSettings()
-            saveSettings()
-        }
-    }
-
     func updateSettingsUi() {
         localUrlTextField?.text = settingsLocalUrl
         remoteUrlTextField?.text = settingsRemoteUrl
@@ -230,11 +226,16 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         sendCrashReportsSwitch?.isOn = settingsSendCrashReports
         iconSegmentedControl?.selectedSegmentIndex = settingsIconType.rawValue
         sortSitemapsBy?.selectedSegmentIndex = settingsSortSitemapsBy.rawValue
+        defaultMainUIPathTextField?.text = settingsDefaultMainUIPath
         if settingsDemomode == true {
             disableConnectionSettings()
         } else {
             enableConnectionSettings()
         }
+
+        let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+        let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        appVersionLabel?.text = "\(appVersionString ?? "") (\(appBuildString ?? ""))"
     }
 
     func loadSettings() {
@@ -250,6 +251,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsSendCrashReports = Preferences.sendCrashReports
         settingsIconType = IconType(rawValue: Preferences.iconType) ?? .png
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
+        settingsDefaultMainUIPath = Preferences.defaultMainUIPath
     }
 
     func updateSettings() {
@@ -266,6 +268,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsSendCrashReports = sendCrashReportsSwitch?.isOn ?? false
         settingsIconType = IconType(rawValue: iconSegmentedControl.selectedSegmentIndex) ?? .png
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: sortSitemapsBy.selectedSegmentIndex) ?? .label
+        settingsDefaultMainUIPath = defaultMainUIPathTextField?.text ?? ""
     }
 
     func saveSettings() {
@@ -281,7 +284,29 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.iconType = settingsIconType.rawValue
         Preferences.sendCrashReports = settingsSendCrashReports
         Preferences.sortSitemapsby = settingsSortSitemapsBy.rawValue
-
+        Preferences.defaultMainUIPath = settingsDefaultMainUIPath
         WatchMessageService.singleton.syncPreferencesToWatch()
+    }
+
+    func promptForDefaultWebView() {
+        DispatchQueue.main.async {
+            let alertController = UIAlertController(title: NSLocalizedString("uselastpath_settings", comment: ""), message: self.appData?.currentWebViewPath ?? "/", preferredStyle: .actionSheet)
+            // popover cords needed for iPad
+            if let ppc = alertController.popoverPresentationController {
+                ppc.sourceView = self.useCurrentMainUIPathButton as UIView
+                ppc.sourceRect = (self.useCurrentMainUIPathButton as UIView).bounds
+            }
+            let cancel = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel) { (_: UIAlertAction) in
+            }
+            let currentPath = UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { (_: UIAlertAction) in
+                if let path = self.appData?.currentWebViewPath {
+                    self.defaultMainUIPathTextField?.text = path
+                    self.settingsDefaultMainUIPath = path
+                }
+            }
+            alertController.addAction(currentPath)
+            alertController.addAction(cancel)
+            self.present(alertController, animated: true, completion: nil)
+        }
     }
 }

@@ -20,6 +20,13 @@ public struct NumberState: CustomStringConvertible, Equatable {
     private(set) var unit: String? = ""
     private(set) var format: String? = ""
 
+    // Access to default memberwise initializer not permitted outside of package
+    public init(value: Double, unit: String? = "", format: String? = "") {
+        self.value = value
+        self.unit = unit
+        self.format = format
+    }
+
     public func toString(locale: Locale?) -> String {
         if let format = format, format.isEmpty == false {
             let actualFormat = format.replacingOccurrences(of: "%unit%", with: unit ?? "")

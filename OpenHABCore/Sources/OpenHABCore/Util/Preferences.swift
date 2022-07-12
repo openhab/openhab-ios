@@ -75,6 +75,7 @@ public enum Preferences {
 
     // MARK: - Public
 
+    @UserDefaultURL("defaultView", defaultValue: "web") public static var defaultView: String
     @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
     @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org") public static var remoteUrl: String
     @UserDefault("username", defaultValue: "test") public static var username: String
@@ -89,6 +90,7 @@ public enum Preferences {
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
     @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
+    @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
 
     // MARK: - Private
 
