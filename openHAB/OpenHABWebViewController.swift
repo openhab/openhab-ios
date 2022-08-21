@@ -312,6 +312,7 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
         if let openHABUrl = openHABUrl {
             openHABRootUrl = openHABUrl.absoluteString
         }
+        appData?.openHABRootUrl = openHABRootUrl
 
         NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
@@ -323,6 +324,14 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
                     self.appData?.openHABRootUrl = openHABRootUrl
                     self.loadWebView(force: false)
                 } catch {
+                    // testing for OH 1.x
+                    let str = String(decoding: data, as: UTF8.self)
+                    if str.hasPrefix("<?xml") {
+                        self.appData?.openHABVersion = 1
+                        self.showPopupMessage(seconds: 2, title: NSLocalizedString("select_sitemap", comment: ""), message: "", theme: .info)
+                        self.showSideMenu()
+                        return
+                    }
                     os_log("Could not decode response as JSON, %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     self.openHABTrackingError(error)
                 }
