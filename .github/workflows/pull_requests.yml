@@ -3,6 +3,7 @@ name: Run Unit Tests
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
 
 jobs:
   build_and_test:
