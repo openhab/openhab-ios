@@ -1,0 +1,157 @@
+"1GaCDV" = "Handling";
+
+"1Kf0qe" = "Angi Fargekontrollverdi";
+
+"1SeS3V" = "Sett ${item} til ${value} (HSB)";
+
+"1USOx9" = "Item";
+
+"2q0TdY" = "Beklager, kan ikke finne ${item}";
+
+"3evvza" = "Verdi";
+
+"5B4e9l" = "Angi teksten til et teksterkontroll-Item";
+
+"5Uu4bK" = "Få Item-tilstand";
+
+"67qFTP" = "Ugyldig tom verdi for ${item}";
+
+"68Y2Ya" = "Navn på Dimmer/Ruller";
+
+"6hUiXZ" = "Tilstanden til ${item} er ${state}";
+
+"80K2Dt" = "Beklager, kan ikke finne ${item}";
+
+"8OBnvT" = "Ugyldig tom verdi for ${item}";
+
+"8dhboX" = "Verdi";
+
+"B2I9b5" = "Item";
+
+"CZfT5a" = "Send den numeriske verdien ${value} til ${item}";
+
+"Cdg015" = "Sett ${item} til ${value}";
+
+"DxO2wk" = "Angi fargen til et fargekontroll-Item";
+
+"E291x3" = "Verdi";
+
+"EEj00Q" = "Sett ${item} til ${value}";
+
+"Fb0pUB" = "Send handlingen ${action} til bryter ${item}";
+
+"GD4RTw" = "Hent nåværende tilstand for et Item";
+
+"GI0faP" = "Ugyldig tilstand: ${state} for ${item}";
+
+"Gjd9MH" = "Sett ${item} til ${value}";
+
+"H26PEQ" = "Tilstanden til ${item} ble satt til ${state}";
+
+"HGbUGw" = "Verdi";
+
+"IpbXHW" = "Send ${action} til ${item}";
+
+"JUznKl" = "Send strengverdien ${value} til ${item}";
+
+"KXqi2s" = "Item";
+
+"M8mX5O" = "Item";
+
+"MCp4x6" = "Item";
+
+"MGYSky" = "Sett ${item} til ${value}";
+
+"N5YsnB" = "Beklager, kan ikke finne ${item}";
+
+"NehcMF" = "Item-navn";
+
+"NjP70V" = "Beklager, kan ikke finne ${item}";
+
+"Nqxuw0" = "Tilstand";
+
+"Nuhhxp" = "Item";
+
+"Oazi8d" = "Beklager, kan ikke finne ${item}";
+
+"SMYYBh" = "Sett ${item} til ${value}";
+
+"TJ1p5Y" = "Handling";
+
+"TK8Rrn" = "Sendte fargeverdien ${value} til ${item}";
+
+"UZYwuH" = "Angi Verdi for Dimmer eller Rullegardin";
+
+"V0QsN4" = "Ugyldig verdi ${value} for ${item} (0-100)";
+
+"VTeXc1" = "Item";
+
+"VmFkwo" = "Sett ${item} til ${value} (HSB)";
+
+"XMNs7r" = "Angi Brytertilstand";
+
+"cBrxnz" = "Item";
+
+"dtRamI" = "Verdi";
+
+"eFb7vM" = "Sett tilstanden til en bryter til åpen eller lukket";
+
+"gBn7U6" = "Sett Strengkontroll-Verdi";
+
+"gQzHiG" = "Item";
+
+"hflKDd" = "Beklager, kan ikke finne ${item}";
+
+"i8fP5e" = "Handling";
+
+"iCUEet" = "Ugyldig handling: ${action} for ${item}";
+
+"iRjffC" = "Ugyldig tom verdi for ${item}";
+
+"k0eXWc" = "Item";
+
+"llL4sP" = "Verdi";
+
+"lqlrGx" = "Navn på bryter";
+
+"m5DFXq" = "Tilstand";
+
+"m9yAKr" = "Hent tilstand til ${item}";
+
+"mAKsWc" = "Verdi";
+
+"mVz5mJ" = "Sett ${item} til ${value}";
+
+"mpxNDZ" = "Item";
+
+"n7cmvU" = "Tilstand";
+
+"nzw2UT" = "Sett Tilstand for Bryter";
+
+"o35DYr" = "Sett Verdi for Numerisk Kontroll";
+
+"oOjAU0" = "Sett tilstanden til en bryter til av eller på";
+
+"oUolm5" = "Send ${action} til ${item}";
+
+"pg4Bec" = "Sett heltallsverdien til en dimmer eller rullegardin";
+
+"pptfkD" = "Sett desimalverdien til en numerisk kontroll-Item";
+
+"ptGHON" = "Beklager, kan ikke finne ${item}";
+
+"qu9K9v" = "Sett tilstanden til ${item} til ${state}";
+
+"raIAR6" = "Ugyldig verdi: ${value} for ${item} må være HSB (0-360,0-100,0-100)";
+
+"skEQxZ" = "Item";
+
+"tclrCp" = "Item";
+
+"ttiBzN" = "Sett tilstanden til ${item} til ${state}";
+
+"tuvmDw" = "Verdi";
+
+"uGsyyj" = "240,100,100";
+
+"wm0fqx" = "Sendte verdien ${value} til ${item}";
