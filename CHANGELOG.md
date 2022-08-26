@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Fixes an incompatibility with openHAB 1.x systems
+
 ## [Version 2.4.49, Build 1580410513] - 2022-06-22Z
 
 - Fix OH3 UI integration for iOS app (#605)
