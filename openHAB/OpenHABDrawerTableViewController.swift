@@ -300,7 +300,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
         switch indexPath.section {
         case 0:
             dismiss(animated: true) {
-                self.delegate?.modalDismissed(to: .webview)
+                if self.appData?.openHABVersion ?? 2 < 2 {
+                    self.delegate?.modalDismissed(to: .sitemap)
+                } else {
+                    self.delegate?.modalDismissed(to: .webview)
+                }
             }
         case 1:
             let passedURL = uiTiles[indexPath.row].url
