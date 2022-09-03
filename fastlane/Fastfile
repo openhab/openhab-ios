@@ -193,7 +193,7 @@ platform :ios do
     end
     
     desc 'Set GitHub Release'
-    lane :set_github_release do
+    lane :set_github_rel do
         # publish a new release into Github
         github_release = set_github_release(
             api_token: is_ci? ? ENV['ACCESS_TOKEN'] : ENV['GITHUB_API_TOKEN'],
