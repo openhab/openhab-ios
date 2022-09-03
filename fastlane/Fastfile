@@ -195,7 +195,7 @@ platform :ios do
     desc 'Set GitHub Release'
     lane :set_github_rel do
         # publish a new release into Github
-        github_release = set_github_release(
+        set_github_release(
             api_token: is_ci? ? ENV['ACCESS_TOKEN'] : ENV['GITHUB_API_TOKEN'],
             repository_name: 'openhab/openhab-ios',
             name: "#{type.capitalize} version #{version}",
