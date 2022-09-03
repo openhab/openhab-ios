@@ -10,6 +10,8 @@ jobs:
   set_github_release:
     runs-on: macos-12
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
       - name: Cache BuildTools
         uses: actions/cache@v2
         env:
