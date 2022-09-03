@@ -7,11 +7,11 @@ on:
  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build_and_deploy::
+  set_github_release:
     runs-on: macos-13
-
+ 
     steps:
-    - name: GitHub Release
+      - name: GitHub Release
         uses: maierj/fastlane-action@v2.2.1
         with:
           lane: set_github_release
