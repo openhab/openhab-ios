@@ -189,6 +189,10 @@ platform :ios do
             push_to_git_remote(tags: true)
             sh 'git checkout develop'
         end
+        
+    end
+    desc 'Set GitHub Release'
+    lane :set_github_release
 
         # publish a new release into Github
         github_release = set_github_release(
