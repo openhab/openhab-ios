@@ -9,7 +9,6 @@ on:
 jobs:
   set_github_release:
     runs-on: macos-13
-
     steps:
       - name: GitHub Release
         uses: maierj/fastlane-action@v2.2.1
