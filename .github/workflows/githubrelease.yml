@@ -12,6 +12,6 @@ jobs:
  
     steps:
       - name: GitHub Release
-        uses: maierj/fastlane-action@v2.2.1
-        with:
-          lane: set_github_release
+      uses: maierj/fastlane-action@v2.2.1
+      with:
+        lane: set_github_release
