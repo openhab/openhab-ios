@@ -69,7 +69,7 @@
 "on" = "encendido";
 "off" = "apagado";
 "empty" = "vacío";
-"sortSitemapsBy" = "Sort sitemaps by";
+"sortSitemapsBy" = "Ordenar mapas del sitio por";
 "mainui_settings" = "Ajustes de la interfaz de usuario principal";
 "sitemap_settings" = "Ajustes del esquema";
 "about_settings" = "Acerca de";
