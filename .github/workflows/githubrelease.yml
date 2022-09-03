@@ -23,4 +23,4 @@ jobs:
           ASC_API_KEY: ${{ secrets.ASC_API_KEY }}
         uses: maierj/fastlane-action@v2.2.1
         with:
-          lane: set_github_release
+          lane: set_github_rel
