@@ -8,7 +8,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   set_github_release:
-    runs-on: macos-13
+    runs-on: macos-12
     steps:
       - name: GitHub Release
         uses: maierj/fastlane-action@v2.2.1
