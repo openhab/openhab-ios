@@ -300,6 +300,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         switch indexPath.section {
         case 0:
             dismiss(animated: true) {
+                os_log("openHABVersion %d", log: .viewCycle, type: .info, self.appData?.openHABVersion ?? -1)
                 if self.appData?.openHABVersion ?? 2 < 2 {
                     self.delegate?.modalDismissed(to: .sitemap)
                 } else {

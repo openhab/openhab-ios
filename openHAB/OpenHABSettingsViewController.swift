@@ -104,6 +104,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         updateSettings()
         saveSettings()
         appData?.sitemapViewController?.pageUrl = ""
+        NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
         navigationController?.popToRootViewController(animated: true)
     }
 

@@ -24,6 +24,7 @@ class OpenHABWebViewController: OpenHABViewController {
     private var tracker: OpenHABTracker?
     private var activityIndicator: UIActivityIndicatorView!
     private var observation: NSKeyValueObservation?
+    private var sseTimer: Timer?
 
     // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
@@ -33,7 +34,10 @@ class OpenHABWebViewController: OpenHABViewController {
         },
         goFullscreen : function(){
             window.webkit.messageHandlers.Native.postMessage('goFullscreen');
-        }
+        },
+        sseConnected : function(connected) {
+            window.webkit.messageHandlers.Native.postMessage('sseConnected-' + connected);
+        },
     }
     """
 
@@ -45,7 +49,9 @@ class OpenHABWebViewController: OpenHABViewController {
         true
     }
 
-    private lazy var webView: WKWebView = {
+    private lazy var webView: WKWebView = newWebView()
+
+    private func newWebView() -> WKWebView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
@@ -72,7 +78,7 @@ class OpenHABWebViewController: OpenHABViewController {
             }
         }
         return webView
-    }()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,6 +98,7 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
+        OpenHABTracker.shared.multicastDelegate.add(self)
         startTracker()
     }
 
@@ -100,15 +107,15 @@ class OpenHABWebViewController: OpenHABViewController {
         // Show the navigation bar on other view controllers
         navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
+        OpenHABTracker.shared.multicastDelegate.remove(self)
     }
 
     func startTracker() {
         if currentTarget == "" {
             showActivityIndicator(show: true)
         }
-        tracker = OpenHABTracker()
-        tracker?.delegate = self
-        tracker?.start()
+        // TODO: we should remove the need for this.
+        OpenHABTracker.shared.restart()
     }
 
     func loadWebView(force: Bool = false) {
@@ -158,8 +165,10 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func clearExistingPage() {
+        os_log("clearExistingPage - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         setHideNavBar(shouldHide: false)
         // clear out existing page while we load.
+        webView.stopLoading()
         webView.evaluateJavaScript("document.body.remove()")
     }
 
@@ -174,6 +183,9 @@ class OpenHABWebViewController: OpenHABViewController {
     override func reloadView() {
         currentTarget = ""
         clearExistingPage()
+        webView.removeFromSuperview()
+        webView = newWebView()
+        view.addSubview(webView)
         startTracker()
     }
 
@@ -198,6 +210,19 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 // check to make sure we are actually the top view before hiding the nav button
                 if isViewLoaded, view.window != nil {
                     setHideNavBar(shouldHide: true)
+                }
+            case "sseConnected-true":
+                os_log("WKScriptMessage sseConnected is true", log: OSLog.remoteAccess, type: .info)
+                hidePopupMessages()
+                sseTimer?.invalidate()
+            case "sseConnected-false":
+                os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
+                sseTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                    self.sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
+                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                        self.reloadView()
+                    }
                 }
             default: break
             }
@@ -282,6 +307,11 @@ extension OpenHABWebViewController: WKNavigationDelegate {
             completionHandler(.performDefaultHandling, nil)
         }
     }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        os_log("webViewWebContentProcessDidTerminate  reloading view", log: .wkwebview, type: .info)
+        reloadView()
+    }
 }
 
 extension OpenHABWebViewController: WKUIDelegate {
@@ -305,41 +335,14 @@ extension OpenHABWebViewController: WKUIDelegate {
 // MARK: - OpenHABTrackerDelegate
 
 extension OpenHABWebViewController: OpenHABTrackerDelegate {
-    func openHABTracked(_ openHABUrl: URL?) {
+    func openHABTracked(_ openHABUrl: URL?, version: Int) {
         os_log("OpenHABWebViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
-
-        var openHABRootUrl = ""
-        if let openHABUrl = openHABUrl {
-            openHABRootUrl = openHABUrl.absoluteString
-        }
-        appData?.openHABRootUrl = openHABRootUrl
-
-        NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
-            switch response.result {
-            case let .success(data):
-                do {
-                    let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
-                    os_log("openHAB version %@", log: .remoteAccess, type: .info, serverProperties.version)
-                    self.openHABTrackedRootUrl = openHABRootUrl
-                    self.appData?.openHABRootUrl = openHABRootUrl
-                    self.loadWebView(force: false)
-                } catch {
-                    // testing for OH 1.x
-                    let str = String(decoding: data, as: UTF8.self)
-                    if str.hasPrefix("<?xml") {
-                        self.appData?.openHABVersion = 1
-                        self.showPopupMessage(seconds: 2, title: NSLocalizedString("select_sitemap", comment: ""), message: "", theme: .info)
-                        self.showSideMenu()
-                        return
-                    }
-                    os_log("Could not decode response as JSON, %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                    self.openHABTrackingError(error)
-                }
-            case let .failure(error):
-                self.openHABTrackingError(error)
-                os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
-                os_log("On Connecting %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-            }
+        if version >= 2 {
+            openHABTrackedRootUrl = openHABUrl?.absoluteString ?? ""
+            loadWebView(force: false)
+        } else {
+            showPopupMessage(seconds: 2, title: NSLocalizedString("select_sitemap", comment: ""), message: "", theme: .info)
+            showSideMenu()
         }
     }
 
