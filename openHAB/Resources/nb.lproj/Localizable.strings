@@ -24,6 +24,7 @@
 "copy_label" = "Kopier Item-etikett";
 "network_not_available" = "Nettverk er ikke tilgjengelig.";
 "connecting_local" = "Kobler til lokal URL";
+"connecting_remote" = "Connecting to remote URL";
 "remote_url_not_configured" = "Ekstern URL er ikke konfigurert.";
 "connecting_discovered" = "Kobler til oppdaget URL";
 "running_demo_mode" = "Kjører i demomodus. Sjekk innstillingene for å deaktivere demomodus.";

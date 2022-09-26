@@ -24,6 +24,7 @@
 "copy_label" = "Copier le label de l'item";
 "network_not_available" = "Aucune connexion réseau disponible.";
 "connecting_local" = "Connexion à l'adresse locale";
+"connecting_remote" = "Connecting to remote URL";
 "remote_url_not_configured" = "L'URL distante n'est pas configurée.";
 "connecting_discovered" = "Connexion à l'URL découverte";
 "running_demo_mode" = "Exécution en mode démo. Vérifiez les paramètres pour désactiver le mode démo.";

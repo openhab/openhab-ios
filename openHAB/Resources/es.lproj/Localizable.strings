@@ -24,6 +24,7 @@
 "copy_label" = "Copiar etiqueta del ítem";
 "network_not_available" = "Red no disponible.";
 "connecting_local" = "Conectando a la URL local";
+"connecting_remote" = "Connecting to remote URL";
 "remote_url_not_configured" = "La URL remota no está configurada.";
 "connecting_discovered" = "Conectando a URL descubierta";
 "running_demo_mode" = "Funccionando en modo demostración. Comprueba la configuración para desactivarlo.";
