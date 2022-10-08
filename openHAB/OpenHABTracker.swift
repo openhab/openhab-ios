@@ -53,7 +53,7 @@ class OpenHABTracker: NSObject {
         // Start NetworkReachabilityManager.Listener
         oldReachabilityStatus = reach?.status
         reach?.startListening { [weak self] status in
-            guard let self = self else { return }
+            guard let self else { return }
 
             let nStatus = status
             if nStatus != self.oldReachabilityStatus {
@@ -157,7 +157,7 @@ class OpenHABTracker: NSObject {
     }
 
     func normalizeUrl(_ url: String?) -> String? {
-        if let url = url, url.hasSuffix("/") {
+        if let url, url.hasSuffix("/") {
             return String(url.dropLast())
         }
         return url

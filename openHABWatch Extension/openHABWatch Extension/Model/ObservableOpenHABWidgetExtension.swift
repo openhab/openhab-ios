@@ -15,7 +15,7 @@ import SwiftUI
 
 extension ObservableOpenHABWidget {
     @ViewBuilder func makeView(settings: ObservableOpenHABDataObject) -> some View {
-        if let linkedPage = linkedPage {
+        if let linkedPage {
             let title = linkedPage.title.components(separatedBy: "[")[0]
             let pageUrl = linkedPage.link
             // os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)

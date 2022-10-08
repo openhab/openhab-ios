@@ -121,7 +121,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
         activityIndicator.startAnimating()
         stopPlayback(andResetUrl: false)
 
-        guard let url = url else {
+        guard let url else {
             stopPlayback()
             return
         }
@@ -151,7 +151,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
     }
 
     private func playMjpegStream() {
-        guard let url = url else {
+        guard let url else {
             stopPlayback()
             return
         }
@@ -201,7 +201,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
     }
 
     private func updateAspectRatio(forView view: UIView?, aspectRatio: CGFloat) {
-        guard let view = view else { return }
+        guard let view else { return }
 
         if let constraint = aspectRatioConstraint {
             removeConstraint(constraint)

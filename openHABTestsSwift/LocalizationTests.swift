@@ -169,10 +169,10 @@ class LocalizationTests: XCTestCase {
 
         var retVal = true
         for localizableString in localizableStrings where localizableString.value.range(of: "%") != nil {
-            if !LocalizationTests.localizedFormatStrings.contains(where: { $0.key == localizableString.key }) {
-                retVal = false
-                XCTFail("Missing translation with key '\(localizableString.key)' in 'LocalizationTests.localizedFormatStrings'.")
-            }
+            guard !LocalizationTests.localizedFormatStrings.contains(where: { $0.key == localizableString.key }) else { continue }
+
+            retVal = false
+            XCTFail("Missing translation with key '\(localizableString.key)' in 'LocalizationTests.localizedFormatStrings'.")
         }
 
         return retVal

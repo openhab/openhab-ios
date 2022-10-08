@@ -19,14 +19,14 @@ class OpenHABLegalViewController: UIViewController {
         super.viewDidLoad()
         let legalPath = Bundle.main.url(forResource: "legal", withExtension: "rtf")
         var legalAttributedString: NSAttributedString?
-        if let legalPath = legalPath {
+        if let legalPath {
             legalAttributedString = try? NSAttributedString(
                 url: legalPath,
                 options: [.characterEncoding: String.Encoding.utf8.rawValue],
                 documentAttributes: nil
             )
         }
-        if let legalAttributedString = legalAttributedString {
+        if let legalAttributedString {
             legalTextView.attributedText = legalAttributedString
         }
 

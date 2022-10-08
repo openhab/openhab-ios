@@ -1,9 +1,6 @@
 # file options
---swiftversion 5.5
---exclude ../Pods
---exclude ../BuildTools
---exclude ../fastlane
---exclude ../OpenHABCore/.build
+--exclude ./fastlane
+--exclude ./OpenHABCore/.build
 --symlinks ignore
 
 # disabled rules

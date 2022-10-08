@@ -66,7 +66,7 @@ public extension String {
         }
         // types can have subtypes (e.g. 'Number:Temperature'); split off those
         let firstColon = firstIndex(of: ":")
-        if let firstColon = firstColon {
+        if let firstColon {
             typeString = String(typeString[..<firstColon])
         }
 
@@ -136,7 +136,7 @@ public extension String {
     }
 }
 
-extension Optional where Wrapped == String {
+extension String? {
     var orEmpty: String {
         switch self {
         case let .some(value):

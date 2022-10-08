@@ -55,6 +55,7 @@ platform :ios do
         run_tests(
             workspace: 'openHAB.xcworkspace',
             scheme: 'openHABTestsSwift',
+            xcargs: '-skipPackagePluginValidation',
             testplan: 'openHABTests',
             devices: ['iPhone 13 Pro'],
             clean: true
@@ -67,19 +68,6 @@ platform :ios do
             command: "clean",
             package_path: "OpenHABCore"
         )
-    end
-
-    desc 'Refresh dSYMS.'
-    lane :refresh_dsyms do
-        download_dsyms(
-            version: 'latest',
-            wait_for_dsym_processing: true,
-            wait_timeout: 600
-        )
-        upload_symbols_to_crashlytics(
-            binary_path: "BuildTools/upload-symbols"
-        )
-        clean_build_artifacts
     end
 
     desc 'Build beta'
@@ -150,6 +138,7 @@ platform :ios do
         build_app(
             scheme: 'openHAB',
             clean: true,
+            xcargs: '-skipPackagePluginValidation',
             export_method: 'app-store',
             disable_package_automatic_updates: true
         )
@@ -161,7 +150,6 @@ platform :ios do
             changelog: changelog,
             groups: ['Beta Testers']
         )
-        refresh_dsyms
 
         # commit to git the changes from bumping version number
         commit_version_bump(
@@ -188,7 +176,7 @@ platform :ios do
             )
             push_to_git_remote(tags: true)
             sh 'git checkout develop'
-            
+
             set_github_release(
               api_token: is_ci? ? ENV['ACCESS_TOKEN'] : ENV['GITHUB_API_TOKEN'],
               repository_name: 'openhab/openhab-ios',
@@ -199,7 +187,7 @@ platform :ios do
               # upload_assets: no assets supported
             )
         end
-        
+
     end
 
     desc 'Setup keychain for CI environment'

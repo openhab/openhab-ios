@@ -67,7 +67,7 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
         }
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item = item else {
+            guard let item else {
                 completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(itemName))
                 return
             }
