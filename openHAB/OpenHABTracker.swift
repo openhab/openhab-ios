@@ -35,6 +35,7 @@ class OpenHABTracker: NSObject {
     private var openHABLocalUrl = ""
     private var openHABRemoteUrl = ""
     private var netService: NetService?
+    private var restartTimer: Timer?
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -67,16 +68,19 @@ class OpenHABTracker: NSObject {
         oldReachabilityStatus = reach?.status
         reach?.startListening { [weak self] status in
             guard let self = self else { return }
-
             let nStatus = status
-            if nStatus != self.oldReachabilityStatus {
-                if let oldReachabilityStatus = self.oldReachabilityStatus {
-                    os_log("OpenHABTracker Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
-                }
-                self.oldReachabilityStatus = nStatus
-                // (self.delegate as? OpenHABTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
-                if self.isNetworkConnected() {
-                    self.restart()
+            //use a timer to prevent bouncing/flapping around when switching between wifi, vpn, and wwan
+            self.restartTimer?.invalidate()
+            self.restartTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
+                if nStatus != self.oldReachabilityStatus {
+                    if let oldReachabilityStatus = self.oldReachabilityStatus {
+                        os_log("OpenHABTracker Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
+                    }
+                    self.oldReachabilityStatus = nStatus
+                    // (self.delegate as? OpenHABTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
+                    if self.isNetworkConnected() {
+                        self.restart()
+                    }
                 }
             }
         }
