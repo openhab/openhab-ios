@@ -183,9 +183,6 @@ class OpenHABWebViewController: OpenHABViewController {
     override func reloadView() {
         currentTarget = ""
         clearExistingPage()
-        webView.removeFromSuperview()
-        webView = newWebView()
-        view.addSubview(webView)
         startTracker()
     }
 

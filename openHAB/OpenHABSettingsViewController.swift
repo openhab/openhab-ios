@@ -15,6 +15,7 @@ import OpenHABCore
 import os.log
 import SafariServices
 import UIKit
+import WebKit
 
 class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate {
     var settingsLocalUrl = ""
@@ -176,6 +177,10 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         switch tableView.cellForRow(at: indexPath)?.tag {
         case 888:
             privacyButtonPressed(nil)
+        case 998:
+            let websiteDataTypes = NSSet(array: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache])
+            let date = Date(timeIntervalSince1970: 0)
+            WKWebsiteDataStore.default().removeData(ofTypes: websiteDataTypes as! Set<String>, modifiedSince: date, completionHandler: {})
         case 999:
             os_log("Clearing image cache", log: .viewCycle, type: .info)
             KingfisherManager.shared.cache.clearMemoryCache()
