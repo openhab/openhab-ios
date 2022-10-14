@@ -47,6 +47,7 @@
 "real_time_sliders" = "Cursori In Tempo Reale";
 "clear_image_cache" = "Pulisci Cache Immagini";
 "clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Tipo di icona";
 "info" = "Informazioni";
 "select_sitemap" = "Seleziona Sitemap";

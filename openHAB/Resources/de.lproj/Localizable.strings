@@ -47,6 +47,7 @@
 "real_time_sliders" = "Echtzeitschieberegler";
 "clear_image_cache" = "Zwischenspeicher für Bilder leeren";
 "clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Icon-Typ";
 "info" = "Info";
 "select_sitemap" = "Sitemap auswählen";

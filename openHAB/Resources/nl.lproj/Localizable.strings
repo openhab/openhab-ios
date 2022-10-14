@@ -47,6 +47,7 @@
 "real_time_sliders" = "Realtime schuifregelaars";
 "clear_image_cache" = "Leeg de afbeeldingencache";
 "clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Icoontype";
 "info" = "Info";
 "select_sitemap" = "Selecteer Sitemap";

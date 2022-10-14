@@ -47,6 +47,7 @@
 "real_time_sliders" = "Deslizadores en tiempo real";
 "clear_image_cache" = "Limpiar caché de imágenes";
 "clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Tipo de icono";
 "info" = "Información";
 "select_sitemap" = "Seleccionar mapa web";
