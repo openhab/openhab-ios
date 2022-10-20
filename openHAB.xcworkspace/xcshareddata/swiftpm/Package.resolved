@@ -213,8 +213,8 @@
         "repositoryURL": "https://github.com/weakfl/SwiftFormatPlugin.git",
         "state": {
           "branch": null,
-          "revision": "9960de27d91cb7ee96cf81bd6cdb127dad53b4bc",
-          "version": "0.50.1"
+          "revision": "503a58bf51ee8b40cb53a83a84b13f3daf43ff42",
+          "version": "0.50.3"
         }
       },
       {
