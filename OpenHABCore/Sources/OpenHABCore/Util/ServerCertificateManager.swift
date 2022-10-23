@@ -155,7 +155,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
                 // We have a certificate for this domain in our memory of decisions, but the certificate we've got now
                 // differs. We need to warn user about possible MiM attack and wait for users decision.
                 // TODO: notify user and wait for decision
-                if let delegate = delegate {
+                if let delegate {
                     self.evaluateResult = .undecided
                     delegate.evaluateCertificateMismatch(self, summary: certificateSummary as String?, forDomain: domain)
                     evaluateResultSemaphore.wait()
@@ -181,7 +181,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
             }
         }
         // Warn user about invalid certificate and wait for user's decision
-        if let delegate = delegate {
+        if let delegate {
             // Delegate should ask user for decision
             self.evaluateResult = .undecided
             delegate.evaluateServerTrust(self, summary: certificateSummary as String?, forDomain: domain)
@@ -213,7 +213,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         // certificate at index 0).
         var result: SecCertificate?
 
-        if let trust = trust {
+        if let trust {
             if SecTrustGetCertificateCount(trust) > 0 {
                 result = SecTrustGetCertificateAtIndex(trust, 0)
                 return result

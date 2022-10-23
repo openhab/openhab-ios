@@ -179,7 +179,7 @@ public class NetworkConnection {
                             longPolling: Bool,
                             openHABVersion: Int,
                             completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
-        guard let url = url else { return nil }
+        guard let url else { return nil }
 
         var pageRequest = URLRequest(url: url)
 

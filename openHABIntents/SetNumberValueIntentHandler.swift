@@ -49,7 +49,7 @@ class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling
         }
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item = item else {
+            guard let item else {
                 completion(OpenHABSetNumberValueIntentResponse.failureInvalidItem(itemName))
                 return
             }

@@ -43,7 +43,7 @@ class OpenHABWatchTracker: NSObject {
         #if !os(watchOS)
         oldReachabilityStatus = pathMonitor.currentPath
         pathMonitor.pathUpdateHandler = { [weak self] path in
-            guard let self = self else { return }
+            guard let self else { return }
 
             let nStatus = path
             if nStatus != self.oldReachabilityStatus {
@@ -73,7 +73,7 @@ class OpenHABWatchTracker: NSObject {
             os_log("Starting discovery", log: .default, type: .debug)
             startDiscovery()
         } else {
-            if let connectivityTask = connectivityTask {
+            if let connectivityTask {
                 connectivityTask.cancel()
             }
             let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
@@ -106,7 +106,7 @@ class OpenHABWatchTracker: NSObject {
                 if ObservableOpenHABDataObject.shared.localUrl.isEmpty {
                     startDiscovery()
                 } else {
-                    if let connectivityTask = connectivityTask {
+                    if let connectivityTask {
                         connectivityTask.cancel()
                     }
                     let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
@@ -263,7 +263,7 @@ class OpenHABWatchTracker: NSObject {
     }
 
     func normalizeUrl(_ url: String?) -> String? {
-        if let url = url, url.hasSuffix("/") {
+        if let url, url.hasSuffix("/") {
             return String(url.dropLast())
         }
         return url

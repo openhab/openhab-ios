@@ -67,7 +67,7 @@ class OpenHABTracker: NSObject {
         // Start NetworkReachabilityManager.Listener
         oldReachabilityStatus = reach?.status
         reach?.startListening { [weak self] status in
-            guard let self = self else { return }
+            guard let self else { return }
             let nStatus = status
             // use a timer to prevent bouncing/flapping around when switching between wifi, vpn, and wwan
             self.restartTimer?.invalidate()
@@ -119,7 +119,7 @@ class OpenHABTracker: NSObject {
         multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("connecting_local", comment: "")) }
         let openHABUrl = normalizeUrl(openHABLocalUrl)
         getServerInfo(URL(string: openHABUrl!)) { url, version, error in
-            if let error = error {
+            if let error {
                 os_log("OpenHABTracker failed connecting to local, trying remote: %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
                 self.tryRemoteUrl()
             } else {
@@ -155,7 +155,7 @@ class OpenHABTracker: NSObject {
 
     private func tryUrl(_ tryUrl: URL?) {
         getServerInfo(tryUrl) { url, version, error in
-            if let error = error {
+            if let error {
                 self.multicastDelegate.invoke { $0.openHABTrackingError(error) }
             } else {
                 self.appData?.openHABVersion = version
@@ -204,8 +204,8 @@ class OpenHABTracker: NSObject {
         netService!.resolve(withTimeout: 5.0)
     }
 
-    private func normalizeUrl(_ url: String?) -> String? {
-        if let url = url, url.hasSuffix("/") {
+    func normalizeUrl(_ url: String?) -> String? {
+        if let url, url.hasSuffix("/") {
             return String(url.dropLast())
         }
         return url

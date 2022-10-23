@@ -23,7 +23,7 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
     if version == 1 {
         os_log("openHAB 1", log: .viewCycle, type: .info)
 
-        if let response = response {
+        if let response {
             os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
         }
         if let data = response,
@@ -41,7 +41,7 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
         }
     } else {
         // Newer versions speak JSON!
-        if let response = response {
+        if let response {
             os_log("openHAB 2", log: .viewCycle, type: .info)
             do {
                 os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
@@ -372,7 +372,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
     }
 
     private func openURL(url: URL?) {
-        if let url = url {
+        if let url {
             let config = SFSafariViewController.Configuration()
             config.entersReaderIfAvailable = true
             let vc = SFSafariViewController(url: url, configuration: config)

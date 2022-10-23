@@ -64,7 +64,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
         value = "\(hue),\(sat),\(val)"
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item = item else {
+            guard let item else {
                 completion(OpenHABSetColorValueIntentResponse.failureInvalidItem(itemName))
                 return
             }

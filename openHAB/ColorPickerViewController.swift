@@ -77,7 +77,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
 extension ColorPickerViewController: ColorPickerDelegate {
     func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: ColorControl) {
-        if let throttler = throttler {
+        if let throttler {
             throttler.throttle { DispatchQueue.main.async { self.sendColorUpdate(color: selectedColor) } }
         } else {
             sendColorUpdate(color: selectedColor)

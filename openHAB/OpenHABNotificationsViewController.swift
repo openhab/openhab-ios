@@ -32,7 +32,7 @@ class OpenHABNotificationsViewController: UITableViewController {
         tableView.tableFooterView = UIView()
         refreshControl = UIRefreshControl()
         refreshControl?.addTarget(self, action: #selector(OpenHABNotificationsViewController.handleRefresh(_:)), for: .valueChanged)
-        if let refreshControl = refreshControl {
+        if let refreshControl {
             tableView.refreshControl = refreshControl
         }
 

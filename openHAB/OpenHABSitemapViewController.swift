@@ -124,7 +124,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
         refreshControl = UIRefreshControl()
 
         refreshControl?.addTarget(self, action: #selector(OpenHABSitemapViewController.handleRefresh(_:)), for: .valueChanged)
-        if let refreshControl = refreshControl {
+        if let refreshControl {
             widgetTableView.refreshControl = refreshControl
         }
 
@@ -306,7 +306,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
             longPolling: longPolling,
             openHABVersion: appData?.openHABVersion ?? 2
         ) { [weak self] response in
-            guard let self = self else { return }
+            guard let self else { return }
 
             switch response.result {
             case let .success(data):
@@ -481,7 +481,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
     }
 
     func filterContentForSearchText(_ searchText: String?, scope: String = "All") {
-        guard let searchText = searchText else { return }
+        guard let searchText else { return }
 
         filteredPage = currentPage?.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
@@ -497,7 +497,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
             commandOperation?.cancel()
             commandOperation = nil
         }
-        if let item = item, let command = command {
+        if let item, let command {
             commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
             commandOperation?.resume()
         }
@@ -557,12 +557,12 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
 extension OpenHABSitemapViewController: ColorPickerUITableViewCellDelegate {
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
-        if let cell = cell {
+        if let cell {
             let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
             colorPickerViewController?.title = widget?.labelText
             colorPickerViewController?.widget = widget
         }
-        if let colorPickerViewController = colorPickerViewController {
+        if let colorPickerViewController {
             navigationController?.pushViewController(colorPickerViewController, animated: true)
         }
     }

@@ -37,7 +37,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     override public func initialize() {
         selectionStyle = .none
         separatorInset = .zero
-        if let widget = widget {
+        if let widget {
             step = Float(widget.step)
         } else {
             step = 1.0

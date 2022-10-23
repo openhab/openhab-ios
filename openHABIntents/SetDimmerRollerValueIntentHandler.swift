@@ -56,7 +56,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
         }
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item = item else {
+            guard let item else {
                 completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidItem(itemName))
                 return
             }

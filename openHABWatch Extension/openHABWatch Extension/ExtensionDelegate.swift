@@ -15,7 +15,7 @@ import WatchKit
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
     var session: WCSession? {
         didSet {
-            if let session = session {
+            if let session {
                 session.delegate = AppMessageService.singleton
                 session.activate()
             }
