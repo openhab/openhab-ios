@@ -309,7 +309,7 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
         os_log("OpenHABWebViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
 
         var openHABRootUrl = ""
-        if let openHABUrl = openHABUrl {
+        if let openHABUrl {
             openHABRootUrl = openHABUrl.absoluteString
         }
         appData?.openHABRootUrl = openHABRootUrl

@@ -151,7 +151,7 @@ final class UserData: ObservableObject {
             longPolling: longPolling,
             openHABVersion: 2
         ) { [weak self] response in
-            guard let self = self else { return }
+            guard let self else { return }
 
             switch response.result {
             case let .success(data):
@@ -198,7 +198,7 @@ final class UserData: ObservableObject {
             commandOperation?.cancel()
             commandOperation = nil
         }
-        if let item = item, let command = command {
+        if let item, let command {
             commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
             commandOperation?.resume()
         }

@@ -15,14 +15,15 @@ import os.log
 import WatchConnectivity
 import WatchKit
 
-class ExtensionDelegate: NSObject, WKExtensionDelegate {
+@main
+class ExtensionDelegate: NSObject, WKApplicationDelegate {
     static var extensionDelegate: ExtensionDelegate!
 
     var appData: ObservableOpenHABDataObject
 
     var session: WCSession? {
         didSet {
-            if let session = session {
+            if let session {
                 session.delegate = AppMessageService.singleton
                 session.activate()
             }

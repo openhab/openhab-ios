@@ -18,14 +18,14 @@ public extension Sequence {
         }
     }
 
-    func max<T: Comparable>(by keyPath: KeyPath<Element, T>) -> Element? {
+    func max(by keyPath: KeyPath<Element, some Comparable>) -> Element? {
         // swiftformat:disable:next redundantSelf
         self.max { a, b in
             a[keyPath: keyPath] < b[keyPath: keyPath]
         }
     }
 
-    func min<T: Comparable>(by keyPath: KeyPath<Element, T>) -> Element? {
+    func min(by keyPath: KeyPath<Element, some Comparable>) -> Element? {
         // swiftformat:disable:next redundantSelf
         self.min { a, b in
             a[keyPath: keyPath] > b[keyPath: keyPath]

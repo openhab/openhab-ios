@@ -31,7 +31,7 @@ public class OpenHABItemCache {
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         var ret = [NSString]()
 
-        guard let items = items else {
+        guard let items else {
             if #available(iOS 12.0, *) {
                 reload(searchTerm: searchTerm, types: types, completion: completion)
             } else {

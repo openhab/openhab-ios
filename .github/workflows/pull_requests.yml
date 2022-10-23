@@ -16,14 +16,6 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Cache BuildTools
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-buildtools-dependencies
-        with:
-          path: BuildTools/.build
-          key: ${{ runner.os }}-buildtools-${{ env.cache-name }}-${{ hashFiles('BuildTools/Package.resolved') }}
-
       - name: Install dependencies
         run: |
             bundle install --redownload
