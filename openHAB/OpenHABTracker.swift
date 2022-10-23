@@ -69,7 +69,7 @@ class OpenHABTracker: NSObject {
         reach?.startListening { [weak self] status in
             guard let self = self else { return }
             let nStatus = status
-            //use a timer to prevent bouncing/flapping around when switching between wifi, vpn, and wwan
+            // use a timer to prevent bouncing/flapping around when switching between wifi, vpn, and wwan
             self.restartTimer?.invalidate()
             self.restartTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
                 if nStatus != self.oldReachabilityStatus {

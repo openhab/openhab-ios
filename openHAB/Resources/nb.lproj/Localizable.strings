@@ -46,6 +46,8 @@
 "disable_idle_timeout" = "Deaktiver Tidsavbrudd for Inaktivitet";
 "real_time_sliders" = "Sanntids Skyveknapper";
 "clear_image_cache" = "Tøm Hurtigbuffer for Bilder";
+"clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Ikontype";
 "info" = "Informasjon";
 "select_sitemap" = "Velg Sitemap";

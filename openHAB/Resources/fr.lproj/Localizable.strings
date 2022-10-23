@@ -46,6 +46,8 @@
 "disable_idle_timeout" = "Désactiver le délai d'inactivité";
 "real_time_sliders" = "Curseurs en temps réel";
 "clear_image_cache" = "Vider le cache des images";
+"clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Type d'icône";
 "info" = "Infos";
 "select_sitemap" = "Sélectionner le Sitemap";

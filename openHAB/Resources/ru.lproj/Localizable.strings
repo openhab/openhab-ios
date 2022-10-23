@@ -46,6 +46,8 @@
 "disable_idle_timeout" = "Disable Idle Timeout";
 "real_time_sliders" = "Real-time Sliders";
 "clear_image_cache" = "Clear Image Cache";
+"clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Icon Type";
 "info" = "Info";
 "select_sitemap" = "Выбрать Sitemap";
