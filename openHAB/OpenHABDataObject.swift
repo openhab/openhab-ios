@@ -21,6 +21,7 @@ class OpenHABDataObject: NSObject, DataObject {
     var sitemapViewController: OpenHABSitemapViewController?
     var openHABVersion: Int = 0
     var currentWebViewPath = ""
+    var currentView: TargetController?
 }
 
 extension OpenHABDataObject {

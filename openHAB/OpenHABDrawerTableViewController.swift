@@ -203,10 +203,17 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = (tableView.dequeueReusableCell(withIdentifier: OpenHABDrawerTableViewController.tableViewCellIdentifier) as? DrawerUITableViewCell)!
         cell.customImageView.subviews.forEach { $0.removeFromSuperview() }
+        cell.accessoryView = nil
         switch indexPath.section {
         case 0:
             cell.customTextLabel?.text = "Home"
             cell.customImageView.image = UIImage(named: "openHABIcon")
+            if let currentView = appData?.currentView {
+                // if we already are on the webview, pressing this again will force a refresh
+                if currentView == .webview {
+                    cell.accessoryView = UIImageView(image: UIImage(named: "arrow.triangle.2.circlepath"))
+                }
+            }
         case 1:
             let imageView = UIImageView(frame: cell.customImageView.bounds)
             let tile = uiTiles[indexPath.row]
@@ -300,6 +307,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         switch indexPath.section {
         case 0:
             dismiss(animated: true) {
+                os_log("openHABVersion %d", log: .viewCycle, type: .info, self.appData?.openHABVersion ?? -1)
                 if self.appData?.openHABVersion ?? 2 < 2 {
                     self.delegate?.modalDismissed(to: .sitemap)
                 } else {
