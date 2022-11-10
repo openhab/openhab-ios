@@ -24,7 +24,7 @@
 "copy_label" = "Copiar etiqueta del ítem";
 "network_not_available" = "Red no disponible.";
 "connecting_local" = "Conectando a la URL local";
-"connecting_remote" = "Connecting to remote URL";
+"connecting_remote" = "Conectando a la URL remota";
 "remote_url_not_configured" = "La URL remota no está configurada.";
 "connecting_discovered" = "Conectando a URL descubierta";
 "running_demo_mode" = "Funccionando en modo demostración. Comprueba la configuración para desactivarlo.";
@@ -46,8 +46,8 @@
 "disable_idle_timeout" = "Desactivar tiempo de espera de inactividad";
 "real_time_sliders" = "Deslizadores en tiempo real";
 "clear_image_cache" = "Limpiar caché de imágenes";
-"clear_web_cache" = "Clear Web Cache";
-"cache_cleared" = "Cache Cleared";
+"clear_web_cache" = "Limpiar caché web";
+"cache_cleared" = "Caché limpiada";
 "icon_type" = "Tipo de icono";
 "info" = "Información";
 "select_sitemap" = "Seleccionar mapa web";
