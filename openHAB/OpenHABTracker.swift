@@ -175,7 +175,7 @@ class OpenHABTracker: NSObject {
                 do {
                     let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
                     os_log("OpenHABTracker openHAB version %@", log: .remoteAccess, type: .info, serverProperties.version)
-                    //OH versions 2.0 through 2.4 return "1" as thier version, so set the floor to 2 so we do not think this is a OH 1.x serevr
+                    // OH versions 2.0 through 2.4 return "1" as thier version, so set the floor to 2 so we do not think this is a OH 1.x serevr
                     let version = max(2, Int(serverProperties.version) ?? 2)
                     completion(url, version, nil)
                 } catch {
