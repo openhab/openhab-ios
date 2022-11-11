@@ -207,6 +207,7 @@ class OpenHABRootViewController: UIViewController {
             }
             addView(viewController: targetView)
             currentView = targetView
+            appData?.currentView = target
             // Don't save our view in demo mode
             if !Preferences.demomode {
                 Preferences.defaultView = currentView.viewName()

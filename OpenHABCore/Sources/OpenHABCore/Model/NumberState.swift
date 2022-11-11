@@ -28,7 +28,7 @@ public struct NumberState: CustomStringConvertible, Equatable {
     }
 
     public func toString(locale: Locale?) -> String {
-        if let format = format, format.isEmpty == false {
+        if let format, format.isEmpty == false {
             let actualFormat = format.replacingOccurrences(of: "%unit%", with: unit ?? "")
             if format.contains("%d") == true {
                 return String(format: actualFormat, locale: locale, Int(value))
@@ -36,7 +36,7 @@ public struct NumberState: CustomStringConvertible, Equatable {
                 return String(format: actualFormat, locale: locale, value)
             }
         }
-        if let unit = unit, unit.isEmpty == false {
+        if let unit, unit.isEmpty == false {
             return "\(formatValue()) \(unit)"
         } else {
             return formatValue()

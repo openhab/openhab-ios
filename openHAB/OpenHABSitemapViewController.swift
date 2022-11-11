@@ -59,8 +59,6 @@ struct OpenHABImageProcessor: ImageProcessor {
 
 class OpenHABSitemapViewController: OpenHABViewController {
     var pageUrl = ""
-
-    private var tracker: OpenHABTracker?
     // private var hamburgerButton: DynamicButton!
     private var selectedWidgetRow: Int = 0
     private var currentPageOperation: Alamofire.Request?
@@ -126,7 +124,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
         refreshControl = UIRefreshControl()
 
         refreshControl?.addTarget(self, action: #selector(OpenHABSitemapViewController.handleRefresh(_:)), for: .valueChanged)
-        if let refreshControl = refreshControl {
+        if let refreshControl {
             widgetTableView.refreshControl = refreshControl
         }
 
@@ -174,9 +172,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 widgetTableView.reloadData()
             }
             os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
-            tracker = OpenHABTracker()
-            tracker?.delegate = self
-            tracker?.start()
+            OpenHABTracker.shared.multicastDelegate.add(self)
+            OpenHABTracker.shared.restart()
         } else {
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
@@ -195,6 +192,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
             currentPageOperation?.cancel()
             currentPageOperation = nil
         }
+        OpenHABTracker.shared.multicastDelegate.remove(self)
         super.viewWillDisappear(animated)
 
         if #unavailable(iOS 13.0) {
@@ -308,7 +306,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
             longPolling: longPolling,
             openHABVersion: appData?.openHABVersion ?? 2
         ) { [weak self] response in
-            guard let self = self else { return }
+            guard let self else { return }
 
             switch response.result {
             case let .success(data):
@@ -483,7 +481,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
     }
 
     func filterContentForSearchText(_ searchText: String?, scope: String = "All") {
-        guard let searchText = searchText else { return }
+        guard let searchText else { return }
 
         filteredPage = currentPage?.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
@@ -499,7 +497,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
             commandOperation?.cancel()
             commandOperation = nil
         }
-        if let item = item, let command = command {
+        if let item, let command {
             commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
             commandOperation?.resume()
         }
@@ -518,40 +516,10 @@ class OpenHABSitemapViewController: OpenHABViewController {
 // MARK: - OpenHABTrackerDelegate
 
 extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
-    func openHABTracked(_ openHABUrl: URL?) {
+    func openHABTracked(_ openHABUrl: URL?, version: Int) {
         os_log("OpenHABSitemapViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
-
-        if let openHABUrl = openHABUrl {
-            openHABRootUrl = openHABUrl.absoluteString
-        } else {
-            openHABRootUrl = ""
-        }
-        appData?.openHABRootUrl = openHABRootUrl
-
-        NetworkConnection.tracker(openHABRootUrl: openHABRootUrl) { response in
-            switch response.result {
-            case let .success(data):
-                do {
-                    self.serverProperties = try data.decoded(as: OpenHABServerProperties.self)
-                    os_log("This is an openHAB >= 2.X", log: .remoteAccess, type: .info)
-                    let version = Int(self.serverProperties?.version ?? "2") ?? 2
-                    self.appData?.openHABVersion = max(2, version)
-                    self.selectSitemap()
-
-                } catch {
-                    os_log("Could not decode response as JSON, test for OH1", log: .notifications, type: .error, error.localizedDescription)
-                    let str = String(decoding: data, as: UTF8.self)
-                    if str.hasPrefix("<?xml") {
-                        self.appData?.openHABVersion = 1
-                        self.selectSitemap()
-                    }
-                }
-            case let .failure(error):
-                self.openHABTrackingError(error)
-                os_log("This is not an openHAB server", log: .remoteAccess, type: .info)
-                os_log("On Connecting %{PUBLIC}@ %d", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-            }
-        }
+        openHABRootUrl = openHABUrl?.absoluteString ?? ""
+        selectSitemap()
     }
 
     func openHABTrackingProgress(_ message: String?) {
@@ -589,12 +557,12 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
 extension OpenHABSitemapViewController: ColorPickerUITableViewCellDelegate {
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
-        if let cell = cell {
+        if let cell {
             let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
             colorPickerViewController?.title = widget?.labelText
             colorPickerViewController?.widget = widget
         }
-        if let colorPickerViewController = colorPickerViewController {
+        if let colorPickerViewController {
             navigationController?.pushViewController(colorPickerViewController, animated: true)
         }
     }

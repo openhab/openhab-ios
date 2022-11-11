@@ -24,6 +24,7 @@
 "copy_label" = "Kopier Item-etikett";
 "network_not_available" = "Nettverk er ikke tilgjengelig.";
 "connecting_local" = "Kobler til lokal URL";
+"connecting_remote" = "Kobler til ekstern URL";
 "remote_url_not_configured" = "Ekstern URL er ikke konfigurert.";
 "connecting_discovered" = "Kobler til oppdaget URL";
 "running_demo_mode" = "Kjører i demomodus. Sjekk innstillingene for å deaktivere demomodus.";
@@ -45,6 +46,8 @@
 "disable_idle_timeout" = "Deaktiver Tidsavbrudd for Inaktivitet";
 "real_time_sliders" = "Sanntids Skyveknapper";
 "clear_image_cache" = "Tøm Hurtigbuffer for Bilder";
+"clear_web_cache" = "Tøm Nettleserens Buffer";
+"cache_cleared" = "Bufferet Ble Tømt";
 "icon_type" = "Ikontype";
 "info" = "Informasjon";
 "select_sitemap" = "Velg Sitemap";

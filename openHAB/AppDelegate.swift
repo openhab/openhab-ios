@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
         didSet {
-            if let session = session {
+            if let session {
                 session.delegate = WatchMessageService.singleton
                 session.activate()
                 os_log("Paired watch %{PUBLIC}@, watch app installed %{PUBLIC}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
@@ -110,7 +110,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
 
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
-            guard let self = self else { return }
+            guard let self else { return }
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
             self.getNotificationSettings()
@@ -177,7 +177,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
 
             let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
-            if let soundPath = soundPath {
+            if let soundPath {
                 do {
                     os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
 

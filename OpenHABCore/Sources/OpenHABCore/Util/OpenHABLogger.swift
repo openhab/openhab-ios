@@ -22,7 +22,7 @@ final class OpenHABLogger: EventMonitor {
     }
 
     // Event called whenever a DataRequest has parsed a response.
-    func request<Value>(_ request: DataRequest, didParseResponse response: DataResponse<Value, AFError>) {
+    func request(_ request: DataRequest, didParseResponse response: DataResponse<some Any, AFError>) {
         os_log("Finished %{PUBLIC}@", log: .alamofire, type: .debug, response.error.debugDescription)
     }
 }

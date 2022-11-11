@@ -31,7 +31,7 @@ class MapViewTableViewCell: GenericUITableViewCell {
                 mapView.removeAnnotations(mapView.annotations)
 
                 if widget?.item?.stateAsLocation() != nil {
-                    if let widget = widget {
+                    if let widget {
                         mapView.addAnnotation(widget)
                     }
                     mapView.setRegion(MKCoordinateRegion(center: (widget?.coordinate)!, latitudinalMeters: 1000.0, longitudinalMeters: 1000.0), animated: false)

@@ -44,7 +44,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
         }
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
-            guard let item = item else {
+            guard let item else {
                 completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(itemName))
                 return
             }
