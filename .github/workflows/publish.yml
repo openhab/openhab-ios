@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-12
 
     steps:
-      - uses: maxim-lobanov/setup-xcode@v1.1
+      - uses: maxim-lobanov/setup-xcode@v1.5.1
         with:
           xcode-version: latest-stable
 
@@ -34,21 +34,17 @@ jobs:
           echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
       - name: SSH Keys
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: |
             ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
-
-      - name: Get the current branch name
-        run: echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
-        id: extract_branch
 
       - name: Deploy on TestFlight
         env:
           OH_CROWDIN_PROJECT_ID: openhab-ios
           OH_CROWDIN_USERNAME: ${{ secrets.OH_CROWDIN_USERNAME }}
           OH_CROWDIN_ACCOUNT_KEY: ${{ secrets.OH_CROWDIN_ACCOUNT_KEY }}
-          BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
+          BRANCH_NAME: ${{ github.ref_name }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
@@ -57,7 +53,7 @@ jobs:
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
-        uses: maierj/fastlane-action@v2.2.1
+        uses: maierj/fastlane-action@v2.3.0
         with:
           lane: beta
           options: '{ "bump": "${{ github.event.inputs.bump_type }}" }'

@@ -31,7 +31,7 @@
 "discovering_oh" = "Discovering openHAB";
 "settings_not_received" = "Settings not yet received from phone.";
 "retry" = "Retry";
-"warning" = "Warning";
+"warning" = "Varoitus";
 "version" = "Version";
 "active_url" = "Active URL";
 "local_url" = "Local URL";
