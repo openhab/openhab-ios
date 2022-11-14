@@ -132,10 +132,10 @@ public extension Endpoint {
         } else {
             endpoint.queryItems.append(URLQueryItem(name: "items", value: name))
         }
-        if let service = service, !service.isEmpty {
+        if let service, !service.isEmpty {
             endpoint.queryItems.append(URLQueryItem(name: "service", value: service))
         }
-        if let legend = legend {
+        if let legend {
             endpoint.queryItems.append(URLQueryItem(name: "legend", value: String(legend)))
         }
         switch theme {
@@ -148,7 +148,7 @@ public extension Endpoint {
     }
 
     static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType) -> Endpoint {
-        guard let icon = icon, !icon.isEmpty else {
+        guard let icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
 

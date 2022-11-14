@@ -19,7 +19,7 @@ extension UITableView {
         return cell
     }
 
-    final func register<T: UITableViewCell>(cellType: T.Type) {
+    final func register(cellType: (some UITableViewCell).Type) {
         register(cellType.self, forCellReuseIdentifier: cellType.reuseIdentifier)
     }
 }

@@ -26,11 +26,11 @@ disabled_rules: # rule identifiers to exclude from running
   - force_cast
   - todo
 
+included:
+  - ./
 excluded:
-  - ../Pods
-  - ../fastlane
-  - ../BuildTools
-  - ../OpenHABCore/.build
+  - ./fastlane
+  - ./OpenHABCore/.build
 
 nesting:
     type_level: 2

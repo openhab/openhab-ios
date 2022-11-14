@@ -153,7 +153,7 @@ public class ClientCertificateManager {
             // Import PKCS12 client cert
             importingRawCert = try Data(contentsOf: url)
 
-            if let delegate = delegate {
+            if let delegate {
                 delegate.askForClientCertificateImport(self)
             } else {
                 return false
@@ -209,7 +209,7 @@ public class ClientCertificateManager {
             os_log("SecItemAdd(key) result=%{PUBLIC}d", log: .default, type: .info, status)
 
             // Add  the cert chain
-            if let importingCertChain = importingCertChain {
+            if let importingCertChain {
                 for cert in importingCertChain where cert != clientCert {
                     let addCertQuery: [String: Any] = [
                         kSecClass as String: kSecClassCertificate,
@@ -258,9 +258,9 @@ public class ClientCertificateManager {
 
     func evaluateTrust(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let dns = challenge.protectionSpace.distinguishedNames
-        if let dns = dns {
+        if let dns {
             let identity = evaluateTrust(distinguishedNames: dns)
-            if let identity = identity {
+            if let identity {
                 var cert: SecCertificate?
                 SecIdentityCopyCertificate(identity, &cert)
                 let certChain = buildIdentityCertChain(cert: cert!)

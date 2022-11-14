@@ -121,7 +121,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     }
 
     var adjustedValue: Double {
-        if let item = item {
+        if let item {
             return adj(item.stateAsDouble())
         } else {
             return minValue
@@ -169,7 +169,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     }
 
     public func sendItemUpdate(state: NumberState?) {
-        guard let item = item, let state = state else {
+        guard let item, let state else {
             os_log("ItemUpdate for Item or State = nil", log: .default, type: .info)
             return
         }
@@ -187,11 +187,11 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     }
 
     func sendCommand(_ command: String?) {
-        guard let item = item else {
+        guard let item else {
             os_log("Command for Item = nil", log: .default, type: .info)
             return
         }
-        guard let sendCommand = sendCommand else {
+        guard let sendCommand else {
             os_log("sendCommand closure not set", log: .default, type: .info)
             return
         }
@@ -339,7 +339,7 @@ extension ObservableOpenHABWidget.CodingData {
 }
 
 //  Recursive parsing of nested widget structure
-extension Array where Element == ObservableOpenHABWidget {
+extension [ObservableOpenHABWidget] {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)

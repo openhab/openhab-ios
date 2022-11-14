@@ -144,7 +144,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     }
 
     public func sendItemUpdate(state: NumberState?) {
-        guard let item = item, let state = state else {
+        guard let item, let state else {
             os_log("ItemUpdate for Item or State = nil", log: .default, type: .info)
             return
         }
@@ -162,11 +162,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     }
 
     public func sendCommand(_ command: String?) {
-        guard let item = item else {
+        guard let item else {
             os_log("Command for Item = nil", log: .default, type: .info)
             return
         }
-        guard let sendCommand = sendCommand else {
+        guard let sendCommand else {
             os_log("sendCommand closure not set", log: .default, type: .info)
             return
         }
@@ -179,7 +179,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 
     public func iconState() -> String {
         var iconState = item?.state ?? ""
-        if let item = item, let itemState = item.state {
+        if let item, let itemState = item.state {
             if item.isOfTypeOrGroupType(.color) {
                 // For items that control a color item fetch the correct icon
                 if type == .slider || (type == .switchWidget && mappings.isEmpty) {
@@ -338,7 +338,7 @@ extension OpenHABWidget.CodingData {
 }
 
 //  Recursive parsing of nested widget structure
-extension Array where Element == OpenHABWidget {
+extension [OpenHABWidget] {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)

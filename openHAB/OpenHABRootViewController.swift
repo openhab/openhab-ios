@@ -179,7 +179,11 @@ class OpenHABRootViewController: UIViewController {
         if let menu = SideMenuManager.default.rightMenuNavigationController {
             // don't try and push an already visible menu less you crash the app
             dismiss(animated: false) {
-                self.present(menu, animated: true)
+                var topMostViewController = UIApplication.shared.keyWindow?.rootViewController
+                while let presentedViewController = topMostViewController?.presentedViewController {
+                    topMostViewController = presentedViewController
+                }
+                topMostViewController?.present(menu, animated: true)
             }
         }
     }
@@ -207,6 +211,7 @@ class OpenHABRootViewController: UIViewController {
             }
             addView(viewController: targetView)
             currentView = targetView
+            appData?.currentView = target
             // Don't save our view in demo mode
             if !Preferences.demomode {
                 Preferences.defaultView = currentView.viewName()

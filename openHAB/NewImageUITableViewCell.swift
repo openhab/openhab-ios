@@ -37,7 +37,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     }
 
     private var widgetPayload: ImageType {
-        guard let widget = widget else { return .empty }
+        guard let widget else { return .empty }
 
         switch widget.type {
         case .chart:
@@ -135,7 +135,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
             mainImageView.image = image
             didLoad?()
         case let .link(url):
-            guard let url = url else { return }
+            guard let url else { return }
             loadRemoteImage(withURL: url)
         default:
             os_log("Failed to determine widget payload.", log: .urlComposition, type: .debug)

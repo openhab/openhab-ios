@@ -39,7 +39,7 @@ class OpenHabService {
                 resultHandler(Sitemap(frames: []), "Can't read the sitemap from '\(requestUrl)'. Message is '\(String(describing: error))'")
                 return
             }
-            guard let data = data else { return }
+            guard let data else { return }
 
             DispatchQueue.main.async {
                 do {
