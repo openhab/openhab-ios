@@ -179,6 +179,7 @@ platform :ios do
 
             set_github_release(
               api_token: is_ci? ? ENV['ACCESS_TOKEN'] : ENV['GITHUB_API_TOKEN'],
+              api_bearer: ENV['ACCESS_TOKEN'],
               repository_name: 'openhab/openhab-ios',
               name: "#{type.capitalize} version #{version}",
               tag_name: version.to_s,
