@@ -19,7 +19,7 @@ platform :ios do
     before_all do |lane, options|
         if is_ci? && "#{lane}" != "unittests"
             ensure_env_vars(
-                env_vars: %w[ASC_API_KEY ASC_API_KEY_ID ASC_API_KEY_ISSUER_ID]
+                env_vars: %w[ASC_API_KEY ASC_API_KEY_ID ASC_API_KEY_ISSUER_ID FASTLANE_GITHUB_RELEASE_API_BEARER]
             )
         end
 
@@ -176,17 +176,29 @@ platform :ios do
             )
             push_to_git_remote(tags: true)
             sh 'git checkout develop'
-
-            set_github_release(
-              api_token: is_ci? ? ENV['ACCESS_TOKEN'] : ENV['GITHUB_API_TOKEN'],
-              api_bearer: ENV['ACCESS_TOKEN'],
-              repository_name: 'openhab/openhab-ios',
-              name: "#{type.capitalize} version #{version}",
-              tag_name: version.to_s,
-              description: changelog,
-              commitish: 'main'
-              # upload_assets: no assets supported
-            )
+            
+            if is_ci?
+                set_github_release(
+                  api_bearer: ENV['FASTLANE_GITHUB_RELEASE_API_BEARER'],
+                  repository_name: 'openhab/openhab-ios',
+                  name: "#{type.capitalize} version #{version}",
+                  tag_name: version.to_s,
+                  description: changelog,
+                  commitish: 'main'
+                  # upload_assets: no assets supported
+                )
+            else 
+                set_github_release(
+                  api_token: ENV['GITHUB_API_TOKEN'],
+                  repository_name: 'openhab/openhab-ios',
+                  name: "#{type.capitalize} version #{version}",
+                  tag_name: version.to_s,
+                  description: changelog,
+                  commitish: 'main'
+                  # upload_assets: no assets supported
+                )
+            end
+            
         end
 
     end
