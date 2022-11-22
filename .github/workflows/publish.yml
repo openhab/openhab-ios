@@ -59,4 +59,3 @@ jobs:
           lane: beta
           options: '{ "bump": "${{ github.event.inputs.bump_type }}" }'
           skip-tracking: true
-          xcode-version: '14.1'
