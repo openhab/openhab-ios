@@ -310,6 +310,11 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         os_log("webViewWebContentProcessDidTerminate  reloading view", log: .wkwebview, type: .info)
         reloadView()
     }
+
+    @available(iOS 15, *)
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(Preferences.alwaysAllowWebRTC ? .grant : .prompt)
+    }
 }
 
 extension OpenHABWebViewController: WKUIDelegate {
