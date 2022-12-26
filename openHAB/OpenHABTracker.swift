@@ -16,7 +16,7 @@ import os.log
 import SystemConfiguration
 
 protocol OpenHABTrackerDelegate: AnyObject {
-    func openHABTracked(_ openHABUrl: URL?)
+    func openHABTracked(_ openHABUrl: URL?, version: Int)
     func openHABTrackingProgress(_ message: String?)
     func openHABTrackingError(_ error: Error)
 }
@@ -26,17 +26,33 @@ protocol OpenHABTrackerExtendedDelegate: OpenHABTrackerDelegate {
 }
 
 class OpenHABTracker: NSObject {
-    var oldReachabilityStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
+    static var shared = OpenHABTracker()
 
-    weak var delegate: OpenHABTrackerDelegate?
-    var openHABDemoMode = false
-    var openHABLocalUrl = ""
-    var openHABRemoteUrl = ""
-    var netService: NetService?
-    var reach = NetworkReachabilityManager()
+    public var multicastDelegate = MulticastDelegate<OpenHABTrackerDelegate>()
+    private var oldReachabilityStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
+    private let reach = NetworkReachabilityManager()
+    private var openHABDemoMode = false
+    private var openHABLocalUrl = ""
+    private var openHABRemoteUrl = ""
+    private var netService: NetService?
+    private var restartTimer: Timer?
 
-    override init() {
+    var appData: OpenHABDataObject? {
+        AppDelegate.appDelegate.appData
+    }
+
+    override private init() {
         super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(restart), name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
+        start()
+    }
+
+    @objc func restart() {
+        reach?.stopListening()
+        start()
+    }
+
+    private func start() {
         openHABDemoMode = Preferences.demomode
         openHABLocalUrl = Preferences.localUrl
         openHABRemoteUrl = Preferences.remoteUrl
@@ -47,43 +63,39 @@ class OpenHABTracker: NSObject {
             openHABDemoMode = true
         }
         #endif
-    }
 
-    func start() {
         // Start NetworkReachabilityManager.Listener
         oldReachabilityStatus = reach?.status
         reach?.startListening { [weak self] status in
-            guard let self = self else { return }
-
+            guard let self else { return }
             let nStatus = status
-            if nStatus != self.oldReachabilityStatus {
-                if let oldReachabilityStatus = self.oldReachabilityStatus {
-                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
-                }
-                self.oldReachabilityStatus = nStatus
-                (self.delegate as? OpenHABTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
-                if self.isNetworkConnected() {
-                    self.reach?.stopListening()
-                    self.start()
+            // use a timer to prevent bouncing/flapping around when switching between wifi, vpn, and wwan
+            self.restartTimer?.invalidate()
+            self.restartTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
+                if nStatus != self.oldReachabilityStatus {
+                    if let oldReachabilityStatus = self.oldReachabilityStatus {
+                        os_log("OpenHABTracker Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
+                    }
+                    self.oldReachabilityStatus = nStatus
+                    // (self.delegate as? OpenHABTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
+                    if self.isNetworkConnected() {
+                        self.restart()
+                    }
                 }
             }
         }
-        // TODO:
-//        if !(reach?.startListening() ?? false) {
-//            os_log("Starting NetworkReachabilityManager.Listener failed.", log: .remoteAccess, type: .info)
-//        }
 
         // Check if any network is available
         if isNetworkConnected() {
             // Check if demo mode is switched on in preferences
             if openHABDemoMode {
                 os_log("OpenHABTracker demo mode preference is on", log: .default, type: .info)
-                trackedDemoMode()
+                tryDemoMode()
             } else {
                 // Check if network is WiFi. If not, go for remote URL
                 if !isNetworkWiFi(), !isNetworkVPN() {
                     os_log("OpenHABTracker network is not WiFi", log: .default, type: .info)
-                    trackedRemoteUrl()
+                    tryRemoteUrl()
                     // If it is WiFi
                 } else {
                     os_log("OpenHABTracker network is Wifi", log: .default, type: .info)
@@ -91,18 +103,7 @@ class OpenHABTracker: NSObject {
                     if openHABLocalUrl.isEmpty {
                         startDiscovery()
                     } else {
-                        let request = URLRequest(url: URL(string: openHABLocalUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                        NetworkConnection.shared.manager.request(request)
-                            .validate()
-                            .responseData { response in
-                                switch response.result {
-                                case .success:
-                                    self.trackedLocalUrl()
-                                case .failure:
-                                    self.trackedRemoteUrl()
-                                }
-                            }
-                            .resume()
+                        tryLocalThenRemoteUrl()
                     }
                 }
             }
@@ -110,54 +111,102 @@ class OpenHABTracker: NSObject {
             var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("network_not_available", comment: "")
             let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
-            delegate?.openHABTrackingError(trackingError)
+            multicastDelegate.invoke { $0.openHABTrackingError(trackingError) }
         }
     }
 
-    func trackedLocalUrl() {
-        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_local", comment: ""))
+    private func tryLocalThenRemoteUrl() {
+        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("connecting_local", comment: "")) }
         let openHABUrl = normalizeUrl(openHABLocalUrl)
-        trackedUrl(URL(string: openHABUrl!))
+        getServerInfo(URL(string: openHABUrl!)) { url, version, error in
+            if let error {
+                os_log("OpenHABTracker failed connecting to local, trying remote: %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                self.tryRemoteUrl()
+            } else {
+                self.appData?.openHABVersion = version
+                self.appData?.openHABRootUrl = url?.absoluteString ?? ""
+                self.multicastDelegate.invoke { $0.openHABTracked(url, version: version) }
+            }
+        }
     }
 
-    func trackedRemoteUrl() {
+    private func tryRemoteUrl() {
         let openHABUrl = normalizeUrl(openHABRemoteUrl)
         if !(openHABUrl ?? "").isEmpty {
-            // delegate?.openHABTrackingProgress("Connecting to remote URL")
-            trackedUrl(URL(string: openHABUrl!))
+            multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("connecting_remote", comment: "")) }
+            tryUrl(URL(string: openHABUrl!))
         } else {
             var errorDetail: [AnyHashable: Any] = [:]
             errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("remote_url_not_configured", comment: "")
             let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String: Any])
-            delegate?.openHABTrackingError(trackingError)
+            multicastDelegate.invoke { $0.openHABTrackingError(trackingError) }
         }
     }
 
-    func trackedDiscoveryUrl(_ discoveryUrl: URL?) {
-        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_discovered", comment: ""))
-        trackedUrl(discoveryUrl)
+    private func tryDiscoveryUrl(_ discoveryUrl: URL?) {
+        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("connecting_discovered", comment: "")) }
+        tryUrl(discoveryUrl)
     }
 
-    func trackedDemoMode() {
-        delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
-        trackedUrl(URL(staticString: "https://demo.openhab.org"))
+    private func tryDemoMode() {
+        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: "")) }
+        tryUrl(URL(staticString: "https://demo.openhab.org"))
     }
 
-    func trackedUrl(_ trackedUrl: URL?) {
-        delegate?.openHABTracked(trackedUrl)
+    private func tryUrl(_ tryUrl: URL?) {
+        getServerInfo(tryUrl) { url, version, error in
+            if let error {
+                self.multicastDelegate.invoke { $0.openHABTrackingError(error) }
+            } else {
+                self.appData?.openHABVersion = version
+                self.appData?.openHABRootUrl = url?.absoluteString ?? ""
+                self.multicastDelegate.invoke { $0.openHABTracked(url, version: version) }
+            }
+        }
     }
 
-    func startDiscovery() {
+    private func getServerInfo(_ url: URL?, completion: @escaping (URL?, Int, Error?) -> Void) {
+        let strUrl = url?.absoluteString ?? ""
+        os_log("OpenHABTracker getServerInfo, trying: %{PUBLIC}@", log: .default, type: .info, strUrl)
+        NetworkConnection.tracker(openHABRootUrl: strUrl) { response in
+            os_log("OpenHABTracker getServerInfo, recieved data for URL: %{PUBLIC}@", log: .default, type: .info, strUrl)
+            switch response.result {
+            case let .success(data):
+                do {
+                    let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+                    os_log("OpenHABTracker openHAB version %@", log: .remoteAccess, type: .info, serverProperties.version)
+                    // OH versions 2.0 through 2.4 return "1" as thier version, so set the floor to 2 so we do not think this is a OH 1.x serevr
+                    let version = max(2, Int(serverProperties.version) ?? 2)
+                    completion(url, version, nil)
+                } catch {
+                    // testing for OH 1.x
+                    let str = String(decoding: data, as: UTF8.self)
+                    if str.hasPrefix("<?xml") {
+                        completion(url, 1, nil)
+                    } else {
+                        os_log("OpenHABTracker Could not decode response as JSON, %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                        completion(url, 0, error)
+                    }
+                }
+            case let .failure(error):
+                os_log("OpenHABTracker getServerInfo ERROR for %{PUBLIC}@ : %{PUBLIC}@ %d", log: .remoteAccess, type: .error, strUrl, error.localizedDescription, response.response?.statusCode ?? 0)
+                completion(url, 0, error)
+            }
+        }
+    }
+
+    private func startDiscovery() {
         os_log("OpenHABTracking starting Bonjour discovery", log: .default, type: .info)
 
-        delegate?.openHABTrackingProgress(NSLocalizedString("discovering_oh", comment: ""))
+        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("discovering_oh", comment: "")) }
+
         netService = NetService(domain: "local.", type: "_openhab-server-ssl._tcp.", name: "openHAB-ssl")
         netService!.delegate = self
         netService!.resolve(withTimeout: 5.0)
     }
 
     func normalizeUrl(_ url: String?) -> String? {
-        if let url = url, url.hasSuffix("/") {
+        if let url, url.hasSuffix("/") {
             return String(url.dropLast())
         }
         return url
@@ -213,12 +262,12 @@ extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
 
         let openhabUrl = "\(resolvedComponents.url!)"
         os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
-        trackedDiscoveryUrl(resolvedComponents.url)
+        tryDiscoveryUrl(resolvedComponents.url)
     }
 
     func netService(_ netService: NetService, didNotResolve errorDict: [String: NSNumber]) {
         os_log("OpenHABTracker discovery didn't resolve openHAB", log: .default, type: .info)
-        trackedRemoteUrl()
+        tryRemoteUrl()
     }
 }
 

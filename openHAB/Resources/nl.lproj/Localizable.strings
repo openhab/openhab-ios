@@ -24,6 +24,7 @@
 "copy_label" = "Item label kopiëren";
 "network_not_available" = "Netwerk is niet beschikbaar.";
 "connecting_local" = "Verbinden naar lokale URL";
+"connecting_remote" = "Verbinden met externe URL";
 "remote_url_not_configured" = "Externe URL is niet geconfigureerd.";
 "connecting_discovered" = "Verbinden naar gevonden URL";
 "running_demo_mode" = "Uitvoeren in demo-modus. Controleer instellingen om demomodus uit te schakelen.";
@@ -45,6 +46,8 @@
 "disable_idle_timeout" = "Schermtimeout uitschakelen";
 "real_time_sliders" = "Realtime schuifregelaars";
 "clear_image_cache" = "Leeg de afbeeldingencache";
+"clear_web_cache" = "Wis webcache";
+"cache_cleared" = "Cache gewist";
 "icon_type" = "Icoontype";
 "info" = "Info";
 "select_sitemap" = "Selecteer Sitemap";
@@ -70,3 +73,7 @@
 "off" = "uit";
 "empty" = "leeg";
 "sortSitemapsBy" = "Sorteer sitemaps op";
+"mainui_settings" = "Main UI Instellingen";
+"sitemap_settings" = "Sitemap instellingen";
+"about_settings" = "Over";
+"uselastpath_settings" = "Laatst bezochte pad gebruiken?";

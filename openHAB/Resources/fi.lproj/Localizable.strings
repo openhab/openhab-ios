@@ -24,13 +24,14 @@
 "copy_label" = "Copy item label";
 "network_not_available" = "Network is not available.";
 "connecting_local" = "Connecting to local URL";
+"connecting_remote" = "Connecting to remote URL";
 "remote_url_not_configured" = "Remote URL is not configured.";
 "connecting_discovered" = "Connecting to discovered URL";
 "running_demo_mode" = "Running in demo mode. Check settings to disable demo mode.";
 "discovering_oh" = "Discovering openHAB";
 "settings_not_received" = "Settings not yet received from phone.";
 "retry" = "Retry";
-"warning" = "Warning";
+"warning" = "Varoitus";
 "version" = "Version";
 "active_url" = "Active URL";
 "local_url" = "Local URL";
@@ -45,6 +46,8 @@
 "disable_idle_timeout" = "Disable Idle Timeout";
 "real_time_sliders" = "Real-time Sliders";
 "clear_image_cache" = "Clear Image Cache";
+"clear_web_cache" = "Clear Web Cache";
+"cache_cleared" = "Cache Cleared";
 "icon_type" = "Icon Type";
 "info" = "Info";
 "select_sitemap" = "Select Sitemap";
@@ -70,3 +73,7 @@
 "off" = "off";
 "empty" = "empty";
 "sortSitemapsBy" = "Sitemapien järjestys";
+"mainui_settings" = "Main UI Settings";
+"sitemap_settings" = "Sitemap Settings";
+"about_settings" = "About";
+"uselastpath_settings" = "Käytä edellistä polkua?";

@@ -1,0 +1,3 @@
+"NSLocalNetworkUsageDescription" = "openHAB trenger tilgang til ditt lokale nettverk for å koble til openHAB-serveren.";
+"NSCameraUsageDescription" = "openHAB trenger tilgang til kameraet.";
+"NSMicrophoneUsageDescription" = "openHAB trenger tilgang til mikrofonen.";

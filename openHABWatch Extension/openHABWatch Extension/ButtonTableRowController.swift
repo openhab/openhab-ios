@@ -19,7 +19,7 @@ class ButtonTableRowController: NSObject {
     @IBOutlet private var buttonSwitch: WKInterfaceSwitch!
 
     @IBAction private func doSwitchButtonPressed(_ value: Bool) {
-        guard let item = item else { return }
+        guard let item else { return }
         let command = value ? "ON" : "OFF"
         switchOpenHabItem(for: item, command: command)
     }
@@ -46,7 +46,7 @@ class ButtonTableRowController: NSObject {
         OpenHabService.singleton.switchOpenHabItem(for: item, command: command) { (data, response, error) in
 
             self.interfaceController!.hideActivityImage()
-            guard let data = data, error == nil else { // check for fundamental networking error
+            guard let data, error == nil else { // check for fundamental networking error
                 self.interfaceController!.displayAlert(message: "error=\(String(describing: error))")
                 return
             }

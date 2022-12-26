@@ -16,7 +16,7 @@ import os.log
 // https://medium.com/@AladinWay/write-a-networking-layer-in-swift-4-using-alamofire-5-and-codable-part-2-perform-request-and-b5c7ee2e012d
 
 public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
-
+    os_log("onReceiveSessionTaskChallenge host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 
@@ -35,7 +35,7 @@ public let onReceiveSessionTaskChallenge = { (_: URLSession, _: URLSessionTask, 
 }
 
 public let onReceiveSessionChallenge = { (_: URLSession, challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) in
-
+    os_log("onReceiveSessionChallenge host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 
@@ -179,7 +179,7 @@ public class NetworkConnection {
                             longPolling: Bool,
                             openHABVersion: Int,
                             completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
-        guard let url = url else { return nil }
+        guard let url else { return nil }
 
         var pageRequest = URLRequest(url: url)
 

@@ -1,1 +1,3 @@
-
+Updated support for the openHAB 3.3 Main UI
+Improved Main UI network resiliency
+Improved layout of settings

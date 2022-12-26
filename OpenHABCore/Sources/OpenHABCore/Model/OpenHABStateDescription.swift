@@ -32,7 +32,7 @@ public class OpenHABStateDescription {
 
         let regexPattern = #"^[A-Z]+(\(.*\))?:(.*)$"#
         let regex = try? NSRegularExpression(pattern: regexPattern, options: .caseInsensitive)
-        if let pattern = pattern {
+        if let pattern {
             let nsrange = NSRange(pattern.startIndex ..< pattern.endIndex, in: pattern)
             if let match = regex?.firstMatch(in: pattern, options: [], range: nsrange) {
                 if let range = Range(match.range(at: 2), in: pattern) {

@@ -12,14 +12,6 @@
 import Foundation
 
 public struct NumberState: CustomStringConvertible, Equatable {
-    // Access to default memberwise initializer not permitted outside of package
-
-    public init(value: Double, unit: String? = "", format: String? = "") {
-        self.value = value
-        self.unit = unit
-        self.format = format
-    }
-
     public var description: String {
         toString(locale: Locale.current)
     }
@@ -28,8 +20,15 @@ public struct NumberState: CustomStringConvertible, Equatable {
     private(set) var unit: String? = ""
     private(set) var format: String? = ""
 
+    // Access to default memberwise initializer not permitted outside of package
+    public init(value: Double, unit: String? = "", format: String? = "") {
+        self.value = value
+        self.unit = unit
+        self.format = format
+    }
+
     public func toString(locale: Locale?) -> String {
-        if let format = format, format.isEmpty == false {
+        if let format, format.isEmpty == false {
             let actualFormat = format.replacingOccurrences(of: "%unit%", with: unit ?? "")
             if format.contains("%d") == true {
                 return String(format: actualFormat, locale: locale, Int(value))
@@ -37,7 +36,7 @@ public struct NumberState: CustomStringConvertible, Equatable {
                 return String(format: actualFormat, locale: locale, value)
             }
         }
-        if let unit = unit, unit.isEmpty == false {
+        if let unit, unit.isEmpty == false {
             return "\(formatValue()) \(unit)"
         } else {
             return formatValue()

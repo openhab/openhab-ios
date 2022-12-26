@@ -55,7 +55,7 @@ public final class OpenHABItem: NSObject, CommItem {
     public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?) {
         self.name = name
         self.type = type.toItemType()
-        if let state = state, (state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame) {
+        if let state, (state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame) {
             self.state = nil
         } else {
             self.state = state
@@ -102,7 +102,7 @@ public extension OpenHABItem {
     }
 
     func stateAsUIColor() -> UIColor {
-        if let state = state {
+        if let state {
             let values = state.components(separatedBy: ",")
             if values.count == 3 {
                 let hue = CGFloat(state: values[0], divisor: 360)
@@ -121,7 +121,7 @@ public extension OpenHABItem {
     func stateAsLocation() -> CLLocation? {
         if type == .location {
             // Example of `state` string for location: '0.000000,0.000000,0.0' ('<latitude>,<longitude>,<altitude>')
-            if let state = state {
+            if let state {
                 let locationComponents = state.components(separatedBy: ",")
                 if locationComponents.count >= 2 {
                     let latitude = CLLocationDegrees(Double(locationComponents[0]) ?? 0.0)

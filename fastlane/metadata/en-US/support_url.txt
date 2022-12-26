@@ -1,1 +1,1 @@
-http://www.openhabfoundation.org
+http://www.openhab.org
