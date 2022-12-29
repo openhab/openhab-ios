@@ -16,16 +16,18 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-            bundle install --redownload
-
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          
       - name: Fastlane unit tests
         env:
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
-        uses: maierj/fastlane-action@v2.0.1
+        uses: maierj/fastlane-action@v3.0.0
         with:
           lane: unittests
           skip-tracking: true
