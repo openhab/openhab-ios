@@ -3,7 +3,6 @@ opt_in_rules:
   - empty_count
   - redundant_type_annotation
   - trailing_closure
-  - unused_import
   - implicit_return
   - multiline_function_chains
   - anyobject_protocol

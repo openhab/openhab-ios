@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -62,6 +62,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
     }
 
     func sendColorUpdate(color: UIColor) {
+        // swiftlint:disable:next large_tuple
         var (hue, saturation, brightness, alpha): (CGFloat, CGFloat, CGFloat, CGFloat) = (0.0, 0.0, 0.0, 0.0)
         color.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
 
