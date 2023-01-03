@@ -376,7 +376,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
                     self?.sendCommand(item, commandToSend: command)
                 }
 
-                // If there are no cell in the view, the view loaded for the first time or the view is empty an cannot have element which are in transition
+                // If there are no cell in the view, the view loaded for the first time or the view is empty and cannot have an element which is in transition
                 if self.widgetTableView.visibleCells.isEmpty {
                     self.widgetTableView.reloadData()
                 }
