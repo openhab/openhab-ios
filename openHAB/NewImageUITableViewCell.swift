@@ -78,15 +78,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
-        if widget.type == .chart {
-            loadImage()
-        }
-    }
-
     override func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
 
@@ -183,6 +174,15 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     func refreshImage(_ timer: Timer?) {
         os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
         loadImage()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
+        if widget.type == .chart {
+            loadImage()
+        }
     }
 }
 
