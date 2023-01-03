@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -22,10 +22,8 @@ class MulticastDelegate<T> {
     }
 
     func remove(_ delegateToRemove: T) {
-        for delegate in delegates.allObjects.reversed() {
-            if delegate === delegateToRemove as AnyObject {
-                delegates.remove(delegate)
-            }
+        for delegate in delegates.allObjects.reversed() where delegate === delegateToRemove as AnyObject {
+            delegates.remove(delegate)
         }
     }
 

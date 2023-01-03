@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -41,7 +41,16 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         switch widget.type {
         case .chart:
-            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: chartStyle).url)
+            return .link(url: Endpoint.chart(
+                rootUrl: appData!.openHABRootUrl,
+                period: widget.period,
+                type: widget.item?.type,
+                service: widget.service,
+                name: widget.item?.name,
+                legend: widget.legend,
+                theme: chartStyle,
+                forceAsItem: widget.forceAsItem
+            ).url)
         case .image:
             if let item = widget.item {
                 return widgetPayload(fromItem: item)
@@ -76,15 +85,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
         ])
 
         chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
-    }
-
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
-        if widget.type == .chart {
-            loadImage()
-        }
     }
 
     override func willMove(toSuperview newSuperview: UIView?) {
@@ -183,6 +183,15 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     func refreshImage(_ timer: Timer?) {
         os_log("Refreshing image on %g seconds schedule", log: .viewCycle, type: .info, Double(widget.refresh) / 1000)
         loadImage()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        chartStyle = OHInterfaceStyle.current == .light ? ChartStyle.light : ChartStyle.dark
+        if widget.type == .chart {
+            loadImage()
+        }
     }
 }
 

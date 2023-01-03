@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -73,6 +73,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var widgets: [ObservableOpenHABWidget] = []
     public var visibility = true
     public var switchSupport = false
+    public var forceAsItem: Bool?
 
     @Published var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -210,7 +211,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
 extension ObservableOpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget]) {
+    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget], forceAsItem: Bool?) {
         self.init()
 
         id = widgetId
@@ -248,6 +249,8 @@ extension ObservableOpenHABWidget {
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
         self.maxValue = max(self.minValue, self.maxValue)
         self.step = abs(self.step)
+
+        self.forceAsItem = forceAsItem
 
         stateEnumBinding = stateEnum
     }
@@ -323,6 +326,7 @@ extension ObservableOpenHABWidget {
         let linkedPage: OpenHABLinkedPage?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [ObservableOpenHABWidget.CodingData]
+        let forceAsItem: Bool?
     }
 }
 
@@ -330,7 +334,7 @@ extension ObservableOpenHABWidget {
 extension ObservableOpenHABWidget.CodingData {
     var openHABWidget: ObservableOpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
-        return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets)
+        return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, forceAsItem: forceAsItem)
     }
 }
 

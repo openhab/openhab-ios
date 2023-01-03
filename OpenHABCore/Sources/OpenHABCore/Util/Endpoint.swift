@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -114,7 +114,7 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light) -> Endpoint {
+    static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light, forceAsItem: Bool?) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)
         var endpoint = Endpoint(
             baseURL: rootUrl,
@@ -125,7 +125,9 @@ public extension Endpoint {
             ]
         )
 
-        if type == .group {
+        let forceAsItem = forceAsItem ?? false
+
+        if type == .group, !forceAsItem {
             endpoint.queryItems.append(URLQueryItem(name: "groups", value: name))
         } else {
             endpoint.queryItems.append(URLQueryItem(name: "items", value: name))
