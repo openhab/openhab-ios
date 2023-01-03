@@ -345,8 +345,29 @@ class OpenHABSitemapViewController: OpenHABViewController {
                         os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                     }
                 }
+                // Store old widgets and isInTransition states for the next update
+                let oldWidgets = self.currentPage?.widgets ?? []
 
                 self.currentPage = openHABSitemapPage
+
+                // openhab#646 Wrong slider movement fix
+                if oldWidgets.count == self.currentPage?.widgets.count {
+                    for cnt in 0 ... oldWidgets.count - 1 {
+                        // reassign the isInTransition state for each new element
+                        self.currentPage?.widgets[cnt].isInTransition = oldWidgets[cnt].isInTransition
+
+                        if self.currentPage?.widgets[cnt].isInTransition == false {
+                            // if the element is not in transition, we will only update the current row
+                            self.widgetTableView.reloadRows(at: [IndexPath(item: cnt, section: 0)], with: UITableView.RowAnimation.none)
+                        } else {
+                            // Element is in transition, we reassign the widget objects from the receiver stream/object model
+                            if let currentCell = self.widgetTableView.cellForRow(at: IndexPath(item: cnt, section: 0)) as? GenericUITableViewCell {
+                                currentCell.widget = self.currentPage?.widgets[cnt]
+                            }
+                        }
+                    }
+                }
+
                 if self.isFiltering {
                     self.filterContentForSearchText(self.search.searchBar.text)
                 }
@@ -354,7 +375,11 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 self.currentPage?.sendCommand = { [weak self] item, command in
                     self?.sendCommand(item, commandToSend: command)
                 }
-                self.widgetTableView.reloadData()
+
+                // If there are no cell in the view, the view loaded for the first time or the view is empty an cannot have element which are in transition
+                if self.widgetTableView.visibleCells.isEmpty {
+                    self.widgetTableView.reloadData()
+                }
                 self.refreshControl?.endRefreshing()
                 self.parent?.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
 

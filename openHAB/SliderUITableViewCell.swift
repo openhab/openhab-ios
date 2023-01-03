@@ -52,10 +52,15 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBAction private func sliderTouchUp(_ sender: UISlider) {
         sliderDidChange(toValue: widgetValue)
+        widget.isInTransition = false
     }
 
     @IBAction private func sliderTouchOutside(_ sender: UISlider) {
         sliderTouchUp(sender)
+    }
+
+    @IBAction private func sliderTouchDown(_ sender: UISlider) {
+        widget.isInTransition = true
     }
 
     private func adj(_ raw: Double) -> Double {

@@ -98,6 +98,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
     public var switchSupport = false
+    public var isInTransition = false
 
     // Text prior to "["
     public var labelText: String? {
