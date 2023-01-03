@@ -51,36 +51,6 @@ class OpenHABWebViewController: OpenHABViewController {
 
     private lazy var webView: WKWebView = newWebView()
 
-    private func newWebView() -> WKWebView {
-        let config = WKWebViewConfiguration()
-        config.allowsInlineMediaPlayback = true
-        config.mediaTypesRequiringUserActionForPlayback = []
-        // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
-        config.userContentController.add(self, name: "Native")
-        config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
-        let webView = WKWebView(frame: view.bounds, configuration: config)
-        // Alow rotation of webview
-        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        webView.scrollView.bounces = false
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
-        // support dark mode and avoid white flashing when loading
-        webView.isOpaque = false
-        webView.backgroundColor = UIColor.clear
-        // watch for URL changes so we can store the last visited path
-        observation = webView.observe(\.url, options: [.new]) { _, _ in
-            if let webviewURL = webView.url {
-                let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
-                if let path = url?.path {
-                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
-                    // append trailing slash as WebUI/Vue/F7 will try and issue a 302 if the url is navigated to directly, this can be problamatic on myopenHAB
-                    self.appData?.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
-                }
-            }
-        }
-        return webView
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
@@ -191,6 +161,36 @@ class OpenHABWebViewController: OpenHABViewController {
         "web"
     }
 
+    private func newWebView() -> WKWebView {
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        config.mediaTypesRequiringUserActionForPlayback = []
+        // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
+        config.userContentController.add(self, name: "Native")
+        config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+        let webView = WKWebView(frame: view.bounds, configuration: config)
+        // Alow rotation of webview
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.scrollView.bounces = false
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
+        // support dark mode and avoid white flashing when loading
+        webView.isOpaque = false
+        webView.backgroundColor = UIColor.clear
+        // watch for URL changes so we can store the last visited path
+        observation = webView.observe(\.url, options: [.new]) { _, _ in
+            if let webviewURL = webView.url {
+                let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
+                if let path = url?.path {
+                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
+                    // append trailing slash as WebUI/Vue/F7 will try and issue a 302 if the url is navigated to directly, this can be problamatic on myopenHAB
+                    self.appData?.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                }
+            }
+        }
+        return webView
+    }
+
     deinit {
         observation = nil
     }
@@ -290,7 +290,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                     return
                 }
                 let credential = URLCredential(trust: serverTrust)
-                completionHandler(.useCredential, credential)
+                DispatchQueue.main.async {
+                    completionHandler(.useCredential, credential)
+                }
             } else {
                 var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
                 var credential: URLCredential?
