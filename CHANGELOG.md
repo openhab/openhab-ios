@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Implement forceAsItem support for Charts in Sitemaps 
+- Fixes #689
+
 ## [Version 2.4.53, Build 1580410519] - 2022-08-27Z
 
 - Fixes an incompatibility with openHAB 1.x systems

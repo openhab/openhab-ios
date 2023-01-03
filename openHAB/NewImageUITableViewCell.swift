@@ -41,7 +41,16 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
         switch widget.type {
         case .chart:
-            return .link(url: Endpoint.chart(rootUrl: appData!.openHABRootUrl, period: widget.period, type: widget.item?.type, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: chartStyle).url)
+            return .link(url: Endpoint.chart(
+                rootUrl: appData!.openHABRootUrl,
+                period: widget.period,
+                type: widget.item?.type,
+                service: widget.service,
+                name: widget.item?.name,
+                legend: widget.legend,
+                theme: chartStyle,
+                forceAsItem: widget.forceAsItem
+            ).url)
         case .image:
             if let item = widget.item {
                 return widgetPayload(fromItem: item)
