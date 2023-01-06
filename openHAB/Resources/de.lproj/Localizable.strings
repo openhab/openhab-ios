@@ -77,3 +77,4 @@
 "sitemap_settings" = "Sitemap-Einstellungen";
 "about_settings" = "Über";
 "uselastpath_settings" = "Zuletzt besuchten Pfad verwenden?";
+"always_allow_webrtc" = "Always Allow WebRTC";
