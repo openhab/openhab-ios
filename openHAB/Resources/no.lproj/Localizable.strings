@@ -77,3 +77,4 @@
 "sitemap_settings" = "Innstillinger for Sitemap";
 "about_settings" = "Om";
 "uselastpath_settings" = "Bruk sist brukte bane?";
+"always_allow_webrtc" = "Always Allow WebRTC";
