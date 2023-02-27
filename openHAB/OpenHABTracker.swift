@@ -131,12 +131,12 @@ class OpenHABTracker: NSObject {
 
     /// Attemps to connect in parallel to the remote and local URLs if configured, the first URL to succeed wins
     private func tryAll() {
-        var urls = [(url: String, delay: Double)]()
+        var urls = [String: Double]()
         if !openHABLocalUrl.isEmpty {
-            urls.append((url: openHABLocalUrl, delay: 0.0))
+            urls[openHABLocalUrl] = 0.0
         }
         if !openHABRemoteUrl.isEmpty {
-            urls.append((url: openHABRemoteUrl, delay: openHABLocalUrl.isEmpty ? 0 : 1.5))
+            urls[openHABRemoteUrl] = openHABLocalUrl.isEmpty ? 0 : 1.5
         }
         if urls.isEmpty {
             multicastDelegate.invoke { $0.openHABTrackingError(errorMessage("error")) }
@@ -159,16 +159,16 @@ class OpenHABTracker: NSObject {
     /// - Parameters:
     ///   - urls: Tuple of String URLS and a request Delay value
     ///   - completion: Completes with the url and version of openHAB that succeeded, or an Error object if all failed
-    private func tryUrls(_ urls: [(url: String, delay: Double)], completion: @escaping (URL?, Int, Error?) -> Void) {
+    private func tryUrls(_ urls: [String: Double], completion: @escaping (URL?, Int, Error?) -> Void) {
         var isRequestCompletedSuccessfully = false
         // request in flight
         var requests = [URL: DataRequest]()
         // timers that have yet to be executed
         var timers = [URL: Timer]()
-        for item in urls {
-            let url = URL(string: item.url)!
+        for (urlString, delay) in urls {
+            let url = URL(string: urlString)!
             let restUrl = URL(string: "rest/", relativeTo: url)!
-            let timer = Timer.scheduledTimer(withTimeInterval: item.delay, repeats: false) { _ in
+            let timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in
                 let request = NetworkConnection.shared.manager.request(restUrl, method: .get)
                     .validate()
                 requests[url] = request
@@ -177,6 +177,7 @@ class OpenHABTracker: NSObject {
                 request.responseData { response in
                     // remove us from the outstanding request list
                     requests.removeValue(forKey: url)
+                    os_log("OpenHABTracker response for URL %{PUBLIC}@", log: .notifications, type: .error, url.absoluteString)
                     switch response.result {
                     case let .success(data):
                         let version = self.getServerInfoFromData(data: data)
@@ -194,7 +195,7 @@ class OpenHABTracker: NSObject {
                     // check if we are the last attempt
                     if !isRequestCompletedSuccessfully, requests.isEmpty, timers.isEmpty {
                         os_log("OpenHABTracker last response", log: .notifications, type: .error)
-                            completion(nil, 0, self.errorMessage("network_not_available"))
+                        completion(nil, 0, self.errorMessage("network_not_available"))
                     }
                 }
                 request.resume()
