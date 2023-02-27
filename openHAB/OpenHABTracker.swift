@@ -194,9 +194,7 @@ class OpenHABTracker: NSObject {
                     // check if we are the last attempt
                     if !isRequestCompletedSuccessfully, requests.isEmpty, timers.isEmpty {
                         os_log("OpenHABTracker last response", log: .notifications, type: .error)
-                        if !isRequestCompletedSuccessfully {
                             completion(nil, 0, self.errorMessage("network_not_available"))
-                        }
                     }
                 }
                 request.resume()
