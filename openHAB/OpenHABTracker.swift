@@ -160,31 +160,39 @@ class OpenHABTracker: NSObject {
     ///   - urls: Tuple of String URLS and a request Delay value
     ///   - completion: Completes with the url and version of openHAB that succeeded, or an Error object if all failed
     private func tryUrls(_ urls: [(url: String, delay: Double)], completion: @escaping (URL?, Int, Error?) -> Void) {
-        let group = DispatchGroup()
         var isRequestCompletedSuccessfully = false
+        // request in flight
         var requests = [DataRequest]()
+        // timers that have yet to be executed
+        var timers = [(url: URL, timer: Timer)]()
         for item in urls {
             let url = URL(string: item.url)!
             let restUrl = URL(string: "rest/", relativeTo: url)!
-            group.enter()
             let timer = Timer.scheduledTimer(withTimeInterval: item.delay, repeats: false) { _ in
                 let request = NetworkConnection.shared.manager.request(restUrl, method: .get)
                     .validate()
                 requests.append(request)
+                // remove us from the outstanding timer list
+                timers.removeAll(where: { $0.url == url })
                 request.responseData { response in
+                    // remove us from the outstanding request list
+                    requests.removeAll(where: { $0 == request })
                     switch response.result {
                     case let .success(data):
                         let version = self.getServerInfoFromData(data: data)
                         if version > 0, !isRequestCompletedSuccessfully {
                             isRequestCompletedSuccessfully = true
                             completion(url, version, nil)
+                            // cancel any timers not yet fired
+                            timers.forEach { $0.timer.invalidate() }
+                            // cancel any requests still in flight
                             requests.forEach { $0.cancel() }
                         }
                     case let .failure(error):
-                        print("Error: \(error.localizedDescription)")
+                        os_log("OpenHABTracker request failure %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
                     }
-                    group.leave()
-                    if !isRequestCompletedSuccessfully, requests.filter({ $0.response == nil }).isEmpty {
+                    // check if we are the last attempt
+                    if !isRequestCompletedSuccessfully, requests.isEmpty, timers.isEmpty {
                         os_log("OpenHABTracker last response", log: .notifications, type: .error)
                         if !isRequestCompletedSuccessfully {
                             completion(nil, 0, self.errorMessage("network_not_available"))
@@ -193,6 +201,7 @@ class OpenHABTracker: NSObject {
                 }
                 request.resume()
             }
+            timers.append((url, timer))
             RunLoop.main.add(timer, forMode: .common)
         }
     }
