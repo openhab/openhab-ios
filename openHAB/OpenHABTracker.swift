@@ -162,31 +162,31 @@ class OpenHABTracker: NSObject {
     private func tryUrls(_ urls: [(url: String, delay: Double)], completion: @escaping (URL?, Int, Error?) -> Void) {
         var isRequestCompletedSuccessfully = false
         // request in flight
-        var requests = [DataRequest]()
+        var requests = [URL: DataRequest]()
         // timers that have yet to be executed
-        var timers = [(url: URL, timer: Timer)]()
+        var timers = [URL: Timer]()
         for item in urls {
             let url = URL(string: item.url)!
             let restUrl = URL(string: "rest/", relativeTo: url)!
             let timer = Timer.scheduledTimer(withTimeInterval: item.delay, repeats: false) { _ in
                 let request = NetworkConnection.shared.manager.request(restUrl, method: .get)
                     .validate()
-                requests.append(request)
+                requests[url] = request
                 // remove us from the outstanding timer list
-                timers.removeAll(where: { $0.url == url })
+                timers.removeValue(forKey: url)
                 request.responseData { response in
                     // remove us from the outstanding request list
-                    requests.removeAll(where: { $0 == request })
+                    requests.removeValue(forKey: url)
                     switch response.result {
                     case let .success(data):
                         let version = self.getServerInfoFromData(data: data)
                         if version > 0, !isRequestCompletedSuccessfully {
                             isRequestCompletedSuccessfully = true
-                            completion(url, version, nil)
                             // cancel any timers not yet fired
-                            timers.forEach { $0.timer.invalidate() }
+                            timers.values.forEach { $0.invalidate() }
                             // cancel any requests still in flight
-                            requests.forEach { $0.cancel() }
+                            requests.values.forEach { $0.cancel() }
+                            completion(url, version, nil)
                         }
                     case let .failure(error):
                         os_log("OpenHABTracker request failure %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
@@ -201,7 +201,7 @@ class OpenHABTracker: NSObject {
                 }
                 request.resume()
             }
-            timers.append((url, timer))
+            timers[url] = timer
             RunLoop.main.add(timer, forMode: .common)
         }
     }
