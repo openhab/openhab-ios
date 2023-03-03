@@ -111,19 +111,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     @IBOutlet private var widgetTableView: UITableView!
 
-    func touchDown() {
-        isUserInteracting = true
-    }
-
-    func touchUp() {
-        isUserInteracting = false
-        if isWaitingToReload {
-            widgetTableView.reloadData()
-            refreshControl?.endRefreshing()
-        }
-        isWaitingToReload = false
-    }
-
     // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -259,6 +246,21 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         widgetTableView.reloadData()
     }
 
+    /// Implementation of GenericUITableViewCellTouchEventDelegate
+    func touchDown() {
+        isUserInteracting = true
+    }
+
+    /// Implementation of GenericUITableViewCellTouchEventDelegate
+    func touchUp() {
+        isUserInteracting = false
+        if isWaitingToReload {
+            widgetTableView.reloadData()
+            refreshControl?.endRefreshing()
+        }
+        isWaitingToReload = false
+    }
+
     func configureTableView() {
         widgetTableView.dataSource = self
         widgetTableView.delegate = self
@@ -369,6 +371,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 self.currentPage?.sendCommand = { [weak self] item, command in
                     self?.sendCommand(item, commandToSend: command)
                 }
+                // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
                 if !self.isUserInteracting {
                     self.widgetTableView.reloadData()
                     self.refreshControl?.endRefreshing()
