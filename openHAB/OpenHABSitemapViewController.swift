@@ -57,7 +57,7 @@ struct OpenHABImageProcessor: ImageProcessor {
     }
 }
 
-class OpenHABSitemapViewController: OpenHABViewController {
+class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
     var pageUrl = ""
     // private var hamburgerButton: DynamicButton!
     private var selectedWidgetRow: Int = 0
@@ -81,6 +81,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
     private var serverProperties: OpenHABServerProperties?
     private let search = UISearchController(searchResultsController: nil)
     private var webViewController: OpenHABWebViewController?
+    private var isUserInteracting = false
+    private var isWaitingToReload = false
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
@@ -108,6 +110,19 @@ class OpenHABSitemapViewController: OpenHABViewController {
     }
 
     @IBOutlet private var widgetTableView: UITableView!
+
+    func touchDown() {
+        isUserInteracting = true
+    }
+
+    func touchUp() {
+        isUserInteracting = false
+        if isWaitingToReload {
+            widgetTableView.reloadData()
+            refreshControl?.endRefreshing()
+        }
+        isWaitingToReload = false
+    }
 
     // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
@@ -354,8 +369,12 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 self.currentPage?.sendCommand = { [weak self] item, command in
                     self?.sendCommand(item, commandToSend: command)
                 }
-                self.widgetTableView.reloadData()
-                self.refreshControl?.endRefreshing()
+                if !self.isUserInteracting {
+                    self.widgetTableView.reloadData()
+                    self.refreshControl?.endRefreshing()
+                } else {
+                    self.isWaitingToReload = true
+                }
                 self.parent?.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
 
                 self.loadPage(true)
@@ -696,6 +715,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         if let cell = cell as? GenericUITableViewCell {
             cell.widget = widget
             cell.displayWidget()
+            cell.touchEventDelegate = self
         }
 
         // Check if this is not the last row in the widgets list

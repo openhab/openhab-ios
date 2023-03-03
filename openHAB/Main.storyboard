@@ -269,6 +269,7 @@
                                                         <constraint firstAttribute="height" constant="30" id="Fo8-Gh-C1v"/>
                                                     </constraints>
                                                     <connections>
+                                                        <action selector="sliderTouchDown:" destination="S22-0C-9Sl" eventType="touchDown" id="M1P-Vg-cgK"/>
                                                         <action selector="sliderTouchOutside:" destination="S22-0C-9Sl" eventType="touchUpOutside" id="Av9-4g-ezL"/>
                                                         <action selector="sliderTouchUp:" destination="S22-0C-9Sl" eventType="touchUpInside" id="HkQ-HY-m11"/>
                                                         <action selector="sliderValueChanged:" destination="S22-0C-9Sl" eventType="valueChanged" id="QVX-2Z-6cm"/>

@@ -17,8 +17,17 @@ protocol GenericCellCacheProtocol: UITableViewCell {
     func invalidateCache()
 }
 
+protocol GenericUITableViewCellTouchEventDelegate: AnyObject {
+    func touchDown()
+    func touchUp()
+}
+
 class GenericUITableViewCell: UITableViewCell {
     private var _widget: OpenHABWidget!
+
+    // optional event callback if table cells neeed to notify on touch up or down events
+    weak var touchEventDelegate: GenericUITableViewCellTouchEventDelegate?
+
     var widget: OpenHABWidget! {
         get {
             _widget
