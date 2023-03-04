@@ -52,6 +52,11 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBAction private func sliderTouchUp(_ sender: UISlider) {
         sliderDidChange(toValue: widgetValue)
+        touchEventDelegate?.touchUp()
+    }
+
+    @IBAction private func sliderTouchDown(_ sender: UISlider) {
+        touchEventDelegate?.touchDown()
     }
 
     @IBAction private func sliderTouchOutside(_ sender: UISlider) {
