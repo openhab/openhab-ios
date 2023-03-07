@@ -215,12 +215,12 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 sseTimer?.invalidate()
             case "sseConnected-false":
                 os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
-                sseTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
-                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
-                    self.sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                sseTimer?.invalidate()
+                sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
+                    self.sseTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: false) { _ in
                         self.reloadView()
                     }
+                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
                 }
             default: break
             }
