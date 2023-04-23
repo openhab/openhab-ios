@@ -44,7 +44,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     weak var delegate: ServerCertificateManagerDelegate?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL = false
-    public var trustedCertificates: [String: Any] = [:]
+    public var trustedCertificates: [String: Data] = [:]
 
     // Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool) {
@@ -90,14 +90,17 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     }
 
     func certificateData(forDomain domain: String) -> CFData? {
-        guard let certificateData = trustedCertificates[domain] as? Data else { return nil }
+        guard let certificateData = trustedCertificates[domain] else { return nil }
         return certificateData as CFData
     }
 
     func loadTrustedCertificates() {
         do {
             let rawdata = try Data(contentsOf: getPersistensePath())
-            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String: Any] {
+
+            // https://stackoverflow.com/questions/51487622/unarchive-array-with-nskeyedunarchiver-unarchivedobjectofclassfrom/52758898#52758898
+
+            if let unarchive = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSData.self], from: rawdata) as? [String: Data] {
                 trustedCertificates = unarchive
             }
         } catch {
