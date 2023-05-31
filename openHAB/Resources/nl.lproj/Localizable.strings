@@ -77,3 +77,4 @@
 "sitemap_settings" = "Sitemap instellingen";
 "about_settings" = "Over";
 "uselastpath_settings" = "Laatst bezochte pad gebruiken?";
+"always_allow_webrtc" = "WebRTC altijd toestaan";

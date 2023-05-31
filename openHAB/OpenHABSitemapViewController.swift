@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -57,7 +57,7 @@ struct OpenHABImageProcessor: ImageProcessor {
     }
 }
 
-class OpenHABSitemapViewController: OpenHABViewController {
+class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
     var pageUrl = ""
     // private var hamburgerButton: DynamicButton!
     private var selectedWidgetRow: Int = 0
@@ -81,6 +81,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
     private var serverProperties: OpenHABServerProperties?
     private let search = UISearchController(searchResultsController: nil)
     private var webViewController: OpenHABWebViewController?
+    private var isUserInteracting = false
+    private var isWaitingToReload = false
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
@@ -244,6 +246,21 @@ class OpenHABSitemapViewController: OpenHABViewController {
         widgetTableView.reloadData()
     }
 
+    /// Implementation of GenericUITableViewCellTouchEventDelegate
+    func touchDown() {
+        isUserInteracting = true
+    }
+
+    /// Implementation of GenericUITableViewCellTouchEventDelegate
+    func touchUp() {
+        isUserInteracting = false
+        if isWaitingToReload {
+            widgetTableView.reloadData()
+            refreshControl?.endRefreshing()
+        }
+        isWaitingToReload = false
+    }
+
     func configureTableView() {
         widgetTableView.dataSource = self
         widgetTableView.delegate = self
@@ -354,8 +371,13 @@ class OpenHABSitemapViewController: OpenHABViewController {
                 self.currentPage?.sendCommand = { [weak self] item, command in
                     self?.sendCommand(item, commandToSend: command)
                 }
-                self.widgetTableView.reloadData()
-                self.refreshControl?.endRefreshing()
+                // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
+                if !self.isUserInteracting {
+                    self.widgetTableView.reloadData()
+                    self.refreshControl?.endRefreshing()
+                } else {
+                    self.isWaitingToReload = true
+                }
                 self.parent?.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
 
                 self.loadPage(true)
@@ -696,6 +718,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         if let cell = cell as? GenericUITableViewCell {
             cell.widget = widget
             cell.displayWidget()
+            cell.touchEventDelegate = self
         }
 
         // Check if this is not the last row in the widgets list

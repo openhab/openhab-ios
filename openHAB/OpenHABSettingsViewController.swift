@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -31,6 +31,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsSendCrashReports = false
     var settingsSortSitemapsBy: SortSitemapsOrder = .label
     var settingsDefaultMainUIPath = ""
+    var settingsAlwaysAllowWebRTC = false
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -53,6 +54,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var useCurrentMainUIPathButton: UIButton!
     @IBOutlet private var defaultMainUIPathTextField: UITextField!
     @IBOutlet private var appVersionLabel: UILabel!
+    @IBOutlet private var alwaysAllowWebRTCSwitch: UISwitch!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -235,6 +237,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         iconSegmentedControl?.selectedSegmentIndex = settingsIconType.rawValue
         sortSitemapsBy?.selectedSegmentIndex = settingsSortSitemapsBy.rawValue
         defaultMainUIPathTextField?.text = settingsDefaultMainUIPath
+        alwaysAllowWebRTCSwitch?.isOn = settingsAlwaysAllowWebRTC
         if settingsDemomode == true {
             disableConnectionSettings()
         } else {
@@ -260,6 +263,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsIconType = IconType(rawValue: Preferences.iconType) ?? .png
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
         settingsDefaultMainUIPath = Preferences.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = Preferences.alwaysAllowWebRTC
     }
 
     func updateSettings() {
@@ -277,6 +281,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsIconType = IconType(rawValue: iconSegmentedControl.selectedSegmentIndex) ?? .png
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: sortSitemapsBy.selectedSegmentIndex) ?? .label
         settingsDefaultMainUIPath = defaultMainUIPathTextField?.text ?? ""
+        settingsAlwaysAllowWebRTC = alwaysAllowWebRTCSwitch?.isOn ?? false
     }
 
     func saveSettings() {
@@ -293,6 +298,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.sendCrashReports = settingsSendCrashReports
         Preferences.sortSitemapsby = settingsSortSitemapsBy.rawValue
         Preferences.defaultMainUIPath = settingsDefaultMainUIPath
+        Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
         WatchMessageService.singleton.syncPreferencesToWatch()
     }
 

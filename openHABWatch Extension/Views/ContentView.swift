@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -81,7 +81,16 @@ struct ContentView: View {
                 ImageRow(URL: URL(string: widget.url))
             }
         case .chart:
-            let url = Endpoint.chart(rootUrl: settings.openHABRootUrl, period: widget.period, type: widget.item?.type ?? .none, service: widget.service, name: widget.item?.name, legend: widget.legend, theme: .dark).url
+            let url = Endpoint.chart(
+                rootUrl: settings.openHABRootUrl,
+                period: widget.period,
+                type: widget.item?.type ?? .none,
+                service: widget.service,
+                name: widget.item?.name,
+                legend: widget.legend,
+                theme: .dark,
+                forceAsItem: widget.forceAsItem
+            ).url
             ImageRow(URL: url)
         case .mapview:
             MapViewRow(widget: widget)

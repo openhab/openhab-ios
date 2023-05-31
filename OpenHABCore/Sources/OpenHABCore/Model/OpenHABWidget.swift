@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -91,6 +91,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var text = ""
     public var legend: Bool?
     public var encoding = ""
+    public var forceAsItem: Bool?
     public var item: OpenHABItem?
     public var linkedPage: OpenHABLinkedPage?
     public var mappings: [OpenHABWidgetMapping] = []
@@ -108,7 +109,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     // Text between square brackets
     public var labelValue: String? {
         // Swift 5 raw strings
-        let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [])
+        let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [.dotMatchesLineSeparators])
         guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: (label as NSString).length)) else { return nil }
         guard let range = Range(match.range(at: 1), in: label) else { return nil }
         return String(label[range])
@@ -212,7 +213,7 @@ extension OpenHABWidget.WidgetType: UnknownCaseRepresentable {
 
 extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -250,6 +251,8 @@ extension OpenHABWidget {
         self.step = abs(self.step)
         self.visibility = visibility ?? true
         self.switchSupport = switchSupport ?? false
+
+        self.forceAsItem = forceAsItem
     }
 
     convenience init(xml xmlElement: XMLElement) {
@@ -322,6 +325,7 @@ public extension OpenHABWidget {
         let widgets: [OpenHABWidget.CodingData]
         let visibility: Bool?
         let switchSupport: Bool?
+        let forceAsItem: Bool?
     }
 }
 
@@ -329,7 +333,7 @@ public extension OpenHABWidget {
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
-        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport)
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
     }
 }
 

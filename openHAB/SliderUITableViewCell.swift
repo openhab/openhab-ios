@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -52,6 +52,11 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     @IBAction private func sliderTouchUp(_ sender: UISlider) {
         sliderDidChange(toValue: widgetValue)
+        touchEventDelegate?.touchUp()
+    }
+
+    @IBAction private func sliderTouchDown(_ sender: UISlider) {
+        touchEventDelegate?.touchDown()
     }
 
     @IBAction private func sliderTouchOutside(_ sender: UISlider) {

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -50,35 +50,6 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     private lazy var webView: WKWebView = newWebView()
-
-    private func newWebView() -> WKWebView {
-        let config = WKWebViewConfiguration()
-        config.allowsInlineMediaPlayback = true
-        config.mediaTypesRequiringUserActionForPlayback = []
-        // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
-        config.userContentController.add(self, name: "Native")
-        config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
-        let webView = WKWebView(frame: view.bounds, configuration: config)
-        // Alow rotation of webview
-        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        webView.scrollView.bounces = false
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
-        // support dark mode and avoid white flashing when loading
-        webView.isOpaque = false
-        webView.backgroundColor = UIColor.clear
-        // watch for URL changes so we can store the last visited path
-        observation = webView.observe(\.url, options: [.new]) { _, _ in
-            if let webviewURL = webView.url {
-                let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
-                if let path = url?.path {
-                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
-                    self.appData?.currentWebViewPath = path
-                }
-            }
-        }
-        return webView
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -190,6 +161,36 @@ class OpenHABWebViewController: OpenHABViewController {
         "web"
     }
 
+    private func newWebView() -> WKWebView {
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        config.mediaTypesRequiringUserActionForPlayback = []
+        // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
+        config.userContentController.add(self, name: "Native")
+        config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+        let webView = WKWebView(frame: view.bounds, configuration: config)
+        // Alow rotation of webview
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.scrollView.bounces = false
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
+        // support dark mode and avoid white flashing when loading
+        webView.isOpaque = false
+        webView.backgroundColor = UIColor.clear
+        // watch for URL changes so we can store the last visited path
+        observation = webView.observe(\.url, options: [.new]) { _, _ in
+            if let webviewURL = webView.url {
+                let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
+                if let path = url?.path {
+                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
+                    // append trailing slash as WebUI/Vue/F7 will try and issue a 302 if the url is navigated to directly, this can be problamatic on myopenHAB
+                    self.appData?.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                }
+            }
+        }
+        return webView
+    }
+
     deinit {
         observation = nil
     }
@@ -214,12 +215,12 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 sseTimer?.invalidate()
             case "sseConnected-false":
                 os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
-                sseTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
-                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
-                    self.sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                sseTimer?.invalidate()
+                sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
+                    self.sseTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: false) { _ in
                         self.reloadView()
                     }
+                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
                 }
             default: break
             }
@@ -289,7 +290,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                     return
                 }
                 let credential = URLCredential(trust: serverTrust)
-                completionHandler(.useCredential, credential)
+                DispatchQueue.main.async {
+                    completionHandler(.useCredential, credential)
+                }
             } else {
                 var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
                 var credential: URLCredential?
@@ -308,6 +311,11 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         os_log("webViewWebContentProcessDidTerminate  reloading view", log: .wkwebview, type: .info)
         reloadView()
+    }
+
+    @available(iOS 15, *)
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(Preferences.alwaysAllowWebRTC ? .grant : .prompt)
     }
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 Contributors to the openHAB project
+// Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -17,8 +17,17 @@ protocol GenericCellCacheProtocol: UITableViewCell {
     func invalidateCache()
 }
 
+protocol GenericUITableViewCellTouchEventDelegate: AnyObject {
+    func touchDown()
+    func touchUp()
+}
+
 class GenericUITableViewCell: UITableViewCell {
     private var _widget: OpenHABWidget!
+
+    // optional event callback if table cells neeed to notify on touch up or down events
+    weak var touchEventDelegate: GenericUITableViewCellTouchEventDelegate?
+
     var widget: OpenHABWidget! {
         get {
             _widget

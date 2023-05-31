@@ -77,3 +77,4 @@
 "sitemap_settings" = "Impostazioni Sitemap";
 "about_settings" = "Info";
 "uselastpath_settings" = "Usare L'Ultimo Percorso Visitato?";
+"always_allow_webrtc" = "Consenti sempre WebRTC";
