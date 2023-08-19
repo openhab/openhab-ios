@@ -1,6 +1,8 @@
 name: Deploy on TestFlight
 
 on:
+  schedule:
+    - cron: "0 6 1 * *"
   workflow_dispatch:
     inputs:
       bump_type:

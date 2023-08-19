@@ -71,9 +71,8 @@ platform :ios do
     end
 
     desc 'Build beta'
-    lane :beta do |options|
-        # check the semantic parameter entered
-        raise 'No bump type defined! Use one of: patch | minor | major'.red unless options[:bump]
+    lane :beta do |options|        
+        options[:bump] = options[:bump] != nil ? options[:bump] : "patch"
 
         if is_ci?
             current_branch = ENV["BRANCH_NAME"]
