@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 2.4.59, Build 1580410537] - 2023-08-19Z
+
 - Implement iconify icons
 - Update Kingfisher to fix build issue
 
