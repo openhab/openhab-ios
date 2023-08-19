@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Implement iconify icons
+- Update Kingfisher to fix build issue
+
 ## [Version 2.4.58, Build 1580410536] - 2023-05-31Z
 
 - Implement forceAsItem support for Charts in Sitemaps 
