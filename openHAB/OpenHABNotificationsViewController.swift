@@ -100,7 +100,8 @@ class OpenHABNotificationsViewController: UITableViewController {
             version: appData!.openHABVersion,
             icon: notification.icon,
             state: "",
-            iconType: .png
+            iconType: .png,
+            iconColor: ""
         ).url {
             cell?.imageView?.kf.setImage(
                 with: iconUrl,
