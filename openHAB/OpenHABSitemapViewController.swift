@@ -679,6 +679,10 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
+        var iconColor = widget?.iconColor
+        if (iconColor == nil || iconColor!.isEmpty), traitCollection.userInterfaceStyle == .dark {
+            iconColor = "white"
+        }
         // No icon is needed for image, video, frame and web widgets
         if widget?.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
             if let urlc = Endpoint.icon(
@@ -686,7 +690,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 version: appData?.openHABVersion ?? 2,
                 icon: widget?.icon,
                 state: widget?.iconState() ?? "",
-                iconType: iconType
+                iconType: iconType,
+                iconColor: iconColor!
             ).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
