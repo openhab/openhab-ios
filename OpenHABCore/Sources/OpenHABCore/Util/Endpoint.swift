@@ -147,7 +147,7 @@ public extension Endpoint {
         return endpoint
     }
 
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType) -> Endpoint {
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
         guard var icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
@@ -171,10 +171,14 @@ public extension Endpoint {
                     icon = components[1]
                 }
                 if source == "if" || source == "iconify" {
+                    queryItems = [URLQueryItem(name: "height", value: "64")]
+                    if !iconColor.isEmpty {
+                        queryItems.append(URLQueryItem(name: "color", value: iconColor))
+                    }
                     return Endpoint(
                         baseURL: "https://api.iconify.design/",
                         path: "/\(set)/\(icon).svg",
-                        queryItems: [URLQueryItem(name: "height", value: "64")]
+                        queryItems: queryItems
                     )
                 }
             }

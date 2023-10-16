@@ -22,7 +22,8 @@ final class OpenHABCoreGeneralTests: XCTestCase {
             version: 2,
             icon: "switch",
             state: "OFF",
-            iconType: .svg
+            iconType: .svg,
+            iconColor: ""
         ).url
         XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }

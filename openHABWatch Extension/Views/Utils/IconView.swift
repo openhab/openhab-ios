@@ -24,7 +24,8 @@ struct IconView: View {
             version: 2,
             icon: widget.icon,
             state: widget.item?.state ?? "",
-            iconType: .png
+            iconType: .png,
+            iconColor: ""
         ).url
     }
 
