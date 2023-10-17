@@ -13,10 +13,6 @@
 import XCTest
 
 class OpenHABGeneralTests: XCTestCase {
-    override func setUp() {
-        super.setUp()
-    }
-
     func testNamedColors() {
         XCTAssertEqual(UIColor.red, UIColor(fromString: "red"))
         XCTAssertEqual(UIColor.gray, UIColor(fromString: "abc"))

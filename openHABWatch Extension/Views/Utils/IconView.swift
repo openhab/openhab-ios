@@ -30,7 +30,7 @@ struct IconView: View {
     }
 
     var body: some View {
-        let image = iconURL != nil ? KFImage(source: .network(ImageResource(
+        let image = iconURL != nil ? KFImage(source: .network(KF.ImageResource(
             downloadURL: iconURL!,
             cacheKey: iconURL!.path + (iconURL!.query ?? "")
         ))) : KFImage(iconURL)

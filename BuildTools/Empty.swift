@@ -8,9 +8,3 @@
 // http://www.eclipse.org/legal/epl-2.0
 //
 // SPDX-License-Identifier: EPL-2.0
-
-import UIKit
-
-class NewImageTableViewCell: UITableViewCell {
-    @IBOutlet private var customImageView: ScaledHeightImageView!
-}

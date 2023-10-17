@@ -209,24 +209,6 @@
         }
       },
       {
-        "package": "SwiftFormatPlugin",
-        "repositoryURL": "https://github.com/weakfl/SwiftFormatPlugin.git",
-        "state": {
-          "branch": null,
-          "revision": "749f67e06cddc05bfbff8e1b1a17f2c4c8e150eb",
-          "version": "0.50.7"
-        }
-      },
-      {
-        "package": "SwiftLintPlugin",
-        "repositoryURL": "https://github.com/weakfl/SwiftLintPlugin.git",
-        "state": {
-          "branch": null,
-          "revision": "8cbc2433be11093a4c9c243eafc101cb5ada820b",
-          "version": "0.50.3"
-        }
-      },
-      {
         "package": "SwiftMessages",
         "repositoryURL": "https://github.com/SwiftKickMobile/SwiftMessages.git",
         "state": {

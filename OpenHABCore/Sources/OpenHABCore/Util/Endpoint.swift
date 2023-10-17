@@ -147,6 +147,7 @@ public extension Endpoint {
         return endpoint
     }
 
+    // swiftlint:disable:next function_parameter_count
     static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
         guard var icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
@@ -209,13 +210,13 @@ public extension Endpoint {
 
     static func iconForDrawer(rootUrl: String, version: Int, icon: String) -> Endpoint {
         if version == 2 {
-            return Endpoint(
+            Endpoint(
                 baseURL: rootUrl,
                 path: "/icon/\(icon).png",
                 queryItems: []
             )
         } else {
-            return Endpoint(
+            Endpoint(
                 baseURL: rootUrl,
                 path: "/images/\(icon).png",
                 queryItems: []

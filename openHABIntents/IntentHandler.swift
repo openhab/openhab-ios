@@ -15,13 +15,13 @@ import OpenHABCore
 class IntentHandler: INExtension {
     override func handler(for intent: INIntent) -> Any {
         switch intent {
-        case is OpenHABGetItemStateIntent: return GetItemStateIntentHandler()
-        case is OpenHABSetSwitchStateIntent: return SetSwitchStateIntentHandler()
-        case is OpenHABSetNumberValueIntent: return SetNumberValueIntentHandler()
-        case is OpenHABSetStringValueIntent: return SetStringValueIntentHandler()
-        case is OpenHABSetColorValueIntent: return SetColorValueIntentHandler()
-        case is OpenHABSetContactStateValueIntent: return SetContactStateValueIntentHandler()
-        default: return SetDimmerRollerValueIntentHandler()
+        case is OpenHABGetItemStateIntent: GetItemStateIntentHandler()
+        case is OpenHABSetSwitchStateIntent: SetSwitchStateIntentHandler()
+        case is OpenHABSetNumberValueIntent: SetNumberValueIntentHandler()
+        case is OpenHABSetStringValueIntent: SetStringValueIntentHandler()
+        case is OpenHABSetColorValueIntent: SetColorValueIntentHandler()
+        case is OpenHABSetContactStateValueIntent: SetContactStateValueIntentHandler()
+        default: SetDimmerRollerValueIntentHandler()
         }
     }
 }

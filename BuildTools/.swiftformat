@@ -1,6 +1,7 @@
 # file options
---exclude ./fastlane
---exclude ./OpenHABCore/.build
+--exclude ../fastlane
+--exclude ../OpenHABCore/.build
+--exclude ./build
 --symlinks ignore
 
 # disabled rules

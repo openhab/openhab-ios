@@ -12,13 +12,11 @@
 import UIKit
 
 class SpinnerViewController: UIViewController {
-    private var spinner: UIActivityIndicatorView = {
-        if #available(iOS 13.0, *) {
-            return UIActivityIndicatorView(style: .large)
-        } else {
-            return UIActivityIndicatorView(style: .gray)
-        }
-    }()
+    private var spinner: UIActivityIndicatorView = if #available(iOS 13.0, *) {
+        .init(style: .large)
+    } else {
+        .init(style: .gray)
+    }
 
     override func loadView() {
         view = UIView()

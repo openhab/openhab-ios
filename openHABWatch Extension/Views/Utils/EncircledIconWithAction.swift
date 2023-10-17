@@ -27,7 +27,7 @@ struct EncircledIconWithAction: View {
 //                    .font(.system(size: 25))
 //            )
             .onTapGesture {
-                self.action()
+                action()
             }
     }
 }

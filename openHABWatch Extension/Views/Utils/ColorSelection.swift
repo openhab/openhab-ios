@@ -23,27 +23,27 @@ enum DragState {
     var translation: CGSize {
         switch self {
         case .inactive, .pressing:
-            return .zero
+            .zero
         case let .dragging(translation):
-            return translation
+            translation
         }
     }
 
     var isActive: Bool {
         switch self {
         case .inactive:
-            return false
+            false
         case .pressing, .dragging:
-            return true
+            true
         }
     }
 
     var isDragging: Bool {
         switch self {
         case .inactive, .pressing:
-            return false
+            false
         case .dragging:
-            return true
+            true
         }
     }
 }
@@ -64,7 +64,7 @@ struct ColorSelection: View {
             Circle()
                 .size(geometry.size)
                 .fill(conic)
-                .overlay(self.generateHandle(geometry: geometry))
+                .overlay(generateHandle(geometry: geometry))
         }
     }
 
@@ -105,8 +105,8 @@ struct ColorSelection: View {
                 guard case .second(true, let drag?) = value else { return }
                 os_log("Translation x y = %g, %g", log: .default, type: .info, drag.translation.width, drag.translation.height)
 
-                self.xpos += Double(drag.translation.width)
-                self.ypos += Double(drag.translation.height)
+                xpos += Double(drag.translation.width)
+                ypos += Double(drag.translation.height)
             }
 
         // MARK: Customize Handle Here

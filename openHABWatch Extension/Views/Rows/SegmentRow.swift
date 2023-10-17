@@ -21,13 +21,13 @@ struct SegmentRow: View {
     var body: some View {
         let valueBinding = Binding<Int>(
             get: {
-                guard case let .segmented(value) = self.widget.stateEnumBinding else { return 0 }
+                guard case let .segmented(value) = widget.stateEnumBinding else { return 0 }
                 return value
             },
             set: {
                 os_log("Slider new value = %g", log: .default, type: .info, $0)
                 // self.widget.sendCommand($0)
-                self.widget.stateEnumBinding = .segmented($0)
+                widget.stateEnumBinding = .segmented($0)
             }
         )
         return
@@ -40,7 +40,7 @@ struct SegmentRow: View {
                 }
                 Picker("Picker", selection: valueBinding) {
                     ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) {
-                        Text(self.widget.mappingsOrItemOptions[$0].label).tag($0)
+                        Text(widget.mappingsOrItemOptions[$0].label).tag($0)
                     }
                 }
                 .labelsHidden()

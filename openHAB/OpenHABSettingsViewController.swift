@@ -197,17 +197,17 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0:
-            return NSLocalizedString("openhab_connection", comment: "")
+            NSLocalizedString("openhab_connection", comment: "")
         case 1:
-            return NSLocalizedString("application_settings", comment: "")
+            NSLocalizedString("application_settings", comment: "")
         case 2:
-            return NSLocalizedString("mainui_settings", comment: "")
+            NSLocalizedString("mainui_settings", comment: "")
         case 3:
-            return NSLocalizedString("sitemap_settings", comment: "")
+            NSLocalizedString("sitemap_settings", comment: "")
         case 4:
-            return NSLocalizedString("about_settings", comment: "")
+            NSLocalizedString("about_settings", comment: "")
         default:
-            return ""
+            ""
         }
     }
 
