@@ -23,27 +23,27 @@ enum DragState {
     var translation: CGSize {
         switch self {
         case .inactive, .pressing:
-            return .zero
+            .zero
         case let .dragging(translation):
-            return translation
+            translation
         }
     }
 
     var isActive: Bool {
         switch self {
         case .inactive:
-            return false
+            false
         case .pressing, .dragging:
-            return true
+            true
         }
     }
 
     var isDragging: Bool {
         switch self {
         case .inactive, .pressing:
-            return false
+            false
         case .dragging:
-            return true
+            true
         }
     }
 }

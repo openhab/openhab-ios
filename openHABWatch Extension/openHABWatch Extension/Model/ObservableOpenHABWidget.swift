@@ -98,9 +98,9 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     var mappingsOrItemOptions: [OpenHABWidgetMapping] {
         if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
-            return itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+            itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
         } else {
-            return mappings
+            mappings
         }
     }
 
@@ -122,49 +122,49 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     var adjustedValue: Double {
         if let item {
-            return adj(item.stateAsDouble())
+            adj(item.stateAsDouble())
         } else {
-            return minValue
+            minValue
         }
     }
 
     var stateEnum: WidgetTypeEnum {
         switch type {
         case "Frame":
-            return .frame
+            .frame
         case "Switch":
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if !mappings.isEmpty {
-                return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
             } else if item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                return .switcher(item?.state == "ON" ? true : false)
+                .switcher(item?.state == "ON" ? true : false)
             } else if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                return .rollershutter
+                .rollershutter
             } else if !mappingsOrItemOptions.isEmpty {
-                return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
             } else {
-                return .switcher(item?.state == "ON" ? true : false)
+                .switcher(item?.state == "ON" ? true : false)
             }
         case "Setpoint":
-            return .setpoint
+            .setpoint
         case "Slider":
-            return .slider // (adjustedValue)
+            .slider // (adjustedValue)
         case "Selection":
-            return .selection
+            .selection
         case "Colorpicker":
-            return .colorpicker
+            .colorpicker
         case "Chart":
-            return .chart
+            .chart
         case "Image":
-            return .image
+            .image
         case "Video":
-            return .video
+            .video
         case "Webview":
-            return .webview
+            .webview
         case "Mapview":
-            return .mapview
+            .mapview
         default:
-            return .unassigned
+            .unassigned
         }
     }
 

@@ -121,9 +121,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 
     public var mappingsOrItemOptions: [OpenHABWidgetMapping] {
         if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
-            return itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+            itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
         } else {
-            return mappings
+            mappings
         }
     }
 

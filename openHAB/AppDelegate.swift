@@ -113,7 +113,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             guard let self else { return }
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
-            self.getNotificationSettings()
+            getNotificationSettings()
         }
     }
 

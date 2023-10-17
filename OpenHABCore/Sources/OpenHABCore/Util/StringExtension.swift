@@ -27,9 +27,9 @@ public extension String {
 
     internal var intValue: Int {
         if let asNumber = NumberFormatter().number(from: self) {
-            return asNumber.intValue
+            asNumber.intValue
         } else {
-            return Int.max
+            Int.max
         }
     }
 
@@ -140,9 +140,9 @@ extension String? {
     var orEmpty: String {
         switch self {
         case let .some(value):
-            return value
+            value
         case .none:
-            return ""
+            ""
         }
     }
 }

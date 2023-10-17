@@ -26,9 +26,9 @@ public class OpenHABServerProperties: Decodable {
 
     public func linkUrl(byType type: String?) -> String? {
         if let index = links.firstIndex(where: { $0.type == type }) {
-            return links[index].url
+            links[index].url
         } else {
-            return nil
+            nil
         }
     }
 }

@@ -71,9 +71,9 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     private func adjustedValue() -> Double {
         if let item = widget.item {
-            return adj(item.stateAsDouble())
+            adj(item.stateAsDouble())
         } else {
-            return widget.minValue
+            widget.minValue
         }
     }
 

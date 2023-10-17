@@ -46,15 +46,15 @@ class OpenHABWatchTracker: NSObject {
             guard let self else { return }
 
             let nStatus = path
-            if nStatus != self.oldReachabilityStatus {
-                if let oldReachabilityStatus = self.oldReachabilityStatus {
+            if nStatus != oldReachabilityStatus {
+                if let oldReachabilityStatus {
                     os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, oldReachabilityStatus.debugDescription, nStatus.debugDescription)
                 }
-                self.oldReachabilityStatus = nStatus
-                (self.delegate as? OpenHABWatchTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
-                if self.isNetworkConnected() {
-                    self.pathMonitor.cancel()
-                    self.selectUrl()
+                oldReachabilityStatus = nStatus
+                (delegate as? OpenHABWatchTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
+                if isNetworkConnected() {
+                    pathMonitor.cancel()
+                    selectUrl()
                 }
             }
         }

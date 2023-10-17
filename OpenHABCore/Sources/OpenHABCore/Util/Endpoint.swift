@@ -210,13 +210,13 @@ public extension Endpoint {
 
     static func iconForDrawer(rootUrl: String, version: Int, icon: String) -> Endpoint {
         if version == 2 {
-            return Endpoint(
+            Endpoint(
                 baseURL: rootUrl,
                 path: "/icon/\(icon).png",
                 queryItems: []
             )
         } else {
-            return Endpoint(
+            Endpoint(
                 baseURL: rootUrl,
                 path: "/images/\(icon).png",
                 queryItems: []
