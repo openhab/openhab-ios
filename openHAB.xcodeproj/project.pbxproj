@@ -26,6 +26,7 @@
 		9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */; };
 		9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */; };
 		935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B484525342B8E00E44CF0 /* URL+Static.swift */; };
+		93685A7A2ADE755C0077A9A6 /* openHABTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */; };
 		937C8B0C2800A738009C055E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
 		937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4470270B36D000A98C26 /* OpenHABCore */; };
 		937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 937E4472270B36DD00A98C26 /* OpenHABCore */; };
@@ -288,6 +289,7 @@
 		935D3447257B7EA40020A404 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = Resources/it.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3449257B7EA50020A404 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = Resources/ru.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3451257B7EA60020A404 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Resources/es.lproj/Intents.strings; sourceTree = "<group>"; };
+		93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = openHABTests.xctestplan; sourceTree = "<group>"; };
 		938BF89524EFBC5400E6B52F /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		938BF9C324EFCB9F00E6B52F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Localization.swift"; sourceTree = "<group>"; };
@@ -299,7 +301,6 @@
 		938BF9CF24EFCCC000E6B52F /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Localization.swift"; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
-		93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = openHABTests.xctestplan; sourceTree = "<group>"; };
 		A07ED02D2402EE6E006588FE /* OpenHABWatchTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OpenHABWatchTracker.swift; path = "openHABWatch Extension/OpenHABWatchTracker.swift"; sourceTree = SOURCE_ROOT; };
 		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
@@ -578,6 +579,14 @@
 			path = openHABUITests;
 			sourceTree = "<group>";
 		};
+		93685A782ADE755C0077A9A6 /* TestPlans */ = {
+			isa = PBXGroup;
+			children = (
+				93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */,
+			);
+			path = TestPlans;
+			sourceTree = "<group>";
+		};
 		938BF9C724EFCCC000E6B52F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -585,14 +594,6 @@
 				938BF9CA24EFCCC000E6B52F /* InfoPlist.strings */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		93A4A7C827CA23FD0060AF5F /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				93A4A7C927CA24100060AF5F /* openHABTests.xctestplan */,
-			);
-			path = Sources;
 			sourceTree = "<group>";
 		};
 		93F38D4623803731001B1451 /* Model */ = {
@@ -867,7 +868,7 @@
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
 				DA817E79234BF39B00C91824 /* CHANGELOG.md */,
 				DFB2623018830A3600D3244D /* openHAB */,
-				93A4A7C827CA23FD0060AF5F /* Sources */,
+				93685A782ADE755C0077A9A6 /* TestPlans */,
 				DA2DC23021F2736C00830730 /* openHABTestsSwift */,
 				933D7F0522E7015000621A03 /* openHABUITests */,
 				DA0775162346705D0086C685 /* openHABWatch */,
@@ -1230,6 +1231,7 @@
 				DF4B84071885AE0E00F34902 /* blankicon.png in Resources */,
 				938BF9D024EFCCC000E6B52F /* Localizable.strings in Resources */,
 				DFB2624618830A3600D3244D /* Images.xcassets in Resources */,
+				93685A7A2ADE755C0077A9A6 /* openHABTests.xctestplan in Resources */,
 				938BF9D124EFCCC000E6B52F /* InfoPlist.strings in Resources */,
 				938BF9C424EFCB9F00E6B52F /* Main.storyboard in Resources */,
 				DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */,
