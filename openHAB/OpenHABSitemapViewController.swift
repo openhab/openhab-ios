@@ -680,7 +680,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         }
 
         var iconColor = widget?.iconColor
-        if (iconColor == nil || iconColor!.isEmpty), traitCollection.userInterfaceStyle == .dark {
+        if iconColor == nil || iconColor!.isEmpty, traitCollection.userInterfaceStyle == .dark {
             iconColor = "white"
         }
         // No icon is needed for image, video, frame and web widgets
@@ -706,7 +706,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 }
 
                 cell.imageView?.kf.setImage(
-                    with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                     placeholder: UIImage(named: "blankicon.png"),
                     options: [.processor(OpenHABImageProcessor())],
                     completionHandler: reportOnResults

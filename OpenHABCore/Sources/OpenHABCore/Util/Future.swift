@@ -11,7 +11,7 @@
 
 import Foundation
 
-// swiftlint:disable file_types_order
+// swiftlint:disable:next file_types_order
 public class Future<Value> {
     public typealias Result = Swift.Result<Value, Error>
 

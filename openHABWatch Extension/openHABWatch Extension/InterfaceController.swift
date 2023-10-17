@@ -57,11 +57,6 @@ class InterfaceController: WKInterfaceController {
         }
     }
 
-    override func didDeactivate() {
-        // This method is called when watch view controller is no longer visible
-        super.didDeactivate()
-    }
-
     func displayAlert(message: String) {
         DispatchQueue.main.async {
             let okAction = WKAlertAction(title: "Ok", style: .default) {

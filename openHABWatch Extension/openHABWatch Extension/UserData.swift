@@ -16,7 +16,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
+// swiftlint:disable:next file_types_order
 extension OpenHABCore.Future where Value == ObservableOpenHABSitemapPage.CodingData {
     func trafo() -> OpenHABCore.Future<ObservableOpenHABSitemapPage> {
         transformed { data in

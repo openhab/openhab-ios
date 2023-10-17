@@ -280,3 +280,5 @@ let failurePage = """
     </widget>
 </page>
 """.data(using: .utf8)
+
+// swiftlint:enable line_length

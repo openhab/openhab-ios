@@ -22,7 +22,7 @@ import WatchConnectivity
 
 var player: AVAudioPlayer?
 
-@UIApplicationMain
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     static var appDelegate: AppDelegate!
 
