@@ -29,7 +29,7 @@ struct ColorPickerRow: View {
                     Spacer()
                     EncircledIconWithAction(
                         systemName: "chevron.down.circle.fill",
-                        action: self.downButtonPressed
+                        action: downButtonPressed
                     )
 
                     Spacer()
@@ -44,7 +44,7 @@ struct ColorPickerRow: View {
 
                     EncircledIconWithAction(
                         systemName: "chevron.up.circle.fill",
-                        action: self.upButtonPressed
+                        action: upButtonPressed
                     )
                     Spacer()
                 }

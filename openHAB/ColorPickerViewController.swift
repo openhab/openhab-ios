@@ -57,10 +57,6 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         throttlingInterval = 0.3
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-
     func sendColorUpdate(color: UIColor) {
         // swiftlint:disable:next large_tuple
         var (hue, saturation, brightness, alpha): (CGFloat, CGFloat, CGFloat, CGFloat) = (0.0, 0.0, 0.0, 0.0)

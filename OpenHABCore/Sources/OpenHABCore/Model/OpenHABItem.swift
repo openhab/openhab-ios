@@ -55,7 +55,7 @@ public final class OpenHABItem: NSObject, CommItem {
     public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?) {
         self.name = name
         self.type = type.toItemType()
-        if let state, (state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame) {
+        if let state, state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame {
             self.state = nil
         } else {
             self.state = state

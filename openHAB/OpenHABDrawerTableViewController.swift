@@ -173,30 +173,30 @@ class OpenHABDrawerTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0:
-            return 1
+            1
         case 1:
-            return uiTiles.count
+            uiTiles.count
         case 2:
-            return sitemaps.count
+            sitemaps.count
         case 3:
-            return drawerItems.count
+            drawerItems.count
         default:
-            return 0
+            0
         }
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0:
-            return "Main"
+            "Main"
         case 1:
-            return "Tiles"
+            "Tiles"
         case 2:
-            return "Sitemaps"
+            "Sitemaps"
         case 3:
-            return "System"
+            "System"
         default:
-            return "Unknown"
+            "Unknown"
         }
     }
 

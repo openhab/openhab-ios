@@ -43,7 +43,8 @@ struct ImageRow_Previews: PreviewProvider {
             version: 2,
             icon: "Switch",
             state: "ON",
-            iconType: .png
+            iconType: .png,
+            iconColor: ""
         ).url
         // let widget = UserData().widgets[8]
         return ImageRow(URL: iconURL)

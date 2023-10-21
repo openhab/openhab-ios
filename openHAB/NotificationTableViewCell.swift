@@ -22,12 +22,6 @@ class NotificationTableViewCell: UITableViewCell {
         separatorInset = .zero
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
-
     // This is to fix possible different sizes of user icons - we fix size and position of UITableViewCell icons
     override func layoutSubviews() {
         super.layoutSubviews()

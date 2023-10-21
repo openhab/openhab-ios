@@ -21,8 +21,8 @@ struct ContentView: View {
     var body: some View {
         ScrollView {
             ForEach(viewModel.widgets) { widget in
-                self.rowWidget(widget: widget)
-                    .environmentObject(self.settings)
+                rowWidget(widget: widget)
+                    .environmentObject(settings)
             }
         }
         .navigationBarTitle(Text(title))
@@ -32,7 +32,7 @@ struct ContentView: View {
                 message: Text(viewModel.errorDescription),
                 dismissButton: .default(Text(NSLocalizedString("retry", comment: ""))) {
                     DispatchQueue.main.async {
-                        self.viewModel.refreshUrl()
+                        viewModel.refreshUrl()
                         os_log("reload after alert", log: .default, type: .info)
                     }
                 }
@@ -57,7 +57,6 @@ struct ContentView: View {
         }
     }
 
-    // swiftlint:enable line_length
     // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
     @ViewBuilder func rowWidget(widget: ObservableOpenHABWidget) -> some View {
         switch widget.stateEnum {

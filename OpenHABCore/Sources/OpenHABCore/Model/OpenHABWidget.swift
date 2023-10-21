@@ -121,9 +121,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 
     public var mappingsOrItemOptions: [OpenHABWidgetMapping] {
         if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
-            return itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+            itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
         } else {
-            return mappings
+            mappings
         }
     }
 
@@ -310,7 +310,7 @@ public extension OpenHABWidget {
         let refresh: Int?
         let height: Double?
         let isLeaf: Bool?
-        let iconColor: String?
+        let iconcolor: String?
         let labelcolor: String?
         let valuecolor: String?
         let service: String?
@@ -329,11 +329,11 @@ public extension OpenHABWidget {
     }
 }
 
-// swiftlint:disable line_length
 extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
-        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
+        // swiftlint:disable:next line_length
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
     }
 }
 

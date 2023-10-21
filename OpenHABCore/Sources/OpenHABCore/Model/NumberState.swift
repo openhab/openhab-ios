@@ -49,9 +49,9 @@ public struct NumberState: CustomStringConvertible, Equatable {
 
     private func getActualValue() -> NSNumber {
         if format?.contains("%d") == true {
-            return NSNumber(value: Int(value))
+            NSNumber(value: Int(value))
         } else {
-            return NSNumber(value: value)
+            NSNumber(value: value)
         }
     }
 }

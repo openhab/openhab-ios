@@ -5,9 +5,7 @@ opt_in_rules:
   - trailing_closure
   - implicit_return
   - multiline_function_chains
-  - anyobject_protocol
   - array_init
-  - attributes
   - closure_end_indentation
   - closure_spacing
   - reduce_boolean
@@ -26,10 +24,11 @@ disabled_rules: # rule identifiers to exclude from running
   - todo
 
 included:
-  - ./
+  - ../
 excluded:
-  - ./fastlane
-  - ./OpenHABCore/.build
+  - ../fastlane
+  - ../OpenHABCore/.build
+  - .build
 
 nesting:
     type_level: 2

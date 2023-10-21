@@ -23,16 +23,6 @@ class NotificationController: WKUserNotificationHostingController<NotificationVi
         NotificationView(customTextLabel: title, customDetailTextLabel: message)
     }
 
-    override func willActivate() {
-        // This method is called when watch view controller is about to be visible to user
-        super.willActivate()
-    }
-
-    override func didDeactivate() {
-        // This method is called when watch view controller is no longer visible
-        super.didDeactivate()
-    }
-
     override func didReceive(_ notification: UNNotification) {
         // This method is called when a notification needs to be presented.
 

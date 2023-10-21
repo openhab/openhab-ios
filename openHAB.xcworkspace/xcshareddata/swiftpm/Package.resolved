@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher.git",
         "state": {
           "branch": null,
-          "revision": "318e319998bf555c3e914d5c3adb6da05af86a32",
-          "version": "7.1.1"
+          "revision": "c1f60c63f356d364f4284ba82961acbe7de79bcc",
+          "version": "7.8.1"
         }
       },
       {
@@ -206,24 +206,6 @@
           "branch": null,
           "revision": "7e2c5f3cbbeea68e004915e3a8961e20bd11d824",
           "version": "1.18.0"
-        }
-      },
-      {
-        "package": "SwiftFormatPlugin",
-        "repositoryURL": "https://github.com/weakfl/SwiftFormatPlugin.git",
-        "state": {
-          "branch": null,
-          "revision": "749f67e06cddc05bfbff8e1b1a17f2c4c8e150eb",
-          "version": "0.50.7"
-        }
-      },
-      {
-        "package": "SwiftLintPlugin",
-        "repositoryURL": "https://github.com/weakfl/SwiftLintPlugin.git",
-        "state": {
-          "branch": null,
-          "revision": "8cbc2433be11093a4c9c243eafc101cb5ada820b",
-          "version": "0.50.3"
         }
       },
       {

@@ -12,18 +12,17 @@
 import SwiftUI
 
 // As explained in https://www.swiftbysundell.com/tips/optional-swiftui-views/
-// swiftlint:disable type_contents_order
 struct Unwrap<Value, Content: View>: View {
     private let value: Value?
     private let contentProvider: (Value) -> Content
+
+    var body: some View {
+        value.map(contentProvider)
+    }
 
     init(_ value: Value?,
          @ViewBuilder content: @escaping (Value) -> Content) {
         self.value = value
         contentProvider = content
-    }
-
-    var body: some View {
-        value.map(contentProvider)
     }
 }

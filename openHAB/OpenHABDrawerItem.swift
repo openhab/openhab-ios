@@ -18,20 +18,20 @@ enum OpenHABDrawerItem {
     var localizedString: String {
         switch self {
         case .settings:
-            return NSLocalizedString("settings", comment: "")
+            NSLocalizedString("settings", comment: "")
         case .notifications:
-            return NSLocalizedString("notifications", comment: "")
+            NSLocalizedString("notifications", comment: "")
         }
     }
 
     static func openHABDrawerItem(localizedString: String) -> OpenHABDrawerItem {
         switch localizedString {
         case OpenHABDrawerItem.settings.localizedString:
-            return OpenHABDrawerItem.settings
+            OpenHABDrawerItem.settings
         case OpenHABDrawerItem.notifications.localizedString:
-            return OpenHABDrawerItem.notifications
+            OpenHABDrawerItem.notifications
         default:
-            return OpenHABDrawerItem.settings
+            OpenHABDrawerItem.settings
         }
     }
 }

@@ -20,13 +20,11 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell {
-    private var activityIndicator: UIActivityIndicatorView = {
-        if #available(iOS 13.0, *) {
-            return UIActivityIndicatorView(style: .medium)
-        } else {
-            return UIActivityIndicatorView(style: .gray)
-        }
-    }()
+    private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
+        .init(style: .medium)
+    } else {
+        .init(style: .gray)
+    }
 
     var didLoad: (() -> Void)?
 

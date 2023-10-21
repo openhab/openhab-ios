@@ -14,7 +14,7 @@
 import os.signpost
 import XCTest
 
-// swiftlint:disable type_body_length
+// swiftlint:disable:next type_body_length
 final class JSONParserTests: XCTestCase {
     let decoder = JSONDecoder()
 

@@ -71,8 +71,8 @@ class OpenHABTracker: NSObject {
             guard let self else { return }
             let nStatus = status
             // use a timer to prevent bouncing/flapping around when switching between wifi, vpn, and wwan
-            self.restartTimer?.invalidate()
-            self.restartTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+            restartTimer?.invalidate()
+            restartTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
                 if nStatus != self.oldReachabilityStatus {
                     if let oldReachabilityStatus = self.oldReachabilityStatus {
                         os_log("OpenHABTracker Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
@@ -276,9 +276,9 @@ class OpenHABTracker: NSObject {
     func string(from status: NetworkReachabilityManager.NetworkReachabilityStatus) -> String? {
         switch status {
         case .unknown, .notReachable:
-            return "unreachable"
+            "unreachable"
         case let .reachable(connectionType):
-            return connectionType == .ethernetOrWiFi ? "WiFi" : "WWAN"
+            connectionType == .ethernetOrWiFi ? "WiFi" : "WWAN"
         }
     }
 

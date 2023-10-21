@@ -86,9 +86,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
-            return filteredPage
+            filteredPage
         } else {
-            return currentPage
+            currentPage
         }
     }
 
@@ -337,7 +337,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 var openHABSitemapPage: OpenHABSitemapPage?
 
                 // If we are talking to openHAB 1.X, talk XML
-                if self.appData?.openHABVersion == 1 {
+                if appData?.openHABVersion == 1 {
                     let str = String(decoding: data, as: UTF8.self)
                     os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
@@ -363,31 +363,31 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     }
                 }
 
-                self.currentPage = openHABSitemapPage
-                if self.isFiltering {
-                    self.filterContentForSearchText(self.search.searchBar.text)
+                currentPage = openHABSitemapPage
+                if isFiltering {
+                    filterContentForSearchText(search.searchBar.text)
                 }
 
-                self.currentPage?.sendCommand = { [weak self] item, command in
+                currentPage?.sendCommand = { [weak self] item, command in
                     self?.sendCommand(item, commandToSend: command)
                 }
                 // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
-                if !self.isUserInteracting {
-                    self.widgetTableView.reloadData()
-                    self.refreshControl?.endRefreshing()
+                if !isUserInteracting {
+                    widgetTableView.reloadData()
+                    refreshControl?.endRefreshing()
                 } else {
-                    self.isWaitingToReload = true
+                    isWaitingToReload = true
                 }
-                self.parent?.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+                parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
 
-                self.loadPage(true)
+                loadPage(true)
             case let .failure(error):
                 os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
 
                 NetworkConnection.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001, longPolling {
                     os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                    self.loadPage(false)
+                    loadPage(false)
                 } else if error.isExplicitlyCancelledError {
                     os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
                 } else {
@@ -679,6 +679,10 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
+        var iconColor = widget?.iconColor
+        if iconColor == nil || iconColor!.isEmpty, traitCollection.userInterfaceStyle == .dark {
+            iconColor = "white"
+        }
         // No icon is needed for image, video, frame and web widgets
         if widget?.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
             if let urlc = Endpoint.icon(
@@ -686,7 +690,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 version: appData?.openHABVersion ?? 2,
                 icon: widget?.icon,
                 state: widget?.iconState() ?? "",
-                iconType: iconType
+                iconType: iconType,
+                iconColor: iconColor!
             ).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
@@ -701,7 +706,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 }
 
                 cell.imageView?.kf.setImage(
-                    with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                     placeholder: UIImage(named: "blankicon.png"),
                     options: [.processor(OpenHABImageProcessor())],
                     completionHandler: reportOnResults
