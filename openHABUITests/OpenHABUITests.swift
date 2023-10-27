@@ -63,8 +63,9 @@ class OpenHABUITests: XCTestCase {
 
         menuStaticText?.tap()
         sleep(1)
+        
         // openHAB logo in left menu
-        webViewsQuery.otherElements["openHAB"].children(matching: .other).element(boundBy: 0).children(matching: .link).element.children(matching: .link).element.children(matching: .image).element.tap()
+        webViewsQuery.links.allElementsBoundByIndex[1].tap()
         sleep(2)
 
         // right menu in webUI
