@@ -83,7 +83,7 @@ extension OpenHABWatchAppDelegate: AuthenticationChallengeResponsible {
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
+        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 
@@ -91,7 +91,7 @@ extension OpenHABWatchAppDelegate: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 }
