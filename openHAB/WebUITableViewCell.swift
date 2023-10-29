@@ -105,7 +105,7 @@ extension WebUITableViewCell: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 }
