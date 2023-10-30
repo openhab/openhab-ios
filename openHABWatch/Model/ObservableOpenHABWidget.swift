@@ -205,7 +205,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     private func adj(_ raw: Double) -> Double {
         var valueAdjustedToStep = floor((raw - minValue) / step) * step
         valueAdjustedToStep += minValue
-        return min(max(valueAdjustedToStep, minValue), maxValue)
+        return valueAdjustedToStep.clamped(to: minValue ... maxValue)
     }
 }
 

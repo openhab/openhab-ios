@@ -70,7 +70,7 @@ struct ColorSelection: View {
 
     /// Prevent the draggable element from going over its limit
     func limitDisplacement(_ value: Double, _ limit: CGFloat, _ state: CGFloat) -> CGFloat {
-        max(0, min(limit, CGFloat(value) * limit + state))
+        (CGFloat(value) * limit + state).clamped(to: 0 ... limit)
     }
 
     /// Prevent the draggable element from going beyond the circle
