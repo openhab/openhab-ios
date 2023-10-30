@@ -66,7 +66,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     private func adj(_ raw: Double) -> Double {
         var valueAdjustedToStep = Double(floor(Float(((raw - widget.minValue))) / step) * step)
         valueAdjustedToStep += widget.minValue
-        return min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
+        return valueAdjustedToStep.clamped(to: widget.minValue ... widget.maxValue)
     }
 
     private func adjustedValue() -> Double {
