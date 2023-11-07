@@ -18,12 +18,10 @@ struct SwitchRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
-    var body: some View {
-        // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
-        let stateBinding = Binding<Bool>(
-            get: {
-                widget.stateEnumBinding.boolState
-            },
+    // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
+    var stateBinding: Binding<Bool> {
+        .init(
+            get: { widget.stateEnumBinding.boolState },
             set: {
                 if $0 {
                     os_log("Switch to ON", log: .viewCycle, type: .info)
@@ -35,20 +33,21 @@ struct SwitchRow: View {
                 widget.stateEnumBinding = .switcher($0)
             }
         )
+    }
 
-        return
-            Toggle(isOn: stateBinding) {
-                HStack {
-                    IconView(widget: widget, settings: settings)
-                    VStack {
-                        TextLabelView(widget: widget)
-                        DetailTextLabelView(widget: widget)
-                    }
+    var body: some View {
+        Toggle(isOn: stateBinding) {
+            HStack {
+                IconView(widget: widget, settings: settings)
+                VStack {
+                    TextLabelView(widget: widget)
+                    DetailTextLabelView(widget: widget)
                 }
             }
-            .focusable(true)
-            .padding(.trailing)
-            .cornerRadius(5)
+        }
+        .focusable(true)
+        .padding(.trailing)
+        .cornerRadius(5)
     }
 }
 

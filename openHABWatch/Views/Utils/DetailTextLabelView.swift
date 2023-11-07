@@ -15,8 +15,8 @@ struct DetailTextLabelView: View {
     @ObservedObject var widget: ObservableOpenHABWidget
 
     var body: some View {
-        Unwrap(widget.labelValue) {
-            Text($0)
+        if let label = widget.labelValue {
+            Text(label)
                 .font(.footnote)
                 .lineLimit(1)
                 .foregroundColor(!widget.valuecolor.isEmpty ? Color(fromString: widget.valuecolor) : .secondary)
