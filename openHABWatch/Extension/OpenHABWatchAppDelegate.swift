@@ -15,58 +15,25 @@ import os.log
 import WatchConnectivity
 import WatchKit
 
-@main
-class ExtensionDelegate: NSObject, WKApplicationDelegate {
-    static var extensionDelegate: ExtensionDelegate!
-
-    var appData: ObservableOpenHABDataObject
-
-    var session: WCSession? {
-        didSet {
-            if let session {
-                session.delegate = AppMessageService.singleton
-                session.activate()
-            }
-        }
-    }
-
-    var viewModel: UserData?
+class OpenHABWatchAppDelegate: NSObject {
+    var session: WCSession
+    let delegate: WCSessionDelegate
+//    var viewModel: UserData?
 
     override init() {
-        appData = ObservableOpenHABDataObject.shared
+        delegate = AppMessageService.singleton
+        session = .default
+        session.delegate = delegate
+        session.activate()
         super.init()
-        ExtensionDelegate.extensionDelegate = self
 
-        ImageDownloader.default.authenticationChallengeResponder = self
+//        let appData = ObservableOpenHABDataObject.shared
+
+//        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: OpenHABAccessTokenAdapter(appData: appData))
     }
+}
 
-    func applicationDidFinishLaunching() {
-        // Perform any final initialization of your application.
-        activateWatchConnectivity()
-
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))
-
-        NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
-
-        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: ExtensionDelegate.extensionDelegate.appData))]
-    }
-
-    func activateWatchConnectivity() {
-        // WCSession.isSupported is always supported on a Watch
-        session = WCSession.default
-    }
-
-    func applicationDidBecomeActive() {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        AppState.singleton.active = true
-    }
-
-    func applicationWillResignActive() {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, etc.
-        AppState.singleton.active = false
-    }
-
+extension OpenHABWatchAppDelegate: WKApplicationDelegate {
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
         // Sent when the system needs to launch the application in the background to process tasks. Tasks arrive in a set, so loop through and process each one.
         for task in backgroundTasks {
@@ -96,11 +63,21 @@ class ExtensionDelegate: NSObject, WKApplicationDelegate {
             }
         }
     }
+
+    func applicationDidFinishLaunching() {
+        // TODO:
+        ImageDownloader.default.authenticationChallengeResponder = self
+
+//        NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
+
+        let appData = ObservableOpenHABDataObject.shared
+        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: appData))]
+    }
 }
 
 // MARK: Kingfisher authentication with NSURLCredential
 
-extension ExtensionDelegate: AuthenticationChallengeResponsible {
+extension OpenHABWatchAppDelegate: AuthenticationChallengeResponsible {
     // sessionDelegate.onReceiveSessionTaskChallenge
     func downloader(_ downloader: ImageDownloader,
                     task: URLSessionTask,
@@ -121,37 +98,37 @@ extension ExtensionDelegate: AuthenticationChallengeResponsible {
 
 // MARK: - ServerCertificateManagerDelegate
 
-extension ExtensionDelegate: ServerCertificateManagerDelegate {
-    // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        guard viewModel != nil else {
-            policy!.evaluateResult = .deny
-            return
-        }
-        DispatchQueue.main.async {
-            self.viewModel?.showCertificateAlert = true
-            self.viewModel?.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
-        }
-    }
-
-    // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        guard viewModel != nil else {
-            policy!.evaluateResult = .deny
-            return
-        }
-        DispatchQueue.main.async {
-            self.viewModel?.showCertificateAlert = true
-            self.viewModel?.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
-        }
-    }
-
-    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {}
-}
+// extension OpenHABWatchAppDelegate: ServerCertificateManagerDelegate {
+//    // delegate should ask user for a decision on what to do with invalid certificate
+//    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
+//        guard viewModel != nil else {
+//            policy!.evaluateResult = .deny
+//            return
+//        }
+//        DispatchQueue.main.async {
+//            self.viewModel?.showCertificateAlert = true
+//            self.viewModel?.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
+//        }
+//    }
+//
+//    // certificate received from openHAB doesn't match our record, ask user for a decision
+//    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
+//        guard viewModel != nil else {
+//            policy!.evaluateResult = .deny
+//            return
+//        }
+//        DispatchQueue.main.async {
+//            self.viewModel?.showCertificateAlert = true
+//            self.viewModel?.certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
+//        }
+//    }
+//
+//    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {}
+// }
 
 // MARK: - ClientCertificateManagerDelegate
 
-extension ExtensionDelegate: ClientCertificateManagerDelegate {
+extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {}
 

@@ -21,7 +21,10 @@ extension ObservableOpenHABWidget {
             // os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
             NavigationLink(destination:
                 LazyView(
-                    ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings: settings, title: title))
+                    // TODO:
+                    EmptyView()
+                    // ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings: settings, title: title)
+                )
             ) {
                 Image(systemName: "chevron.right")
             }

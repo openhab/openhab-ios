@@ -28,7 +28,7 @@ struct UserDefaultsBacked<T> {
     }
 }
 
-/// Convenience initializer when UserDefaults is optional.
+// Convenience initializer when UserDefaults is optional.
 extension UserDefaultsBacked where T: ExpressibleByNilLiteral {
     init(key: String, storage: UserDefaults = .standard) {
         self.init(key: key, defaultValue: nil, storage: storage)

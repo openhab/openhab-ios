@@ -13,7 +13,7 @@ import Foundation
 import os.log
 import Security
 
-public protocol ClientCertificateManagerDelegate: NSObjectProtocol {
+public protocol ClientCertificateManagerDelegate: AnyObject {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?)
     // delegate should ask user for the export password used to decode the PKCS#12

@@ -26,6 +26,7 @@ extension OpenHABCore.Future where Value == ObservableOpenHABSitemapPage.CodingD
 }
 
 final class UserData: ObservableObject {
+    static let shared = UserData()
     @Published var widgets: [ObservableOpenHABWidget] = []
     @Published var showAlert = false
     @Published var errorDescription = ""

@@ -77,6 +77,9 @@ class OpenHABWatchTracker: NSObject {
                 connectivityTask.cancel()
             }
             let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
+            if NetworkConnection.shared == nil {
+                NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
+            }
             connectivityTask = NetworkConnection.shared.manager.request(request)
                 .validate()
                 .responseData { response in

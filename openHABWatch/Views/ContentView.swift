@@ -101,13 +101,23 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            ContentView(viewModel: UserData())
-                .previewDevice("Apple Watch Series 4 - 44mm")
-            ContentView(viewModel: UserData())
-                .previewDevice("Apple Watch Series 2 - 38mm")
-        }
-    }
-}
+// TODO:
+// struct ContentView_Previews: PreviewProvider {
+//    static let envObject = UserData()
+//    static var previews: some View {
+//        Group {
+//            ContentView()
+////                .previewDevice("Apple Watch Series 4 - 44mm")
+//                .environmentObject({ () -> UserData in
+//                    let envObj = UserData()
+//                    return envObj
+//                }() )
+//
+//
+//
+//
+//            ContentView(viewModel: UserData())
+//                .previewDevice("Apple Watch Series 2 - 38mm")
+//        }
+//    }
+// }

@@ -45,10 +45,10 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 ObservableOpenHABDataObject.shared.ignoreSSL = ignoreSSL
             }
 
-            if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Any] {
-                NetworkConnection.shared.serverCertificateManager.trustedCertificates = trustedCertificates
-                NetworkConnection.shared.serverCertificateManager.saveTrustedCertificates()
-            }
+//            if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Any] {
+//                NetworkConnection.shared.serverCertificateManager.trustedCertificates = trustedCertificates
+//                NetworkConnection.shared.serverCertificateManager.saveTrustedCertificates()
+//            }
 
             if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {
                 ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds
@@ -68,7 +68,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
                     os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
 
                     DispatchQueue.main.async { () in
-                        AppMessageService.singleton.updateValuesFromApplicationContext(response as [String: AnyObject])
+                        self.updateValuesFromApplicationContext(response as [String: AnyObject])
                     }
                 },
                 errorHandler: { (error) in
@@ -77,7 +77,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
             )
     }
 
-    @available(watchOSApplicationExtension 2.2, *)
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
         DispatchQueue.main.async { () in
@@ -86,7 +85,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
     }
 
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
-    @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         os_log("didReceiveApplicationContext %{PUBLIC}@", log: .watch, type: .info, "\(applicationContext)")
         DispatchQueue.main.async { () in
@@ -95,7 +93,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
     }
 
     /** Called on the delegate of the receiver. Will be called on startup if the user info finished transferring when the receiver was not running. */
-    @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
         os_log("didReceiveUserInfo %{PUBLIC}@", log: .watch, type: .info, "\(userInfo)")
         DispatchQueue.main.async { () in
@@ -103,7 +100,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
-    @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
         os_log("didReceiveMessage some filtered messages: %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
@@ -112,7 +108,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
-    @available(watchOS 2.0, *)
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username", "defaultSitemap"].contains($0.key) }
         os_log("didReceiveMessage some filtered messages: %{PUBLIC}@ with reply handler", log: .watch, type: .info, "\(filteredMessages)")
