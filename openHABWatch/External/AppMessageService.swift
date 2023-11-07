@@ -45,10 +45,10 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 ObservableOpenHABDataObject.shared.ignoreSSL = ignoreSSL
             }
 
-//            if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Any] {
-//                NetworkConnection.shared.serverCertificateManager.trustedCertificates = trustedCertificates
-//                NetworkConnection.shared.serverCertificateManager.saveTrustedCertificates()
-//            }
+            if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
+                NetworkConnection.shared.serverCertificateManager.trustedCertificates = trustedCertificates
+                NetworkConnection.shared.serverCertificateManager.saveTrustedCertificates()
+            }
 
             if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {
                 ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds

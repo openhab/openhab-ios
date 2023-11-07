@@ -44,7 +44,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     weak var delegate: ServerCertificateManagerDelegate?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL = false
-    public var trustedCertificates: [String: Any] = [:]
+    public var trustedCertificates: [String: Data] = [:]
 
     // Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool) {
@@ -76,7 +76,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
 
     public func saveTrustedCertificates() {
         do {
-            let data = try NSKeyedArchiver.archivedData(withRootObject: trustedCertificates, requiringSecureCoding: false)
+            let data = try PropertyListEncoder().encode(trustedCertificates)
             try data.write(to: getPersistensePath())
         } catch {
             os_log("Could not save trusted certificates", log: .default)
@@ -90,18 +90,31 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     }
 
     func certificateData(forDomain domain: String) -> CFData? {
-        guard let certificateData = trustedCertificates[domain] as? Data else { return nil }
+        guard let certificateData = trustedCertificates[domain] else { return nil }
         return certificateData as CFData
     }
 
     func loadTrustedCertificates() {
+        var decodableTrustedCertificates: [String: Data] = [:]
         do {
             let rawdata = try Data(contentsOf: getPersistensePath())
-            if let unarchive = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawdata) as? [String: Any] {
-                trustedCertificates = unarchive
-            }
+            let decoder = PropertyListDecoder()
+            decodableTrustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
+            trustedCertificates = decodableTrustedCertificates
         } catch {
-            os_log("Could not load trusted certificates", log: .default)
+            // if Decodable fails, fall back to NSKeyedArchiver. Handling can be removed when customer base is migrated
+            do {
+                let rawdata = try Data(contentsOf: getPersistensePath())
+                if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
+                    trustedCertificates = unarchivedTrustedCertificates
+                    saveTrustedCertificates() // Ensure that data is written in new format to take this path only once
+                } else {
+                    return
+                }
+            } catch {
+                os_log("Could not load trusted unarchived certificates", log: .default)
+            }
+            os_log("Could not load trusted codable certificates", log: .default)
         }
     }
 
