@@ -34,7 +34,7 @@ struct SetpointRow: View {
             HStack {
                 Spacer()
 
-                EncircledIconWithAction(
+                ImageWithAction(
                     systemName:
                     "chevron.down.circle.fill",
                     action: decreaseValue
@@ -47,7 +47,7 @@ struct SetpointRow: View {
 
                 Spacer()
 
-                EncircledIconWithAction(
+                ImageWithAction(
                     systemName: "chevron.up.circle.fill",
                     action: increaseValue
                 )

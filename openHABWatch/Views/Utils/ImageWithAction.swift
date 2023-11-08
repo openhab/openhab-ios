@@ -11,7 +11,7 @@
 
 import SwiftUI
 
-struct EncircledIconWithAction: View {
+struct ImageWithAction: View {
     var systemName: String
     var action: () -> Void
     var body: some View {
@@ -19,21 +19,14 @@ struct EncircledIconWithAction: View {
             .font(.system(size: 25))
             .colorMultiply(.blue)
             .saturation(0.8)
-//        Circle()
-//            .fill(Color.blue)
-//            .frame(width: 35, height: 35)
-//            .overlay(
-//                Image(systemName: systemName)
-//                    .font(.system(size: 25))
-//            )
             .onTapGesture {
                 action()
             }
     }
 }
 
-struct EncircledIconWithAction_Previews: PreviewProvider {
+struct ImageWithAction_Previews: PreviewProvider {
     static var previews: some View {
-        EncircledIconWithAction(systemName: "chevron.up.circle.fill") {}
+        ImageWithAction(systemName: "chevron.up.circle.fill") {}
     }
 }

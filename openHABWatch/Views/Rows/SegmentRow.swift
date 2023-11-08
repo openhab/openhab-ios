@@ -18,8 +18,9 @@ struct SegmentRow: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     @State private var favoriteColor = 0
-    var body: some View {
-        let valueBinding = Binding<Int>(
+
+    var valueBinding: Binding<Int> {
+        .init(
             get: {
                 guard case let .segmented(value) = widget.stateEnumBinding else { return 0 }
                 return value
@@ -30,23 +31,25 @@ struct SegmentRow: View {
                 widget.stateEnumBinding = .segmented($0)
             }
         )
-        return
-            VStack {
-                HStack {
-                    IconView(widget: widget, settings: settings)
-                    TextLabelView(widget: widget)
-                    Spacer()
-                    DetailTextLabelView(widget: widget)
-                }
-                Picker("Picker", selection: valueBinding) {
-                    ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) {
-                        Text(widget.mappingsOrItemOptions[$0].label).tag($0)
-                    }
-                }
-                .labelsHidden()
-                .frame(height: 100)
-                .padding(.top, 0)
+    }
+
+    var body: some View {
+        VStack {
+            HStack {
+                IconView(widget: widget, settings: settings)
+                TextLabelView(widget: widget)
+                Spacer()
+                DetailTextLabelView(widget: widget)
             }
+            Picker("Picker", selection: valueBinding) {
+                ForEach(0 ..< widget.mappingsOrItemOptions.count, id: \.self) {
+                    Text(widget.mappingsOrItemOptions[$0].label).tag($0)
+                }
+            }
+            .labelsHidden()
+            .frame(height: 100)
+            .padding(.top, 0)
+        }
     }
 }
 
