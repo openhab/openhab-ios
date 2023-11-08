@@ -19,12 +19,13 @@ struct ContentView: View {
     @State var title = "openHAB"
 
     var body: some View {
-        ScrollView {
+        List {
             ForEach(viewModel.widgets) { widget in
                 rowWidget(widget: widget)
                     .environmentObject(settings)
             }
         }
+        .listStyle(.carousel)
         .navigationBarTitle(Text(title))
         .alert(isPresented: $viewModel.showAlert) {
             Alert(

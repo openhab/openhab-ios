@@ -45,6 +45,7 @@ struct IconView: View {
                 Image(systemName: "arrow.2.circlepath.circle")
                     .font(.callout)
                     .opacity(0.3)
+                    .hidden()
             }
             .cancelOnDisappear(true)
             .resizable()

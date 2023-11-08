@@ -85,11 +85,9 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     // Text between square brackets
     var labelValue: String? {
-        // Swift 5 raw strings
-        let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [])
-        guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: (label as NSString).length)) else { return nil }
-        guard let range = Range(match.range(at: 1), in: label) else { return nil }
-        return String(label[range])
+        let regex = /\[(.*?)\]/
+        guard let match = label.firstMatch(of: regex) else { return nil }
+        return String(match.1)
     }
 
     var coordinate: CLLocationCoordinate2D {
