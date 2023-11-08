@@ -9,6 +9,8 @@
         "thread-id": "5280"
     },
 
-    "openHABMessageIndexKey": 1
-    
+    "openHABMessageIndexKey": 1,
+
+    "Simulator Target Bundle": "es.spaphone.openhab.watchkitapp"
+
 }

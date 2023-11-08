@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import SwiftUI
+import UserNotifications
 
 @main
 struct OpenHABWatch: App {
@@ -30,11 +31,15 @@ struct OpenHABWatch: App {
                         Label("Preferences", systemImage: "person.crop.circle.fill")
                     }
             }
+            .task {
+                let center = UNUserNotificationCenter.current()
+                _ = try? await center.requestAuthorization(
+                    options: [.alert, .sound, .badge]
+                )
+            }
             //            .environmentObject(userData)
         }
 
-        #if os(watchOS)
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")
-        #endif
     }
 }
