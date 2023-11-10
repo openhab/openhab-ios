@@ -20,6 +20,12 @@ struct ContentView: View {
 
     var body: some View {
         List {
+            HStack {
+                Text(viewModel.openHABSitemapPage?.title ?? "Sitemap without title")
+                    .font(.body)
+                    .lineLimit(1)
+                Spacer()
+            }
             ForEach(viewModel.widgets) { widget in
                 rowWidget(widget: widget)
                     .environmentObject(settings)
