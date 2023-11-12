@@ -20,8 +20,9 @@ public class OpenHABSitemapPage: NSObject {
     public var title = ""
     public var link = ""
     public var leaf = false
+    public var icon = ""
 
-    public init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
+    public init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget], icon: String) {
         super.init()
         self.pageId = pageId
         self.title = title
@@ -35,6 +36,7 @@ public class OpenHABSitemapPage: NSObject {
                 self?.sendCommand(item, commandToSend: command)
             }
         }
+        self.icon = icon
     }
 
     public init(xml xmlElement: XMLElement) {
@@ -46,26 +48,13 @@ public class OpenHABSitemapPage: NSObject {
             case "title": title = child.stringValue
             case "link": link = child.stringValue
             case "leaf": leaf = child.stringValue == "true" ? true : false
+            case "icon": icon = child.stringValue
             default: break
             }
         }
         var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
         widgets = tempWidgets
-        widgets.forEach {
-            $0.sendCommand = { [weak self] item, command in
-                self?.sendCommand(item, commandToSend: command)
-            }
-        }
-    }
-
-    public init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
-        super.init()
-        self.pageId = pageId
-        self.title = title
-        self.link = link
-        self.leaf = leaf
-        widgets = expandedWidgets
         widgets.forEach {
             $0.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
@@ -88,7 +77,8 @@ public extension OpenHABSitemapPage {
             title: title,
             link: link,
             leaf: leaf,
-            expandedWidgets: widgets.filter(isIncluded)
+            widgets: widgets.filter(isIncluded),
+            icon: icon
         )
         return filteredOpenHABSitemapPage
     }
@@ -101,6 +91,7 @@ public extension OpenHABSitemapPage {
         let link: String?
         let leaf: Bool?
         let widgets: [OpenHABWidget.CodingData]?
+        let icon: String?
 
         private enum CodingKeys: String, CodingKey {
             case pageId = "id"
@@ -108,6 +99,7 @@ public extension OpenHABSitemapPage {
             case link
             case leaf
             case widgets
+            case icon
         }
     }
 }
@@ -115,6 +107,6 @@ public extension OpenHABSitemapPage {
 public extension OpenHABSitemapPage.CodingData {
     var openHABSitemapPage: OpenHABSitemapPage {
         let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
-        return OpenHABSitemapPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets)
+        return OpenHABSitemapPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets, icon: icon.orEmpty)
     }
 }

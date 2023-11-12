@@ -67,7 +67,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var legend: Bool?
     var encoding = ""
     @Published var item: OpenHABItem?
-    var linkedPage: OpenHABLinkedPage?
+    var linkedPage: OpenHABSitemapPage?
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
     var widgets: [ObservableOpenHABWidget] = []
@@ -211,7 +211,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
 extension ObservableOpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget], forceAsItem: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget], forceAsItem: Bool?) {
         self.init()
 
         id = widgetId
@@ -289,7 +289,7 @@ extension ObservableOpenHABWidget {
             case "widget": widgets.append(ObservableOpenHABWidget(xml: child))
             case "item": item = OpenHABItem(xml: child)
             case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
+            case "linkedPage": linkedPage = OpenHABSitemapPage(xml: child)
             default:
                 break
             }
@@ -323,7 +323,7 @@ extension ObservableOpenHABWidget {
         let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABLinkedPage?
+        let linkedPage: OpenHABSitemapPage.CodingData?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [ObservableOpenHABWidget.CodingData]
         let forceAsItem: Bool?
@@ -334,7 +334,7 @@ extension ObservableOpenHABWidget.CodingData {
     var openHABWidget: ObservableOpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
         // swiftlint:disable:next line_length
-        return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, forceAsItem: forceAsItem)
+        return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage?.openHABSitemapPage, mappings: mappings, widgets: mappedWidgets, forceAsItem: forceAsItem)
     }
 }
 
