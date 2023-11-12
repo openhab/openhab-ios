@@ -1,6 +1,4 @@
 <p align="center">
-    <a href="https://www.bountysource.com/teams/openhab/issues?tracker_ids=860186"><img alt="Bountysource" src="https://www.bountysource.com/badge/tracker?tracker_id=860186"></a>
-    <br>
     <img alt="Logo" src="openHAB/Images.xcassets/AppIcon.appiconset/Icon.png" width="100">
     <br>
     <b>openHAB client for iOS</b>
