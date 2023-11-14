@@ -37,7 +37,6 @@ struct OpenHABWatch: App {
                     options: [.alert, .sound, .badge]
                 )
             }
-            //            .environmentObject(userData)
         }
 
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")

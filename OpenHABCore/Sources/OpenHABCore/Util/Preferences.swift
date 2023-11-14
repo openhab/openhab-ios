@@ -92,6 +92,7 @@ public enum Preferences {
     @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
+    @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
 
     // MARK: - Private
 

@@ -49,6 +49,13 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
         }
     }
 
+    @UserDefaultsBacked(key: "sitemapForWatch", defaultValue: "")
+    var sitemapForWatch: String {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
     @UserDefaultsBacked(key: "username", defaultValue: "")
     var openHABUsername: String {
         willSet {

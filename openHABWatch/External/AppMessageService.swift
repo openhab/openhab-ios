@@ -20,6 +20,9 @@ class AppMessageService: NSObject, WCSessionDelegate {
     static let singleton = AppMessageService()
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
+        if NetworkConnection.shared == nil {
+            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
+        }
         if !applicationContext.isEmpty {
             if let localUrl = applicationContext["localUrl"] as? String {
                 ObservableOpenHABDataObject.shared.localUrl = localUrl
@@ -31,6 +34,10 @@ class AppMessageService: NSObject, WCSessionDelegate {
             // !!!
             if let sitemapName = applicationContext["defaultSitemap"] as? String {
                 ObservableOpenHABDataObject.shared.sitemapName = sitemapName
+            }
+
+            if let sitemapForWatch = applicationContext["sitemapForWatch"] as? String {
+                ObservableOpenHABDataObject.shared.sitemapForWatch = sitemapForWatch
             }
 
             if let username = applicationContext["username"] as? String {

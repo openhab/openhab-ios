@@ -45,7 +45,7 @@ public extension Endpoint {
     static func watchSitemap(openHABRootUrl: String, sitemapName: String) -> Endpoint {
         Endpoint(
             baseURL: openHABRootUrl,
-            path: "/rest/sitemaps/uicomponents_\(sitemapName)/uicomponents_\(sitemapName)",
+            path: "/rest/sitemaps/\(sitemapName)/\(sitemapName)",
             queryItems: [URLQueryItem(name: "jsoncallback", value: "callback")]
         )
     }

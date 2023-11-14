@@ -241,7 +241,7 @@ extension UserData: OpenHABWatchTrackerDelegate {
 
         ObservableOpenHABDataObject.shared.openHABRootUrl = urlString
 
-        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: ObservableOpenHABDataObject.shared.sitemapName).url
+        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
         loadPage(url: url, longPolling: false, refresh: true)
     }
 
