@@ -51,29 +51,29 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
         os_log("SetContactStateValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
+            completion(.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
         guard let state = intent.state else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: NSLocalizedString("empty", comment: "empty value"), item: itemName))
+            completion(.failureInvalidAction(state: NSLocalizedString("empty", comment: "empty value"), item: itemName))
             return
         }
 
         // Map user language to real action
         guard let realState = SetContactStateValueIntentHandler.ACTION_MAP[state] else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: state, item: itemName))
+            completion(.failureInvalidAction(state: state, item: itemName))
             return
         }
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
             guard let item else {
-                completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(itemName))
+                completion(.failureInvalidItem(itemName))
                 return
             }
             OpenHABItemCache.instance.sendState(item, stateToSend: realState)
 
-            completion(OpenHABSetContactStateValueIntentResponse.success(item: itemName, state: state))
+            completion(.success(item: itemName, state: state))
         }
     }
 }

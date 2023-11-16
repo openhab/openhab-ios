@@ -39,23 +39,23 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
         os_log("SetStringValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetStringValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
+            completion(.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
         guard let value = intent.value else {
-            completion(OpenHABSetStringValueIntentResponse.failureEmptyValue(item: itemName))
+            completion(.failureEmptyValue(item: itemName))
             return
         }
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
             guard let item else {
-                completion(OpenHABSetStringValueIntentResponse.failureInvalidItem(itemName))
+                completion(.failureInvalidItem(itemName))
                 return
             }
             OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
 
-            completion(OpenHABSetStringValueIntentResponse.success(value: value, item: itemName))
+            completion(.success(value: value, item: itemName))
         }
     }
 }

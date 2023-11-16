@@ -39,18 +39,18 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
         os_log("SetColorValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
+            completion(.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
         guard var value = intent.value else {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidValue(NSLocalizedString("empty", comment: "empty value"), item: intent.item!))
+            completion(.failureInvalidValue(NSLocalizedString("empty", comment: "empty value"), item: intent.item!))
             return
         }
 
         let hsb = value.split(separator: ",")
         if hsb.count != 3 {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidValue(value, item: intent.item!))
+            completion(.failureInvalidValue(value, item: intent.item!))
             return
         }
         let hue = Int(hsb[0]) ?? 0
@@ -58,19 +58,19 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
         let val = Int(hsb[2]) ?? 0
 
         if hue < 0 || hue > 360 || sat < 0 || sat > 100 || val < 0 || val > 100 {
-            completion(OpenHABSetColorValueIntentResponse.failureInvalidValue(value, item: intent.item!))
+            completion(.failureInvalidValue(value, item: intent.item!))
             return
         }
         value = "\(hue),\(sat),\(val)"
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
             guard let item else {
-                completion(OpenHABSetColorValueIntentResponse.failureInvalidItem(itemName))
+                completion(.failureInvalidItem(itemName))
                 return
             }
             OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
 
-            completion(OpenHABSetColorValueIntentResponse.success(value: value, item: itemName))
+            completion(.success(value: value, item: itemName))
         }
     }
 }
