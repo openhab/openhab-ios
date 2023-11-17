@@ -61,6 +61,7 @@ struct OpenHABWidget: Widget {
             OpenHABWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
+        .supportedFamilies([.systemSmall])
     }
 }
 

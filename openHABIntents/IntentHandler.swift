@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Intents
-import OpenHABCore
 
 class IntentHandler: INExtension {
     override func handler(for intent: INIntent) -> Any {
