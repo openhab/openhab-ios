@@ -32,17 +32,20 @@ struct SliderWithSwitchSupportRow: View {
 
         let stateBinding = Binding<Bool>(
             get: {
-                widget.stateEnumBinding.boolState
+                if widget.adjustedValue > widget.minValue {
+                    true
+                } else {
+                    false
+                }
             },
             set: {
                 if $0 {
                     os_log("Switch to ON", log: .viewCycle, type: .info)
-                    widget.sendCommand("ON")
+                    widget.sendCommand(widget.maxValue.valueText(step: widget.step))
                 } else {
                     os_log("Switch to OFF", log: .viewCycle, type: .info)
-                    widget.sendCommand("OFF")
+                    widget.sendCommand(widget.minValue.valueText(step: widget.step))
                 }
-                widget.stateEnumBinding = .switcher($0)
             }
         )
 
