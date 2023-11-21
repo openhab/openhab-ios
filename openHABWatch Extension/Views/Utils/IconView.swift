@@ -24,12 +24,13 @@ struct IconView: View {
             version: 2,
             icon: widget.icon,
             state: widget.item?.state ?? "",
-            iconType: .png
+            iconType: .png,
+            iconColor: ""
         ).url
     }
 
     var body: some View {
-        let image = iconURL != nil ? KFImage(source: .network(ImageResource(
+        let image = iconURL != nil ? KFImage(source: .network(KF.ImageResource(
             downloadURL: iconURL!,
             cacheKey: iconURL!.path + (iconURL!.query ?? "")
         ))) : KFImage(iconURL)

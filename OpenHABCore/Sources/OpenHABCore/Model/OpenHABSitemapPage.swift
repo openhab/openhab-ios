@@ -83,12 +83,12 @@ public class OpenHABSitemapPage: NSObject {
 
 public extension OpenHABSitemapPage {
     func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = OpenHABSitemapPage(
+        let filteredOpenHABSitemapPage = try OpenHABSitemapPage(
             pageId: pageId,
             title: title,
             link: link,
             leaf: leaf,
-            expandedWidgets: try widgets.filter(isIncluded)
+            expandedWidgets: widgets.filter(isIncluded)
         )
         return filteredOpenHABSitemapPage
     }

@@ -147,8 +147,9 @@ public extension Endpoint {
         return endpoint
     }
 
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType) -> Endpoint {
-        guard let icon, !icon.isEmpty else {
+    // swiftlint:disable:next function_parameter_count
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
+        guard var icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
 
@@ -157,6 +158,31 @@ public extension Endpoint {
             var queryItems = [
                 URLQueryItem(name: "state", value: state)
             ]
+            if version >= 4 {
+                let components = icon.components(separatedBy: ":")
+                var source = ""
+                var set = ""
+                if components.count == 3 {
+                    source = components[0]
+                    set = components[1]
+                    icon = components[2]
+                } else if components.count == 2 {
+                    source = components[0]
+                    set = "classic"
+                    icon = components[1]
+                }
+                if source == "if" || source == "iconify" {
+                    queryItems = [URLQueryItem(name: "height", value: "64")]
+                    if !iconColor.isEmpty {
+                        queryItems.append(URLQueryItem(name: "color", value: iconColor))
+                    }
+                    return Endpoint(
+                        baseURL: "https://api.iconify.design/",
+                        path: "/\(set)/\(icon).svg",
+                        queryItems: queryItems
+                    )
+                }
+            }
             if version >= 3 {
                 queryItems.append(contentsOf: [
                     URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
@@ -184,13 +210,13 @@ public extension Endpoint {
 
     static func iconForDrawer(rootUrl: String, version: Int, icon: String) -> Endpoint {
         if version == 2 {
-            return Endpoint(
+            Endpoint(
                 baseURL: rootUrl,
                 path: "/icon/\(icon).png",
                 queryItems: []
             )
         } else {
-            return Endpoint(
+            Endpoint(
                 baseURL: rootUrl,
                 path: "/images/\(icon).png",
                 queryItems: []

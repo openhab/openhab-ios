@@ -16,7 +16,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-// swiftlint:disable file_types_order
+// swiftlint:disable:next file_types_order
 extension OpenHABCore.Future where Value == ObservableOpenHABSitemapPage.CodingData {
     func trafo() -> OpenHABCore.Future<ObservableOpenHABSitemapPage> {
         transformed { data in
@@ -162,7 +162,7 @@ final class UserData: ObservableObject {
                 do {
                     // Self-executing closure
                     // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                    self.openHABSitemapPage = try {
+                    openHABSitemapPage = try {
                         let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
                         return sitemapPageCodingData.openHABSitemapPage
                     }()
@@ -170,14 +170,14 @@ final class UserData: ObservableObject {
                     os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                 }
 
-                self.openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                openHABSitemapPage?.sendCommand = { [weak self] item, command in
                     self?.sendCommand(item, commandToSend: command)
                 }
 
-                self.widgets = self.openHABSitemapPage?.widgets ?? []
+                widgets = openHABSitemapPage?.widgets ?? []
 
-                self.showAlert = self.widgets.isEmpty ? true : false
-                if refresh { self.loadPage(
+                showAlert = widgets.isEmpty ? true : false
+                if refresh { loadPage(
                     url: url,
                     longPolling: true,
                     refresh: true
@@ -185,9 +185,9 @@ final class UserData: ObservableObject {
 
             case let .failure(error):
                 os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                self.errorDescription = error.localizedDescription
-                self.widgets = []
-                self.showAlert = true
+                errorDescription = error.localizedDescription
+                widgets = []
+                showAlert = true
             }
         }
         currentPageOperation?.resume()

@@ -57,7 +57,6 @@ struct ContentView: View {
         }
     }
 
-    // swiftlint:enable line_length
     // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
     @ViewBuilder func rowWidget(widget: ObservableOpenHABWidget) -> some View {
         switch widget.stateEnum {
