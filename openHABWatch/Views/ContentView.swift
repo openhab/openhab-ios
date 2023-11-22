@@ -19,48 +19,47 @@ struct ContentView: View {
     @State var title = "openHAB"
 
     var body: some View {
-        List {
-            HStack {
-                Text(viewModel.openHABSitemapPage?.title ?? "Sitemap without title")
-                    .font(.body)
-                    .lineLimit(1)
-                Spacer()
-            }
-            ForEach(viewModel.widgets) { widget in
-                rowWidget(widget: widget)
-                    .environmentObject(settings)
-            }
-        }
-        .listStyle(.carousel)
-        .navigationBarTitle(Text(title))
-        .alert(isPresented: $viewModel.showAlert) {
-            Alert(
-                title: Text(NSLocalizedString("error", comment: "")),
-                message: Text(viewModel.errorDescription),
-                dismissButton: .default(Text(NSLocalizedString("retry", comment: ""))) {
-                    DispatchQueue.main.async {
-                        viewModel.refreshUrl()
-                        os_log("reload after alert", log: .default, type: .info)
-                    }
+        ZStack {
+            ScrollView {
+                HStack {
+                    Text(viewModel.openHABSitemapPage?.title ?? "Sitemap without title")
+                        .font(.body)
+                        .lineLimit(1)
+                    Spacer()
                 }
-            )
-        }
-        .actionSheet(isPresented: $viewModel.showCertificateAlert) {
-            ActionSheet(
-                title: Text(NSLocalizedString("warning", comment: "")),
-                message: Text(viewModel.certificateErrorDescription),
-                buttons: [
-                    .default(Text(NSLocalizedString("abort", comment: ""))) {
-                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
-                    },
-                    .default(Text(NSLocalizedString("once", comment: ""))) {
-                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
-                    },
-                    .default(Text(NSLocalizedString("always", comment: ""))) {
-                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
+                ForEach(viewModel.widgets) { widget in
+                    rowWidget(widget: widget)
+                        .environmentObject(settings)
+                }
+            }
+            .navigationBarTitle(Text(title))
+            .actionSheet(isPresented: $viewModel.showCertificateAlert) {
+                ActionSheet(
+                    title: Text(NSLocalizedString("warning", comment: "")),
+                    message: Text(viewModel.certificateErrorDescription),
+                    buttons: [
+                        .default(Text(NSLocalizedString("abort", comment: ""))) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
+                        },
+                        .default(Text(NSLocalizedString("once", comment: ""))) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
+                        },
+                        .default(Text(NSLocalizedString("always", comment: ""))) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
+                        }
+                    ]
+                )
+            }
+            if viewModel.showAlert {
+                Text("Refreshing...")
+                    .onAppear {
+                        DispatchQueue.main.async {
+                            viewModel.refreshUrl()
+                            os_log("reload after alert", log: .default, type: .info)
+                        }
+                        viewModel.showAlert = false
                     }
-                ]
-            )
+            }
         }
     }
 
