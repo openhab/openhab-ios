@@ -63,7 +63,7 @@ class OpenHABUITests: XCTestCase {
 
         menuStaticText?.tap()
         sleep(1)
-        
+
         // openHAB logo in left menu
         webViewsQuery.links.allElementsBoundByIndex[1].tap()
         sleep(2)

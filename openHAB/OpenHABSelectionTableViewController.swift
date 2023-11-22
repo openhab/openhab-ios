@@ -19,9 +19,12 @@ public protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
 }
 
 class OpenHABSelectionTableViewController: UITableViewController {
-    static let tableViewCellIdentifier = "SelectionCell"
+    private let cellReuseIdentifier = "SelectionCell"
 
-    var mappings: [AnyHashable] = []
+    private lazy var dataSource = makeDataSource()
+    private lazy var collectionView = makeCollectionView()
+
+    var mappings: [OpenHABWidgetMapping] = []
     weak var delegate: OpenHABSelectionTableViewControllerDelegate?
     var selectionItem: OpenHABItem?
 
@@ -48,15 +51,14 @@ class OpenHABSelectionTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: OpenHABSelectionTableViewController.tableViewCellIdentifier, for: indexPath)
-        if let mapping = mappings[indexPath.row] as? OpenHABWidgetMapping {
-            cell.textLabel?.text = mapping.label
-            if selectionItem?.state == mapping.command {
-                os_log("This item is selected", log: .viewCycle, type: .info)
-                cell.accessoryType = .checkmark
-            } else {
-                cell.accessoryType = .none
-            }
+        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: cellReuseIdentifier, for: indexPath)
+        let mapping = mappings[indexPath.row]
+        cell.textLabel?.text = mapping.label
+        if selectionItem?.state == mapping.command {
+            os_log("This item is selected", log: .viewCycle, type: .info)
+            cell.accessoryType = .checkmark
+        } else {
+            cell.accessoryType = .none
         }
         return cell
     }
@@ -66,5 +68,62 @@ class OpenHABSelectionTableViewController: UITableViewController {
 
         delegate?.didSelectWidgetMapping(indexPath.row)
         navigationController?.popViewController(animated: true)
+    }
+}
+
+private extension OpenHABSelectionTableViewController {
+    enum Section: String, CaseIterable {
+        case uniq
+    }
+}
+
+private extension OpenHABSelectionTableViewController {
+    typealias Cell = UICollectionViewListCell
+    typealias CellRegistration = UICollectionView.CellRegistration<Cell, OpenHABWidgetMapping>
+
+    func makeCellRegistration() -> CellRegistration {
+        CellRegistration { cell, indexPath, mapping in
+
+            var content = cell.defaultContentConfiguration()
+            content.text = mapping.label
+
+            if self.selectionItem?.state == mapping.command {
+                os_log("This item is selected", log: .viewCycle, type: .info)
+                content.accessoryType = .checkmark
+            } else {
+                cell.accessoryType = .none
+            }
+            cell.contentConfiguration = content
+        }
+    }
+}
+
+private extension OpenHABSelectionTableViewController {
+    func makeDataSource() -> UICollectionViewDiffableDataSource<Section, OpenHABWidgetMapping> {
+        UICollectionViewDiffableDataSource(
+            collectionView: collectionView,
+            cellProvider: makeCellRegistration().cellProvider
+        )
+    }
+}
+
+extension UICollectionView.CellRegistration {
+    var cellProvider: (UICollectionView, IndexPath, Item) -> Cell {
+        return { collectionView, indexPath, product in
+            collectionView.dequeueConfiguredReusableCell(
+                using: self,
+                for: indexPath,
+                item: product
+            )
+        }
+    }
+}
+
+extension OpenHABSelectionTableViewController {
+    func update(with list: [OpenHABWidgetMapping], animate: Bool = true) {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, OpenHABWidgetMapping>()
+        snapshot.appendSections(Section.allCases)
+        snapshot.appendItems(list, toSection: .uniq)
+        dataSource.apply(snapshot, animatingDifferences: animate)
     }
 }
