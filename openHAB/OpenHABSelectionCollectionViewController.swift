@@ -18,7 +18,7 @@ public protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
     func didSelectWidgetMapping(_ selectedMapping: Int)
 }
 
-class OpenHABSelectionTableViewController: UICollectionViewController {
+class OpenHABSelectionCollectionViewController: UICollectionViewController {
     private let cellReuseIdentifier = "SelectionCell"
 
     private lazy var dataSource = makeDataSource()
@@ -47,13 +47,13 @@ class OpenHABSelectionTableViewController: UICollectionViewController {
     }
 }
 
-private extension OpenHABSelectionTableViewController {
+private extension OpenHABSelectionCollectionViewController {
     enum Section: String, CaseIterable {
         case uniq
     }
 }
 
-private extension OpenHABSelectionTableViewController {
+private extension OpenHABSelectionCollectionViewController {
     typealias Cell = UICollectionViewListCell
     typealias CellRegistration = UICollectionView.CellRegistration<Cell, OpenHABWidgetMapping>
 
@@ -75,7 +75,7 @@ private extension OpenHABSelectionTableViewController {
     }
 }
 
-private extension OpenHABSelectionTableViewController {
+private extension OpenHABSelectionCollectionViewController {
     func makeDataSource() -> UICollectionViewDiffableDataSource<Section, OpenHABWidgetMapping> {
         UICollectionViewDiffableDataSource(
             collectionView: collectionView,
@@ -96,7 +96,7 @@ extension UICollectionView.CellRegistration {
     }
 }
 
-extension OpenHABSelectionTableViewController {
+extension OpenHABSelectionCollectionViewController {
     func update(with list: [OpenHABWidgetMapping], animate: Bool = true) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, OpenHABWidgetMapping>()
         snapshot.appendSections(Section.allCases)
