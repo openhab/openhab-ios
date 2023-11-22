@@ -18,11 +18,10 @@ public protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
     func didSelectWidgetMapping(_ selectedMapping: Int)
 }
 
-class OpenHABSelectionTableViewController: UITableViewController {
+class OpenHABSelectionTableViewController: UICollectionViewController {
     private let cellReuseIdentifier = "SelectionCell"
 
     private lazy var dataSource = makeDataSource()
-    private lazy var collectionView = makeCollectionView()
 
     var mappings: [OpenHABWidgetMapping] = []
     weak var delegate: OpenHABSelectionTableViewControllerDelegate?
@@ -37,33 +36,10 @@ class OpenHABSelectionTableViewController: UITableViewController {
 
         os_log("I have %d mappings", log: .viewCycle, type: .info, mappings.count)
 
-        // Uncomment the following line to preserve selection between presentations.
-        // self.clearsSelectionOnViewWillAppear = NO;
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+        collectionView.dataSource = dataSource
     }
 
-    // MARK: - Table view data source
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        mappings.count
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: cellReuseIdentifier, for: indexPath)
-        let mapping = mappings[indexPath.row]
-        cell.textLabel?.text = mapping.label
-        if selectionItem?.state == mapping.command {
-            os_log("This item is selected", log: .viewCycle, type: .info)
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
-        return cell
-    }
-
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         os_log("Selected mapping %d", log: .viewCycle, type: .info, indexPath.row)
 
         delegate?.didSelectWidgetMapping(indexPath.row)
@@ -82,18 +58,19 @@ private extension OpenHABSelectionTableViewController {
     typealias CellRegistration = UICollectionView.CellRegistration<Cell, OpenHABWidgetMapping>
 
     func makeCellRegistration() -> CellRegistration {
-        CellRegistration { cell, indexPath, mapping in
+        CellRegistration { cell, _, mapping in
 
             var content = cell.defaultContentConfiguration()
             content.text = mapping.label
 
+            cell.contentConfiguration = content
+
             if self.selectionItem?.state == mapping.command {
                 os_log("This item is selected", log: .viewCycle, type: .info)
-                content.accessoryType = .checkmark
+                cell.accessories = [.checkmark()]
             } else {
-                cell.accessoryType = .none
+                cell.accessories = []
             }
-            cell.contentConfiguration = content
         }
     }
 }
@@ -109,7 +86,7 @@ private extension OpenHABSelectionTableViewController {
 
 extension UICollectionView.CellRegistration {
     var cellProvider: (UICollectionView, IndexPath, Item) -> Cell {
-        return { collectionView, indexPath, product in
+        { collectionView, indexPath, product in
             collectionView.dequeueConfiguredReusableCell(
                 using: self,
                 for: indexPath,
