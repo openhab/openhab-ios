@@ -765,13 +765,16 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             os_log("Selected selection widget", log: .viewCycle, type: .info)
 
             selectedWidgetRow = indexPath.row
-            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
+            let layout = UICollectionViewCompositionalLayout.list(
+                using: UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+            )
+            let selectionViewController = OpenHABSelectionCollectionViewController(collectionViewLayout: layout)
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
             selectionViewController.title = selectedWidget?.labelText
             selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
             selectionViewController.delegate = self
             selectionViewController.selectionItem = selectedWidget?.item
-            navigationController?.pushViewController(selectionViewController, animated: true)
+            show(selectionViewController, sender: self)
         }
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)

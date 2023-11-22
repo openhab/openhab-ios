@@ -27,16 +27,13 @@ class OpenHABSelectionCollectionViewController: UICollectionViewController {
     weak var delegate: OpenHABSelectionTableViewControllerDelegate?
     var selectionItem: OpenHABItem?
 
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
         os_log("I have %d mappings", log: .viewCycle, type: .info, mappings.count)
 
         collectionView.dataSource = dataSource
+        update(with: mappings)
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
