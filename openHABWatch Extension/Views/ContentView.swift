@@ -22,8 +22,8 @@ struct ContentView: View {
         ZStack {
             ScrollView {
                 ForEach(viewModel.widgets) { widget in
-                    self.rowWidget(widget: widget)
-                        .environmentObject(self.settings)
+                    rowWidget(widget: widget)
+                        .environmentObject(settings)
                 }
             }
             .navigationBarTitle(Text(title))
@@ -49,7 +49,7 @@ struct ContentView: View {
                     .onAppear {
                         DispatchQueue.main.async {
                             viewModel.refreshUrl()
-                            self.viewModel.refreshUrl()
+                            viewModel.refreshUrl()
                             os_log("reload after alert", log: .default, type: .info)
                         }
                         viewModel.showAlert = false

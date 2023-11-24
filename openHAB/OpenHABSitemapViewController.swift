@@ -113,10 +113,10 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         search.isActive && !searchBarIsEmpty
     }
 
-    @IBOutlet private var tableView: UITableView!
-
     var dataSource: UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>! = nil
     var currentSnapshot: NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>! = nil
+
+    @IBOutlet private var tableView: UITableView!
 
     // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
