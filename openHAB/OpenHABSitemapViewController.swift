@@ -25,6 +25,10 @@ enum Action<I, O> {
     typealias Async = (UIViewController, I, @escaping (O) -> Void) -> Void
 }
 
+enum ViewControllerSection {
+    case main
+}
+
 struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
@@ -109,7 +113,10 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         search.isActive && !searchBarIsEmpty
     }
 
-    @IBOutlet private var widgetTableView: UITableView!
+    @IBOutlet private var tableView: UITableView!
+
+    var dataSource: UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>! = nil
+    var currentSnapshot: NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>! = nil
 
     // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
@@ -118,16 +125,17 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
         pageNetworkStatus = nil
         sitemaps = []
-        widgetTableView.tableFooterView = UIView()
+        //      tableView.tableFooterView = UIView()
 
         registerTableViewCells()
+        dataSource = makeDataSource()
         configureTableView()
 
         refreshControl = UIRefreshControl()
 
         refreshControl?.addTarget(self, action: #selector(OpenHABSitemapViewController.handleRefresh(_:)), for: .valueChanged)
         if let refreshControl {
-            widgetTableView.refreshControl = refreshControl
+            tableView.refreshControl = refreshControl
         }
 
         search.searchResultsUpdater = self
@@ -137,7 +145,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
         #if DEBUG
         // setup accessibilityIdentifiers for UITest
-        widgetTableView.accessibilityIdentifier = "OpenHABSitemapViewControllerWidgetTableView"
+        tableView.accessibilityIdentifier = "OpenHABSitemapViewControllerWidgetTableView"
         #endif
     }
 
@@ -171,7 +179,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             appData?.sitemapViewController = self
             if currentPage != nil {
                 currentPage?.widgets = []
-                widgetTableView.reloadData()
+                updateUI()
             }
             os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
             OpenHABTracker.shared.multicastDelegate.add(self)
@@ -243,7 +251,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
 
-        widgetTableView.reloadData()
+        updateUI()
     }
 
     /// Implementation of GenericUITableViewCellTouchEventDelegate
@@ -255,28 +263,28 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     func touchUp() {
         isUserInteracting = false
         if isWaitingToReload {
-            widgetTableView.reloadData()
+            updateUI()
             refreshControl?.endRefreshing()
         }
         isWaitingToReload = false
     }
 
     func configureTableView() {
-        widgetTableView.dataSource = self
-        widgetTableView.delegate = self
+        tableView.dataSource = dataSource
+        tableView.delegate = self
     }
 
     func registerTableViewCells() {
-        widgetTableView.register(cellType: MapViewTableViewCell.self)
-        widgetTableView.register(cellType: NewImageUITableViewCell.self)
-        widgetTableView.register(cellType: VideoUITableViewCell.self)
+        tableView.register(cellType: MapViewTableViewCell.self)
+        tableView.register(cellType: NewImageUITableViewCell.self)
+        tableView.register(cellType: VideoUITableViewCell.self)
     }
 
     @objc
     func handleRefresh(_ refreshControl: UIRefreshControl?) {
         loadPage(false)
-        widgetTableView.reloadData()
-        widgetTableView.layoutIfNeeded()
+        updateUI()
+        tableView.layoutIfNeeded()
     }
 
     func restart() {
@@ -295,8 +303,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     private func updateWidgetTableView() {
         UIView.performWithoutAnimation {
-            widgetTableView.beginUpdates()
-            widgetTableView.endUpdates()
+            tableView.beginUpdates()
+            tableView.endUpdates()
         }
     }
 
@@ -373,7 +381,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 }
                 // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
                 if !isUserInteracting {
-                    widgetTableView.reloadData()
+                    updateUI()
                     refreshControl?.endRefreshing()
                 } else {
                     isWaitingToReload = true
@@ -437,7 +445,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     self.showSideMenu()
                 default: break
                 }
-                self.widgetTableView.reloadData()
+                self.updateUI()
             case let .failure(error):
                 os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                 DispatchQueue.main.async {
@@ -511,7 +519,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         filteredPage?.sendCommand = { [weak self] item, command in
             self?.sendCommand(item, commandToSend: command)
         }
-        widgetTableView.reloadData()
+        updateUI()
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
@@ -580,7 +588,7 @@ extension OpenHABSitemapViewController: ColorPickerUITableViewCellDelegate {
     func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell {
-            let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
+            let widget = relevantPage?.widgets[tableView.indexPath(for: cell)?.row ?? 0]
             colorPickerViewController?.title = widget?.labelText
             colorPickerViewController?.widget = widget
         }
@@ -590,20 +598,130 @@ extension OpenHABSitemapViewController: ColorPickerUITableViewCellDelegate {
     }
 }
 
-// MARK: - UITableViewDelegate, UITableViewDataSource
+extension OpenHABSitemapViewController {
+    private func makeDataSource() -> UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget> {
+        UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>(tableView: tableView) { [weak self] (tableView: UITableView, indexPath: IndexPath, widget: OpenHABWidget) -> UITableViewCell? in
 
-extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if currentPage != nil {
-            if isFiltering {
-                return filteredPage?.widgets.count ?? 0
+            let cell: UITableViewCell
+
+            switch widget.type {
+            case .frame:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: FrameUITableViewCell.self)
+            case .switchWidget:
+                // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
+                if !widget.mappings.isEmpty {
+                    cell = tableView.dequeueReusableCell(for: indexPath, cellType: SegmentedUITableViewCell.self)
+                } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
+                    cell = tableView.dequeueReusableCell(for: indexPath, cellType: SwitchUITableViewCell.self)
+                } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
+                    cell = tableView.dequeueReusableCell(for: indexPath, cellType: RollershutterUITableViewCell.self)
+                } else if !widget.mappingsOrItemOptions.isEmpty {
+                    cell = tableView.dequeueReusableCell(for: indexPath, cellType: SegmentedUITableViewCell.self)
+                } else {
+                    cell = tableView.dequeueReusableCell(for: indexPath, cellType: SwitchUITableViewCell.self)
+                }
+            case .setpoint:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: SetpointUITableViewCell.self)
+            case .slider:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: SliderUITableViewCell.self)
+            case .selection:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: SelectionUITableViewCell.self)
+            case .colorpicker:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: ColorPickerUITableViewCell.self)
+                (cell as? ColorPickerUITableViewCell)?.delegate = self
+            case .image, .chart:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: NewImageUITableViewCell.self)
+                (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
+                    self?.updateWidgetTableView()
+                }
+            case .video:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: VideoUITableViewCell.self)
+                (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
+                    self?.updateWidgetTableView()
+                }
+            case .webview:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: WebUITableViewCell.self)
+            case .mapview:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: MapViewTableViewCell.self)
+            case .group, .text:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: GenericUITableViewCell.self)
+            default:
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: GenericUITableViewCell.self)
             }
-            return currentPage?.widgets.count ?? 0
-        } else {
-            return 0
+
+            var iconColor = widget.iconColor
+            if iconColor.isEmpty, self?.traitCollection.userInterfaceStyle == .dark {
+                iconColor = "white"
+            }
+            // No icon is needed for image, video, frame and web widgets
+            if !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
+                if let urlc = Endpoint.icon(
+                    rootUrl: self?.openHABRootUrl ?? "",
+                    version: self?.appData?.openHABVersion ?? 2,
+                    icon: widget.icon,
+                    state: widget.iconState(),
+                    iconType: self?.iconType ?? .svg,
+                    iconColor: iconColor
+                ).url {
+                    var imageRequest = URLRequest(url: urlc)
+                    imageRequest.timeoutInterval = 10.0
+
+                    let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
+                        switch result {
+                        case let .success(value):
+                            os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
+                        case let .failure(error):
+                            os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+                        }
+                    }
+
+                    cell.imageView?.kf.setImage(
+                        with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                        placeholder: UIImage(named: "blankicon.png"),
+                        options: [.processor(OpenHABImageProcessor())],
+                        completionHandler: reportOnResults
+                    )
+                }
+            }
+
+            if cell is FrameUITableViewCell {
+                cell.backgroundColor = .ohSystemGroupedBackground
+            } else {
+                cell.backgroundColor = .ohSecondarySystemGroupedBackground
+            }
+
+            if let cell = cell as? GenericUITableViewCell {
+                cell.widget = widget
+                cell.displayWidget()
+                cell.touchEventDelegate = self
+            }
+
+            // Check if this is not the last row in the widgets list
+            if indexPath.row < (self?.relevantPage?.widgets.count ?? 1) - 1 {
+                let nextWidget: OpenHABWidget? = self?.relevantPage?.widgets[indexPath.row + 1]
+                if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
+                    cell.separatorInset = UIEdgeInsets.zero
+                } else if !(widget.type == .frame) {
+                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+                }
+            }
+
+            return cell
         }
     }
 
+    /// - Tag: WiFiUpdate
+    func updateUI(animated: Bool = true) {
+        currentSnapshot = NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>()
+        currentSnapshot.appendSections([.main])
+        currentSnapshot.appendItems(relevantPage?.widgets ?? [], toSection: .main)
+        dataSource.apply(currentSnapshot, animatingDifferences: animated)
+    }
+}
+
+// MARK: - UITableViewDelegate, UITableViewDataSource
+
+extension OpenHABSitemapViewController: UITableViewDelegate { // }, UITableViewDataSource {
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         44.0
     }
@@ -627,116 +745,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             }
         default: return 44.0
         }
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-
-        let cell: UITableViewCell
-
-        switch widget?.type {
-        case .frame:
-            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
-        case .switchWidget:
-            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if !(widget?.mappings ?? []).isEmpty {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else if widget?.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            } else if widget?.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
-            } else if !(widget?.mappingsOrItemOptions ?? []).isEmpty {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            }
-        case .setpoint:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
-        case .slider:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
-        case .selection:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
-        case .colorpicker:
-            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
-            (cell as? ColorPickerUITableViewCell)?.delegate = self
-        case .image, .chart:
-            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
-            (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case .video:
-            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
-            (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case .webview:
-            cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
-        case .mapview:
-            cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
-        case .group, .text:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
-        default:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
-        }
-
-        var iconColor = widget?.iconColor
-        if iconColor == nil || iconColor!.isEmpty, traitCollection.userInterfaceStyle == .dark {
-            iconColor = "white"
-        }
-        // No icon is needed for image, video, frame and web widgets
-        if widget?.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
-            if let urlc = Endpoint.icon(
-                rootUrl: openHABRootUrl,
-                version: appData?.openHABVersion ?? 2,
-                icon: widget?.icon,
-                state: widget?.iconState() ?? "",
-                iconType: iconType,
-                iconColor: iconColor!
-            ).url {
-                var imageRequest = URLRequest(url: urlc)
-                imageRequest.timeoutInterval = 10.0
-
-                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
-                    switch result {
-                    case let .success(value):
-                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
-                    case let .failure(error):
-                        os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-                    }
-                }
-
-                cell.imageView?.kf.setImage(
-                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                    placeholder: UIImage(named: "blankicon.png"),
-                    options: [.processor(OpenHABImageProcessor())],
-                    completionHandler: reportOnResults
-                )
-            }
-        }
-
-        if cell is FrameUITableViewCell {
-            cell.backgroundColor = .ohSystemGroupedBackground
-        } else {
-            cell.backgroundColor = .ohSecondarySystemGroupedBackground
-        }
-
-        if let cell = cell as? GenericUITableViewCell {
-            cell.widget = widget
-            cell.displayWidget()
-            cell.touchEventDelegate = self
-        }
-
-        // Check if this is not the last row in the widgets list
-        if indexPath.row < (relevantPage?.widgets.count ?? 1) - 1 {
-            let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
-            if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
-                cell.separatorInset = UIEdgeInsets.zero
-            } else if !(widget?.type == .frame) {
-                cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
-            }
-        }
-
-        return cell
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -776,8 +784,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             selectionViewController.selectionItem = selectedWidget?.item
             show(selectionViewController, sender: self)
         }
-        if let index = widgetTableView.indexPathForSelectedRow {
-            widgetTableView.deselectRow(at: index, animated: false)
+        if let index = tableView.indexPathForSelectedRow {
+            tableView.deselectRow(at: index, animated: false)
         }
     }
 

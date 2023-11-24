@@ -45,14 +45,12 @@ class OpenHABSelectionCollectionViewController: UICollectionViewController {
 }
 
 private extension OpenHABSelectionCollectionViewController {
+    typealias Cell = UICollectionViewListCell
+    typealias CellRegistration = UICollectionView.CellRegistration<Cell, OpenHABWidgetMapping>
+
     enum Section: String, CaseIterable {
         case uniq
     }
-}
-
-private extension OpenHABSelectionCollectionViewController {
-    typealias Cell = UICollectionViewListCell
-    typealias CellRegistration = UICollectionView.CellRegistration<Cell, OpenHABWidgetMapping>
 
     func makeCellRegistration() -> CellRegistration {
         CellRegistration { cell, _, mapping in
@@ -70,30 +68,14 @@ private extension OpenHABSelectionCollectionViewController {
             }
         }
     }
-}
 
-private extension OpenHABSelectionCollectionViewController {
     func makeDataSource() -> UICollectionViewDiffableDataSource<Section, OpenHABWidgetMapping> {
         UICollectionViewDiffableDataSource(
             collectionView: collectionView,
             cellProvider: makeCellRegistration().cellProvider
         )
     }
-}
 
-extension UICollectionView.CellRegistration {
-    var cellProvider: (UICollectionView, IndexPath, Item) -> Cell {
-        { collectionView, indexPath, product in
-            collectionView.dequeueConfiguredReusableCell(
-                using: self,
-                for: indexPath,
-                item: product
-            )
-        }
-    }
-}
-
-extension OpenHABSelectionCollectionViewController {
     func update(with list: [OpenHABWidgetMapping], animate: Bool = true) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, OpenHABWidgetMapping>()
         snapshot.appendSections(Section.allCases)

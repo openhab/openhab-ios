@@ -105,6 +105,7 @@
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
+		DABA07542B0F9E7A00708281 /* UICollectionViewCellRegistrationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABA07532B0F9E7A00708281 /* UICollectionViewCellRegistrationExtension.swift */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
@@ -382,6 +383,7 @@
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
+		DABA07532B0F9E7A00708281 /* UICollectionViewCellRegistrationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICollectionViewCellRegistrationExtension.swift; sourceTree = "<group>"; };
 		DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		DAC6608B236F6F4200F4501E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSwiftUIView.swift; sourceTree = "<group>"; };
@@ -965,6 +967,7 @@
 				938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */,
 				938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */,
 				935B484525342B8E00E44CF0 /* URL+Static.swift */,
+				DABA07532B0F9E7A00708281 /* UICollectionViewCellRegistrationExtension.swift */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -1409,6 +1412,7 @@
 				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */,
 				938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
+				DABA07542B0F9E7A00708281 /* UICollectionViewCellRegistrationExtension.swift in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABSitemapViewController.swift in Sources */,
 				DF05FF2018965B5400FF2F9B /* RollershutterUITableViewCell.swift in Sources */,
 				653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */,

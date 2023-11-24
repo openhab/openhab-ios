@@ -2,7 +2,6 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ni3-JL-qg0">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -562,7 +561,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="N7h-KT-EtL"/>
                     <connections>
-                        <outlet property="widgetTableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
+                        <outlet property="tableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -1240,7 +1239,7 @@
                                         <rect key="frame" x="0.0" y="1039.3333301544189" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="5Rk-xB-wOS" id="szB-fb-9zj">
-                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="356.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Legal" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v8c-Ps-18a">
@@ -1266,7 +1265,7 @@
                                         <rect key="frame" x="0.0" y="1083.3333301544189" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="gOB-5d-9fY" id="9lh-Vk-icE">
-                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="356.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Privacy Policy" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vcs-uN-ETx">
@@ -1425,7 +1424,7 @@
             <objects>
                 <tableViewController id="sb0-mR-isg" userLabel="Client Certificates" customClass="OpenHABClientCertificatesViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="dsq-Ze-GrF">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="802"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
@@ -1479,7 +1478,7 @@
                         <viewControllerLayoutGuide type="bottom" id="vRb-Nk-z4d"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="NPT-SP-acq">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="802"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="lllsls" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8QX-Dp-MYj">
@@ -1607,29 +1606,6 @@
             <point key="canvasLocation" x="1890" y="32"/>
         </scene>
     </scenes>
-    <designables>
-        <designable name="OR4-bR-Ekg">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="PuF-sy-GZG">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="PzY-Bs-9MZ">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="bnc-pN-4ms">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="gIa-Hx-tGr">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="riU-tV-5Y6">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="vxc-Zw-Oyh">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-    </designables>
     <resources>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
