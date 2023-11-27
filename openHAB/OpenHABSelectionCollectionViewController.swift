@@ -49,7 +49,7 @@ private extension OpenHABSelectionCollectionViewController {
     typealias CellRegistration = UICollectionView.CellRegistration<Cell, OpenHABWidgetMapping>
 
     enum Section: String, CaseIterable {
-        case uniq
+        case main
     }
 
     func makeCellRegistration() -> CellRegistration {
@@ -79,7 +79,7 @@ private extension OpenHABSelectionCollectionViewController {
     func update(with list: [OpenHABWidgetMapping], animate: Bool = true) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, OpenHABWidgetMapping>()
         snapshot.appendSections(Section.allCases)
-        snapshot.appendItems(list, toSection: .uniq)
+        snapshot.appendItems(list, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: animate)
     }
 }

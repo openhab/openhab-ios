@@ -93,6 +93,7 @@ custom_rules:
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"
+  excluded: "UICollectionViewCellRegistrationExtension.swift"
 
 opening_brace:
   allow_multiline_func: true
