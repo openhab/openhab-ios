@@ -150,6 +150,8 @@ platform :ios do
             groups: ['Beta Testers']
         )
 
+        clean_build_artifacts
+
         # commit to git the changes from bumping version number
         commit_version_bump(
             message: "committed version bump: #{version} (#{build_number})",
