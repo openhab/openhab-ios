@@ -38,6 +38,7 @@ public final class OpenHABItem: NSObject, CommItem {
     public var link = ""
     public var label = ""
     public var stateDescription: OpenHABStateDescription?
+    public var commandDescription: OpenHABCommandDescription?
     public var readOnly = false
     public var members: [OpenHABItem] = []
     public var category = ""
@@ -52,7 +53,7 @@ public final class OpenHABItem: NSObject, CommItem {
             isOfTypeOrGroupType(ItemType.player)
     }
 
-    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?) {
+    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, commandDescription: OpenHABCommandDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?) {
         self.name = name
         self.type = type.toItemType()
         if let state, state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame {
@@ -64,6 +65,7 @@ public final class OpenHABItem: NSObject, CommItem {
         self.label = label.orEmpty
         self.groupType = groupType?.toItemType()
         self.stateDescription = stateDescription
+        self.commandDescription = commandDescription
         readOnly = stateDescription?.readOnly ?? false
         self.members = members
         self.category = category.orEmpty
@@ -146,6 +148,7 @@ public extension OpenHABItem {
         let state: String?
         let label: String?
         let stateDescription: OpenHABStateDescription.CodingData?
+        let commandDescription: OpenHABCommandDescription.CodingData?
         let members: [OpenHABItem.CodingData]?
         let category: String?
         let options: [OpenHABOptions]?
@@ -156,7 +159,7 @@ public extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
 
-        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, members: mappedMembers, category: category, options: options)
+        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
     }
 }
 
