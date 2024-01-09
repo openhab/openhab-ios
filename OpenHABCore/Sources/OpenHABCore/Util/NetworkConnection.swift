@@ -110,6 +110,7 @@ public class NetworkConnection {
     public static func uiTiles(openHABRootUrl: String,
                                completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
         if let url = Endpoint.uiTiles(openHABRootUrl: openHABRootUrl).url {
+            os_log("URL for Endpoint %{PUBLIC}@", log: .default, type: .info, url.debugDescription)
             load(from: url, completionHandler: completionHandler)
         }
     }
@@ -154,7 +155,7 @@ public class NetworkConnection {
 
             commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
 
-            os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
+            os_log("Timeout %{PUBLIC}@", log: .default, type: .info, commandRequest.timeoutInterval)
             let link = item.link
             os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command ?? "", link)
             os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
