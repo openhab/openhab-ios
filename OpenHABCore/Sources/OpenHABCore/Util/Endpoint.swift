@@ -168,8 +168,21 @@ public extension Endpoint {
                     icon = components[2]
                 } else if components.count == 2 {
                     source = components[0]
-                    set = "classic"
+                    if source == "material" {
+                        set = "baseline"
+                    } else {
+                        set = "classic"
+                    }
                     icon = components[1]
+                }
+                if source == "material" {
+                    source = "iconify"
+                    icon = "\(set)-\(icon)"
+                    set = "ic"
+                }
+                if source == "f7" {
+                    source = "iconify"
+                    set = "f7"
                 }
                 if source == "if" || source == "iconify" {
                     queryItems = [URLQueryItem(name: "height", value: "64")]
