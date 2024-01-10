@@ -40,7 +40,7 @@ protocol Widget: AnyObject {
     var legend: Bool { get set }
     var encoding: String { get set }
     var item: OpenHABItem? { get set }
-    var linkedPage: OpenHABLinkedPage? { get set }
+    var linkedPage: OpenHABSitemapPage? { get set }
     var mappings: [OpenHABWidgetMapping] { get set }
     var image: UIImage? { get set }
     var widgets: [ChildWidget] { get set }
@@ -92,7 +92,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var encoding = ""
     public var forceAsItem: Bool?
     public var item: OpenHABItem?
-    public var linkedPage: OpenHABLinkedPage?
+    public var linkedPage: OpenHABSitemapPage?
     public var mappings: [OpenHABWidgetMapping] = []
     public var image: UIImage?
     public var widgets: [OpenHABWidget] = []
@@ -119,8 +119,10 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     }
 
     public var mappingsOrItemOptions: [OpenHABWidgetMapping] {
-        if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
-            itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+        if mappings.isEmpty, let commandOptions = item?.commandDescription?.commandOptions {
+            commandOptions.map { OpenHABWidgetMapping(command: $0.command, label: $0.label) }
+        } else if mappings.isEmpty, let stateOptions = item?.stateDescription?.options {
+            stateOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
         } else {
             mappings
         }
@@ -212,7 +214,7 @@ extension OpenHABWidget.WidgetType: UnknownCaseRepresentable {
 
 extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -287,7 +289,7 @@ extension OpenHABWidget {
             case "widget": widgets.append(OpenHABWidget(xml: child))
             case "item": item = OpenHABItem(xml: child)
             case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
+            case "linkedPage": linkedPage = OpenHABSitemapPage(xml: child)
             default:
                 break
             }
@@ -319,7 +321,7 @@ public extension OpenHABWidget {
         let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABLinkedPage?
+        let linkedPage: OpenHABSitemapPage.CodingData?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [OpenHABWidget.CodingData]
         let visibility: Bool?
@@ -332,7 +334,7 @@ extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
         // swiftlint:disable:next line_length
-        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage?.openHABSitemapPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
     }
 }
 

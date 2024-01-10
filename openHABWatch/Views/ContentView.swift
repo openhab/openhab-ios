@@ -69,7 +69,11 @@ struct ContentView: View {
         case .switcher:
             SwitchRow(widget: widget)
         case .slider:
-            SliderRow(widget: widget)
+            if widget.switchSupport {
+                SliderRow(widget: widget)
+            } else {
+                SliderWithSwitchSupportRow(widget: widget)
+            }
         case .segmented:
             SegmentRow(widget: widget)
         case .rollershutter:
