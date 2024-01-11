@@ -1,3 +1,14 @@
+// Copyright (c) 2010-2024 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
 // Copyright (c) 2010-2023 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +23,7 @@
 import Kingfisher
 import OpenHABCore
 import os.log
+import SDWebImage
 import WatchConnectivity
 import WatchKit
 
@@ -137,4 +149,18 @@ extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
 
     // delegate should alert the user that an error occured importing the certificate
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
+}
+
+// MARK: SDWebImageDownloaderOperation
+
+class OpenHABImageDownloaderOperation: SDWebImageDownloaderOperation {
+    override func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
+        completionHandler(disposition, credential)
+    }
+
+    override func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
+        completionHandler(disposition, credential)
+    }
 }
