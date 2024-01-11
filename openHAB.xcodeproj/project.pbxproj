@@ -199,6 +199,20 @@
 			remoteGlobalIDString = DFB2622618830A3600D3244D;
 			remoteInfo = openHAB;
 		};
+		DAA0708C2B504B280060BB0E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DA0775142346705D0086C685;
+			remoteInfo = openHABWatch;
+		};
+		DAA0708E2B504B2C0060BB0E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DFB2621F18830A3600D3244D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DA0775142346705D0086C685;
+			remoteInfo = openHABWatch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1108,6 +1122,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				DAA0708D2B504B280060BB0E /* PBXTargetDependency */,
 			);
 			name = "openHABWatchSwiftUI Watch AppTests";
 			productName = "openHABWatchSwiftUI Watch AppTests";
@@ -1125,6 +1140,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				DAA0708F2B504B2C0060BB0E /* PBXTargetDependency */,
 			);
 			name = "openHABWatchSwiftUI Watch AppUITests";
 			productName = "openHABWatchSwiftUI Watch AppUITests";
@@ -1199,11 +1215,11 @@
 					};
 					DAD0856B2AE4782A001D36BE = {
 						CreatedOnToolsVersion = 15.0;
-						TestTargetID = DAD0855C2AE47822001D36BE;
+						TestTargetID = DA0775142346705D0086C685;
 					};
 					DAD085752AE4782D001D36BE = {
 						CreatedOnToolsVersion = 15.0;
-						TestTargetID = DAD0855C2AE47822001D36BE;
+						TestTargetID = DA0775142346705D0086C685;
 					};
 					DFB2622618830A3600D3244D = {
 						LastSwiftMigration = "";
@@ -1567,6 +1583,16 @@
 			isa = PBXTargetDependency;
 			target = DFB2622618830A3600D3244D /* openHAB */;
 			targetProxy = DA2DC23421F2736C00830730 /* PBXContainerItemProxy */;
+		};
+		DAA0708D2B504B280060BB0E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DA0775142346705D0086C685 /* openHABWatch */;
+			targetProxy = DAA0708C2B504B280060BB0E /* PBXContainerItemProxy */;
+		};
+		DAA0708F2B504B2C0060BB0E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DA0775142346705D0086C685 /* openHABWatch */;
+			targetProxy = DAA0708E2B504B2C0060BB0E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2022,7 +2048,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatchSwiftUI Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatchSwiftUI Watch App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
@@ -2057,7 +2083,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatchSwiftUI Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatchSwiftUI Watch App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/openHABWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/openHABWatch";
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
@@ -2094,7 +2120,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "openHABWatchSwiftUI Watch App";
+				TEST_TARGET_NAME = openHABWatch;
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
@@ -2128,7 +2154,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "openHABWatchSwiftUI Watch App";
+				TEST_TARGET_NAME = openHABWatch;
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;

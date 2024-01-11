@@ -20,7 +20,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@testable import openHABWatchSwiftUI_Watch_App
+@testable import openHABWatch
 import XCTest
 
 final class OpenHABWatchAppTests: XCTestCase {
