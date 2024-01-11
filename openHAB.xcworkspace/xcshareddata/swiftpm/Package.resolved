@@ -173,6 +173,33 @@
         }
       },
       {
+        "package": "SDWebImage",
+        "repositoryURL": "https://github.com/SDWebImage/SDWebImage.git",
+        "state": {
+          "branch": null,
+          "revision": "69e573c01d04f5f1af0d2373ebfe251cfa5aa313",
+          "version": "5.18.9"
+        }
+      },
+      {
+        "package": "SDWebImageSVGCoder",
+        "repositoryURL": "https://github.com/SDWebImage/SDWebImageSVGCoder.git",
+        "state": {
+          "branch": null,
+          "revision": "950167445ab703740569869c8b7510efc9d09a26",
+          "version": "1.7.0"
+        }
+      },
+      {
+        "package": "SDWebImageSwiftUI",
+        "repositoryURL": "https://github.com/SDWebImage/SDWebImageSwiftUI.git",
+        "state": {
+          "branch": null,
+          "revision": "261b6cec35686d2dc192b809ab50742b4502a73b",
+          "version": "2.2.6"
+        }
+      },
+      {
         "package": "SideMenu",
         "repositoryURL": "https://github.com/jonkykong/SideMenu.git",
         "state": {

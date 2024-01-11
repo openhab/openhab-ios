@@ -85,6 +85,10 @@
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
+		DA2C4FCD2B4F55D700D1C533 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FCC2B4F55D700D1C533 /* SDWebImage */; };
+		DA2C4FCF2B4F55D700D1C533 /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FCE2B4F55D700D1C533 /* SDWebImageMapKit */; };
+		DA2C4FD22B4F56D000D1C533 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FD12B4F56D000D1C533 /* SDWebImageSwiftUI */; };
+		DA2C4FD52B4F573300D1C533 /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FD42B4F573300D1C533 /* SDWebImageSVGCoder */; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2E0AA423DC96E9009B0A99 /* ImageWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* ImageWithAction.swift */; };
 		DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0D23DCC152009B0A99 /* MapView.swift */; };
@@ -111,9 +115,9 @@
 		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
 		DACB636227D3FC6500041931 /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = DACB636127D3FC6500041931 /* error.png */; };
 		DACB636327D3FC6500041931 /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = DACB636127D3FC6500041931 /* error.png */; };
-		DAD085712AE4782D001D36BE /* openHABWatchSwiftUI_Watch_AppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD085702AE4782D001D36BE /* openHABWatchSwiftUI_Watch_AppTests.swift */; };
-		DAD0857B2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857A2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITests.swift */; };
-		DAD0857D2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITestsLaunchTests.swift */; };
+		DAD085712AE4782D001D36BE /* OpenHABWatchAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD085702AE4782D001D36BE /* OpenHABWatchAppTests.swift */; };
+		DAD0857B2AE4782F001D36BE /* OpenHABWatchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */; };
+		DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */; };
 		DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */; };
 		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
@@ -390,10 +394,10 @@
 		DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatch.swift; sourceTree = "<group>"; };
 		DAD085662AE4782A001D36BE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DAD0856C2AE4782B001D36BE /* openHABWatchSwiftUI Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "openHABWatchSwiftUI Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAD085702AE4782D001D36BE /* openHABWatchSwiftUI_Watch_AppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = openHABWatchSwiftUI_Watch_AppTests.swift; sourceTree = "<group>"; };
+		DAD085702AE4782D001D36BE /* OpenHABWatchAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchAppTests.swift; sourceTree = "<group>"; };
 		DAD085762AE4782E001D36BE /* openHABWatchSwiftUI Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "openHABWatchSwiftUI Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAD0857A2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = openHABWatchSwiftUI_Watch_AppUITests.swift; sourceTree = "<group>"; };
-		DAD0857C2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = openHABWatchSwiftUI_Watch_AppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchUITests.swift; sourceTree = "<group>"; };
+		DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchLaunchTests.swift; sourceTree = "<group>"; };
 		DAD488B3287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = Resources/nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		DAD488B4287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -459,9 +463,13 @@
 				934E592728F16EBA00162004 /* Kingfisher in Frameworks */,
 				937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */,
 				934E592B28F16EBA00162004 /* Alamofire in Frameworks */,
+				DA2C4FD52B4F573300D1C533 /* SDWebImageSVGCoder in Frameworks */,
 				934E592528F16EBA00162004 /* OpenHABCore in Frameworks */,
 				93F8062F27AE63620035A6B0 /* Alamofire in Frameworks */,
 				937E448E270B37D200A98C26 /* DeviceKit in Frameworks */,
+				DA2C4FCF2B4F55D700D1C533 /* SDWebImageMapKit in Frameworks */,
+				DA2C4FCD2B4F55D700D1C533 /* SDWebImage in Frameworks */,
+				DA2C4FD22B4F56D000D1C533 /* SDWebImageSwiftUI in Frameworks */,
 				934E592928F16EBA00162004 /* DeviceKit in Frameworks */,
 				937E448C270B37CA00A98C26 /* Kingfisher in Frameworks */,
 			);
@@ -739,7 +747,7 @@
 		DAD0856F2AE4782D001D36BE /* openHABWatchSwiftUI Watch AppTests */ = {
 			isa = PBXGroup;
 			children = (
-				DAD085702AE4782D001D36BE /* openHABWatchSwiftUI_Watch_AppTests.swift */,
+				DAD085702AE4782D001D36BE /* OpenHABWatchAppTests.swift */,
 			);
 			path = "openHABWatchSwiftUI Watch AppTests";
 			sourceTree = "<group>";
@@ -747,8 +755,8 @@
 		DAD085792AE4782F001D36BE /* openHABWatchSwiftUI Watch AppUITests */ = {
 			isa = PBXGroup;
 			children = (
-				DAD0857A2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITests.swift */,
-				DAD0857C2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITestsLaunchTests.swift */,
+				DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */,
+				DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */,
 			);
 			path = "openHABWatchSwiftUI Watch AppUITests";
 			sourceTree = "<group>";
@@ -1062,6 +1070,10 @@
 				934E592628F16EBA00162004 /* Kingfisher */,
 				934E592828F16EBA00162004 /* DeviceKit */,
 				934E592A28F16EBA00162004 /* Alamofire */,
+				DA2C4FCC2B4F55D700D1C533 /* SDWebImage */,
+				DA2C4FCE2B4F55D700D1C533 /* SDWebImageMapKit */,
+				DA2C4FD12B4F56D000D1C533 /* SDWebImageSwiftUI */,
+				DA2C4FD42B4F573300D1C533 /* SDWebImageSVGCoder */,
 			);
 			productName = openHABWatchSwift2;
 			productReference = DA0775152346705D0086C685 /* openHABWatch.app */;
@@ -1244,6 +1256,9 @@
 				93F8064B27AE7A4D0035A6B0 /* XCRemoteSwiftPackageReference "DynamicButton" */,
 				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */,
 				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */,
+				DA2C4FCB2B4F55D600D1C533 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				DA2C4FD02B4F56CF00D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -1463,7 +1478,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAD085712AE4782D001D36BE /* openHABWatchSwiftUI_Watch_AppTests.swift in Sources */,
+				DAD085712AE4782D001D36BE /* OpenHABWatchAppTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1471,8 +1486,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAD0857D2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITestsLaunchTests.swift in Sources */,
-				DAD0857B2AE4782F001D36BE /* openHABWatchSwiftUI_Watch_AppUITests.swift in Sources */,
+				DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */,
+				DAD0857B2AE4782F001D36BE /* OpenHABWatchUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2494,6 +2509,30 @@
 				kind = branch;
 			};
 		};
+		DA2C4FCB2B4F55D600D1C533 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.18.9;
+			};
+		};
+		DA2C4FD02B4F56CF00D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.6;
+			};
+		};
+		DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSVGCoder.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.7.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -2607,6 +2646,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */;
 			productName = SVGKit;
+		};
+		DA2C4FCC2B4F55D700D1C533 /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2C4FCB2B4F55D600D1C533 /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
+		};
+		DA2C4FCE2B4F55D700D1C533 /* SDWebImageMapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2C4FCB2B4F55D600D1C533 /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImageMapKit;
+		};
+		DA2C4FD12B4F56D000D1C533 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2C4FD02B4F56CF00D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+		DA2C4FD42B4F573300D1C533 /* SDWebImageSVGCoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */;
+			productName = SDWebImageSVGCoder;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

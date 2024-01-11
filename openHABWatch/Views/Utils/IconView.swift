@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Kingfisher
 import OpenHABCore
 import os.log
+import SDWebImageSwiftUI
 import SwiftUI
 
 struct IconView: View {
@@ -21,36 +21,24 @@ struct IconView: View {
     var iconURL: URL? {
         Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
-            version: 2,
+            version: 3, // appData?.openHABVersion ?? 2,
             icon: widget.icon,
             state: widget.item?.state ?? "",
-            iconType: .png,
-            iconColor: ""
+            iconType: .svg, // iconType
+            iconColor: "" // iconColor
         ).url
     }
 
     var body: some View {
-        let image = iconURL != nil ? KFImage(source: .network(KF.ImageResource(
-            downloadURL: iconURL!,
-            cacheKey: iconURL!.path + (iconURL!.query ?? "")
-        ))) : KFImage(iconURL)
-        return image
-            .onSuccess { retrieveImageResult in
-                os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
-            }
-            .onFailure { kingfisherError in
-                os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
-            }
-            .placeholder {
-                Image(systemName: "arrow.2.circlepath.circle")
-                    .font(.callout)
-                    .opacity(0.3)
-                    .hidden()
-            }
-            .cancelOnDisappear(true)
-            .resizable()
-            .scaledToFit()
-            .frame(width: 20.0, height: 20.0)
+        WebImage(
+            url: iconURL,
+            options: settings.ignoreSSL ? [.allowInvalidSSLCertificates] : [],
+            context: [.imageThumbnailPixelSize: CGSize.zero]
+        )
+        .cancelOnDisappear(true)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 20.0, height: 20.0)
     }
 }
 

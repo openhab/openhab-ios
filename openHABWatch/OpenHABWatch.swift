@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -9,6 +9,8 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import SDWebImage
+import SDWebImageSVGCoder
 import SwiftUI
 import UserNotifications
 
@@ -40,5 +42,45 @@ struct OpenHABWatch: App {
         }
 
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")
+    }
+
+    init() {
+        setupSDImage()
+    }
+}
+
+// Initialize SVGCoder
+private extension OpenHABWatch {
+    func setupSDImage() {
+        SDImageCodersManager.shared.addCoder(SDImageSVGCoder.shared)
+        SDWebImageDownloader.shared.config.operationClass = OpenHABImageDownloaderOperation.self
+        SDWebImageDownloader.shared.requestModifier = OpenHABSDWebImageDownloaderRequestModifier(appData: settings)
+    }
+}
+
+class OpenHABSDWebImageDownloaderRequestModifier: SDWebImageDownloaderRequestModifier {
+    var appData: ObservableOpenHABDataObject
+
+    public init(appData data: ObservableOpenHABDataObject) {
+        appData = data
+        super.init()
+    }
+
+    override func modifiedRequest(with request: URLRequest) -> URLRequest? {
+        guard appData.openHABAlwaysSendCreds || request.url?.host?.hasSuffix("myopenhab.org") == true else {
+            // The user did not choose for the credentials to be sent with every request.
+            return request
+        }
+
+        let user = appData.openHABUsername
+        let password = appData.openHABPassword
+        guard !user.isEmpty, !password.isEmpty else {
+            // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
+            return request
+        }
+
+        var request = request
+        request.headers.add(.authorization(username: user, password: password))
+        return request
     }
 }
