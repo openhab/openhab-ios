@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+
 // swiftlint:disable line_length
 
 let singleWidgetXML = """

@@ -18,7 +18,7 @@ class ScaledHeightUIImageView: UIImageView {
 
     override var intrinsicContentSize: CGSize {
         layoutedWidth = bounds.width
-        if let image = self.image {
+        if let image {
             let viewWidth = bounds.width
             let ratio = viewWidth / image.size.width
             return CGSize(width: viewWidth, height: image.size.height * ratio)

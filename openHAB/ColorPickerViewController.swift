@@ -24,10 +24,10 @@ class ColorPickerViewController: DefaultColorPickerViewController {
     public var throttlingInterval: TimeInterval? = 0 {
         didSet {
             guard let interval = throttlingInterval else {
-                self.throttler = nil
+                throttler = nil
                 return
             }
-            self.throttler = Throttler(maxInterval: interval)
+            throttler = Throttler(maxInterval: interval)
         }
     }
 

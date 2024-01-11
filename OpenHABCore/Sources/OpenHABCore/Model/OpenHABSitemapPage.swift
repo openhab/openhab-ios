@@ -31,8 +31,8 @@ public class OpenHABSitemapPage: NSObject {
         var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
         self.widgets = tempWidgets
-        self.widgets.forEach {
-            $0.sendCommand = { [weak self] item, command in
+        for widget in self.widgets {
+            widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
         }
@@ -55,8 +55,8 @@ public class OpenHABSitemapPage: NSObject {
         var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
         widgets = tempWidgets
-        widgets.forEach {
-            $0.sendCommand = { [weak self] item, command in
+        for widget in widgets {
+            widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
         }
