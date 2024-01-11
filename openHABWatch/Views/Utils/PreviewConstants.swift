@@ -11,7 +11,7 @@
 
 import Foundation
 
-struct PreviewConstants {
+enum PreviewConstants {
     static let remoteURLString = "http://192.168.2.15:8081"
 
     static let sitemapJson = """

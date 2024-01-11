@@ -31,8 +31,8 @@ class ObservableOpenHABSitemapPage: NSObject {
         var tempWidgets = [ObservableOpenHABWidget]()
         tempWidgets.flatten(widgets)
         self.widgets = tempWidgets
-        self.widgets.forEach {
-            $0.sendCommand = { [weak self] item, command in
+        for widget in self.widgets {
+            widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
         }
@@ -53,8 +53,8 @@ class ObservableOpenHABSitemapPage: NSObject {
         var tempWidgets = [ObservableOpenHABWidget]()
         tempWidgets.flatten(widgets)
         widgets = tempWidgets
-        widgets.forEach {
-            $0.sendCommand = { [weak self] item, command in
+        for widget in widgets {
+            widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
         }
@@ -67,8 +67,8 @@ class ObservableOpenHABSitemapPage: NSObject {
         self.link = link
         self.leaf = leaf
         widgets = expandedWidgets
-        widgets.forEach {
-            $0.sendCommand = { [weak self] item, command in
+        for widget in widgets {
+            widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
         }
