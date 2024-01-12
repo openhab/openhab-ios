@@ -61,6 +61,10 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds
             }
 
+            if let iconType = applicationContext["iconType"] as? IconType {
+                ObservableOpenHABDataObject.shared.iconType = iconType
+            }
+
             ObservableOpenHABDataObject.shared.haveReceivedAppContext = true
         }
     }
