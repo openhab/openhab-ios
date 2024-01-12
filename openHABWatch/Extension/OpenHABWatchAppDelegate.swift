@@ -27,6 +27,20 @@ import SDWebImage
 import WatchConnectivity
 import WatchKit
 
+// MARK: SDWebImageDownloaderOperation
+
+class OpenHABImageDownloaderOperation: SDWebImageDownloaderOperation {
+    override func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
+        completionHandler(disposition, credential)
+    }
+
+    override func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
+        completionHandler(disposition, credential)
+    }
+}
+
 class OpenHABWatchAppDelegate: NSObject {
     var session: WCSession
     let delegate: WCSessionDelegate
@@ -149,18 +163,4 @@ extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
 
     // delegate should alert the user that an error occured importing the certificate
     func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
-}
-
-// MARK: SDWebImageDownloaderOperation
-
-class OpenHABImageDownloaderOperation: SDWebImageDownloaderOperation {
-    override func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
-        completionHandler(disposition, credential)
-    }
-
-    override func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
-        completionHandler(disposition, credential)
-    }
 }

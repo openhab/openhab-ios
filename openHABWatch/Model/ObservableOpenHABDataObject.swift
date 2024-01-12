@@ -91,6 +91,13 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
             objectRefreshed.send()
         }
     }
+
+    @UserDefaultsBacked(key: "iconType", defaultValue: .svg)
+    var iconType: IconType {
+        didSet {
+            objectRefreshed.send()
+        }
+    }
 }
 
 extension ObservableOpenHABDataObject {

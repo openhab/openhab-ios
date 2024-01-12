@@ -279,6 +279,71 @@ class OpenHABWatchTracker: NSObject {
     func isNetworkWiFi() -> Bool {
         (pathMonitor.currentPath.status == .satisfied && !pathMonitor.currentPath.isExpensive)
     }
+
+    /// Attemps to connect to the URL and get the openHAB version
+    /// - Parameter tryUrl: Completes with the url and version of openHAB that succeeded, or an Error object if failed
+    private func tryUrl(_ tryUrl: URL?) {
+        getServerInfoForUrl(tryUrl) { url, version, error in
+            if let error {
+                self.delegate?.openHABTrackingError(error)
+            } else {
+                ObservableOpenHABDataObject.shared.openHABVersion = version
+                ObservableOpenHABDataObject.shared.openHABRootUrl = url?.absoluteString ?? ""
+                self.delegate?.openHABTracked(url)
+            }
+        }
+    }
+
+    /// Attempts to parse the data response from a request and determine if its an openHAB server and its server version
+    /// - Parameter data: request data
+    /// - Returns: Version of openHAB or -1 if not an openHAB server
+    private func getServerInfoFromData(data: Data) -> Int {
+        do {
+            let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
+            os_log("OpenHABTracker openHAB version %@", log: .remoteAccess, type: .info, serverProperties.version)
+            // OH versions 2.0 through 2.4 return "1" as their version, so set the floor to 2 so we do not think this is a OH 1.x serevr
+            return max(2, Int(serverProperties.version) ?? 2)
+        } catch {
+            // testing for OH 1.x
+            let str = String(decoding: data, as: UTF8.self)
+            if str.hasPrefix("<?xml") {
+                return 1
+            } else {
+                os_log("OpenHABTracker could not decode response", log: .notifications, type: .error)
+                return -1
+            }
+        }
+    }
+
+    /// Attempts to connect to a URL and determine its server version
+    /// - Parameters:
+    ///   - url: URL of the openHAB server
+    ///   - completion: Completes with the url and version of openHAB that succeeded, or an Error object if failed
+    private func getServerInfoForUrl(_ url: URL?, completion: @escaping (URL?, Int, Error?) -> Void) {
+        let strUrl = url?.absoluteString ?? ""
+        os_log("OpenHABTracker getServerInfo, trying: %{PUBLIC}@", log: .default, type: .info, strUrl)
+        NetworkConnection.tracker(openHABRootUrl: strUrl) { response in
+            os_log("OpenHABTracker getServerInfo, received data for URL: %{PUBLIC}@", log: .default, type: .info, strUrl)
+            switch response.result {
+            case let .success(data):
+                let version = self.getServerInfoFromData(data: data)
+                if version > 0 {
+                    completion(url, version, nil)
+                } else {
+                    completion(url, 0, self.errorMessage("error"))
+                }
+            case let .failure(error):
+                os_log("OpenHABTracker getServerInfo ERROR for %{PUBLIC}@ : %{PUBLIC}@ %d", log: .remoteAccess, type: .error, strUrl, error.localizedDescription, response.response?.statusCode ?? 0)
+                completion(url, 0, error)
+            }
+        }
+    }
+
+    func errorMessage(_ message: String) -> NSError {
+        var errorDetail: [AnyHashable: Any] = [:]
+        errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString(message, comment: "")
+        return NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String: Any])
+    }
 }
 
 extension NWPath: CustomStringConvertible {

@@ -19,17 +19,22 @@ struct IconView: View {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var iconURL: URL? {
-        Endpoint.icon(
+        var iconColor = widget.iconColor
+        if iconColor.isEmpty {
+            iconColor = "white"
+        }
+        return Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
             version: 3, // appData?.openHABVersion ?? 2,
             icon: widget.icon,
             state: widget.item?.state ?? "",
-            iconType: .svg, // iconType
-            iconColor: "" // iconColor
+            iconType: settings.iconType,
+            iconColor: iconColor
         ).url
     }
 
     var body: some View {
+        // Inspired by https://anoop4real.medium.com/display-svg-in-swiftui-ios-watchos-260120557e3a
         WebImage(
             url: iconURL,
             options: settings.ignoreSSL ? [.allowInvalidSSLCertificates] : [],

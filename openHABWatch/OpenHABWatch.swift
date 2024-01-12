@@ -14,6 +14,33 @@ import SDWebImageSVGCoder
 import SwiftUI
 import UserNotifications
 
+class OpenHABRequestModifier: SDWebImageDownloaderRequestModifier {
+    var appData: ObservableOpenHABDataObject
+
+    public init(appData data: ObservableOpenHABDataObject) {
+        appData = data
+        super.init()
+    }
+
+    override func modifiedRequest(with request: URLRequest) -> URLRequest? {
+        guard appData.openHABAlwaysSendCreds || request.url?.host?.hasSuffix("myopenhab.org") == true else {
+            // The user did not choose for the credentials to be sent with every request.
+            return request
+        }
+
+        let user = appData.openHABUsername
+        let password = appData.openHABPassword
+        guard !user.isEmpty, !password.isEmpty else {
+            // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
+            return request
+        }
+
+        var request = request
+        request.headers.add(.authorization(username: user, password: password))
+        return request
+    }
+}
+
 @main
 struct OpenHABWatch: App {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
@@ -45,42 +72,9 @@ struct OpenHABWatch: App {
     }
 
     init() {
-        setupSDImage()
-    }
-}
-
-// Initialize SVGCoder
-private extension OpenHABWatch {
-    func setupSDImage() {
+        // Initialize SVGCoder
         SDImageCodersManager.shared.addCoder(SDImageSVGCoder.shared)
         SDWebImageDownloader.shared.config.operationClass = OpenHABImageDownloaderOperation.self
-        SDWebImageDownloader.shared.requestModifier = OpenHABSDWebImageDownloaderRequestModifier(appData: settings)
-    }
-}
-
-class OpenHABSDWebImageDownloaderRequestModifier: SDWebImageDownloaderRequestModifier {
-    var appData: ObservableOpenHABDataObject
-
-    public init(appData data: ObservableOpenHABDataObject) {
-        appData = data
-        super.init()
-    }
-
-    override func modifiedRequest(with request: URLRequest) -> URLRequest? {
-        guard appData.openHABAlwaysSendCreds || request.url?.host?.hasSuffix("myopenhab.org") == true else {
-            // The user did not choose for the credentials to be sent with every request.
-            return request
-        }
-
-        let user = appData.openHABUsername
-        let password = appData.openHABPassword
-        guard !user.isEmpty, !password.isEmpty else {
-            // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
-            return request
-        }
-
-        var request = request
-        request.headers.add(.authorization(username: user, password: password))
-        return request
+        SDWebImageDownloader.shared.requestModifier = OpenHABRequestModifier(appData: settings)
     }
 }
