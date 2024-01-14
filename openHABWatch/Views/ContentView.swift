@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -87,7 +87,7 @@ struct ContentView: View {
             if widget.item != nil {
                 ImageRawRow(widget: widget)
             } else {
-                ImageRow(URL: URL(string: widget.url))
+                ImageRow(url: URL(string: widget.url))
             }
         case .chart:
             let url = Endpoint.chart(
@@ -100,7 +100,7 @@ struct ContentView: View {
                 theme: .dark,
                 forceAsItem: widget.forceAsItem
             ).url
-            ImageRow(URL: url)
+            ImageRow(url: url)
         case .mapview:
             MapViewRow(widget: widget)
         case .colorpicker:

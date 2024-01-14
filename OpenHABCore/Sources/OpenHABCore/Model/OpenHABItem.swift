@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -159,17 +159,19 @@ public extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
 
-        return OpenHABItem(name: name, 
-                           type: type,
-                           state: state,
-                           link: link,
-                           label: label,
-                           groupType: groupType,
-                           stateDescription: stateDescription?.openHABStateDescription,
-                           commandDescription: commandDescription?.openHABCommandDescription,
-                           members: mappedMembers,
-                           category: category,
-                           options: options)
+        return OpenHABItem(
+            name: name,
+            type: type,
+            state: state,
+            link: link,
+            label: label,
+            groupType: groupType,
+            stateDescription: stateDescription?.openHABStateDescription,
+            commandDescription: commandDescription?.openHABCommandDescription,
+            members: mappedMembers,
+            category: category,
+            options: options
+        )
     }
 }
 

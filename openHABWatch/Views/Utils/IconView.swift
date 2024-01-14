@@ -25,7 +25,7 @@ struct IconView: View {
         }
         return Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
-            version: 3, // appData?.openHABVersion ?? 2,
+            version: settings.openHABVersion,
             icon: widget.icon,
             state: widget.item?.state ?? "",
             iconType: settings.iconType,

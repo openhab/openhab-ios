@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -77,7 +77,8 @@ final class UserData: ObservableObject {
     init(url: URL?) {
         tracker = OpenHABWatchTracker()
         tracker?.delegate = self
-        tracker?.trackedUrl(url)
+//        TODO:
+//        tracker?.trackedUrl(url)
 
 //        dataObjectCancellable = ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
 //            // New settings updates from the phone app to start a reconnect
@@ -228,7 +229,7 @@ final class UserData: ObservableObject {
 }
 
 extension UserData: OpenHABWatchTrackerDelegate {
-    func openHABTracked(_ openHABUrl: URL?) {
+    func openHABTracked(_ openHABUrl: URL?, version: Int) {
         guard let urlString = openHABUrl?.absoluteString else { return }
         os_log("openHABTracked: %{PUBLIC}@", log: .remoteAccess, type: .error, urlString)
 
@@ -240,6 +241,7 @@ extension UserData: OpenHABWatchTrackerDelegate {
         }
 
         ObservableOpenHABDataObject.shared.openHABRootUrl = urlString
+        ObservableOpenHABDataObject.shared.openHABVersion = version
 
         let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
         loadPage(url: url, longPolling: false, refresh: true)

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -85,9 +85,13 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     // Text between square brackets
     var labelValue: String? {
-        let regex = /\[(.*?)\]/
-        guard let match = label.firstMatch(of: regex) else { return nil }
-        return String(match.1)
+        if #available(watchOS 9.0, *) {
+            let regex = /\[(.*?)\]/
+            guard let match = label.firstMatch(of: regex) else { return nil }
+            return String(match.1)
+        } else {
+            return nil
+        }
     }
 
     var coordinate: CLLocationCoordinate2D {

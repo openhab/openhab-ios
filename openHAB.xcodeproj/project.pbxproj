@@ -103,6 +103,8 @@
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
 		DA9721C324E29A8F0092CCFD /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */; };
+		DAA070912B51804C0060BB0E /* OpenHABRequestModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA070902B51804C0060BB0E /* OpenHABRequestModifier.swift */; };
+		DAA070932B5181210060BB0E /* OpenHABImageDownloaderOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA070922B5181210060BB0E /* OpenHABImageDownloaderOperation.swift */; };
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
@@ -391,6 +393,8 @@
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
 		DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
+		DAA070902B51804C0060BB0E /* OpenHABRequestModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABRequestModifier.swift; sourceTree = "<group>"; };
+		DAA070922B5181210060BB0E /* OpenHABImageDownloaderOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABImageDownloaderOperation.swift; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
@@ -662,6 +666,8 @@
 				DA0775372346705F0086C685 /* Info.plist */,
 				DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */,
 				DA0775382346705F0086C685 /* PushNotificationPayload.apns */,
+				DAA070902B51804C0060BB0E /* OpenHABRequestModifier.swift */,
+				DAA070922B5181210060BB0E /* OpenHABImageDownloaderOperation.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -1444,6 +1450,7 @@
 				DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */,
 				DA0775272346705F0086C685 /* ContentView.swift in Sources */,
 				DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */,
+				DAA070912B51804C0060BB0E /* OpenHABRequestModifier.swift in Sources */,
 				DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */,
 				DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */,
 				A07ED02E2402EE6E006588FE /* OpenHABWatchTracker.swift in Sources */,
@@ -1465,6 +1472,7 @@
 				DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */,
 				DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */,
 				DAF457A623DB9CE00018B495 /* SetpointRow.swift in Sources */,
+				DAA070932B5181210060BB0E /* OpenHABImageDownloaderOperation.swift in Sources */,
 				DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */,
 				9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */,
 				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
@@ -1865,7 +1873,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VERSIONING_SYSTEM = "apple-generic";
-				WATCHOS_DEPLOYMENT_TARGET = 9.6;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
 			};
 			name = Debug;
 		};
@@ -1920,7 +1928,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VERSIONING_SYSTEM = "apple-generic";
-				WATCHOS_DEPLOYMENT_TARGET = 9.6;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
 			};
 			name = Release;
 		};

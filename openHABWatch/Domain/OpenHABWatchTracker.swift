@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -16,7 +16,7 @@ import OpenHABCore
 import os.log
 
 protocol OpenHABWatchTrackerDelegate: AnyObject {
-    func openHABTracked(_ openHABUrl: URL?)
+    func openHABTracked(_ openHABUrl: URL?, version: Int)
     func openHABTrackingProgress(_ message: String?)
     func openHABTrackingError(_ error: Error)
 }
@@ -26,146 +26,69 @@ protocol OpenHABWatchTrackerExtendedDelegate: OpenHABWatchTrackerDelegate {
 }
 
 class OpenHABWatchTracker: NSObject {
-    var oldReachabilityStatus: NWPath?
-
     weak var delegate: OpenHABWatchTrackerDelegate?
+
+    private var openHABLocalUrl = ""
+    private var openHABRemoteUrl = ""
+    private var restartTimer: Timer?
+
     var netBrowser: NWBrowser?
     var pathMonitor = NWPathMonitor()
-    var connectivityTask: DataRequest?
+    private let pathMonitorQueue = DispatchQueue(label: "NWPathMonitor")
+    @Published private(set) var pathStatus: NWPath.Status = .unsatisfied
 
-    let backgroundQueue = DispatchQueue.global(qos: .background)
-
-    override init() {
-        super.init()
+    @objc
+    func restart() {
+        pathMonitor.cancel()
+        start()
     }
 
     func start() {
-        #if !os(watchOS)
-        oldReachabilityStatus = pathMonitor.currentPath
+        openHABLocalUrl = ObservableOpenHABDataObject.shared.localUrl
+        openHABRemoteUrl = ObservableOpenHABDataObject.shared.remoteUrl
+        selectUrl()
+        enablePathMonitor()
+    }
+
+    private func enablePathMonitor() {
         pathMonitor.pathUpdateHandler = { [weak self] path in
             guard let self else { return }
+            let newStatus = path.status
+            // use a timer to prevent bouncing/flapping around when switching between wifi, vpn, and wwan
+            restartTimer?.invalidate()
+            restartTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+                if newStatus != self.pathStatus {
+                    os_log(
+                        "OpenHABTracker Network status changed from %{PUBLIC}@ to %{PUBLIC}@",
+                        log: OSLog.remoteAccess,
+                        type: .info,
+                        String(reflecting: self.pathStatus),
+                        path.debugDescription
+                    )
 
-            let nStatus = path
-            if nStatus != oldReachabilityStatus {
-                if let oldReachabilityStatus {
-                    os_log("Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, oldReachabilityStatus.debugDescription, nStatus.debugDescription)
-                }
-                oldReachabilityStatus = nStatus
-                (delegate as? OpenHABWatchTrackerExtendedDelegate)?.openHABTrackingNetworkChange(nStatus)
-                if isNetworkConnected() {
-                    pathMonitor.cancel()
-                    selectUrl()
+                    self.pathStatus = newStatus
+                    if self.isNetworkConnected() {
+                        self.restart()
+                    }
                 }
             }
         }
-        pathMonitor.start(queue: backgroundQueue)
-        #endif
-        selectUrl()
-    }
-
-    func start(URL: URL?) {
-        trackedUrl(URL)
+        pathMonitor.start(queue: pathMonitorQueue)
     }
 
     func selectUrl() {
-        #if os(watchOS)
-        if ObservableOpenHABDataObject.shared.localUrl.isEmpty {
-            os_log("Starting discovery", log: .default, type: .debug)
-            startDiscovery()
-        } else {
-            if let connectivityTask {
-                connectivityTask.cancel()
-            }
-            let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-            if NetworkConnection.shared == nil {
-                NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
-            }
-            connectivityTask = NetworkConnection.shared.manager.request(request)
-                .validate()
-                .responseData { response in
-                    switch response.result {
-                    case .success:
-                        os_log("Tracking local URL", log: .default, type: .debug)
-                        self.trackedLocalUrl()
-                    case .failure:
-                        os_log("Tracking remote URL", log: .default, type: .debug)
-                        self.trackedRemoteUrl()
-                    }
-                }
-            connectivityTask?.resume()
-        }
-        #else
-
         // Check if any network is available
         if isNetworkConnected() {
-            // Check if network is WiFi. If not, go for remote URL
-            if !isNetworkWiFi() {
-                os_log("OpenHABWatchTracker network is not WiFi", log: .default, type: .info)
-                trackedRemoteUrl()
-                // If it is WiFi
+            if isNetworkWiFi(), openHABLocalUrl.isEmpty {
+                startDiscovery()
             } else {
-                os_log("OpenHABWatchTracker network is Wifi", log: .default, type: .info)
-                // Check if local URL is configured
-                if ObservableOpenHABDataObject.shared.localUrl.isEmpty {
-                    startDiscovery()
-                } else {
-                    if let connectivityTask {
-                        connectivityTask.cancel()
-                    }
-                    let request = URLRequest(url: URL(string: ObservableOpenHABDataObject.shared.localUrl)!, cachePolicy: .reloadIgnoringCacheData, timeoutInterval: 2.0)
-                    connectivityTask = NetworkConnection.shared.manager.request(request)
-                        .validate()
-                        .responseData { response in
-                            switch response.result {
-                            case .success:
-                                self.trackedLocalUrl()
-                            case .failure:
-                                self.trackedRemoteUrl()
-                            }
-                        }
-                    connectivityTask?.resume()
-                }
+                os_log("OpenHABTracker network trying all", log: .default, type: .info)
+                tryAll()
             }
         } else {
-            var errorDetail: [AnyHashable: Any] = [:]
-            errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("network_not_available", comment: "")
-            let trackingError = NSError(domain: "openHAB", code: 100, userInfo: errorDetail as? [String: Any])
-            delegate?.openHABTrackingError(trackingError)
+            os_log("OpenHABTracker network not available", log: .default, type: .info)
+            delegate?.openHABTrackingError(errorMessage("network_not_available"))
         }
-        #endif
-    }
-
-    func trackedLocalUrl() {
-        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_local", comment: ""))
-        let openHABUrl = normalizeUrl(ObservableOpenHABDataObject.shared.localUrl)
-        trackedUrl(URL(string: openHABUrl!))
-    }
-
-    func trackedRemoteUrl() {
-        let openHABUrl = normalizeUrl(ObservableOpenHABDataObject.shared.remoteUrl)
-        if !(openHABUrl ?? "").isEmpty {
-            // delegate?.openHABTrackingProgress("Connecting to remote URL")
-            trackedUrl(URL(string: openHABUrl!))
-        } else {
-            var errorDetail: [AnyHashable: Any] = [:]
-            errorDetail[NSLocalizedDescriptionKey] = NSLocalizedString("remote_url_not_configured", comment: "")
-            let trackingError = NSError(domain: "openHAB", code: 101, userInfo: errorDetail as? [String: Any])
-            delegate?.openHABTrackingError(trackingError)
-        }
-    }
-
-    func trackedDiscoveryUrl(_ discoveryUrl: URL?) {
-        delegate?.openHABTrackingProgress(NSLocalizedString("connecting_discovered", comment: ""))
-        trackedUrl(discoveryUrl)
-    }
-
-    func trackedDemoMode() {
-        delegate?.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: ""))
-        trackedUrl(URL(staticString: "https://demo.openhab.org:8443"))
-    }
-
-    func trackedUrl(_ trackedUrl: URL?) {
-        delegate?.openHABTracked(trackedUrl)
     }
 
     func startDiscovery() {
@@ -180,7 +103,8 @@ class OpenHABWatchTracker: NSObject {
                 os_log("OpenHABWatchTracker discovery ready", log: .default, type: .info)
             case let .failed(error):
                 os_log("OpenHABWatchTracker discovery failed: %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
-                self.trackedRemoteUrl()
+//                TODO:
+//                self.trackedRemoteUrl()
             default:
                 break
             }
@@ -216,10 +140,12 @@ class OpenHABWatchTracker: NSObject {
                             }
                             if components.host == nil {
                                 os_log("OpenHABWatchTracker unable to build URL from discovered endpoint, using remote URL instead", log: OSLog.remoteAccess, type: .info)
-                                self.trackedRemoteUrl()
+//                                TODO:
+//                                self.trackedRemoteUrl()
                             } else {
                                 os_log("OpenHABWatchTracker discovered: %{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, components.url?.description ?? "")
-                                self.trackedDiscoveryUrl(components.url)
+//                                TODO:
+//                                self.trackedDiscoveryUrl(components.url)
                             }
                             return
                         default:
@@ -232,7 +158,8 @@ class OpenHABWatchTracker: NSObject {
                         // Error establishing the connection or other unknown condition
                         connection.cancel()
                         os_log("OpenHABWatchTracker unable establish connection to discovered endpoint, using remote URL instead", log: OSLog.remoteAccess, type: .info)
-                        self.trackedRemoteUrl()
+//                        TODO:
+//                        self.trackedRemoteUrl()
                     }
                 }
                 self.netBrowser!.cancel()
@@ -246,7 +173,8 @@ class OpenHABWatchTracker: NSObject {
 
             // Unable to discover local endpoint
             os_log("OpenHABWatchTracker unable to discover local server, using remote URL", log: OSLog.remoteAccess, type: .info)
-            self.trackedRemoteUrl()
+//            TODO:
+//            self.trackedRemoteUrl()
         }
         netBrowser?.start(queue: .main)
     }
@@ -289,8 +217,85 @@ class OpenHABWatchTracker: NSObject {
             } else {
                 ObservableOpenHABDataObject.shared.openHABVersion = version
                 ObservableOpenHABDataObject.shared.openHABRootUrl = url?.absoluteString ?? ""
-                self.delegate?.openHABTracked(url)
+                self.delegate?.openHABTracked(url, version: version)
             }
+        }
+    }
+
+    /// Attemps to connect in parallel to the remote and local URLs if configured, the first URL to succeed wins
+    private func tryAll() {
+        var urls = [String: Double]()
+        if !openHABLocalUrl.isEmpty {
+            urls[openHABLocalUrl] = 0.0
+        }
+        if !openHABRemoteUrl.isEmpty {
+            urls[openHABRemoteUrl] = openHABLocalUrl.isEmpty ? 0 : 1.5
+        }
+        if urls.isEmpty {
+            delegate?.openHABTrackingProgress("error")
+            return
+        }
+        delegate?.openHABTrackingProgress(NSLocalizedString("connecting", comment: ""))
+        tryUrls(urls) { url, version, error in
+            if let error {
+                os_log("OpenHABTracker failed %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                self.delegate?.openHABTrackingError(error)
+            } else {
+                self.delegate?.openHABTracked(url, version: version)
+            }
+        }
+    }
+
+    /// Tries to connect in parallel to all URL's passed in and completes when either the first requests succeedes, or all fail.
+    /// - Parameters:
+    ///   - urls: Tuple of String URLS and a request Delay value
+    ///   - completion: Completes with the url and version of openHAB that succeeded, or an Error object if all failed
+    private func tryUrls(_ urls: [String: Double], completion: @escaping (URL?, Int, Error?) -> Void) {
+        var isRequestCompletedSuccessfully = false
+        // request in flight
+        var requests = [URL: DataRequest]()
+        // timers that have yet to be executed
+        var timers = [URL: Timer]()
+        for (urlString, delay) in urls {
+            let url = URL(string: urlString)!
+            let restUrl = URL(string: "rest/", relativeTo: url)!
+            let timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in
+                if NetworkConnection.shared == nil {
+                    NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
+                }
+                let request = NetworkConnection.shared.manager.request(restUrl, method: .get)
+                    .validate()
+                requests[url] = request
+                // remove us from the outstanding timer list
+                timers.removeValue(forKey: url)
+                request.responseData { response in
+                    // remove us from the outstanding request list
+                    requests.removeValue(forKey: url)
+                    os_log("OpenHABTracker response for URL %{PUBLIC}@", log: .notifications, type: .error, url.absoluteString)
+                    switch response.result {
+                    case let .success(data):
+                        let version = self.getServerInfoFromData(data: data)
+                        if version > 0, !isRequestCompletedSuccessfully {
+                            isRequestCompletedSuccessfully = true
+                            // cancel any timers not yet fired
+                            timers.values.forEach { $0.invalidate() }
+                            // cancel any requests still in flight
+                            requests.values.forEach { $0.cancel() }
+                            completion(url, version, nil)
+                        }
+                    case let .failure(error):
+                        os_log("OpenHABTracker request failure %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+                    }
+                    // check if we are the last attempt
+                    if !isRequestCompletedSuccessfully, requests.isEmpty, timers.isEmpty {
+                        os_log("OpenHABTracker last response", log: .notifications, type: .error)
+                        completion(nil, 0, self.errorMessage("network_not_available"))
+                    }
+                }
+                request.resume()
+            }
+            timers[url] = timer
+            RunLoop.main.add(timer, forMode: .common)
         }
     }
 
