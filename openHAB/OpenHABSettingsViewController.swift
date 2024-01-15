@@ -32,6 +32,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsSortSitemapsBy: SortSitemapsOrder = .label
     var settingsDefaultMainUIPath = ""
     var settingsAlwaysAllowWebRTC = false
+    var settingsSitemapForWatch = "watch"
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -55,6 +56,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var defaultMainUIPathTextField: UITextField!
     @IBOutlet private var appVersionLabel: UILabel!
     @IBOutlet private var alwaysAllowWebRTCSwitch: UISwitch!
+    @IBOutlet private var sitemapWatchTextField: UITextField!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -75,6 +77,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         usernameTextField?.delegate = self
         passwordTextField?.delegate = self
         defaultMainUIPathTextField.delegate = self
+        sitemapWatchTextField.delegate = self
         demomodeSwitch?.addTarget(self, action: #selector(OpenHABSettingsViewController.demomodeSwitchChange(_:)), for: .valueChanged)
         sendCrashReportsDummy.addTarget(self, action: #selector(crashReportingDummyPressed(_:)), for: .touchUpInside)
         useCurrentMainUIPathButton?.addTarget(self, action: #selector(currentMainUIPathButtonPressed(_:)), for: .touchUpInside)
@@ -238,6 +241,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         sortSitemapsBy?.selectedSegmentIndex = settingsSortSitemapsBy.rawValue
         defaultMainUIPathTextField?.text = settingsDefaultMainUIPath
         alwaysAllowWebRTCSwitch?.isOn = settingsAlwaysAllowWebRTC
+        sitemapWatchTextField?.text = settingsSitemapForWatch
         if settingsDemomode == true {
             disableConnectionSettings()
         } else {
@@ -264,6 +268,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
         settingsDefaultMainUIPath = Preferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.alwaysAllowWebRTC
+        settingsSitemapForWatch = Preferences.sitemapForWatch
     }
 
     func updateSettings() {
@@ -282,6 +287,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: sortSitemapsBy.selectedSegmentIndex) ?? .label
         settingsDefaultMainUIPath = defaultMainUIPathTextField?.text ?? ""
         settingsAlwaysAllowWebRTC = alwaysAllowWebRTCSwitch?.isOn ?? false
+        settingsSitemapForWatch = sitemapWatchTextField?.text ?? ""
     }
 
     func saveSettings() {
@@ -299,6 +305,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         Preferences.sortSitemapsby = settingsSortSitemapsBy.rawValue
         Preferences.defaultMainUIPath = settingsDefaultMainUIPath
         Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+        Preferences.sitemapForWatch = settingsSitemapForWatch
         WatchMessageService.singleton.syncPreferencesToWatch()
     }
 
