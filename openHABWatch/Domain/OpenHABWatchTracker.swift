@@ -140,12 +140,10 @@ class OpenHABWatchTracker: NSObject {
                             }
                             if components.host == nil {
                                 os_log("OpenHABWatchTracker unable to build URL from discovered endpoint, using remote URL instead", log: OSLog.remoteAccess, type: .info)
-//                                TODO:
-//                                self.trackedRemoteUrl()
+                                self.tryUrl(URL(string: self.openHABRemoteUrl))
                             } else {
                                 os_log("OpenHABWatchTracker discovered: %{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, components.url?.description ?? "")
-//                                TODO:
-//                                self.trackedDiscoveryUrl(components.url)
+                                self.tryUrl(components.url)
                             }
                             return
                         default:
@@ -158,8 +156,7 @@ class OpenHABWatchTracker: NSObject {
                         // Error establishing the connection or other unknown condition
                         connection.cancel()
                         os_log("OpenHABWatchTracker unable establish connection to discovered endpoint, using remote URL instead", log: OSLog.remoteAccess, type: .info)
-//                        TODO:
-//                        self.trackedRemoteUrl()
+                        self.tryUrl(URL(string: self.openHABRemoteUrl))
                     }
                 }
                 self.netBrowser!.cancel()
@@ -173,8 +170,8 @@ class OpenHABWatchTracker: NSObject {
 
             // Unable to discover local endpoint
             os_log("OpenHABWatchTracker unable to discover local server, using remote URL", log: OSLog.remoteAccess, type: .info)
-//            TODO:
-//            self.trackedRemoteUrl()
+            self.tryUrl(URL(string: self.openHABRemoteUrl))
+
         }
         netBrowser?.start(queue: .main)
     }

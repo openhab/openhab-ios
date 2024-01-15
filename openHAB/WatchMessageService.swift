@@ -21,7 +21,6 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        // TODO: Use RemoteUrl, TOO
         os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
 
         if message["request"] != nil {
