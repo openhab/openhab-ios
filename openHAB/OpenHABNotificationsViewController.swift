@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Kingfisher
 import OpenHABCore
 import os.log
 import SideMenu
@@ -103,10 +104,16 @@ class OpenHABNotificationsViewController: UITableViewController {
             iconType: .png,
             iconColor: ""
         ).url {
-            cell?.imageView?.kf.setImage(
-                with: iconUrl,
-                placeholder: UIImage(named: "openHABIcon")
-            )
+            KF.resource(KF.ImageResource(downloadURL: iconUrl, cacheKey: iconUrl.absoluteString))
+                .placeholder(UIImage(named: "openHABIcon"))
+                .setProcessor(OpenHABImageProcessor())
+                .onSuccess { result in
+                    os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, result.source.url?.absoluteString ?? "")
+                }
+                .onFailure { error in
+                    os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+                }
+                .set(to: (cell?.imageView)!)
         }
 
         if cell?.responds(to: #selector(setter: NotificationTableViewCell.preservesSuperviewLayoutMargins)) ?? false {

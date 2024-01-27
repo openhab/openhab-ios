@@ -701,21 +701,33 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
 
-                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
-                    switch result {
-                    case let .success(value):
-                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
-                    case let .failure(error):
+//                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
+//                    switch result {
+//                    case let .success(value):
+//                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
+//                    case let .failure(error):
+//                        os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+//                    }
+//                }
+//
+//                cell.imageView?.kf.setImage(
+//                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+//                    placeholder: UIImage(named: "blankicon.png"),
+//                    options: [.processor(OpenHABImageProcessor())],
+//                    completionHandler: reportOnResults
+//                )
+
+                // Use `KF` builder
+                KF.resource(KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")))
+                    .placeholder(UIImage(named: "blankicon.png"))
+                    .setProcessor(OpenHABImageProcessor())
+                    .onSuccess { result in
+                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, result.source.url?.absoluteString ?? "")
+                    }
+                    .onFailure { error in
                         os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
                     }
-                }
-
-                cell.imageView?.kf.setImage(
-                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                    placeholder: UIImage(named: "blankicon.png"),
-                    options: [.processor(OpenHABImageProcessor())],
-                    completionHandler: reportOnResults
-                )
+                    .set(to: cell.imageView!)
             }
         }
 
