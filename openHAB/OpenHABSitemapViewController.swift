@@ -17,45 +17,12 @@ import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
-import SVGKit
 import SwiftUI
 import UIKit
 
 enum Action<I, O> {
     typealias Sync = (UIViewController, I) -> O
     typealias Async = (UIViewController, I, @escaping (O) -> Void) -> Void
-}
-
-struct OpenHABImageProcessor: ImageProcessor {
-    // `identifier` should be the same for processors with the same properties/functionality
-    // It will be used when storing and retrieving the image to/from cache.
-    let identifier = "org.openhab.svgprocessor"
-
-    // Convert input data/image to target image and return it.
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
-        switch item {
-        case let .image(image):
-            os_log("already an image", log: .default, type: .info)
-            return image
-        case let .data(data):
-            guard !data.isEmpty else { return nil }
-
-            switch data[0] {
-            case 0x3C: // svg
-                // <?xml version="1.0" encoding="UTF-8"?>
-                // <svg
-                let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
-                let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
-                if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData), image.hasSize() {
-                    return image.uiImage
-                } else {
-                    return UIImage(named: "error.png")
-                }
-            default:
-                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
-            }
-        }
-    }
 }
 
 class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
@@ -701,23 +668,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
 
-//                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
-//                    switch result {
-//                    case let .success(value):
-//                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
-//                    case let .failure(error):
-//                        os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-//                    }
-//                }
-//
-//                cell.imageView?.kf.setImage(
-//                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-//                    placeholder: UIImage(named: "blankicon.png"),
-//                    options: [.processor(OpenHABImageProcessor())],
-//                    completionHandler: reportOnResults
-//                )
-
-                // Use `KF` builder
+                // Use `KF` builder instead of  cell.imageView?.kf.setImage
                 KF.resource(KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")))
                     .placeholder(UIImage(named: "blankicon.png"))
                     .setProcessor(OpenHABImageProcessor())

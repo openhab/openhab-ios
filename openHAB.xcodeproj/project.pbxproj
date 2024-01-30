@@ -964,10 +964,10 @@
 		DFFD8FCE18EDBD30003B502A /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */,
-				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				286F556E22EA062700AECC5C /* DynamicButtonStyleBell.swift */,
 				286F557022EA3D4E00AECC5C /* DynamicButtonStyleGear.swift */,
+				938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */,
+				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */,
 				938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */,
 				935B484525342B8E00E44CF0 /* URL+Static.swift */,

@@ -30,7 +30,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
             }
             // !!!
             if let sitemapName = applicationContext["defaultSitemap"] as? String {
-                ObservableOpenHABDataObject.shared.sitemapName = sitemapName
+                ObservableOpenHABDataObject.shared.sitemapName = sitemapName // "uicomponents_watch"
             }
 
             if let username = applicationContext["username"] as? String {

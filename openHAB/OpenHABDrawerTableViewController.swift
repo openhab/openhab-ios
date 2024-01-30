@@ -11,6 +11,7 @@
 
 import DynamicButton
 import Fuzi
+import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
@@ -229,11 +230,16 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     } // data;image/png;base64,
                 case _ where passedURL.hasPrefix("http"):
                     os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: passedURL))
-                    imageView.kf.setImage(with: URL(string: passedURL), placeholder: UIImage(named: "openHABIcon"))
+
+                    KF.url(URL(string: passedURL))
+                        .placeholder(UIImage(named: "openHABIcon"))
+                        .set(to: imageView)
                 default:
                     if let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: passedURL.prepare()).url {
                         os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: builtURL))
-                        imageView.kf.setImage(with: builtURL, placeholder: UIImage(named: "openHABIcon"))
+                        KF.url(builtURL)
+                            .placeholder(UIImage(named: "openHABIcon"))
+                            .set(to: imageView)
                     }
                 }
             } else {
@@ -248,7 +254,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 cell.customTextLabel?.text = sitemaps[siteMapIndex].label
                 if !sitemaps[siteMapIndex].icon.isEmpty {
                     if let iconURL = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", version: appData?.openHABVersion ?? 2, icon: sitemaps[siteMapIndex].icon).url {
-                        imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
+                        KF.url(iconURL)
+                            .placeholder(UIImage(named: "openHABIcon"))
+                            .set(to: imageView)
                     }
                 } else {
                     imageView.image = UIImage(named: "openHABIcon")

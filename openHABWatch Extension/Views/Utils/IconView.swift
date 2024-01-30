@@ -21,10 +21,10 @@ struct IconView: View {
     var iconURL: URL? {
         Endpoint.icon(
             rootUrl: settings.openHABRootUrl,
-            version: 2,
+            version: 4,
             icon: widget.icon,
             state: widget.item?.state ?? "",
-            iconType: .png,
+            iconType: .svg,
             iconColor: ""
         ).url
     }
@@ -38,6 +38,7 @@ struct IconView: View {
             )
         }
         return KFImage.resource(resource)
+            .setProcessor(OpenHABImageProcessor())
             .onSuccess { retrieveImageResult in
                 os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
             }
