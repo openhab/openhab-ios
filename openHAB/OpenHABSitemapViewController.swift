@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -18,6 +18,7 @@ import OpenHABCore
 import os.log
 import SafariServices
 import SVGKit
+import SwiftUI
 import UIKit
 
 enum Action<I, O> {
@@ -653,7 +654,11 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         case .setpoint:
             cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
         case .slider:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+            if let switchSupport = widget?.switchSupport, switchSupport {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
+            } else {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+            }
         case .selection:
             cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
         case .colorpicker:

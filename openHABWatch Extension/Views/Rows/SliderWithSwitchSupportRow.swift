@@ -13,7 +13,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct SliderRow: View {
+struct SliderWithSwitchSupportRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
@@ -30,14 +30,39 @@ struct SliderRow: View {
             }
         )
 
+        let stateBinding = Binding<Bool>(
+            get: {
+                if widget.adjustedValue > widget.minValue {
+                    true
+                } else {
+                    false
+                }
+            },
+            set: {
+                if $0 {
+                    os_log("Switch to ON", log: .viewCycle, type: .info)
+                    widget.sendCommand(widget.maxValue.valueText(step: widget.step))
+                } else {
+                    os_log("Switch to OFF", log: .viewCycle, type: .info)
+                    widget.sendCommand(widget.minValue.valueText(step: widget.step))
+                }
+            }
+        )
+
         return
             VStack(spacing: 3) {
-                HStack {
-                    IconView(widget: widget, settings: settings)
-                    TextLabelView(widget: widget)
-                    Spacer()
-                    DetailTextLabelView(widget: widget)
-                }.padding(.top, 8)
+                Toggle(isOn: stateBinding) {
+                    HStack {
+                        IconView(widget: widget, settings: settings)
+                        VStack {
+                            TextLabelView(widget: widget)
+                            DetailTextLabelView(widget: widget)
+                        }
+                    }
+                }
+                .focusable(true)
+                .padding(.trailing)
+                .cornerRadius(5)
 
                 Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
                     .labelsHidden()
@@ -54,7 +79,7 @@ struct SliderRow: View {
     }
 }
 
-struct SliderRow_Previews: PreviewProvider {
+struct SliderWithSwitchSupportRow_Previews: PreviewProvider {
     static var previews: some View {
         let widget = UserData().widgets[3]
         return Group {

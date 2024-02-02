@@ -9,11 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Alamofire
+import AVFoundation
+import AVKit
 import OpenHABCore
 import os.log
-import UIKit
 
-class SliderUITableViewCell: GenericUITableViewCell {
+class SliderWithSwitchSupportUITableViewCell: GenericUITableViewCell {
     private var step: Float = 1.0
 
     private var widgetValue: Double {
@@ -21,6 +23,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     @IBOutlet private var widgetSlider: UISlider!
+    @IBOutlet private var widgetSwitch: UISwitch!
     @IBOutlet private var customDetailText: UILabel!
 
     required init?(coder: NSCoder) {
@@ -31,17 +34,6 @@ class SliderUITableViewCell: GenericUITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
-    }
-
-    // swiftlint:disable:next type_contents_order
-    override public func initialize() {
-        selectionStyle = .none
-        separatorInset = .zero
-        if let widget {
-            step = Float(widget.step)
-        } else {
-            step = 1.0
-        }
     }
 
     @IBAction private func sliderValueChanged(_ sender: UISlider) {
@@ -63,6 +55,16 @@ class SliderUITableViewCell: GenericUITableViewCell {
         sliderTouchUp(sender)
     }
 
+    override public func initialize() {
+        selectionStyle = .none
+        separatorInset = .zero
+        if let widget {
+            step = Float(widget.step)
+        } else {
+            step = 1.0
+        }
+    }
+
     private func adj(_ raw: Double) -> Double {
         var valueAdjustedToStep = Double(floor(Float(((raw - widget.minValue))) / step) * step)
         valueAdjustedToStep += widget.minValue
@@ -79,6 +81,16 @@ class SliderUITableViewCell: GenericUITableViewCell {
 
     override func displayWidget() {
         // guard !isInTransition else { return }
+
+        customTextLabel?.text = widget.labelText
+        var state = widget.state
+        // if state is nil or empty using the item state ( OH 1.x compatability )
+        if state.isEmpty {
+            state = (widget.item?.state) ?? ""
+        }
+        widgetSwitch?.isOn = state.parseAsBool()
+        widgetSwitch?.addTarget(self, action: .switchChange, for: .valueChanged)
+        super.displayWidget()
 
         if let item = widget.item, item.isOfTypeOrGroupType(.color) {
             widgetSlider?.minimumValue = 0.0
@@ -107,4 +119,19 @@ class SliderUITableViewCell: GenericUITableViewCell {
         os_log("Slider new value = %g", log: .default, type: .info, value)
         widget.sendCommand(value.valueText(step: Double(step)))
     }
+
+    @objc
+    func switchChange() {
+        if (widgetSwitch?.isOn)! {
+            os_log("Switch to ON", log: .viewCycle, type: .info)
+            widget.sendCommand("ON")
+        } else {
+            os_log("Switch to OFF", log: .viewCycle, type: .info)
+            widget.sendCommand("OFF")
+        }
+    }
+}
+
+private extension Selector {
+    static let switchChange = #selector(SwitchUITableViewCell.switchChange)
 }
