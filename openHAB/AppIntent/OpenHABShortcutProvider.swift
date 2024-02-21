@@ -24,5 +24,6 @@ struct OpenHABAppShortcutsProvider: AppShortcutsProvider {
             shortTitle: "Set switch"
         )
     }
+
     static var shortcutTileColor: ShortcutTileColor = .orange
 }
