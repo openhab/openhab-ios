@@ -4,9 +4,6 @@
       "id" : "660BC591-F2EF-425A-B637-F63CCEF0251A",
       "name" : "ASAN",
       "options" : {
-        "addressSanitizer" : {
-          "enabled" : true
-        },
         "undefinedBehaviorSanitizerEnabled" : true
       }
     }
