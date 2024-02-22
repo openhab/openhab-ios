@@ -28,6 +28,15 @@ public class OpenHABItemCache {
     var lastUrlConnected = URL_NONE
     var lastLoad = Date().timeIntervalSince1970
 
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
+        await withCheckedContinuation { continuation in
+            getItemNames(searchTerm: searchTerm, types: types) { result in
+                continuation.resume(returning: result.map { String($0) })
+            }
+        }
+    }
+
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         var ret = [NSString]()
 
@@ -43,6 +52,24 @@ public class OpenHABItemCache {
         ret.append(contentsOf: items.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) })
 
         completion(ret)
+    }
+
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    public func getItems(types: [OpenHABItem.ItemType]?) async -> [OpenHABItem] {
+        guard let items else {
+            items = await reload(searchTerm: nil, types: types)
+            return []
+        }
+        return items.filter { (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name)
+    }
+
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    public func getItem(name: String) async -> OpenHABItem? {
+        await withCheckedContinuation { continuation in
+            getItem(name: name) { result in
+                continuation.resume(returning: result)
+            }
+        }
     }
 
     @available(iOS 12.0, *)
@@ -68,6 +95,52 @@ public class OpenHABItemCache {
     public func sendState(_ item: OpenHABItem, stateToSend command: String) {
         let commandOperation = NetworkConnection.sendState(item: item, stateToSend: command)
         commandOperation?.resume()
+    }
+
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [OpenHABItem] {
+        await withCheckedContinuation { continuation in
+            reload(searchTerm: searchTerm, types: types) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
+    @available(iOS 12.0, *)
+    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([OpenHABItem]) -> Void) {
+        lastLoad = Date().timeIntervalSince1970
+
+        guard let uurl = getURL() else { return }
+
+        os_log("Loading items from %{PUBLIC}@", log: .default, type: .info, url)
+
+        if NetworkConnection.shared == nil {
+            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
+        }
+
+        NetworkConnection.load(from: uurl, timeout: timeout) { response in
+            switch response.result {
+            case let .success(data):
+                do {
+                    try self.decodeItemsData(data)
+
+                    let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name) ?? []
+
+                    completion(ret)
+                } catch {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                }
+            case let .failure(error):
+                if self.lastUrlConnected == OpenHABItemCache.URL_LOCAL {
+                    self.localUrlFailed = true
+                    os_log("%{PUBLIC}@ ", log: .default, type: .info, error.localizedDescription)
+                    self.reload(searchTerm: searchTerm, types: types, completion: completion) // try remote
+
+                } else {
+                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                }
+            }
+        }
     }
 
     @available(iOS 12.0, *)

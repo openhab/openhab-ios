@@ -9,11 +9,11 @@
 	<key>INIntentDefinitionNamespace</key>
 	<string>aK4nIm</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>21C52</string>
+	<string>22G513</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
-	<string>13C100</string>
+	<string>15C500b</string>
 	<key>INIntentDefinitionToolsVersion</key>
-	<string>13.2.1</string>
+	<string>15.2</string>
 	<key>INIntents</key>
 	<array>
 		<dict>
@@ -27,7 +27,7 @@
 			<string>Retrieve the current state of an item</string>
 			<key>INIntentDescriptionID</key>
 			<string>GD4RTw</string>
-			<key>INIntentIneligibleForSuggestions</key>
+			<key>INIntentEligibleForWidgets</key>
 			<true/>
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
@@ -49,6 +49,22 @@
 			</dict>
 			<key>INIntentName</key>
 			<string>GetItemState</string>
+			<key>INIntentParameterCombinations</key>
+			<dict>
+				<key>item</key>
+				<dict>
+					<key>INIntentParameterCombinationIsLinked</key>
+					<true/>
+					<key>INIntentParameterCombinationIsPrimary</key>
+					<true/>
+					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
+					<true/>
+					<key>INIntentParameterCombinationTitle</key>
+					<string>Get ${item} State</string>
+					<key>INIntentParameterCombinationTitleID</key>
+					<string>joyqa0</string>
+				</dict>
+			</dict>
 			<key>INIntentParameters</key>
 			<array>
 				<dict>
@@ -175,6 +191,8 @@
 			<string>Set the state of a switch on or off</string>
 			<key>INIntentDescriptionID</key>
 			<string>oOjAU0</string>
+			<key>INIntentEligibleForWidgets</key>
+			<true/>
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
@@ -389,6 +407,8 @@
 			<string>Set the integer value of a dimmer or roller shutter</string>
 			<key>INIntentDescriptionID</key>
 			<string>pg4Bec</string>
+			<key>INIntentEligibleForWidgets</key>
+			<true/>
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
@@ -605,6 +625,8 @@
 			<string>Set the decimal value of a number control item</string>
 			<key>INIntentDescriptionID</key>
 			<string>pptfkD</string>
+			<key>INIntentEligibleForWidgets</key>
+			<true/>
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
@@ -813,6 +835,8 @@
 			<string>Set the string of a string control item</string>
 			<key>INIntentDescriptionID</key>
 			<string>5B4e9l</string>
+			<key>INIntentEligibleForWidgets</key>
+			<true/>
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
@@ -1027,6 +1051,8 @@
 			<string>Set the color of a color control item</string>
 			<key>INIntentDescriptionID</key>
 			<string>DxO2wk</string>
+			<key>INIntentEligibleForWidgets</key>
+			<true/>
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
@@ -1243,6 +1269,8 @@
 			<string>Set the state of a contact open or closed</string>
 			<key>INIntentDescriptionID</key>
 			<string>eFb7vM</string>
+			<key>INIntentEligibleForWidgets</key>
+			<true/>
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
