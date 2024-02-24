@@ -155,7 +155,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
             sendCommand(state.toString(locale: Locale(identifier: "US")))
         } else {
             // For all other items, send the plain value
-            sendCommand(state.formatValue())
+            sendCommand(state.stringValue)
         }
     }
 
