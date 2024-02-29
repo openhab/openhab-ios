@@ -42,7 +42,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
         var numberState = widget?.stateValueAsNumberState
         let stateValue = numberState?.value ?? widget.minValue
         let newValue: Double = down ? stateValue - widget.step : stateValue + widget.step
-        let limitedNewValue = max(widget.minValue, min(widget.maxValue, newValue))
+
+        let limitedNewValue = newValue.clamped(to: widget.minValue ... widget.maxValue)
 
         guard limitedNewValue != stateValue else {
             // nothing to update, skip sending value

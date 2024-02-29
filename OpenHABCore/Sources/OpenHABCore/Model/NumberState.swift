@@ -23,6 +23,7 @@ public struct NumberState: CustomStringConvertible, Equatable {
     public var intValue: Int {
         Int(value)
     }
+
     public var stringValue: String {
         String(value)
     }
@@ -38,16 +39,15 @@ public struct NumberState: CustomStringConvertible, Equatable {
         if let format, !format.isEmpty {
             let actualFormat = format
                 .replacingOccurrences(of: "%unit%", with: unit ?? "")
-            // %s in Java is for Strings, but does not work in Swift, see
-            // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html)
+                // %s in Java is for Strings, but does not work in Swift, see
+                // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html)
                 .replacingOccurrences(of: "%s", with: "%@")
-            let formatValue: CVarArg
-            if format.contains("%d") {
-                formatValue = intValue
+            let formatValue: CVarArg = if format.contains("%d") {
+                intValue
             } else if format.contains("%s") {
-                formatValue = stringValue
+                stringValue
             } else {
-                formatValue = value
+                value
             }
             return String(format: actualFormat, locale: locale, formatValue)
         }
