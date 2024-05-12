@@ -631,7 +631,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath), let widgetType = widget.type else {
+        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else {
             // this should never be the case
             let cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
             cell.displayWidget()
@@ -642,7 +642,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         let cell: UITableViewCell
 
-        switch widgetType {
+        switch widget.type {
         case .frame:
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case .switchWidget:

@@ -75,7 +75,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var widgetId = ""
     public var label = ""
     public var icon = ""
-    public var type: WidgetType?
+    public var type: WidgetType = .unknownCase
     public var url = ""
     public var period = ""
     public var minValue = 0.0
