@@ -631,24 +631,29 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath) else {
-            return tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath), let widgetType = widget.type else {
+            // this should never be the case
+            let cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+            cell.displayWidget()
+            cell.touchEventDelegate = self
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+            return cell
         }
 
         let cell: UITableViewCell
 
-        switch widget.type {
+        switch widgetType {
         case .frame:
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case .switchWidget:
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if !(widget?.mappings ?? []).isEmpty {
+            if !widget.mappings.isEmpty {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else if widget?.item?.isOfTypeOrGroupType(.switchItem) ?? false {
+            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            } else if widget?.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
+            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
-            } else if !(widget?.mappingsOrItemOptions ?? []).isEmpty {
+            } else if !widget.mappingsOrItemOptions.isEmpty {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
@@ -656,7 +661,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         case .setpoint:
             cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
         case .slider:
-            if let switchSupport = widget?.switchSupport, switchSupport {
+            if widget.switchSupport {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
@@ -680,26 +685,25 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case .mapview:
             cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
-        case .group, .text:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         case .input:
-            cell = tableView.dequeueReusableCell(for: IndexPath)
-                as TextInputUITableViewCell
+            cell = tableView.dequeueReusableCell(for: indexPath) as TextInputUITableViewCell
+        case .group, .text, .defaultWidget, .unknown:
+            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
         var iconColor = widget.iconColor
-        if iconColor == nil || iconColor!.isEmpty, traitCollection.userInterfaceStyle == .dark {
+        if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
             iconColor = "white"
         }
         // No icon is needed for image, video, frame and web widgets
-        if widget.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
+        if !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
             if let urlc = Endpoint.icon(
                 rootUrl: openHABRootUrl,
                 version: appData?.openHABVersion ?? 2,
-                icon: widget?.icon,
-                state: widget?.iconState() ?? "",
+                icon: widget.icon,
+                state: widget.iconState(),
                 iconType: iconType,
-                iconColor: iconColor!
+                iconColor: iconColor
             ).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
@@ -739,7 +743,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
             if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
                 cell.separatorInset = UIEdgeInsets.zero
-            } else if !(widget?.type == .frame) {
+            } else if !(widget.type == .frame) {
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
             }
         }
