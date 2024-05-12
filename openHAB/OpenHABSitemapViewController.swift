@@ -631,11 +631,13 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
+        guard let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath) else {
+            return tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+        }
 
         let cell: UITableViewCell
 
-        switch widget?.type {
+        switch widget.type {
         case .frame:
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case .switchWidget:
@@ -680,16 +682,17 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
         case .group, .text:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
-        default:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+        case .input:
+            cell = tableView.dequeueReusableCell(for: IndexPath)
+                as TextInputUITableViewCell
         }
 
-        var iconColor = widget?.iconColor
+        var iconColor = widget.iconColor
         if iconColor == nil || iconColor!.isEmpty, traitCollection.userInterfaceStyle == .dark {
             iconColor = "white"
         }
         // No icon is needed for image, video, frame and web widgets
-        if widget?.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
+        if widget.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
             if let urlc = Endpoint.icon(
                 rootUrl: openHABRootUrl,
                 version: appData?.openHABVersion ?? 2,

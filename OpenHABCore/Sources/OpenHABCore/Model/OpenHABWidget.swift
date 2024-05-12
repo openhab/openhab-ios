@@ -57,6 +57,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
         case frame = "Frame"
         case group = "Group"
         case image = "Image"
+        case input = "Input"
         case mapview = "Mapview"
         case selection = "Selection"
         case setpoint = "Setpoint"
