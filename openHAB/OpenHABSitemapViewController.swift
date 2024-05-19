@@ -789,10 +789,21 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             selectionViewController.selectionItem = widget.item
             navigationController?.pushViewController(selectionViewController, animated: true)
         } else if widget.type == .input {
+            let hint = widget.inputHint
             // TODO: proper texts instead of hardcoded values
-            let alert = UIAlertController(title: "Enter new value", message: "Current value for \(widget.label) is \(widget.state)", preferredStyle: .alert)
-            alert.addTextField { _ in
+            let alert = UIAlertController(
+                title: "Enter new value",
+                message: "Current value for \(widget.label) is \(widget.state)",
+                preferredStyle: .alert
+            )
+            alert.addTextField { textField in
                 // TODO: configure (set current value, validation, allow clearing, set delegate...)
+                textField.clearButtonMode = .always
+                // TODO: change text field propoerties according to hint
+                switch hint {
+                default:
+                    textField.keyboardType = .alphabet
+                }
             }
             let sendAction = UIAlertAction(title: "Set value", style: .destructive, handler: { [weak self] _ in
                 self?.sendCommand(widget.item, commandToSend: alert.textFields?[0].text) // TODO: sanitize / convert text?
