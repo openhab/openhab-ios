@@ -762,31 +762,45 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-        if widget?.linkedPage != nil {
-            if let link = widget?.linkedPage?.link {
-                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
-            }
-            selectedWidgetRow = indexPath.row
-            let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-            newViewController.title = widget?.linkedPage?.title.components(separatedBy: "[")[0]
-            newViewController.pageUrl = widget?.linkedPage?.link ?? ""
-            newViewController.openHABRootUrl = openHABRootUrl
-            navigationController?.pushViewController(newViewController, animated: true)
-        } else if widget?.type == .selection {
-            os_log("Selected selection widget", log: .viewCycle, type: .info)
-
-            selectedWidgetRow = indexPath.row
-            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
-            let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-            selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
-            selectionViewController.delegate = self
-            selectionViewController.selectionItem = selectedWidget?.item
-            navigationController?.pushViewController(selectionViewController, animated: true)
-        }
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)
+        }
+
+        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else {
+            return
+        }
+
+        if widget.linkedPage != nil {
+            if let link = widget.linkedPage?.link {
+                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
+            }
+            let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
+            newViewController.title = widget.linkedPage?.title.components(separatedBy: "[")[0]
+            newViewController.pageUrl = widget.linkedPage?.link ?? ""
+            newViewController.openHABRootUrl = openHABRootUrl
+            navigationController?.pushViewController(newViewController, animated: true)
+        } else if widget.type == .selection {
+            os_log("Selected selection widget", log: .viewCycle, type: .info)
+
+            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
+            selectionViewController.title = widget.labelText
+            selectionViewController.mappings = widget.mappingsOrItemOptions
+            selectionViewController.delegate = self
+            selectionViewController.selectionItem = widget.item
+            navigationController?.pushViewController(selectionViewController, animated: true)
+        } else if widget.type == .input {
+            // TODO: proper texts instead of hardcoded values
+            let alert = UIAlertController(title: "Enter new value", message: "Current value for \(widget.label) is \(widget.state)", preferredStyle: .alert)
+            alert.addTextField { _ in
+                // TODO: configure (set current value, validation, allow clearing, set delegate...)
+            }
+            let sendAction = UIAlertAction(title: "Set value", style: .destructive, handler: { [weak self] _ in
+                self?.sendCommand(widget.item, commandToSend: alert.textFields?[0].text) // TODO: sanitize / convert text?
+            })
+            alert.addAction(sendAction)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            alert.preferredAction = sendAction
+            present(alert, animated: true)
         }
     }
 
