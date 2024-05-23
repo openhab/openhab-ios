@@ -593,7 +593,7 @@ extension OpenHABSitemapViewController: ColorPickerUITableViewCellDelegate {
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
-extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource {
+extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if currentPage != nil {
             if isFiltering {
@@ -796,17 +796,49 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 message: "Current value for \(widget.label) is \(widget.state)",
                 preferredStyle: .alert
             )
-            alert.addTextField { textField in
-                // TODO: configure (set current value, validation, allow clearing, set delegate...)
-                textField.clearButtonMode = .always
-                // TODO: change text field propoerties according to hint
-                switch hint {
-                default:
-                    textField.keyboardType = .alphabet
+
+            let textExtractor: () -> String?
+            switch hint {
+            case .date:
+                let datePicker = UIDatePicker()
+                datePicker.datePickerMode = .date
+                alert.view.addSubview(datePicker)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .full
+                dateFormatter.timeStyle = .none
+                textExtractor = { dateFormatter.string(from: datePicker.date) }
+            case .datetime:
+                let datePicker = UIDatePicker()
+                datePicker.datePickerMode = .dateAndTime
+                alert.view.addSubview(datePicker)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .full
+                dateFormatter.timeStyle = .full
+                textExtractor = { dateFormatter.string(from: datePicker.date) }
+            case .time:
+                let datePicker = UIDatePicker()
+                datePicker.datePickerMode = .time
+                alert.view.addSubview(datePicker)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .none
+                dateFormatter.timeStyle = .full
+                textExtractor = { dateFormatter.string(from: datePicker.date) }
+            case .number:
+                alert.addTextField { textField in
+                    textField.clearButtonMode = .always
+                    textField.delegate = self
+                    textField.keyboardType = .numbersAndPunctuation
                 }
+                textExtractor = { alert.textFields?[0].text }
+            case .text:
+                alert.addTextField { textField in
+                    textField.clearButtonMode = .always
+                    textField.keyboardType = .default
+                }
+                textExtractor = { alert.textFields?[0].text }
             }
             let sendAction = UIAlertAction(title: "Set value", style: .destructive, handler: { [weak self] _ in
-                self?.sendCommand(widget.item, commandToSend: alert.textFields?[0].text) // TODO: sanitize / convert text?
+                self?.sendCommand(widget.item, commandToSend: textExtractor()) // TODO: sanitize / convert text?
             })
             alert.addAction(sendAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
@@ -837,6 +869,37 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         }
 
         return nil
+    }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let decimalSeparator = NSLocale.current.decimalSeparator ?? ""
+        let oldString = (textField.text ?? "")
+        let replacement: NSString = string as NSString
+        let wholeNumberRegex = "^-?[0-9]*$"
+
+        // check for deletion
+        return string.isEmpty
+            // check for new negative sign
+            || (
+                !string.starts(with: "-") // new string does not add negative sign
+                    || range.location == 0 // new string adds negative sign to beginning
+                    && (
+                        !oldString.starts(with: "-") // old string does not contain negative sign
+                            || range.length > 0
+                    )
+            ) // new string replaces negative sign in old string
+            // check for old negative sign
+            && (
+                !oldString.starts(with: "-") // old string does not start with negative sign
+                    || range.location > 0 // new string starts after negative sign in old string
+                    || range.length > 0
+            ) // new string replaces negative sign in old string
+            // check for decimal points
+            && (
+                string.range(of: wholeNumberRegex) != nil // new string is whole number
+                    || replacement.replacingCharacters(in: replacement.range(of: decimalSeparator), with: "").range(of: wholeNumberRegex) != nil // new string is valid decimal number
+                    && !(oldString as NSString).replacingCharacters(in: range, with: "").contains(decimalSeparator)
+            ) // old string without replaced range not yet contains decimal separator
     }
 }
 
