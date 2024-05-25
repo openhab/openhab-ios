@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
         "state": {
           "branch": null,
-          "revision": "80ada1f753b0d53d9b57c465936a7c4169375002",
-          "version": "3.7.4"
+          "revision": "4b8714a7fb84d42393314ce897127b3939885ec3",
+          "version": "3.8.5"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/devicekit/DeviceKit.git",
         "state": {
           "branch": null,
-          "revision": "6b58d9a61ea0a7fd23f2e6092821dea2342c2f5a",
-          "version": "4.5.0"
+          "revision": "d37e70cb2646666dcf276d7d3d4a9760a41ff8a6",
+          "version": "4.9.0"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/google/GoogleDataTransport.git",
         "state": {
           "branch": null,
-          "revision": "a732a4b47f59e4f725a2ea10f0c77e93a7131117",
-          "version": "9.3.0"
+          "revision": "a637d318ae7ae246b02d7305121275bc75ed5565",
+          "version": "9.4.0"
         }
       },
       {
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/google/GoogleUtilities.git",
         "state": {
           "branch": null,
-          "revision": "bc27fad73504f3d4af235de451f02ee22586ebd3",
-          "version": "7.12.1"
+          "revision": "57a1d307f42df690fdef2637f3e5b776da02aad6",
+          "version": "7.13.3"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/onevcat/Kingfisher.git",
         "state": {
           "branch": null,
-          "revision": "c1f60c63f356d364f4284ba82961acbe7de79bcc",
-          "version": "7.8.1"
+          "revision": "5b92f029fab2cce44386d28588098b5be0824ef5",
+          "version": "7.11.0"
         }
       },
       {
@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/firebase/leveldb.git",
         "state": {
           "branch": null,
-          "revision": "0706abcc6b0bd9cedfbb015ba840e4a780b5159b",
-          "version": "1.22.2"
+          "revision": "a0bc79961d7be727d258d33d5a6b2f1023270ba1",
+          "version": "1.22.5"
         }
       },
       {
@@ -186,17 +186,17 @@
         "repositoryURL": "https://github.com/SVGKit/SVGKit.git",
         "state": {
           "branch": "3.x",
-          "revision": "ab87d9d066d35bd4b72c6935fdd5782e7ecb10ce",
+          "revision": "02421928cab787faaffb2403d47c39392936fbc7",
           "version": null
         }
       },
       {
         "package": "swift-log",
-        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-          "version": "1.4.2"
+          "revision": "e97a6fcb1ab07462881ac165fdbb37f067e205d5",
+          "version": "1.5.4"
         }
       },
       {
@@ -204,8 +204,8 @@
         "repositoryURL": "https://github.com/apple/swift-protobuf.git",
         "state": {
           "branch": null,
-          "revision": "65e8f29b2d63c4e38e736b25c27b83e012159be8",
-          "version": "1.25.2"
+          "revision": "9f0c76544701845ad98716f3f6a774a892152bcb",
+          "version": "1.26.0"
         }
       },
       {
@@ -213,8 +213,8 @@
         "repositoryURL": "https://github.com/SwiftKickMobile/SwiftMessages.git",
         "state": {
           "branch": null,
-          "revision": "b29dd21090b708aa0ae9ecbaf6e2d0487028dc3f",
-          "version": "9.0.6"
+          "revision": "62e12e138fc3eedf88c7553dd5d98712aa119f40",
+          "version": "9.0.9"
         }
       }
     ]
