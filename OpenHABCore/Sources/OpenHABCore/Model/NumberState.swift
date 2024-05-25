@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -20,6 +20,14 @@ public struct NumberState: CustomStringConvertible, Equatable {
     private(set) var unit: String? = ""
     private(set) var format: String? = ""
 
+    public var intValue: Int {
+        Int(value)
+    }
+
+    public var stringValue: String {
+        String(value)
+    }
+
     // Access to default memberwise initializer not permitted outside of package
     public init(value: Double, unit: String? = "", format: String? = "") {
         self.value = value
@@ -28,30 +36,33 @@ public struct NumberState: CustomStringConvertible, Equatable {
     }
 
     public func toString(locale: Locale?) -> String {
-        if let format, format.isEmpty == false {
-            let actualFormat = format.replacingOccurrences(of: "%unit%", with: unit ?? "")
-            if format.contains("%d") == true {
-                return String(format: actualFormat, locale: locale, Int(value))
+        if let format, !format.isEmpty {
+            let actualFormat = format
+                .replacingOccurrences(of: "%unit%", with: unit ?? "")
+                // %s in Java is for Strings, but does not work in Swift, see
+                // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html)
+                .replacingOccurrences(of: "%s", with: "%@")
+            let formatValue: CVarArg = if format.contains("%d") {
+                intValue
+            } else if format.contains("%s") {
+                stringValue
             } else {
-                return String(format: actualFormat, locale: locale, value)
+                value
             }
+            return String(format: actualFormat, locale: locale, formatValue)
         }
-        if let unit, unit.isEmpty == false {
-            return "\(formatValue()) \(unit)"
+        if let unit, !unit.isEmpty {
+            return "\(stringValue) \(unit)"
         } else {
-            return formatValue()
+            return stringValue
         }
-    }
-
-    public func formatValue() -> String {
-        String(value)
     }
 
     private func getActualValue() -> NSNumber {
         if format?.contains("%d") == true {
-            return NSNumber(value: Int(value))
+            NSNumber(value: intValue)
         } else {
-            return NSNumber(value: value)
+            NSNumber(value: value)
         }
     }
 }

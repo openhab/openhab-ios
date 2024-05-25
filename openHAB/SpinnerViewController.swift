@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -12,13 +12,11 @@
 import UIKit
 
 class SpinnerViewController: UIViewController {
-    private var spinner: UIActivityIndicatorView = {
-        if #available(iOS 13.0, *) {
-            return UIActivityIndicatorView(style: .large)
-        } else {
-            return UIActivityIndicatorView(style: .gray)
-        }
-    }()
+    private var spinner: UIActivityIndicatorView = if #available(iOS 13.0, *) {
+        .init(style: .large)
+    } else {
+        .init(style: .gray)
+    }
 
     override func loadView() {
         view = UIView()

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -55,11 +55,6 @@ class InterfaceController: WKInterfaceController {
             row.setInterfaceController(interfaceController: self)
             row.setItem(item: sitemap.frames[0].items[i])
         }
-    }
-
-    override func didDeactivate() {
-        // This method is called when watch view controller is no longer visible
-        super.didDeactivate()
     }
 
     func displayAlert(message: String) {

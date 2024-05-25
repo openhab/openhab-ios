@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -26,19 +26,19 @@ struct RollershutterRow: View {
                 Spacer()
 
                 EncircledIconWithAction(systemName: "chevron.up.circle.fill") {
-                    self.widget.sendCommand("UP")
+                    widget.sendCommand("UP")
                 }
 
                 Spacer()
 
                 EncircledIconWithAction(systemName: "square") {
-                    self.widget.sendCommand("STOP")
+                    widget.sendCommand("STOP")
                 }
 
                 Spacer()
 
                 EncircledIconWithAction(systemName: "chevron.down.circle.fill") {
-                    self.widget.sendCommand("DOWN")
+                    widget.sendCommand("DOWN")
                 }
 
                 Spacer()

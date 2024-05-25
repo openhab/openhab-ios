@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -20,13 +20,11 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell {
-    private var activityIndicator: UIActivityIndicatorView = {
-        if #available(iOS 13.0, *) {
-            return UIActivityIndicatorView(style: .medium)
-        } else {
-            return UIActivityIndicatorView(style: .gray)
-        }
-    }()
+    private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
+        .init(style: .medium)
+    } else {
+        .init(style: .gray)
+    }
 
     var didLoad: (() -> Void)?
 

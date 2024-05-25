@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -13,10 +13,6 @@
 import XCTest
 
 class OpenHABGeneralTests: XCTestCase {
-    override func setUp() {
-        super.setUp()
-    }
-
     func testNamedColors() {
         XCTAssertEqual(UIColor.red, UIColor(fromString: "red"))
         XCTAssertEqual(UIColor.gray, UIColor(fromString: "abc"))

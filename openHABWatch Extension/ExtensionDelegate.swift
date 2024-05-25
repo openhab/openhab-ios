@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -106,7 +106,7 @@ extension ExtensionDelegate: AuthenticationChallengeResponsible {
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
+        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 
@@ -114,7 +114,7 @@ extension ExtensionDelegate: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 }

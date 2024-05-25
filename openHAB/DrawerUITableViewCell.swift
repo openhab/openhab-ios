@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -21,12 +21,6 @@ class DrawerUITableViewCell: UITableViewCell {
         super.init(coder: coder)
 
         separatorInset = .zero
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
 
     // This is to fix possible different sizes of user icons - we fix size and position of UITableViewCell icons

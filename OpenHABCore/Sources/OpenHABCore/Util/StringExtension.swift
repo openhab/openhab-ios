@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -27,9 +27,9 @@ public extension String {
 
     internal var intValue: Int {
         if let asNumber = NumberFormatter().number(from: self) {
-            return asNumber.intValue
+            asNumber.intValue
         } else {
-            return Int.max
+            Int.max
         }
     }
 
@@ -140,9 +140,9 @@ extension String? {
     var orEmpty: String {
         switch self {
         case let .some(value):
-            return value
+            value
         case .none:
-            return ""
+            ""
         }
     }
 }

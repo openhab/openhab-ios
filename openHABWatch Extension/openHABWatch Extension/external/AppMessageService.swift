@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -45,7 +45,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 ObservableOpenHABDataObject.shared.ignoreSSL = ignoreSSL
             }
 
-            if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Any] {
+            if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
                 NetworkConnection.shared.serverCertificateManager.trustedCertificates = trustedCertificates
                 NetworkConnection.shared.serverCertificateManager.saveTrustedCertificates()
             }

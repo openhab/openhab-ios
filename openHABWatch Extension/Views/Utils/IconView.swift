@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -30,7 +30,7 @@ struct IconView: View {
     }
 
     var body: some View {
-        let image = iconURL != nil ? KFImage(source: .network(ImageResource(
+        let image = iconURL != nil ? KFImage(source: .network(KF.ImageResource(
             downloadURL: iconURL!,
             cacheKey: iconURL!.path + (iconURL!.query ?? "")
         ))) : KFImage(iconURL)

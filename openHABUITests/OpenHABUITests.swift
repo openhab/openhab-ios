@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -63,8 +63,9 @@ class OpenHABUITests: XCTestCase {
 
         menuStaticText?.tap()
         sleep(1)
+
         // openHAB logo in left menu
-        webViewsQuery.otherElements["openHAB"].children(matching: .other).element(boundBy: 0).children(matching: .link).element.children(matching: .link).element.children(matching: .image).element.tap()
+        webViewsQuery.links.allElementsBoundByIndex[1].tap()
         sleep(2)
 
         // right menu in webUI

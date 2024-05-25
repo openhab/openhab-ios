@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -66,14 +66,14 @@ class SliderUITableViewCell: GenericUITableViewCell {
     private func adj(_ raw: Double) -> Double {
         var valueAdjustedToStep = Double(floor(Float(((raw - widget.minValue))) / step) * step)
         valueAdjustedToStep += widget.minValue
-        return min(max(valueAdjustedToStep, widget.minValue), widget.maxValue)
+        return valueAdjustedToStep.clamped(to: widget.minValue ... widget.maxValue)
     }
 
     private func adjustedValue() -> Double {
         if let item = widget.item {
-            return adj(item.stateAsDouble())
+            adj(item.stateAsDouble())
         } else {
-            return widget.minValue
+            widget.minValue
         }
     }
 

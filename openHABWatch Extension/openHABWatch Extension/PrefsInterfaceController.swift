@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -19,10 +19,6 @@ class PrefsInterfaceController: WKInterfaceController {
     @IBOutlet private var usernameLabel: WKInterfaceLabel!
     @IBOutlet private var sitemapLabel: WKInterfaceLabel!
 
-    override func awake(withContext context: Any?) {
-        super.awake(withContext: context)
-    }
-
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
@@ -40,10 +36,5 @@ class PrefsInterfaceController: WKInterfaceController {
         let buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
 
         versionLabel.setText("V\(versionNumber).\(buildNumber)")
-    }
-
-    override func didDeactivate() {
-        // This method is called when watch view controller is no longer visible
-        super.didDeactivate()
     }
 }

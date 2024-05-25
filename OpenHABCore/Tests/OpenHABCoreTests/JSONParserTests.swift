@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -14,7 +14,7 @@
 import os.signpost
 import XCTest
 
-// swiftlint:disable type_body_length
+// swiftlint:disable:next type_body_length
 final class JSONParserTests: XCTestCase {
     let decoder = JSONDecoder()
 
@@ -146,7 +146,8 @@ final class JSONParserTests: XCTestCase {
         """
         let data = Data(json.utf8)
         do {
-            let decoded = try decoder.decode(OpenHABLinkedPage.self, from: data)
+            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: data)
+            let decoded = codingData.openHABSitemapPage
             XCTAssertEqual(decoded.pageId, "1302", "LinkedPage properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
@@ -254,8 +255,9 @@ final class JSONParserTests: XCTestCase {
         }
         """.data(using: .utf8)!
         do {
-            let codingData = try decoder.decode(OpenHABLinkedPage.self, from: json)
-            XCTAssertEqual(codingData.pageId, "1304", "OpenHABLinkedPage properly parsed")
+            let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: json)
+            let sitemapPage = sitemapPageCodingData.openHABSitemapPage
+            XCTAssertEqual(sitemapPage.pageId, "1304", "OpenHABLinkedPage properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }

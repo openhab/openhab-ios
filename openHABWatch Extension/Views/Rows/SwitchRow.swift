@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -22,17 +22,17 @@ struct SwitchRow: View {
         // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
         let stateBinding = Binding<Bool>(
             get: {
-                self.widget.stateEnumBinding.boolState
+                widget.stateEnumBinding.boolState
             },
             set: {
                 if $0 {
                     os_log("Switch to ON", log: .viewCycle, type: .info)
-                    self.widget.sendCommand("ON")
+                    widget.sendCommand("ON")
                 } else {
                     os_log("Switch to OFF", log: .viewCycle, type: .info)
-                    self.widget.sendCommand("OFF")
+                    widget.sendCommand("OFF")
                 }
-                self.widget.stateEnumBinding = .switcher($0)
+                widget.stateEnumBinding = .switcher($0)
             }
         )
 

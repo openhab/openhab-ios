@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -179,7 +179,11 @@ class OpenHABRootViewController: UIViewController {
         if let menu = SideMenuManager.default.rightMenuNavigationController {
             // don't try and push an already visible menu less you crash the app
             dismiss(animated: false) {
-                var topMostViewController = UIApplication.shared.keyWindow?.rootViewController
+                var topMostViewController: UIViewController? = if #available(iOS 13, *) {
+                    UIApplication.shared.connectedScenes.flatMap { ($0 as? UIWindowScene)?.windows ?? [] }.last { $0.isKeyWindow }?.rootViewController
+                } else {
+                    UIApplication.shared.keyWindow?.rootViewController
+                }
                 while let presentedViewController = topMostViewController?.presentedViewController {
                     topMostViewController = presentedViewController
                 }

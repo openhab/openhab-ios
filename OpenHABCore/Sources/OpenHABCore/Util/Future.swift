@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -11,7 +11,7 @@
 
 import Foundation
 
-// swiftlint:disable file_types_order
+// swiftlint:disable:next file_types_order
 public class Future<Value> {
     public typealias Result = Swift.Result<Value, Error>
 

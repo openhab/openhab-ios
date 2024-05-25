@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -297,9 +297,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                 var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
                 var credential: URLCredential?
                 if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                    (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), URLSessionDataTask(), challenge)
+                    (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
                 } else {
-                    (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+                    (disposition, credential) = onReceiveSessionChallenge(with: challenge)
                 }
                 completionHandler(disposition, credential)
             }

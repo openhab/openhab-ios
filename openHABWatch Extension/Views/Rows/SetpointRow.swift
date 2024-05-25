@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -37,7 +37,7 @@ struct SetpointRow: View {
                 EncircledIconWithAction(
                     systemName:
                     "chevron.down.circle.fill",
-                    action: self.decreaseValue
+                    action: decreaseValue
                 )
 
                 Spacer()
@@ -49,7 +49,7 @@ struct SetpointRow: View {
 
                 EncircledIconWithAction(
                     systemName: "chevron.up.circle.fill",
-                    action: self.increaseValue
+                    action: increaseValue
                 )
 
                 Spacer()
@@ -60,12 +60,11 @@ struct SetpointRow: View {
     private func handleUpDown(down: Bool) {
         var numberState = widget.stateValueAsNumberState
         let stateValue = numberState?.value ?? widget.minValue
-        let newValue: Double
-        switch down {
+        let newValue: Double = switch down {
         case true:
-            newValue = stateValue - widget.step
+            stateValue - widget.step
         case false:
-            newValue = stateValue + widget.step
+            stateValue + widget.step
         }
         if newValue >= widget.minValue, newValue <= widget.maxValue {
             numberState?.value = newValue

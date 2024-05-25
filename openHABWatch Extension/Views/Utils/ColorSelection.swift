@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -23,27 +23,27 @@ enum DragState {
     var translation: CGSize {
         switch self {
         case .inactive, .pressing:
-            return .zero
+            .zero
         case let .dragging(translation):
-            return translation
+            translation
         }
     }
 
     var isActive: Bool {
         switch self {
         case .inactive:
-            return false
+            false
         case .pressing, .dragging:
-            return true
+            true
         }
     }
 
     var isDragging: Bool {
         switch self {
         case .inactive, .pressing:
-            return false
+            false
         case .dragging:
-            return true
+            true
         }
     }
 }
@@ -64,13 +64,13 @@ struct ColorSelection: View {
             Circle()
                 .size(geometry.size)
                 .fill(conic)
-                .overlay(self.generateHandle(geometry: geometry))
+                .overlay(generateHandle(geometry: geometry))
         }
     }
 
     /// Prevent the draggable element from going over its limit
     func limitDisplacement(_ value: Double, _ limit: CGFloat, _ state: CGFloat) -> CGFloat {
-        max(0, min(limit, CGFloat(value) * limit + state))
+        (CGFloat(value) * limit + state).clamped(to: 0 ... limit)
     }
 
     /// Prevent the draggable element from going beyond the circle
@@ -105,8 +105,8 @@ struct ColorSelection: View {
                 guard case .second(true, let drag?) = value else { return }
                 os_log("Translation x y = %g, %g", log: .default, type: .info, drag.translation.width, drag.translation.height)
 
-                self.xpos += Double(drag.translation.width)
-                self.ypos += Double(drag.translation.height)
+                xpos += Double(drag.translation.width)
+                ypos += Double(drag.translation.height)
             }
 
         // MARK: Customize Handle Here

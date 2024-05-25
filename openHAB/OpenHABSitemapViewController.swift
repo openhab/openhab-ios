@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -18,6 +18,7 @@ import OpenHABCore
 import os.log
 import SafariServices
 import SVGKit
+import SwiftUI
 import UIKit
 
 enum Action<I, O> {
@@ -86,9 +87,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
-            return filteredPage
+            filteredPage
         } else {
-            return currentPage
+            currentPage
         }
     }
 
@@ -337,7 +338,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 var openHABSitemapPage: OpenHABSitemapPage?
 
                 // If we are talking to openHAB 1.X, talk XML
-                if self.appData?.openHABVersion == 1 {
+                if appData?.openHABVersion == 1 {
                     let str = String(decoding: data, as: UTF8.self)
                     os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
 
@@ -363,31 +364,31 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     }
                 }
 
-                self.currentPage = openHABSitemapPage
-                if self.isFiltering {
-                    self.filterContentForSearchText(self.search.searchBar.text)
+                currentPage = openHABSitemapPage
+                if isFiltering {
+                    filterContentForSearchText(search.searchBar.text)
                 }
 
-                self.currentPage?.sendCommand = { [weak self] item, command in
+                currentPage?.sendCommand = { [weak self] item, command in
                     self?.sendCommand(item, commandToSend: command)
                 }
                 // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
-                if !self.isUserInteracting {
-                    self.widgetTableView.reloadData()
-                    self.refreshControl?.endRefreshing()
+                if !isUserInteracting {
+                    widgetTableView.reloadData()
+                    refreshControl?.endRefreshing()
                 } else {
-                    self.isWaitingToReload = true
+                    isWaitingToReload = true
                 }
-                self.parent?.navigationItem.title = self.currentPage?.title.components(separatedBy: "[")[0]
+                parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
 
-                self.loadPage(true)
+                loadPage(true)
             case let .failure(error):
                 os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
 
                 NetworkConnection.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001, longPolling {
                     os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                    self.loadPage(false)
+                    loadPage(false)
                 } else if error.isExplicitlyCancelledError {
                     os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
                 } else {
@@ -653,7 +654,11 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         case .setpoint:
             cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
         case .slider:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+            if let switchSupport = widget?.switchSupport, switchSupport {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
+            } else {
+                cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+            }
         case .selection:
             cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
         case .colorpicker:
@@ -680,7 +685,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         }
 
         var iconColor = widget?.iconColor
-        if (iconColor == nil || iconColor!.isEmpty), traitCollection.userInterfaceStyle == .dark {
+        if iconColor == nil || iconColor!.isEmpty, traitCollection.userInterfaceStyle == .dark {
             iconColor = "white"
         }
         // No icon is needed for image, video, frame and web widgets
@@ -706,7 +711,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 }
 
                 cell.imageView?.kf.setImage(
-                    with: ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                     placeholder: UIImage(named: "blankicon.png"),
                     options: [.processor(OpenHABImageProcessor())],
                     completionHandler: reportOnResults
@@ -811,7 +816,7 @@ extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
                     task: URLSessionTask,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(URLSession(configuration: .default), task, challenge)
+        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 
@@ -819,7 +824,7 @@ extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(URLSession(configuration: .default), challenge)
+        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 }

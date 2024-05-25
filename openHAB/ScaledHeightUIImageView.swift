@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -18,7 +18,7 @@ class ScaledHeightUIImageView: UIImageView {
 
     override var intrinsicContentSize: CGSize {
         layoutedWidth = bounds.width
-        if let image = self.image {
+        if let image {
             let viewWidth = bounds.width
             let ratio = viewWidth / image.size.width
             return CGSize(width: viewWidth, height: image.size.height * ratio)

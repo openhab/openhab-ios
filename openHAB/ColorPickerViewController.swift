@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -24,10 +24,10 @@ class ColorPickerViewController: DefaultColorPickerViewController {
     public var throttlingInterval: TimeInterval? = 0 {
         didSet {
             guard let interval = throttlingInterval else {
-                self.throttler = nil
+                throttler = nil
                 return
             }
-            self.throttler = Throttler(maxInterval: interval)
+            throttler = Throttler(maxInterval: interval)
         }
     }
 
@@ -55,10 +55,6 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 
         super.viewDidLoad()
         throttlingInterval = 0.3
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
     }
 
     func sendColorUpdate(color: UIColor) {

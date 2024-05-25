@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -19,52 +19,55 @@ struct ContentView: View {
     @State var title = "openHAB"
 
     var body: some View {
-        ScrollView {
-            ForEach(viewModel.widgets) { widget in
-                self.rowWidget(widget: widget)
-                    .environmentObject(self.settings)
-            }
-        }
-        .navigationBarTitle(Text(title))
-        .alert(isPresented: $viewModel.showAlert) {
-            Alert(
-                title: Text(NSLocalizedString("error", comment: "")),
-                message: Text(viewModel.errorDescription),
-                dismissButton: .default(Text(NSLocalizedString("retry", comment: ""))) {
-                    DispatchQueue.main.async {
-                        self.viewModel.refreshUrl()
-                        os_log("reload after alert", log: .default, type: .info)
-                    }
+        ZStack {
+            ScrollView {
+                ForEach(viewModel.widgets) { widget in
+                    rowWidget(widget: widget)
+                        .environmentObject(settings)
                 }
-            )
-        }
-        .actionSheet(isPresented: $viewModel.showCertificateAlert) {
-            ActionSheet(
-                title: Text(NSLocalizedString("warning", comment: "")),
-                message: Text(viewModel.certificateErrorDescription),
-                buttons: [
-                    .default(Text(NSLocalizedString("abort", comment: ""))) {
-                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
-                    },
-                    .default(Text(NSLocalizedString("once", comment: ""))) {
-                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
-                    },
-                    .default(Text(NSLocalizedString("always", comment: ""))) {
-                        NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
+            }
+            .navigationBarTitle(Text(title))
+            .actionSheet(isPresented: $viewModel.showCertificateAlert) {
+                ActionSheet(
+                    title: Text(NSLocalizedString("warning", comment: "")),
+                    message: Text(viewModel.certificateErrorDescription),
+                    buttons: [
+                        .default(Text(NSLocalizedString("abort", comment: ""))) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
+                        },
+                        .default(Text(NSLocalizedString("once", comment: ""))) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
+                        },
+                        .default(Text(NSLocalizedString("always", comment: ""))) {
+                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
+                        }
+                    ]
+                )
+            }
+            if viewModel.showAlert {
+                Text("Refreshing...")
+                    .onAppear {
+                        DispatchQueue.main.async {
+                            viewModel.refreshUrl()
+                            os_log("reload after alert", log: .default, type: .info)
+                        }
+                        viewModel.showAlert = false
                     }
-                ]
-            )
+            }
         }
     }
 
-    // swiftlint:enable line_length
     // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
     @ViewBuilder func rowWidget(widget: ObservableOpenHABWidget) -> some View {
         switch widget.stateEnum {
         case .switcher:
             SwitchRow(widget: widget)
         case .slider:
-            SliderRow(widget: widget)
+            if widget.switchSupport {
+                SliderRow(widget: widget)
+            } else {
+                SliderWithSwitchSupportRow(widget: widget)
+            }
         case .segmented:
             SegmentRow(widget: widget)
         case .rollershutter:

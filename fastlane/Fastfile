@@ -137,7 +137,7 @@ platform :ios do
         build_app(
             scheme: 'openHAB',
             clean: true,
-            xcargs: '-skipPackagePluginValidation',
+            xcargs: '-skipPackagePluginValidation -allowProvisioningUpdates',
             export_method: 'app-store',
             disable_package_automatic_updates: true
         )
@@ -149,6 +149,8 @@ platform :ios do
             changelog: changelog,
             groups: ['Beta Testers']
         )
+
+        clean_build_artifacts
 
         # commit to git the changes from bumping version number
         commit_version_bump(

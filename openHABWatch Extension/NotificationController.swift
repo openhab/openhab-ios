@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -21,16 +21,6 @@ class NotificationController: WKUserNotificationHostingController<NotificationVi
 
     override var body: NotificationView {
         NotificationView(customTextLabel: title, customDetailTextLabel: message)
-    }
-
-    override func willActivate() {
-        // This method is called when watch view controller is about to be visible to user
-        super.willActivate()
-    }
-
-    override func didDeactivate() {
-        // This method is called when watch view controller is no longer visible
-        super.didDeactivate()
     }
 
     override func didReceive(_ notification: UNNotification) {

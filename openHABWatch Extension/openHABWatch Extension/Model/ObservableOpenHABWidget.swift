@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -67,7 +67,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     var legend: Bool?
     var encoding = ""
     @Published var item: OpenHABItem?
-    var linkedPage: OpenHABLinkedPage?
+    var linkedPage: OpenHABSitemapPage?
     var mappings: [OpenHABWidgetMapping] = []
     var image: UIImage?
     var widgets: [ObservableOpenHABWidget] = []
@@ -97,10 +97,12 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     }
 
     var mappingsOrItemOptions: [OpenHABWidgetMapping] {
-        if mappings.isEmpty, let itemOptions = item?.stateDescription?.options {
-            return itemOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+        if mappings.isEmpty, let commandOptions = item?.commandDescription?.commandOptions {
+            commandOptions.map { OpenHABWidgetMapping(command: $0.command, label: $0.label) }
+        } else if mappings.isEmpty, let stateOptions = item?.stateDescription?.options {
+            stateOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
         } else {
-            return mappings
+            mappings
         }
     }
 
@@ -122,49 +124,49 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
 
     var adjustedValue: Double {
         if let item {
-            return adj(item.stateAsDouble())
+            adj(item.stateAsDouble())
         } else {
-            return minValue
+            minValue
         }
     }
 
     var stateEnum: WidgetTypeEnum {
         switch type {
         case "Frame":
-            return .frame
+            .frame
         case "Switch":
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
             if !mappings.isEmpty {
-                return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
             } else if item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                return .switcher(item?.state == "ON" ? true : false)
+                .switcher(item?.state == "ON" ? true : false)
             } else if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                return .rollershutter
+                .rollershutter
             } else if !mappingsOrItemOptions.isEmpty {
-                return .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
             } else {
-                return .switcher(item?.state == "ON" ? true : false)
+                .switcher(item?.state == "ON" ? true : false)
             }
         case "Setpoint":
-            return .setpoint
+            .setpoint
         case "Slider":
-            return .slider // (adjustedValue)
+            .slider // (adjustedValue)
         case "Selection":
-            return .selection
+            .selection
         case "Colorpicker":
-            return .colorpicker
+            .colorpicker
         case "Chart":
-            return .chart
+            .chart
         case "Image":
-            return .image
+            .image
         case "Video":
-            return .video
+            .video
         case "Webview":
-            return .webview
+            .webview
         case "Mapview":
-            return .mapview
+            .mapview
         default:
-            return .unassigned
+            .unassigned
         }
     }
 
@@ -178,7 +180,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
             sendCommand(state.toString(locale: Locale(identifier: "US")))
         } else {
             // For all other items, send the plain value
-            sendCommand(state.formatValue())
+            sendCommand(state.stringValue)
         }
     }
 
@@ -205,13 +207,13 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     private func adj(_ raw: Double) -> Double {
         var valueAdjustedToStep = floor((raw - minValue) / step) * step
         valueAdjustedToStep += minValue
-        return min(max(valueAdjustedToStep, minValue), maxValue)
+        return valueAdjustedToStep.clamped(to: minValue ... maxValue)
     }
 }
 
 extension ObservableOpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget], forceAsItem: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: String, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [ObservableOpenHABWidget], forceAsItem: Bool?) {
         self.init()
 
         id = widgetId
@@ -289,7 +291,7 @@ extension ObservableOpenHABWidget {
             case "widget": widgets.append(ObservableOpenHABWidget(xml: child))
             case "item": item = OpenHABItem(xml: child)
             case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
+            case "linkedPage": linkedPage = OpenHABSitemapPage(xml: child)
             default:
                 break
             }
@@ -323,18 +325,18 @@ extension ObservableOpenHABWidget {
         let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABLinkedPage?
+        let linkedPage: OpenHABSitemapPage.CodingData?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [ObservableOpenHABWidget.CodingData]
         let forceAsItem: Bool?
     }
 }
 
-// swiftlint:disable line_length
 extension ObservableOpenHABWidget.CodingData {
     var openHABWidget: ObservableOpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
-        return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, forceAsItem: forceAsItem)
+        // swiftlint:disable:next line_length
+        return ObservableOpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconColor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage?.openHABSitemapPage, mappings: mappings, widgets: mappedWidgets, forceAsItem: forceAsItem)
     }
 }
 

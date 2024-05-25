@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "swiftformatplugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/weakfl/SwiftFormatPlugin",
+      "state" : {
+        "revision" : "29d6c0bc4c078f819504d92fb5b359e63fd32046",
+        "version" : "0.53.2"
+      }
+    },
+    {
+      "identity" : "swiftlintplugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
+      "state" : {
+        "revision" : "de1f12218ad7ddac09b878e63017b71b6f609b32",
+        "version" : "0.54.0"
+      }
+    }
+  ],
+  "version" : 2
+}

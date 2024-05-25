@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -41,22 +41,22 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     private func handleUpDown(down: Bool) {
         var numberState = widget?.stateValueAsNumberState
         let stateValue = numberState?.value ?? widget.minValue
-        let newValue: Double
-        switch down {
-        case true:
-            newValue = stateValue - widget.step
-        case false:
-            newValue = stateValue + widget.step
-        }
-        if newValue >= widget.minValue, newValue <= widget.maxValue {
-            if numberState != nil {
-                numberState?.value = newValue
-            } else {
-                numberState = NumberState(value: newValue)
-            }
+        let newValue: Double = down ? stateValue - widget.step : stateValue + widget.step
 
-            widget.sendItemUpdate(state: numberState)
+        let limitedNewValue = newValue.clamped(to: widget.minValue ... widget.maxValue)
+
+        guard limitedNewValue != stateValue else {
+            // nothing to update, skip sending value
+            return
         }
+
+        if numberState != nil {
+            numberState?.value = newValue
+        } else {
+            numberState = NumberState(value: newValue)
+        }
+
+        widget.sendItemUpdate(state: numberState)
     }
 
     @objc

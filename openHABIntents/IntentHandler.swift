@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -15,13 +15,13 @@ import OpenHABCore
 class IntentHandler: INExtension {
     override func handler(for intent: INIntent) -> Any {
         switch intent {
-        case is OpenHABGetItemStateIntent: return GetItemStateIntentHandler()
-        case is OpenHABSetSwitchStateIntent: return SetSwitchStateIntentHandler()
-        case is OpenHABSetNumberValueIntent: return SetNumberValueIntentHandler()
-        case is OpenHABSetStringValueIntent: return SetStringValueIntentHandler()
-        case is OpenHABSetColorValueIntent: return SetColorValueIntentHandler()
-        case is OpenHABSetContactStateValueIntent: return SetContactStateValueIntentHandler()
-        default: return SetDimmerRollerValueIntentHandler()
+        case is OpenHABGetItemStateIntent: GetItemStateIntentHandler()
+        case is OpenHABSetSwitchStateIntent: SetSwitchStateIntentHandler()
+        case is OpenHABSetNumberValueIntent: SetNumberValueIntentHandler()
+        case is OpenHABSetStringValueIntent: SetStringValueIntentHandler()
+        case is OpenHABSetColorValueIntent: SetColorValueIntentHandler()
+        case is OpenHABSetContactStateValueIntent: SetContactStateValueIntentHandler()
+        default: SetDimmerRollerValueIntentHandler()
         }
     }
 }
