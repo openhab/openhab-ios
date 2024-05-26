@@ -56,7 +56,7 @@ public extension Endpoint {
                                   deviceName: String) -> Endpoint {
         Endpoint(
             baseURL: prefsURL,
-            path: "/addAppleRegistration",
+            path: "/addIosRegistration",
             queryItems: [
                 URLQueryItem(name: "regId", value: deviceToken),
                 URLQueryItem(name: "deviceId", value: deviceId),
