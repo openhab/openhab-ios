@@ -1561,7 +1561,7 @@
 				MARKETING_VERSION = 2.4.60;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.openHABIntents;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -1602,7 +1602,7 @@
 				MARKETING_VERSION = 2.4.60;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.openHABIntents;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -1723,7 +1723,7 @@
 				MARKETING_VERSION = 2.4.60;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
@@ -1768,7 +1768,7 @@
 				MARKETING_VERSION = 2.4.60;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
@@ -2015,7 +2015,7 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MARKETING_VERSION = 2.4.60;
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG -Xfrontend -warn-long-expression-type-checking=200 -Xfrontend -warn-long-function-bodies=200";
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2057,7 +2057,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MARKETING_VERSION = 2.4.60;
-				PRODUCT_BUNDLE_IDENTIFIER = es.spaphone.openhab;
+				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";

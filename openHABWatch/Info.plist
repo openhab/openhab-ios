@@ -35,6 +35,6 @@
 	<key>WKApplication</key>
 	<true/>
 	<key>WKCompanionAppBundleIdentifier</key>
-	<string>es.spaphone.openhab</string>
+	<string>org.openhab.app</string>
 </dict>
 </plist>
