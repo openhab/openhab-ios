@@ -137,7 +137,7 @@ platform :ios do
         build_app(
             scheme: 'openHAB',
             clean: true,
-            xcargs: '-skipPackagePluginValidation',
+            xcargs: '-skipPackagePluginValidation -allowProvisioningUpdates',
             export_method: 'app-store',
             disable_package_automatic_updates: true
         )
@@ -235,7 +235,7 @@ platform :ios do
             Spaceship::ConnectAPI::login(portal_team_id: "PBAPXHRAM9", tunes_team_id: "118429042")
         end
 
-        app = Spaceship::ConnectAPI::App.find("es.spaphone.openhab")
+        app = Spaceship::ConnectAPI::App.find("org.openhab.app")
         UI.message("Found app: #{app.name}")
 
         platform = Spaceship::ConnectAPI::Platform::IOS

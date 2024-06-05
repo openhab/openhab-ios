@@ -70,7 +70,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
         #else
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.es.spaphone.openhab")!.appendingPathComponent("trustedCertificates")
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
         #endif
     }
 
