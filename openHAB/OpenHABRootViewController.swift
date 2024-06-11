@@ -53,7 +53,7 @@ class OpenHABRootViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABRootViewController viewDidLoad", log: .default, type: .info)
-
+        NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
         setupSideMenu()
 
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
@@ -170,6 +170,29 @@ class OpenHABRootViewController: UIViewController {
                         os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     }
                 }
+            }
+        }
+    }
+    
+    @objc func handleApnsMessage(notification: Notification) {
+        if let navigate = notification.userInfo?["navigate"] as? String {
+            os_log("handleApnsMessage navigation:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
+            let components = navigate.split(separator: ":")
+            guard components.count >= 2 else {
+                return
+            }
+            
+            let type = String(components[0])
+            let path = String(components[1])
+            
+            // Use a switch statement to act on the prefix
+            switch type {
+            case "mainui":
+                switchView(target: .webview)
+            case "sitemap":
+                os_log("handleApnsMessage sitemap", log: .notifications, type: .info)
+            default:
+                print("Unknown type")
             }
         }
     }

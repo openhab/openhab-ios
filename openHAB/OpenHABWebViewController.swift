@@ -26,6 +26,9 @@ class OpenHABWebViewController: OpenHABViewController {
     private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
 
+    /**
+     let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
+     */
     // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
     window.OHApp = {
@@ -159,6 +162,10 @@ class OpenHABWebViewController: OpenHABViewController {
 
     override func viewName() -> String {
         "web"
+    }
+    
+    public func navigateToPath(_ path: String){
+        webView.
     }
 
     private func newWebView() -> WKWebView {

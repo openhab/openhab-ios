@@ -151,46 +151,68 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        // version without completionHandler is deprecated
-        // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo)
-
+        
         if application.applicationState == .active {
             os_log("App is active and got a remote notification", log: .notifications, type: .info)
-            let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
-            if let soundPath {
-                do {
-                    os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
-
-                    player = try AVAudioPlayer(contentsOf: soundPath)
-                    player?.numberOfLoops = 0
-                    player?.play()
-                } catch {
-                    os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-                }
-                player = try? AVAudioPlayer(contentsOf: soundPath)
+            handleNotification(userInfo: userInfo)
+        }
+        
+        completionHandler(.newData)
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let userInfo = notification.request.content.userInfo
+        os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
+        handleNotification(userInfo: userInfo)
+        completionHandler([.alert, .badge, .sound])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        os_log("Notification clicked: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
+        
+        // Handle the notification payload when the app is opened from a background state
+        handleNotification(userInfo: userInfo)
+        
+        completionHandler()
+    }
+    
+    private func handleNotification(userInfo: [AnyHashable: Any]) {
+        let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
+        if let soundPath {
+            do {
+                os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
+                player = try AVAudioPlayer(contentsOf: soundPath)
+                player?.numberOfLoops = 0
+                player?.play()
+            } catch {
+                os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
             }
+            player = try? AVAudioPlayer(contentsOf: soundPath)
+        }
 
-            let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
-
-            var config = SwiftMessages.Config()
-            config.duration = .seconds(seconds: 5)
-            config.presentationStyle = .bottom
-
-            SwiftMessages.show(config: config) {
-                let view = MessageView.viewFromNib(layout: .cardView)
-                // ... configure the view
-                view.configureTheme(.info)
-                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
-                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                return view
-            }
+        let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
+        
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 5)
+        config.presentationStyle = .bottom
+        
+        SwiftMessages.show(config: config) {
+            let view = MessageView.viewFromNib(layout: .cardView)
+            view.configureTheme(.info)
+            view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            return view
         }
     }
-
+    
+    func notifyMessageReceived(_ userInfo: [AnyHashable: Any]) {
+        NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
+    }
+    
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
@@ -224,4 +246,8 @@ extension AppDelegate: MessagingDelegate {
         ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
+}
+
+extension Notification.Name {
+    static let apnsReceived = Notification.Name("apnsReceived")
 }
