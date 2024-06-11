@@ -30,6 +30,7 @@ final class UserDefaultsTests: XCTestCase {
         Preferences.idleOff = Preferences.idleOff
         Preferences.iconType = Preferences.iconType
         Preferences.defaultSitemap = Preferences.defaultSitemap
+        Preferences.sitemapForWatch = Preferences.sitemapForWatch
     }
 
     // Testing the consistency between properties of Preferences and the corresponding entry in UserDefaults
@@ -45,5 +46,6 @@ final class UserDefaultsTests: XCTestCase {
         XCTAssertEqual(Preferences.idleOff, data.bool(forKey: "idleOff"))
         XCTAssertEqual(Preferences.iconType, data.integer(forKey: "iconType"))
         XCTAssertEqual(Preferences.defaultSitemap, data.string(forKey: "defaultSitemap"))
+        XCTAssertEqual(Preferences.sitemapForWatch, data.string(forKey: "sitemapForWatch"))
     }
 }
