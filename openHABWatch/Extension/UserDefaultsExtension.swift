@@ -13,6 +13,6 @@ import Foundation
 
 extension UserDefaults {
     static var shared: UserDefaults {
-        UserDefaults(suiteName: "group.org.openhab.openhabwatch")!
+        UserDefaults(suiteName: "group.org.openhab.app.watch")!
     }
 }

@@ -171,7 +171,6 @@ class OpenHABWatchTracker: NSObject {
             // Unable to discover local endpoint
             os_log("OpenHABWatchTracker unable to discover local server, using remote URL", log: OSLog.remoteAccess, type: .info)
             self.tryUrl(URL(string: self.openHABRemoteUrl))
-
         }
         netBrowser?.start(queue: .main)
     }
