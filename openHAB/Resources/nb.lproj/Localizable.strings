@@ -78,7 +78,7 @@
 "about_settings" = "Om";
 "uselastpath_settings" = "Bruk sist brukte bane?";
 "always_allow_webrtc" = "Always Allow WebRTC";
-"upgrade_about" = "Update Available!";
-"upgrade_remdinder" = "Do not remind me";
-"upgrade_message_title" = "Updated openHAB App Available";
-"upgrade_message_body" = "You are currently using the legacy version of the openHAB IOS app designed for openHAB versions 1.x and later as well as usage on older IOS devices.  This version of the app will only be updated for security reasons an is considered deprecated.\n\nFor a more modern experince we recomend users install our updated IOS application which includes Apple Watch support, more frequent updates as well as new and exciting features. This new IOS app supports openHAB versions 3.x and later.\n\nClick below to be redirected to the updated application.";
+"upgrade_about" = "Oppdatering Tilgjengelig!";
+"upgrade_reminder" = "Ikke minne meg på dette";
+"upgrade_message_title" = "Oppdatert openHAB-app Tilgjengelig";
+"upgrade_message_body" = "Du bruker for øyeblikket den eldre versjonen av openHAB iOS-appen designet for openHAB versjoner 1.x og senere, samt bruk på eldre iOS-enheter. Denne versjonen av appen vil kun bli oppdatert av sikkerhetsgrunner og anses som utdatert.\n\nFor en mer moderne opplevelse anbefaler vi at brukere installerer vår oppdaterte iOS-applikasjon som inkluderer støtte for Apple Watch, hyppigere oppdateringer samt nye og spennende funksjoner. Denne nye iOS-appen støtter openHAB versjoner 3.x og senere.\n\nKlikk nedenfor for å bli omdirigert til den oppdaterte applikasjonen.";
