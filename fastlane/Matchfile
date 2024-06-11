@@ -4,7 +4,7 @@ storage_mode("git")
 
 type("appstore") # The default type, can be: appstore, adhoc, enterprise or development
 
-app_identifier(["es.spaphone.openhab", "es.spaphone.openhab.*", "es.spaphone.openhab.openHABIntents"])
+app_identifier(["org.openhab.app", "org.openhab.app.*", "org.openhab.app.openHABIntents"])
 # username("user@fastlane.tools") # Your Apple Developer Portal username
 
 # For all available options run `fastlane match --help`

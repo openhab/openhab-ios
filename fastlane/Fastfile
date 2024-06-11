@@ -235,7 +235,7 @@ platform :ios do
             Spaceship::ConnectAPI::login(portal_team_id: "PBAPXHRAM9", tunes_team_id: "118429042")
         end
 
-        app = Spaceship::ConnectAPI::App.find("es.spaphone.openhab")
+        app = Spaceship::ConnectAPI::App.find("org.openhab.app")
         UI.message("Found app: #{app.name}")
 
         platform = Spaceship::ConnectAPI::Platform::IOS

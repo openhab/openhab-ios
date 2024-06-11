@@ -56,7 +56,7 @@ public extension Endpoint {
                                   deviceName: String) -> Endpoint {
         Endpoint(
             baseURL: prefsURL,
-            path: "/addAppleRegistration",
+            path: "/addIosRegistration",
             queryItems: [
                 URLQueryItem(name: "regId", value: deviceToken),
                 URLQueryItem(name: "deviceId", value: deviceId),
@@ -183,6 +183,7 @@ public extension Endpoint {
                 if source == "f7" {
                     source = "iconify"
                     set = "f7"
+                    icon = icon.replacingOccurrences(of: "_", with: "-")
                 }
                 if source == "if" || source == "iconify" {
                     queryItems = [URLQueryItem(name: "height", value: "64")]
