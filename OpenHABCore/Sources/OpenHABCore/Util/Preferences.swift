@@ -92,6 +92,7 @@ public enum Preferences {
     @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
+    @UserDefault("prompForUpgrade", defaultValue: true) public static var promptForUpgrade: Bool
 
     // MARK: - Private
 
@@ -115,5 +116,6 @@ public extension Preferences {
         Preferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? Preferences.iconType
         Preferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? Preferences.defaultSitemap
         Preferences.sendCrashReports = UserDefaults.standard.object(forKey: "sendCrashReports") as? Bool ?? Preferences.sendCrashReports
+        Preferences.promptForUpgrade = UserDefaults.standard.object(forKey: "prompForUpgrade") as? Bool ?? Preferences.promptForUpgrade
     }
 }

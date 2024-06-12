@@ -113,6 +113,14 @@ public extension Endpoint {
         )
     }
 
+    static func appIds() -> Endpoint {
+        Endpoint(
+            baseURL: "https://myopenhab.org",
+            path: "/api/v1/appids",
+            queryItems: []
+        )
+    }
+
     // swiftlint:disable:next function_parameter_count
     static func chart(rootUrl: String, period: String?, type: OpenHABItem.ItemType?, service: String?, name: String?, legend: Bool?, theme: ChartStyle = .light, forceAsItem: Bool?) -> Endpoint {
         let random = Int.random(in: 0 ..< 1000)

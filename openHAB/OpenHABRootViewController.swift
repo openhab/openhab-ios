@@ -46,6 +46,12 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
+    private lazy var legacyViewController: LegacyNoticeViewController = {
+        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+        var viewController = storyboard.instantiateViewController(withIdentifier: "LegacyNoticeViewController") as! LegacyNoticeViewController
+        return viewController
+    }()
+
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
     }
@@ -93,6 +99,7 @@ class OpenHABRootViewController: UIViewController {
         // save this so we know if its changed later
         isDemoMode = Preferences.demomode
         switchToSavedView()
+        checkForUpdate()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -236,6 +243,30 @@ class OpenHABRootViewController: UIViewController {
             switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
         }
     }
+
+    private func checkForUpdate() {
+        NetworkConnection.appStoreIds() { response in
+            switch response.result {
+            case let .success(data):
+                do {
+                    let decoder = JSONDecoder()
+                    let codingDatas = try data.decoded(as: OpenHABRootViewController.AppStoreIDsCodingData.self, using: decoder)
+                    let myAppId = Bundle.main.object(forInfoDictionaryKey: "APP_STORE_ID") as? String
+                    os_log("checkForUpdate mine: %{PUBLIC}@ thiers: %{PUBLIC}@", log: .default, type: .info, myAppId ?? "none", codingDatas.ios)
+                    if myAppId != codingDatas.ios {
+                        self.appData?.updatedAppId = codingDatas.ios
+                        if Preferences.promptForUpgrade {
+                            self.present(self.legacyViewController, animated: true, completion: nil)
+                        }
+                    }
+                } catch {
+                    os_log("checkForUpdate %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                }
+            case let .failure(error):
+                os_log("checkForUpdate %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            }
+        }
+    }
 }
 
 // MARK: - UISideMenuNavigationControllerDelegate
@@ -268,5 +299,12 @@ extension OpenHABRootViewController: ModalHandler {
         case .webview:
             switchView(target: to)
         }
+    }
+}
+
+extension OpenHABRootViewController {
+    public struct AppStoreIDsCodingData: Decodable {
+        let ios: String
+        let android: String
     }
 }

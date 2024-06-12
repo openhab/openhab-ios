@@ -137,5 +137,7 @@
 	</array>
 	<key>firebase_performance_collection_enabled</key>
 	<false/>
+	<key>APP_STORE_ID</key>
+	<string>492054521</string>
 </dict>
 </plist>

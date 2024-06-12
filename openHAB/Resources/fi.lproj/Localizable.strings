@@ -78,3 +78,7 @@
 "about_settings" = "About";
 "uselastpath_settings" = "Käytä edellistä polkua?";
 "always_allow_webrtc" = "Always Allow WebRTC";
+"upgrade_about" = "Päivitys saatavilla!";
+"upgrade_reminder" = "Älä muistuta minua";
+"upgrade_message_title" = "Päivitetty openHAB-sovellus saatavilla";
+"upgrade_message_body" = "Käytät tällä hetkellä openHAB IOS -sovelluksen vanhaa versiota, joka on suunniteltu openHAB 1.x -versioille ja vanhemmille IOS-laitteille. Tätä sovellusversiota päivitetään vain turvallisuussyistä ja sitä pidetään vanhentuneena.\n\nNykyisemmän käyttökokemuksen saamiseksi suosittelemme asentamaan päivitetyn IOS-sovelluksemme, joka sisältää Apple Watch -tuen, tiheämmät päivitykset sekä uusia ja jännittäviä ominaisuuksia. Tämä uusi IOS-sovellus tukee openHAB 3.x -versioita ja uudempia.\n\nKlikkaa alla olevaa painiketta, jotta sinut ohjataan päivitettyyn sovellukseen.";
