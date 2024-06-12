@@ -39,30 +39,30 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
         os_log("SetDimmerRollerValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
+            completion(.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
         guard let value = intent.value else {
-            completion(OpenHABSetDimmerRollerValueIntentResponse.failureEmptyValue(item: itemName))
+            completion(.failureEmptyValue(item: itemName))
             return
         }
 
         let number = Int(truncating: value)
 
         if number < 0 || number > 100 {
-            completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidValue(value, item: itemName))
+            completion(.failureInvalidValue(value, item: itemName))
             return
         }
 
         OpenHABItemCache.instance.getItem(name: itemName) { item in
             guard let item else {
-                completion(OpenHABSetDimmerRollerValueIntentResponse.failureInvalidItem(itemName))
+                completion(.failureInvalidItem(itemName))
                 return
             }
             OpenHABItemCache.instance.sendCommand(item, commandToSend: "\(number)")
 
-            completion(OpenHABSetDimmerRollerValueIntentResponse.success(value: NSNumber(value: number), item: itemName))
+            completion(.success(value: NSNumber(value: number), item: itemName))
         }
     }
 }

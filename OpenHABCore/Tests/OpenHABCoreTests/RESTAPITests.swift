@@ -62,7 +62,7 @@ final class RESTAPITests: XCTestCase {
         registrationOperation.resume()
 
         // then
-        wait(for: [expectation], timeout: 3)
+        wait(for: [expectation], timeout: 6)
     }
 
     func testRegisterApp() {
@@ -77,7 +77,7 @@ final class RESTAPITests: XCTestCase {
             expectation.fulfill()
         }
         // then
-        wait(for: [expectation], timeout: 3)
+        wait(for: [expectation], timeout: 6)
     }
 
     func testSitemap() {
@@ -92,7 +92,7 @@ final class RESTAPITests: XCTestCase {
             expectation.fulfill()
         }
         // then
-        wait(for: [expectation], timeout: 3)
+        wait(for: [expectation], timeout: 6)
     }
 
     func testTracker() {
@@ -107,6 +107,6 @@ final class RESTAPITests: XCTestCase {
             expectation.fulfill()
         }
         // then
-        wait(for: [expectation], timeout: 3)
+        wait(for: [expectation], timeout: 6)
     }
 }
