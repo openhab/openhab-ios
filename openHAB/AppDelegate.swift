@@ -24,7 +24,7 @@ import WatchConnectivity
 var player: AVAudioPlayer?
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     static var appDelegate: AppDelegate!
 
     var window: UIWindow?
@@ -124,6 +124,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
+        UNUserNotificationCenter.current().delegate = self
     }
 
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
@@ -151,35 +152,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
+    // this is a legacy interface, i'm not sure it gets called any more , remove ?
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo)
-        
+        NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
         if application.applicationState == .active {
             os_log("App is active and got a remote notification", log: .notifications, type: .info)
-            handleNotification(userInfo: userInfo)
+            displayNotification(userInfo: userInfo)
         }
-        
+
         completionHandler(.newData)
     }
-    
+
+    // this is called when a notification comes in while in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
         handleNotification(userInfo: userInfo)
-        completionHandler([.alert, .badge, .sound])
+        displayNotification(userInfo: userInfo)
+        // completionHandler([.alert, .badge, .sound])
+        completionHandler([])
     }
-    
+
+    // this is called when clicking a notification while in the background
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
         os_log("Notification clicked: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
-        
-        // Handle the notification payload when the app is opened from a background state
         handleNotification(userInfo: userInfo)
-        
         completionHandler()
     }
-    
-    private func handleNotification(userInfo: [AnyHashable: Any]) {
+
+    private func displayNotification(userInfo: [AnyHashable: Any]) {
+        os_log("displayNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo["message"] as? String ?? "no message")
+
         let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
         if let soundPath {
             do {
@@ -194,11 +199,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
-        
+
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: 5)
         config.presentationStyle = .bottom
-        
+
         SwiftMessages.show(config: config) {
             let view = MessageView.viewFromNib(layout: .cardView)
             view.configureTheme(.info)
@@ -208,11 +213,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return view
         }
     }
-    
-    func notifyMessageReceived(_ userInfo: [AnyHashable: Any]) {
+
+    private func handleNotification(userInfo: [AnyHashable: Any]) {
         NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
+        var notificationActions: [UNNotificationAction] = []
+        if let actionsArray = userInfo["actions"] as? [[String: Any]], let category = userInfo["category"] as? String {
+            os_log("handleNotification %{PUBLIC}@", log: .notifications, type: .info, actionsArray)
+            for actionDict in actionsArray {
+                if let action = actionDict["action"] as? String,
+                   let title = actionDict["title"] as? String {
+                    os_log("handleNotification %{PUBLIC}@", log: .notifications, type: .info, "Action: \(action), Label: \(title)")
+                    notificationActions.append(
+                        UNNotificationAction(
+                            identifier: action,
+                            title: title,
+                            options: [.foreground]
+                        )
+                    )
+                }
+            }
+            if !notificationActions.isEmpty {
+                os_log("handleNotification registering %{PUBLIC}@ for category %{PUBLIC}@", log: .notifications, type: .info, notificationActions, category)
+                let notificationCategory =
+                    UNNotificationCategory(
+                        identifier: category,
+                        actions: notificationActions,
+                        intentIdentifiers: [],
+                        hiddenPreviewsBodyPlaceholder: "",
+                        options: .customDismissAction
+                    )
+                UNUserNotificationCenter.current().setNotificationCategories([notificationCategory])
+            }
+        }
     }
-    
+
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.

@@ -25,6 +25,8 @@ class OpenHABWebViewController: OpenHABViewController {
     private var activityIndicator: UIActivityIndicatorView!
     private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
+    private var commandQueue: [String] = []
+    private var isWebViewLoaded = false
 
     /**
      let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
@@ -108,6 +110,7 @@ class OpenHABWebViewController: OpenHABViewController {
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
             clearExistingPage()
+            isWebViewLoaded = false
             webView.load(request)
         }
     }
@@ -163,9 +166,32 @@ class OpenHABWebViewController: OpenHABViewController {
     override func viewName() -> String {
         "web"
     }
-    
-    public func navigateToPath(_ path: String){
-        webView.
+
+    public func navigateCommand(_ command: String) {
+        if isWebViewLoaded {
+            navigateCommandInternal(command)
+        } else {
+            commandQueue.append(command)
+        }
+    }
+
+    private func navigateCommandInternal(_ command: String) {
+        // let jsCode = "window.OHApp.navigate === 'function' && window.OHApp.navigate('\(command)')"
+        let jsCode = "window.MainUI.navigate('\(command)')"
+        webView.evaluateJavaScript(jsCode) { (_, error) in
+            if let error {
+                os_log("navigateCommandInternal failed %{PUBLIC}@", log: .wkwebview, type: .error, error.localizedDescription)
+            } else {
+                os_log("navigateCommandInternal Success", log: .wkwebview, type: .info)
+            }
+        }
+    }
+
+    private func executeQueuedCommands() {
+        while !commandQueue.isEmpty {
+            let command = commandQueue.removeFirst()
+            navigateCommandInternal(command)
+        }
     }
 
     private func newWebView() -> WKWebView {
@@ -283,6 +309,8 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: false)
         hidePopupMessages()
+        isWebViewLoaded = true
+        executeQueuedCommands()
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,

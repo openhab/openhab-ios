@@ -173,26 +173,33 @@ class OpenHABRootViewController: UIViewController {
             }
         }
     }
-    
+
     @objc func handleApnsMessage(notification: Notification) {
         if let navigate = notification.userInfo?["navigate"] as? String {
             os_log("handleApnsMessage navigation:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
-            let components = navigate.split(separator: ":")
-            guard components.count >= 2 else {
-                return
-            }
-            
-            let type = String(components[0])
-            let path = String(components[1])
-            
-            // Use a switch statement to act on the prefix
-            switch type {
-            case "mainui":
-                switchView(target: .webview)
-            case "sitemap":
-                os_log("handleApnsMessage sitemap", log: .notifications, type: .info)
-            default:
-                print("Unknown type")
+            // let components = navigate.split(separator: ":")
+            if let index = navigate.firstIndex(of: ":") {
+                let type = String(navigate[..<index])
+                let path = String(navigate[navigate.index(after: index)...])
+                //            guard components.count >= 2 else {
+                //                return
+                //            }
+                //
+                //            let type = String(components[0])
+                //            let path = String(components[1])
+
+                // Use a switch statement to act on the prefix
+                switch type {
+                case "mainui":
+                    if currentView != webViewController {
+                        switchView(target: .webview)
+                    }
+                    webViewController.navigateCommand(path)
+                case "sitemap":
+                    os_log("handleApnsMessage sitemap", log: .notifications, type: .info)
+                default:
+                    print("Unknown type")
+                }
             }
         }
     }
