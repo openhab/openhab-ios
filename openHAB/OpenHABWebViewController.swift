@@ -28,10 +28,6 @@ class OpenHABWebViewController: OpenHABViewController {
     private var commandQueue: [String] = []
     private var isWebViewLoaded = false
 
-    /**
-     let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
-     */
-    // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
     window.OHApp = {
         exitToApp : function(){

@@ -152,33 +152,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
-    // this is a legacy interface, i'm not sure it gets called any more , remove ?
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo)
-        NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
-        if application.applicationState == .active {
-            os_log("App is active and got a remote notification", log: .notifications, type: .info)
-            displayNotification(userInfo: userInfo)
-        }
-
-        completionHandler(.newData)
-    }
-
     // this is called when a notification comes in while in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
-        handleNotification(userInfo: userInfo)
+        notifyNotificationListeners(userInfo)
         displayNotification(userInfo: userInfo)
-        // completionHandler([.alert, .badge, .sound])
         completionHandler([])
     }
 
     // this is called when clicking a notification while in the background
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        let userInfo = response.notification.request.content.userInfo
-        os_log("Notification clicked: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
-        handleNotification(userInfo: userInfo)
+        var userInfo = response.notification.request.content.userInfo
+
+        let actionIdentifier = response.actionIdentifier
+        os_log("Notification clicked: action %{PUBLIC}@ userInfo %{PUBLIC}@", log: .notifications, type: .info, actionIdentifier, userInfo)
+        if actionIdentifier == UNNotificationDefaultActionIdentifier {
+            notifyNotificationListeners(userInfo)
+        } else if actionIdentifier == UNNotificationDismissActionIdentifier {
+            // Handle the dismissal action
+        } else {
+            userInfo["actionIdentifier"] = actionIdentifier
+            notifyNotificationListeners(userInfo)
+        }
         completionHandler()
     }
 
@@ -214,37 +210,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
     }
 
-    private func handleNotification(userInfo: [AnyHashable: Any]) {
+    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) {
         NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
-        var notificationActions: [UNNotificationAction] = []
-        if let actionsArray = userInfo["actions"] as? [[String: Any]], let category = userInfo["category"] as? String {
-            os_log("handleNotification %{PUBLIC}@", log: .notifications, type: .info, actionsArray)
-            for actionDict in actionsArray {
-                if let action = actionDict["action"] as? String,
-                   let title = actionDict["title"] as? String {
-                    os_log("handleNotification %{PUBLIC}@", log: .notifications, type: .info, "Action: \(action), Label: \(title)")
-                    notificationActions.append(
-                        UNNotificationAction(
-                            identifier: action,
-                            title: title,
-                            options: [.foreground]
-                        )
-                    )
-                }
-            }
-            if !notificationActions.isEmpty {
-                os_log("handleNotification registering %{PUBLIC}@ for category %{PUBLIC}@", log: .notifications, type: .info, notificationActions, category)
-                let notificationCategory =
-                    UNNotificationCategory(
-                        identifier: category,
-                        actions: notificationActions,
-                        intentIdentifiers: [],
-                        hiddenPreviewsBodyPlaceholder: "",
-                        options: .customDismissAction
-                    )
-                UNUserNotificationCenter.current().setNotificationCategories([notificationCategory])
-            }
-        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

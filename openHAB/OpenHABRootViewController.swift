@@ -29,6 +29,10 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
+struct CommandItem: CommItem {
+    var link: String
+}
+
 class OpenHABRootViewController: UIViewController {
     var hamburgerButton: DynamicButton!
     var currentView: OpenHABViewController!
@@ -175,31 +179,48 @@ class OpenHABRootViewController: UIViewController {
     }
 
     @objc func handleApnsMessage(notification: Notification) {
-        if let navigate = notification.userInfo?["navigate"] as? String {
-            os_log("handleApnsMessage navigation:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
-            // let components = navigate.split(separator: ":")
-            if let index = navigate.firstIndex(of: ":") {
-                let type = String(navigate[..<index])
-                let path = String(navigate[navigate.index(after: index)...])
-                //            guard components.count >= 2 else {
-                //                return
-                //            }
-                //
-                //            let type = String(components[0])
-                //            let path = String(components[1])
+        if let action = notification.userInfo?["actionIdentifier"] as? String {
+            if action.hasPrefix("navigate") {
+                navigateCommandAction(action)
+            }
+            if action.hasPrefix("command") {
+                sendCommandAction(action)
+            }
+        } else if let navigate = notification.userInfo?["navigate"] as? String {
+            navigateCommandAction(navigate)
+        }
+    }
 
-                // Use a switch statement to act on the prefix
-                switch type {
-                case "mainui":
-                    if currentView != webViewController {
-                        switchView(target: .webview)
-                    }
-                    webViewController.navigateCommand(path)
-                case "sitemap":
-                    os_log("handleApnsMessage sitemap", log: .notifications, type: .info)
-                default:
-                    print("Unknown type")
+    func navigateCommandAction(_ navigate: String) {
+        os_log("handleApnsMessage navigation:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
+        if let index = navigate.firstIndex(of: ":") {
+            let type = String(navigate[..<index])
+            let path = String(navigate[navigate.index(after: index)...])
+            switch type {
+            case "mainui":
+                if currentView != webViewController {
+                    switchView(target: .webview)
                 }
+                webViewController.navigateCommand(path)
+            case "sitemap":
+                os_log("handleApnsMessage sitemap", log: .notifications, type: .info)
+            default:
+                print("Unknown type")
+            }
+        }
+    }
+
+    func sendCommandAction(_ action: String) {
+        let components = action.split(separator: ":")
+        if components.count == 3 {
+            let itemName = String(components[1])
+            let itemCommand = String(components[2])
+            OpenHABItemCache.instance.getItem(name: itemName) { item in
+                guard let item else {
+                    os_log("Could not find item %{PUBLIC}@", log: .notifications, type: .info, itemName)
+                    return
+                }
+                OpenHABItemCache.instance.sendCommand(item, commandToSend: itemCommand)
             }
         }
     }
