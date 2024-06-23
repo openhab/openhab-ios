@@ -170,7 +170,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if actionIdentifier == UNNotificationDefaultActionIdentifier {
             notifyNotificationListeners(userInfo)
         } else if actionIdentifier == UNNotificationDismissActionIdentifier {
-            // Handle the dismissal action
+            // Handle the dismissal action, nothing
         } else {
             userInfo["actionIdentifier"] = actionIdentifier
             notifyNotificationListeners(userInfo)

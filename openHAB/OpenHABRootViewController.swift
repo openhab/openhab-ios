@@ -163,22 +163,23 @@ class OpenHABRootViewController: UIViewController {
         let theData = note?.userInfo
         if theData != nil {
             let prefsURL = Preferences.remoteUrl
-            if prefsURL.contains("openhab.org") {
-                guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
-                os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
-                NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
-                    switch response.result {
-                    case .success:
-                        os_log("my.openHAB registration sent", log: .notifications, type: .info)
-                    case let .failure(error):
-                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                    }
+             if prefsURL.contains("openhab.org") {
+            guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
+            os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
+            NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
+                switch response.result {
+                case .success:
+                    os_log("my.openHAB registration sent", log: .notifications, type: .info)
+                case let .failure(error):
+                    os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                 }
             }
+             }
         }
     }
 
     @objc func handleApnsMessage(notification: Notification) {
+        //actionIdentifier is the result of a action button being pressed
         if let action = notification.userInfo?["actionIdentifier"] as? String {
             if action.hasPrefix("navigate") {
                 navigateCommandAction(action)
@@ -187,12 +188,13 @@ class OpenHABRootViewController: UIViewController {
                 sendCommandAction(action)
             }
         } else if let navigate = notification.userInfo?["navigate"] as? String {
+            //the user simply clicked on the notification, but indicated a navigation in the payload
             navigateCommandAction(navigate)
         }
     }
 
-    func navigateCommandAction(_ navigate: String) {
-        os_log("handleApnsMessage navigation:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
+    private func navigateCommandAction(_ navigate: String) {
+        os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
         if let index = navigate.firstIndex(of: ":") {
             let type = String(navigate[..<index])
             let path = String(navigate[navigate.index(after: index)...])
@@ -210,7 +212,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    func sendCommandAction(_ action: String) {
+    private func sendCommandAction(_ action: String) {
         let components = action.split(separator: ":")
         if components.count == 3 {
             let itemName = String(components[1])

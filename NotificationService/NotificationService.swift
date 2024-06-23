@@ -24,7 +24,8 @@ class NotificationService: UNNotificationServiceExtension {
             var notificationActions: [UNNotificationAction] = []
             let userInfo = bestAttemptContent.userInfo
             os_log("handleNotification userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
-
+            
+            //Check if the user has defined custom actions in the payload
             if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
                 for actionDict in actionsArray {
                     if let action = actionDict["action"],
@@ -34,13 +35,11 @@ class NotificationService: UNNotificationServiceExtension {
                         if action.hasPrefix("navigate") {
                             options = [.foreground]
                         }
-
                         let notificationAction = UNNotificationAction(
                             identifier: action,
                             title: title,
                             options: options
                         )
-
                         notificationActions.append(notificationAction)
                     }
                 }
@@ -53,13 +52,22 @@ class NotificationService: UNNotificationServiceExtension {
                             intentIdentifiers: [],
                             options: .customDismissAction
                         )
-                    let notificationCategories: Set<UNNotificationCategory> = [notificationCategory]
-                    UNUserNotificationCenter.current().setNotificationCategories(notificationCategories)
+                    UNUserNotificationCenter.current().getNotificationCategories { (existingCategories) in
+                        // Check if the new category already exists, this is a hash of the actions string done by the cloud service
+                        let existingCategoryIdentifiers = existingCategories.map(\.identifier)
+                        if !existingCategoryIdentifiers.contains(category) {
+                            var updatedCategories = existingCategories
+                            os_log("handleNotification adding category %{PUBLIC}@", log: .default, type: .info, category)
+                            updatedCategories.insert(notificationCategory)
+                            UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
+                        }
+                    }
                 }
             }
-
+            
+            // check if there is an attachment to put on the notification
             // this should be last as we need to wait for media
-            // Retrieve the attachment URL from the payload
+            // TODO we should support relative paths and try the user's openHAB (local,remote) for content
             if let attachmentURLString = userInfo["attachment-url"] as? String, let attachmentURL = URL(string: attachmentURLString) {
                 os_log("handleNotification downloading %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
                 downloadAndAttachMedia(url: attachmentURL) { attachment in
@@ -88,8 +96,7 @@ class NotificationService: UNNotificationServiceExtension {
 
     private func parseActions(_ userInfo: [AnyHashable: Any]) -> [[String: String]]? {
         // Extract actions and convert it from JSON string to an array of dictionaries
-        if let actionsString = userInfo["actions"] as? String,
-           let actionsData = actionsString.data(using: .utf8) {
+        if let actionsString = userInfo["actions"] as? String, let actionsData = actionsString.data(using: .utf8) {
             do {
                 if let actionsArray = try JSONSerialization.jsonObject(with: actionsData, options: []) as? [[String: String]] {
                     return actionsArray
@@ -109,7 +116,7 @@ class NotificationService: UNNotificationServiceExtension {
         }
         return nil
     }
-    
+
     private func downloadAndAttachMedia(url: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
         let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
             guard let localURL else {
