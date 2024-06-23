@@ -24,8 +24,8 @@ class NotificationService: UNNotificationServiceExtension {
             var notificationActions: [UNNotificationAction] = []
             let userInfo = bestAttemptContent.userInfo
             os_log("handleNotification userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
-            
-            //Check if the user has defined custom actions in the payload
+
+            // Check if the user has defined custom actions in the payload
             if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
                 for actionDict in actionsArray {
                     if let action = actionDict["action"],
@@ -64,10 +64,10 @@ class NotificationService: UNNotificationServiceExtension {
                     }
                 }
             }
-            
+
             // check if there is an attachment to put on the notification
             // this should be last as we need to wait for media
-            // TODO we should support relative paths and try the user's openHAB (local,remote) for content
+            // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
             if let attachmentURLString = userInfo["attachment-url"] as? String, let attachmentURL = URL(string: attachmentURLString) {
                 os_log("handleNotification downloading %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
                 downloadAndAttachMedia(url: attachmentURL) { attachment in

@@ -156,7 +156,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
-        notifyNotificationListeners(userInfo)
+        appData.lastNotificationInfo = userInfo
         displayNotification(userInfo: userInfo)
         completionHandler([])
     }
@@ -167,13 +167,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         let actionIdentifier = response.actionIdentifier
         os_log("Notification clicked: action %{PUBLIC}@ userInfo %{PUBLIC}@", log: .notifications, type: .info, actionIdentifier, userInfo)
-        if actionIdentifier == UNNotificationDefaultActionIdentifier {
+        if actionIdentifier != UNNotificationDismissActionIdentifier {
+            if actionIdentifier != UNNotificationDefaultActionIdentifier {
+                userInfo["actionIdentifier"] = actionIdentifier
+            }
             notifyNotificationListeners(userInfo)
-        } else if actionIdentifier == UNNotificationDismissActionIdentifier {
-            // Handle the dismissal action, nothing
-        } else {
-            userInfo["actionIdentifier"] = actionIdentifier
-            notifyNotificationListeners(userInfo)
+            appData.lastNotificationInfo = userInfo
         }
         completionHandler()
     }
@@ -206,7 +205,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
             view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
             view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            // Add tap gesture recognizer to the view for actions
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.messageViewTapped))
+            view.addGestureRecognizer(tapGesture)
             return view
+        }
+    }
+
+    // Action to be performed when the notification message view is tapped
+    @objc func messageViewTapped() {
+        if let userInfo = appData.lastNotificationInfo {
+            notifyNotificationListeners(userInfo)
+            SwiftMessages.hideAll()
         }
     }
 

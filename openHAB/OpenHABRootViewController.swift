@@ -57,7 +57,6 @@ class OpenHABRootViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABRootViewController viewDidLoad", log: .default, type: .info)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
         setupSideMenu()
 
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
@@ -97,6 +96,13 @@ class OpenHABRootViewController: UIViewController {
         // save this so we know if its changed later
         isDemoMode = Preferences.demomode
         switchToSavedView()
+
+        // ready for push notifications
+        NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
+        // check if we were launched with a notification
+        if let userInfo = appData?.lastNotificationInfo {
+            handleNotification(userInfo)
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -163,32 +169,40 @@ class OpenHABRootViewController: UIViewController {
         let theData = note?.userInfo
         if theData != nil {
             let prefsURL = Preferences.remoteUrl
-             if prefsURL.contains("openhab.org") {
-            guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
-            os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
-            NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
-                switch response.result {
-                case .success:
-                    os_log("my.openHAB registration sent", log: .notifications, type: .info)
-                case let .failure(error):
-                    os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+            if prefsURL.contains("openhab.org") {
+                guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
+                os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
+                NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
+                    switch response.result {
+                    case .success:
+                        os_log("my.openHAB registration sent", log: .notifications, type: .info)
+                    case let .failure(error):
+                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    }
                 }
             }
-             }
         }
     }
 
     @objc func handleApnsMessage(notification: Notification) {
-        //actionIdentifier is the result of a action button being pressed
-        if let action = notification.userInfo?["actionIdentifier"] as? String {
+        // actionIdentifier is the result of a action button being pressed
+        if let userInfo = notification.userInfo {
+            handleNotification(userInfo)
+        }
+    }
+
+    private func handleNotification(_ userInfo: [AnyHashable: Any]) {
+        // actionIdentifier is the result of a action button being pressed
+        if let action = userInfo["actionIdentifier"] as? String {
+            let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
             if action.hasPrefix("navigate") {
-                navigateCommandAction(action)
+                navigateCommandAction(cmd)
             }
             if action.hasPrefix("command") {
-                sendCommandAction(action)
+                sendCommandAction(cmd)
             }
-        } else if let navigate = notification.userInfo?["navigate"] as? String {
-            //the user simply clicked on the notification, but indicated a navigation in the payload
+        } else if let navigate = userInfo["navigate"] as? String {
+            // the user simply clicked on the notification, but indicated a navigation in the payload
             navigateCommandAction(navigate)
         }
     }
@@ -196,8 +210,9 @@ class OpenHABRootViewController: UIViewController {
     private func navigateCommandAction(_ navigate: String) {
         os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
         if let index = navigate.firstIndex(of: ":") {
-            let type = String(navigate[..<index])
-            let path = String(navigate[navigate.index(after: index)...])
+            let components = navigate.split(separator: ":")
+            let type = String(components.first ?? "")
+            let path = components.dropFirst().joined(separator: ":")
             switch type {
             case "mainui":
                 if currentView != webViewController {
@@ -207,16 +222,16 @@ class OpenHABRootViewController: UIViewController {
             case "sitemap":
                 os_log("handleApnsMessage sitemap", log: .notifications, type: .info)
             default:
-                print("Unknown type")
+                os_log("navigateCommandAction unknown", log: .notifications, type: .info)
             }
         }
     }
 
     private func sendCommandAction(_ action: String) {
         let components = action.split(separator: ":")
-        if components.count == 3 {
-            let itemName = String(components[1])
-            let itemCommand = String(components[2])
+        if components.count == 2 {
+            let itemName = String(components[0])
+            let itemCommand = String(components[1])
             OpenHABItemCache.instance.getItem(name: itemName) { item in
                 guard let item else {
                     os_log("Could not find item %{PUBLIC}@", log: .notifications, type: .info, itemName)

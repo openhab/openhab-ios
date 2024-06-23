@@ -26,7 +26,7 @@ class OpenHABWebViewController: OpenHABViewController {
     private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
     private var commandQueue: [String] = []
-    private var isWebViewLoaded = false
+    private var acceptsCommands = false
 
     private var js = """
     window.OHApp = {
@@ -38,6 +38,9 @@ class OpenHABWebViewController: OpenHABViewController {
         },
         sseConnected : function(connected) {
             window.webkit.messageHandlers.Native.postMessage('sseConnected-' + connected);
+        },
+        ready : function() {
+            window.webkit.messageHandlers.Native.postMessage('ready');
         },
     }
     """
@@ -106,7 +109,7 @@ class OpenHABWebViewController: OpenHABViewController {
         if let modifiedUrl = modifyUrl(orig: url) {
             let request = URLRequest(url: modifiedUrl)
             clearExistingPage()
-            isWebViewLoaded = false
+            acceptsCommands = false
             webView.load(request)
         }
     }
@@ -164,7 +167,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     public func navigateCommand(_ command: String) {
-        if isWebViewLoaded {
+        if acceptsCommands {
             navigateCommandInternal(command)
         } else {
             commandQueue.append(command)
@@ -206,6 +209,9 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+        }
         // watch for URL changes so we can store the last visited path
         observation = webView.observe(\.url, options: [.new]) { _, _ in
             if let webviewURL = webView.url {
@@ -242,6 +248,8 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 os_log("WKScriptMessage sseConnected is true", log: OSLog.remoteAccess, type: .info)
                 hidePopupMessages()
                 sseTimer?.invalidate()
+                acceptsCommands = true
+                executeQueuedCommands()
             case "sseConnected-false":
                 os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
                 sseTimer?.invalidate()
@@ -250,6 +258,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                         self.reloadView()
                     }
                     self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                    self.acceptsCommands = false
                 }
             default: break
             }
@@ -305,8 +314,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: false)
         hidePopupMessages()
-        isWebViewLoaded = true
-        executeQueuedCommands()
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
