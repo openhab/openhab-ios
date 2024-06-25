@@ -201,9 +201,9 @@ class OpenHABRootViewController: UIViewController {
             if action.hasPrefix("command") {
                 sendCommandAction(cmd)
             }
-        } else if let navigate = userInfo["navigate"] as? String {
+        } else if let clickAction = userInfo["on-click"] as? String {
             // the user simply clicked on the notification, but indicated a navigation in the payload
-            navigateCommandAction(navigate)
+            navigateCommandAction(clickAction)
         }
     }
 

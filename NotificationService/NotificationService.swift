@@ -68,7 +68,7 @@ class NotificationService: UNNotificationServiceExtension {
             // check if there is an attachment to put on the notification
             // this should be last as we need to wait for media
             // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
-            if let attachmentURLString = userInfo["attachment-url"] as? String, let attachmentURL = URL(string: attachmentURLString) {
+            if let attachmentURLString = userInfo["media-attachment-url"] as? String, let attachmentURL = URL(string: attachmentURLString) {
                 os_log("handleNotification downloading %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
                 downloadAndAttachMedia(url: attachmentURL) { attachment in
                     if let attachment {
