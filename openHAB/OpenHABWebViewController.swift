@@ -176,7 +176,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     private func navigateCommandInternal(_ command: String) {
         // let jsCode = "window.OHApp.navigate === 'function' && window.OHApp.navigate('\(command)')"
-        let jsCode = "window.MainUI.navigate('\(command)')"
+        let jsCode = "window.MainUI.handleCommand('\(command)')"
         webView.evaluateJavaScript(jsCode) { (_, error) in
             if let error {
                 os_log("navigateCommandInternal failed %{PUBLIC}@", log: .wkwebview, type: .error, error.localizedDescription)
