@@ -193,21 +193,19 @@ class OpenHABRootViewController: UIViewController {
 
     private func handleNotification(_ userInfo: [AnyHashable: Any]) {
         // actionIdentifier is the result of a action button being pressed
-        if let action = userInfo["actionIdentifier"] as? String {
+        // if not actionIdentifier, then the notification was clicked, so use "on-click" if there
+        if let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String {
             let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
-            if action.hasPrefix("navigate") {
-                navigateCommandAction(cmd)
+            if action.hasPrefix("ui") {
+                uiCommandAction(cmd)
             }
             if action.hasPrefix("command") {
                 sendCommandAction(cmd)
             }
-        } else if let clickAction = userInfo["on-click"] as? String {
-            // the user simply clicked on the notification, but indicated a navigation in the payload
-            navigateCommandAction(clickAction)
         }
     }
 
-    private func navigateCommandAction(_ navigate: String) {
+    private func uiCommandAction(_ navigate: String) {
         os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
         if let index = navigate.firstIndex(of: ":") {
             let components = navigate.split(separator: ":")
