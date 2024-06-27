@@ -93,7 +93,7 @@ class OpenHABWebViewController: OpenHABViewController {
         OpenHABTracker.shared.restart()
     }
 
-    func loadWebView(force: Bool = false) {
+    func loadWebView(force: Bool = false, path: String? = nil) {
         os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl)
 
         let authStr = "\(Preferences.username):\(Preferences.password)"
@@ -106,7 +106,7 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = newTarget
         let url = URL(string: openHABTrackedRootUrl)
 
-        if let modifiedUrl = modifyUrl(orig: url) {
+        if let modifiedUrl = modifyUrl(orig: url, path: path) {
             let request = URLRequest(url: modifiedUrl)
             clearExistingPage()
             acceptsCommands = false
@@ -114,17 +114,41 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
-    func modifyUrl(orig: URL?) -> URL? {
+    func modifyUrl(orig: URL?, path: String? = nil) -> URL? {
         // better way to cone/copy ?
         guard let urlString = orig?.absoluteString, var url = URL(string: urlString) else { return orig }
         if url.host == "myopenhab.org" {
             url = URL(string: "https://home.myopenhab.org") ?? url
         }
 
-        if !Preferences.defaultMainUIPath.isEmpty {
-            url.appendPathComponent(Preferences.defaultMainUIPath)
+        if let path {
+            url = appendPathToURL(baseURL: url, path: path) ?? url
+        } else if !Preferences.defaultMainUIPath.isEmpty {
+            url = appendPathToURL(baseURL: url, path: Preferences.defaultMainUIPath) ?? url
         }
         return url
+    }
+
+    // swift really makes you work to construct simple URLs, uhg.....
+    func appendPathToURL(baseURL: URL, path: String) -> URL? {
+        guard var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        // Split the user path into path and query components
+        if let questionMarkRange = path.range(of: "?") {
+            // Separate path and query
+            let pathComponent = String(path[..<questionMarkRange.lowerBound])
+            let queryComponent = String(path[questionMarkRange.upperBound...])
+            // Append the path component
+            urlComponents.path = (urlComponents.path as NSString).appendingPathComponent(pathComponent)
+            // Append the query component
+            urlComponents.query = queryComponent
+        } else {
+            // No query in the path, just append the path
+            urlComponents.path = (urlComponents.path as NSString).appendingPathComponent(path)
+        }
+        // Return the constructed URL
+        return urlComponents.url
     }
 
     func showActivityIndicator(show: Bool) {

@@ -205,23 +205,36 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func uiCommandAction(_ navigate: String) {
-        os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, navigate)
-        if let index = navigate.firstIndex(of: ":") {
-            let components = navigate.split(separator: ":")
-            let type = String(components.first ?? "")
-            let path = components.dropFirst().joined(separator: ":")
-            switch type {
-            case "mainui":
+    private func uiCommandAction(_ command: String) {
+        os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
+        let pattern = "^(/basicui/app\\?.*|/.*|.*)$"
+
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: [])
+            let nsString = command as NSString
+            let results = regex.matches(in: command, options: [], range: NSRange(location: 0, length: nsString.length))
+
+            if let match = results.first {
+                let pathRange = match.range(at: 1)
+                let path = nsString.substring(with: pathRange)
+                os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
                 if currentView != webViewController {
                     switchView(target: .webview)
                 }
-                webViewController.navigateCommand(path)
-            case "sitemap":
-                os_log("handleApnsMessage sitemap", log: .notifications, type: .info)
-            default:
-                os_log("navigateCommandAction unknown", log: .notifications, type: .info)
+                if path.starts(with: "/basicui/app?") {
+                    // TODO: this is a sitemap, we should use the native renderer
+                    // temp hack right now to just use a webview
+                    webViewController.loadWebView(force: true, path: path)
+                } else if path.starts(with: "/") {
+                    // have the webview load this path itself
+                    webViewController.loadWebView(force: true, path: path)
+                } else {
+                    // have the mainUI handle the navigation
+                    webViewController.navigateCommand(path)
+                }
             }
+        } catch {
+            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
         }
     }
 
