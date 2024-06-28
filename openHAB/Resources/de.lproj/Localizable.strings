@@ -78,3 +78,7 @@
 "about_settings" = "Über";
 "uselastpath_settings" = "Zuletzt besuchten Pfad verwenden?";
 "always_allow_webrtc" = "WebRTC immer erlauben";
+"upgrade_about" = "Update Verfügbar!";
+"upgrade_reminder" = "Nicht mehr erinnern";
+"upgrade_message_title" = "Aktualisierte openHAB App Verfügbar";
+"upgrade_message_body" = "Sie verwenden derzeit die Legacy-Version der openHAB IOS-App, die für openHAB-Versionen 1.x und später sowie für ältere IOS-Geräte entwickelt wurde. Diese Version der App wird nur aus Sicherheitsgründen aktualisiert und gilt als veraltet.\n\nFür ein moderneres Erlebnis empfehlen wir den Nutzern, unsere aktualisierte IOS-Anwendung zu installieren, die Unterstützung für die Apple Watch, häufigere Updates sowie neue und spannende Funktionen umfasst. Diese neue IOS-App unterstützt openHAB-Versionen 3.x und später.\n\nKlicken Sie unten, um zur aktualisierten Anwendung weitergeleitet zu werden.";

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ni3-JL-qg0">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ni3-JL-qg0">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -53,11 +52,11 @@
                                         <rect key="frame" x="0.0" y="85" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="fYY-WZ-Zms" id="GBq-BC-eoa">
-                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fxA-Sy-xY6">
-                                                    <rect key="frame" x="314.33333333333331" y="11.999999999999998" width="25.333333333333314" height="20.333333333333329"/>
+                                                    <rect key="frame" x="318.33333333333331" y="11.999999999999998" width="25.333333333333314" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                                     <nil key="highlightedColor"/>
@@ -311,7 +310,7 @@
                                         <rect key="frame" x="0.0" y="305" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" tableViewCell="OGD-zU-l0C" id="cLy-KN-ufh">
-                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="700" text="Choice" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hd9-I4-GIr">
@@ -320,7 +319,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="right" verticalHuggingPriority="251" horizontalCompressionResistancePriority="800" text="Selected" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Adh-o9-6Qx">
-                                                    <rect key="frame" x="123.33333333333333" y="11.999999999999998" width="216.33333333333337" height="20.333333333333329"/>
+                                                    <rect key="frame" x="123.33333333333333" y="11.999999999999998" width="220.33333333333337" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                                     <nil key="highlightedColor"/>
@@ -648,7 +647,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Demo mode" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dn3-BH-eJh">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="93" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="93" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -656,7 +655,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="U49-Vc-87C">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                     <accessibility key="accessibilityConfiguration" label="Demo mode"/>
                                                 </switch>
                                             </subviews>
@@ -685,7 +684,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Local URL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OUE-SR-nte">
-                                                    <rect key="frame" x="32.000000000000007" y="11.999999999999998" width="76.666666666666686" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28.000000000000007" y="11.999999999999998" width="76.666666666666686" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -693,7 +692,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="https://demo.openhab.org" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="8Z4-jj-MHt">
-                                                    <rect key="frame" x="198.33333333333337" y="14" width="146.66666666666663" height="16"/>
+                                                    <rect key="frame" x="202.33333333333337" y="14" width="146.66666666666663" height="16"/>
                                                     <accessibility key="accessibilityConfiguration" label="Local URL"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="URL" returnKeyType="done" textContentType="url"/>
@@ -724,7 +723,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Remote URL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3fe-eg-ODI">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="95" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="95" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -732,7 +731,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="https://demo.openhab.org" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ppC-da-pKq">
-                                                    <rect key="frame" x="198.33333333333337" y="14" width="146.66666666666663" height="16"/>
+                                                    <rect key="frame" x="202.33333333333337" y="14" width="146.66666666666663" height="16"/>
                                                     <accessibility key="accessibilityConfiguration" label="Remote URL"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="URL" returnKeyType="done" textContentType="url"/>
@@ -764,7 +763,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Username" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r0v-Zu-Asn">
-                                                    <rect key="frame" x="31.999999999999993" y="11.999999999999998" width="78.333333333333314" height="20.333333333333329"/>
+                                                    <rect key="frame" x="27.999999999999993" y="11.999999999999998" width="78.333333333333314" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -772,7 +771,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="left" contentVerticalAlignment="center" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7GO-er-lvr">
-                                                    <rect key="frame" x="130.33333333333337" y="11" width="214.66666666666663" height="22"/>
+                                                    <rect key="frame" x="126.33333333333333" y="11" width="222.66666666666669" height="22"/>
                                                     <accessibility key="accessibilityConfiguration" label="Username"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done" textContentType="username"/>
@@ -803,7 +802,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I0L-Yz-WXB">
-                                                    <rect key="frame" x="31.999999999999993" y="11.999999999999998" width="73.333333333333314" height="20.333333333333329"/>
+                                                    <rect key="frame" x="27.999999999999993" y="11.999999999999998" width="73.333333333333314" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -811,7 +810,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalCompressionResistancePriority="740" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="lsllslslslllsllllllslslslsllllsllllsllllllslslsllslsl" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="3La-Yc-Vmi">
-                                                    <rect key="frame" x="125.33333333333333" y="11.666666666666664" width="219.66666666666669" height="21"/>
+                                                    <rect key="frame" x="121.33333333333333" y="11.666666666666664" width="227.66666666666669" height="21"/>
                                                     <accessibility key="accessibilityConfiguration" label="Password"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <textInputTraits key="textInputTraits" returnKeyType="done" secureTextEntry="YES" textContentType="password"/>
@@ -842,7 +841,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Always send credentials" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Dn3-BH-eJh">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="183" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="183" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -850,7 +849,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u49-Vc-87C">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                     <accessibility key="accessibilityConfiguration" label="Always send credentials"/>
                                                 </switch>
                                             </subviews>
@@ -883,7 +882,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Ignore SSL Certificates" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VTh-or-BWi">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="174.66666666666666" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="174.66666666666666" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -891,7 +890,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SSG-Hc-q0a">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                     <accessibility key="accessibilityConfiguration" label="Ignore SSL Certificates"/>
                                                 </switch>
                                             </subviews>
@@ -921,7 +920,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Disable Idle Timeout" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5nH-h0-rdy">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="155" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="155" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -929,7 +928,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nhl-2h-nOu" userLabel="Disable Idle Timeout">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                 </switch>
                                             </subviews>
                                             <constraints>
@@ -959,7 +958,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Crash reporting" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ai7-cr-dBg">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="119" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="119" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -967,11 +966,11 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qS5-yP-H2i">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                     <accessibility key="accessibilityConfiguration" label="Crash reporting"/>
                                                 </switch>
                                                 <button opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="749" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Hwl-Ux-Na9">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="49" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="49" height="31.000000000000004"/>
                                                 </button>
                                             </subviews>
                                             <constraints>
@@ -1000,11 +999,11 @@
                                         <rect key="frame" x="0.0" y="499.33333015441895" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="yUI-2s-808" id="jfm-uY-49i">
-                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Client Certificates" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cT1-QE-49w">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="136" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="136" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1034,7 +1033,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Always Allow WebRTC" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qFl-xX-FvO">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="169.33333333333334" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="169.33333333333334" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1042,7 +1041,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="POz-Tb-X9w">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                     <accessibility key="accessibilityConfiguration" label="Ignore SSL Certificates"/>
                                                 </switch>
                                             </subviews>
@@ -1072,7 +1071,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Default Path" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zII-W7-GRC">
-                                                    <rect key="frame" x="32.000000000000007" y="11.999999999999998" width="93.666666666666686" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28.000000000000007" y="11.999999999999998" width="93.666666666666686" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -1111,11 +1110,11 @@
                                         <rect key="frame" x="0.0" y="679.33333015441895" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="UUA-3Z-NmO" id="fcG-5u-aWO">
-                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Clear Web Cache" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fPd-0G-j6i">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="132" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="132" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1142,7 +1141,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Real-time Sliders" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9TL-Xo-PaM">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="129" height="20.333333333333329"/>
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="129" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1150,7 +1149,7 @@
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Fno-ux-LOG">
-                                                    <rect key="frame" x="296" y="6.6666666666666679" width="51" height="31.000000000000004"/>
+                                                    <rect key="frame" x="300" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                     <accessibility key="accessibilityConfiguration" label="Real-time Sliders"/>
                                                 </switch>
                                             </subviews>
@@ -1176,11 +1175,11 @@
                                         <rect key="frame" x="0.0" y="815.33333015441895" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="SKa-Hj-Omq" id="7Uf-fl-adr">
-                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Clear Image Cache" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EsS-lC-iXU">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="144" height="20.333333333333329"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Clear Image Cache" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EsS-lC-iXU">
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="144" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1201,16 +1200,16 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Icon Type" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xdK-7c-gvS">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="74" height="20.333333333333329"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Icon Type" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xdK-7c-gvS">
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="74" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="icon_type"/>
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
-                                                <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="N6V-Uk-Y4k">
-                                                    <rect key="frame" x="252" y="6.6666666666666679" width="93" height="32"/>
+                                                <segmentedControl opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="N6V-Uk-Y4k">
+                                                    <rect key="frame" x="256" y="6.6666666666666679" width="93" height="32"/>
                                                     <segments>
                                                         <segment title="PNG"/>
                                                         <segment title="SVG"/>
@@ -1233,16 +1232,16 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sort sitemaps by" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="atQ-1e-lcL">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="128" height="20.333333333333329"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Sort sitemaps by" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="atQ-1e-lcL">
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="128" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
                                                         <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="sortSitemapsBy"/>
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
-                                                <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="XGP-Fi-vHF">
-                                                    <rect key="frame" x="236" y="6.6666666666666679" width="109" height="32"/>
+                                                <segmentedControl opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="XGP-Fi-vHF">
+                                                    <rect key="frame" x="240" y="6.6666666666666679" width="109" height="32"/>
                                                     <segments>
                                                         <segment title="Label"/>
                                                         <segment title="Name"/>
@@ -1269,15 +1268,15 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="App Version" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qfh-lz-UXm">
-                                                    <rect key="frame" x="32" y="12" width="92" height="20"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="About" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qfh-lz-UXm">
+                                                    <rect key="frame" x="28" y="12" width="46" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="app_version"/>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="about_settings"/>
                                                     </userDefinedRuntimeAttributes>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="version" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1gb-3M-iPN">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="version" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1gb-3M-iPN">
                                                     <rect key="frame" x="300" y="11.666666666666664" width="55" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -1292,6 +1291,9 @@
                                                 <constraint firstItem="Qfh-lz-UXm" firstAttribute="leading" secondItem="Tqr-A3-HHs" secondAttribute="leadingMargin" constant="12" id="mws-cm-0mM"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="m0Q-kz-WwD" kind="show" id="bf9-Qz-SFp"/>
+                                        </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="5Rk-xB-wOS">
                                         <rect key="frame" x="0.0" y="1039.3333301544189" width="375" height="44"/>
@@ -1300,8 +1302,8 @@
                                             <rect key="frame" x="0.0" y="0.0" width="356.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Legal" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v8c-Ps-18a">
-                                                    <rect key="frame" x="32" y="11.999999999999998" width="41" height="20.333333333333329"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Legal" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v8c-Ps-18a">
+                                                    <rect key="frame" x="28" y="11.999999999999998" width="41" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1326,8 +1328,8 @@
                                             <rect key="frame" x="0.0" y="0.0" width="356.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Privacy Policy" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vcs-uN-ETx">
-                                                    <rect key="frame" x="31.999999999999993" y="11.999999999999998" width="105.33333333333331" height="20.333333333333329"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Privacy Policy" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vcs-uN-ETx">
+                                                    <rect key="frame" x="27.999999999999993" y="11.999999999999998" width="105.33333333333331" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                     <userDefinedRuntimeAttributes>
@@ -1351,6 +1353,8 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Settings" id="6QK-CR-nbP"/>
                     <connections>
+                        <outlet property="aboutLabel" destination="Qfh-lz-UXm" id="GYZ-jQ-7UF"/>
+                        <outlet property="aboutTableViewCell" destination="K1V-oh-QdT" id="llT-EY-ylo"/>
                         <outlet property="alwaysAllowWebRTCSwitch" destination="POz-Tb-X9w" id="Io2-RL-YyU"/>
                         <outlet property="alwaysSendCredsSwitch" destination="u49-Vc-87C" id="fyh-cn-GhG"/>
                         <outlet property="appVersionLabel" destination="1gb-3M-iPN" id="BgG-su-tvZ"/>
@@ -1394,13 +1398,13 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4HA-k8-SRV">
-                                            <rect key="frame" x="70" y="7.9999999999999982" width="285" height="20.333333333333329"/>
+                                            <rect key="frame" x="66" y="7.9999999999999982" width="293" height="20.333333333333329"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" tag="102" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uwJ-PQ-XzZ">
-                                            <rect key="frame" x="70" y="26.999999999999996" width="43.666666666666657" height="14.333333333333332"/>
+                                            <rect key="frame" x="66" y="26.999999999999996" width="43.666666666666657" height="14.333333333333332"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                             <color key="textColor" systemColor="secondaryLabelColor"/>
                                             <nil key="highlightedColor"/>
@@ -1482,7 +1486,7 @@
             <objects>
                 <tableViewController id="sb0-mR-isg" userLabel="Client Certificates" customClass="OpenHABClientCertificatesViewController" customModule="openHAB" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="dsq-Ze-GrF">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="802"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
@@ -1565,7 +1569,7 @@
                         <viewControllerLayoutGuide type="bottom" id="vRb-Nk-z4d"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="NPT-SP-acq">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="802"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="lllsls" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8QX-Dp-MYj">
@@ -1636,7 +1640,7 @@
                                             </constraints>
                                         </view>
                                         <label opaque="NO" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NcF-3h-pDH">
-                                            <rect key="frame" x="42" y="22" width="313" height="0.0"/>
+                                            <rect key="frame" x="42" y="22" width="317" height="0.0"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -1692,39 +1696,111 @@
             </objects>
             <point key="canvasLocation" x="1890" y="32"/>
         </scene>
+        <!--Legacy Notice View Controller-->
+        <scene sceneID="gPe-FJ-eNK">
+            <objects>
+                <viewController storyboardIdentifier="LegacyNoticeViewController" id="m0Q-kz-WwD" customClass="LegacyNoticeViewController" customModule="openHAB" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="yFX-JX-iby"/>
+                        <viewControllerLayoutGuide type="bottom" id="Xq0-0r-Me2"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Ha2-0x-w71">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Download_on_the_App_Store_Badge_US-UK_RGB_blk" translatesAutoresizingMaskIntoConstraints="NO" id="2gX-1U-UVL">
+                                <rect key="frame" x="53" y="679" width="268" height="40"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="A5I-c4-0BH" appends="YES" id="e4Q-5R-YeQ"/>
+                                </connections>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Do not remind me" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tqp-2v-wRp">
+                                <rect key="frame" x="153" y="750" width="136" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="upgrade_reminder"/>
+                                </userDefinedRuntimeAttributes>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="9J6-gt-c5N">
+                                <rect key="frame" x="96" y="745" width="51" height="31"/>
+                                <connections>
+                                    <action selector="switchValueChanged:" destination="m0Q-kz-WwD" eventType="valueChanged" id="oab-Jw-cLl"/>
+                                </connections>
+                            </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Updated openHAB App Available" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="HOG-rn-f5A">
+                                <rect key="frame" x="39" y="30" width="296" height="23"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="19"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="upgrade_message_title"/>
+                                </userDefinedRuntimeAttributes>
+                            </label>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="center" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="R5H-yg-1cC">
+                                <rect key="frame" x="8" y="64" width="358" height="595"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <string key="text">You are currently using the legacy version of the openHAB IOS app designed for openHAB versions 1.x and later as well as usage on older IOS devices.  This version of the app will only be updated for security reasons an is considered deprecated.
+
+For a more modern experince we recomend users install our updated IOS application which includes Apple Watch support, more frequent updates as well as new and exciting features.  This new IOS app supports openHAB versions 3.x and later.
+
+Click below to be redirected to the updated application.</string>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="20"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="9J6-gt-c5N" firstAttribute="top" secondItem="2gX-1U-UVL" secondAttribute="bottom" constant="26" id="1iS-OH-3Jb"/>
+                            <constraint firstItem="R5H-yg-1cC" firstAttribute="leading" secondItem="Ha2-0x-w71" secondAttribute="leading" constant="8" id="Bqb-da-vqO"/>
+                            <constraint firstItem="HOG-rn-f5A" firstAttribute="top" secondItem="yFX-JX-iby" secondAttribute="bottom" constant="30" id="EBZ-pQ-1Xt"/>
+                            <constraint firstItem="R5H-yg-1cC" firstAttribute="top" secondItem="HOG-rn-f5A" secondAttribute="bottom" constant="11" id="IRB-xa-UMS"/>
+                            <constraint firstAttribute="trailing" secondItem="R5H-yg-1cC" secondAttribute="trailing" constant="9" id="J0i-Sa-i84"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="HOG-rn-f5A" secondAttribute="trailing" constant="24" id="M6Y-dV-YCd"/>
+                            <constraint firstItem="9J6-gt-c5N" firstAttribute="leading" secondItem="Ha2-0x-w71" secondAttribute="leadingMargin" constant="80" id="PzZ-RI-QY8"/>
+                            <constraint firstItem="Tqp-2v-wRp" firstAttribute="leading" secondItem="9J6-gt-c5N" secondAttribute="trailing" constant="8" symbolic="YES" id="QUu-ae-XuG"/>
+                            <constraint firstItem="Xq0-0r-Me2" firstAttribute="top" secondItem="9J6-gt-c5N" secondAttribute="bottom" constant="26" id="Qdl-pJ-XDC"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Tqp-2v-wRp" secondAttribute="trailing" constant="70" id="T5t-Bh-jfh"/>
+                            <constraint firstItem="HOG-rn-f5A" firstAttribute="leading" secondItem="Ha2-0x-w71" secondAttribute="leadingMargin" constant="23" id="XrO-iP-4td"/>
+                            <constraint firstItem="Tqp-2v-wRp" firstAttribute="leading" secondItem="9J6-gt-c5N" secondAttribute="trailing" constant="8" symbolic="YES" id="f6C-2i-vPZ"/>
+                            <constraint firstItem="Xq0-0r-Me2" firstAttribute="top" secondItem="Tqp-2v-wRp" secondAttribute="bottom" constant="31" id="o3v-OY-MK0"/>
+                            <constraint firstItem="2gX-1U-UVL" firstAttribute="leading" secondItem="Ha2-0x-w71" secondAttribute="leadingMargin" constant="37" id="pme-4n-6NG"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="2gX-1U-UVL" secondAttribute="trailing" constant="38" id="rVM-vc-5d2"/>
+                            <constraint firstItem="2gX-1U-UVL" firstAttribute="top" secondItem="R5H-yg-1cC" secondAttribute="bottom" constant="20" id="vfJ-EI-gz0"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="oOz-s7-lCI"/>
+                    <connections>
+                        <outlet property="textView" destination="R5H-yg-1cC" id="dXG-ep-po1"/>
+                        <outlet property="toggleSwitch" destination="9J6-gt-c5N" id="b9k-I0-pR8"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="D1G-ND-345" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="A5I-c4-0BH">
+                    <connections>
+                        <action selector="imageClicked:" destination="m0Q-kz-WwD" id="kxV-ez-TyC"/>
+                    </connections>
+                </tapGestureRecognizer>
+            </objects>
+            <point key="canvasLocation" x="2413.5999999999999" y="-649.50738916256159"/>
+        </scene>
     </scenes>
-    <designables>
-        <designable name="OR4-bR-Ekg">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="PuF-sy-GZG">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="PzY-Bs-9MZ">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="bnc-pN-4ms">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="gIa-Hx-tGr">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="riU-tV-5Y6">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-        <designable name="vxc-Zw-Oyh">
-            <size key="intrinsicContentSize" width="30" height="34"/>
-        </designable>
-    </designables>
     <resources>
+        <image name="Download_on_the_App_Store_Badge_US-UK_RGB_blk" width="119.66407012939453" height="40"/>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="lightTextColor">
             <color white="1" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

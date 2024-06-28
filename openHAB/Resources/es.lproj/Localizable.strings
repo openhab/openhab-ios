@@ -78,3 +78,7 @@
 "about_settings" = "Acerca de";
 "uselastpath_settings" = "¿Usar la última ruta visitada?";
 "always_allow_webrtc" = "Consenti sempre WebRTC";
+"upgrade_about" = "¡Actualización disponible!";
+"upgrade_reminder" = "No recordarme";
+"upgrade_message_title" = "Actualización de la aplicación openHAB disponible";
+"upgrade_message_body" = "Actualmente estás usando la versión heredada de la aplicación openHAB para IOS, diseñada para versiones de openHAB 1.x y posteriores, así como para dispositivos IOS más antiguos. Esta versión de la aplicación solo se actualizará por razones de seguridad y se considera obsoleta.\n\nPara una experiencia más moderna, recomendamos a los usuarios instalar nuestra aplicación actualizada para IOS, que incluye soporte para Apple Watch, actualizaciones más frecuentes, así como nuevas y emocionantes características. Esta nueva aplicación para IOS es compatible con versiones de openHAB 3.x y posteriores.\n\nHaz clic abajo para ser redirigido a la aplicación actualizada.";
