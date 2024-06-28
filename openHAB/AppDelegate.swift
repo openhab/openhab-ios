@@ -24,7 +24,7 @@ import WatchConnectivity
 var player: AVAudioPlayer?
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     static var appDelegate: AppDelegate!
 
     var window: UIWindow?
@@ -124,6 +124,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
+        UNUserNotificationCenter.current().delegate = self
     }
 
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
@@ -151,44 +152,76 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        // version without completionHandler is deprecated
-        // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-        os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo)
+    // this is called when a notification comes in while in the foreground
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let userInfo = notification.request.content.userInfo
+        os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
+        appData.lastNotificationInfo = userInfo
+        displayNotification(userInfo: userInfo)
+        completionHandler([])
+    }
 
-        if application.applicationState == .active {
-            os_log("App is active and got a remote notification", log: .notifications, type: .info)
-            let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
-            if let soundPath {
-                do {
-                    os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
+    // this is called when clicking a notification while in the background
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        var userInfo = response.notification.request.content.userInfo
 
-                    player = try AVAudioPlayer(contentsOf: soundPath)
-                    player?.numberOfLoops = 0
-                    player?.play()
-                } catch {
-                    os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-                }
-                player = try? AVAudioPlayer(contentsOf: soundPath)
+        let actionIdentifier = response.actionIdentifier
+        os_log("Notification clicked: action %{PUBLIC}@ userInfo %{PUBLIC}@", log: .notifications, type: .info, actionIdentifier, userInfo)
+        if actionIdentifier != UNNotificationDismissActionIdentifier {
+            if actionIdentifier != UNNotificationDefaultActionIdentifier {
+                userInfo["actionIdentifier"] = actionIdentifier
             }
-
-            let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
-
-            var config = SwiftMessages.Config()
-            config.duration = .seconds(seconds: 5)
-            config.presentationStyle = .bottom
-
-            SwiftMessages.show(config: config) {
-                let view = MessageView.viewFromNib(layout: .cardView)
-                // ... configure the view
-                view.configureTheme(.info)
-                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
-                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                return view
-            }
+            notifyNotificationListeners(userInfo)
+            appData.lastNotificationInfo = userInfo
         }
+        completionHandler()
+    }
+
+    private func displayNotification(userInfo: [AnyHashable: Any]) {
+        os_log("displayNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo["message"] as? String ?? "no message")
+
+        let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
+        if let soundPath {
+            do {
+                os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
+                player = try AVAudioPlayer(contentsOf: soundPath)
+                player?.numberOfLoops = 0
+                player?.play()
+            } catch {
+                os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+            }
+            player = try? AVAudioPlayer(contentsOf: soundPath)
+        }
+
+        let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
+
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 5)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            let view = MessageView.viewFromNib(layout: .cardView)
+            view.configureTheme(.info)
+            view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            // Add tap gesture recognizer to the view for actions
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.messageViewTapped))
+            view.addGestureRecognizer(tapGesture)
+            return view
+        }
+    }
+
+    // Action to be performed when the notification message view is tapped
+    @objc func messageViewTapped() {
+        if let userInfo = appData.lastNotificationInfo {
+            notifyNotificationListeners(userInfo)
+            SwiftMessages.hideAll()
+        }
+    }
+
+    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) {
+        NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -224,4 +257,8 @@ extension AppDelegate: MessagingDelegate {
         ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
+}
+
+extension Notification.Name {
+    static let apnsReceived = Notification.Name("apnsReceived")
 }
