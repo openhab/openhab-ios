@@ -29,6 +29,10 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
+struct CommandItem: CommItem {
+    var link: String
+}
+
 class OpenHABRootViewController: UIViewController {
     var hamburgerButton: DynamicButton!
     var currentView: OpenHABViewController!
@@ -53,7 +57,6 @@ class OpenHABRootViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABRootViewController viewDidLoad", log: .default, type: .info)
-
         setupSideMenu()
 
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
@@ -93,6 +96,13 @@ class OpenHABRootViewController: UIViewController {
         // save this so we know if its changed later
         isDemoMode = Preferences.demomode
         switchToSavedView()
+
+        // ready for push notifications
+        NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
+        // check if we were launched with a notification
+        if let userInfo = appData?.lastNotificationInfo {
+            handleNotification(userInfo)
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -170,6 +180,75 @@ class OpenHABRootViewController: UIViewController {
                         os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     }
                 }
+            }
+        }
+    }
+
+    @objc func handleApnsMessage(notification: Notification) {
+        // actionIdentifier is the result of a action button being pressed
+        if let userInfo = notification.userInfo {
+            handleNotification(userInfo)
+        }
+    }
+
+    private func handleNotification(_ userInfo: [AnyHashable: Any]) {
+        // actionIdentifier is the result of a action button being pressed
+        // if not actionIdentifier, then the notification was clicked, so use "on-click" if there
+        if let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String {
+            let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
+            if action.hasPrefix("ui") {
+                uiCommandAction(cmd)
+            }
+            if action.hasPrefix("command") {
+                sendCommandAction(cmd)
+            }
+        }
+    }
+
+    private func uiCommandAction(_ command: String) {
+        os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
+        let pattern = "^(/basicui/app\\?.*|/.*|.*)$"
+
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: [])
+            let nsString = command as NSString
+            let results = regex.matches(in: command, options: [], range: NSRange(location: 0, length: nsString.length))
+
+            if let match = results.first {
+                let pathRange = match.range(at: 1)
+                let path = nsString.substring(with: pathRange)
+                os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
+                if currentView != webViewController {
+                    switchView(target: .webview)
+                }
+                if path.starts(with: "/basicui/app?") {
+                    // TODO: this is a sitemap, we should use the native renderer
+                    // temp hack right now to just use a webview
+                    webViewController.loadWebView(force: true, path: path)
+                } else if path.starts(with: "/") {
+                    // have the webview load this path itself
+                    webViewController.loadWebView(force: true, path: path)
+                } else {
+                    // have the mainUI handle the navigation
+                    webViewController.navigateCommand(path)
+                }
+            }
+        } catch {
+            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+        }
+    }
+
+    private func sendCommandAction(_ action: String) {
+        let components = action.split(separator: ":")
+        if components.count == 2 {
+            let itemName = String(components[0])
+            let itemCommand = String(components[1])
+            OpenHABItemCache.instance.getItem(name: itemName) { item in
+                guard let item else {
+                    os_log("Could not find item %{PUBLIC}@", log: .notifications, type: .info, itemName)
+                    return
+                }
+                OpenHABItemCache.instance.sendCommand(item, commandToSend: itemCommand)
             }
         }
     }

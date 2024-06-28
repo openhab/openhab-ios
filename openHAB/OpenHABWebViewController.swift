@@ -25,8 +25,9 @@ class OpenHABWebViewController: OpenHABViewController {
     private var activityIndicator: UIActivityIndicatorView!
     private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
+    private var commandQueue: [String] = []
+    private var acceptsCommands = false
 
-    // https://developer.apple.com/documentation/webkit/wkscriptmessagehandler?preferredLanguage=occ
     private var js = """
     window.OHApp = {
         exitToApp : function(){
@@ -37,6 +38,9 @@ class OpenHABWebViewController: OpenHABViewController {
         },
         sseConnected : function(connected) {
             window.webkit.messageHandlers.Native.postMessage('sseConnected-' + connected);
+        },
+        ready : function() {
+            window.webkit.messageHandlers.Native.postMessage('ready');
         },
     }
     """
@@ -89,7 +93,7 @@ class OpenHABWebViewController: OpenHABViewController {
         OpenHABTracker.shared.restart()
     }
 
-    func loadWebView(force: Bool = false) {
+    func loadWebView(force: Bool = false, path: String? = nil) {
         os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl)
 
         let authStr = "\(Preferences.username):\(Preferences.password)"
@@ -102,24 +106,49 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = newTarget
         let url = URL(string: openHABTrackedRootUrl)
 
-        if let modifiedUrl = modifyUrl(orig: url) {
+        if let modifiedUrl = modifyUrl(orig: url, path: path) {
             let request = URLRequest(url: modifiedUrl)
             clearExistingPage()
+            acceptsCommands = false
             webView.load(request)
         }
     }
 
-    func modifyUrl(orig: URL?) -> URL? {
+    func modifyUrl(orig: URL?, path: String? = nil) -> URL? {
         // better way to cone/copy ?
         guard let urlString = orig?.absoluteString, var url = URL(string: urlString) else { return orig }
         if url.host == "myopenhab.org" {
             url = URL(string: "https://home.myopenhab.org") ?? url
         }
 
-        if !Preferences.defaultMainUIPath.isEmpty {
-            url.appendPathComponent(Preferences.defaultMainUIPath)
+        if let path {
+            url = appendPathToURL(baseURL: url, path: path) ?? url
+        } else if !Preferences.defaultMainUIPath.isEmpty {
+            url = appendPathToURL(baseURL: url, path: Preferences.defaultMainUIPath) ?? url
         }
         return url
+    }
+
+    // swift really makes you work to construct simple URLs, uhg.....
+    func appendPathToURL(baseURL: URL, path: String) -> URL? {
+        guard var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        // Split the user path into path and query components
+        if let questionMarkRange = path.range(of: "?") {
+            // Separate path and query
+            let pathComponent = String(path[..<questionMarkRange.lowerBound])
+            let queryComponent = String(path[questionMarkRange.upperBound...])
+            // Append the path component
+            urlComponents.path = (urlComponents.path as NSString).appendingPathComponent(pathComponent)
+            // Append the query component
+            urlComponents.query = queryComponent
+        } else {
+            // No query in the path, just append the path
+            urlComponents.path = (urlComponents.path as NSString).appendingPathComponent(path)
+        }
+        // Return the constructed URL
+        return urlComponents.url
     }
 
     func showActivityIndicator(show: Bool) {
@@ -161,6 +190,33 @@ class OpenHABWebViewController: OpenHABViewController {
         "web"
     }
 
+    public func navigateCommand(_ command: String) {
+        if acceptsCommands {
+            navigateCommandInternal(command)
+        } else {
+            commandQueue.append(command)
+        }
+    }
+
+    private func navigateCommandInternal(_ command: String) {
+        // let jsCode = "window.OHApp.navigate === 'function' && window.OHApp.navigate('\(command)')"
+        let jsCode = "window.MainUI.handleCommand('\(command)')"
+        webView.evaluateJavaScript(jsCode) { (_, error) in
+            if let error {
+                os_log("navigateCommandInternal failed %{PUBLIC}@", log: .wkwebview, type: .error, error.localizedDescription)
+            } else {
+                os_log("navigateCommandInternal Success", log: .wkwebview, type: .info)
+            }
+        }
+    }
+
+    private func executeQueuedCommands() {
+        while !commandQueue.isEmpty {
+            let command = commandQueue.removeFirst()
+            navigateCommandInternal(command)
+        }
+    }
+
     private func newWebView() -> WKWebView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
@@ -177,6 +233,9 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+        }
         // watch for URL changes so we can store the last visited path
         observation = webView.observe(\.url, options: [.new]) { _, _ in
             if let webviewURL = webView.url {
@@ -213,6 +272,8 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 os_log("WKScriptMessage sseConnected is true", log: OSLog.remoteAccess, type: .info)
                 hidePopupMessages()
                 sseTimer?.invalidate()
+                acceptsCommands = true
+                executeQueuedCommands()
             case "sseConnected-false":
                 os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
                 sseTimer?.invalidate()
@@ -221,6 +282,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                         self.reloadView()
                     }
                     self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                    self.acceptsCommands = false
                 }
             default: break
             }
