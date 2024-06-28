@@ -32,6 +32,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     var settingsSortSitemapsBy: SortSitemapsOrder = .label
     var settingsDefaultMainUIPath = ""
     var settingsAlwaysAllowWebRTC = false
+    var updateAvailable = false
 
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -54,6 +55,8 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @IBOutlet private var useCurrentMainUIPathButton: UIButton!
     @IBOutlet private var defaultMainUIPathTextField: UITextField!
     @IBOutlet private var appVersionLabel: UILabel!
+    @IBOutlet private var aboutLabel: UILabel!
+    @IBOutlet private var aboutTableViewCell: UITableViewCell!
     @IBOutlet private var alwaysAllowWebRTCSwitch: UISwitch!
 
     required init?(coder aDecoder: NSCoder) {
@@ -68,6 +71,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         let rightBarButton = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(OpenHABSettingsViewController.saveButtonPressed(_:)))
         navigationItem.leftBarButtonItem = leftBarButton
         navigationItem.rightBarButtonItem = rightBarButton
+        updateAvailable = appData?.updatedAppId.isEmpty == false
         loadSettings()
         updateSettingsUi()
         localUrlTextField?.delegate = self
@@ -247,6 +251,10 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
         let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
         let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         appVersionLabel?.text = "\(appVersionString ?? "") (\(appBuildString ?? ""))"
+        if updateAvailable {
+            aboutLabel?.text = NSLocalizedString("upgrade_about", comment: "Upgrade Available")
+            aboutTableViewCell.isUserInteractionEnabled = true
+        }
     }
 
     func loadSettings() {

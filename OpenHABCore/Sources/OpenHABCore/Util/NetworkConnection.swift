@@ -128,6 +128,12 @@ public class NetworkConnection {
         }
     }
 
+    public static func appStoreIds(completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
+        if let appIdsUrl = Endpoint.appIds().url {
+            load(from: appIdsUrl, completionHandler: completionHandler)
+        }
+    }
+
     public static func sendState(item: CommItem, stateToSend state: String?) -> DataRequest? {
         sendCommandOrState(item: item, commandToSend: state, state: true)
     }
