@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
       "state" : {
-        "revision" : "29d6c0bc4c078f819504d92fb5b359e63fd32046",
-        "version" : "0.53.2"
+        "revision" : "d21a0b3a91f956e7a3e40ee99e9495ca4926f30c",
+        "version" : "0.53.8"
       }
     },
     {

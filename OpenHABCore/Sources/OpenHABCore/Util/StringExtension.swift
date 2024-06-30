@@ -77,7 +77,7 @@ public extension String {
         return OpenHABItem.ItemType(rawValue: typeString)
     }
 
-    internal func toWidgetType() -> OpenHABWidget.WidgetType? {
+    internal func toWidgetType() -> OpenHABWidget.WidgetType {
         OpenHABWidget.WidgetType(rawValue: self)
     }
 
