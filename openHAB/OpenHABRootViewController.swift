@@ -198,9 +198,10 @@ class OpenHABRootViewController: UIViewController {
             let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
             if action.hasPrefix("ui") {
                 uiCommandAction(cmd)
-            }
-            if action.hasPrefix("command") {
+            } else if action.hasPrefix("command") {
                 sendCommandAction(cmd)
+            } else if action.hasPrefix("http") {
+                httpCommandAction(action)
             }
         }
     }
@@ -250,6 +251,13 @@ class OpenHABRootViewController: UIViewController {
                 }
                 OpenHABItemCache.instance.sendCommand(item, commandToSend: itemCommand)
             }
+        }
+    }
+
+    private func httpCommandAction(_ command: String) {
+        if let url = URL(string: command) {
+            let vc = SFSafariViewController(url: url)
+            present(vc, animated: true)
         }
     }
 
