@@ -177,6 +177,7 @@ public extension Endpoint {
                 }
                 if source == "material" {
                     source = "iconify"
+                    icon = icon.replacingOccurrences(of: "_", with: "-")
                     icon = "\(set)-\(icon)"
                     set = "ic"
                 }
