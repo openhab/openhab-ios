@@ -34,7 +34,7 @@ class NotificationService: UNNotificationServiceExtension {
                        let title = actionDict["title"] {
                         var options: UNNotificationActionOptions = []
                         // navigate options need to bring the app forward
-                        if action.hasPrefix("ui") {
+                        if action.hasPrefix("ui") || action.hasPrefix("http") {
                             options = [.foreground]
                         }
                         let notificationAction = UNNotificationAction(
