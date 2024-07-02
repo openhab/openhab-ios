@@ -152,6 +152,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
+    // this is called for "content-available" silent notifications (background notifications)
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .default, type: .info, userInfo)
+        // Hide notification logic
+        if let type = userInfo["type"] as? String, type == "hideNotification" {
+            if let refid = userInfo["reference-id"] as? String {
+                os_log("didReceiveRemoteNotification remove id %{PUBLIC}@", log: .default, type: .info, refid)
+                UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [refid])
+            }
+            if let tag = userInfo["tag"] as? String {
+                UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
+                    let notificationsWithSeverity = notifications.filter { notification in
+                        notification.request.content.userInfo["tag"] as? String == tag
+                    }
+
+                    // Get the identifiers of these notifications
+                    let identifiers = notificationsWithSeverity.map(\.request.identifier)
+
+                    if !identifiers.isEmpty {
+                        os_log("didReceiveRemoteNotification remove tag %{PUBLIC}@ %{PUBLIC}@", log: .default, type: .info, tag, identifiers)
+                        // Remove the filtered notifications
+                        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
+                    }
+                }
+            }
+        }
+        completionHandler(.newData)
+    }
+
     // this is called when a notification comes in while in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
@@ -164,7 +193,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     // this is called when clicking a notification while in the background
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         var userInfo = response.notification.request.content.userInfo
-
         let actionIdentifier = response.actionIdentifier
         os_log("Notification clicked: action %{PUBLIC}@ userInfo %{PUBLIC}@", log: .notifications, type: .info, actionIdentifier, userInfo)
         if actionIdentifier != UNNotificationDismissActionIdentifier {
