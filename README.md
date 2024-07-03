@@ -38,8 +38,10 @@ Beta releases are available on [TestFlight](https://testflight.apple.com/join/56
 * [Widgets](#widgets) (coming soon!)
 
 ## App Configuration
+<p float="left">
 <img alt="Logo" src="./doc/settings1.jpeg" width="200">
 <img alt="Logo" src="./doc/settings2.jpeg" width="200">
+</p>
 
 ### Connection Settings
 The app will try and connect using the Local URL as the primary connection, and if that fails or is not reachable, falls back to the local URL.  
