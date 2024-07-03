@@ -92,7 +92,7 @@ public enum Preferences {
     @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
-    
+
     // MARK: - Private
 
     @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
