@@ -25,7 +25,15 @@ class NotificationService: UNNotificationServiceExtension {
         if let bestAttemptContent {
             var notificationActions: [UNNotificationAction] = []
             let userInfo = bestAttemptContent.userInfo
-            os_log("handleNotification userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
+
+            os_log("didReceive userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
+
+            if let title = userInfo["title"] as? String {
+                bestAttemptContent.title = title
+            }
+            if let message = userInfo["message"] as? String {
+                bestAttemptContent.body = message
+            }
 
             // Check if the user has defined custom actions in the payload
             if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
@@ -33,7 +41,7 @@ class NotificationService: UNNotificationServiceExtension {
                     if let action = actionDict["action"],
                        let title = actionDict["title"] {
                         var options: UNNotificationActionOptions = []
-                        // navigate options need to bring the app forward
+                        // navigate/browser options need to bring the app to the foreground
                         if action.hasPrefix("ui") || action.hasPrefix("http") {
                             options = [.foreground]
                         }
@@ -46,7 +54,7 @@ class NotificationService: UNNotificationServiceExtension {
                     }
                 }
                 if !notificationActions.isEmpty {
-                    os_log("handleNotification registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
+                    os_log("didReceive registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
                     let notificationCategory =
                         UNNotificationCategory(
                             identifier: category,
@@ -188,6 +196,8 @@ class NotificationService: UNNotificationServiceExtension {
                 } catch {
                     os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 }
+                completion(nil)
+            } else {
                 completion(nil)
             }
         }
