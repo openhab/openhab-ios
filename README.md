@@ -24,7 +24,7 @@ Beta releases are available on [TestFlight](https://testflight.apple.com/join/0u
 
 ### openHAB V1 (Legacy)
 
-This is the legacy app for user's on iOS 15 or earlier as well as openHAB system 1.x and later (tested to at least openHAB 4).
+This is the legacy app for users on iOS 15 or earlier as well as openHAB system 1.x and later (tested to at least openHAB 4).
 This app only receives security updates and minor fixes and is not intended for most users. 
 
 <a href="https://itunes.apple.com/us/app/openhab/id492054521?ls=1&mt=8"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store"></a>
@@ -38,24 +38,17 @@ Beta releases are available on [TestFlight](https://testflight.apple.com/join/56
 * [Widgets](#widgets) (coming soon!)
 
 ## App Configuration
+<img alt="Logo" src="./doc/settings1.jpeg" width="200">
+<img alt="Logo" src="./doc/settings2.jpeg" width="200">
 
-<p >
-    
-    <br>
-    <b>openHAB client for iOS</b>
-</p>
-<p >
-   
-    <br>
-    <b>openHAB client for iOS</b>
-</p>
-<img alt="Logo" src="doc/setting1.jpeg" width="100">
-<img alt="Logo" src="doc/setting1.jpeg" width="100">
 ### Connection Settings
 The app will try and connect using the Local URL as the primary connection, and if that fails or is not reachable, falls back to the local URL.  
 
+### Demo Mode
+This sets up the app to use the openHAB demo server and can be used to experience the app without needing to install openHAB.
+
 #### Local URL
-This is the primary connection to your openHAB instance, a fully qualified URL with a IP or host is required
+This is the primary connection to your openHAB instance, a fully qualified URL with a IP or host is required.
 
 Example:
 `https://openhab.local:8443`
@@ -77,7 +70,7 @@ If using the openHAB cloud, these should be set to those login credentials.
 ### Certificates
 Provide a client side certificate in P12 format for use in client side authentication setups.
 
-To install a client certificate, rename the certificate with the extension `.ohp12`, then send it to your iOS device (airdrop, icloud, dropbox, etc..), then open/save and select `openHAB` from the "Open In" menu (you may need to select "More..." to see all apps)
+To install a client certificate, rename the certificate with the extension `.ohp12`, then send it to your iOS device (airdrop, icloud, dropbox, etc..), then open/save and select `openHAB` from the "Open In" menu (you may need to select "More..." to see all apps).
 
 To delete a certificate, swipe left on the certificate name in the certificate menu 
 
@@ -85,10 +78,10 @@ If using openssl v3 make sure to add `-legacy -certpbe pbeWithSHA1And40BitRC2-CB
 See https://github.com/openssl/openssl/issues/19871 
 
 ### Idle Timeout
-Useful for wall or fixed installations, will disable the Idle screen timeout
+Useful for wall or fixed installations, will disable the Idle screen timeout.
 
 ### Crash Reporting
-Sends crash reports to Google / Firebase 
+Sends crash reports to Google / Firebase.
 
 ### Main UI Settings
 
@@ -100,7 +93,7 @@ Allows the user to enter a path to act as the starting point when the Main UI is
 Clicking the "+" button will prompt to enter the current path the of Main UI view.
 
 #### Clear Cache
-Clears the Main UI web cache
+Clears the Main UI web cache.
 
 ### Sitemap Settings
 
@@ -108,13 +101,13 @@ Clears the Main UI web cache
 Allows sitemap sliders to send changes as the control is sliding in realtime.
 
 ### Image Cache
-Clears the sitemap cached images 
+Clears the sitemap cached images.
 
 ### Icon Type
-Select which type of icon the sitemap view will attempt to load for icons
+Select which type of icon the sitemap view will attempt to load for icons.
 
 ### Sitemap Sorting
-Sort order when presenting multiple sitemaps for selection
+Sort order when presenting multiple sitemaps for selection.
 
 ## Apple Watch Configuration
 The Apple watch requires a sitemap with the name `watch.sitemap`. 
@@ -124,15 +117,15 @@ When using the Watch app, slide left to bring up the configuration view and sele
 
 ## Main UI and Sitemap Usage
 
-(show screen shot of menu)
+<img alt="Logo" src="doc/sidemenu.jpeg" width="200">
 
 Clicking "Home" will navigate to the Main UI from the user's openHAB system.  Clicking this when the Main UI is already visible will force a reload the Main UI.
 
-Tiles are the alternative UIs installed on a user's system and will be opened in an embedded browser
+Tiles are the alternative UIs installed on a user's system and will be opened in an embedded browser.
 
 Sitemaps show the available sitemaps on the users system.  Selecting a sitemap will present the native sitemap renderer view.
 
-Notifications is a list of push notification retrieved from the openHAB cloud (if configured)
+Notifications is a list of push notification retrieved from the openHAB cloud (if configured).
 
 Settings opens the application settings view.
 
@@ -158,7 +151,8 @@ Coming soon !
 ## Setting up development environment
 
 If you want to contribute to the iOS application we are here to help you to set up
-development environment. openHAB iOS app is developed using Xcode and the standard iOS SDK from Apple.
+development environment. 
+openHAB iOS app is developed using Xcode and the standard iOS SDK from Apple.
 The iOS application is based on the iOS 16 and watchOS 8 SDK and makes uses of several Swift packages.
 
 To start developing you need an [Apple Developer](https://developer.apple.com/devcenter/ios/index.action) account.
