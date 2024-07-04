@@ -8,6 +8,10 @@
 
 This is the IOS native client for openHAB.
 
+<p float="left">
+<img alt="Main UI" src="./doc/mainui.png" width="200">
+<img alt="Sitemap" src="./doc/sitemap.png" width="200">
+</p>
 
 ## Download
 
@@ -70,14 +74,14 @@ If using the openHAB cloud, these should be set to those login credentials.
 ### Application Settings
 
 ### Certificates
-Provide a client side certificate in P12 format for use in client side authentication setups.
+Allows the installation of p12 formatted certificates for use in client side authentication setups.
 
 To install a client certificate, rename the certificate with the extension `.ohp12`, then send it to your iOS device (airdrop, icloud, dropbox, etc..), then open/save and select `openHAB` from the "Open In" menu (you may need to select "More..." to see all apps).
 
 To delete a certificate, swipe left on the certificate name in the certificate menu 
 
-If using openssl v3 make sure to add `-legacy -certpbe pbeWithSHA1And40BitRC2-CBC` to the pk12 export command
-See https://github.com/openssl/openssl/issues/19871 
+If using openssl v3 to generate certificates, make sure to add `-legacy -certpbe pbeWithSHA1And40BitRC2-CBC` to the pk12 export command.
+See https://github.com/openssl/openssl/issues/19871 for more information on V3 compatibility with Apple products.  
 
 ### Idle Timeout
 Useful for wall or fixed installations, will disable the Idle screen timeout.
