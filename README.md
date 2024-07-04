@@ -118,7 +118,6 @@ Note that some advanced sitemap features may not be supported on the Apple watch
 When using the Watch app, slide left to bring up the configuration view and select "sync" to ensure the local, remote and username/password configurations are synced to the watch.
 
 ## Main UI and Sitemap Usage
-
 <img alt="Logo" src="doc/sidemenu.jpeg" width="200">
 
 Clicking "Home" will navigate to the Main UI from the user's openHAB system.  Clicking this when the Main UI is already visible will force a reload the Main UI.
@@ -134,24 +133,24 @@ Settings opens the application settings view.
 The app will persist the last primary view opened (Main UI or Sitemaps) when the app is opened or restarted.
 
 ## Push Notifications
-
 The [openHAB Cloud Connector](https://next.openhab.org/addons/integrations/openhabcloud/)  allows users to send push notifications mobile devices registered with an [openHAB Cloud instance](https://github.com/openhab/openhab-cloud) such as [myopenHAB.org](https://www.myopenhab.org).
 
-Push Notifications on iOS support:
-- Title and Body text
-- Image and Video Attachments
-- Collapsible / Updated Notifications
-- Removing notifications
-- Up to 3 action buttons (long press notification)
+<p float="left">
+<img alt="Logo" src="./doc/notifications.png" width="500">
+</p>
 
-See [Cloud notification actions](https://next.openhab.org/addons/integrations/openhabcloud/#cloud-notification-actions) for a full list of notification options.
+Push Notifications on iOS support:
+- Title and message text
+- Image and video attachments
+- Up to 3 action buttons (long press notification)
+- Collapsible / updated notifications
+- Removing notifications
 
 ## Widgets
 
 Coming soon !
 
 ## Setting up development environment
-
 If you want to contribute to the iOS application we are here to help you to set up
 development environment. 
 openHAB iOS app is developed using Xcode and the standard iOS SDK from Apple.
@@ -173,7 +172,6 @@ And also please support with the localization of openhab-ios:
 
 
 ## Trademark Disclaimer
-
 Product names, logos, brands and other trademarks referred to within the openHAB website are the
 property of their respective trademark holders. These trademark holders are not affiliated with
 openHAB or our website. They do not sponsor or endorse our materials.
