@@ -244,12 +244,16 @@ class OpenHABRootViewController: UIViewController {
         if components.count == 2 {
             let itemName = String(components[0])
             let itemCommand = String(components[1])
-            OpenHABItemCache.instance.getItem(name: itemName) { item in
-                guard let item else {
-                    os_log("Could not find item %{PUBLIC}@", log: .notifications, type: .info, itemName)
-                    return
+            let client = HTTPClient(username: Preferences.username, password: Preferences.username)
+            client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
+                if let error {
+                    os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                } else {
+                    os_log("Request succeeded", log: .default, type: .info)
+                    if let data {
+                        os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                    }
                 }
-                OpenHABItemCache.instance.sendCommand(item, commandToSend: itemCommand)
             }
         }
     }

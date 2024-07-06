@@ -194,7 +194,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
-        os_log("Notification clicked: action %{PUBLIC}@ userInfo %{PUBLIC}@", log: .notifications, type: .info, actionIdentifier, userInfo)
+        os_log("Notification clicked: action %{public}@ userInfo %{public}@", log: .notifications, type: .info, actionIdentifier, userInfo)
         if actionIdentifier != UNNotificationDismissActionIdentifier {
             if actionIdentifier != UNNotificationDefaultActionIdentifier {
                 userInfo["actionIdentifier"] = actionIdentifier
