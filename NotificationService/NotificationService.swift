@@ -86,7 +86,7 @@ class NotificationService: UNNotificationServiceExtension {
                     } else {
                         downloadAndAttachMedia
                     }
-
+                    os_log("handleNotification downloading %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
                     downloadHandler(attachmentURL) { attachment in
                         if let attachment {
                             os_log("handleNotification attaching %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
@@ -138,7 +138,8 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     private func downloadAndAttachMedia(url: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
-        let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        let client = HTTPClient(username: Preferences.username, password: Preferences.username) // lets not always send auth with this
+        client.downloadFile(url: url) { localURL, response, error in
             guard let localURL else {
                 os_log("Error downloading media %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "Unknown error")
                 completion(nil)
@@ -146,18 +147,19 @@ class NotificationService: UNNotificationServiceExtension {
             }
             self.attachFile(localURL: localURL, mimeType: response?.mimeType, completion: completion)
         }
-        task.resume()
     }
 
     func downloadAndAttachItemImage(attachmentURL: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
         guard let scheme = attachmentURL.scheme else {
             os_log("Could not find scheme %{PUBLIC}@", log: .default, type: .info)
+            completion(nil)
             return
         }
 
         let itemName = String(attachmentURL.absoluteString.dropFirst(scheme.count + 1))
 
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
+        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+        client.getItem(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], itemName: itemName) { item, error in
             guard let item else {
                 os_log("Could not find item %{PUBLIC}@", log: .default, type: .info, itemName)
                 completion(nil)
@@ -168,11 +170,9 @@ class NotificationService: UNNotificationServiceExtension {
                     // Extract MIME type and base64 string
                     let pattern = "^data:(.*?);base64,(.*)$"
                     let regex = try NSRegularExpression(pattern: pattern, options: [])
-
                     if let match = regex.firstMatch(in: state, options: [], range: NSRange(location: 0, length: state.utf16.count)) {
                         let mimeTypeRange = Range(match.range(at: 1), in: state)
                         let base64Range = Range(match.range(at: 2), in: state)
-
                         if let mimeTypeRange, let base64Range {
                             let mimeType = String(state[mimeTypeRange])
                             let base64String = String(state[base64Range])
@@ -196,10 +196,8 @@ class NotificationService: UNNotificationServiceExtension {
                 } catch {
                     os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 }
-                completion(nil)
-            } else {
-                completion(nil)
             }
+            completion(nil)
         }
     }
 
@@ -222,11 +220,11 @@ class NotificationService: UNNotificationServiceExtension {
                 os_log("Unrecognized MIME type or file extension", log: .default, type: .error)
                 attachment = nil
             }
-
             completion(attachment)
+            return
         } catch {
             os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-            completion(nil)
         }
+        completion(nil)
     }
 }

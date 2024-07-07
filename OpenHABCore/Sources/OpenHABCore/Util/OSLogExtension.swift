@@ -44,4 +44,7 @@ public extension OSLog {
 
     /// Logs WkWebView events
     static let wkwebview = OSLog(subsystem: subsystem, category: "wkwebview")
+
+    /// Log Networking events
+    static let networking = OSLog(subsystem: subsystem, category: "networking")
 }
