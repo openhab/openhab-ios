@@ -78,26 +78,23 @@ class NotificationService: UNNotificationServiceExtension {
             // check if there is an attachment to put on the notification
             // this should be last as we need to wait for media
             // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
-            if let attachmentURLString = userInfo["media-attachment-url"] as? String, let attachmentURL = URL(string: attachmentURLString) {
-                if let scheme = attachmentURL.scheme {
-                    let isItem = scheme == "item"
-                    let downloadHandler: (URL, @escaping (UNNotificationAttachment?) -> Void) -> Void = if isItem {
-                        downloadAndAttachItemImage
+            if let attachmentURLString = userInfo["media-attachment-url"] as? String {
+                let isItem = attachmentURLString.starts(with: "item:")
+
+                let downloadCompletionHandler: @Sendable (UNNotificationAttachment?) -> Void = { attachment in
+                    if let attachment {
+                        os_log("handleNotification attaching %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+                        bestAttemptContent.attachments = [attachment]
                     } else {
-                        downloadAndAttachMedia
+                        os_log("handleNotification could not attach %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
                     }
-                    os_log("handleNotification downloading %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
-                    downloadHandler(attachmentURL) { attachment in
-                        if let attachment {
-                            os_log("handleNotification attaching %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
-                            bestAttemptContent.attachments = [attachment]
-                        } else {
-                            os_log("handleNotification could not attach %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
-                        }
-                        contentHandler(bestAttemptContent)
-                    }
-                } else {
                     contentHandler(bestAttemptContent)
+                }
+
+                if isItem {
+                    downloadAndAttachItemImage(itemURI: attachmentURLString, completion: downloadCompletionHandler)
+                } else {
+                    downloadAndAttachMedia(url: attachmentURLString, completion: downloadCompletionHandler)
                 }
             } else {
                 contentHandler(bestAttemptContent)
@@ -137,9 +134,10 @@ class NotificationService: UNNotificationServiceExtension {
         return nil
     }
 
-    private func downloadAndAttachMedia(url: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
+    private func downloadAndAttachMedia(url: String, completion: @escaping (UNNotificationAttachment?) -> Void) {
         let client = HTTPClient(username: Preferences.username, password: Preferences.username) // lets not always send auth with this
-        client.downloadFile(url: url) { localURL, response, error in
+
+        let downloadCompletionHandler: @Sendable (URL?, URLResponse?, Error?) -> Void = { (localURL, response, error) in
             guard let localURL else {
                 os_log("Error downloading media %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "Unknown error")
                 completion(nil)
@@ -147,16 +145,21 @@ class NotificationService: UNNotificationServiceExtension {
             }
             self.attachFile(localURL: localURL, mimeType: response?.mimeType, completion: completion)
         }
+        if url.starts(with: "/") {
+            client.downloadFile(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: url, completionHandler: downloadCompletionHandler)
+        } else {
+            client.downloadFile(url: url, completionHandler: downloadCompletionHandler)
+        }
     }
 
-    func downloadAndAttachItemImage(attachmentURL: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
-        guard let scheme = attachmentURL.scheme else {
+    func downloadAndAttachItemImage(itemURI: String, completion: @escaping (UNNotificationAttachment?) -> Void) {
+        guard let itemURI = URL(string: itemURI), let scheme = itemURI.scheme else {
             os_log("Could not find scheme %{PUBLIC}@", log: .default, type: .info)
             completion(nil)
             return
         }
 
-        let itemName = String(attachmentURL.absoluteString.dropFirst(scheme.count + 1))
+        let itemName = String(itemURI.absoluteString.dropFirst(scheme.count + 1))
 
         let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
         client.getItem(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], itemName: itemName) { item, error in
