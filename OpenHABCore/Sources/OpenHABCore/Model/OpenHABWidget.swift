@@ -50,13 +50,15 @@ protocol Widget: AnyObject {
 }
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
-    public enum WidgetType: String {
+    public enum WidgetType: String, Decodable, UnknownCaseRepresentable {
+        static var unknownCase: OpenHABWidget.WidgetType = .unknown
         case chart = "Chart"
         case colorpicker = "Colorpicker"
         case defaultWidget = "Default"
         case frame = "Frame"
         case group = "Group"
         case image = "Image"
+        case input = "Input"
         case mapview = "Mapview"
         case selection = "Selection"
         case setpoint = "Setpoint"
@@ -68,13 +70,18 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
         case unknown = "Unknown"
     }
 
+    public enum InputHint: String, Decodable, UnknownCaseRepresentable {
+        static var unknownCase: OpenHABWidget.InputHint = .text
+        case text, number, date, time, datetime
+    }
+
     public var id: String = ""
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
     public var label = ""
     public var icon = ""
-    public var type: WidgetType?
+    public var type: WidgetType = .unknownCase
     public var url = ""
     public var period = ""
     public var minValue = 0.0
@@ -90,6 +97,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var state = ""
     public var text = ""
     public var legend: Bool?
+    public var inputHint = InputHint.unknownCase
     public var encoding = ""
     public var forceAsItem: Bool?
     public var item: OpenHABItem?
@@ -207,15 +215,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     }
 }
 
-extension OpenHABWidget.WidgetType: Decodable {}
-
-extension OpenHABWidget.WidgetType: UnknownCaseRepresentable {
-    static var unknownCase: OpenHABWidget.WidgetType = .unknown
-}
-
 extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, inputHint: InputHint, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -242,6 +244,7 @@ extension OpenHABWidget {
         self.state = state ?? ""
         self.text = text ?? ""
         self.legend = legend
+        self.inputHint = inputHint
         self.encoding = encoding ?? ""
         self.item = item
         self.linkedPage = linkedPage
@@ -284,6 +287,7 @@ extension OpenHABWidget {
             // Bool
             case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
             case "legend": legend = child.stringValue == "true" ? true : false
+            case "inputHint": inputHint = InputHint(rawValue: child.stringValue)
             // Int
             case "refresh": refresh = Int(child.stringValue) ?? 0
             // Embedded
@@ -319,6 +323,7 @@ public extension OpenHABWidget {
         let state: String?
         let text: String?
         let legend: Bool?
+        let inputHint: InputHint
         let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
@@ -335,7 +340,7 @@ extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
         // swiftlint:disable:next line_length
-        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage?.openHABSitemapPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, inputHint: inputHint, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage?.openHABSitemapPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
     }
 }
 
