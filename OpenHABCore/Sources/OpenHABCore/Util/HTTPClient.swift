@@ -12,12 +12,6 @@
 import Foundation
 import os.log
 
-// Define a custom log object
-extension OSLog {
-    private static var subsystem = Bundle.main.bundleIdentifier!
-    static let networking = OSLog(subsystem: subsystem, category: "networking")
-}
-
 public class HTTPClient: NSObject, URLSessionDelegate {
     // MARK: - Properties
 
@@ -39,14 +33,6 @@ public class HTTPClient: NSObject, URLSessionDelegate {
         config.timeoutIntervalForResource = 60
 
         session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
-    }
-
-    // MARK: - Basic Authentication
-
-    private func basicAuthHeader() -> String {
-        let authString = "\(username):\(password)"
-        let authData = authString.data(using: .utf8)!
-        return "Basic \(authData.base64EncodedString())"
     }
 
     // MARK: - URLSessionDelegate for Client Certificates
@@ -74,8 +60,81 @@ public class HTTPClient: NSObject, URLSessionDelegate {
         }
     }
 
+    public func doGet(baseURLs: [String], path: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+        doRequest(baseURLs: baseURLs, path: path, method: "GET", completion: completion)
+    }
+
+    public func doPost(baseURLs: [String], path: String, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+        doRequest(baseURLs: baseURLs, path: path, method: "POST", body: body, completion: completion)
+    }
+
+    public func baseURLs(baseURLs: [String], path: String, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+        doRequest(baseURLs: baseURLs, path: path, method: "PUT", body: body, completion: completion)
+    }
+
+    public func getItems(baseURLs: [String], completion: @escaping ([OpenHABItem]?, Error?) -> Void) {
+        doGet(baseURLs: baseURLs, path: "/rest/items") { data, _, error in
+            if let error {
+                completion(nil, error)
+            } else {
+                do {
+                    var items = [OpenHABItem]()
+                    if let data {
+                        os_log("getItemsInternal Data: %{public}@", log: .networking, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+
+                        // if we are hitting an item, then its OpenHABItem.CodingData] not [OpenHABItem.CodingData]
+                        let codingDatas = try data.decoded(as: [OpenHABItem.CodingData].self, using: decoder)
+                        for codingDatum in codingDatas where codingDatum.openHABItem.type != OpenHABItem.ItemType.group {
+                            items.append(codingDatum.openHABItem)
+                        }
+                        os_log("Loaded items to cache: %{PUBLIC}d", log: .networking, type: .info, items.count)
+                    }
+                    completion(items, nil)
+                } catch {
+                    os_log("getItemsInternal ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))
+                    completion(nil, error)
+                }
+            }
+        }
+    }
+
+    public func getItem(baseURLs: [String], itemName: String, completion: @escaping (OpenHABItem?, Error?) -> Void) {
+        os_log("getItem from URsL %{public}@ and item %{public}@", log: .networking, type: .info, baseURLs, itemName)
+        doGet(baseURLs: baseURLs, path: "/rest/items/\(itemName)") { data, _, error in
+            if let error {
+                completion(nil, error)
+            } else {
+                do {
+                    if let data {
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                        let item = try data.decoded(as: OpenHABItem.CodingData.self, using: decoder)
+                        completion(item.openHABItem, nil)
+                    } else {
+                        completion(nil, NSError(domain: "HTTPClient", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data for item"]))
+                    }
+                } catch {
+                    os_log("getItemsInternal ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))
+                    completion(nil, error)
+                }
+            }
+        }
+    }
+
+    // MARK: - Private Methods
+
+    // MARK: - Basic Authentication
+
+    private func basicAuthHeader() -> String {
+        let authString = "\(username):\(password)"
+        let authData = authString.data(using: .utf8)!
+        return "Basic \(authData.base64EncodedString())"
+    }
+
     // Perform an HTTP request
-    public func performRequest(request: URLRequest, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    private func performRequest(request: URLRequest, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
         var request = request
         if alwaysSendBasicAuth {
             request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
@@ -131,19 +190,6 @@ public class HTTPClient: NSObject, URLSessionDelegate {
                 }
             }
         }
-
         sendRequest()
-    }
-
-    public func doGet(baseURLs: [String], path: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        doRequest(baseURLs: baseURLs, path: path, method: "GET", completion: completion)
-    }
-
-    public func doPost(baseURLs: [String], path: String, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        doRequest(baseURLs: baseURLs, path: path, method: "POST", body: body, completion: completion)
-    }
-
-    public func baseURLs(baseURLs: [String], path: String, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        doRequest(baseURLs: baseURLs, path: path, method: "PUT", body: body, completion: completion)
     }
 }
