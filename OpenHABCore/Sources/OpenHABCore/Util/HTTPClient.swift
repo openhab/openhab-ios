@@ -60,15 +60,15 @@ public class HTTPClient: NSObject, URLSessionDelegate {
         }
     }
 
-    public func doGet(baseURLs: [String], path: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    public func doGet(baseURLs: [String], path: String?, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
         doRequest(baseURLs: baseURLs, path: path, method: "GET", completion: completion)
     }
 
-    public func doPost(baseURLs: [String], path: String, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    public func doPost(baseURLs: [String], path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
         doRequest(baseURLs: baseURLs, path: path, method: "POST", body: body, completion: completion)
     }
 
-    public func baseURLs(baseURLs: [String], path: String, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    public func doPut(baseURLs: [String], path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
         doRequest(baseURLs: baseURLs, path: path, method: "PUT", body: body, completion: completion)
     }
 
@@ -123,6 +123,11 @@ public class HTTPClient: NSObject, URLSessionDelegate {
         }
     }
 
+    public func downloadFile(url: URL, completionHandler: @escaping @Sendable (URL?, URLResponse?, (any Error)?) -> Void) {
+        let task = session.downloadTask(with: url, completionHandler: completionHandler)
+        task.resume()
+    }
+
     // MARK: - Private Methods
 
     // MARK: - Basic Authentication
@@ -144,11 +149,13 @@ public class HTTPClient: NSObject, URLSessionDelegate {
     }
 
     // General function to perform HTTP requests
-    private func doRequest(baseURLs: [String], path: String, method: String, body: String? = nil, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    private func doRequest(baseURLs: [String], path: String?, method: String, body: String? = nil, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
         var urls: [URL] = []
         for urlString in baseURLs {
             if var urlComponent = URLComponents(string: urlString) {
-                urlComponent.path = path
+                if let path {
+                    urlComponent.path = path
+                }
                 if let url = urlComponent.url {
                     urls.append(url)
                 }

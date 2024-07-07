@@ -138,7 +138,8 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     private func downloadAndAttachMedia(url: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
-        let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        let client = HTTPClient(username: Preferences.username, password: Preferences.username) // lets not always send auth with this
+        client.downloadFile(url: url) { localURL, response, error in
             guard let localURL else {
                 os_log("Error downloading media %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "Unknown error")
                 completion(nil)
@@ -146,7 +147,6 @@ class NotificationService: UNNotificationServiceExtension {
             }
             self.attachFile(localURL: localURL, mimeType: response?.mimeType, completion: completion)
         }
-        task.resume()
     }
 
     func downloadAndAttachItemImage(attachmentURL: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
@@ -158,7 +158,7 @@ class NotificationService: UNNotificationServiceExtension {
 
         let itemName = String(attachmentURL.absoluteString.dropFirst(scheme.count + 1))
 
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username)
+        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
         client.getItem(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], itemName: itemName) { item, error in
             guard let item else {
                 os_log("Could not find item %{PUBLIC}@", log: .default, type: .info, itemName)
