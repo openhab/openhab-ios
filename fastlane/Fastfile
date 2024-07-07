@@ -168,15 +168,15 @@ platform :ios do
         ensure_git_status_clean
         push_to_git_remote
 
-        # merge into main and tag if not a feature build
+        # tag if not a feature build
         if !options[:isfeaturebuild]
-            sh 'git checkout main && git merge develop --no-ff'
+            #sh 'git checkout main && git merge develop --no-ff'
             add_git_tag(
                 message: changelog,
                 tag: version.to_s
             )
             push_to_git_remote(tags: true)
-            sh 'git checkout develop'
+            #sh 'git checkout develop'
 
             if is_ci?
                 set_github_release(
@@ -185,7 +185,7 @@ platform :ios do
                   name: "#{type.capitalize} version #{version}",
                   tag_name: version.to_s,
                   description: changelog,
-                  commitish: 'main'
+                  commitish: 'develop'
                   # upload_assets: no assets supported
                 )
             else
@@ -195,7 +195,7 @@ platform :ios do
                   name: "#{type.capitalize} version #{version}",
                   tag_name: version.to_s,
                   description: changelog,
-                  commitish: 'main'
+                  commitish: 'develop'
                   # upload_assets: no assets supported
                 )
             end
