@@ -76,7 +76,7 @@ public class OpenHABItemCache {
 
         guard let uurl = getURL() else { return }
 
-        os_log("Loading items from %{PUBLIC}@", log: .default, type: .info, url)
+        os_log("Loading items from %{public}@", log: .default, type: .info, url)
 
         if NetworkConnection.shared == nil {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
@@ -92,16 +92,16 @@ public class OpenHABItemCache {
 
                     completion(ret)
                 } catch {
-                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                    os_log("%{public}@ ", log: .default, type: .error, error.localizedDescription)
                 }
             case let .failure(error):
                 if self.lastUrlConnected == OpenHABItemCache.URL_LOCAL {
                     self.localUrlFailed = true
-                    os_log("%{PUBLIC}@ ", log: .default, type: .info, error.localizedDescription)
+                    os_log("%{public}@ ", log: .default, type: .info, error.localizedDescription)
                     self.reload(searchTerm: searchTerm, types: types, completion: completion) // try remote
 
                 } else {
-                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                    os_log("%{public}@ ", log: .default, type: .error, error.localizedDescription)
                 }
             }
         }
@@ -113,7 +113,7 @@ public class OpenHABItemCache {
 
         guard let uurl = getURL() else { return }
 
-        os_log("Loading items from %{PUBLIC}@", log: .default, type: .info, url)
+        os_log("Loading items from %{public}@", log: .default, type: .info, url)
 
         if NetworkConnection.shared == nil {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
@@ -130,16 +130,16 @@ public class OpenHABItemCache {
                     completion(item)
 
                 } catch {
-                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                    os_log("%{public}@ ", log: .default, type: .error, error.localizedDescription)
                 }
             case let .failure(error):
                 if self.lastUrlConnected == OpenHABItemCache.URL_LOCAL {
                     self.localUrlFailed = true
-                    os_log("%{PUBLIC}@ ", log: .default, type: .info, error.localizedDescription)
+                    os_log("%{public}@ ", log: .default, type: .info, error.localizedDescription)
                     self.reload(name: name, completion: completion) // try remote
 
                 } else {
-                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                    os_log("%{public}@ ", log: .default, type: .error, error.localizedDescription)
                 }
             }
         }
@@ -180,6 +180,6 @@ public class OpenHABItemCache {
             self.items?.append(codingDatum.openHABItem)
         }
 
-        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, items?.count ?? 0)
+        os_log("Loaded items to cache: %{public}d", log: .default, type: .info, items?.count ?? 0)
     }
 }

@@ -22,7 +22,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         // TODO: Use RemoteUrl, TOO
-        os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
+        os_log("didReceiveMessage %{public}@", log: .watch, type: .info, "\(message)")
 
         if message["request"] != nil {
             let applicationDict = buildApplicationDict()
@@ -31,11 +31,11 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        os_log("Received message: %{PUBLIC}@", log: .watch, type: .info, message)
+        os_log("Received message: %{public}@", log: .watch, type: .info, message)
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
+        os_log("activationDidCompleteWith activationState %{public}@ error: %{public}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {

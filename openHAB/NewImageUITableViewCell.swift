@@ -149,7 +149,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     }
 
     private func loadRemoteImage(withURL url: URL) {
-        os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
+        os_log("Image URL: %{public}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
 
         var imageRequest = URLRequest(url: url)
         imageRequest.timeoutInterval = 10.0
@@ -173,7 +173,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
                         self?.didLoad?()
                     }
                 case let .failure(error):
-                    os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+                    os_log("Download failed: %{public}@", log: .urlComposition, type: .debug, error.localizedDescription)
                 }
             }
         downloadRequest?.resume()

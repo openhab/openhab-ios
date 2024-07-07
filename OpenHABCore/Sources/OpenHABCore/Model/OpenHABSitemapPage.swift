@@ -65,7 +65,7 @@ public class OpenHABSitemapPage: NSObject {
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item else { return }
 
-        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command.orEmpty, item.name)
+        os_log("SitemapPage sending command %{public}@ to %{public}@", log: OSLog.remoteAccess, type: .info, command.orEmpty, item.name)
         sendCommand?(item, command)
     }
 }

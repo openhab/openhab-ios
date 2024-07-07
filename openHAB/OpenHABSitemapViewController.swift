@@ -179,7 +179,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             OpenHABTracker.shared.restart()
         } else {
             if !pageNetworkStatusChanged() {
-                os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
+                os_log("OpenHABSitemapViewController pageUrl = %{public}@", log: .notifications, type: .info, pageUrl)
                 loadPage(false)
             } else {
                 os_log("OpenHABSitemapViewController network status changed while I was not appearing", log: .viewCycle, type: .info)
@@ -311,7 +311,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         if pageUrl == "" {
             return
         }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+        os_log("pageUrl = %{public}@", log: OSLog.remoteAccess, type: .info, pageUrl)
 
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
@@ -333,18 +333,18 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
                 NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
                 if !NetworkConnection.atmosphereTrackingId.isEmpty {
-                    os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
+                    os_log("Found X-Atmosphere-tracking-id: %{public}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
                 }
                 var openHABSitemapPage: OpenHABSitemapPage?
 
                 // If we are talking to openHAB 1.X, talk XML
                 if appData?.openHABVersion == 1 {
                     let str = String(decoding: data, as: UTF8.self)
-                    os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
+                    os_log("%{public}@", log: .remoteAccess, type: .info, str)
 
                     guard let doc = try? XMLDocument(data: data) else { return }
                     if let rootElement = doc.root, let name = rootElement.tag {
-                        os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
+                        os_log("XML sitemap with root element: %{public}@", log: .remoteAccess, type: .info, name)
                         if name == "page" {
                             openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
                         }
@@ -360,7 +360,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                             return sitemapPageCodingData.openHABSitemapPage
                         }()
                     } catch {
-                        os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                        os_log("Should not throw %{public}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                     }
                 }
 
@@ -383,7 +383,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
                 loadPage(true)
             case let .failure(error):
-                os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                os_log("On LoadPage \"%{public}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
 
                 NetworkConnection.atmosphereTrackingId = ""
                 if (error as NSError?)?.code == -1001, longPolling {
@@ -440,7 +440,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 }
                 self.widgetTableView.reloadData()
             case let .failure(error):
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                os_log("%{public}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                 DispatchQueue.main.async {
                     // Error
                     if (error as NSError?)?.code == -1012 {
@@ -540,18 +540,18 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
 extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
     func openHABTracked(_ openHABUrl: URL?, version: Int) {
-        os_log("OpenHABSitemapViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
+        os_log("OpenHABSitemapViewController openHAB URL =  %{public}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
         openHABRootUrl = openHABUrl?.absoluteString ?? ""
         selectSitemap()
     }
 
     func openHABTrackingProgress(_ message: String?) {
-        os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
+        os_log("OpenHABSitemapViewController %{public}@", log: .viewCycle, type: .info, message ?? "")
         showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message ?? "", theme: .info)
     }
 
     func openHABTrackingError(_ error: Error) {
-        os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+        os_log("Tracking error: %{public}@", log: .viewCycle, type: .info, error.localizedDescription)
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
     }
 }
@@ -704,9 +704,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
                     switch result {
                     case let .success(value):
-                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
+                        os_log("Task done for: %{public}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
                     case let .failure(error):
-                        os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+                        os_log("Job failed: %{public}@", log: .viewCycle, type: .info, error.localizedDescription)
                     }
                 }
 
@@ -758,7 +758,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
         if widget?.linkedPage != nil {
             if let link = widget?.linkedPage?.link {
-                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
+                os_log("Selected %{public}@", log: .viewCycle, type: .info, link)
             }
             selectedWidgetRow = indexPath.row
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!

@@ -46,7 +46,7 @@ class WebUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
+        os_log("webview loading url %{public}@", log: .default, type: .info, widget.url)
 
         let urlString = widget.url.lowercased().hasPrefix("http") ? widget.url : Preferences.localUrl + widget.url
         guard url?.absoluteString != urlString else {
@@ -79,28 +79,28 @@ extension WebUITableViewCell: GenericCellCacheProtocol {
 
 extension WebUITableViewCell: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        os_log("webview started loading with URL: %{PUBLIC}s", log: .viewCycle, type: .info, widget.url)
+        os_log("webview started loading with URL: %{public}s", log: .viewCycle, type: .info, widget.url)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        os_log("webview finished load with URL: %{PUBLIC}s", log: .viewCycle, type: .info, widget.url)
+        os_log("webview finished load with URL: %{public}s", log: .viewCycle, type: .info, widget.url)
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if let response = navigationResponse.response as? HTTPURLResponse, response.statusCode >= 400 {
-            os_log("webview failed with status code: %{PUBLIC}i", log: .urlComposition, type: .debug, response.statusCode)
+            os_log("webview failed with status code: %{public}i", log: .urlComposition, type: .debug, response.statusCode)
             url = nil
         }
         decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
+        os_log("webview failed with error: %{public}s", log: .urlComposition, type: .debug, error.localizedDescription)
         url = nil
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
+        os_log("webview failed with error: %{public}s", log: .urlComposition, type: .debug, error.localizedDescription)
         url = nil
     }
 

@@ -75,7 +75,7 @@ class OpenHABTracker: NSObject {
             restartTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
                 if nStatus != self.oldReachabilityStatus {
                     if let oldReachabilityStatus = self.oldReachabilityStatus {
-                        os_log("OpenHABTracker Network status changed from %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
+                        os_log("OpenHABTracker Network status changed from %{public}@ to %{public}@", log: OSLog.remoteAccess, type: .info, self.string(from: oldReachabilityStatus) ?? "", self.string(from: nStatus) ?? "")
                     }
                     self.oldReachabilityStatus = nStatus
                     if self.isNetworkConnected() {
@@ -145,7 +145,7 @@ class OpenHABTracker: NSObject {
         multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("connecting", comment: "")) }
         tryUrls(urls) { url, version, error in
             if let error {
-                os_log("OpenHABTracker failed %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                os_log("OpenHABTracker failed %{public}@", log: .default, type: .info, error.localizedDescription)
                 self.multicastDelegate.invoke { $0.openHABTrackingError(error) }
             } else {
                 self.appData?.openHABVersion = version
@@ -177,7 +177,7 @@ class OpenHABTracker: NSObject {
                 request.responseData { response in
                     // remove us from the outstanding request list
                     requests.removeValue(forKey: url)
-                    os_log("OpenHABTracker response for URL %{PUBLIC}@", log: .notifications, type: .error, url.absoluteString)
+                    os_log("OpenHABTracker response for URL %{public}@", log: .notifications, type: .error, url.absoluteString)
                     switch response.result {
                     case let .success(data):
                         let version = self.getServerInfoFromData(data: data)
@@ -190,7 +190,7 @@ class OpenHABTracker: NSObject {
                             completion(url, version, nil)
                         }
                     case let .failure(error):
-                        os_log("OpenHABTracker request failure %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+                        os_log("OpenHABTracker request failure %{public}@", log: .notifications, type: .error, error.localizedDescription)
                     }
                     // check if we are the last attempt
                     if !isRequestCompletedSuccessfully, requests.isEmpty, timers.isEmpty {
@@ -232,9 +232,9 @@ class OpenHABTracker: NSObject {
     ///   - completion: Completes with the url and version of openHAB that succeeded, or an Error object if failed
     private func getServerInfoForUrl(_ url: URL?, completion: @escaping (URL?, Int, Error?) -> Void) {
         let strUrl = url?.absoluteString ?? ""
-        os_log("OpenHABTracker getServerInfo, trying: %{PUBLIC}@", log: .default, type: .info, strUrl)
+        os_log("OpenHABTracker getServerInfo, trying: %{public}@", log: .default, type: .info, strUrl)
         NetworkConnection.tracker(openHABRootUrl: strUrl) { response in
-            os_log("OpenHABTracker getServerInfo, recieved data for URL: %{PUBLIC}@", log: .default, type: .info, strUrl)
+            os_log("OpenHABTracker getServerInfo, recieved data for URL: %{public}@", log: .default, type: .info, strUrl)
             switch response.result {
             case let .success(data):
                 let version = self.getServerInfoFromData(data: data)
@@ -244,7 +244,7 @@ class OpenHABTracker: NSObject {
                     completion(url, 0, self.errorMessage("error"))
                 }
             case let .failure(error):
-                os_log("OpenHABTracker getServerInfo ERROR for %{PUBLIC}@ : %{PUBLIC}@ %d", log: .remoteAccess, type: .error, strUrl, error.localizedDescription, response.response?.statusCode ?? 0)
+                os_log("OpenHABTracker getServerInfo ERROR for %{public}@ : %{public}@ %d", log: .remoteAccess, type: .error, strUrl, error.localizedDescription, response.response?.statusCode ?? 0)
                 completion(url, 0, error)
             }
         }
@@ -310,7 +310,7 @@ extension OpenHABTracker: NetServiceDelegate, NetServiceBrowserDelegate {
         }()
 
         let openhabUrl = "\(resolvedComponents.url!)"
-        os_log("OpenHABTracker discovered:%{PUBLIC}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
+        os_log("OpenHABTracker discovered:%{public}@ ", log: OSLog.remoteAccess, type: .info, openhabUrl)
         tryDiscoveryUrl(resolvedComponents.url)
     }
 

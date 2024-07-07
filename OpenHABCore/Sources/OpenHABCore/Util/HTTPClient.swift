@@ -89,11 +89,11 @@ public class HTTPClient: NSObject, URLSessionDelegate {
                         for codingDatum in codingDatas where codingDatum.openHABItem.type != OpenHABItem.ItemType.group {
                             items.append(codingDatum.openHABItem)
                         }
-                        os_log("Loaded items to cache: %{PUBLIC}d", log: .networking, type: .info, items.count)
+                        os_log("Loaded items to cache: %{public}d", log: .networking, type: .info, items.count)
                     }
                     completion(items, nil)
                 } catch {
-                    os_log("getItemsInternal ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))
+                    os_log("getItemsInternal ERROR: %{public}@", log: .networking, type: .info, String(describing: error))
                     completion(nil, error)
                 }
             }
@@ -116,7 +116,7 @@ public class HTTPClient: NSObject, URLSessionDelegate {
                         completion(nil, NSError(domain: "HTTPClient", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data for item"]))
                     }
                 } catch {
-                    os_log("getItemsInternal ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))
+                    os_log("getItemsInternal ERROR: %{public}@", log: .networking, type: .info, String(describing: error))
                     completion(nil, error)
                 }
             }

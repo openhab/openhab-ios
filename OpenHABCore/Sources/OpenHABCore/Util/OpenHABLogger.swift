@@ -18,11 +18,11 @@ final class OpenHABLogger: EventMonitor {
 
     // Event called when any type of Request is resumed.
     func requestDidResume(_ request: Request) {
-        os_log("Resuming: %{PUBLIC}@", log: .alamofire, type: .info, request.description)
+        os_log("Resuming: %{public}@", log: .alamofire, type: .info, request.description)
     }
 
     // Event called whenever a DataRequest has parsed a response.
     func request(_ request: DataRequest, didParseResponse response: DataResponse<some Any, AFError>) {
-        os_log("Finished %{PUBLIC}@", log: .alamofire, type: .debug, response.error.debugDescription)
+        os_log("Finished %{public}@", log: .alamofire, type: .debug, response.error.debugDescription)
     }
 }

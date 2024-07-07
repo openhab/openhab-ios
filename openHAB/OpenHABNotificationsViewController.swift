@@ -58,14 +58,14 @@ class OpenHABNotificationsViewController: UITableViewController {
                         self.notifications.add(codingDatum.openHABNotification)
                     }
                 } catch {
-                    os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+                    os_log("%{public}@ ", log: .default, type: .error, error.localizedDescription)
                 }
 
                 self.refreshControl?.endRefreshing()
                 self.tableView.reloadData()
 
             case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                os_log("%{public}@", log: .default, type: .error, error.localizedDescription)
                 self.refreshControl?.endRefreshing()
             }
         }

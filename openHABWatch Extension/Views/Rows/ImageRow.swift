@@ -20,10 +20,10 @@ struct ImageRow: View {
     var body: some View {
         KFImage(URL)
             .onSuccess { retrieveImageResult in
-                os_log("Success loading icon: %{PUBLIC}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
+                os_log("Success loading icon: %{public}s", log: .notifications, type: .debug, "\(retrieveImageResult)")
             }
             .onFailure { kingfisherError in
-                os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
+                os_log("Failure loading icon: %{public}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
             }
             .placeholder {
                 Image(systemName: "arrow.2.circlepath.circle")

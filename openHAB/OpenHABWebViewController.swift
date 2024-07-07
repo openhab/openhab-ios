@@ -94,7 +94,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func loadWebView(force: Bool = false, path: String? = nil) {
-        os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl)
+        os_log("loadWebView %{public}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl)
 
         let authStr = "\(Preferences.username):\(Preferences.password)"
         let newTarget = "\(openHABTrackedRootUrl):\(authStr)"
@@ -165,7 +165,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func clearExistingPage() {
-        os_log("clearExistingPage - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        os_log("clearExistingPage - webView.url %{public}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         setHideNavBar(shouldHide: false)
         // clear out existing page while we load.
         webView.stopLoading()
@@ -173,7 +173,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func pageLoadError(message: String) {
-        os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
+        os_log("pageLoadError - webView.url %{public}@ %{public}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
         showActivityIndicator(show: false)
         // webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
@@ -203,7 +203,7 @@ class OpenHABWebViewController: OpenHABViewController {
         let jsCode = "window.MainUI.handleCommand('\(command)')"
         webView.evaluateJavaScript(jsCode) { (_, error) in
             if let error {
-                os_log("navigateCommandInternal failed %{PUBLIC}@", log: .wkwebview, type: .error, error.localizedDescription)
+                os_log("navigateCommandInternal failed %{public}@", log: .wkwebview, type: .error, error.localizedDescription)
             } else {
                 os_log("navigateCommandInternal Success", log: .wkwebview, type: .info)
             }
@@ -241,7 +241,7 @@ class OpenHABWebViewController: OpenHABViewController {
             if let webviewURL = webView.url {
                 let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
                 if let path = url?.path {
-                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
+                    os_log("navigation change base: %{public}@ path: %{public}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
                     // append trailing slash as WebUI/Vue/F7 will try and issue a 302 if the url is navigated to directly, this can be problamatic on myopenHAB
                     self.appData?.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
                 }
@@ -257,9 +257,9 @@ class OpenHABWebViewController: OpenHABViewController {
 
 extension OpenHABWebViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
+        os_log("WKScriptMessage %{public}@", log: OSLog.remoteAccess, type: .info, message.name)
         if let callbackName = message.body as? String {
-            os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, callbackName)
+            os_log("WKScriptMessage %{public}@", log: OSLog.remoteAccess, type: .info, callbackName)
             switch callbackName {
             case "exitToApp":
                 showSideMenu()
@@ -299,7 +299,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         }
 
         guard let url = navigationAction.request.url else { return }
-        os_log("decidePolicyFor - url: %{PUBLIC}@", log: .wkwebview, type: .info, url.absoluteString)
+        os_log("decidePolicyFor - url: %{public}@", log: .wkwebview, type: .info, url.absoluteString)
 
         if navigationAction.navigationType == .linkActivated {
             action = .cancel // Stop in WebView
@@ -311,7 +311,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if let response = navigationResponse.response as? HTTPURLResponse {
             dump(response.allHeaderFields)
-            os_log("navigationResponse: %{PUBLIC}@", log: .wkwebview, type: .info, String(response.statusCode))
+            os_log("navigationResponse: %{public}@", log: .wkwebview, type: .info, String(response.statusCode))
             if response.statusCode >= 400 {
                 pageLoadError(message: "\(response.statusCode)")
                 decisionHandler(.cancel)
@@ -322,12 +322,12 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        os_log("didStartProvisionalNavigation - webView.url: %{public}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: true)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        os_log("didFail - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        os_log("didFail - webView.url %{public}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         let nserror = error as NSError
         if nserror.code != NSURLErrorCancelled {
             pageLoadError(message: nserror.localizedDescription)
@@ -335,14 +335,14 @@ extension OpenHABWebViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        os_log("didFinish - webView.url %{public}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
         showActivityIndicator(show: false)
         hidePopupMessages()
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
+        os_log("Challenge.protectionSpace.authtenticationMethod: %{public}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
 
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             // openHABTracker takes care of triggering server trust prompts
@@ -403,7 +403,7 @@ extension OpenHABWebViewController: WKUIDelegate {
 
 extension OpenHABWebViewController: OpenHABTrackerDelegate {
     func openHABTracked(_ openHABUrl: URL?, version: Int) {
-        os_log("OpenHABWebViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
+        os_log("OpenHABWebViewController openHAB URL =  %{public}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
         if version >= 2 {
             openHABTrackedRootUrl = openHABUrl?.absoluteString ?? ""
             loadWebView(force: false)
@@ -414,12 +414,12 @@ extension OpenHABWebViewController: OpenHABTrackerDelegate {
     }
 
     func openHABTrackingProgress(_ message: String?) {
-        os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
+        os_log("OpenHABViewController %{public}@", log: .viewCycle, type: .info, message ?? "")
         showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message ?? "", theme: .info)
     }
 
     func openHABTrackingError(_ error: Error) {
-        os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+        os_log("Tracking error: %{public}@", log: .viewCycle, type: .info, error.localizedDescription)
         pageLoadError(message: error.localizedDescription)
     }
 }

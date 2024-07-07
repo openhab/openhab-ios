@@ -18,7 +18,7 @@ extension ObservableOpenHABWidget {
         if let linkedPage {
             let title = linkedPage.title.components(separatedBy: "[")[0]
             let pageUrl = linkedPage.link
-            // os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
+            // os_log("Selected %{public}@", log: .viewCycle, type: .info, pageUrl)
             NavigationLink(destination:
                 LazyView(
                     ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings: settings, title: title))

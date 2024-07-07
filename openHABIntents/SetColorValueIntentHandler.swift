@@ -36,7 +36,7 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     }
 
     func handle(intent: OpenHABSetColorValueIntent, completion: @escaping (OpenHABSetColorValueIntentResponse) -> Void) {
-        os_log("SetColorValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+        os_log("SetColorValueIntent for %{public}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
             completion(OpenHABSetColorValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))

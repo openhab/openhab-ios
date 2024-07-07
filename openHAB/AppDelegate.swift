@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             if let session {
                 session.delegate = WatchMessageService.singleton
                 session.activate()
-                os_log("Paired watch %{PUBLIC}@, watch app installed %{PUBLIC}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
+                os_log("Paired watch %{public}@, watch app installed %{public}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
             }
         }
     }
@@ -64,8 +64,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         registerForPushNotifications()
 
-        os_log("uniq id: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.identifierForVendor?.uuidString ?? "")
-        os_log("device name: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.name)
+        os_log("uniq id: %{public}s", log: .notifications, type: .info, UIDevice.current.identifierForVendor?.uuidString ?? "")
+        os_log("device name: %{public}s", log: .notifications, type: .info, UIDevice.current.name)
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -113,10 +113,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
             guard let self else { return }
-            os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
+            os_log("Permission granted: %{public}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
-                os_log("Notification settings: %{PUBLIC}@", log: .notifications, type: .info, settings)
+                os_log("Notification settings: %{public}@", log: .notifications, type: .info, settings)
 
                 guard settings.authorizationStatus == .authorized else { return }
                 DispatchQueue.main.async {
@@ -131,9 +131,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
 
-        os_log("Calling Application Bundle ID: %{PUBLIC}@", log: .notifications, type: .info, options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")
-        os_log("URL scheme: %{PUBLIC}@", log: .notifications, type: .info, url.scheme ?? "")
-        os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
+        os_log("Calling Application Bundle ID: %{public}@", log: .notifications, type: .info, options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")
+        os_log("URL scheme: %{public}@", log: .notifications, type: .info, url.scheme ?? "")
+        os_log("URL query: %{public}@", log: .notifications, type: .info, url.query ?? "")
 
         if url.isFileURL {
             let clientCertificateManager = NetworkConnection.shared.clientCertificateManager
@@ -149,16 +149,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+        os_log("Failed to get token for notifications: %{public}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
     // this is called for "content-available" silent notifications (background notifications)
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .default, type: .info, userInfo)
+        os_log("didReceiveRemoteNotification %{public}@", log: .default, type: .info, userInfo)
         // Hide notification logic
         if let type = userInfo["type"] as? String, type == "hideNotification" {
             if let refid = userInfo["reference-id"] as? String {
-                os_log("didReceiveRemoteNotification remove id %{PUBLIC}@", log: .default, type: .info, refid)
+                os_log("didReceiveRemoteNotification remove id %{public}@", log: .default, type: .info, refid)
                 UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [refid])
             }
             if let tag = userInfo["tag"] as? String {
@@ -171,7 +171,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                     let identifiers = notificationsWithSeverity.map(\.request.identifier)
 
                     if !identifiers.isEmpty {
-                        os_log("didReceiveRemoteNotification remove tag %{PUBLIC}@ %{PUBLIC}@", log: .default, type: .info, tag, identifiers)
+                        os_log("didReceiveRemoteNotification remove tag %{public}@ %{public}@", log: .default, type: .info, tag, identifiers)
                         // Remove the filtered notifications
                         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
                     }
@@ -184,7 +184,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     // this is called when a notification comes in while in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
-        os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
+        os_log("Notification received while app is in foreground: %{public}@", log: .notifications, type: .info, userInfo)
         appData.lastNotificationInfo = userInfo
         displayNotification(userInfo: userInfo)
         completionHandler([])
@@ -206,17 +206,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 
     private func displayNotification(userInfo: [AnyHashable: Any]) {
-        os_log("displayNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo["message"] as? String ?? "no message")
+        os_log("displayNotification %{public}@", log: .notifications, type: .info, userInfo["message"] as? String ?? "no message")
 
         let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
         if let soundPath {
             do {
-                os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
+                os_log("Sound path %{public}@", log: .notifications, type: .info, soundPath.debugDescription)
                 player = try AVAudioPlayer(contentsOf: soundPath)
                 player?.numberOfLoops = 0
                 player?.play()
             } catch {
-                os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+                os_log("%{public}@", log: .notifications, type: .error, error.localizedDescription)
             }
             player = try? AVAudioPlayer(contentsOf: soundPath)
         }
@@ -277,7 +277,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        os_log("My FCM token is: %{PUBLIC}@", log: .notifications, type: .info, fcmToken ?? "")
+        os_log("My FCM token is: %{public}@", log: .notifications, type: .info, fcmToken ?? "")
         let dataDict = [
             "deviceToken": fcmToken ?? "",
             "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",

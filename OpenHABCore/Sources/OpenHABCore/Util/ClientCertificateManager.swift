@@ -98,14 +98,14 @@ public class ClientCertificateManager {
             kSecValueRef as String: cert!
         ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
-        os_log("SecItemDelete(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
+        os_log("SecItemDelete(cert) result=%{public}d", log: .default, type: .info, status)
         if status == noErr {
             let deleteKeyQuery: [String: Any] = [
                 kSecClass as String: kSecClassKey,
                 kSecValueRef as String: key!
             ]
             status = SecItemDelete(deleteKeyQuery as NSDictionary)
-            os_log("SecItemDelete(key) result=%{PUBLIC}d", log: .default, type: .info, status)
+            os_log("SecItemDelete(key) result=%{public}d", log: .default, type: .info, status)
         }
 
         // Figure out which certs in the certificate chain also need to be removed.
@@ -124,7 +124,7 @@ public class ClientCertificateManager {
                     ]
                     let status = SecItemDelete(deleteCertQuery as NSDictionary)
                     let summary = SecCertificateCopySubjectSummary(ct) as String? ?? ""
-                    os_log("SecItemDelete(certChain) %s result=%{PUBLIC}d", log: .default, type: .info, summary, status)
+                    os_log("SecItemDelete(certChain) %s result=%{public}d", log: .default, type: .info, summary, status)
                 }
             }
         }
@@ -198,7 +198,7 @@ public class ClientCertificateManager {
             kSecValueRef as String: clientCert!
         ]
         var status = SecItemAdd(addCertQuery as NSDictionary, nil)
-        os_log("SecItemAdd(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
+        os_log("SecItemAdd(cert) result=%{public}d", log: .default, type: .info, status)
         if status == noErr {
             let addKeyQuery: [String: Any] = [
                 kSecClass as String: kSecClassKey,
@@ -206,7 +206,7 @@ public class ClientCertificateManager {
                 kSecValueRef as String: clientKey!
             ]
             status = SecItemAdd(addKeyQuery as NSDictionary, nil)
-            os_log("SecItemAdd(key) result=%{PUBLIC}d", log: .default, type: .info, status)
+            os_log("SecItemAdd(key) result=%{public}d", log: .default, type: .info, status)
 
             // Add  the cert chain
             if let importingCertChain {
@@ -216,7 +216,7 @@ public class ClientCertificateManager {
                         kSecValueRef as String: cert
                     ]
                     status = SecItemAdd(addCertQuery as NSDictionary, nil)
-                    os_log("SecItemAdd(certChain) result=%{PUBLIC}d", log: .default, type: .info, status)
+                    os_log("SecItemAdd(certChain) result=%{public}d", log: .default, type: .info, status)
                     if status == errSecDuplicateItem {
                         // Ignore duplicates as there may already be other client certs with an overlapping issuer chain
                         status = noErr
@@ -251,7 +251,7 @@ public class ClientCertificateManager {
             importingIdentity = identityDictionaries[0][kSecImportItemIdentity as String] as! SecIdentity?
             importingCertChain = identityDictionaries[0][kSecImportItemCertChain as String] as! [SecCertificate]?
         } else {
-            os_log("SecPKCS12Import failed; result=%{PUBLIC}d", log: .default, type: .info, status)
+            os_log("SecPKCS12Import failed; result=%{public}d", log: .default, type: .info, status)
         }
         return status
     }

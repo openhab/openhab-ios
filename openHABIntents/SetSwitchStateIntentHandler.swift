@@ -48,7 +48,7 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
     }
 
     func handle(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
-        os_log("SetSwitchStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+        os_log("SetSwitchStateIntent for %{public}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
             completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))

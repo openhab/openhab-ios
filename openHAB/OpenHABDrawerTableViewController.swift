@@ -24,12 +24,12 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
         os_log("openHAB 1", log: .viewCycle, type: .info)
 
         if let response {
-            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
+            os_log("%{public}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
         }
         if let data = response,
            let doc = try? XMLDocument(data: data),
            let name = doc.root?.tag {
-            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
+            os_log("%{public}@", log: .remoteAccess, type: .info, name)
             if name == "sitemaps" {
                 for element in doc.root?.children(tag: "sitemap") ?? [] {
                     let sitemap = OpenHABSitemap(xml: element)
@@ -47,11 +47,11 @@ func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
                 os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
                 let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
                 for sitemapCodingDatum in sitemapsCodingData {
-                    os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
+                    os_log("Sitemap %{public}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
                     sitemaps.append(sitemapCodingDatum.openHABSitemap)
                 }
             } catch {
-                os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+                os_log("Should not throw %{public}@", log: .notifications, type: .error, error.localizedDescription)
             }
         }
     }
@@ -122,7 +122,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.setStandardDrawerItems()
                 self.tableView.reloadData()
             case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                os_log("%{public}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
                 self.setStandardDrawerItems()
                 self.tableView.reloadData()
@@ -142,11 +142,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
                     self.uiTiles = try JSONDecoder().decode([OpenHABUiTile].self, from: responseData)
                     self.tableView.reloadData()
                 } catch {
-                    os_log("Error: did not receive data %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, error.localizedDescription)
+                    os_log("Error: did not receive data %{public}@", log: OSLog.remoteAccess, type: .info, error.localizedDescription)
                 }
             case let .failure(error):
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                os_log("%{public}@", log: .default, type: .error, error.localizedDescription)
             }
         }
     }
@@ -228,11 +228,11 @@ class OpenHABDrawerTableViewController: UITableViewController {
                         imageView.image = UIImage(data: imageData)
                     } // data;image/png;base64,
                 case _ where passedURL.hasPrefix("http"):
-                    os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: passedURL))
+                    os_log("Loading %{public}@", log: .default, type: .info, String(describing: passedURL))
                     imageView.kf.setImage(with: URL(string: passedURL), placeholder: UIImage(named: "openHABIcon"))
                 default:
                     if let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: passedURL.prepare()).url {
-                        os_log("Loading %{PUBLIC}@", log: .default, type: .info, String(describing: builtURL))
+                        os_log("Loading %{public}@", log: .default, type: .info, String(describing: builtURL))
                         imageView.kf.setImage(with: builtURL, placeholder: UIImage(named: "openHABIcon"))
                     }
                 }

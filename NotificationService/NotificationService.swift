@@ -26,7 +26,7 @@ class NotificationService: UNNotificationServiceExtension {
             var notificationActions: [UNNotificationAction] = []
             let userInfo = bestAttemptContent.userInfo
 
-            os_log("didReceive userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
+            os_log("didReceive userInfo %{public}@", log: .default, type: .info, userInfo)
 
             if let title = userInfo["title"] as? String {
                 bestAttemptContent.title = title
@@ -54,7 +54,7 @@ class NotificationService: UNNotificationServiceExtension {
                     }
                 }
                 if !notificationActions.isEmpty {
-                    os_log("didReceive registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
+                    os_log("didReceive registering %{public}@ for category %{public}@", log: .default, type: .info, notificationActions, category)
                     let notificationCategory =
                         UNNotificationCategory(
                             identifier: category,
@@ -67,7 +67,7 @@ class NotificationService: UNNotificationServiceExtension {
                         let existingCategoryIdentifiers = existingCategories.map(\.identifier)
                         if !existingCategoryIdentifiers.contains(category) {
                             var updatedCategories = existingCategories
-                            os_log("handleNotification adding category %{PUBLIC}@", log: .default, type: .info, category)
+                            os_log("handleNotification adding category %{public}@", log: .default, type: .info, category)
                             updatedCategories.insert(notificationCategory)
                             UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
                         }
@@ -86,13 +86,13 @@ class NotificationService: UNNotificationServiceExtension {
                     } else {
                         downloadAndAttachMedia
                     }
-                    os_log("handleNotification downloading %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+                    os_log("handleNotification downloading %{public}@", log: .default, type: .info, attachmentURLString)
                     downloadHandler(attachmentURL) { attachment in
                         if let attachment {
-                            os_log("handleNotification attaching %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+                            os_log("handleNotification attaching %{public}@", log: .default, type: .info, attachmentURLString)
                             bestAttemptContent.attachments = [attachment]
                         } else {
-                            os_log("handleNotification could not attach %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+                            os_log("handleNotification could not attach %{public}@", log: .default, type: .info, attachmentURLString)
                         }
                         contentHandler(bestAttemptContent)
                     }
@@ -122,7 +122,7 @@ class NotificationService: UNNotificationServiceExtension {
                     return actionsArray
                 }
             } catch {
-                os_log("Error parsing actions: %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                os_log("Error parsing actions: %{public}@", log: .default, type: .info, error.localizedDescription)
             }
         }
         return nil
@@ -141,7 +141,7 @@ class NotificationService: UNNotificationServiceExtension {
         let client = HTTPClient(username: Preferences.username, password: Preferences.username) // lets not always send auth with this
         client.downloadFile(url: url) { localURL, response, error in
             guard let localURL else {
-                os_log("Error downloading media %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "Unknown error")
+                os_log("Error downloading media %{public}@", log: .default, type: .error, error?.localizedDescription ?? "Unknown error")
                 completion(nil)
                 return
             }
@@ -151,7 +151,7 @@ class NotificationService: UNNotificationServiceExtension {
 
     func downloadAndAttachItemImage(attachmentURL: URL, completion: @escaping (UNNotificationAttachment?) -> Void) {
         guard let scheme = attachmentURL.scheme else {
-            os_log("Could not find scheme %{PUBLIC}@", log: .default, type: .info)
+            os_log("Could not find scheme %{public}@", log: .default, type: .info)
             completion(nil)
             return
         }
@@ -161,7 +161,7 @@ class NotificationService: UNNotificationServiceExtension {
         let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
         client.getItem(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], itemName: itemName) { item, error in
             guard let item else {
-                os_log("Could not find item %{PUBLIC}@", log: .default, type: .info, itemName)
+                os_log("Could not find item %{public}@", log: .default, type: .info, itemName)
                 completion(nil)
                 return
             }
@@ -182,11 +182,11 @@ class NotificationService: UNNotificationServiceExtension {
                                 let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
                                 do {
                                     try imageData.write(to: tempFileURL)
-                                    os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
+                                    os_log("Image saved to temporary file: %{public}@", log: .default, type: .info, tempFileURL.absoluteString)
                                     self.attachFile(localURL: tempFileURL, mimeType: mimeType, completion: completion)
                                     return
                                 } catch {
-                                    os_log("Failed to write image data to file: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                                    os_log("Failed to write image data to file: %{public}@", log: .default, type: .error, error.localizedDescription)
                                 }
                             } else {
                                 os_log("Failed to decode base64 string to Data", log: .default, type: .error)
@@ -194,7 +194,7 @@ class NotificationService: UNNotificationServiceExtension {
                         }
                     }
                 } catch {
-                    os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                    os_log("Failed to parse data: %{public}@", log: .default, type: .error, error.localizedDescription)
                 }
             }
             completion(nil)
@@ -223,7 +223,7 @@ class NotificationService: UNNotificationServiceExtension {
             completion(attachment)
             return
         } catch {
-            os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            os_log("Failed to create UNNotificationAttachment: %{public}@", log: .default, type: .error, error.localizedDescription)
         }
         completion(nil)
     }

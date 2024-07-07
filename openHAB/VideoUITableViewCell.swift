@@ -130,10 +130,10 @@ class VideoUITableViewCell: GenericUITableViewCell {
             playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in
                 switch playerItem.status {
                 case .failed:
-                    os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
+                    os_log("Failed to load video with URL: %{public}@", log: .urlComposition, type: .debug, url.absoluteString)
                     self?.url = nil
                 case .readyToPlay:
-                    os_log("Loaded video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
+                    os_log("Loaded video with URL: %{public}@", log: .urlComposition, type: .debug, url.absoluteString)
                 default: return
                 }
 

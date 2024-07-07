@@ -36,7 +36,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     }
 
     func handle(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
-        os_log("GetItemStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+        os_log("GetItemStateIntent for %{public}@", log: .default, type: .info, intent.item ?? "")
 
         guard let itemName = intent.item else {
             completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))

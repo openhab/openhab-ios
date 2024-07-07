@@ -55,7 +55,7 @@ final class UserData: ObservableObject {
                 return sitemapPageCodingData.openHABSitemapPage
             }()
         } catch {
-            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+            os_log("Should not throw %{public}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
         }
 
         widgets = openHABSitemapPage?.widgets ?? []
@@ -129,7 +129,7 @@ final class UserData: ObservableObject {
                 promise.resolve(with: data)
 
             case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                os_log("On LoadPage %{public}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                 promise.reject(with: error)
             }
         }
@@ -167,7 +167,7 @@ final class UserData: ObservableObject {
                         return sitemapPageCodingData.openHABSitemapPage
                     }()
                 } catch {
-                    os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                    os_log("Should not throw %{public}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                 }
 
                 openHABSitemapPage?.sendCommand = { [weak self] item, command in
@@ -184,7 +184,7 @@ final class UserData: ObservableObject {
                 ) }
 
             case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                os_log("On LoadPage %{public}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                 errorDescription = error.localizedDescription
                 widgets = []
                 showAlert = true
@@ -218,7 +218,7 @@ final class UserData: ObservableObject {
             .observe { result in
                 switch result {
                 case let .failure(error):
-                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+                    os_log("On LoadPage %{public}@", log: .remoteAccess, type: .error, error.localizedDescription)
                 case let .success(page):
                     self.openHABSitemapPage = page
                 }
@@ -229,7 +229,7 @@ final class UserData: ObservableObject {
 extension UserData: OpenHABWatchTrackerDelegate {
     func openHABTracked(_ openHABUrl: URL?) {
         guard let urlString = openHABUrl?.absoluteString else { return }
-        os_log("openHABTracked: %{PUBLIC}@", log: .remoteAccess, type: .error, urlString)
+        os_log("openHABTracked: %{public}@", log: .remoteAccess, type: .error, urlString)
 
         if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
             AppMessageService.singleton.requestApplicationContext()
@@ -245,10 +245,10 @@ extension UserData: OpenHABWatchTrackerDelegate {
     }
 
     func openHABTrackingProgress(_ message: String?) {
-        os_log("openHABTrackingProgress: %{PUBLIC}@", log: .remoteAccess, type: .error, message ?? "")
+        os_log("openHABTrackingProgress: %{public}@", log: .remoteAccess, type: .error, message ?? "")
     }
 
     func openHABTrackingError(_ error: Error) {
-        os_log("openHABTrackingError: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+        os_log("openHABTrackingError: %{public}@", log: .remoteAccess, type: .error, error.localizedDescription)
     }
 }

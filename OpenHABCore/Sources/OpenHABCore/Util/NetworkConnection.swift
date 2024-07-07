@@ -14,7 +14,7 @@ import Foundation
 import os.log
 
 public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    os_log("onReceiveSessionTaskChallenge host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+    os_log("onReceiveSessionTaskChallenge host:'%{public}@'", log: .default, type: .error, challenge.protectionSpace.host)
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 
@@ -26,14 +26,14 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
         if challenge.protectionSpace.host == localUrl?.host || challenge.protectionSpace.host == remoteUrl?.host || challenge.protectionSpace.host == "home.myopenhab.org" {
             credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
             disposition = .useCredential
-            os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+            os_log("HTTP BasicAuth host:'%{public}@'", log: .default, type: .error, challenge.protectionSpace.host)
         }
     }
     return (disposition, credential)
 }
 
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    os_log("onReceiveSessionChallenge host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+    os_log("onReceiveSessionChallenge host:'%{public}@'", log: .default, type: .error, challenge.protectionSpace.host)
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 
@@ -154,10 +154,10 @@ public class NetworkConnection {
 
             commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
 
-            os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
+            os_log("Timeout %{public}g", log: .default, type: .info, commandRequest.timeoutInterval)
             let link = item.link
-            os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command ?? "", link)
-            os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
+            os_log("OpenHABViewController posting %{public}@ command to %{public}@", log: .default, type: .info, command ?? "", link)
+            os_log("%{public}@", log: .default, type: .info, commandRequest.debugDescription)
 
             return NetworkConnection.shared.manager.request(commandRequest)
                 .validate()
@@ -166,7 +166,7 @@ public class NetworkConnection {
                     case .success:
                         os_log("Command sent!", log: .remoteAccess, type: .info)
                     case let .failure(error):
-                        os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                        os_log("%{public}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
                     }
                 }
         }
@@ -211,7 +211,7 @@ public class NetworkConnection {
         if pageUrl == "" {
             return nil
         }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+        os_log("pageUrl = %{public}@", log: OSLog.remoteAccess, type: .info, pageUrl)
 
         guard let pageToLoadUrl = URL(string: pageUrl) else { return nil }
 
