@@ -256,46 +256,6 @@ extension OpenHABWidget {
 
         self.forceAsItem = forceAsItem
     }
-
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
-        id = widgetId
-
-        for child in xmlElement.children {
-            switch child.tag {
-            case "widgetId": widgetId = child.stringValue
-            case "label": label = child.stringValue
-            case "type": type = child.stringValue.toWidgetType()
-            case "icon": icon = child.stringValue
-            case "url": url = child.stringValue
-            case "period": period = child.stringValue
-            case "iconColor": iconColor = child.stringValue
-            case "labelcolor": labelcolor = child.stringValue
-            case "valuecolor": valuecolor = child.stringValue
-            case "service": service = child.stringValue
-            case "state": state = child.stringValue
-            case "text": text = child.stringValue
-            case "height": height = Double(child.stringValue)
-            case "encoding": encoding = child.stringValue
-            // Double
-            case "minValue": minValue = Double(child.stringValue) ?? 0.0
-            case "maxValue": maxValue = Double(child.stringValue) ?? 0.0
-            case "step": step = Double(child.stringValue) ?? 0.0
-            // Bool
-            case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
-            case "legend": legend = child.stringValue == "true" ? true : false
-            // Int
-            case "refresh": refresh = Int(child.stringValue) ?? 0
-            // Embedded
-            case "widget": widgets.append(OpenHABWidget(xml: child))
-            case "item": item = OpenHABItem(xml: child)
-            case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-            case "linkedPage": linkedPage = OpenHABSitemapPage(xml: child)
-            default:
-                break
-            }
-        }
-    }
 }
 
 public extension OpenHABWidget {

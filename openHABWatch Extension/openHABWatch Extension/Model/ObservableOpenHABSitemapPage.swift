@@ -38,28 +38,6 @@ class ObservableOpenHABSitemapPage: NSObject {
         }
     }
 
-    init(xml xmlElement: XMLElement) {
-        super.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "widget": widgets.append(ObservableOpenHABWidget(xml: child))
-            case "id": pageId = child.stringValue
-            case "title": title = child.stringValue
-            case "link": link = child.stringValue
-            case "leaf": leaf = child.stringValue == "true" ? true : false
-            default: break
-            }
-        }
-        var tempWidgets = [ObservableOpenHABWidget]()
-        tempWidgets.flatten(widgets)
-        widgets = tempWidgets
-        for widget in widgets {
-            widget.sendCommand = { [weak self] item, command in
-                self?.sendCommand(item, commandToSend: command)
-            }
-        }
-    }
-
     init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [ObservableOpenHABWidget]) {
         super.init()
         self.pageId = pageId

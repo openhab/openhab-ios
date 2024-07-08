@@ -23,16 +23,4 @@ public extension OpenHABWidgetMapping {
         self.command = command
         self.label = label
     }
-
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "command": command = child.stringValue
-            case "label": label = child.stringValue
-            default:
-                break
-            }
-        }
-    }
 }
