@@ -12,7 +12,6 @@
 import Alamofire
 import AVFoundation
 import AVKit
-import Fuzi
 import Kingfisher
 import OpenHABCore
 import os.log

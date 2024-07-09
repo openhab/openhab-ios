@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CoreLocation
-import Fuzi
 import os.log
 import UIKit
 

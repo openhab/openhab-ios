@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import DynamicButton
-import Fuzi
 import OpenHABCore
 import os.log
 import SafariServices

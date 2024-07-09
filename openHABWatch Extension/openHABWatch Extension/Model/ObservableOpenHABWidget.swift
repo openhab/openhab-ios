@@ -14,7 +14,6 @@ import Alamofire
 import Combine
 #endif
 import Foundation
-import Fuzi
 import MapKit
 import OpenHABCore
 import os.log

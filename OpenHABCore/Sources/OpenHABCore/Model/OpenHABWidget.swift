@@ -11,7 +11,6 @@
 
 import Alamofire
 import Foundation
-import Fuzi
 import MapKit
 import os.log
 
