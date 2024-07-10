@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CoreLocation
-import Fuzi
 import os.log
 import UIKit
 
@@ -70,21 +69,6 @@ public final class OpenHABItem: NSObject, CommItem {
         self.members = members
         self.category = category.orEmpty
         self.options = options ?? []
-    }
-
-    public init(xml xmlElement: XMLElement) {
-        super.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "name": name = child.stringValue
-            case "type": type = child.stringValue.toItemType()
-            case "groupType": groupType = child.stringValue.toItemType()
-            case "state": state = child.stringValue
-            case "link": link = child.stringValue
-            default:
-                break
-            }
-        }
     }
 
     public func isOfTypeOrGroupType(_ type: ItemType) -> Bool {

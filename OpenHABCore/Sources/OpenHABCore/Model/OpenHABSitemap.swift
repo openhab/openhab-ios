@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import Fuzi
 
 // The OpenHAB REST API returns either a value (eg. String, Int, Double...) or false (not null).
 // Inspired by https://stackoverflow.com/questions/52836448/decodable-value-string-or-bool
@@ -43,28 +42,6 @@ public final class OpenHABSitemap: NSObject {
         self.link = link
         self.leaf = leaf
         self.homepageLink = homepageLink
-    }
-
-    public init(xml xmlElement: XMLElement) {
-        super.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "name": name = child.stringValue
-            case "icon": icon = child.stringValue
-            case "label": label = child.stringValue
-            case "link": link = child.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
-            case "leaf": leaf = child.stringValue == "true" ? true : false
-            case "homepage":
-                for child2 in child.children {
-                    switch child2.tag {
-                    case "link": homepageLink = child2.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                    case "leaf": leaf = child2.stringValue == "true" ? true : false
-                    default: break
-                    }
-                }
-            default: break
-            }
-        }
     }
 }
 

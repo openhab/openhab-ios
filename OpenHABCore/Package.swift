@@ -16,7 +16,6 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(name: "Alamofire", url: "https://github.com/Alamofire/Alamofire.git", from: "5.0.0"),
-        .package(name: "Fuzi", url: "https://github.com/cezheng/Fuzi.git", from: "3.0.0"),
         .package(name: "Kingfisher", url: "https://github.com/onevcat/Kingfisher.git", from: "7.0.0")
     ],
     targets: [
@@ -26,7 +25,6 @@ let package = Package(
             name: "OpenHABCore",
             dependencies: [
                 .product(name: "Alamofire", package: "Alamofire", condition: .when(platforms: [.iOS, .watchOS])),
-                .product(name: "Fuzi", package: "Fuzi", condition: .when(platforms: [.iOS, .watchOS])),
                 .product(name: "Kingfisher", package: "Kingfisher", condition: .when(platforms: [.iOS, .watchOS]))
             ]
         ),

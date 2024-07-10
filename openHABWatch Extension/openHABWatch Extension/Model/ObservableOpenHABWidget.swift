@@ -14,7 +14,6 @@ import Alamofire
 import Combine
 #endif
 import Foundation
-import Fuzi
 import MapKit
 import OpenHABCore
 import os.log
@@ -253,49 +252,6 @@ extension ObservableOpenHABWidget {
         self.step = abs(self.step)
 
         self.forceAsItem = forceAsItem
-
-        stateEnumBinding = stateEnum
-    }
-
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
-        id = widgetId
-        // OH 1.x compatability
-
-        for child in xmlElement.children {
-            switch child.tag {
-            case "widgetId": widgetId = child.stringValue
-            case "label": label = child.stringValue
-            case "type": type = child.stringValue
-            case "icon": icon = child.stringValue
-            case "url": url = child.stringValue
-            case "period": period = child.stringValue
-            case "iconColor": iconColor = child.stringValue
-            case "labelcolor": labelcolor = child.stringValue
-            case "valuecolor": valuecolor = child.stringValue
-            case "service": service = child.stringValue
-            case "state": state = child.stringValue
-            case "text": text = child.stringValue
-            case "height": height = Double(child.stringValue) ?? 44.0
-            case "encoding": encoding = child.stringValue
-            // Double
-            case "minValue": minValue = Double(child.stringValue) ?? 0.0
-            case "maxValue": maxValue = Double(child.stringValue) ?? 0.0
-            case "step": step = Double(child.stringValue) ?? 0.0
-            // Bool
-            case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
-            case "legend": legend = child.stringValue == "true" ? true : false
-            // Int
-            case "refresh": refresh = Int(child.stringValue) ?? 0
-            // Embedded
-            case "widget": widgets.append(ObservableOpenHABWidget(xml: child))
-            case "item": item = OpenHABItem(xml: child)
-            case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-            case "linkedPage": linkedPage = OpenHABSitemapPage(xml: child)
-            default:
-                break
-            }
-        }
 
         stateEnumBinding = stateEnum
     }
