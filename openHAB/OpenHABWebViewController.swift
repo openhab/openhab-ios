@@ -404,13 +404,8 @@ extension OpenHABWebViewController: WKUIDelegate {
 extension OpenHABWebViewController: OpenHABTrackerDelegate {
     func openHABTracked(_ openHABUrl: URL?, version: Int) {
         os_log("OpenHABWebViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
-        if version >= 2 {
-            openHABTrackedRootUrl = openHABUrl?.absoluteString ?? ""
-            loadWebView(force: false)
-        } else {
-            showPopupMessage(seconds: 2, title: NSLocalizedString("select_sitemap", comment: ""), message: "", theme: .info)
-            showSideMenu()
-        }
+        openHABTrackedRootUrl = openHABUrl?.absoluteString ?? ""
+        loadWebView(force: false)
     }
 
     func openHABTrackingProgress(_ message: String?) {

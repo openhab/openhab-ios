@@ -135,7 +135,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     private func downloadAndAttachMedia(url: String, completion: @escaping (UNNotificationAttachment?) -> Void) {
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username) // lets not always send auth with this
+        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
 
         let downloadCompletionHandler: @Sendable (URL?, URLResponse?, Error?) -> Void = { (localURL, response, error) in
             guard let localURL else {
@@ -161,7 +161,7 @@ class NotificationService: UNNotificationServiceExtension {
 
         let itemName = String(itemURI.absoluteString.dropFirst(scheme.count + 1))
 
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+        let client = HTTPClient(username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
         client.getItem(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], itemName: itemName) { item, error in
             guard let item else {
                 os_log("Could not find item %{PUBLIC}@", log: .default, type: .info, itemName)
