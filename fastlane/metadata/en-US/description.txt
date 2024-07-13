@@ -10,7 +10,6 @@ iOS Key Features:
 * Apple Watch companion app
 * Natively supports both iPhone and iPad
 
-
 Make openHAB the central integration and control point of your Smart Home. 
 You will find openHAB at http://www.openhab.org/
 
