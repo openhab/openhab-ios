@@ -282,7 +282,7 @@ public class HTTPClient: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     }
 
     // MARK: - URLSessionDelegate for Client Certificates and Basic Auth
-    
+
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         urlSessionInternal(session, task: nil, didReceive: challenge, completionHandler: completionHandler)
     }
