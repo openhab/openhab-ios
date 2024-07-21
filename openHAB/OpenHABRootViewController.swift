@@ -202,6 +202,10 @@ class OpenHABRootViewController: UIViewController {
                 sendCommandAction(cmd)
             } else if action.hasPrefix("http") {
                 httpCommandAction(action)
+            } else if action.hasPrefix("app") {
+                appCommandAction(action)
+            } else if action.hasPrefix("rule") {
+                ruleCommandAction(action)
             }
         }
     }
@@ -262,6 +266,65 @@ class OpenHABRootViewController: UIViewController {
         if let url = URL(string: command) {
             let vc = SFSafariViewController(url: url)
             present(vc, animated: true)
+        }
+    }
+
+    private func appCommandAction(_ command: String) {
+        let content = command.dropFirst(4) // Remove "app:"
+        let pairs = content.split(separator: ",")
+        for pair in pairs {
+            let keyValue = pair.split(separator: "=", maxSplits: 1)
+            guard keyValue.count == 2 else { continue }
+            if keyValue[0] == "ios" {
+                if let url = URL(string: String(keyValue[1])) {
+                    os_log("appCommandAction opening %{public}@ %{public}@", log: .default, type: .error, String(keyValue[0]), String(keyValue[1]))
+                    UIApplication.shared.open(url)
+                    return
+                }
+            }
+        }
+    }
+
+    private func ruleCommandAction(_ command: String) {
+        let components = command.split(separator: ":", maxSplits: 2)
+
+        guard components.count == 3,
+              components[0] == "rule" else {
+            return
+        }
+
+        let uuid = String(components[1])
+        let propertiesString = String(components[2])
+
+        let propertyPairs = propertiesString.split(separator: ",")
+        var properties: [String: String] = [:]
+
+        for pair in propertyPairs {
+            let keyValue = pair.split(separator: "=", maxSplits: 1)
+            if keyValue.count == 2 {
+                let key = String(keyValue[0])
+                let value = String(keyValue[1])
+                properties[key] = value
+            }
+        }
+
+        var jsonString = ""
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: properties, options: [.prettyPrinted])
+            jsonString = String(data: jsonData, encoding: .utf8)!
+        } catch {
+            // nothing
+        }
+        let client = HTTPClient(username: Preferences.username, password: Preferences.username)
+        client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
+            if let error {
+                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+            } else {
+                os_log("Request succeeded", log: .default, type: .info)
+                if let data {
+                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                }
+            }
         }
     }
 
