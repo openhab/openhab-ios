@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import Fuzi
 
 public class OpenHABWidgetMapping: NSObject, Decodable {
     public var command = ""
@@ -22,17 +21,5 @@ public extension OpenHABWidgetMapping {
         self.init()
         self.command = command
         self.label = label
-    }
-
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "command": command = child.stringValue
-            case "label": label = child.stringValue
-            default:
-                break
-            }
-        }
     }
 }

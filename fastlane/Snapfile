@@ -2,10 +2,10 @@
 
 #A list of devices you want to take the screenshots from
 devices([
-    "iPhone 13 Pro Max",
+    "iPhone 15 Pro Max",
     "iPhone 8 Plus",
-    "iPad Pro (12.9-inch) (4th generation)",
-    "iPad Pro (11-inch) (3rd generation)"
+    "iPad Pro 13-inch (M4)",
+    "iPad Pro (12.9-inch) (6th generation)"
 ])
 
 #languages([
@@ -31,7 +31,7 @@ skip_open_summary true
 override_status_bar(true)
 
 # Do not check for most recent SnapshotHelper code
-skip_helper_version_check true
+skip_helper_version_check false
 
 # Arguments to pass to the app on launch. See https://docs.fastlane.tools/actions/snapshot/#launch-arguments
 # launch_arguments(["-favColor red"])

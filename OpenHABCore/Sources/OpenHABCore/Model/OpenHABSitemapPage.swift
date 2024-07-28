@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import Fuzi
 import os.log
 
 public class OpenHABSitemapPage: NSObject {
@@ -37,29 +36,6 @@ public class OpenHABSitemapPage: NSObject {
             }
         }
         self.icon = icon
-    }
-
-    public init(xml xmlElement: XMLElement) {
-        super.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "widget": widgets.append(OpenHABWidget(xml: child))
-            case "id": pageId = child.stringValue
-            case "title": title = child.stringValue
-            case "link": link = child.stringValue
-            case "leaf": leaf = child.stringValue == "true" ? true : false
-            case "icon": icon = child.stringValue
-            default: break
-            }
-        }
-        var tempWidgets = [OpenHABWidget]()
-        tempWidgets.flatten(widgets)
-        widgets = tempWidgets
-        for widget in widgets {
-            widget.sendCommand = { [weak self] item, command in
-                self?.sendCommand(item, commandToSend: command)
-            }
-        }
     }
 
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {

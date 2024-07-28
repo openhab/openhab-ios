@@ -111,8 +111,7 @@ final class UserData: ObservableObject {
 
         currentPageOperation = NetworkConnection.page(
             url: url,
-            longPolling: true,
-            openHABVersion: 2
+            longPolling: true
         ) { [weak self] response in
             guard self != nil else { return }
 
@@ -141,17 +140,13 @@ final class UserData: ObservableObject {
 
         currentPageOperation = NetworkConnection.page(
             url: url,
-            longPolling: longPolling,
-            openHABVersion: 2
+            longPolling: longPolling
         ) { [weak self] response in
             guard let self else { return }
 
             switch response.result {
             case let .success(data):
                 os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
-
-                // Newer versions talk JSON!
-                os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
                 do {
                     // Self-executing closure
                     // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift

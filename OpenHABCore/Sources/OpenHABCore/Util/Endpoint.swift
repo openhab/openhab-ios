@@ -154,88 +154,73 @@ public extension Endpoint {
         }
 
         // determineOH2IconPath
-        if version >= 2 {
-            var queryItems = [
-                URLQueryItem(name: "state", value: state)
-            ]
-            if version >= 4 {
-                let components = icon.components(separatedBy: ":")
-                var source = ""
-                var set = ""
-                if components.count == 3 {
-                    source = components[0]
-                    set = components[1]
-                    icon = components[2]
-                } else if components.count == 2 {
-                    source = components[0]
-                    if source == "material" {
-                        set = "baseline"
-                    } else {
-                        set = "classic"
-                    }
-                    icon = components[1]
-                }
+        var queryItems = [
+            URLQueryItem(name: "state", value: state)
+        ]
+        if version >= 4 {
+            let components = icon.components(separatedBy: ":")
+            var source = ""
+            var set = ""
+            if components.count == 3 {
+                source = components[0]
+                set = components[1]
+                icon = components[2]
+            } else if components.count == 2 {
+                source = components[0]
                 if source == "material" {
-                    source = "iconify"
-                    icon = "\(set)-\(icon)"
-                    set = "ic"
+                    set = "baseline"
+                } else {
+                    set = "classic"
                 }
-                if source == "f7" {
-                    source = "iconify"
-                    set = "f7"
-                    icon = icon.replacingOccurrences(of: "_", with: "-")
-                }
-                if source == "if" || source == "iconify" {
-                    queryItems = [URLQueryItem(name: "height", value: "64")]
-                    if !iconColor.isEmpty {
-                        queryItems.append(URLQueryItem(name: "color", value: iconColor))
-                    }
-                    return Endpoint(
-                        baseURL: "https://api.iconify.design/",
-                        path: "/\(set)/\(icon).svg",
-                        queryItems: queryItems
-                    )
-                }
+                icon = components[1]
             }
-            if version >= 3 {
-                queryItems.append(contentsOf: [
-                    URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
-                    URLQueryItem(name: "anyFormat", value: "true")
-                ])
-            } else {
-                queryItems.append(
-                    URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG")
+            if source == "material" {
+                source = "iconify"
+                icon = icon.replacingOccurrences(of: "_", with: "-")
+                icon = "\(set)-\(icon)"
+                set = "ic"
+            }
+            if source == "f7" {
+                source = "iconify"
+                set = "f7"
+                icon = icon.replacingOccurrences(of: "_", with: "-")
+            }
+            if source == "if" || source == "iconify" {
+                queryItems = [URLQueryItem(name: "height", value: "64")]
+                if !iconColor.isEmpty {
+                    queryItems.append(URLQueryItem(name: "color", value: iconColor))
+                }
+                return Endpoint(
+                    baseURL: "https://api.iconify.design/",
+                    path: "/\(set)/\(icon).svg",
+                    queryItems: queryItems
                 )
             }
-
-            return Endpoint(
-                baseURL: rootUrl,
-                path: "/icon/\(icon)",
-                queryItems: queryItems
-            )
+        }
+        if version >= 3 {
+            queryItems.append(contentsOf: [
+                URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
+                URLQueryItem(name: "anyFormat", value: "true")
+            ])
         } else {
-            return Endpoint(
-                baseURL: rootUrl,
-                path: "/images/\(icon).png",
-                queryItems: []
+            queryItems.append(
+                URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG")
             )
         }
+
+        return Endpoint(
+            baseURL: rootUrl,
+            path: "/icon/\(icon)",
+            queryItems: queryItems
+        )
     }
 
-    static func iconForDrawer(rootUrl: String, version: Int, icon: String) -> Endpoint {
-        if version == 2 {
-            Endpoint(
-                baseURL: rootUrl,
-                path: "/icon/\(icon).png",
-                queryItems: []
-            )
-        } else {
-            Endpoint(
-                baseURL: rootUrl,
-                path: "/images/\(icon).png",
-                queryItems: []
-            )
-        }
+    static func iconForDrawer(rootUrl: String, icon: String) -> Endpoint {
+        Endpoint(
+            baseURL: rootUrl,
+            path: "/icon/\(icon).png",
+            queryItems: []
+        )
     }
 }
 

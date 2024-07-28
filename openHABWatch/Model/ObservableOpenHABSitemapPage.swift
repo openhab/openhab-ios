@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import Fuzi
 import OpenHABCore
 import os.log
 
@@ -32,28 +31,6 @@ class ObservableOpenHABSitemapPage: NSObject {
         tempWidgets.flatten(widgets)
         self.widgets = tempWidgets
         for widget in self.widgets {
-            widget.sendCommand = { [weak self] item, command in
-                self?.sendCommand(item, commandToSend: command)
-            }
-        }
-    }
-
-    init(xml xmlElement: XMLElement) {
-        super.init()
-        for child in xmlElement.children {
-            switch child.tag {
-            case "widget": widgets.append(ObservableOpenHABWidget(xml: child))
-            case "id": pageId = child.stringValue
-            case "title": title = child.stringValue
-            case "link": link = child.stringValue
-            case "leaf": leaf = child.stringValue == "true" ? true : false
-            default: break
-            }
-        }
-        var tempWidgets = [ObservableOpenHABWidget]()
-        tempWidgets.flatten(widgets)
-        widgets = tempWidgets
-        for widget in widgets {
             widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }

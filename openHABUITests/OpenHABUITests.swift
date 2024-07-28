@@ -13,6 +13,7 @@ import os.log
 import XCTest
 
 class OpenHABUITests: XCTestCase {
+    @MainActor
     override func setUp() {
         let app = XCUIApplication()
         app.launchEnvironment = ["UITest": "1"]
@@ -21,10 +22,12 @@ class OpenHABUITests: XCTestCase {
         app.launch()
     }
 
+    @MainActor
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    @MainActor
     func testShots() {
         let app = XCUIApplication()
         let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]

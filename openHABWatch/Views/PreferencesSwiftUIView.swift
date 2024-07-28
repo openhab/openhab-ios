@@ -30,7 +30,7 @@ struct PreferencesSwiftUIView: View {
             PreferencesRowUIView(label: NSLocalizedString("active_url", comment: ""), content: settings.openHABRootUrl).font(.footnote)
             PreferencesRowUIView(label: NSLocalizedString("local_url", comment: ""), content: settings.localUrl).font(.footnote)
             PreferencesRowUIView(label: NSLocalizedString("remote_url", comment: ""), content: settings.remoteUrl).font(.footnote)
-            PreferencesRowUIView(label: NSLocalizedString("sitemap", comment: ""), content: settings.sitemapName).font(.footnote)
+            PreferencesRowUIView(label: NSLocalizedString("sitemap", comment: ""), content: settings.sitemapForWatch).font(.footnote)
             PreferencesRowUIView(label: NSLocalizedString("username", comment: ""), content: settings.openHABUsername).font(.footnote)
             HStack {
                 Button(action: { AppMessageService.singleton.requestApplicationContext() }, label: { Text(NSLocalizedString("sync_prefs", comment: "")) })
