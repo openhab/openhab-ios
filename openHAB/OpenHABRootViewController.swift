@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import FirebaseCrashlytics
 import Foundation
 import OpenHABCore
@@ -34,7 +33,6 @@ struct CommandItem: CommItem {
 }
 
 class OpenHABRootViewController: UIViewController {
-    var hamburgerButton: DynamicButton!
     var currentView: OpenHABViewController!
     var isDemoMode = false
 
@@ -118,21 +116,13 @@ class OpenHABRootViewController: UIViewController {
 
     fileprivate func setupSideMenu() {
         let hamburgerButtonItem: UIBarButtonItem
-        if #available(iOS 13.0, *) {
-            let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
-            let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
-            let button = UIButton(type: .custom)
-            button.setImage(buttonImage, for: .normal)
-            button.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-            hamburgerButtonItem = UIBarButtonItem(customView: button)
-            hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        } else {
-            hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
-            hamburgerButton.setStyle(.hamburger, animated: true)
-            hamburgerButton.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-            hamburgerButton.strokeColor = view.tintColor
-            hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
-        }
+        let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
+        let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
+        let button = UIButton(type: .custom)
+        button.setImage(buttonImage, for: .normal)
+        button.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+        hamburgerButtonItem = UIBarButtonItem(customView: button)
+        hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
         navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
 
         // Define the menus

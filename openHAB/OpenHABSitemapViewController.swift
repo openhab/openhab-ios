@@ -59,7 +59,6 @@ struct OpenHABImageProcessor: ImageProcessor {
 
 class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
     var pageUrl = ""
-    // private var hamburgerButton: DynamicButton!
     private var selectedWidgetRow: Int = 0
     private var currentPageOperation: Alamofire.Request?
     private var commandOperation: Alamofire.Request?
@@ -556,10 +555,10 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
     }
 }
 
-// MARK: - ColorPickerUITableViewCellDelegate
+// MARK: - ColorPickerCellDelegate
 
-extension OpenHABSitemapViewController: ColorPickerUITableViewCellDelegate {
-    func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
+extension OpenHABSitemapViewController: ColorPickerCellDelegate {
+    func didPressColorButton(_ cell: ColorPickerCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell {
             let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
@@ -626,14 +625,14 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             } else if widget?.item?.isOfTypeOrGroupType(.switchItem) ?? false {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             } else if widget?.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterUITableViewCell
+                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterCell
             } else if !(widget?.mappingsOrItemOptions ?? []).isEmpty {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
             }
         case .setpoint:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointUITableViewCell
+            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointCell
         case .slider:
             if let switchSupport = widget?.switchSupport, switchSupport {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
@@ -643,8 +642,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         case .selection:
             cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
         case .colorpicker:
-            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerUITableViewCell
-            (cell as? ColorPickerUITableViewCell)?.delegate = self
+            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerCell
+            (cell as? ColorPickerCell)?.delegate = self
         case .image, .chart:
             cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
             (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
