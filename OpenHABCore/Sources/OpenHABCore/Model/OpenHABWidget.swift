@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -11,7 +11,6 @@
 
 import Alamofire
 import Foundation
-import Fuzi
 import MapKit
 import os.log
 
@@ -41,7 +40,7 @@ protocol Widget: AnyObject {
     var legend: Bool { get set }
     var encoding: String { get set }
     var item: OpenHABItem? { get set }
-    var linkedPage: OpenHABLinkedPage? { get set }
+    var linkedPage: OpenHABSitemapPage? { get set }
     var mappings: [OpenHABWidgetMapping] { get set }
     var image: UIImage? { get set }
     var widgets: [ChildWidget] { get set }
@@ -93,7 +92,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var encoding = ""
     public var forceAsItem: Bool?
     public var item: OpenHABItem?
-    public var linkedPage: OpenHABLinkedPage?
+    public var linkedPage: OpenHABSitemapPage?
     public var mappings: [OpenHABWidgetMapping] = []
     public var image: UIImage?
     public var widgets: [OpenHABWidget] = []
@@ -155,7 +154,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
             sendCommand(state.toString(locale: Locale(identifier: "US")))
         } else {
             // For all other items, send the plain value
-            sendCommand(state.formatValue())
+            sendCommand(state.stringValue)
         }
     }
 
@@ -215,7 +214,7 @@ extension OpenHABWidget.WidgetType: UnknownCaseRepresentable {
 
 extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABLinkedPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -256,46 +255,6 @@ extension OpenHABWidget {
 
         self.forceAsItem = forceAsItem
     }
-
-    convenience init(xml xmlElement: XMLElement) {
-        self.init()
-        id = widgetId
-
-        for child in xmlElement.children {
-            switch child.tag {
-            case "widgetId": widgetId = child.stringValue
-            case "label": label = child.stringValue
-            case "type": type = child.stringValue.toWidgetType()
-            case "icon": icon = child.stringValue
-            case "url": url = child.stringValue
-            case "period": period = child.stringValue
-            case "iconColor": iconColor = child.stringValue
-            case "labelcolor": labelcolor = child.stringValue
-            case "valuecolor": valuecolor = child.stringValue
-            case "service": service = child.stringValue
-            case "state": state = child.stringValue
-            case "text": text = child.stringValue
-            case "height": height = Double(child.stringValue)
-            case "encoding": encoding = child.stringValue
-            // Double
-            case "minValue": minValue = Double(child.stringValue) ?? 0.0
-            case "maxValue": maxValue = Double(child.stringValue) ?? 0.0
-            case "step": step = Double(child.stringValue) ?? 0.0
-            // Bool
-            case "isLeaf": isLeaf = child.stringValue == "true" ? true : false
-            case "legend": legend = child.stringValue == "true" ? true : false
-            // Int
-            case "refresh": refresh = Int(child.stringValue) ?? 0
-            // Embedded
-            case "widget": widgets.append(OpenHABWidget(xml: child))
-            case "item": item = OpenHABItem(xml: child)
-            case "mapping": mappings.append(OpenHABWidgetMapping(xml: child))
-            case "linkedPage": linkedPage = OpenHABLinkedPage(xml: child)
-            default:
-                break
-            }
-        }
-    }
 }
 
 public extension OpenHABWidget {
@@ -322,7 +281,7 @@ public extension OpenHABWidget {
         let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABLinkedPage?
+        let linkedPage: OpenHABSitemapPage.CodingData?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [OpenHABWidget.CodingData]
         let visibility: Bool?
@@ -335,7 +294,7 @@ extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
         // swiftlint:disable:next line_length
-        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
+        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage?.openHABSitemapPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
     }
 }
 

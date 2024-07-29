@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -176,16 +176,10 @@ public class NetworkConnection {
 
     public static func page(url: URL?,
                             longPolling: Bool,
-                            openHABVersion: Int,
                             completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
         guard let url else { return nil }
 
         var pageRequest = URLRequest(url: url)
-
-        // We accept XML only if openHAB is 1.X
-        if openHABVersion == 1 {
-            pageRequest.setValue("application/xml", forHTTPHeaderField: "Accept")
-        }
 
         pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
         if longPolling {
@@ -207,7 +201,6 @@ public class NetworkConnection {
 
     public static func page(pageUrl: String,
                             longPolling: Bool,
-                            openHABVersion: Int,
                             completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
         if pageUrl == "" {
             return nil
@@ -216,7 +209,7 @@ public class NetworkConnection {
 
         guard let pageToLoadUrl = URL(string: pageUrl) else { return nil }
 
-        return page(url: pageToLoadUrl, longPolling: longPolling, openHABVersion: openHABVersion, completionHandler: completionHandler)
+        return page(url: pageToLoadUrl, longPolling: longPolling, completionHandler: completionHandler)
     }
 
     static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {

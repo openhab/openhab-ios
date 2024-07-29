@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -71,7 +71,7 @@ public struct UserDefaultURL {
 }
 
 public enum Preferences {
-    fileprivate static let sharedDefaults = UserDefaults(suiteName: "group.es.spaphone.openhab")!
+    fileprivate static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
     // MARK: - Public
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -215,14 +215,8 @@ class OpenHABTracker: NSObject {
             // OH versions 2.0 through 2.4 return "1" as thier version, so set the floor to 2 so we do not think this is a OH 1.x serevr
             return max(2, Int(serverProperties.version) ?? 2)
         } catch {
-            // testing for OH 1.x
-            let str = String(decoding: data, as: UTF8.self)
-            if str.hasPrefix("<?xml") {
-                return 1
-            } else {
-                os_log("OpenHABTracker Could not decode response", log: .notifications, type: .error)
-                return -1
-            }
+            os_log("OpenHABTracker Could not decode response", log: .notifications, type: .error)
+            return -1
         }
     }
 

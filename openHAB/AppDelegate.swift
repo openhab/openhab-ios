@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -12,6 +12,7 @@
 import AlamofireNetworkActivityIndicator
 import AVFoundation
 import Firebase
+import FirebaseMessaging
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -23,7 +24,7 @@ import WatchConnectivity
 var player: AVAudioPlayer?
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     static var appDelegate: AppDelegate!
 
     var window: UIWindow?
@@ -49,7 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
 
-        setupCrashReporting()
+        setupFirebase()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
@@ -84,11 +85,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    private func setupCrashReporting() {
+    private func setupFirebase() {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
+        Messaging.messaging().delegate = self
     }
 
     func activateWatchConnectivity() {
@@ -113,19 +115,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             guard let self else { return }
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
-            getNotificationSettings()
-        }
-    }
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                os_log("Notification settings: %{PUBLIC}@", log: .notifications, type: .info, settings)
 
-    func getNotificationSettings() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            os_log("Notification settings: %{PUBLIC}@", log: .notifications, type: .info, settings)
-
-            guard settings.authorizationStatus == .authorized else { return }
-            DispatchQueue.main.async {
-                UIApplication.shared.registerForRemoteNotifications()
+                guard settings.authorizationStatus == .authorized else { return }
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
             }
         }
+        UNUserNotificationCenter.current().delegate = self
     }
 
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
@@ -146,67 +145,111 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // This is only informational - on success - DID Register
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        let deviceTokenString = deviceToken.reduce("") { $0 + String(format: "%02X", $1) } // try "%02.2hhx",
-
-        os_log("My token is: %{PUBLIC}@", log: .notifications, type: .info, deviceTokenString)
-
-        let dataDict = [
-            "deviceToken": deviceTokenString,
-            "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
-            "deviceName": UIDevice.current.name
-        ]
-        NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
+        // Do nothing now, we are using FCM
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
 
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        // version without completionHandler is deprecated
-        // func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-        os_log("didReceiveRemoteNotification", log: .notifications, type: .info)
-
-        if application.applicationState == .active {
-            os_log("App is active and got a remote notification", log: .notifications, type: .info)
-
-            guard let aps = userInfo["aps"] as? [String: AnyObject] else {
-                completionHandler(.failed)
-                return
+    // this is called for "content-available" silent notifications (background notifications)
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .default, type: .info, userInfo)
+        // Hide notification logic
+        if let type = userInfo["type"] as? String, type == "hideNotification" {
+            if let refid = userInfo["reference-id"] as? String {
+                os_log("didReceiveRemoteNotification remove id %{PUBLIC}@", log: .default, type: .info, refid)
+                UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [refid])
             }
+            if let tag = userInfo["tag"] as? String {
+                UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
+                    let notificationsWithSeverity = notifications.filter { notification in
+                        notification.request.content.userInfo["tag"] as? String == tag
+                    }
 
-            let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
-            if let soundPath {
-                do {
-                    os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
+                    // Get the identifiers of these notifications
+                    let identifiers = notificationsWithSeverity.map(\.request.identifier)
 
-                    player = try AVAudioPlayer(contentsOf: soundPath)
-                    player?.numberOfLoops = 0
-                    player?.play()
-                } catch {
-                    os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+                    if !identifiers.isEmpty {
+                        os_log("didReceiveRemoteNotification remove tag %{PUBLIC}@ %{PUBLIC}@", log: .default, type: .info, tag, identifiers)
+                        // Remove the filtered notifications
+                        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
+                    }
                 }
-                player = try? AVAudioPlayer(contentsOf: soundPath)
-            }
-            os_log("%{PUBLIC}@", log: .notifications, type: .info, aps)
-
-            let message = (aps["alert"] as? [String: String])?["body"] ?? NSLocalizedString("message_not_decoded", comment: "")
-
-            var config = SwiftMessages.Config()
-            config.duration = .seconds(seconds: 5)
-            config.presentationStyle = .bottom
-
-            SwiftMessages.show(config: config) {
-                let view = MessageView.viewFromNib(layout: .cardView)
-                // ... configure the view
-                view.configureTheme(.info)
-                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
-                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-                view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                return view
             }
         }
+        completionHandler(.newData)
+    }
+
+    // this is called when a notification comes in while in the foreground
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let userInfo = notification.request.content.userInfo
+        os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
+        appData.lastNotificationInfo = userInfo
+        displayNotification(userInfo: userInfo)
+        completionHandler([])
+    }
+
+    // this is called when clicking a notification while in the background
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        var userInfo = response.notification.request.content.userInfo
+        let actionIdentifier = response.actionIdentifier
+        os_log("Notification clicked: action %{public}@ userInfo %{public}@", log: .notifications, type: .info, actionIdentifier, userInfo)
+        if actionIdentifier != UNNotificationDismissActionIdentifier {
+            if actionIdentifier != UNNotificationDefaultActionIdentifier {
+                userInfo["actionIdentifier"] = actionIdentifier
+            }
+            notifyNotificationListeners(userInfo)
+            appData.lastNotificationInfo = userInfo
+        }
+        completionHandler()
+    }
+
+    private func displayNotification(userInfo: [AnyHashable: Any]) {
+        os_log("displayNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo["message"] as? String ?? "no message")
+
+        let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
+        if let soundPath {
+            do {
+                os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
+                player = try AVAudioPlayer(contentsOf: soundPath)
+                player?.numberOfLoops = 0
+                player?.play()
+            } catch {
+                os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+            }
+            player = try? AVAudioPlayer(contentsOf: soundPath)
+        }
+
+        let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
+
+        var config = SwiftMessages.Config()
+        config.duration = .seconds(seconds: 5)
+        config.presentationStyle = .bottom
+
+        SwiftMessages.show(config: config) {
+            let view = MessageView.viewFromNib(layout: .cardView)
+            view.configureTheme(.info)
+            view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
+            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+            view.buttonTapHandler = { _ in SwiftMessages.hide() }
+            // Add tap gesture recognizer to the view for actions
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.messageViewTapped))
+            view.addGestureRecognizer(tapGesture)
+            return view
+        }
+    }
+
+    // Action to be performed when the notification message view is tapped
+    @objc func messageViewTapped() {
+        if let userInfo = appData.lastNotificationInfo {
+            notifyNotificationListeners(userInfo)
+            SwiftMessages.hideAll()
+        }
+    }
+
+    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) {
+        NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -230,4 +273,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+}
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        os_log("My FCM token is: %{PUBLIC}@", log: .notifications, type: .info, fcmToken ?? "")
+        let dataDict = [
+            "deviceToken": fcmToken ?? "",
+            "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
+            "deviceName": UIDevice.current.name
+        ]
+        NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
+    }
+}
+
+extension Notification.Name {
+    static let apnsReceived = Notification.Name("apnsReceived")
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -12,12 +12,12 @@
 import Alamofire
 import AVFoundation
 import AVKit
-import Fuzi
 import Kingfisher
 import OpenHABCore
 import os.log
 import SafariServices
 import SVGKit
+import SwiftUI
 import UIKit
 
 enum Action<I, O> {
@@ -328,8 +328,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
         currentPageOperation = NetworkConnection.page(
             pageUrl: pageUrl,
-            longPolling: longPolling,
-            openHABVersion: appData?.openHABVersion ?? 2
+            longPolling: longPolling
         ) { [weak self] response in
             guard let self else { return }
 
@@ -343,32 +342,15 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
                 }
                 var openHABSitemapPage: OpenHABSitemapPage?
-
-                // If we are talking to openHAB 1.X, talk XML
-                if appData?.openHABVersion == 1 {
-                    let str = String(decoding: data, as: UTF8.self)
-                    os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, str)
-
-                    guard let doc = try? XMLDocument(data: data) else { return }
-                    if let rootElement = doc.root, let name = rootElement.tag {
-                        os_log("XML sitemap with root element: %{PUBLIC}@", log: .remoteAccess, type: .info, name)
-                        if name == "page" {
-                            openHABSitemapPage = OpenHABSitemapPage(xml: rootElement)
-                        }
-                    }
-                } else {
-                    // Newer versions talk JSON!
-                    os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                    do {
-                        // Self-executing closure
-                        // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                        openHABSitemapPage = try {
-                            let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                            return sitemapPageCodingData.openHABSitemapPage
-                        }()
-                    } catch {
-                        os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
-                    }
+                do {
+                    // Self-executing closure
+                    // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
+                    openHABSitemapPage = try {
+                        let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
+                        return sitemapPageCodingData.openHABSitemapPage
+                    }()
+                } catch {
+                    os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                 }
 
                 currentPage = openHABSitemapPage
@@ -421,7 +403,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
             switch response.result {
             case let .success(data):
-                self.sitemaps = deriveSitemaps(data, version: self.appData?.openHABVersion)
+                self.sitemaps = deriveSitemaps(data)
                 switch self.sitemaps.count {
                 case 2...:
                     if !self.defaultSitemap.isEmpty {

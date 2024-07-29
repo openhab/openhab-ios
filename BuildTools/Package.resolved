@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
       "state" : {
-        "revision" : "115b875683a00fc3a3876e6fac82d63c4bddcc43",
-        "version" : "0.52.7"
+        "revision" : "29d6c0bc4c078f819504d92fb5b359e63fd32046",
+        "version" : "0.53.2"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
       "state" : {
-        "revision" : "6e1d5fe55dae1c0514f006b50b3265c9b5398fa7",
-        "version" : "0.53.0"
+        "revision" : "de1f12218ad7ddac09b878e63017b71b6f609b32",
+        "version" : "0.54.0"
       }
     }
   ],

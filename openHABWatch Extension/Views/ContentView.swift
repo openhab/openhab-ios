@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -49,7 +49,6 @@ struct ContentView: View {
                     .onAppear {
                         DispatchQueue.main.async {
                             viewModel.refreshUrl()
-                            viewModel.refreshUrl()
                             os_log("reload after alert", log: .default, type: .info)
                         }
                         viewModel.showAlert = false
@@ -64,7 +63,11 @@ struct ContentView: View {
         case .switcher:
             SwitchRow(widget: widget)
         case .slider:
-            SliderRow(widget: widget)
+            if widget.switchSupport {
+                SliderRow(widget: widget)
+            } else {
+                SliderWithSwitchSupportRow(widget: widget)
+            }
         case .segmented:
             SegmentRow(widget: widget)
         case .rollershutter:

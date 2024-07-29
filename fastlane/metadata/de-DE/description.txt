@@ -1,1 +1,18 @@
-Dies ist der native iOS Client für openHAB - dem Open-Source Home Automation System. Das Projekt openHAB (open Home Automation Bus) zielt darauf ab, eine universale Integrationsplattform für alle Dinge rund um das Thema "SmartHome" zu sein und ist dabei absolut hersteller- und protokollunabhängig. openHAB vereint verschiedene Bus-Systeme, Geräte und Schnittstellenprotokolle. Zu den unterstützten Systemen gehören bspw. KNX, Modbus, DMX, Philips Hue, PLCBus, Sonos, Plugwise, IHC/Elko, RFXCOM, Homematic, Koubachi, Pulseaudio, Samsung TV, Bluetooth, One-Wire, Novelan, Asterisk, Serielle Geräte und viele, viele andere (eine vollständige Liste ist unter http://www.openhab.org/features-tech.html zu finden). Die App unterstützt alle neuen openHAB Features und zusätzlich das automatische Auffinden Ihrer openHAB Installation. Sowohl im Heimnetz als auch über das Internet mit Hilfe des my.openHAB Dienstes. Weitere Informationen finden Sie unter http://www.openhab.org/
+Dies ist die native iOS- und Apple Watch-Begleit-App für openHAB – ein Open-Source-Hausautomationssystem.
+
+Das open Home Automation Bus (openHAB) Projekt zielt darauf ab, eine universelle Integrationsplattform bereitzustellen, die Heimautomationstechnologien in ein einziges intelligentes System integriert. Mit mehr als 3000 Geräten, die openHAB verbinden kann, gibt es praktisch nichts, was nicht integriert werden kann. Seine fortschrittliche, regelbasierte Architektur ermöglicht die vollständige Automatisierung mit mehreren beliebten Skriptsprachen (Java Script, Ruby, Python, Java, RDSL und mehr) sowie visuellen Regel-Designern, die entweder Drag-and-Drop-Schnittstellen oder einfache "Wenn/Dann"-Formulare verwenden. Die neue openHAB-Benutzeroberfläche ermöglicht es Benutzern, problemlos schöne Schnittstellen zu erstellen, die an ihre Bedürfnisse angepasst sind. openHAB ist so konzipiert, dass es absolut herstellerneutral sowie hardware-/protokollunabhängig ist.
+
+iOS-Hauptfunktionen:
+
+* Integriert sich nahtlos in Ihre eigene openHAB-Benutzeroberfläche (Hauptbenutzeroberfläche oder Sitemaps)
+* Steuern Sie alles auf Ihrem openHAB-Server direkt oder remote über den kostenlosen openHAB Cloud-Service (https://myopenhab.org)
+* Verbesserte Push-Benachrichtigungen mit Medien von openHAB Cloud und dem openHAB-Cloud-Binding
+* Apple Watch-Begleit-App
+* Unterstützt nativ sowohl iPhone als auch iPad
+
+Machen Sie openHAB zum zentralen Integrations- und Steuerungspunkt Ihres Smart Home.
+Sie finden openHAB unter http://www.openhab.org/
+
+openHAB hat über 450 Add-Ons, die über 3000 Geräte unterstützen, darunter:
+
+Aiphone, Amazon Dash Button, Amazon Echo Control, AmpliFi, AndroidTV, Anker, Apple HomeKit, Arlo, August, Belkin, Blink, Bosch Smart Home, Bose SoundTouch, Brinks, Chamberlain, Chromecast, Cree, D-Link, Daikin, Denon / Marantz, Dynaudio, Ecobee, Electrolux, Eero, Fibaro, Foscam, Freebox, Gardena, Google Home, Hisense, Honeywell, Honeywell Home, Hue, iRobot, JBL, Jablotron Alarm, Kaleidescape, Kenwood, KNX, Kodi, Kuka, Kwikset, LIFX, LG, Linksys, Logitech, Lutron, Miele Cloud, Miele@home, Moen, Nanoleaf, Neato, Netatmo, Nest, Nortek, Nuki, Osram, Philips Hue, Pioneer, Plex, Powermax, Rako, Ring, Ring Alarm, Roku, Samsung Smartthings, Sennheiser, Sensibo, Shelly, Siemens, SimpliSafe, Smarthome, Smartmeter, Smartthings, Sonos, Sony, Spotify, Squeezebox, Tado, Technics, Tesla, TP-Link Smart Home, TRÅDFRI, Unifi, Velux, Vera, Verisure, Vizio, Volumio, Wemo, Whirlpool, Wink, Xiaomi, Yamaha Musiccast, Yamaha Receiver, Yeelight, Zigbee, Z-Wave und 400 weitere beliebte Technologien.

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -70,7 +70,7 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
         #else
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.es.spaphone.openhab")!.appendingPathComponent("trustedCertificates")
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
         #endif
     }
 

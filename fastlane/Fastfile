@@ -57,7 +57,7 @@ platform :ios do
             scheme: 'openHABTestsSwift',
             xcargs: '-skipPackagePluginValidation',
             testplan: 'openHABTests',
-            devices: ['iPhone 14 Pro'],
+            devices: ['iPhone 15 Pro'],
             clean: true
         )
     end
@@ -71,7 +71,7 @@ platform :ios do
     end
 
     desc 'Build beta'
-    lane :beta do |options|        
+    lane :beta do |options|
         options[:bump] = options[:bump] != nil ? options[:bump] : "patch"
 
         if is_ci?
@@ -107,7 +107,7 @@ platform :ios do
                 scheme: 'openHAB'
             )
         end
-        increment_version_if_required
+        # increment_version_if_required
         # NOTE: this resolves packages of the project so need to clean
         sh("cd .. && git clean -fd")
 
@@ -137,7 +137,7 @@ platform :ios do
         build_app(
             scheme: 'openHAB',
             clean: true,
-            xcargs: '-skipPackagePluginValidation',
+            xcargs: '-skipPackagePluginValidation -allowProvisioningUpdates',
             export_method: 'app-store',
             disable_package_automatic_updates: true
         )
@@ -168,15 +168,15 @@ platform :ios do
         ensure_git_status_clean
         push_to_git_remote
 
-        # merge into main and tag if not a feature build
+        # tag if not a feature build
         if !options[:isfeaturebuild]
-            sh 'git checkout main && git merge develop --no-ff'
+            #sh 'git checkout main && git merge develop --no-ff'
             add_git_tag(
                 message: changelog,
                 tag: version.to_s
             )
             push_to_git_remote(tags: true)
-            sh 'git checkout develop'
+            #sh 'git checkout develop'
 
             if is_ci?
                 set_github_release(
@@ -185,7 +185,7 @@ platform :ios do
                   name: "#{type.capitalize} version #{version}",
                   tag_name: version.to_s,
                   description: changelog,
-                  commitish: 'main'
+                  commitish: 'develop'
                   # upload_assets: no assets supported
                 )
             else
@@ -195,7 +195,7 @@ platform :ios do
                   name: "#{type.capitalize} version #{version}",
                   tag_name: version.to_s,
                   description: changelog,
-                  commitish: 'main'
+                  commitish: 'develop'
                   # upload_assets: no assets supported
                 )
             end
@@ -235,7 +235,7 @@ platform :ios do
             Spaceship::ConnectAPI::login(portal_team_id: "PBAPXHRAM9", tunes_team_id: "118429042")
         end
 
-        app = Spaceship::ConnectAPI::App.find("es.spaphone.openhab")
+        app = Spaceship::ConnectAPI::App.find("org.openhab.app")
         UI.message("Found app: #{app.name}")
 
         platform = Spaceship::ConnectAPI::Platform::IOS

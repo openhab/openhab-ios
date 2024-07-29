@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2023 Contributors to the openHAB project
+// Copyright (c) 2010-2024 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -10,51 +10,27 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import DynamicButton
-import Fuzi
 import OpenHABCore
 import os.log
 import SafariServices
 import UIKit
 
-func deriveSitemaps(_ response: Data?, version: Int?) -> [OpenHABSitemap] {
+func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
     var sitemaps = [OpenHABSitemap]()
 
-    // If we are talking to openHAB 1.X, talk XML
-    if version == 1 {
-        os_log("openHAB 1", log: .viewCycle, type: .info)
-
-        if let response {
-            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, String(data: response, encoding: .utf8) ?? "")
-        }
-        if let data = response,
-           let doc = try? XMLDocument(data: data),
-           let name = doc.root?.tag {
-            os_log("%{PUBLIC}@", log: .remoteAccess, type: .info, name)
-            if name == "sitemaps" {
-                for element in doc.root?.children(tag: "sitemap") ?? [] {
-                    let sitemap = OpenHABSitemap(xml: element)
-                    sitemaps.append(sitemap)
-                }
+    if let response {
+        do {
+            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
+            let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
+            for sitemapCodingDatum in sitemapsCodingData {
+                os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
+                sitemaps.append(sitemapCodingDatum.openHABSitemap)
             }
-        } else {
-            return []
-        }
-    } else {
-        // Newer versions speak JSON!
-        if let response {
-            os_log("openHAB 2", log: .viewCycle, type: .info)
-            do {
-                os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-                let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
-                for sitemapCodingDatum in sitemapsCodingData {
-                    os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-                    sitemaps.append(sitemapCodingDatum.openHABSitemap)
-                }
-            } catch {
-                os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-            }
+        } catch {
+            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
         }
     }
+
     return sitemaps
 }
 
@@ -117,7 +93,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             case let .success(data):
                 os_log("Sitemap response", log: .viewCycle, type: .info)
 
-                self.sitemaps = deriveSitemaps(data, version: self.appData?.openHABVersion)
+                self.sitemaps = deriveSitemaps(data)
 
                 if self.sitemaps.last?.name == "_default", self.sitemaps.count > 1 {
                     self.sitemaps = Array(self.sitemaps.dropLast())
@@ -231,7 +207,7 @@ extension OpenHABDrawerTableViewController {
             let imageView = UIImageView(frame: cell.customImageView.bounds)
             cell.customTextLabel?.text = sitemap.label
             if !sitemap.icon.isEmpty {
-                if let iconURL = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", version: appData?.openHABVersion ?? 2, icon: sitemap.icon).url {
+                if let iconURL = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", icon: sitemap.icon).url {
                     imageView.kf.setImage(with: iconURL, placeholder: UIImage(named: "openHABIcon"))
                 }
             } else {
@@ -297,12 +273,7 @@ extension OpenHABDrawerTableViewController {
         switch menuItem {
         case .main:
             dismiss(animated: true) {
-                os_log("openHABVersion %d", log: .viewCycle, type: .info, self.appData?.openHABVersion ?? -1)
-                if self.appData?.openHABVersion ?? 2 < 2 {
-                    self.delegate?.modalDismissed(to: .sitemap)
-                } else {
-                    self.delegate?.modalDismissed(to: .webview)
-                }
+                self.delegate?.modalDismissed(to: .webview)
             }
         case let .tiles(tile):
             let passedURL = tile.url

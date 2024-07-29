@@ -10,9 +10,13 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.es.spaphone.openhab</string>
+		<string>group.org.openhab.app</string>
 	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)org.openhab.app</string>
+	</array>
 </dict>
 </plist>
