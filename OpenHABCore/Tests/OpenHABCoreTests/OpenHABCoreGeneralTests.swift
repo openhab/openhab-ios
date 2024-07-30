@@ -28,7 +28,8 @@ final class OpenHABCoreGeneralTests: XCTestCase {
         XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }
 
-    func testLabelVale() {
+    @available(iOS 16.0, *)
+    func testLabelValue() {
         let widget = OpenHABWidget()
         widget.label = "llldl [llsl]"
         XCTAssertEqual(widget.labelValue, "llsl")

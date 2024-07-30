@@ -21,7 +21,7 @@ public class OpenHABStateDescription {
 
     public var numberPattern: String?
 
-    init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?, pattern: String?) {
+    init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?, pattern tobeSearched: String?) {
         self.minimum = minimum ?? 0.0
         self.maximum = maximum ?? 100.0
         self.step = step ?? 1.0
@@ -29,17 +29,13 @@ public class OpenHABStateDescription {
         self.options = options ?? []
 
         // Remove transformation instructions (e.g. for 'MAP(foo.map):%s' keep only '%s')
-
-        let regexPattern = #"^[A-Z]+(\(.*\))?:(.*)$"#
-        let regex = try? NSRegularExpression(pattern: regexPattern, options: .caseInsensitive)
-        if let pattern {
-            let nsrange = NSRange(pattern.startIndex ..< pattern.endIndex, in: pattern)
-            if let match = regex?.firstMatch(in: pattern, options: [], range: nsrange) {
-                if let range = Range(match.range(at: 2), in: pattern) {
-                    numberPattern = String(pattern[range])
-                }
+        
+        let regexPattern = /^[A-Z]+(\(.*\))?:(.*)$/.ignoresCase()
+        if let tobeSearched {
+            if let firstMatch = tobeSearched.firstMatch(of: regexPattern){
+                numberPattern = String(firstMatch.2)
             } else {
-                numberPattern = pattern
+                numberPattern = tobeSearched
             }
         } else {
             numberPattern = nil
