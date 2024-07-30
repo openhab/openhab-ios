@@ -12,7 +12,7 @@
 import Foundation
 import os.log
 
-public class HTTPClient: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
+public class HTTPClient: NSObject {
     // MARK: - Properties
 
     private var session: URLSession!
@@ -242,7 +242,6 @@ public class HTTPClient: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
                 request.httpBody = body.data(using: .utf8)
                 request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
             }
-
             performRequest(request: request, download: download) { result, response, error in
                 if let error {
                     os_log("Error with URL %{public}@ : %{public}@", log: .networking, type: .error, url.absoluteString, error.localizedDescription)
@@ -281,58 +280,73 @@ public class HTTPClient: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
         task.resume()
     }
 
+    @available(watchOS 8.0, *)
+    @available(iOS 15.0, *)
+    private func performRequest(request: URLRequest, download: Bool) async throws -> (Any?, URLResponse?) {
+        var request = request
+        if alwaysSendBasicAuth {
+            request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
+        }
+        if download {
+            return try await session.download(for: request)
+        } else {
+            return try await session.data(for: request)
+        }
+    }
+}
+
+extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
     // MARK: - URLSessionDelegate for Client Certificates and Basic Auth
 
-    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        urlSessionInternal(session, task: nil, didReceive: challenge, completionHandler: completionHandler)
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await urlSessionInternal(session, task: nil, didReceive: challenge)
     }
 
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        urlSessionInternal(session, task: task, didReceive: challenge, completionHandler: completionHandler)
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await urlSessionInternal(session, task: task, didReceive: challenge)
     }
 
-    private func urlSessionInternal(_ session: URLSession, task: URLSessionTask?, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    private func urlSessionInternal(_ session: URLSession, task: URLSessionTask?, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         os_log("URLAuthenticationChallenge: %{public}@", log: .networking, type: .info, challenge.protectionSpace.authenticationMethod)
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
         switch authenticationMethod {
         case NSURLAuthenticationMethodServerTrust:
-            handleServerTrust(challenge: challenge, completionHandler: completionHandler)
+            return await handleServerTrust(challenge: challenge)
         case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
             if let task {
                 task.authAttemptCount += 1
                 if task.authAttemptCount > 1 {
-                    completionHandler(.cancelAuthenticationChallenge, nil)
+                    return (.cancelAuthenticationChallenge, nil)
                 } else {
-                    handleBasicAuth(challenge: challenge, completionHandler: completionHandler)
+                    return await handleBasicAuth(challenge: challenge)
                 }
             } else {
-                handleBasicAuth(challenge: challenge, completionHandler: completionHandler)
+                return await handleBasicAuth(challenge: challenge)
             }
         case NSURLAuthenticationMethodClientCertificate:
-            handleClientCertificateAuth(challenge: challenge, completionHandler: completionHandler)
+            return await handleClientCertificateAuth(challenge: challenge)
         default:
-            completionHandler(.performDefaultHandling, nil)
+            return (.performDefaultHandling, nil)
         }
     }
 
-    private func handleServerTrust(challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    private func handleServerTrust(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         guard let serverTrust = challenge.protectionSpace.serverTrust else {
-            completionHandler(.performDefaultHandling, nil)
-            return
+            return (.performDefaultHandling, nil)
         }
         let credential = URLCredential(trust: serverTrust)
-        completionHandler(.useCredential, credential)
+        return (.useCredential, credential)
     }
 
-    private func handleBasicAuth(challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    private func handleBasicAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let credential = URLCredential(user: username, password: password, persistence: .forSession)
-        completionHandler(.useCredential, credential)
+        return (.useCredential, credential)
     }
 
-    private func handleClientCertificateAuth(challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    private func handleClientCertificateAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let certificateManager = ClientCertificateManager()
         let (disposition, credential) = certificateManager.evaluateTrust(with: challenge)
-        completionHandler(disposition, credential)
+        return (disposition, credential)
     }
 }
 
