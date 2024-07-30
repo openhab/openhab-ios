@@ -12,6 +12,7 @@
 import OpenHABCore
 import os.log
 import SafariServices
+import SFSafeSymbols
 import UIKit
 
 func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
@@ -236,9 +237,9 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell.customTextLabel?.text = drawerItem.localizedString
             switch drawerItem {
             case .notifications:
-                cell.customImageView.image = UIImage(systemName: "bell")
+                cell.customImageView.image = UIImage(systemSymbol: .bell)
             case .settings:
-                cell.customImageView.image = UIImage(systemName: "gear")
+                cell.customImageView.image = UIImage(systemSymbol: .gear)
             }
         default:
             break

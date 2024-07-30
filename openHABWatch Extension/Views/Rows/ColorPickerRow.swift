@@ -28,7 +28,7 @@ struct ColorPickerRow: View {
                 HStack {
                     Spacer()
                     EncircledIconWithAction(
-                        systemName: "chevron.down.circle.fill",
+                        systemSymbol: .chevronDownCircleFill,
                         action: downButtonPressed
                     )
 
@@ -43,7 +43,8 @@ struct ColorPickerRow: View {
                     Spacer()
 
                     EncircledIconWithAction(
-                        systemName: "chevron.up.circle.fill",
+                        systemSymbol:
+                        .chevronUpCircleFill,
                         action: upButtonPressed
                     )
                     Spacer()

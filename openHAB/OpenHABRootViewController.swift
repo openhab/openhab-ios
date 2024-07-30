@@ -117,7 +117,7 @@ class OpenHABRootViewController: UIViewController {
     fileprivate func setupSideMenu() {
         let hamburgerButtonItem: UIBarButtonItem
         let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
-        let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
+        let buttonImage = UIImage(systemSymbol: .line3Horizontal, withConfiguration: imageConfig)
         let button = UIButton(type: .custom)
         button.setImage(buttonImage, for: .normal)
         button.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)

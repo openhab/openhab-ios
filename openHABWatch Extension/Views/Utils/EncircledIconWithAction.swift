@@ -9,23 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import SFSafeSymbols
 import SwiftUI
 
 struct EncircledIconWithAction: View {
-    var systemName: String
+    var systemSymbol: SFSymbol
     var action: () -> Void
     var body: some View {
-        Image(systemName: systemName)
+        Image(systemSymbol: systemSymbol)
             .font(.system(size: 25))
             .colorMultiply(.blue)
             .saturation(0.8)
-//        Circle()
-//            .fill(Color.blue)
-//            .frame(width: 35, height: 35)
-//            .overlay(
-//                Image(systemName: systemName)
-//                    .font(.system(size: 25))
-//            )
             .onTapGesture {
                 action()
             }
@@ -34,6 +28,7 @@ struct EncircledIconWithAction: View {
 
 struct EncircledIconWithAction_Previews: PreviewProvider {
     static var previews: some View {
-        EncircledIconWithAction(systemName: "chevron.up.circle.fill") {}
+        EncircledIconWithAction(systemSymbol:
+            .chevronUpCircleFill) {}
     }
 }

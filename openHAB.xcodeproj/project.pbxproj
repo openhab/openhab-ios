@@ -92,6 +92,8 @@
 		DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */; };
 		DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0D23DCC152009B0A99 /* MapView.swift */; };
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
+		DA3B75AE2C59741800E219AB /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA3B75AD2C59741800E219AB /* SFSafeSymbols */; };
+		DA3B75B02C59742A00E219AB /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA3B75AF2C59742A00E219AB /* SFSafeSymbols */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
@@ -473,6 +475,7 @@
 				934E592728F16EBA00162004 /* Kingfisher in Frameworks */,
 				937E4473270B36DD00A98C26 /* OpenHABCore in Frameworks */,
 				934E592B28F16EBA00162004 /* Alamofire in Frameworks */,
+				DA3B75B02C59742A00E219AB /* SFSafeSymbols in Frameworks */,
 				934E592528F16EBA00162004 /* OpenHABCore in Frameworks */,
 				93F8062F27AE63620035A6B0 /* Alamofire in Frameworks */,
 				937E448E270B37D200A98C26 /* DeviceKit in Frameworks */,
@@ -531,6 +534,7 @@
 				DFB2622D18830A3600D3244D /* CoreGraphics.framework in Frameworks */,
 				93F8063527AE6C620035A6B0 /* FirebaseCrashlytics in Frameworks */,
 				937E4488270B37A600A98C26 /* Kingfisher in Frameworks */,
+				DA3B75AE2C59741800E219AB /* SFSafeSymbols in Frameworks */,
 				937E4471270B36D000A98C26 /* OpenHABCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1085,6 +1089,7 @@
 				934E592628F16EBA00162004 /* Kingfisher */,
 				934E592828F16EBA00162004 /* DeviceKit */,
 				934E592A28F16EBA00162004 /* Alamofire */,
+				DA3B75AF2C59742A00E219AB /* SFSafeSymbols */,
 			);
 			productName = openHABWatchSwift2;
 			productReference = DA0775152346705D0086C685 /* openHABWatch.app */;
@@ -1141,6 +1146,7 @@
 				93F8064F27AE7A830035A6B0 /* SideMenu */,
 				93F8065227AE7B580035A6B0 /* SVGKit */,
 				6557AF912C039D140094D0C8 /* FirebaseMessaging */,
+				DA3B75AD2C59741800E219AB /* SFSafeSymbols */,
 			);
 			productName = openHAB;
 			productReference = DFB2622718830A3600D3244D /* openHAB.app */;
@@ -1226,6 +1232,7 @@
 				93F8064827AE7A2E0035A6B0 /* XCRemoteSwiftPackageReference "FlexColorPicker" */,
 				93F8064E27AE7A820035A6B0 /* XCRemoteSwiftPackageReference "SideMenu" */,
 				93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */,
+				DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */,
 			);
 			productRefGroup = DFB2622818830A3600D3244D /* Products */;
 			projectDirPath = "";
@@ -2383,6 +2390,14 @@
 				kind = branch;
 			};
 		};
+		DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SFSafeSymbols/SFSafeSymbols";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.3.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -2490,6 +2505,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 93F8065127AE7B580035A6B0 /* XCRemoteSwiftPackageReference "SVGKit" */;
 			productName = SVGKit;
+		};
+		DA3B75AD2C59741800E219AB /* SFSafeSymbols */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */;
+			productName = SFSafeSymbols;
+		};
+		DA3B75AF2C59742A00E219AB /* SFSafeSymbols */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */;
+			productName = SFSafeSymbols;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
