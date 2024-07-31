@@ -294,12 +294,13 @@ public class ClientCertificateManager {
 
         let chainSize = SecTrustGetCertificateCount(trust)
 
-        if trustResult == .recoverableTrustFailure, chainSize > 1 {
-            trustResult = SecTrustResultType.proceed
-            let rootCA = SecTrustGetCertificateAtIndex(trust, chainSize - 1)
+        if trustResult == .recoverableTrustFailure, chainSize > 1,
+           let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate] {
+            let rootCA = certificates[chainSize - 1]
             let anchors = [rootCA]
-            os_log("Setting anchor for trust evaluation to %s", log: .default, type: .info, rootCA.debugDescription)
+            os_log("Setting anchor for trust evaluation to %s", log: .default, type: .info, SecCertificateCopySubjectSummary(rootCA)! as String)
             SecTrustSetAnchorCertificates(trust, anchors as CFArray)
+            trustResult = SecTrustResultType.proceed
             if #available(iOS 12.0, *) {
                 var trustError: CFError?
                 if SecTrustEvaluateWithError(trust, &trustError) != true {
@@ -316,13 +317,7 @@ public class ClientCertificateManager {
             return nil
         }
 
-        var certChain: [SecCertificate] = []
-        for ix in 0 ... chainSize - 1 {
-            guard let ct = SecTrustGetCertificateAtIndex(trust, ix) else { return nil }
-            if ct != cert {
-                certChain.append(ct)
-            }
-        }
-        return certChain
+        let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate]
+        return certificates?.filter { $0 != cert }
     }
 }
