@@ -29,10 +29,10 @@ public class OpenHABStateDescription {
         self.options = options ?? []
 
         // Remove transformation instructions (e.g. for 'MAP(foo.map):%s' keep only '%s')
-        
+
         let regexPattern = /^[A-Z]+(\(.*\))?:(.*)$/.ignoresCase()
         if let tobeSearched {
-            if let firstMatch = tobeSearched.firstMatch(of: regexPattern){
+            if let firstMatch = tobeSearched.firstMatch(of: regexPattern) {
                 numberPattern = String(firstMatch.2)
             } else {
                 numberPattern = tobeSearched

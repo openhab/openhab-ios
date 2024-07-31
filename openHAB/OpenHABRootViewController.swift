@@ -212,34 +212,27 @@ class OpenHABRootViewController: UIViewController {
 
     private func uiCommandAction(_ command: String) {
         os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
-        let pattern = "^(/basicui/app\\?.*|/.*|.*)$"
-
-        do {
-            let regex = try NSRegularExpression(pattern: pattern, options: [])
-            let nsString = command as NSString
-            let results = regex.matches(in: command, options: [], range: NSRange(location: 0, length: nsString.length))
-
-            if let match = results.first {
-                let pathRange = match.range(at: 1)
-                let path = nsString.substring(with: pathRange)
-                os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
-                if currentView != webViewController {
-                    switchView(target: .webview)
-                }
-                if path.starts(with: "/basicui/app?") {
-                    // TODO: this is a sitemap, we should use the native renderer
-                    // temp hack right now to just use a webview
-                    webViewController.loadWebView(force: true, path: path)
-                } else if path.starts(with: "/") {
-                    // have the webview load this path itself
-                    webViewController.loadWebView(force: true, path: path)
-                } else {
-                    // have the mainUI handle the navigation
-                    webViewController.navigateCommand(path)
-                }
+        let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
+        if let firstMatch = command.firstMatch(of: regexPattern) {
+            let path = String(firstMatch.1)
+            os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
+            if currentView != webViewController {
+                switchView(target: .webview)
             }
-        } catch {
-            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+            if path.starts(with: "/basicui/app?") {
+                // TODO: this is a sitemap, we should use the native renderer
+                // temp hack right now to just use a webview
+                webViewController.loadWebView(force: true, path: path)
+            } else if path.starts(with: "/") {
+                // have the webview load this path itself
+                webViewController.loadWebView(force: true, path: path)
+            } else {
+                // have the mainUI handle the navigation
+                webViewController.navigateCommand(path)
+            }
+
+        } else {
+            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
         }
     }
 
