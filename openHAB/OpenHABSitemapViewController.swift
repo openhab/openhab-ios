@@ -13,6 +13,8 @@ import Alamofire
 import AVFoundation
 import AVKit
 import Kingfisher
+import OpenAPIRuntime
+import OpenAPIURLSession
 import OpenHABCore
 import os.log
 import SafariServices
@@ -71,20 +73,21 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private var defaultSitemap = ""
     private var idleOff = false
     private var sitemaps: [OpenHABSitemap] = []
-    private var currentPage: OpenHABSitemapPage?
+    private var currentPage: OpenHABPage?
     private var selectionPicker: UIPickerView?
     private var pageNetworkStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
     private var pageNetworkStatusAvailable = false
     private var toggle: Int = 0
     private var refreshControl: UIRefreshControl?
-    private var filteredPage: OpenHABSitemapPage?
+    private var filteredPage: OpenHABPage?
     private var serverProperties: OpenHABServerProperties?
     private let search = UISearchController(searchResultsController: nil)
     private var webViewController: OpenHABWebViewController?
     private var isUserInteracting = false
     private var isWaitingToReload = false
+    private var asyncOperation: Task<Int, Never>?
 
-    var relevantPage: OpenHABSitemapPage? {
+    var relevantPage: OpenHABPage? {
         if isFiltering {
             filteredPage
         } else {
@@ -108,6 +111,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     var isFiltering: Bool {
         search.isActive && !searchBarIsEmpty
     }
+
+    private let apiactor = APIActor()
 
     @IBOutlet private var widgetTableView: UITableView!
 
@@ -177,6 +182,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             OpenHABTracker.shared.multicastDelegate.add(self)
             OpenHABTracker.shared.restart()
         } else {
+            Task { await apiactor.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!) }
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
                 loadPage(false)
@@ -307,6 +313,11 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             currentPageOperation = nil
         }
 
+        //        if asyncOperation != nil {
+        //            asyncOperation?.cancel()
+        //            asyncOperation = nil
+        //        }
+
         if pageUrl == "" {
             return
         }
@@ -315,37 +326,14 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
         if !longPolling {
-            _ = pageNetworkStatusChanged()
+            pageNetworkStatusChanged()
         }
+        asyncOperation = Task {
+            do {
+                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
 
-        currentPageOperation = NetworkConnection.page(
-            pageUrl: pageUrl,
-            longPolling: longPolling
-        ) { [weak self] response in
-            guard let self else { return }
+                currentPage = try await apiactor.openHABpollPage(sitemapname: defaultSitemap, longPolling: longPolling)
 
-            switch response.result {
-            case let .success(data):
-                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
-                let headers = response.response?.allHeaderFields
-
-                NetworkConnection.atmosphereTrackingId = headers?["X-Atmosphere-tracking-id"] as? String ?? ""
-                if !NetworkConnection.atmosphereTrackingId.isEmpty {
-                    os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
-                }
-                var openHABSitemapPage: OpenHABSitemapPage?
-                do {
-                    // Self-executing closure
-                    // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                    openHABSitemapPage = try {
-                        let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
-                        return sitemapPageCodingData.openHABSitemapPage
-                    }()
-                } catch {
-                    os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
-                }
-
-                currentPage = openHABSitemapPage
                 if isFiltering {
                     filterContentForSearchText(search.searchBar.text)
                 }
@@ -363,65 +351,64 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
 
                 loadPage(true)
-            case let .failure(error):
-                os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+            } catch let error as DecodingError {
+                os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                //            } catch let error as NSError where error.code == -1001 {
+                //                os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
+                //                loadPage(false)
 
+            } catch {
+                os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription)
                 NetworkConnection.atmosphereTrackingId = ""
-                if (error as NSError?)?.code == -1001, longPolling {
-                    os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                    loadPage(false)
-                } else if error.isExplicitlyCancelledError {
-                    os_log("Request was cancelled", log: OSLog.remoteAccess, type: .error)
-                } else {
-                    // Error
-                    DispatchQueue.main.async {
-                        if (error as NSError?)?.code == -1012 {
-                            self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
-                        } else {
-                            self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
-                        }
+                // Error
+                DispatchQueue.main.async {
+                    if (error as NSError?)?.code == -1012 {
+                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
+                    } else {
+                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
                     }
                 }
             }
+            return 0
         }
-
-        currentPageOperation?.resume()
 
         os_log("OpenHABSitemapViewController request sent", log: .remoteAccess, type: .error)
     }
 
     // Select sitemap
     func selectSitemap() {
-        NetworkConnection.sitemaps(openHABRootUrl: openHABRootUrl) { response in
-            switch response.result {
-            case let .success(data):
-                self.sitemaps = deriveSitemaps(data)
-                switch self.sitemaps.count {
+        Task {
+            do {
+                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
+
+                sitemaps = try await apiactor.openHABSitemaps()
+
+                switch sitemaps.count {
                 case 2...:
                     if !self.defaultSitemap.isEmpty {
-                        if let sitemapToOpen = self.sitemap(byName: self.defaultSitemap) {
+                        if let sitemapToOpen = sitemap(byName: self.defaultSitemap) {
                             if self.currentPage?.pageId != sitemapToOpen.name {
                                 self.currentPage?.widgets.removeAll() // NOTE: remove all widgets to ensure cells get invalidated
                             }
-                            self.pageUrl = sitemapToOpen.homepageLink
-                            self.loadPage(false)
+                            pageUrl = sitemapToOpen.homepageLink
+                            loadPage(false)
                         } else {
-                            self.showSideMenu()
+                            showSideMenu()
                         }
                     } else {
-                        self.showSideMenu()
+                        showSideMenu()
                     }
                 case 1:
-                    self.pageUrl = self.sitemaps[0].homepageLink
-                    self.loadPage(false)
+                    pageUrl = sitemaps[0].homepageLink
+                    loadPage(false)
                 case ...0:
-                    self.showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
-                    self.showSideMenu()
+                    showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
+                    showSideMenu()
                 default: break
                 }
-                self.widgetTableView.reloadData()
-            case let .failure(error):
-                os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                widgetTableView.reloadData()
+            } catch {
+                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 DispatchQueue.main.async {
                     // Error
                     if (error as NSError?)?.code == -1012 {
@@ -464,6 +451,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         return nil
     }
 
+    @discardableResult
     func pageNetworkStatusChanged() -> Bool {
         os_log("OpenHABSitemapViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
         if !pageUrl.isEmpty {
@@ -497,14 +485,13 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        if commandOperation != nil {
-            commandOperation?.cancel()
-            commandOperation = nil
-        }
         if let item, let command {
-            commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
-            commandOperation?.resume()
+            sendCommand(itemname: item.name, command: command)
         }
+    }
+
+    func sendCommand(itemname: String, command: String) {
+        Task { try await apiactor.openHABSendItemCommand(itemname: itemname, command: command) }
     }
 
     override func reloadView() {

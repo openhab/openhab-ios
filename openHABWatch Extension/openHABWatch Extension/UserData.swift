@@ -16,15 +16,6 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-// swiftlint:disable:next file_types_order
-extension OpenHABCore.Future where Value == ObservableOpenHABSitemapPage.CodingData {
-    func trafo() -> OpenHABCore.Future<ObservableOpenHABSitemapPage> {
-        transformed { data in
-            data.openHABSitemapPage
-        }
-    }
-}
-
 final class UserData: ObservableObject {
     @Published var widgets: [ObservableOpenHABWidget] = []
     @Published var showAlert = false
@@ -99,44 +90,6 @@ final class UserData: ObservableObject {
         refreshUrl()
     }
 
-    func request(_ endpoint: Endpoint) -> OpenHABCore.Future<Data> {
-        // Start by constructing a Promise, that will later be
-        // returned as a Future
-        let promise = Promise<Data>()
-
-        // Immediately reject the promise in case the passed
-        // endpoint can't be converted into a valid URL
-        guard let url = endpoint.url else {
-            promise.reject(with: NetworkingError.invalidURL)
-            return promise
-        }
-
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
-
-        currentPageOperation = NetworkConnection.page(
-            url: url,
-            longPolling: true
-        ) { [weak self] response in
-            guard self != nil else { return }
-
-            switch response.result {
-            case let .success(data):
-                os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                promise.resolve(with: data)
-
-            case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                promise.reject(with: error)
-            }
-        }
-        currentPageOperation?.resume()
-
-        return promise
-    }
-
     func loadPage(url: URL?,
                   longPolling: Bool,
                   refresh: Bool) {
@@ -204,20 +157,6 @@ final class UserData: ObservableObject {
             showAlert = false
             tracker?.selectUrl()
         }
-    }
-
-    func loadPage(_ endpoint: Endpoint) {
-        request(endpoint)
-            .decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-            .trafo()
-            .observe { result in
-                switch result {
-                case let .failure(error):
-                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-                case let .success(page):
-                    self.openHABSitemapPage = page
-                }
-            }
     }
 }
 

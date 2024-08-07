@@ -12,7 +12,7 @@
 import Foundation
 import os.log
 
-public class OpenHABSitemapPage: NSObject {
+public class OpenHABPage: NSObject {
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgets: [OpenHABWidget] = []
     public var pageId = ""
@@ -46,9 +46,9 @@ public class OpenHABSitemapPage: NSObject {
     }
 }
 
-public extension OpenHABSitemapPage {
-    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
-        let filteredOpenHABSitemapPage = try OpenHABSitemapPage(
+public extension OpenHABPage {
+    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABPage {
+        let filteredOpenHABSitemapPage = try OpenHABPage(
             pageId: pageId,
             title: title,
             link: link,
@@ -60,7 +60,7 @@ public extension OpenHABSitemapPage {
     }
 }
 
-public extension OpenHABSitemapPage {
+public extension OpenHABPage {
     struct CodingData: Decodable {
         let pageId: String?
         let title: String?
@@ -80,9 +80,9 @@ public extension OpenHABSitemapPage {
     }
 }
 
-public extension OpenHABSitemapPage.CodingData {
-    var openHABSitemapPage: OpenHABSitemapPage {
+public extension OpenHABPage.CodingData {
+    var openHABSitemapPage: OpenHABPage {
         let mappedWidgets = widgets?.map(\.openHABWidget) ?? []
-        return OpenHABSitemapPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets, icon: icon.orEmpty)
+        return OpenHABPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets, icon: icon.orEmpty)
     }
 }

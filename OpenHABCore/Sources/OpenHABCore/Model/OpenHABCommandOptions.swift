@@ -14,4 +14,9 @@ import Foundation
 public class OpenHABCommandOptions: Decodable {
     public var command = ""
     public var label = ""
+
+    public init(command: String = "", label: String = "") {
+        self.command = command
+        self.label = label
+    }
 }

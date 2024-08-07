@@ -1,0 +1,9 @@
+generate:
+  - types
+  - client
+accessModifier: internal
+filter:
+    tags:
+        - sitemaps
+        - ui
+        - items

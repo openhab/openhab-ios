@@ -139,6 +139,7 @@ public extension OpenHABItem {
     }
 }
 
+// swiftlint:disable line_length
 public extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
@@ -146,6 +147,8 @@ public extension OpenHABItem.CodingData {
         return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
     }
 }
+
+// swiftlint:enable line_length
 
 extension CGFloat {
     init(state string: String, divisor: Float) {

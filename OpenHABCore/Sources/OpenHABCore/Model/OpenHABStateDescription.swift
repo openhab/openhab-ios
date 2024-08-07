@@ -21,7 +21,7 @@ public class OpenHABStateDescription {
 
     public var numberPattern: String?
 
-    init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?, pattern: String?) {
+    public init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?, pattern: String?) {
         self.minimum = minimum ?? 0.0
         self.maximum = maximum ?? 100.0
         self.step = step ?? 1.0

@@ -14,7 +14,7 @@ import Foundation
 public class OpenHABCommandDescription {
     public var commandOptions: [OpenHABCommandOptions] = []
 
-    init(commandOptions: [OpenHABCommandOptions]?) {
+    public init(commandOptions: [OpenHABCommandOptions]?) {
         self.commandOptions = commandOptions ?? []
     }
 }

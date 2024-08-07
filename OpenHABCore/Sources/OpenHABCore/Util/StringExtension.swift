@@ -136,7 +136,7 @@ public extension String {
     }
 }
 
-extension String? {
+public extension String? {
     var orEmpty: String {
         switch self {
         case let .some(value):

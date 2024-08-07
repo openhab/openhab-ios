@@ -40,7 +40,7 @@ protocol Widget: AnyObject {
     var legend: Bool { get set }
     var encoding: String { get set }
     var item: OpenHABItem? { get set }
-    var linkedPage: OpenHABSitemapPage? { get set }
+    var linkedPage: OpenHABPage? { get set }
     var mappings: [OpenHABWidgetMapping] { get set }
     var image: UIImage? { get set }
     var widgets: [ChildWidget] { get set }
@@ -92,7 +92,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var encoding = ""
     public var forceAsItem: Bool?
     public var item: OpenHABItem?
-    public var linkedPage: OpenHABSitemapPage?
+    public var linkedPage: OpenHABPage?
     public var mappings: [OpenHABWidgetMapping] = []
     public var image: UIImage?
     public var widgets: [OpenHABWidget] = []
@@ -212,9 +212,9 @@ extension OpenHABWidget.WidgetType: UnknownCaseRepresentable {
     static var unknownCase: OpenHABWidget.WidgetType = .unknown
 }
 
-extension OpenHABWidget {
+public extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABSitemapPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
+    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -281,7 +281,7 @@ public extension OpenHABWidget {
         let encoding: String?
         let groupType: String?
         let item: OpenHABItem.CodingData?
-        let linkedPage: OpenHABSitemapPage.CodingData?
+        let linkedPage: OpenHABPage.CodingData?
         let mappings: [OpenHABWidgetMapping]
         let widgets: [OpenHABWidget.CodingData]
         let visibility: Bool?

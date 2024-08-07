@@ -10,29 +10,11 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import DynamicButton
+import OpenAPIURLSession
 import OpenHABCore
 import os.log
 import SafariServices
 import UIKit
-
-func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
-    var sitemaps = [OpenHABSitemap]()
-
-    if let response {
-        do {
-            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-            let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
-            for sitemapCodingDatum in sitemapsCodingData {
-                os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-                sitemaps.append(sitemapCodingDatum.openHABSitemap)
-            }
-        } catch {
-            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-        }
-    }
-
-    return sitemaps
-}
 
 struct UiTile: Decodable {
     var name: String
@@ -55,11 +37,15 @@ class OpenHABDrawerTableViewController: UITableViewController {
         AppDelegate.appDelegate.appData
     }
 
+    private let apiactor: APIActor
+
     init() {
+        apiactor = APIActor()
         super.init(nibName: nil, bundle: nil)
     }
 
     required init?(coder aDecoder: NSCoder) {
+        apiactor = APIActor()
         super.init(coder: aDecoder)
     }
 
@@ -77,27 +63,24 @@ class OpenHABDrawerTableViewController: UITableViewController {
         super.viewWillAppear(animated)
         os_log("OpenHABDrawerTableViewController viewWillAppear", log: .viewCycle, type: .info)
 
-        NetworkConnection.sitemaps(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
-            switch response.result {
-            case let .success(data):
-                os_log("Sitemap response", log: .viewCycle, type: .info)
+        Task {
+            do {
+                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
 
-                self.sitemaps = deriveSitemaps(data)
-
-                if self.sitemaps.last?.name == "_default", self.sitemaps.count > 1 {
-                    self.sitemaps = Array(self.sitemaps.dropLast())
+                sitemaps = try await apiactor.openHABSitemaps()
+                if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                    sitemaps = Array(sitemaps.dropLast())
                 }
-
                 // Sort the sitemaps according to Settings selection.
                 switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
-                case .label: self.sitemaps.sort { $0.label < $1.label }
-                case .name: self.sitemaps.sort { $0.name < $1.name }
+                case .label: sitemaps.sort { $0.label < $1.label }
+                case .name: sitemaps.sort { $0.name < $1.name }
                 }
 
                 self.drawerItems.removeAll()
                 self.setStandardDrawerItems()
                 self.tableView.reloadData()
-            case let .failure(error):
+            } catch {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
                 self.setStandardDrawerItems()
@@ -105,23 +88,13 @@ class OpenHABDrawerTableViewController: UITableViewController {
             }
         }
 
-        NetworkConnection.uiTiles(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
-            switch response.result {
-            case .success:
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        Task {
+            do {
+                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
+                uiTiles = try await apiactor.openHABTiles()
                 os_log("ui tiles response", log: .viewCycle, type: .info)
-                guard let responseData = response.data else {
-                    os_log("Error: did not receive data", log: OSLog.remoteAccess, type: .info)
-                    return
-                }
-                do {
-                    self.uiTiles = try JSONDecoder().decode([OpenHABUiTile].self, from: responseData)
-                    self.tableView.reloadData()
-                } catch {
-                    os_log("Error: did not receive data %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, error.localizedDescription)
-                }
-            case let .failure(error):
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                self.tableView.reloadData()
+            } catch {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
             }
         }

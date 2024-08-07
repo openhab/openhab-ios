@@ -14,4 +14,9 @@ import Foundation
 public class OpenHABOptions: Decodable {
     public var value = ""
     public var label = ""
+
+    public init(value: String = "", label: String = "") {
+        self.value = value
+        self.label = label
+    }
 }

@@ -146,7 +146,7 @@ final class JSONParserTests: XCTestCase {
         """
         let data = Data(json.utf8)
         do {
-            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: data)
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: data)
             let decoded = codingData.openHABSitemapPage
             XCTAssertEqual(decoded.pageId, "1302", "LinkedPage properly parsed")
         } catch {
@@ -255,7 +255,7 @@ final class JSONParserTests: XCTestCase {
         }
         """.data(using: .utf8)!
         do {
-            let sitemapPageCodingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: json)
+            let sitemapPageCodingData = try decoder.decode(OpenHABPage.CodingData.self, from: json)
             let sitemapPage = sitemapPageCodingData.openHABSitemapPage
             XCTAssertEqual(sitemapPage.pageId, "1304", "OpenHABLinkedPage properly parsed")
         } catch {
@@ -357,7 +357,7 @@ final class JSONParserTests: XCTestCase {
 
     func testJSONSitemapPage() {
         do {
-            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: jsonSitemap)
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: jsonSitemap)
             XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
             XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
         } catch {
@@ -367,7 +367,7 @@ final class JSONParserTests: XCTestCase {
 
     func testJSONSitemapPage2() {
         do {
-            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: jsonSitemap2)
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: jsonSitemap2)
             XCTAssertEqual(codingData.leaf, false, "OpenHABSitemapPage properly parsed")
             XCTAssertEqual(codingData.widgets?[0].widgetId, "00", "widget properly parsed")
             XCTAssertEqual(codingData.widgets?[4].widgets[3].item?.stateDescription?.options?[0].label, "New moon", "State description properly parsed")
@@ -385,7 +385,7 @@ final class JSONParserTests: XCTestCase {
         """.data(using: .utf8)!
         do {
             let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: json)
-            XCTAssertEqual(codingData.page.link, "https://192.168.2.15:8444/rest/sitemaps/watch/watch", "OpenHABSitemapPage properly parsed")
+            XCTAssertEqual(codingData.page?.link, "https://192.168.2.15:8444/rest/sitemaps/watch/watch", "OpenHABSitemapPage properly parsed")
             //        XCTAssert(codingData.openHABSitemapPage. widgets[0].type == "Frame", "")
             //        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
         } catch {
@@ -433,7 +433,7 @@ final class JSONParserTests: XCTestCase {
         """
         let data = Data(jsonInputForGroup.utf8)
         do {
-            let codingData = try decoder.decode(OpenHABSitemapPage.CodingData.self, from: data)
+            let codingData = try decoder.decode(OpenHABPage.CodingData.self, from: data)
             let widget = codingData.widgets?[0]
             XCTAssert(widget?.item?.type == "Group" && widget?.item?.groupType == "Rollershutter", "")
             XCTAssertEqual(codingData.widgets?[0].item?.groupType, "Rollershutter")
@@ -490,11 +490,11 @@ final class JSONParserTests: XCTestCase {
                 "End"
             )
 
-            let widgets: [OpenHABWidget.CodingData] = try XCTUnwrap(codingData.page.widgets)
+            let widgets: [OpenHABWidget.CodingData] = try XCTUnwrap(codingData.page?.widgets)
             let widget = widgets[0]
             XCTAssertEqual(widget.label, "Flat Scenes")
             XCTAssertEqual(widget.widgets[0].label, "Scenes")
-            XCTAssertEqual(codingData.page.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
+            XCTAssertEqual(codingData.page?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
             let widget2 = widgets[10]
             XCTAssertEqual(widget2.widgets[0].label, "Admin Items")
         }
