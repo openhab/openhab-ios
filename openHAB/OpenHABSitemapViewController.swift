@@ -112,7 +112,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         search.isActive && !searchBarIsEmpty
     }
 
-    private let apiactor = APIActor()
+    private var apiactor: APIActor?
 
     @IBOutlet private var widgetTableView: UITableView!
 
@@ -124,6 +124,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
+        Task { await apiactor = APIActor(username: openHABUsername, password: openHABPassword, alwaysSendBasicAuth: openHABAlwaysSendCreds, url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")) }
 
         registerTableViewCells()
         configureTableView()
@@ -182,7 +183,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             OpenHABTracker.shared.multicastDelegate.add(self)
             OpenHABTracker.shared.restart()
         } else {
-            Task { await apiactor.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!) }
+            Task { await apiactor?.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!) }
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
                 loadPage(false)
@@ -330,9 +331,14 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
         asyncOperation = Task {
             do {
-                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
+                await apiactor?.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
 
-                currentPage = try await apiactor.openHABpollPage(sitemapname: defaultSitemap, longPolling: longPolling)
+//                if let subscriptionid = try await apiactor?.openHABcreateSubscription() {
+//                    let sitemap = try await apiactor?.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
+//                    try await apiactor?.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
+//                }
+
+                currentPage = try await apiactor?.openHABpollPage(sitemapname: defaultSitemap, longPolling: longPolling)
 
                 if isFiltering {
                     filterContentForSearchText(search.searchBar.text)
@@ -379,9 +385,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     func selectSitemap() {
         Task {
             do {
-                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
-
-                sitemaps = try await apiactor.openHABSitemaps()
+                logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
+                apiactor = await APIActor(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
+                sitemaps = try await apiactor?.openHABSitemaps() ?? []
 
                 switch sitemaps.count {
                 case 2...:
@@ -407,6 +413,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 default: break
                 }
                 widgetTableView.reloadData()
+            } catch let error as APIActorError {
+                logger.debug("APIActorError on OpenHABSitemapViewController")
             } catch {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 DispatchQueue.main.async {
@@ -491,11 +499,12 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 
     func sendCommand(itemname: String, command: String) {
-        Task { try await apiactor.openHABSendItemCommand(itemname: itemname, command: command) }
+        Task { try await apiactor?.openHABSendItemCommand(itemname: itemname, command: command) }
     }
 
     override func reloadView() {
         defaultSitemap = Preferences.defaultSitemap
+        logger.debug("Reload view")
         selectSitemap()
     }
 

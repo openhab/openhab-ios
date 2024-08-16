@@ -5501,7 +5501,17 @@
         "operationId": "createSitemapEventSubscription",
         "responses": {
           "201": {
-            "description": "Subscription created."
+            "description": "Subscription created.",
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/JerseyResponseBuilderDTO"
+                }
+              }
+            }
           },
           "503": {
             "description": "Subscriptions limit reached."
@@ -5602,6 +5612,14 @@
             "name": "Accept-Language",
             "in": "header",
             "description": "language",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Atmosphere-Transport",
+            "in": "header",
+            "description": "X-Atmosphere-Transport for long polling",
             "schema": {
               "type": "string"
             }
@@ -5794,7 +5812,15 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/event-stream": {},
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitemapWidgetEvent"
+                }
+              }
+            }
           },
           "400": {
             "description": "Missing sitemap or page parameter, or page not linked successfully to the subscription."
@@ -9001,6 +9027,36 @@
           }
         }
       },
+      "JerseyResponseBuilderDTO": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "context": {
+              "$ref": "#/components/schemas/ContextDTO"
+          }
+        }
+      },
+      "ContextDTO": {
+        "type": "object",
+        "properties": {
+          "headers": {
+              "$ref": "#/components/schemas/HeadersDTO"
+          }
+        }
+      },
+      "HeadersDTO": {
+        "type": "object",
+        "properties": {
+          "Location": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+           }
+        }
+      },
       "ChannelDefinitionDTO": {
         "type": "object",
         "properties": {
@@ -9447,6 +9503,53 @@
             "items": {
               "$ref": "#/components/schemas/WidgetDTO"
             }
+          }
+        }
+      },
+      "SitemapWidgetEvent": {
+        "type": "object",
+        "properties": {
+          "widgetId": {
+              "type": "string"
+          },
+          "label": {
+              "type": "string"
+          },
+          "labelSource": {
+              "type": "string"
+          },
+          "icon": {
+              "type": "string"
+          },
+          "labelcolor": {
+              "type": "string"
+          },
+          "valuecolor": {
+              "type": "string"
+          },
+          "iconcolor": {
+              "type": "string"
+          },
+          "state": {
+              "type": "string"
+          },
+          "reloadIcon": {
+              "type": "boolean"
+          },
+          "visibility": {
+              "type": "boolean"
+          },
+          "descriptionChanged": {
+              "type": "boolean"
+          },
+          "item": {
+              "$ref": "#/components/schemas/EnrichedItemDTO"
+          },
+          "sitemapName": {
+              "type": "string"
+          },
+          "pageId": {
+              "type": "string"
           }
         }
       },

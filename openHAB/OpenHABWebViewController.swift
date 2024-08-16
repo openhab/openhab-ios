@@ -13,7 +13,6 @@ import OpenHABCore
 import os.log
 import SafariServices
 import SideMenu
-import SwiftMessages
 import UIKit
 import WebKit
 

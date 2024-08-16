@@ -16,6 +16,8 @@ import os.log
 import SafariServices
 import UIKit
 
+let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABDrawerTableViewController")
+
 struct UiTile: Decodable {
     var name: String
     var url: String
@@ -37,17 +39,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
         AppDelegate.appDelegate.appData
     }
 
-    private let apiactor: APIActor
-
-    init() {
-        apiactor = APIActor()
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        apiactor = APIActor()
-        super.init(coder: aDecoder)
-    }
+    private var apiactor: APIActor?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,9 +57,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
         Task {
             do {
-                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
-
-                sitemaps = try await apiactor.openHABSitemaps()
+                apiactor = await APIActor(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
+                sitemaps = try await apiactor?.openHABSitemaps() ?? []
                 if sitemaps.last?.name == "_default", sitemaps.count > 1 {
                     sitemaps = Array(sitemaps.dropLast())
                 }
@@ -81,7 +72,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 self.setStandardDrawerItems()
                 self.tableView.reloadData()
             } catch {
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                os_log("Error %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 self.drawerItems.removeAll()
                 self.setStandardDrawerItems()
                 self.tableView.reloadData()
@@ -90,8 +81,8 @@ class OpenHABDrawerTableViewController: UITableViewController {
 
         Task {
             do {
-                await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
-                uiTiles = try await apiactor.openHABTiles()
+                await apiactor = APIActor(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
+                uiTiles = try await apiactor?.openHABTiles() ?? []
                 os_log("ui tiles response", log: .viewCycle, type: .info)
                 self.tableView.reloadData()
             } catch {

@@ -9,19 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-//
-//  File.swift
-//
-//
-//  Created by Tim on 10.08.24.
-//
 import Foundation
 import HTTPTypes
 import OpenAPIRuntime
 import OpenAPIURLSession
 import os
-
-let logger = Logger(subsystem: "org.openhab.app", category: "apiactor")
 
 public protocol OpenHABSitemapsService {
     func openHABSitemaps() async throws -> [OpenHABSitemap]
@@ -41,8 +33,9 @@ public actor APIActor {
     var username: String
     var password: String
 
-    public init(username: String = "", password: String = "", alwaysSendBasicAuth: Bool = true) {
-        let url = "about:blank"
+    private let logger = Logger(subsystem: "org.openhab.app", category: "apiactor")
+
+    public init(username: String = "", password: String = "", alwaysSendBasicAuth: Bool = true, url: URL = URL(staticString: "about:blank")) async {
         // TODO: Make use of prepareURLSessionConfiguration
         let config = URLSessionConfiguration.default
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
@@ -51,11 +44,15 @@ public actor APIActor {
         self.username = username
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
+        self.url = url
 
         api = Client(
-            serverURL: URL(string: url)!,
+            serverURL: url.appending(path: "/rest"),
             transport: URLSessionTransport(configuration: .init(session: session)),
-            middlewares: [AuthorisationMiddleware(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth)]
+            middlewares: [
+                AuthorisationMiddleware(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth),
+                LoggingMiddleware()
+            ]
         )
     }
 
@@ -74,7 +71,10 @@ public actor APIActor {
             api = Client(
                 serverURL: newURL.appending(path: "/rest"),
                 transport: URLSessionTransport(configuration: .init(session: session)),
-                middlewares: [AuthorisationMiddleware(username: username, password: password)]
+                middlewares: [
+                    AuthorisationMiddleware(username: username, password: password),
+                    LoggingMiddleware()
+                ]
             )
         }
     }
@@ -88,17 +88,27 @@ public actor APIActor {
             api = Client(
                 serverURL: url!.appending(path: "/rest"),
                 transport: URLSessionTransport(configuration: .init(session: session)),
-                middlewares: [AuthorisationMiddleware(username: username, password: password)]
+                middlewares: [
+                    AuthorisationMiddleware(username: username, password: password),
+                    LoggingMiddleware()
+                ]
             )
         }
     }
 }
 
+public enum APIActorError: Error {
+    case undocumented
+}
+
 extension APIActor: OpenHABSitemapsService {
     public func openHABSitemaps() async throws -> [OpenHABSitemap] {
-        try await api.getSitemaps(.init())
-            .ok.body.json
-            .map(OpenHABSitemap.init)
+        // swiftformat:disable:next redundantSelf
+        logger.log("Trying to getSitemaps for : \(self.url?.debugDescription ?? "No URL")")
+        switch try await api.getSitemaps(.init()) {
+        case let .ok(okresponse): return try okresponse.body.json.map(OpenHABSitemap.init)
+        case .undocumented: throw APIActorError.undocumented
+        }
     }
 }
 
@@ -110,19 +120,65 @@ extension APIActor: OpenHABUiTileService {
     }
 }
 
-extension APIActor {
-    func openHABSitemap(path: Operations.getSitemapByName.Input.Path) async throws -> OpenHABSitemap? {
-        let result = try await api.getSitemapByName(path: path)
-            .ok.body.json
-        return OpenHABSitemap(result)
+public extension AsyncThrowingStream {
+//    func map<Transformed>(_ transform: @escaping (Self.Element) -> Transformed) -> AsyncThrowingStream<Transformed, Error> {
+//        AsyncThrowingStream<Transformed, Error> { continuation in
+//            Task {
+//                for try await element in self {
+//                    continuation.yield(transform(element))
+//                }
+//                continuation.finish()
+//            }
+//        }
+//    }
+
+    func map2<T>(transform: @escaping (Self.Element) -> T) -> AsyncThrowingStream<T, Error> {
+        AsyncThrowingStream<T, Error> { continuation in
+            let task = Task<Void, Error> {
+                for try await element in self {
+                    continuation.yield(transform(element))
+                }
+                continuation.finish()
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+}
+
+public extension APIActor {
+    func openHABcreateSubscription() async throws -> String? {
+        logger.info("Creating subscription")
+        let result = try await api.createSitemapEventSubscription()
+        guard let urlString = try result.ok.body.json.context?.headers?.Location?.first else { return nil }
+        return URL(string: urlString)?.lastPathComponent
+    }
+
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> String {
+//    AsyncThrowingStream<OpenHABSitemapWidgetEvent,Error> {
+        let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
+        let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
+        let stream = try await api.getSitemapEvents_1(path: path, query: query).ok.body.text_event_hyphen_stream.asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self).compactMap { (value) -> OpenHABSitemapWidgetEvent? in
+            guard let data = value.data else { return nil }
+            return OpenHABSitemapWidgetEvent(data)
+        }
+//        return stream.map2
+
+        for try await line in stream {
+            print(line)
+            print("\n")
+        }
+        return ""
+
+        logger.debug("subscription date received")
     }
 }
 
 extension APIActor {
     // Internal function for pollPage
     func openHABpollPage(path: Operations.pollDataForPage.Input.Path,
+                         query: Operations.pollDataForPage.Input.Query = .init(),
                          headers: Operations.pollDataForPage.Input.Headers) async throws -> OpenHABPage? {
-        let result = try await api.pollDataForPage(path: path, headers: headers)
+        let result = try await api.pollDataForPage(path: path, query: query, headers: headers)
             .ok.body.json
         return OpenHABPage(result)
     }
@@ -133,7 +189,6 @@ extension APIActor {
     ///   - longPolling: set to true for long-polling
     public func openHABpollPage(sitemapname: String, longPolling: Bool) async throws -> OpenHABPage? {
         var headers = Operations.pollDataForPage.Input.Headers()
-
         if longPolling {
             logger.info("Long-polling, setting X-Atmosphere-Transport")
             headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
@@ -144,14 +199,28 @@ extension APIActor {
         await updateForLongPolling(longPolling)
         return try await openHABpollPage(path: path, headers: headers)
     }
-}
 
-extension APIActor {
-    func openHABSitemap(path: Operations.getSitemapByName.Input.Path,
-                        headers: Operations.getSitemapByName.Input.Headers) async throws -> OpenHABSitemap? {
-        let result = try await api.getSitemapByName(path: path, headers: headers)
+    // Internal function for pollSitemap
+    func openHABpollSitemap(path: Operations.pollDataForSitemap.Input.Path,
+                            query: Operations.pollDataForSitemap.Input.Query = .init(),
+                            headers: Operations.pollDataForSitemap.Input.Headers) async throws -> OpenHABSitemap? {
+        let result = try await api.pollDataForSitemap(path: path, query: query, headers: headers)
             .ok.body.json
         return OpenHABSitemap(result)
+    }
+
+    public func openHABpollSitemap(sitemapname: String, longPolling: Bool, subscriptionId: String? = nil) async throws -> OpenHABSitemap? {
+        var headers = Operations.pollDataForSitemap.Input.Headers()
+        if longPolling {
+            logger.info("Long-polling, setting X-Atmosphere-Transport")
+            headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
+        } else {
+            headers.X_hyphen_Atmosphere_hyphen_Transport = nil
+        }
+        let query = Operations.pollDataForSitemap.Input.Query(subscriptionid: subscriptionId)
+        let path = Operations.pollDataForSitemap.Input.Path(sitemapname: sitemapname)
+        await updateForLongPolling(longPolling)
+        return try await openHABpollSitemap(path: path, query: query, headers: headers)
     }
 }
 
@@ -171,6 +240,44 @@ public extension APIActor {
         let response = try await api.sendItemCommand(path: path, body: body)
         _ = try response.ok
     }
+}
+
+class OpenHABSitemapWidgetEvent {
+    init(sitemapName: String? = nil, pageId: String? = nil, widgetId: String? = nil, label: String? = nil, labelSource: String? = nil, icon: String? = nil, reloadIcon: Bool? = nil, labelcolor: String? = nil, valuecolor: String? = nil, iconcolor: String? = nil, visibility: Bool? = nil, state: String? = nil, enrichedItem: OpenHABItem? = nil, descriptionChanged: Bool? = nil) {
+        self.sitemapName = sitemapName
+        self.pageId = pageId
+        self.widgetId = widgetId
+        self.label = label
+        self.labelSource = labelSource
+        self.icon = icon
+        self.reloadIcon = reloadIcon
+        self.labelcolor = labelcolor
+        self.valuecolor = valuecolor
+        self.iconcolor = iconcolor
+        self.visibility = visibility
+        self.state = state
+        self.enrichedItem = enrichedItem
+        self.descriptionChanged = descriptionChanged
+    }
+
+    convenience init(_ event: Components.Schemas.SitemapWidgetEvent) {
+        self.init(sitemapName: event.sitemapName, pageId: event.pageId, widgetId: event.widgetId, label: event.label, labelSource: event.labelSource, icon: event.icon, reloadIcon: event.reloadIcon, labelcolor: event.labelcolor, valuecolor: event.valuecolor, iconcolor: event.iconcolor, visibility: event.visibility, state: event.state, enrichedItem: OpenHABItem(event.item), descriptionChanged: event.descriptionChanged)
+    }
+
+    var sitemapName: String?
+    var pageId: String?
+    var widgetId: String?
+    var label: String?
+    var labelSource: String?
+    var icon: String?
+    var reloadIcon: Bool?
+    var labelcolor: String?
+    var valuecolor: String?
+    var iconcolor: String?
+    var visibility: Bool?
+    var state: String?
+    var enrichedItem: OpenHABItem?
+    var descriptionChanged: Bool?
 }
 
 public struct AuthorisationMiddleware {
@@ -199,12 +306,10 @@ extension AuthorisationMiddleware: ClientMiddleware {
         // Use a mutable copy of request
         var request = request
 
-        if ((baseURL.host?.hasSuffix("myopenhab.org")) == nil), alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
+        if baseURL.host?.hasSuffix("myopenhab.org") == nil, alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
             request.headerFields[.authorization] = basicAuthHeader()
         }
-        logger.info("Outgoing request: \(request.headerFields.debugDescription, privacy: .public)")
         let (response, body) = try await next(request, body, baseURL)
-        logger.debug("Incoming response \(response.headerFields.debugDescription)")
         return (response, body)
     }
 }
