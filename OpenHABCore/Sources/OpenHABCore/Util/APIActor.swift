@@ -40,7 +40,9 @@ public actor APIActor {
         let config = URLSessionConfiguration.default
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
 //        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
-        let session = URLSession(configuration: config)
+
+        let delegate = APIActorDelegate(username: username, password: password)
+        let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
         self.username = username
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
@@ -242,6 +244,89 @@ public extension APIActor {
     }
 }
 
+// MARK: - URLSessionDelegate for Client Certificates and Basic Auth
+
+class APIActorDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
+    private let username: String
+    private let password: String
+
+    init(username: String, password: String) {
+        self.username = username
+        self.password = password
+    }
+
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await urlSessionInternal(session, task: nil, didReceive: challenge)
+    }
+
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        await urlSessionInternal(session, task: task, didReceive: challenge)
+    }
+
+    private func urlSessionInternal(_ session: URLSession, task: URLSessionTask?, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        os_log("URLAuthenticationChallenge: %{public}@", log: .networking, type: .info, challenge.protectionSpace.authenticationMethod)
+        let authenticationMethod = challenge.protectionSpace.authenticationMethod
+        switch authenticationMethod {
+        case NSURLAuthenticationMethodServerTrust:
+            return await handleServerTrust(challenge: challenge)
+        case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
+            if let task {
+                task.authAttemptCount += 1
+                if task.authAttemptCount > 1 {
+                    return (.cancelAuthenticationChallenge, nil)
+                } else {
+                    return await handleBasicAuth(challenge: challenge)
+                }
+            } else {
+                return await handleBasicAuth(challenge: challenge)
+            }
+        case NSURLAuthenticationMethodClientCertificate:
+            return await handleClientCertificateAuth(challenge: challenge)
+        default:
+            return (.performDefaultHandling, nil)
+        }
+    }
+
+    private func handleServerTrust(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+            return (.performDefaultHandling, nil)
+        }
+        let credential = URLCredential(trust: serverTrust)
+        return (.useCredential, credential)
+    }
+
+    private func handleBasicAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        let credential = URLCredential(user: username, password: password, persistence: .forSession)
+        return (.useCredential, credential)
+    }
+
+    private func handleClientCertificateAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        let certificateManager = ClientCertificateManager()
+        let (disposition, credential) = certificateManager.evaluateTrust(with: challenge)
+        return (disposition, credential)
+    }
+}
+
+extension OpenHABWidget {
+    func update(with event: OpenHABSitemapWidgetEvent) {
+        
+        state = event.state ?? self.state
+        icon = event.icon ?? self.icon
+        label = event.label ?? self.label
+        iconColor = event.iconcolor ?? ""
+        labelcolor = event.labelcolor ?? ""
+        valuecolor = event.valuecolor ?? ""
+        visibility = event.visibility ?? self.visibility
+        
+        if let enrichedItem = event.enrichedItem {
+            if let link = self.item?.link {
+                enrichedItem.link = link
+            }
+            item = enrichedItem
+        }
+    }
+}
+
 class OpenHABSitemapWidgetEvent {
     init(sitemapName: String? = nil, pageId: String? = nil, widgetId: String? = nil, label: String? = nil, labelSource: String? = nil, icon: String? = nil, reloadIcon: Bool? = nil, labelcolor: String? = nil, valuecolor: String? = nil, iconcolor: String? = nil, visibility: Bool? = nil, state: String? = nil, enrichedItem: OpenHABItem? = nil, descriptionChanged: Bool? = nil) {
         self.sitemapName = sitemapName
@@ -278,40 +363,6 @@ class OpenHABSitemapWidgetEvent {
     var state: String?
     var enrichedItem: OpenHABItem?
     var descriptionChanged: Bool?
-}
-
-public struct AuthorisationMiddleware {
-    private let username: String
-    private let password: String
-    private let alwaysSendBasicAuth: Bool
-
-    public init(username: String, password: String, alwaysSendBasicAuth: Bool = false) {
-        self.username = username
-        self.password = password
-        self.alwaysSendBasicAuth = alwaysSendBasicAuth
-    }
-}
-
-extension AuthorisationMiddleware: ClientMiddleware {
-    private func basicAuthHeader() -> String {
-        let credential = Data("\(username):\(password)".utf8).base64EncodedString()
-        return "Basic \(credential)"
-    }
-
-    public func intercept(_ request: HTTPRequest,
-                          body: HTTPBody?,
-                          baseURL: URL,
-                          operationID: String,
-                          next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)) async throws -> (HTTPResponse, HTTPBody?) {
-        // Use a mutable copy of request
-        var request = request
-
-        if baseURL.host?.hasSuffix("myopenhab.org") == nil, alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
-            request.headerFields[.authorization] = basicAuthHeader()
-        }
-        let (response, body) = try await next(request, body, baseURL)
-        return (response, body)
-    }
 }
 
 extension OpenHABUiTile {
