@@ -155,23 +155,16 @@ public extension APIActor {
         return URL(string: urlString)?.lastPathComponent
     }
 
-    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> String {
-//    AsyncThrowingStream<OpenHABSitemapWidgetEvent,Error> {
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> AsyncThrowingCompactMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, OpenHABSitemapWidgetEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-        let stream = try await api.getSitemapEvents_1(path: path, query: query).ok.body.text_event_hyphen_stream.asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self).compactMap { (value) -> OpenHABSitemapWidgetEvent? in
-            guard let data = value.data else { return nil }
-            return OpenHABSitemapWidgetEvent(data)
+        let decodedSequence = try await api.getSitemapEvents_1(path: path, query: query).ok.body.text_event_hyphen_stream.asDecodedServerSentEvents()
+        let opaqueSequence = decodedSequence.compactMap { (event) in
+            if let data = event.data {
+                try JSONDecoder().decode(OpenHABSitemapWidgetEvent.CodingData.self, from: Data(data.utf8)).openHABSitemapWidgetEvent
+            } else { nil }
         }
-//        return stream.map2
-
-        for try await line in stream {
-            print(line)
-            print("\n")
-        }
-        return ""
-
-        logger.debug("subscription date received")
+        return opaqueSequence
     }
 }
 
@@ -309,17 +302,16 @@ class APIActorDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
 
 extension OpenHABWidget {
     func update(with event: OpenHABSitemapWidgetEvent) {
-        
-        state = event.state ?? self.state
-        icon = event.icon ?? self.icon
-        label = event.label ?? self.label
+        state = event.state ?? state
+        icon = event.icon ?? icon
+        label = event.label ?? label
         iconColor = event.iconcolor ?? ""
         labelcolor = event.labelcolor ?? ""
         valuecolor = event.valuecolor ?? ""
-        visibility = event.visibility ?? self.visibility
-        
+        visibility = event.visibility ?? visibility
+
         if let enrichedItem = event.enrichedItem {
-            if let link = self.item?.link {
+            if let link = item?.link {
                 enrichedItem.link = link
             }
             item = enrichedItem
@@ -327,7 +319,22 @@ extension OpenHABWidget {
     }
 }
 
-class OpenHABSitemapWidgetEvent {
+public class OpenHABSitemapWidgetEvent {
+    var sitemapName: String?
+    var pageId: String?
+    var widgetId: String?
+    var label: String?
+    var labelSource: String?
+    var icon: String?
+    var reloadIcon: Bool?
+    var labelcolor: String?
+    var valuecolor: String?
+    var iconcolor: String?
+    var visibility: Bool?
+    var state: String?
+    var enrichedItem: OpenHABItem?
+    var descriptionChanged: Bool?
+
     init(sitemapName: String? = nil, pageId: String? = nil, widgetId: String? = nil, label: String? = nil, labelSource: String? = nil, icon: String? = nil, reloadIcon: Bool? = nil, labelcolor: String? = nil, valuecolor: String? = nil, iconcolor: String? = nil, visibility: Bool? = nil, state: String? = nil, enrichedItem: OpenHABItem? = nil, descriptionChanged: Bool? = nil) {
         self.sitemapName = sitemapName
         self.pageId = pageId
@@ -345,24 +352,51 @@ class OpenHABSitemapWidgetEvent {
         self.descriptionChanged = descriptionChanged
     }
 
-    convenience init(_ event: Components.Schemas.SitemapWidgetEvent) {
+    convenience init?(_ event: Components.Schemas.SitemapWidgetEvent?) {
+        guard let event else { return nil }
         self.init(sitemapName: event.sitemapName, pageId: event.pageId, widgetId: event.widgetId, label: event.label, labelSource: event.labelSource, icon: event.icon, reloadIcon: event.reloadIcon, labelcolor: event.labelcolor, valuecolor: event.valuecolor, iconcolor: event.iconcolor, visibility: event.visibility, state: event.state, enrichedItem: OpenHABItem(event.item), descriptionChanged: event.descriptionChanged)
     }
+}
 
-    var sitemapName: String?
-    var pageId: String?
-    var widgetId: String?
-    var label: String?
-    var labelSource: String?
-    var icon: String?
-    var reloadIcon: Bool?
-    var labelcolor: String?
-    var valuecolor: String?
-    var iconcolor: String?
-    var visibility: Bool?
-    var state: String?
-    var enrichedItem: OpenHABItem?
-    var descriptionChanged: Bool?
+extension OpenHABSitemapWidgetEvent: CustomStringConvertible {
+    public var description: String {
+        "\(widgetId) \(label) \(enrichedItem?.state)"
+    }
+}
+
+public extension OpenHABSitemapWidgetEvent {
+    struct CodingData: Decodable, Hashable, Equatable {
+        public static func == (lhs: OpenHABSitemapWidgetEvent.CodingData, rhs: OpenHABSitemapWidgetEvent.CodingData) -> Bool {
+            lhs.widgetId == rhs.widgetId
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(widgetId)
+        }
+
+        var sitemapName: String?
+        var pageId: String?
+        var widgetId: String?
+        var label: String?
+        var labelSource: String?
+        var icon: String?
+        var reloadIcon: Bool?
+        var labelcolor: String?
+        var valuecolor: String?
+        var iconcolor: String?
+        var visibility: Bool?
+//        var state: String?
+        var item: OpenHABItem.CodingData?
+        var descriptionChanged: Bool?
+        var link: String?
+    }
+}
+
+extension OpenHABSitemapWidgetEvent.CodingData {
+    var openHABSitemapWidgetEvent: OpenHABSitemapWidgetEvent {
+        // swiftlint:disable:next line_length
+        OpenHABSitemapWidgetEvent(sitemapName: sitemapName, pageId: pageId, widgetId: widgetId, label: label, labelSource: labelSource, icon: icon, reloadIcon: reloadIcon, labelcolor: labelcolor, valuecolor: valuecolor, iconcolor: iconcolor, visibility: visibility, enrichedItem: item?.openHABItem, descriptionChanged: descriptionChanged)
+    }
 }
 
 extension OpenHABUiTile {

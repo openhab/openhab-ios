@@ -28,6 +28,7 @@ public class OpenHABItem: NSObject, CommItem {
         case rollershutter = "Rollershutter"
         case stringItem = "String"
         case switchItem = "Switch"
+        case undetermind = "" // Relevant only for SitemapWidgetEvent
     }
 
     public var type: ItemType?
@@ -125,10 +126,10 @@ public extension OpenHABItem {
 
 public extension OpenHABItem {
     struct CodingData: Decodable {
-        let type: String
+        let type: String?
         let groupType: String?
         let name: String
-        let link: String
+        let link: String?
         let state: String?
         let label: String?
         let stateDescription: OpenHABStateDescription.CodingData?
@@ -144,7 +145,7 @@ public extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
 
-        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
+        return OpenHABItem(name: name, type: type ?? "", state: state, link: link ?? "", label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
     }
 }
 

@@ -331,12 +331,17 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
         asyncOperation = Task {
             do {
-                await apiactor?.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
+                if let apiactor {
+                    await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
 
-//                if let subscriptionid = try await apiactor?.openHABcreateSubscription() {
-//                    let sitemap = try await apiactor?.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
-//                    try await apiactor?.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
-//                }
+                    if let subscriptionid = try await apiactor.openHABcreateSubscription() {
+                        let sitemap = try await apiactor.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
+                        let events = try await apiactor.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
+                        for try await event in events {
+                            print(event)
+                        }
+                    }
+                }
 
                 currentPage = try await apiactor?.openHABpollPage(sitemapname: defaultSitemap, longPolling: longPolling)
 
