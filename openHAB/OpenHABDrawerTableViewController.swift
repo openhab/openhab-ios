@@ -9,10 +9,10 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import OpenHABCore
 import os.log
 import SafariServices
+import SFSafeSymbols
 import UIKit
 
 func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
@@ -234,30 +234,12 @@ class OpenHABDrawerTableViewController: UITableViewController {
         case 3:
             // Then menu items
             let drawerItem = drawerItems[indexPath.row]
-
             cell.customTextLabel?.text = drawerItem.localizedString
-
-            if #available(iOS 13, *) {
-                switch drawerItem {
-                case .notifications:
-                    cell.customImageView.image = UIImage(systemName: "bell")
-                case .settings:
-                    cell.customImageView.image = UIImage(systemName: "gear")
-                }
-            } else {
-                let buttonIcon = DynamicButton(frame: cell.customImageView.bounds)
-                buttonIcon.bounceButtonOnTouch = false
-
-                buttonIcon.strokeColor = .black
-                buttonIcon.lineWidth = 1
-
-                switch drawerItem {
-                case .notifications:
-                    buttonIcon.style = .custom(DynamicButtonStyleBell.self)
-                case .settings:
-                    buttonIcon.style = .custom(DynamicButtonStyleGear.self)
-                }
-                cell.customImageView.addSubview(buttonIcon)
+            switch drawerItem {
+            case .notifications:
+                cell.customImageView.image = UIImage(systemSymbol: .bell)
+            case .settings:
+                cell.customImageView.image = UIImage(systemSymbol: .gear)
             }
         default:
             break
