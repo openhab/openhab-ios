@@ -9,24 +9,23 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import OpenHABCore
 import os.log
 import UIKit
 
-protocol ColorPickerUITableViewCellDelegate: NSObjectProtocol {
-    func didPressColorButton(_ cell: ColorPickerUITableViewCell?)
+protocol ColorPickerCellDelegate: NSObjectProtocol {
+    func didPressColorButton(_ cell: ColorPickerCell?)
 }
 
-class ColorPickerUITableViewCell: GenericUITableViewCell {
-    weak var delegate: ColorPickerUITableViewCellDelegate?
+class ColorPickerCell: GenericUITableViewCell {
+    weak var delegate: ColorPickerCellDelegate?
 
-    @IBOutlet private var upButton: DynamicButton!
+    @IBOutlet private var downButton: UIButton!
+    @IBOutlet private var upButton: UIButton!
     @IBOutlet private var colorButton: UICircleButton!
-    @IBOutlet private var downButton: DynamicButton!
 
     required init?(coder: NSCoder) {
-        os_log("ColorPickerUITableViewCell initWithCoder", log: OSLog.viewCycle, type: .info)
+        os_log("ColorPickerCell initWithCoder", log: OSLog.viewCycle, type: .info)
 
         super.init(coder: coder)
 
@@ -46,15 +45,10 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        downButton.setStyle(.caretDown, animated: false)
-        upButton.setStyle(.caretUp, animated: false)
-
         customTextLabel?.text = widget.labelText
         colorButton?.backgroundColor = widget.item?.stateAsUIColor()
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
-        downButton?.highlightStokeColor = .ohHightlightStrokeColor
-        upButton?.highlightStokeColor = .ohHightlightStrokeColor
     }
 
     @objc
@@ -71,6 +65,6 @@ class ColorPickerUITableViewCell: GenericUITableViewCell {
 }
 
 private extension Selector {
-    static let upButtonPressed = #selector(ColorPickerUITableViewCell.upButtonPressed)
-    static let downButtonPressed = #selector(ColorPickerUITableViewCell.downButtonPressed)
+    static let upButtonPressed = #selector(ColorPickerCell.upButtonPressed)
+    static let downButtonPressed = #selector(ColorPickerCell.downButtonPressed)
 }

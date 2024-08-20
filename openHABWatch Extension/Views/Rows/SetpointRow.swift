@@ -35,8 +35,7 @@ struct SetpointRow: View {
                 Spacer()
 
                 EncircledIconWithAction(
-                    systemName:
-                    "chevron.down.circle.fill",
+                    systemSymbol: .chevronDownCircleFill,
                     action: decreaseValue
                 )
 
@@ -48,7 +47,7 @@ struct SetpointRow: View {
                 Spacer()
 
                 EncircledIconWithAction(
-                    systemName: "chevron.up.circle.fill",
+                    systemSymbol: .chevronUpCircleFill,
                     action: increaseValue
                 )
 

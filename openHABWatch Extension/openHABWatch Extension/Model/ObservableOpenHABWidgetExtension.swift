@@ -23,7 +23,7 @@ extension ObservableOpenHABWidget {
                 LazyView(
                     ContentView(viewModel: UserData(url: URL(string: pageUrl)), settings: settings, title: title))
             ) {
-                Image(systemName: "chevron.right")
+                Image(systemSymbol: .chevronRight)
             }
         } else {
             EmptyView()
