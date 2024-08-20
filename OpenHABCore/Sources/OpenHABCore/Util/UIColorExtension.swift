@@ -80,10 +80,6 @@ public extension UIColor {
         return .white
     }
 
-    class var ohHightlightStrokeColor: UIColor {
-        OHInterfaceStyle.current == .light ? .black : .white
-    }
-
     // standard colors
     class var ohMaroon: UIColor {
         OHInterfaceStyle.current == .light ? UIColor(hex: "#800000") : UIColor(hex: "#800000")

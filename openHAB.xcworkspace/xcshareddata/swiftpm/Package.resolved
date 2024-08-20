@@ -56,15 +56,6 @@
         }
       },
       {
-        "package": "DynamicButton",
-        "repositoryURL": "https://github.com/yannickl/DynamicButton.git",
-        "state": {
-          "branch": null,
-          "revision": "4fbd60e46a548e77fd118483bbb4e58d3c11c5ed",
-          "version": "6.2.1"
-        }
-      },
-      {
         "package": "Firebase",
         "repositoryURL": "https://github.com/firebase/firebase-ios-sdk.git",
         "state": {
@@ -170,6 +161,15 @@
           "branch": null,
           "revision": "540318ecedd63d883069ae7f1ed811a2df00b6ac",
           "version": "2.4.0"
+        }
+      },
+      {
+        "package": "SFSafeSymbols",
+        "repositoryURL": "https://github.com/SFSafeSymbols/SFSafeSymbols",
+        "state": {
+          "branch": null,
+          "revision": "e2e28f4e56e1769c2ec3c61c9355fc64eb7a535a",
+          "version": "5.3.0"
         }
       },
       {
