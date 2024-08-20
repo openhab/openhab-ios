@@ -122,31 +122,6 @@ extension APIActor: OpenHABUiTileService {
     }
 }
 
-public extension AsyncThrowingStream {
-//    func map<Transformed>(_ transform: @escaping (Self.Element) -> Transformed) -> AsyncThrowingStream<Transformed, Error> {
-//        AsyncThrowingStream<Transformed, Error> { continuation in
-//            Task {
-//                for try await element in self {
-//                    continuation.yield(transform(element))
-//                }
-//                continuation.finish()
-//            }
-//        }
-//    }
-
-    func map2<T>(transform: @escaping (Self.Element) -> T) -> AsyncThrowingStream<T, Error> {
-        AsyncThrowingStream<T, Error> { continuation in
-            let task = Task<Void, Error> {
-                for try await element in self {
-                    continuation.yield(transform(element))
-                }
-                continuation.finish()
-            }
-            continuation.onTermination = { _ in task.cancel() }
-        }
-    }
-}
-
 public extension APIActor {
     func openHABcreateSubscription() async throws -> String? {
         logger.info("Creating subscription")

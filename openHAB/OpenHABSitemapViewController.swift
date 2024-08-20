@@ -87,6 +87,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private var isWaitingToReload = false
     private var asyncOperation: Task<Int, Never>?
 
+    private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
+
     var relevantPage: OpenHABPage? {
         if isFiltering {
             filteredPage
@@ -333,8 +335,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             do {
                 if let apiactor {
                     await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
-
                     if let subscriptionid = try await apiactor.openHABcreateSubscription() {
+                        logger.log("Got subscriptionid: \(subscriptionid)")
                         let sitemap = try await apiactor.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
                         let events = try await apiactor.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
                         for try await event in events {
