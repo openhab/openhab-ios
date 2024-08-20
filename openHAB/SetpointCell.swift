@@ -9,15 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import OpenHABCore
 import os.log
 import UIKit
 
-class SetpointUITableViewCell: GenericUITableViewCell {
-    @IBOutlet private var downButton: DynamicButton!
-    @IBOutlet private var upButton: DynamicButton!
-
+class SetpointCell: GenericUITableViewCell {
+    @IBOutlet private var downButton: UIButton!
+    @IBOutlet private var upButton: UIButton!
     required init?(coder: NSCoder) {
         super.init(coder: coder)
 
@@ -26,14 +24,8 @@ class SetpointUITableViewCell: GenericUITableViewCell {
     }
 
     override func displayWidget() {
-        downButton.setStyle(.caretDown, animated: false)
-        upButton.setStyle(.caretUp, animated: false)
-
-        downButton.addTarget(self, action: #selector(SetpointUITableViewCell.decreaseValue), for: .touchUpInside)
-        upButton.addTarget(self, action: #selector(SetpointUITableViewCell.increaseValue), for: .touchUpInside)
-
-        downButton.highlightStokeColor = .ohHightlightStrokeColor
-        upButton.highlightStokeColor = .ohHightlightStrokeColor
+        downButton.addTarget(self, action: #selector(SetpointCell.decreaseValue), for: .touchUpInside)
+        upButton.addTarget(self, action: #selector(SetpointCell.increaseValue), for: .touchUpInside)
 
         super.displayWidget()
     }
