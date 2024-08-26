@@ -9,27 +9,26 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import OpenHABCore
 import os.log
 import UIKit
 
-class RollershutterUITableViewCell: GenericUITableViewCell {
+class RollershutterCell: GenericUITableViewCell {
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
 
-    @IBOutlet private var downButton: DynamicButton!
-    @IBOutlet private var stopButton: DynamicButton!
-    @IBOutlet private var upButton: DynamicButton!
+    @IBOutlet private var upButton: UIButton!
+    @IBOutlet private var stopButton: UIButton!
+    @IBOutlet private var downButton: UIButton!
     @IBOutlet private var customDetailText: UILabel!
 
     required init?(coder: NSCoder) {
-        os_log("RollershutterUITableViewCell initWithCoder", log: .viewCycle, type: .info)
+        os_log("RollershutterCell initWithCoder", log: .viewCycle, type: .info)
         super.init(coder: coder)
         initialize()
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        os_log("RollershutterUITableViewCell initWithStyle", log: .viewCycle, type: .info)
+        os_log("RollershutterCell initWithStyle", log: .viewCycle, type: .info)
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
     }
@@ -42,15 +41,9 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
     override func displayWidget() {
         customTextLabel?.text = widget.labelText
         customDetailText?.text = widget.labelValue ?? ""
-        upButton?.setStyle(.caretUp, animated: true)
-        stopButton?.setStyle(.stop, animated: true)
-        downButton?.setStyle(.caretDown, animated: true)
         upButton?.addTarget(self, action: .upButtonPressed, for: .touchUpInside)
         stopButton?.addTarget(self, action: .stopButtonPressed, for: .touchUpInside)
         downButton?.addTarget(self, action: .downButtonPressed, for: .touchUpInside)
-        downButton?.highlightStokeColor = .ohHightlightStrokeColor
-        upButton?.highlightStokeColor = .ohHightlightStrokeColor
-        stopButton?.highlightStokeColor = .ohHightlightStrokeColor
     }
 
     @objc
@@ -78,7 +71,7 @@ class RollershutterUITableViewCell: GenericUITableViewCell {
 // inspired by: Selectors in swift: A better approach using extensions
 // https://medium.com/@abhimuralidharan/selectors-in-swift-a-better-approach-using-extensions-aa6b0416e850
 private extension Selector {
-    static let upButtonPressed = #selector(RollershutterUITableViewCell.upButtonPressed)
-    static let stopButtonPressed = #selector(RollershutterUITableViewCell.stopButtonPressed)
-    static let downButtonPressed = #selector(RollershutterUITableViewCell.downButtonPressed)
+    static let upButtonPressed = #selector(RollershutterCell.upButtonPressed)
+    static let stopButtonPressed = #selector(RollershutterCell.stopButtonPressed)
+    static let downButtonPressed = #selector(RollershutterCell.downButtonPressed)
 }

@@ -63,7 +63,6 @@ struct OpenHABImageProcessor: ImageProcessor {
 
 class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
     var pageUrl = ""
-    // private var hamburgerButton: DynamicButton!
     private var selectedWidgetRow: Int = 0
     private var currentPageOperation: Alamofire.Request?
     private var commandOperation: Alamofire.Request?
@@ -564,10 +563,10 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
     }
 }
 
-// MARK: - ColorPickerUITableViewCellDelegate
+// MARK: - ColorPickerCellDelegate
 
-extension OpenHABSitemapViewController: ColorPickerUITableViewCellDelegate {
-    func didPressColorButton(_ cell: ColorPickerUITableViewCell?) {
+extension OpenHABSitemapViewController: ColorPickerCellDelegate {
+    func didPressColorButton(_ cell: ColorPickerCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell {
             let widget = relevantPage?.widgets[tableView.indexPath(for: cell)?.row ?? 0]
@@ -784,7 +783,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate { // }, UITableViewD
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == .text, let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-                let copy = UIAction(title: NSLocalizedString("copy_label", comment: ""), image: UIImage(systemName: "square.and.arrow.up")) { _ in
+                let copy = UIAction(title: NSLocalizedString("copy_label", comment: ""), image: UIImage(systemSymbol: .squareAndArrowUp)) { _ in
                     UIPasteboard.general.string = text
                 }
 
