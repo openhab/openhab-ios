@@ -338,6 +338,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     if let subscriptionid = try await apiactor.openHABcreateSubscription() {
                         logger.log("Got subscriptionid: \(subscriptionid)")
                         let sitemap = try await apiactor.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
+                        currentPage = sitemap?.page
                         let events = try await apiactor.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
                         for try await event in events {
                             print(event)

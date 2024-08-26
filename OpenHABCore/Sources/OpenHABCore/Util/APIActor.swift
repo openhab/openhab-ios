@@ -130,16 +130,14 @@ public extension APIActor {
         return URL(string: urlString)?.lastPathComponent
     }
 
-    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> AsyncThrowingCompactMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, OpenHABSitemapWidgetEvent> {
+    // Will need swift 6.0 SE-0421 to return an opaque sequence
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> AsyncCompactMapSequence<AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<Components.Schemas.SitemapWidgetEvent>>, OpenHABSitemapWidgetEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-        let decodedSequence = try await api.getSitemapEvents_1(path: path, query: query).ok.body.text_event_hyphen_stream.asDecodedServerSentEvents()
-        let opaqueSequence = decodedSequence.compactMap { (event) in
-            if let data = event.data {
-                try JSONDecoder().decode(OpenHABSitemapWidgetEvent.CodingData.self, from: Data(data.utf8)).openHABSitemapWidgetEvent
-            } else { nil }
-        }
-        return opaqueSequence
+        let decodedSequence = try await api.getSitemapEvents_1(path: path, query: query)
+            .ok.body.text_event_hyphen_stream
+            .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
+        return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
     }
 }
 

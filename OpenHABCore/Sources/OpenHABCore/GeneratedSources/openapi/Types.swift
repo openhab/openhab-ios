@@ -21,7 +21,7 @@ import struct Foundation.Date
 import struct Foundation.URL
 #endif
 /// A type that performs HTTP operations defined by the OpenAPI document.
-protocol APIProtocol: Sendable {
+public protocol APIProtocol: Sendable {
     /// Adds a new member to a group item.
     ///
     /// - Remark: HTTP `PUT /items/{itemName}/members/{memberItemName}`.
@@ -175,7 +175,7 @@ protocol APIProtocol: Sendable {
 }
 
 /// Convenience overloads for operation inputs.
-extension APIProtocol {
+public extension APIProtocol {
     /// Adds a new member to a group item.
     ///
     /// - Remark: HTTP `PUT /items/{itemName}/members/{memberItemName}`.
@@ -514,8 +514,8 @@ extension APIProtocol {
 }
 
 /// Server URLs defined in the OpenAPI document.
-enum Servers {
-    static func server1() throws -> Foundation.URL {
+public enum Servers {
+    public static func server1() throws -> Foundation.URL {
         try Foundation.URL(
             validatingOpenAPIServerURL: "/rest",
             variables: []
@@ -524,25 +524,25 @@ enum Servers {
 }
 
 /// Types generated from the components section of the OpenAPI document.
-enum Components {
+public enum Components {
     /// Types generated from the `#/components/schemas` section of the OpenAPI document.
-    enum Schemas {
+    public enum Schemas {
         /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO`.
-        struct ConfigDescriptionParameterDTO: Codable, Hashable, Sendable {
+        public struct ConfigDescriptionParameterDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/context`.
-            var context: Swift.String?
+            public var context: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/defaultValue`.
-            var defaultValue: Swift.String?
+            public var defaultValue: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/description`.
-            var description: Swift.String?
+            public var description: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/required`.
-            var required: Swift.Bool?
+            public var required: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/type`.
-            enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
+            @frozen public enum _typePayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case TEXT
                 case INTEGER
                 case DECIMAL
@@ -550,37 +550,37 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/type`.
-            var _type: Components.Schemas.ConfigDescriptionParameterDTO._typePayload?
+            public var _type: Components.Schemas.ConfigDescriptionParameterDTO._typePayload?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/min`.
-            var min: Swift.Double?
+            public var min: Swift.Double?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/max`.
-            var max: Swift.Double?
+            public var max: Swift.Double?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/stepsize`.
-            var stepsize: Swift.Double?
+            public var stepsize: Swift.Double?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/pattern`.
-            var pattern: Swift.String?
+            public var pattern: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/readOnly`.
-            var readOnly: Swift.Bool?
+            public var readOnly: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/multiple`.
-            var multiple: Swift.Bool?
+            public var multiple: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/multipleLimit`.
-            var multipleLimit: Swift.Int32?
+            public var multipleLimit: Swift.Int32?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/groupName`.
-            var groupName: Swift.String?
+            public var groupName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/advanced`.
-            var advanced: Swift.Bool?
+            public var advanced: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/verify`.
-            var verify: Swift.Bool?
+            public var verify: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/limitToOptions`.
-            var limitToOptions: Swift.Bool?
+            public var limitToOptions: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/unit`.
-            var unit: Swift.String?
+            public var unit: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/unitLabel`.
-            var unitLabel: Swift.String?
+            public var unitLabel: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/options`.
-            var options: [Components.Schemas.ParameterOptionDTO]?
+            public var options: [Components.Schemas.ParameterOptionDTO]?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterDTO/filterCriteria`.
-            var filterCriteria: [Components.Schemas.FilterCriteriaDTO]?
+            public var filterCriteria: [Components.Schemas.FilterCriteriaDTO]?
             /// Creates a new `ConfigDescriptionParameterDTO`.
             ///
             /// - Parameters:
@@ -606,28 +606,28 @@ enum Components {
             ///   - unitLabel:
             ///   - options:
             ///   - filterCriteria:
-            init(context: Swift.String? = nil,
-                 defaultValue: Swift.String? = nil,
-                 description: Swift.String? = nil,
-                 label: Swift.String? = nil,
-                 name: Swift.String? = nil,
-                 required: Swift.Bool? = nil,
-                 _type: Components.Schemas.ConfigDescriptionParameterDTO._typePayload? = nil,
-                 min: Swift.Double? = nil,
-                 max: Swift.Double? = nil,
-                 stepsize: Swift.Double? = nil,
-                 pattern: Swift.String? = nil,
-                 readOnly: Swift.Bool? = nil,
-                 multiple: Swift.Bool? = nil,
-                 multipleLimit: Swift.Int32? = nil,
-                 groupName: Swift.String? = nil,
-                 advanced: Swift.Bool? = nil,
-                 verify: Swift.Bool? = nil,
-                 limitToOptions: Swift.Bool? = nil,
-                 unit: Swift.String? = nil,
-                 unitLabel: Swift.String? = nil,
-                 options: [Components.Schemas.ParameterOptionDTO]? = nil,
-                 filterCriteria: [Components.Schemas.FilterCriteriaDTO]? = nil) {
+            public init(context: Swift.String? = nil,
+                        defaultValue: Swift.String? = nil,
+                        description: Swift.String? = nil,
+                        label: Swift.String? = nil,
+                        name: Swift.String? = nil,
+                        required: Swift.Bool? = nil,
+                        _type: Components.Schemas.ConfigDescriptionParameterDTO._typePayload? = nil,
+                        min: Swift.Double? = nil,
+                        max: Swift.Double? = nil,
+                        stepsize: Swift.Double? = nil,
+                        pattern: Swift.String? = nil,
+                        readOnly: Swift.Bool? = nil,
+                        multiple: Swift.Bool? = nil,
+                        multipleLimit: Swift.Int32? = nil,
+                        groupName: Swift.String? = nil,
+                        advanced: Swift.Bool? = nil,
+                        verify: Swift.Bool? = nil,
+                        limitToOptions: Swift.Bool? = nil,
+                        unit: Swift.String? = nil,
+                        unitLabel: Swift.String? = nil,
+                        options: [Components.Schemas.ParameterOptionDTO]? = nil,
+                        filterCriteria: [Components.Schemas.FilterCriteriaDTO]? = nil) {
                 self.context = context
                 self.defaultValue = defaultValue
                 self.description = description
@@ -652,7 +652,7 @@ enum Components {
                 self.filterCriteria = filterCriteria
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case context
                 case defaultValue
                 case description
@@ -679,103 +679,103 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/FilterCriteriaDTO`.
-        struct FilterCriteriaDTO: Codable, Hashable, Sendable {
+        public struct FilterCriteriaDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/FilterCriteriaDTO/value`.
-            var value: Swift.String?
+            public var value: Swift.String?
             /// - Remark: Generated from `#/components/schemas/FilterCriteriaDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// Creates a new `FilterCriteriaDTO`.
             ///
             /// - Parameters:
             ///   - value:
             ///   - name:
-            init(value: Swift.String? = nil,
-                 name: Swift.String? = nil) {
+            public init(value: Swift.String? = nil,
+                        name: Swift.String? = nil) {
                 self.value = value
                 self.name = name
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case value
                 case name
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/ParameterOptionDTO`.
-        struct ParameterOptionDTO: Codable, Hashable, Sendable {
+        public struct ParameterOptionDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ParameterOptionDTO/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ParameterOptionDTO/value`.
-            var value: Swift.String?
+            public var value: Swift.String?
             /// Creates a new `ParameterOptionDTO`.
             ///
             /// - Parameters:
             ///   - label:
             ///   - value:
-            init(label: Swift.String? = nil,
-                 value: Swift.String? = nil) {
+            public init(label: Swift.String? = nil,
+                        value: Swift.String? = nil) {
                 self.label = label
                 self.value = value
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case label
                 case value
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/CommandDescription`.
-        struct CommandDescription: Codable, Hashable, Sendable {
+        public struct CommandDescription: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/CommandDescription/commandOptions`.
-            var commandOptions: [Components.Schemas.CommandOption]?
+            public var commandOptions: [Components.Schemas.CommandOption]?
             /// Creates a new `CommandDescription`.
             ///
             /// - Parameters:
             ///   - commandOptions:
-            init(commandOptions: [Components.Schemas.CommandOption]? = nil) {
+            public init(commandOptions: [Components.Schemas.CommandOption]? = nil) {
                 self.commandOptions = commandOptions
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case commandOptions
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/CommandOption`.
-        struct CommandOption: Codable, Hashable, Sendable {
+        public struct CommandOption: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/CommandOption/command`.
-            var command: Swift.String?
+            public var command: Swift.String?
             /// - Remark: Generated from `#/components/schemas/CommandOption/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// Creates a new `CommandOption`.
             ///
             /// - Parameters:
             ///   - command:
             ///   - label:
-            init(command: Swift.String? = nil,
-                 label: Swift.String? = nil) {
+            public init(command: Swift.String? = nil,
+                        label: Swift.String? = nil) {
                 self.command = command
                 self.label = label
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case command
                 case label
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterGroupDTO`.
-        struct ConfigDescriptionParameterGroupDTO: Codable, Hashable, Sendable {
+        public struct ConfigDescriptionParameterGroupDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterGroupDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterGroupDTO/context`.
-            var context: Swift.String?
+            public var context: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterGroupDTO/advanced`.
-            var advanced: Swift.Bool?
+            public var advanced: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterGroupDTO/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionParameterGroupDTO/description`.
-            var description: Swift.String?
+            public var description: Swift.String?
             /// Creates a new `ConfigDescriptionParameterGroupDTO`.
             ///
             /// - Parameters:
@@ -784,11 +784,11 @@ enum Components {
             ///   - advanced:
             ///   - label:
             ///   - description:
-            init(name: Swift.String? = nil,
-                 context: Swift.String? = nil,
-                 advanced: Swift.Bool? = nil,
-                 label: Swift.String? = nil,
-                 description: Swift.String? = nil) {
+            public init(name: Swift.String? = nil,
+                        context: Swift.String? = nil,
+                        advanced: Swift.Bool? = nil,
+                        label: Swift.String? = nil,
+                        description: Swift.String? = nil) {
                 self.name = name
                 self.context = context
                 self.advanced = advanced
@@ -796,7 +796,7 @@ enum Components {
                 self.description = description
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case name
                 case context
                 case advanced
@@ -806,19 +806,19 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/StateDescription`.
-        struct StateDescription: Codable, Hashable, Sendable {
+        public struct StateDescription: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/StateDescription/minimum`.
-            var minimum: Swift.Double?
+            public var minimum: Swift.Double?
             /// - Remark: Generated from `#/components/schemas/StateDescription/maximum`.
-            var maximum: Swift.Double?
+            public var maximum: Swift.Double?
             /// - Remark: Generated from `#/components/schemas/StateDescription/step`.
-            var step: Swift.Double?
+            public var step: Swift.Double?
             /// - Remark: Generated from `#/components/schemas/StateDescription/pattern`.
-            var pattern: Swift.String?
+            public var pattern: Swift.String?
             /// - Remark: Generated from `#/components/schemas/StateDescription/readOnly`.
-            var readOnly: Swift.Bool?
+            public var readOnly: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/StateDescription/options`.
-            var options: [Components.Schemas.StateOption]?
+            public var options: [Components.Schemas.StateOption]?
             /// Creates a new `StateDescription`.
             ///
             /// - Parameters:
@@ -828,12 +828,12 @@ enum Components {
             ///   - pattern:
             ///   - readOnly:
             ///   - options:
-            init(minimum: Swift.Double? = nil,
-                 maximum: Swift.Double? = nil,
-                 step: Swift.Double? = nil,
-                 pattern: Swift.String? = nil,
-                 readOnly: Swift.Bool? = nil,
-                 options: [Components.Schemas.StateOption]? = nil) {
+            public init(minimum: Swift.Double? = nil,
+                        maximum: Swift.Double? = nil,
+                        step: Swift.Double? = nil,
+                        pattern: Swift.String? = nil,
+                        readOnly: Swift.Bool? = nil,
+                        options: [Components.Schemas.StateOption]? = nil) {
                 self.minimum = minimum
                 self.maximum = maximum
                 self.step = step
@@ -842,7 +842,7 @@ enum Components {
                 self.options = options
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case minimum
                 case maximum
                 case step
@@ -853,51 +853,51 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/StateOption`.
-        struct StateOption: Codable, Hashable, Sendable {
+        public struct StateOption: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/StateOption/value`.
-            var value: Swift.String?
+            public var value: Swift.String?
             /// - Remark: Generated from `#/components/schemas/StateOption/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// Creates a new `StateOption`.
             ///
             /// - Parameters:
             ///   - value:
             ///   - label:
-            init(value: Swift.String? = nil,
-                 label: Swift.String? = nil) {
+            public init(value: Swift.String? = nil,
+                        label: Swift.String? = nil) {
                 self.value = value
                 self.label = label
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case value
                 case label
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/ConfigDescriptionDTO`.
-        struct ConfigDescriptionDTO: Codable, Hashable, Sendable {
+        public struct ConfigDescriptionDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionDTO/uri`.
-            var uri: Swift.String?
+            public var uri: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionDTO/parameters`.
-            var parameters: [Components.Schemas.ConfigDescriptionParameterDTO]?
+            public var parameters: [Components.Schemas.ConfigDescriptionParameterDTO]?
             /// - Remark: Generated from `#/components/schemas/ConfigDescriptionDTO/parameterGroups`.
-            var parameterGroups: [Components.Schemas.ConfigDescriptionParameterGroupDTO]?
+            public var parameterGroups: [Components.Schemas.ConfigDescriptionParameterGroupDTO]?
             /// Creates a new `ConfigDescriptionDTO`.
             ///
             /// - Parameters:
             ///   - uri:
             ///   - parameters:
             ///   - parameterGroups:
-            init(uri: Swift.String? = nil,
-                 parameters: [Components.Schemas.ConfigDescriptionParameterDTO]? = nil,
-                 parameterGroups: [Components.Schemas.ConfigDescriptionParameterGroupDTO]? = nil) {
+            public init(uri: Swift.String? = nil,
+                        parameters: [Components.Schemas.ConfigDescriptionParameterDTO]? = nil,
+                        parameterGroups: [Components.Schemas.ConfigDescriptionParameterGroupDTO]? = nil) {
                 self.uri = uri
                 self.parameters = parameters
                 self.parameterGroups = parameterGroups
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case uri
                 case parameters
                 case parameterGroups
@@ -905,100 +905,100 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/MetadataDTO`.
-        struct MetadataDTO: Codable, Hashable, Sendable {
+        public struct MetadataDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/MetadataDTO/value`.
-            var value: Swift.String?
+            public var value: Swift.String?
             /// - Remark: Generated from `#/components/schemas/MetadataDTO/config`.
-            struct configPayload: Codable, Hashable, Sendable {
+            public struct configPayload: Codable, Hashable, Sendable {
                 /// A container of undocumented properties.
-                var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
+                public var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
                 /// Creates a new `configPayload`.
                 ///
                 /// - Parameters:
                 ///   - additionalProperties: A container of undocumented properties.
-                init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
+                public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
 
-                init(from decoder: any Decoder) throws {
+                public init(from decoder: any Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
 
-                func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
 
             /// - Remark: Generated from `#/components/schemas/MetadataDTO/config`.
-            var config: Components.Schemas.MetadataDTO.configPayload?
+            public var config: Components.Schemas.MetadataDTO.configPayload?
             /// Creates a new `MetadataDTO`.
             ///
             /// - Parameters:
             ///   - value:
             ///   - config:
-            init(value: Swift.String? = nil,
-                 config: Components.Schemas.MetadataDTO.configPayload? = nil) {
+            public init(value: Swift.String? = nil,
+                        config: Components.Schemas.MetadataDTO.configPayload? = nil) {
                 self.value = value
                 self.config = config
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case value
                 case config
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO`.
-        struct EnrichedItemDTO: Codable, Hashable, Sendable {
+        public struct EnrichedItemDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/type`.
-            var _type: Swift.String?
+            public var _type: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/category`.
-            var category: Swift.String?
+            public var category: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/tags`.
-            var tags: [Swift.String]?
+            public var tags: [Swift.String]?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/groupNames`.
-            var groupNames: [Swift.String]?
+            public var groupNames: [Swift.String]?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/link`.
-            var link: Swift.String?
+            public var link: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/state`.
-            var state: Swift.String?
+            public var state: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/transformedState`.
-            var transformedState: Swift.String?
+            public var transformedState: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/stateDescription`.
-            var stateDescription: Components.Schemas.StateDescription?
+            public var stateDescription: Components.Schemas.StateDescription?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/unitSymbol`.
-            var unitSymbol: Swift.String?
+            public var unitSymbol: Swift.String?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/commandDescription`.
-            var commandDescription: Components.Schemas.CommandDescription?
+            public var commandDescription: Components.Schemas.CommandDescription?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/metadata`.
-            struct metadataPayload: Codable, Hashable, Sendable {
+            public struct metadataPayload: Codable, Hashable, Sendable {
                 /// A container of undocumented properties.
-                var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
+                public var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
                 /// Creates a new `metadataPayload`.
                 ///
                 /// - Parameters:
                 ///   - additionalProperties: A container of undocumented properties.
-                init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
+                public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
 
-                init(from decoder: any Decoder) throws {
+                public init(from decoder: any Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
 
-                func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
 
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/metadata`.
-            var metadata: Components.Schemas.EnrichedItemDTO.metadataPayload?
+            public var metadata: Components.Schemas.EnrichedItemDTO.metadataPayload?
             /// - Remark: Generated from `#/components/schemas/EnrichedItemDTO/editable`.
-            var editable: Swift.Bool?
+            public var editable: Swift.Bool?
             /// Creates a new `EnrichedItemDTO`.
             ///
             /// - Parameters:
@@ -1016,20 +1016,20 @@ enum Components {
             ///   - commandDescription:
             ///   - metadata:
             ///   - editable:
-            init(_type: Swift.String? = nil,
-                 name: Swift.String? = nil,
-                 label: Swift.String? = nil,
-                 category: Swift.String? = nil,
-                 tags: [Swift.String]? = nil,
-                 groupNames: [Swift.String]? = nil,
-                 link: Swift.String? = nil,
-                 state: Swift.String? = nil,
-                 transformedState: Swift.String? = nil,
-                 stateDescription: Components.Schemas.StateDescription? = nil,
-                 unitSymbol: Swift.String? = nil,
-                 commandDescription: Components.Schemas.CommandDescription? = nil,
-                 metadata: Components.Schemas.EnrichedItemDTO.metadataPayload? = nil,
-                 editable: Swift.Bool? = nil) {
+            public init(_type: Swift.String? = nil,
+                        name: Swift.String? = nil,
+                        label: Swift.String? = nil,
+                        category: Swift.String? = nil,
+                        tags: [Swift.String]? = nil,
+                        groupNames: [Swift.String]? = nil,
+                        link: Swift.String? = nil,
+                        state: Swift.String? = nil,
+                        transformedState: Swift.String? = nil,
+                        stateDescription: Components.Schemas.StateDescription? = nil,
+                        unitSymbol: Swift.String? = nil,
+                        commandDescription: Components.Schemas.CommandDescription? = nil,
+                        metadata: Components.Schemas.EnrichedItemDTO.metadataPayload? = nil,
+                        editable: Swift.Bool? = nil) {
                 self._type = _type
                 self.name = name
                 self.label = label
@@ -1046,7 +1046,7 @@ enum Components {
                 self.editable = editable
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case _type = "type"
                 case name
                 case label
@@ -1065,46 +1065,46 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/GroupFunctionDTO`.
-        struct GroupFunctionDTO: Codable, Hashable, Sendable {
+        public struct GroupFunctionDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/GroupFunctionDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// - Remark: Generated from `#/components/schemas/GroupFunctionDTO/params`.
-            var params: [Swift.String]?
+            public var params: [Swift.String]?
             /// Creates a new `GroupFunctionDTO`.
             ///
             /// - Parameters:
             ///   - name:
             ///   - params:
-            init(name: Swift.String? = nil,
-                 params: [Swift.String]? = nil) {
+            public init(name: Swift.String? = nil,
+                        params: [Swift.String]? = nil) {
                 self.name = name
                 self.params = params
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case name
                 case params
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/GroupItemDTO`.
-        struct GroupItemDTO: Codable, Hashable, Sendable {
+        public struct GroupItemDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/type`.
-            var _type: Swift.String?
+            public var _type: Swift.String?
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/category`.
-            var category: Swift.String?
+            public var category: Swift.String?
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/tags`.
-            var tags: [Swift.String]?
+            public var tags: [Swift.String]?
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/groupNames`.
-            var groupNames: [Swift.String]?
+            public var groupNames: [Swift.String]?
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/groupType`.
-            var groupType: Swift.String?
+            public var groupType: Swift.String?
             /// - Remark: Generated from `#/components/schemas/GroupItemDTO/function`.
-            var function: Components.Schemas.GroupFunctionDTO?
+            public var function: Components.Schemas.GroupFunctionDTO?
             /// Creates a new `GroupItemDTO`.
             ///
             /// - Parameters:
@@ -1116,14 +1116,14 @@ enum Components {
             ///   - groupNames:
             ///   - groupType:
             ///   - function:
-            init(_type: Swift.String? = nil,
-                 name: Swift.String? = nil,
-                 label: Swift.String? = nil,
-                 category: Swift.String? = nil,
-                 tags: [Swift.String]? = nil,
-                 groupNames: [Swift.String]? = nil,
-                 groupType: Swift.String? = nil,
-                 function: Components.Schemas.GroupFunctionDTO? = nil) {
+            public init(_type: Swift.String? = nil,
+                        name: Swift.String? = nil,
+                        label: Swift.String? = nil,
+                        category: Swift.String? = nil,
+                        tags: [Swift.String]? = nil,
+                        groupNames: [Swift.String]? = nil,
+                        groupType: Swift.String? = nil,
+                        function: Components.Schemas.GroupFunctionDTO? = nil) {
                 self._type = _type
                 self.name = name
                 self.label = label
@@ -1134,7 +1134,7 @@ enum Components {
                 self.function = function
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case _type = "type"
                 case name
                 case label
@@ -1147,76 +1147,76 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/JerseyResponseBuilderDTO`.
-        struct JerseyResponseBuilderDTO: Codable, Hashable, Sendable {
+        public struct JerseyResponseBuilderDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/JerseyResponseBuilderDTO/status`.
-            var status: Swift.String?
+            public var status: Swift.String?
             /// - Remark: Generated from `#/components/schemas/JerseyResponseBuilderDTO/context`.
-            var context: Components.Schemas.ContextDTO?
+            public var context: Components.Schemas.ContextDTO?
             /// Creates a new `JerseyResponseBuilderDTO`.
             ///
             /// - Parameters:
             ///   - status:
             ///   - context:
-            init(status: Swift.String? = nil,
-                 context: Components.Schemas.ContextDTO? = nil) {
+            public init(status: Swift.String? = nil,
+                        context: Components.Schemas.ContextDTO? = nil) {
                 self.status = status
                 self.context = context
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case status
                 case context
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/ContextDTO`.
-        struct ContextDTO: Codable, Hashable, Sendable {
+        public struct ContextDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ContextDTO/headers`.
-            var headers: Components.Schemas.HeadersDTO?
+            public var headers: Components.Schemas.HeadersDTO?
             /// Creates a new `ContextDTO`.
             ///
             /// - Parameters:
             ///   - headers:
-            init(headers: Components.Schemas.HeadersDTO? = nil) {
+            public init(headers: Components.Schemas.HeadersDTO? = nil) {
                 self.headers = headers
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case headers
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/HeadersDTO`.
-        struct HeadersDTO: Codable, Hashable, Sendable {
+        public struct HeadersDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/HeadersDTO/Location`.
-            var Location: [Swift.String]?
+            public var Location: [Swift.String]?
             /// Creates a new `HeadersDTO`.
             ///
             /// - Parameters:
             ///   - Location:
-            init(Location: [Swift.String]? = nil) {
+            public init(Location: [Swift.String]? = nil) {
                 self.Location = Location
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case Location
             }
         }
 
         /// - Remark: Generated from `#/components/schemas/MappingDTO`.
-        struct MappingDTO: Codable, Hashable, Sendable {
+        public struct MappingDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/MappingDTO/row`.
-            var row: Swift.Int32?
+            public var row: Swift.Int32?
             /// - Remark: Generated from `#/components/schemas/MappingDTO/column`.
-            var column: Swift.Int32?
+            public var column: Swift.Int32?
             /// - Remark: Generated from `#/components/schemas/MappingDTO/command`.
-            var command: Swift.String?
+            public var command: Swift.String?
             /// - Remark: Generated from `#/components/schemas/MappingDTO/releaseCommand`.
-            var releaseCommand: Swift.String?
+            public var releaseCommand: Swift.String?
             /// - Remark: Generated from `#/components/schemas/MappingDTO/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/MappingDTO/icon`.
-            var icon: Swift.String?
+            public var icon: Swift.String?
             /// Creates a new `MappingDTO`.
             ///
             /// - Parameters:
@@ -1226,12 +1226,12 @@ enum Components {
             ///   - releaseCommand:
             ///   - label:
             ///   - icon:
-            init(row: Swift.Int32? = nil,
-                 column: Swift.Int32? = nil,
-                 command: Swift.String? = nil,
-                 releaseCommand: Swift.String? = nil,
-                 label: Swift.String? = nil,
-                 icon: Swift.String? = nil) {
+            public init(row: Swift.Int32? = nil,
+                        column: Swift.Int32? = nil,
+                        command: Swift.String? = nil,
+                        releaseCommand: Swift.String? = nil,
+                        label: Swift.String? = nil,
+                        icon: Swift.String? = nil) {
                 self.row = row
                 self.column = column
                 self.command = command
@@ -1240,7 +1240,7 @@ enum Components {
                 self.icon = icon
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case row
                 case column
                 case command
@@ -1251,9 +1251,9 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/PageDTO`.
-        struct PageDTO: Codable, Hashable, Sendable {
+        public struct PageDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/PageDTO/id`.
-            var id: Swift.String? {
+            public var id: Swift.String? {
                 get {
                     storage.value.id
                 }
@@ -1263,7 +1263,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/PageDTO/title`.
-            var title: Swift.String? {
+            public var title: Swift.String? {
                 get {
                     storage.value.title
                 }
@@ -1273,7 +1273,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/PageDTO/icon`.
-            var icon: Swift.String? {
+            public var icon: Swift.String? {
                 get {
                     storage.value.icon
                 }
@@ -1283,7 +1283,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/PageDTO/link`.
-            var link: Swift.String? {
+            public var link: Swift.String? {
                 get {
                     storage.value.link
                 }
@@ -1293,7 +1293,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/PageDTO/parent`.
-            var parent: Components.Schemas.PageDTO? {
+            public var parent: Components.Schemas.PageDTO? {
                 get {
                     storage.value.parent
                 }
@@ -1303,7 +1303,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/PageDTO/leaf`.
-            var leaf: Swift.Bool? {
+            public var leaf: Swift.Bool? {
                 get {
                     storage.value.leaf
                 }
@@ -1313,7 +1313,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/PageDTO/timeout`.
-            var timeout: Swift.Bool? {
+            public var timeout: Swift.Bool? {
                 get {
                     storage.value.timeout
                 }
@@ -1323,7 +1323,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/PageDTO/widgets`.
-            var widgets: [Components.Schemas.WidgetDTO]? {
+            public var widgets: [Components.Schemas.WidgetDTO]? {
                 get {
                     storage.value.widgets
                 }
@@ -1343,14 +1343,14 @@ enum Components {
             ///   - leaf:
             ///   - timeout:
             ///   - widgets:
-            init(id: Swift.String? = nil,
-                 title: Swift.String? = nil,
-                 icon: Swift.String? = nil,
-                 link: Swift.String? = nil,
-                 parent: Components.Schemas.PageDTO? = nil,
-                 leaf: Swift.Bool? = nil,
-                 timeout: Swift.Bool? = nil,
-                 widgets: [Components.Schemas.WidgetDTO]? = nil) {
+            public init(id: Swift.String? = nil,
+                        title: Swift.String? = nil,
+                        icon: Swift.String? = nil,
+                        link: Swift.String? = nil,
+                        parent: Components.Schemas.PageDTO? = nil,
+                        leaf: Swift.Bool? = nil,
+                        timeout: Swift.Bool? = nil,
+                        widgets: [Components.Schemas.WidgetDTO]? = nil) {
                 storage = .init(value: .init(
                     id: id,
                     title: title,
@@ -1363,7 +1363,7 @@ enum Components {
                 ))
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case id
                 case title
                 case icon
@@ -1374,11 +1374,11 @@ enum Components {
                 case widgets
             }
 
-            init(from decoder: any Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 storage = try .init(from: decoder)
             }
 
-            func encode(to encoder: any Encoder) throws {
+            public func encode(to encoder: any Encoder) throws {
                 try storage.encode(to: encoder)
             }
 
@@ -1424,9 +1424,9 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/WidgetDTO`.
-        struct WidgetDTO: Codable, Hashable, Sendable {
+        public struct WidgetDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/widgetId`.
-            var widgetId: Swift.String? {
+            public var widgetId: Swift.String? {
                 get {
                     storage.value.widgetId
                 }
@@ -1436,7 +1436,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/type`.
-            var _type: Swift.String? {
+            public var _type: Swift.String? {
                 get {
                     storage.value._type
                 }
@@ -1446,7 +1446,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/name`.
-            var name: Swift.String? {
+            public var name: Swift.String? {
                 get {
                     storage.value.name
                 }
@@ -1456,7 +1456,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/visibility`.
-            var visibility: Swift.Bool? {
+            public var visibility: Swift.Bool? {
                 get {
                     storage.value.visibility
                 }
@@ -1466,7 +1466,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/label`.
-            var label: Swift.String? {
+            public var label: Swift.String? {
                 get {
                     storage.value.label
                 }
@@ -1476,7 +1476,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/labelSource`.
-            var labelSource: Swift.String? {
+            public var labelSource: Swift.String? {
                 get {
                     storage.value.labelSource
                 }
@@ -1486,7 +1486,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/icon`.
-            var icon: Swift.String? {
+            public var icon: Swift.String? {
                 get {
                     storage.value.icon
                 }
@@ -1496,7 +1496,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/staticIcon`.
-            var staticIcon: Swift.Bool? {
+            public var staticIcon: Swift.Bool? {
                 get {
                     storage.value.staticIcon
                 }
@@ -1506,7 +1506,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/labelcolor`.
-            var labelcolor: Swift.String? {
+            public var labelcolor: Swift.String? {
                 get {
                     storage.value.labelcolor
                 }
@@ -1516,7 +1516,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/valuecolor`.
-            var valuecolor: Swift.String? {
+            public var valuecolor: Swift.String? {
                 get {
                     storage.value.valuecolor
                 }
@@ -1526,7 +1526,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/iconcolor`.
-            var iconcolor: Swift.String? {
+            public var iconcolor: Swift.String? {
                 get {
                     storage.value.iconcolor
                 }
@@ -1536,7 +1536,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/pattern`.
-            var pattern: Swift.String? {
+            public var pattern: Swift.String? {
                 get {
                     storage.value.pattern
                 }
@@ -1546,7 +1546,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/unit`.
-            var unit: Swift.String? {
+            public var unit: Swift.String? {
                 get {
                     storage.value.unit
                 }
@@ -1556,7 +1556,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/mappings`.
-            var mappings: [Components.Schemas.MappingDTO]? {
+            public var mappings: [Components.Schemas.MappingDTO]? {
                 get {
                     storage.value.mappings
                 }
@@ -1566,7 +1566,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/switchSupport`.
-            var switchSupport: Swift.Bool? {
+            public var switchSupport: Swift.Bool? {
                 get {
                     storage.value.switchSupport
                 }
@@ -1576,7 +1576,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/releaseOnly`.
-            var releaseOnly: Swift.Bool? {
+            public var releaseOnly: Swift.Bool? {
                 get {
                     storage.value.releaseOnly
                 }
@@ -1586,7 +1586,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/sendFrequency`.
-            var sendFrequency: Swift.Int32? {
+            public var sendFrequency: Swift.Int32? {
                 get {
                     storage.value.sendFrequency
                 }
@@ -1596,7 +1596,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/refresh`.
-            var refresh: Swift.Int32? {
+            public var refresh: Swift.Int32? {
                 get {
                     storage.value.refresh
                 }
@@ -1606,7 +1606,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/height`.
-            var height: Swift.Int32? {
+            public var height: Swift.Int32? {
                 get {
                     storage.value.height
                 }
@@ -1616,7 +1616,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/minValue`.
-            var minValue: Swift.Double? {
+            public var minValue: Swift.Double? {
                 get {
                     storage.value.minValue
                 }
@@ -1626,7 +1626,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/maxValue`.
-            var maxValue: Swift.Double? {
+            public var maxValue: Swift.Double? {
                 get {
                     storage.value.maxValue
                 }
@@ -1636,7 +1636,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/step`.
-            var step: Swift.Double? {
+            public var step: Swift.Double? {
                 get {
                     storage.value.step
                 }
@@ -1646,7 +1646,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/inputHint`.
-            var inputHint: Swift.String? {
+            public var inputHint: Swift.String? {
                 get {
                     storage.value.inputHint
                 }
@@ -1656,7 +1656,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/url`.
-            var url: Swift.String? {
+            public var url: Swift.String? {
                 get {
                     storage.value.url
                 }
@@ -1666,7 +1666,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/encoding`.
-            var encoding: Swift.String? {
+            public var encoding: Swift.String? {
                 get {
                     storage.value.encoding
                 }
@@ -1676,7 +1676,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/service`.
-            var service: Swift.String? {
+            public var service: Swift.String? {
                 get {
                     storage.value.service
                 }
@@ -1686,7 +1686,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/period`.
-            var period: Swift.String? {
+            public var period: Swift.String? {
                 get {
                     storage.value.period
                 }
@@ -1696,7 +1696,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/yAxisDecimalPattern`.
-            var yAxisDecimalPattern: Swift.String? {
+            public var yAxisDecimalPattern: Swift.String? {
                 get {
                     storage.value.yAxisDecimalPattern
                 }
@@ -1706,7 +1706,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/legend`.
-            var legend: Swift.Bool? {
+            public var legend: Swift.Bool? {
                 get {
                     storage.value.legend
                 }
@@ -1716,7 +1716,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/forceAsItem`.
-            var forceAsItem: Swift.Bool? {
+            public var forceAsItem: Swift.Bool? {
                 get {
                     storage.value.forceAsItem
                 }
@@ -1726,7 +1726,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/row`.
-            var row: Swift.Int32? {
+            public var row: Swift.Int32? {
                 get {
                     storage.value.row
                 }
@@ -1736,7 +1736,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/column`.
-            var column: Swift.Int32? {
+            public var column: Swift.Int32? {
                 get {
                     storage.value.column
                 }
@@ -1746,7 +1746,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/command`.
-            var command: Swift.String? {
+            public var command: Swift.String? {
                 get {
                     storage.value.command
                 }
@@ -1756,7 +1756,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/releaseCommand`.
-            var releaseCommand: Swift.String? {
+            public var releaseCommand: Swift.String? {
                 get {
                     storage.value.releaseCommand
                 }
@@ -1766,7 +1766,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/stateless`.
-            var stateless: Swift.Bool? {
+            public var stateless: Swift.Bool? {
                 get {
                     storage.value.stateless
                 }
@@ -1776,7 +1776,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/state`.
-            var state: Swift.String? {
+            public var state: Swift.String? {
                 get {
                     storage.value.state
                 }
@@ -1786,7 +1786,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/item`.
-            var item: Components.Schemas.EnrichedItemDTO? {
+            public var item: Components.Schemas.EnrichedItemDTO? {
                 get {
                     storage.value.item
                 }
@@ -1796,7 +1796,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/linkedPage`.
-            var linkedPage: Components.Schemas.PageDTO? {
+            public var linkedPage: Components.Schemas.PageDTO? {
                 get {
                     storage.value.linkedPage
                 }
@@ -1806,7 +1806,7 @@ enum Components {
             }
 
             /// - Remark: Generated from `#/components/schemas/WidgetDTO/widgets`.
-            var widgets: [Components.Schemas.WidgetDTO]? {
+            public var widgets: [Components.Schemas.WidgetDTO]? {
                 get {
                     storage.value.widgets
                 }
@@ -1857,45 +1857,45 @@ enum Components {
             ///   - item:
             ///   - linkedPage:
             ///   - widgets:
-            init(widgetId: Swift.String? = nil,
-                 _type: Swift.String? = nil,
-                 name: Swift.String? = nil,
-                 visibility: Swift.Bool? = nil,
-                 label: Swift.String? = nil,
-                 labelSource: Swift.String? = nil,
-                 icon: Swift.String? = nil,
-                 staticIcon: Swift.Bool? = nil,
-                 labelcolor: Swift.String? = nil,
-                 valuecolor: Swift.String? = nil,
-                 iconcolor: Swift.String? = nil,
-                 pattern: Swift.String? = nil,
-                 unit: Swift.String? = nil,
-                 mappings: [Components.Schemas.MappingDTO]? = nil,
-                 switchSupport: Swift.Bool? = nil,
-                 releaseOnly: Swift.Bool? = nil,
-                 sendFrequency: Swift.Int32? = nil,
-                 refresh: Swift.Int32? = nil,
-                 height: Swift.Int32? = nil,
-                 minValue: Swift.Double? = nil,
-                 maxValue: Swift.Double? = nil,
-                 step: Swift.Double? = nil,
-                 inputHint: Swift.String? = nil,
-                 url: Swift.String? = nil,
-                 encoding: Swift.String? = nil,
-                 service: Swift.String? = nil,
-                 period: Swift.String? = nil,
-                 yAxisDecimalPattern: Swift.String? = nil,
-                 legend: Swift.Bool? = nil,
-                 forceAsItem: Swift.Bool? = nil,
-                 row: Swift.Int32? = nil,
-                 column: Swift.Int32? = nil,
-                 command: Swift.String? = nil,
-                 releaseCommand: Swift.String? = nil,
-                 stateless: Swift.Bool? = nil,
-                 state: Swift.String? = nil,
-                 item: Components.Schemas.EnrichedItemDTO? = nil,
-                 linkedPage: Components.Schemas.PageDTO? = nil,
-                 widgets: [Components.Schemas.WidgetDTO]? = nil) {
+            public init(widgetId: Swift.String? = nil,
+                        _type: Swift.String? = nil,
+                        name: Swift.String? = nil,
+                        visibility: Swift.Bool? = nil,
+                        label: Swift.String? = nil,
+                        labelSource: Swift.String? = nil,
+                        icon: Swift.String? = nil,
+                        staticIcon: Swift.Bool? = nil,
+                        labelcolor: Swift.String? = nil,
+                        valuecolor: Swift.String? = nil,
+                        iconcolor: Swift.String? = nil,
+                        pattern: Swift.String? = nil,
+                        unit: Swift.String? = nil,
+                        mappings: [Components.Schemas.MappingDTO]? = nil,
+                        switchSupport: Swift.Bool? = nil,
+                        releaseOnly: Swift.Bool? = nil,
+                        sendFrequency: Swift.Int32? = nil,
+                        refresh: Swift.Int32? = nil,
+                        height: Swift.Int32? = nil,
+                        minValue: Swift.Double? = nil,
+                        maxValue: Swift.Double? = nil,
+                        step: Swift.Double? = nil,
+                        inputHint: Swift.String? = nil,
+                        url: Swift.String? = nil,
+                        encoding: Swift.String? = nil,
+                        service: Swift.String? = nil,
+                        period: Swift.String? = nil,
+                        yAxisDecimalPattern: Swift.String? = nil,
+                        legend: Swift.Bool? = nil,
+                        forceAsItem: Swift.Bool? = nil,
+                        row: Swift.Int32? = nil,
+                        column: Swift.Int32? = nil,
+                        command: Swift.String? = nil,
+                        releaseCommand: Swift.String? = nil,
+                        stateless: Swift.Bool? = nil,
+                        state: Swift.String? = nil,
+                        item: Components.Schemas.EnrichedItemDTO? = nil,
+                        linkedPage: Components.Schemas.PageDTO? = nil,
+                        widgets: [Components.Schemas.WidgetDTO]? = nil) {
                 storage = .init(value: .init(
                     widgetId: widgetId,
                     _type: _type,
@@ -1939,7 +1939,7 @@ enum Components {
                 ))
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case widgetId
                 case _type = "type"
                 case name
@@ -1981,11 +1981,11 @@ enum Components {
                 case widgets
             }
 
-            init(from decoder: any Decoder) throws {
+            public init(from decoder: any Decoder) throws {
                 storage = try .init(from: decoder)
             }
 
-            func encode(to encoder: any Encoder) throws {
+            public func encode(to encoder: any Encoder) throws {
                 try storage.encode(to: encoder)
             }
 
@@ -2155,35 +2155,35 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent`.
-        struct SitemapWidgetEvent: Codable, Hashable, Sendable {
+        public struct SitemapWidgetEvent: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/widgetId`.
-            var widgetId: Swift.String?
+            public var widgetId: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/labelSource`.
-            var labelSource: Swift.String?
+            public var labelSource: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/icon`.
-            var icon: Swift.String?
+            public var icon: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/labelcolor`.
-            var labelcolor: Swift.String?
+            public var labelcolor: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/valuecolor`.
-            var valuecolor: Swift.String?
+            public var valuecolor: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/iconcolor`.
-            var iconcolor: Swift.String?
+            public var iconcolor: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/state`.
-            var state: Swift.String?
+            public var state: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/reloadIcon`.
-            var reloadIcon: Swift.Bool?
+            public var reloadIcon: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/visibility`.
-            var visibility: Swift.Bool?
+            public var visibility: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/descriptionChanged`.
-            var descriptionChanged: Swift.Bool?
+            public var descriptionChanged: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/item`.
-            var item: Components.Schemas.EnrichedItemDTO?
+            public var item: Components.Schemas.EnrichedItemDTO?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/sitemapName`.
-            var sitemapName: Swift.String?
+            public var sitemapName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapWidgetEvent/pageId`.
-            var pageId: Swift.String?
+            public var pageId: Swift.String?
             /// Creates a new `SitemapWidgetEvent`.
             ///
             /// - Parameters:
@@ -2201,20 +2201,20 @@ enum Components {
             ///   - item:
             ///   - sitemapName:
             ///   - pageId:
-            init(widgetId: Swift.String? = nil,
-                 label: Swift.String? = nil,
-                 labelSource: Swift.String? = nil,
-                 icon: Swift.String? = nil,
-                 labelcolor: Swift.String? = nil,
-                 valuecolor: Swift.String? = nil,
-                 iconcolor: Swift.String? = nil,
-                 state: Swift.String? = nil,
-                 reloadIcon: Swift.Bool? = nil,
-                 visibility: Swift.Bool? = nil,
-                 descriptionChanged: Swift.Bool? = nil,
-                 item: Components.Schemas.EnrichedItemDTO? = nil,
-                 sitemapName: Swift.String? = nil,
-                 pageId: Swift.String? = nil) {
+            public init(widgetId: Swift.String? = nil,
+                        label: Swift.String? = nil,
+                        labelSource: Swift.String? = nil,
+                        icon: Swift.String? = nil,
+                        labelcolor: Swift.String? = nil,
+                        valuecolor: Swift.String? = nil,
+                        iconcolor: Swift.String? = nil,
+                        state: Swift.String? = nil,
+                        reloadIcon: Swift.Bool? = nil,
+                        visibility: Swift.Bool? = nil,
+                        descriptionChanged: Swift.Bool? = nil,
+                        item: Components.Schemas.EnrichedItemDTO? = nil,
+                        sitemapName: Swift.String? = nil,
+                        pageId: Swift.String? = nil) {
                 self.widgetId = widgetId
                 self.label = label
                 self.labelSource = labelSource
@@ -2231,7 +2231,7 @@ enum Components {
                 self.pageId = pageId
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case widgetId
                 case label
                 case labelSource
@@ -2250,17 +2250,17 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/SitemapDTO`.
-        struct SitemapDTO: Codable, Hashable, Sendable {
+        public struct SitemapDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/SitemapDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapDTO/icon`.
-            var icon: Swift.String?
+            public var icon: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapDTO/label`.
-            var label: Swift.String?
+            public var label: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapDTO/link`.
-            var link: Swift.String?
+            public var link: Swift.String?
             /// - Remark: Generated from `#/components/schemas/SitemapDTO/homepage`.
-            var homepage: Components.Schemas.PageDTO?
+            public var homepage: Components.Schemas.PageDTO?
             /// Creates a new `SitemapDTO`.
             ///
             /// - Parameters:
@@ -2269,11 +2269,11 @@ enum Components {
             ///   - label:
             ///   - link:
             ///   - homepage:
-            init(name: Swift.String? = nil,
-                 icon: Swift.String? = nil,
-                 label: Swift.String? = nil,
-                 link: Swift.String? = nil,
-                 homepage: Components.Schemas.PageDTO? = nil) {
+            public init(name: Swift.String? = nil,
+                        icon: Swift.String? = nil,
+                        label: Swift.String? = nil,
+                        link: Swift.String? = nil,
+                        homepage: Components.Schemas.PageDTO? = nil) {
                 self.name = name
                 self.icon = icon
                 self.label = label
@@ -2281,7 +2281,7 @@ enum Components {
                 self.homepage = homepage
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case name
                 case icon
                 case label
@@ -2291,65 +2291,65 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/RootUIComponent`.
-        struct RootUIComponent: Codable, Hashable, Sendable {
+        public struct RootUIComponent: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/component`.
-            var component: Swift.String?
+            public var component: Swift.String?
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/config`.
-            struct configPayload: Codable, Hashable, Sendable {
+            public struct configPayload: Codable, Hashable, Sendable {
                 /// A container of undocumented properties.
-                var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
+                public var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
                 /// Creates a new `configPayload`.
                 ///
                 /// - Parameters:
                 ///   - additionalProperties: A container of undocumented properties.
-                init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
+                public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
 
-                init(from decoder: any Decoder) throws {
+                public init(from decoder: any Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
 
-                func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
 
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/config`.
-            var config: Components.Schemas.RootUIComponent.configPayload?
+            public var config: Components.Schemas.RootUIComponent.configPayload?
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/slots`.
-            struct slotsPayload: Codable, Hashable, Sendable {
+            public struct slotsPayload: Codable, Hashable, Sendable {
                 /// A container of undocumented properties.
-                var additionalProperties: [String: [Components.Schemas.UIComponent]]
+                public var additionalProperties: [String: [Components.Schemas.UIComponent]]
                 /// Creates a new `slotsPayload`.
                 ///
                 /// - Parameters:
                 ///   - additionalProperties: A container of undocumented properties.
-                init(additionalProperties: [String: [Components.Schemas.UIComponent]] = .init()) {
+                public init(additionalProperties: [String: [Components.Schemas.UIComponent]] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
 
-                init(from decoder: any Decoder) throws {
+                public init(from decoder: any Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
 
-                func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
 
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/slots`.
-            var slots: Components.Schemas.RootUIComponent.slotsPayload?
+            public var slots: Components.Schemas.RootUIComponent.slotsPayload?
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/uid`.
-            var uid: Swift.String?
+            public var uid: Swift.String?
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/tags`.
-            var tags: [Swift.String]?
+            public var tags: [Swift.String]?
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/props`.
-            var props: Components.Schemas.ConfigDescriptionDTO?
+            public var props: Components.Schemas.ConfigDescriptionDTO?
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/timestamp`.
-            var timestamp: Foundation.Date?
+            public var timestamp: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/RootUIComponent/type`.
-            var _type: Swift.String?
+            public var _type: Swift.String?
             /// Creates a new `RootUIComponent`.
             ///
             /// - Parameters:
@@ -2361,14 +2361,14 @@ enum Components {
             ///   - props:
             ///   - timestamp:
             ///   - _type:
-            init(component: Swift.String? = nil,
-                 config: Components.Schemas.RootUIComponent.configPayload? = nil,
-                 slots: Components.Schemas.RootUIComponent.slotsPayload? = nil,
-                 uid: Swift.String? = nil,
-                 tags: [Swift.String]? = nil,
-                 props: Components.Schemas.ConfigDescriptionDTO? = nil,
-                 timestamp: Foundation.Date? = nil,
-                 _type: Swift.String? = nil) {
+            public init(component: Swift.String? = nil,
+                        config: Components.Schemas.RootUIComponent.configPayload? = nil,
+                        slots: Components.Schemas.RootUIComponent.slotsPayload? = nil,
+                        uid: Swift.String? = nil,
+                        tags: [Swift.String]? = nil,
+                        props: Components.Schemas.ConfigDescriptionDTO? = nil,
+                        timestamp: Foundation.Date? = nil,
+                        _type: Swift.String? = nil) {
                 self.component = component
                 self.config = config
                 self.slots = slots
@@ -2379,7 +2379,7 @@ enum Components {
                 self._type = _type
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case component
                 case config
                 case slots
@@ -2392,49 +2392,49 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/UIComponent`.
-        struct UIComponent: Codable, Hashable, Sendable {
+        public struct UIComponent: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/UIComponent/component`.
-            var component: Swift.String?
+            public var component: Swift.String?
             /// - Remark: Generated from `#/components/schemas/UIComponent/config`.
-            struct configPayload: Codable, Hashable, Sendable {
+            public struct configPayload: Codable, Hashable, Sendable {
                 /// A container of undocumented properties.
-                var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
+                public var additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer]
                 /// Creates a new `configPayload`.
                 ///
                 /// - Parameters:
                 ///   - additionalProperties: A container of undocumented properties.
-                init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
+                public init(additionalProperties: [String: OpenAPIRuntime.OpenAPIObjectContainer] = .init()) {
                     self.additionalProperties = additionalProperties
                 }
 
-                init(from decoder: any Decoder) throws {
+                public init(from decoder: any Decoder) throws {
                     additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
                 }
 
-                func encode(to encoder: any Encoder) throws {
+                public func encode(to encoder: any Encoder) throws {
                     try encoder.encodeAdditionalProperties(additionalProperties)
                 }
             }
 
             /// - Remark: Generated from `#/components/schemas/UIComponent/config`.
-            var config: Components.Schemas.UIComponent.configPayload?
+            public var config: Components.Schemas.UIComponent.configPayload?
             /// - Remark: Generated from `#/components/schemas/UIComponent/type`.
-            var _type: Swift.String?
+            public var _type: Swift.String?
             /// Creates a new `UIComponent`.
             ///
             /// - Parameters:
             ///   - component:
             ///   - config:
             ///   - _type:
-            init(component: Swift.String? = nil,
-                 config: Components.Schemas.UIComponent.configPayload? = nil,
-                 _type: Swift.String? = nil) {
+            public init(component: Swift.String? = nil,
+                        config: Components.Schemas.UIComponent.configPayload? = nil,
+                        _type: Swift.String? = nil) {
                 self.component = component
                 self.config = config
                 self._type = _type
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case component
                 case config
                 case _type = "type"
@@ -2442,15 +2442,15 @@ enum Components {
         }
 
         /// - Remark: Generated from `#/components/schemas/TileDTO`.
-        struct TileDTO: Codable, Hashable, Sendable {
+        public struct TileDTO: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/TileDTO/name`.
-            var name: Swift.String?
+            public var name: Swift.String?
             /// - Remark: Generated from `#/components/schemas/TileDTO/url`.
-            var url: Swift.String?
+            public var url: Swift.String?
             /// - Remark: Generated from `#/components/schemas/TileDTO/overlay`.
-            var overlay: Swift.String?
+            public var overlay: Swift.String?
             /// - Remark: Generated from `#/components/schemas/TileDTO/imageUrl`.
-            var imageUrl: Swift.String?
+            public var imageUrl: Swift.String?
             /// Creates a new `TileDTO`.
             ///
             /// - Parameters:
@@ -2458,17 +2458,17 @@ enum Components {
             ///   - url:
             ///   - overlay:
             ///   - imageUrl:
-            init(name: Swift.String? = nil,
-                 url: Swift.String? = nil,
-                 overlay: Swift.String? = nil,
-                 imageUrl: Swift.String? = nil) {
+            public init(name: Swift.String? = nil,
+                        url: Swift.String? = nil,
+                        overlay: Swift.String? = nil,
+                        imageUrl: Swift.String? = nil) {
                 self.name = name
                 self.url = url
                 self.overlay = overlay
                 self.imageUrl = imageUrl
             }
 
-            enum CodingKeys: String, CodingKey {
+            public enum CodingKeys: String, CodingKey {
                 case name
                 case url
                 case overlay
@@ -2478,60 +2478,60 @@ enum Components {
     }
 
     /// Types generated from the `#/components/parameters` section of the OpenAPI document.
-    enum Parameters {}
+    public enum Parameters {}
     /// Types generated from the `#/components/requestBodies` section of the OpenAPI document.
-    enum RequestBodies {}
+    public enum RequestBodies {}
     /// Types generated from the `#/components/responses` section of the OpenAPI document.
-    enum Responses {}
+    public enum Responses {}
     /// Types generated from the `#/components/headers` section of the OpenAPI document.
-    enum Headers {}
+    public enum Headers {}
 }
 
 /// API operations, with input and output types, generated from `#/paths` in the OpenAPI document.
-enum Operations {
+public enum Operations {
     /// Adds a new member to a group item.
     ///
     /// - Remark: HTTP `PUT /items/{itemName}/members/{memberItemName}`.
     /// - Remark: Generated from `#/paths//items/{itemName}/members/{memberItemName}/put(addMemberToGroupItem)`.
-    enum addMemberToGroupItem {
-        static let id: Swift.String = "addMemberToGroupItem"
-        struct Input: Sendable, Hashable {
+    public enum addMemberToGroupItem {
+        public static let id: Swift.String = "addMemberToGroupItem"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemName}/members/{memberItemName}/PUT/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemName}/members/{memberItemName}/PUT/path/itemName`.
-                var itemName: Swift.String
+                public var itemName: Swift.String
                 /// member item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemName}/members/{memberItemName}/PUT/path/memberItemName`.
-                var memberItemName: Swift.String
+                public var memberItemName: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemName: item name
                 ///   - memberItemName: member item name
-                init(itemName: Swift.String,
-                     memberItemName: Swift.String) {
+                public init(itemName: Swift.String,
+                            memberItemName: Swift.String) {
                     self.itemName = itemName
                     self.memberItemName = memberItemName
                 }
             }
 
-            var path: Operations.addMemberToGroupItem.Input.Path
+            public var path: Operations.addMemberToGroupItem.Input.Path
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            init(path: Operations.addMemberToGroupItem.Input.Path) {
+            public init(path: Operations.addMemberToGroupItem.Input.Path) {
                 self.path = path
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -2544,7 +2544,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.addMemberToGroupItem.Output.Ok {
+            public var ok: Operations.addMemberToGroupItem.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -2558,9 +2558,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item or member item not found or item is not of type group item.
@@ -2573,7 +2573,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.addMemberToGroupItem.Output.NotFound {
+            public var notFound: Operations.addMemberToGroupItem.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -2587,9 +2587,9 @@ enum Operations {
                 }
             }
 
-            struct MethodNotAllowed: Sendable, Hashable {
+            public struct MethodNotAllowed: Sendable, Hashable {
                 /// Creates a new `MethodNotAllowed`.
-                init() {}
+                public init() {}
             }
 
             /// Member item is not editable.
@@ -2602,7 +2602,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.methodNotAllowed`.
             /// - SeeAlso: `.methodNotAllowed`.
-            var methodNotAllowed: Operations.addMemberToGroupItem.Output.MethodNotAllowed {
+            public var methodNotAllowed: Operations.addMemberToGroupItem.Output.MethodNotAllowed {
                 get throws {
                     switch self {
                     case let .methodNotAllowed(response):
@@ -2627,45 +2627,45 @@ enum Operations {
     ///
     /// - Remark: HTTP `DELETE /items/{itemName}/members/{memberItemName}`.
     /// - Remark: Generated from `#/paths//items/{itemName}/members/{memberItemName}/delete(removeMemberFromGroupItem)`.
-    enum removeMemberFromGroupItem {
-        static let id: Swift.String = "removeMemberFromGroupItem"
-        struct Input: Sendable, Hashable {
+    public enum removeMemberFromGroupItem {
+        public static let id: Swift.String = "removeMemberFromGroupItem"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemName}/members/{memberItemName}/DELETE/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemName}/members/{memberItemName}/DELETE/path/itemName`.
-                var itemName: Swift.String
+                public var itemName: Swift.String
                 /// member item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemName}/members/{memberItemName}/DELETE/path/memberItemName`.
-                var memberItemName: Swift.String
+                public var memberItemName: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemName: item name
                 ///   - memberItemName: member item name
-                init(itemName: Swift.String,
-                     memberItemName: Swift.String) {
+                public init(itemName: Swift.String,
+                            memberItemName: Swift.String) {
                     self.itemName = itemName
                     self.memberItemName = memberItemName
                 }
             }
 
-            var path: Operations.removeMemberFromGroupItem.Input.Path
+            public var path: Operations.removeMemberFromGroupItem.Input.Path
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            init(path: Operations.removeMemberFromGroupItem.Input.Path) {
+            public init(path: Operations.removeMemberFromGroupItem.Input.Path) {
                 self.path = path
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -2678,7 +2678,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.removeMemberFromGroupItem.Output.Ok {
+            public var ok: Operations.removeMemberFromGroupItem.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -2692,9 +2692,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item or member item not found or item is not of type group item.
@@ -2707,7 +2707,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.removeMemberFromGroupItem.Output.NotFound {
+            public var notFound: Operations.removeMemberFromGroupItem.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -2721,9 +2721,9 @@ enum Operations {
                 }
             }
 
-            struct MethodNotAllowed: Sendable, Hashable {
+            public struct MethodNotAllowed: Sendable, Hashable {
                 /// Creates a new `MethodNotAllowed`.
-                init() {}
+                public init() {}
             }
 
             /// Member item is not editable.
@@ -2736,7 +2736,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.methodNotAllowed`.
             /// - SeeAlso: `.methodNotAllowed`.
-            var methodNotAllowed: Operations.removeMemberFromGroupItem.Output.MethodNotAllowed {
+            public var methodNotAllowed: Operations.removeMemberFromGroupItem.Output.MethodNotAllowed {
                 get throws {
                     switch self {
                     case let .methodNotAllowed(response):
@@ -2761,55 +2761,55 @@ enum Operations {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}/metadata/{namespace}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/metadata/{namespace}/put(addMetadataToItem)`.
-    enum addMetadataToItem {
-        static let id: Swift.String = "addMetadataToItem"
-        struct Input: Sendable, Hashable {
+    public enum addMetadataToItem {
+        public static let id: Swift.String = "addMetadataToItem"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/PUT/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/PUT/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// namespace
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/PUT/path/namespace`.
-                var namespace: Swift.String
+                public var namespace: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
                 ///   - namespace: namespace
-                init(itemname: Swift.String,
-                     namespace: Swift.String) {
+                public init(itemname: Swift.String,
+                            namespace: Swift.String) {
                     self.itemname = itemname
                     self.namespace = namespace
                 }
             }
 
-            var path: Operations.addMetadataToItem.Input.Path
+            public var path: Operations.addMetadataToItem.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/PUT/requestBody`.
-            enum Body: Sendable, Hashable {
+            @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/PUT/requestBody/content/application\/json`.
                 case json(Components.Schemas.MetadataDTO)
             }
 
-            var body: Operations.addMetadataToItem.Input.Body
+            public var body: Operations.addMetadataToItem.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - body:
-            init(path: Operations.addMetadataToItem.Input.Path,
-                 body: Operations.addMetadataToItem.Input.Body) {
+            public init(path: Operations.addMetadataToItem.Input.Path,
+                        body: Operations.addMetadataToItem.Input.Body) {
                 self.path = path
                 self.body = body
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -2822,7 +2822,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.addMetadataToItem.Output.Ok {
+            public var ok: Operations.addMetadataToItem.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -2836,9 +2836,9 @@ enum Operations {
                 }
             }
 
-            struct Created: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
                 /// Creates a new `Created`.
-                init() {}
+                public init() {}
             }
 
             /// Created
@@ -2851,7 +2851,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.created`.
             /// - SeeAlso: `.created`.
-            var created: Operations.addMetadataToItem.Output.Created {
+            public var created: Operations.addMetadataToItem.Output.Created {
                 get throws {
                     switch self {
                     case let .created(response):
@@ -2865,9 +2865,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Metadata value empty.
@@ -2880,7 +2880,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.addMetadataToItem.Output.BadRequest {
+            public var badRequest: Operations.addMetadataToItem.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -2894,9 +2894,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found.
@@ -2909,7 +2909,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.addMetadataToItem.Output.NotFound {
+            public var notFound: Operations.addMetadataToItem.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -2923,9 +2923,9 @@ enum Operations {
                 }
             }
 
-            struct MethodNotAllowed: Sendable, Hashable {
+            public struct MethodNotAllowed: Sendable, Hashable {
                 /// Creates a new `MethodNotAllowed`.
-                init() {}
+                public init() {}
             }
 
             /// Metadata not editable.
@@ -2938,7 +2938,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.methodNotAllowed`.
             /// - SeeAlso: `.methodNotAllowed`.
-            var methodNotAllowed: Operations.addMetadataToItem.Output.MethodNotAllowed {
+            public var methodNotAllowed: Operations.addMetadataToItem.Output.MethodNotAllowed {
                 get throws {
                     switch self {
                     case let .methodNotAllowed(response):
@@ -2963,45 +2963,45 @@ enum Operations {
     ///
     /// - Remark: HTTP `DELETE /items/{itemname}/metadata/{namespace}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/metadata/{namespace}/delete(removeMetadataFromItem)`.
-    enum removeMetadataFromItem {
-        static let id: Swift.String = "removeMetadataFromItem"
-        struct Input: Sendable, Hashable {
+    public enum removeMetadataFromItem {
+        public static let id: Swift.String = "removeMetadataFromItem"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/DELETE/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/DELETE/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// namespace
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/{namespace}/DELETE/path/namespace`.
-                var namespace: Swift.String
+                public var namespace: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
                 ///   - namespace: namespace
-                init(itemname: Swift.String,
-                     namespace: Swift.String) {
+                public init(itemname: Swift.String,
+                            namespace: Swift.String) {
                     self.itemname = itemname
                     self.namespace = namespace
                 }
             }
 
-            var path: Operations.removeMetadataFromItem.Input.Path
+            public var path: Operations.removeMetadataFromItem.Input.Path
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            init(path: Operations.removeMetadataFromItem.Input.Path) {
+            public init(path: Operations.removeMetadataFromItem.Input.Path) {
                 self.path = path
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -3014,7 +3014,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.removeMetadataFromItem.Output.Ok {
+            public var ok: Operations.removeMetadataFromItem.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3028,9 +3028,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found.
@@ -3043,7 +3043,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.removeMetadataFromItem.Output.NotFound {
+            public var notFound: Operations.removeMetadataFromItem.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3057,9 +3057,9 @@ enum Operations {
                 }
             }
 
-            struct MethodNotAllowed: Sendable, Hashable {
+            public struct MethodNotAllowed: Sendable, Hashable {
                 /// Creates a new `MethodNotAllowed`.
-                init() {}
+                public init() {}
             }
 
             /// Meta data not editable.
@@ -3072,7 +3072,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.methodNotAllowed`.
             /// - SeeAlso: `.methodNotAllowed`.
-            var methodNotAllowed: Operations.removeMetadataFromItem.Output.MethodNotAllowed {
+            public var methodNotAllowed: Operations.removeMetadataFromItem.Output.MethodNotAllowed {
                 get throws {
                     switch self {
                     case let .methodNotAllowed(response):
@@ -3097,45 +3097,45 @@ enum Operations {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}/tags/{tag}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/tags/{tag}/put(addTagToItem)`.
-    enum addTagToItem {
-        static let id: Swift.String = "addTagToItem"
-        struct Input: Sendable, Hashable {
+    public enum addTagToItem {
+        public static let id: Swift.String = "addTagToItem"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/tags/{tag}/PUT/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/tags/{tag}/PUT/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// tag
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/tags/{tag}/PUT/path/tag`.
-                var tag: Swift.String
+                public var tag: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
                 ///   - tag: tag
-                init(itemname: Swift.String,
-                     tag: Swift.String) {
+                public init(itemname: Swift.String,
+                            tag: Swift.String) {
                     self.itemname = itemname
                     self.tag = tag
                 }
             }
 
-            var path: Operations.addTagToItem.Input.Path
+            public var path: Operations.addTagToItem.Input.Path
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            init(path: Operations.addTagToItem.Input.Path) {
+            public init(path: Operations.addTagToItem.Input.Path) {
                 self.path = path
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -3148,7 +3148,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.addTagToItem.Output.Ok {
+            public var ok: Operations.addTagToItem.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3162,9 +3162,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found.
@@ -3177,7 +3177,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.addTagToItem.Output.NotFound {
+            public var notFound: Operations.addTagToItem.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3191,9 +3191,9 @@ enum Operations {
                 }
             }
 
-            struct MethodNotAllowed: Sendable, Hashable {
+            public struct MethodNotAllowed: Sendable, Hashable {
                 /// Creates a new `MethodNotAllowed`.
-                init() {}
+                public init() {}
             }
 
             /// Item not editable.
@@ -3206,7 +3206,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.methodNotAllowed`.
             /// - SeeAlso: `.methodNotAllowed`.
-            var methodNotAllowed: Operations.addTagToItem.Output.MethodNotAllowed {
+            public var methodNotAllowed: Operations.addTagToItem.Output.MethodNotAllowed {
                 get throws {
                     switch self {
                     case let .methodNotAllowed(response):
@@ -3231,45 +3231,45 @@ enum Operations {
     ///
     /// - Remark: HTTP `DELETE /items/{itemname}/tags/{tag}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/tags/{tag}/delete(removeTagFromItem)`.
-    enum removeTagFromItem {
-        static let id: Swift.String = "removeTagFromItem"
-        struct Input: Sendable, Hashable {
+    public enum removeTagFromItem {
+        public static let id: Swift.String = "removeTagFromItem"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/tags/{tag}/DELETE/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/tags/{tag}/DELETE/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// tag
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/tags/{tag}/DELETE/path/tag`.
-                var tag: Swift.String
+                public var tag: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
                 ///   - tag: tag
-                init(itemname: Swift.String,
-                     tag: Swift.String) {
+                public init(itemname: Swift.String,
+                            tag: Swift.String) {
                     self.itemname = itemname
                     self.tag = tag
                 }
             }
 
-            var path: Operations.removeTagFromItem.Input.Path
+            public var path: Operations.removeTagFromItem.Input.Path
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            init(path: Operations.removeTagFromItem.Input.Path) {
+            public init(path: Operations.removeTagFromItem.Input.Path) {
                 self.path = path
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -3282,7 +3282,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.removeTagFromItem.Output.Ok {
+            public var ok: Operations.removeTagFromItem.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3296,9 +3296,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found.
@@ -3311,7 +3311,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.removeTagFromItem.Output.NotFound {
+            public var notFound: Operations.removeTagFromItem.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3325,9 +3325,9 @@ enum Operations {
                 }
             }
 
-            struct MethodNotAllowed: Sendable, Hashable {
+            public struct MethodNotAllowed: Sendable, Hashable {
                 /// Creates a new `MethodNotAllowed`.
-                init() {}
+                public init() {}
             }
 
             /// Item not editable.
@@ -3340,7 +3340,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.methodNotAllowed`.
             /// - SeeAlso: `.methodNotAllowed`.
-            var methodNotAllowed: Operations.removeTagFromItem.Output.MethodNotAllowed {
+            public var methodNotAllowed: Operations.removeTagFromItem.Output.MethodNotAllowed {
                 get throws {
                     switch self {
                     case let .methodNotAllowed(response):
@@ -3365,94 +3365,94 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/get(getItemByName)`.
-    enum getItemByName {
-        static let id: Swift.String = "getItemByName"
-        struct Input: Sendable, Hashable {
+    public enum getItemByName {
+        public static let id: Swift.String = "getItemByName"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/GET/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
-                init(itemname: Swift.String) {
+                public init(itemname: Swift.String) {
                     self.itemname = itemname
                 }
             }
 
-            var path: Operations.getItemByName.Input.Path
+            public var path: Operations.getItemByName.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemname}/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// metadata selector - a comma separated list or a regular expression (returns all if no value given)
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/GET/query/metadata`.
-                var metadata: Swift.String?
+                public var metadata: Swift.String?
                 /// get member items if the item is a group item
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/GET/query/recursive`.
-                var recursive: Swift.Bool?
+                public var recursive: Swift.Bool?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
                 ///   - metadata: metadata selector - a comma separated list or a regular expression (returns all if no value given)
                 ///   - recursive: get member items if the item is a group item
-                init(metadata: Swift.String? = nil,
-                     recursive: Swift.Bool? = nil) {
+                public init(metadata: Swift.String? = nil,
+                            recursive: Swift.Bool? = nil) {
                     self.metadata = metadata
                     self.recursive = recursive
                 }
             }
 
-            var query: Operations.getItemByName.Input.Query
+            public var query: Operations.getItemByName.Input.Query
             /// - Remark: Generated from `#/paths/items/{itemname}/GET/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/GET/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemByName.AcceptableContentType>]
+                public var Accept_hyphen_Language: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemByName.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
                 ///   - accept:
-                init(Accept_hyphen_Language: Swift.String? = nil,
-                     accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemByName.AcceptableContentType>] = .defaultValues()) {
+                public init(Accept_hyphen_Language: Swift.String? = nil,
+                            accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemByName.AcceptableContentType>] = .defaultValues()) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getItemByName.Input.Headers
+            public var headers: Operations.getItemByName.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - query:
             ///   - headers:
-            init(path: Operations.getItemByName.Input.Path,
-                 query: Operations.getItemByName.Input.Query = .init(),
-                 headers: Operations.getItemByName.Input.Headers = .init()) {
+            public init(path: Operations.getItemByName.Input.Path,
+                        query: Operations.getItemByName.Input.Query = .init(),
+                        headers: Operations.getItemByName.Input.Headers = .init()) {
                 self.path = path
                 self.query = query
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/items/{itemname}/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.EnrichedItemDTO)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.EnrichedItemDTO {
+                    public var json: Components.Schemas.EnrichedItemDTO {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -3463,12 +3463,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getItemByName.Output.Ok.Body
+                public var body: Operations.getItemByName.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getItemByName.Output.Ok.Body) {
+                public init(body: Operations.getItemByName.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -3483,7 +3483,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getItemByName.Output.Ok {
+            public var ok: Operations.getItemByName.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3497,9 +3497,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found
@@ -3512,7 +3512,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.getItemByName.Output.NotFound {
+            public var notFound: Operations.getItemByName.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3532,10 +3532,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -3544,7 +3544,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -3553,7 +3553,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -3565,48 +3565,48 @@ enum Operations {
     ///
     /// - Remark: HTTP `POST /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/post(sendItemCommand)`.
-    enum sendItemCommand {
-        static let id: Swift.String = "sendItemCommand"
-        struct Input: Sendable, Hashable {
+    public enum sendItemCommand {
+        public static let id: Swift.String = "sendItemCommand"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/POST/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/POST/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
-                init(itemname: Swift.String) {
+                public init(itemname: Swift.String) {
                     self.itemname = itemname
                 }
             }
 
-            var path: Operations.sendItemCommand.Input.Path
+            public var path: Operations.sendItemCommand.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody`.
-            enum Body: Sendable, Hashable {
+            @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/POST/requestBody/content/text\/plain`.
                 case plainText(OpenAPIRuntime.HTTPBody)
             }
 
-            var body: Operations.sendItemCommand.Input.Body
+            public var body: Operations.sendItemCommand.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - body:
-            init(path: Operations.sendItemCommand.Input.Path,
-                 body: Operations.sendItemCommand.Input.Body) {
+            public init(path: Operations.sendItemCommand.Input.Path,
+                        body: Operations.sendItemCommand.Input.Body) {
                 self.path = path
                 self.body = body
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -3619,7 +3619,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.sendItemCommand.Output.Ok {
+            public var ok: Operations.sendItemCommand.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3633,9 +3633,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Item command null
@@ -3648,7 +3648,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.sendItemCommand.Output.BadRequest {
+            public var badRequest: Operations.sendItemCommand.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -3662,9 +3662,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found
@@ -3677,7 +3677,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.sendItemCommand.Output.NotFound {
+            public var notFound: Operations.sendItemCommand.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3702,78 +3702,78 @@ enum Operations {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/put(addOrUpdateItemInRegistry)`.
-    enum addOrUpdateItemInRegistry {
-        static let id: Swift.String = "addOrUpdateItemInRegistry"
-        struct Input: Sendable, Hashable {
+    public enum addOrUpdateItemInRegistry {
+        public static let id: Swift.String = "addOrUpdateItemInRegistry"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/PUT/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/PUT/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
-                init(itemname: Swift.String) {
+                public init(itemname: Swift.String) {
                     self.itemname = itemname
                 }
             }
 
-            var path: Operations.addOrUpdateItemInRegistry.Input.Path
+            public var path: Operations.addOrUpdateItemInRegistry.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemname}/PUT/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/PUT/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemInRegistry.AcceptableContentType>]
+                public var Accept_hyphen_Language: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemInRegistry.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
                 ///   - accept:
-                init(Accept_hyphen_Language: Swift.String? = nil,
-                     accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemInRegistry.AcceptableContentType>] = .defaultValues()) {
+                public init(Accept_hyphen_Language: Swift.String? = nil,
+                            accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemInRegistry.AcceptableContentType>] = .defaultValues()) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.addOrUpdateItemInRegistry.Input.Headers
+            public var headers: Operations.addOrUpdateItemInRegistry.Input.Headers
             /// - Remark: Generated from `#/paths/items/{itemname}/PUT/requestBody`.
-            enum Body: Sendable, Hashable {
+            @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/PUT/requestBody/content/application\/json`.
                 case json(Components.Schemas.GroupItemDTO)
             }
 
-            var body: Operations.addOrUpdateItemInRegistry.Input.Body
+            public var body: Operations.addOrUpdateItemInRegistry.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             ///   - body:
-            init(path: Operations.addOrUpdateItemInRegistry.Input.Path,
-                 headers: Operations.addOrUpdateItemInRegistry.Input.Headers = .init(),
-                 body: Operations.addOrUpdateItemInRegistry.Input.Body) {
+            public init(path: Operations.addOrUpdateItemInRegistry.Input.Path,
+                        headers: Operations.addOrUpdateItemInRegistry.Input.Headers = .init(),
+                        body: Operations.addOrUpdateItemInRegistry.Input.Body) {
                 self.path = path
                 self.headers = headers
                 self.body = body
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/PUT/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/items/{itemname}/PUT/responses/200/content/*\/*`.
                     case any(OpenAPIRuntime.HTTPBody)
                     /// The associated value of the enum case if `self` is `.any`.
                     ///
                     /// - Throws: An error if `self` is not `.any`.
                     /// - SeeAlso: `.any`.
-                    var any: OpenAPIRuntime.HTTPBody {
+                    public var any: OpenAPIRuntime.HTTPBody {
                         get throws {
                             switch self {
                             case let .any(body):
@@ -3784,12 +3784,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.addOrUpdateItemInRegistry.Output.Ok.Body
+                public var body: Operations.addOrUpdateItemInRegistry.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.addOrUpdateItemInRegistry.Output.Ok.Body) {
+                public init(body: Operations.addOrUpdateItemInRegistry.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -3804,7 +3804,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.addOrUpdateItemInRegistry.Output.Ok {
+            public var ok: Operations.addOrUpdateItemInRegistry.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3818,9 +3818,9 @@ enum Operations {
                 }
             }
 
-            struct Created: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
                 /// Creates a new `Created`.
-                init() {}
+                public init() {}
             }
 
             /// Item created.
@@ -3833,7 +3833,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.created`.
             /// - SeeAlso: `.created`.
-            var created: Operations.addOrUpdateItemInRegistry.Output.Created {
+            public var created: Operations.addOrUpdateItemInRegistry.Output.Created {
                 get throws {
                     switch self {
                     case let .created(response):
@@ -3847,9 +3847,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Payload invalid.
@@ -3862,7 +3862,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.addOrUpdateItemInRegistry.Output.BadRequest {
+            public var badRequest: Operations.addOrUpdateItemInRegistry.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -3876,9 +3876,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found or name in path invalid.
@@ -3891,7 +3891,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.addOrUpdateItemInRegistry.Output.NotFound {
+            public var notFound: Operations.addOrUpdateItemInRegistry.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3905,9 +3905,9 @@ enum Operations {
                 }
             }
 
-            struct MethodNotAllowed: Sendable, Hashable {
+            public struct MethodNotAllowed: Sendable, Hashable {
                 /// Creates a new `MethodNotAllowed`.
-                init() {}
+                public init() {}
             }
 
             /// Item not editable.
@@ -3920,7 +3920,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.methodNotAllowed`.
             /// - SeeAlso: `.methodNotAllowed`.
-            var methodNotAllowed: Operations.addOrUpdateItemInRegistry.Output.MethodNotAllowed {
+            public var methodNotAllowed: Operations.addOrUpdateItemInRegistry.Output.MethodNotAllowed {
                 get throws {
                     switch self {
                     case let .methodNotAllowed(response):
@@ -3940,10 +3940,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case any
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "*/*":
                     self = .any
@@ -3952,7 +3952,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -3961,7 +3961,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .any
                 ]
@@ -3973,38 +3973,38 @@ enum Operations {
     ///
     /// - Remark: HTTP `DELETE /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/delete(removeItemFromRegistry)`.
-    enum removeItemFromRegistry {
-        static let id: Swift.String = "removeItemFromRegistry"
-        struct Input: Sendable, Hashable {
+    public enum removeItemFromRegistry {
+        public static let id: Swift.String = "removeItemFromRegistry"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/DELETE/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/DELETE/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
-                init(itemname: Swift.String) {
+                public init(itemname: Swift.String) {
                     self.itemname = itemname
                 }
             }
 
-            var path: Operations.removeItemFromRegistry.Input.Path
+            public var path: Operations.removeItemFromRegistry.Input.Path
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            init(path: Operations.removeItemFromRegistry.Input.Path) {
+            public init(path: Operations.removeItemFromRegistry.Input.Path) {
                 self.path = path
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -4017,7 +4017,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.removeItemFromRegistry.Output.Ok {
+            public var ok: Operations.removeItemFromRegistry.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4031,9 +4031,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found or item is not editable.
@@ -4046,7 +4046,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.removeItemFromRegistry.Output.NotFound {
+            public var notFound: Operations.removeItemFromRegistry.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -4071,35 +4071,35 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /items`.
     /// - Remark: Generated from `#/paths//items/get(getItems)`.
-    enum getItems {
-        static let id: Swift.String = "getItems"
-        struct Input: Sendable, Hashable {
+    public enum getItems {
+        public static let id: Swift.String = "getItems"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// item type filter
                 ///
                 /// - Remark: Generated from `#/paths/items/GET/query/type`.
-                var _type: Swift.String?
+                public var _type: Swift.String?
                 /// item tag filter
                 ///
                 /// - Remark: Generated from `#/paths/items/GET/query/tags`.
-                var tags: Swift.String?
+                public var tags: Swift.String?
                 /// metadata selector - a comma separated list or a regular expression (returns all if no value given)
                 ///
                 /// - Remark: Generated from `#/paths/items/GET/query/metadata`.
-                var metadata: Swift.String?
+                public var metadata: Swift.String?
                 /// get member items recursively
                 ///
                 /// - Remark: Generated from `#/paths/items/GET/query/recursive`.
-                var recursive: Swift.Bool?
+                public var recursive: Swift.Bool?
                 /// limit output to the given fields (comma separated)
                 ///
                 /// - Remark: Generated from `#/paths/items/GET/query/fields`.
-                var fields: Swift.String?
+                public var fields: Swift.String?
                 /// provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header, all other parameters are ignored except "metadata"
                 ///
                 /// - Remark: Generated from `#/paths/items/GET/query/staticDataOnly`.
-                var staticDataOnly: Swift.Bool?
+                public var staticDataOnly: Swift.Bool?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
@@ -4109,12 +4109,12 @@ enum Operations {
                 ///   - recursive: get member items recursively
                 ///   - fields: limit output to the given fields (comma separated)
                 ///   - staticDataOnly: provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header, all other parameters are ignored except "metadata"
-                init(_type: Swift.String? = nil,
-                     tags: Swift.String? = nil,
-                     metadata: Swift.String? = nil,
-                     recursive: Swift.Bool? = nil,
-                     fields: Swift.String? = nil,
-                     staticDataOnly: Swift.Bool? = nil) {
+                public init(_type: Swift.String? = nil,
+                            tags: Swift.String? = nil,
+                            metadata: Swift.String? = nil,
+                            recursive: Swift.Bool? = nil,
+                            fields: Swift.String? = nil,
+                            staticDataOnly: Swift.Bool? = nil) {
                     self._type = _type
                     self.tags = tags
                     self.metadata = metadata
@@ -4124,50 +4124,50 @@ enum Operations {
                 }
             }
 
-            var query: Operations.getItems.Input.Query
+            public var query: Operations.getItems.Input.Query
             /// - Remark: Generated from `#/paths/items/GET/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/items/GET/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItems.AcceptableContentType>]
+                public var Accept_hyphen_Language: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItems.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
                 ///   - accept:
-                init(Accept_hyphen_Language: Swift.String? = nil,
-                     accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItems.AcceptableContentType>] = .defaultValues()) {
+                public init(Accept_hyphen_Language: Swift.String? = nil,
+                            accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItems.AcceptableContentType>] = .defaultValues()) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getItems.Input.Headers
+            public var headers: Operations.getItems.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - query:
             ///   - headers:
-            init(query: Operations.getItems.Input.Query = .init(),
-                 headers: Operations.getItems.Input.Headers = .init()) {
+            public init(query: Operations.getItems.Input.Query = .init(),
+                        headers: Operations.getItems.Input.Headers = .init()) {
                 self.query = query
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/items/GET/responses/200/content/application\/json`.
                     case json([Components.Schemas.EnrichedItemDTO])
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: [Components.Schemas.EnrichedItemDTO] {
+                    public var json: [Components.Schemas.EnrichedItemDTO] {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -4178,12 +4178,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getItems.Output.Ok.Body
+                public var body: Operations.getItems.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getItems.Output.Ok.Body) {
+                public init(body: Operations.getItems.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -4198,7 +4198,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getItems.Output.Ok {
+            public var ok: Operations.getItems.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4218,10 +4218,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -4230,7 +4230,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -4239,7 +4239,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -4251,52 +4251,52 @@ enum Operations {
     ///
     /// - Remark: HTTP `PUT /items`.
     /// - Remark: Generated from `#/paths//items/put(addOrUpdateItemsInRegistry)`.
-    enum addOrUpdateItemsInRegistry {
-        static let id: Swift.String = "addOrUpdateItemsInRegistry"
-        struct Input: Sendable, Hashable {
+    public enum addOrUpdateItemsInRegistry {
+        public static let id: Swift.String = "addOrUpdateItemsInRegistry"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/PUT/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemsInRegistry.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemsInRegistry.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemsInRegistry.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addOrUpdateItemsInRegistry.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.addOrUpdateItemsInRegistry.Input.Headers
+            public var headers: Operations.addOrUpdateItemsInRegistry.Input.Headers
             /// - Remark: Generated from `#/paths/items/PUT/requestBody`.
-            enum Body: Sendable, Hashable {
+            @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/PUT/requestBody/content/application\/json`.
                 case json([Components.Schemas.GroupItemDTO])
             }
 
-            var body: Operations.addOrUpdateItemsInRegistry.Input.Body
+            public var body: Operations.addOrUpdateItemsInRegistry.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - headers:
             ///   - body:
-            init(headers: Operations.addOrUpdateItemsInRegistry.Input.Headers = .init(),
-                 body: Operations.addOrUpdateItemsInRegistry.Input.Body) {
+            public init(headers: Operations.addOrUpdateItemsInRegistry.Input.Headers = .init(),
+                        body: Operations.addOrUpdateItemsInRegistry.Input.Body) {
                 self.headers = headers
                 self.body = body
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/PUT/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/items/PUT/responses/200/content/*\/*`.
                     case any(OpenAPIRuntime.HTTPBody)
                     /// The associated value of the enum case if `self` is `.any`.
                     ///
                     /// - Throws: An error if `self` is not `.any`.
                     /// - SeeAlso: `.any`.
-                    var any: OpenAPIRuntime.HTTPBody {
+                    public var any: OpenAPIRuntime.HTTPBody {
                         get throws {
                             switch self {
                             case let .any(body):
@@ -4307,12 +4307,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.addOrUpdateItemsInRegistry.Output.Ok.Body
+                public var body: Operations.addOrUpdateItemsInRegistry.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.addOrUpdateItemsInRegistry.Output.Ok.Body) {
+                public init(body: Operations.addOrUpdateItemsInRegistry.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -4327,7 +4327,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.addOrUpdateItemsInRegistry.Output.Ok {
+            public var ok: Operations.addOrUpdateItemsInRegistry.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4341,9 +4341,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Payload is invalid.
@@ -4356,7 +4356,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.addOrUpdateItemsInRegistry.Output.BadRequest {
+            public var badRequest: Operations.addOrUpdateItemsInRegistry.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -4376,10 +4376,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case any
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "*/*":
                     self = .any
@@ -4388,7 +4388,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -4397,7 +4397,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .any
                 ]
@@ -4409,61 +4409,61 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /items/{itemname}/state`.
     /// - Remark: Generated from `#/paths//items/{itemname}/state/get(getItemState_1)`.
-    enum getItemState_1 {
-        static let id: Swift.String = "getItemState_1"
-        struct Input: Sendable, Hashable {
+    public enum getItemState_1 {
+        public static let id: Swift.String = "getItemState_1"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/state/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/state/GET/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
-                init(itemname: Swift.String) {
+                public init(itemname: Swift.String) {
                     self.itemname = itemname
                 }
             }
 
-            var path: Operations.getItemState_1.Input.Path
+            public var path: Operations.getItemState_1.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemname}/state/GET/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemState_1.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemState_1.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemState_1.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemState_1.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getItemState_1.Input.Headers
+            public var headers: Operations.getItemState_1.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
-            init(path: Operations.getItemState_1.Input.Path,
-                 headers: Operations.getItemState_1.Input.Headers = .init()) {
+            public init(path: Operations.getItemState_1.Input.Path,
+                        headers: Operations.getItemState_1.Input.Headers = .init()) {
                 self.path = path
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/state/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/items/{itemname}/state/GET/responses/200/content/text\/plain`.
                     case plainText(OpenAPIRuntime.HTTPBody)
                     /// The associated value of the enum case if `self` is `.plainText`.
                     ///
                     /// - Throws: An error if `self` is not `.plainText`.
                     /// - SeeAlso: `.plainText`.
-                    var plainText: OpenAPIRuntime.HTTPBody {
+                    public var plainText: OpenAPIRuntime.HTTPBody {
                         get throws {
                             switch self {
                             case let .plainText(body):
@@ -4474,12 +4474,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getItemState_1.Output.Ok.Body
+                public var body: Operations.getItemState_1.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getItemState_1.Output.Ok.Body) {
+                public init(body: Operations.getItemState_1.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -4494,7 +4494,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getItemState_1.Output.Ok {
+            public var ok: Operations.getItemState_1.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4508,9 +4508,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found
@@ -4523,7 +4523,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.getItemState_1.Output.NotFound {
+            public var notFound: Operations.getItemState_1.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -4543,10 +4543,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case plainText
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "text/plain":
                     self = .plainText
@@ -4555,7 +4555,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -4564,7 +4564,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .plainText
                 ]
@@ -4576,67 +4576,67 @@ enum Operations {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}/state`.
     /// - Remark: Generated from `#/paths//items/{itemname}/state/put(updateItemState)`.
-    enum updateItemState {
-        static let id: Swift.String = "updateItemState"
-        struct Input: Sendable, Hashable {
+    public enum updateItemState {
+        public static let id: Swift.String = "updateItemState"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
-                init(itemname: Swift.String) {
+                public init(itemname: Swift.String) {
                     self.itemname = itemname
                 }
             }
 
-            var path: Operations.updateItemState.Input.Path
+            public var path: Operations.updateItemState.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
+                public var Accept_hyphen_Language: Swift.String?
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
-                init(Accept_hyphen_Language: Swift.String? = nil) {
+                public init(Accept_hyphen_Language: Swift.String? = nil) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                 }
             }
 
-            var headers: Operations.updateItemState.Input.Headers
+            public var headers: Operations.updateItemState.Input.Headers
             /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/requestBody`.
-            enum Body: Sendable, Hashable {
+            @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/state/PUT/requestBody/content/text\/plain`.
                 case plainText(OpenAPIRuntime.HTTPBody)
             }
 
-            var body: Operations.updateItemState.Input.Body
+            public var body: Operations.updateItemState.Input.Body
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             ///   - body:
-            init(path: Operations.updateItemState.Input.Path,
-                 headers: Operations.updateItemState.Input.Headers = .init(),
-                 body: Operations.updateItemState.Input.Body) {
+            public init(path: Operations.updateItemState.Input.Path,
+                        headers: Operations.updateItemState.Input.Headers = .init(),
+                        body: Operations.updateItemState.Input.Body) {
                 self.path = path
                 self.headers = headers
                 self.body = body
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Accepted: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Accepted: Sendable, Hashable {
                 /// Creates a new `Accepted`.
-                init() {}
+                public init() {}
             }
 
             /// Accepted
@@ -4649,7 +4649,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.accepted`.
             /// - SeeAlso: `.accepted`.
-            var accepted: Operations.updateItemState.Output.Accepted {
+            public var accepted: Operations.updateItemState.Output.Accepted {
                 get throws {
                     switch self {
                     case let .accepted(response):
@@ -4663,9 +4663,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Item state null
@@ -4678,7 +4678,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.updateItemState.Output.BadRequest {
+            public var badRequest: Operations.updateItemState.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -4692,9 +4692,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found
@@ -4707,7 +4707,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.updateItemState.Output.NotFound {
+            public var notFound: Operations.updateItemState.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -4732,68 +4732,68 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /items/{itemname}/metadata/namespaces`.
     /// - Remark: Generated from `#/paths//items/{itemname}/metadata/namespaces/get(getItemNamespaces)`.
-    enum getItemNamespaces {
-        static let id: Swift.String = "getItemNamespaces"
-        struct Input: Sendable, Hashable {
+    public enum getItemNamespaces {
+        public static let id: Swift.String = "getItemNamespaces"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemname}/metadata/namespaces/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/namespaces/GET/path/itemname`.
-                var itemname: Swift.String
+                public var itemname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemname: item name
-                init(itemname: Swift.String) {
+                public init(itemname: Swift.String) {
                     self.itemname = itemname
                 }
             }
 
-            var path: Operations.getItemNamespaces.Input.Path
+            public var path: Operations.getItemNamespaces.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemname}/metadata/namespaces/GET/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/namespaces/GET/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemNamespaces.AcceptableContentType>]
+                public var Accept_hyphen_Language: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemNamespaces.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
                 ///   - accept:
-                init(Accept_hyphen_Language: Swift.String? = nil,
-                     accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemNamespaces.AcceptableContentType>] = .defaultValues()) {
+                public init(Accept_hyphen_Language: Swift.String? = nil,
+                            accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getItemNamespaces.AcceptableContentType>] = .defaultValues()) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getItemNamespaces.Input.Headers
+            public var headers: Operations.getItemNamespaces.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
-            init(path: Operations.getItemNamespaces.Input.Path,
-                 headers: Operations.getItemNamespaces.Input.Headers = .init()) {
+            public init(path: Operations.getItemNamespaces.Input.Path,
+                        headers: Operations.getItemNamespaces.Input.Headers = .init()) {
                 self.path = path
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/items/{itemname}/metadata/namespaces/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/items/{itemname}/metadata/namespaces/GET/responses/200/content/application\/json`.
                     case json(Swift.String)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Swift.String {
+                    public var json: Swift.String {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -4804,12 +4804,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getItemNamespaces.Output.Ok.Body
+                public var body: Operations.getItemNamespaces.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getItemNamespaces.Output.Ok.Body) {
+                public init(body: Operations.getItemNamespaces.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -4824,7 +4824,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getItemNamespaces.Output.Ok {
+            public var ok: Operations.getItemNamespaces.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4838,9 +4838,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found
@@ -4853,7 +4853,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.getItemNamespaces.Output.NotFound {
+            public var notFound: Operations.getItemNamespaces.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -4873,10 +4873,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -4885,7 +4885,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -4894,7 +4894,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -4906,64 +4906,64 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /items/{itemName}/semantic/{semanticClass}`.
     /// - Remark: Generated from `#/paths//items/{itemName}/semantic/{semanticClass}/get(getSemanticItem)`.
-    enum getSemanticItem {
-        static let id: Swift.String = "getSemanticItem"
-        struct Input: Sendable, Hashable {
+    public enum getSemanticItem {
+        public static let id: Swift.String = "getSemanticItem"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/items/{itemName}/semantic/{semanticClass}/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// item name
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemName}/semantic/{semanticClass}/GET/path/itemName`.
-                var itemName: Swift.String
+                public var itemName: Swift.String
                 /// semantic class
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemName}/semantic/{semanticClass}/GET/path/semanticClass`.
-                var semanticClass: Swift.String
+                public var semanticClass: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemName: item name
                 ///   - semanticClass: semantic class
-                init(itemName: Swift.String,
-                     semanticClass: Swift.String) {
+                public init(itemName: Swift.String,
+                            semanticClass: Swift.String) {
                     self.itemName = itemName
                     self.semanticClass = semanticClass
                 }
             }
 
-            var path: Operations.getSemanticItem.Input.Path
+            public var path: Operations.getSemanticItem.Input.Path
             /// - Remark: Generated from `#/paths/items/{itemName}/semantic/{semanticClass}/GET/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/items/{itemName}/semantic/{semanticClass}/GET/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
+                public var Accept_hyphen_Language: Swift.String?
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
-                init(Accept_hyphen_Language: Swift.String? = nil) {
+                public init(Accept_hyphen_Language: Swift.String? = nil) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                 }
             }
 
-            var headers: Operations.getSemanticItem.Input.Headers
+            public var headers: Operations.getSemanticItem.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
-            init(path: Operations.getSemanticItem.Input.Path,
-                 headers: Operations.getSemanticItem.Input.Headers = .init()) {
+            public init(path: Operations.getSemanticItem.Input.Path,
+                        headers: Operations.getSemanticItem.Input.Headers = .init()) {
                 self.path = path
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -4976,7 +4976,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getSemanticItem.Output.Ok {
+            public var ok: Operations.getSemanticItem.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4990,9 +4990,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Item not found
@@ -5005,7 +5005,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.getSemanticItem.Output.NotFound {
+            public var notFound: Operations.getSemanticItem.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -5030,17 +5030,17 @@ enum Operations {
     ///
     /// - Remark: HTTP `POST /items/metadata/purge`.
     /// - Remark: Generated from `#/paths//items/metadata/purge/post(purgeDatabase)`.
-    enum purgeDatabase {
-        static let id: Swift.String = "purgeDatabase"
-        struct Input: Sendable, Hashable {
+    public enum purgeDatabase {
+        public static let id: Swift.String = "purgeDatabase"
+        public struct Input: Sendable, Hashable {
             /// Creates a new `Input`.
-            init() {}
+            public init() {}
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -5053,7 +5053,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.purgeDatabase.Output.Ok {
+            public var ok: Operations.purgeDatabase.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5078,35 +5078,35 @@ enum Operations {
     ///
     /// - Remark: HTTP `POST /sitemaps/events/subscribe`.
     /// - Remark: Generated from `#/paths//sitemaps/events/subscribe/post(createSitemapEventSubscription)`.
-    enum createSitemapEventSubscription {
-        static let id: Swift.String = "createSitemapEventSubscription"
-        struct Input: Sendable, Hashable {
+    public enum createSitemapEventSubscription {
+        public static let id: Swift.String = "createSitemapEventSubscription"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/sitemaps/events/subscribe/POST/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.createSitemapEventSubscription.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.createSitemapEventSubscription.Input.Headers
+            public var headers: Operations.createSitemapEventSubscription.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - headers:
-            init(headers: Operations.createSitemapEventSubscription.Input.Headers = .init()) {
+            public init(headers: Operations.createSitemapEventSubscription.Input.Headers = .init()) {
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Created: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
                 /// Creates a new `Created`.
-                init() {}
+                public init() {}
             }
 
             /// Subscription created.
@@ -5119,7 +5119,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.created`.
             /// - SeeAlso: `.created`.
-            var created: Operations.createSitemapEventSubscription.Output.Created {
+            public var created: Operations.createSitemapEventSubscription.Output.Created {
                 get throws {
                     switch self {
                     case let .created(response):
@@ -5133,16 +5133,16 @@ enum Operations {
                 }
             }
 
-            struct Ok: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/sitemaps/events/subscribe/POST/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/sitemaps/events/subscribe/POST/responses/200/content/application\/json`.
                     case json(Components.Schemas.JerseyResponseBuilderDTO)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.JerseyResponseBuilderDTO {
+                    public var json: Components.Schemas.JerseyResponseBuilderDTO {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -5153,12 +5153,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.createSitemapEventSubscription.Output.Ok.Body
+                public var body: Operations.createSitemapEventSubscription.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.createSitemapEventSubscription.Output.Ok.Body) {
+                public init(body: Operations.createSitemapEventSubscription.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -5173,7 +5173,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.createSitemapEventSubscription.Output.Ok {
+            public var ok: Operations.createSitemapEventSubscription.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5187,9 +5187,9 @@ enum Operations {
                 }
             }
 
-            struct ServiceUnavailable: Sendable, Hashable {
+            public struct ServiceUnavailable: Sendable, Hashable {
                 /// Creates a new `ServiceUnavailable`.
-                init() {}
+                public init() {}
             }
 
             /// Subscriptions limit reached.
@@ -5202,7 +5202,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.serviceUnavailable`.
             /// - SeeAlso: `.serviceUnavailable`.
-            var serviceUnavailable: Operations.createSitemapEventSubscription.Output.ServiceUnavailable {
+            public var serviceUnavailable: Operations.createSitemapEventSubscription.Output.ServiceUnavailable {
                 get throws {
                     switch self {
                     case let .serviceUnavailable(response):
@@ -5222,10 +5222,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -5234,7 +5234,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -5243,7 +5243,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -5255,108 +5255,108 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /sitemaps/{sitemapname}/{pageid}`.
     /// - Remark: Generated from `#/paths//sitemaps/{sitemapname}/{pageid}/get(pollDataForPage)`.
-    enum pollDataForPage {
-        static let id: Swift.String = "pollDataForPage"
-        struct Input: Sendable, Hashable {
+    public enum pollDataForPage {
+        public static let id: Swift.String = "pollDataForPage"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// sitemap name
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/path/sitemapname`.
-                var sitemapname: Swift.String
+                public var sitemapname: Swift.String
                 /// page id
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/path/pageid`.
-                var pageid: Swift.String
+                public var pageid: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - sitemapname: sitemap name
                 ///   - pageid: page id
-                init(sitemapname: Swift.String,
-                     pageid: Swift.String) {
+                public init(sitemapname: Swift.String,
+                            pageid: Swift.String) {
                     self.sitemapname = sitemapname
                     self.pageid = pageid
                 }
             }
 
-            var path: Operations.pollDataForPage.Input.Path
+            public var path: Operations.pollDataForPage.Input.Path
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// subscriptionid
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/query/subscriptionid`.
-                var subscriptionid: Swift.String?
+                public var subscriptionid: Swift.String?
                 /// include hidden widgets
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/query/includeHidden`.
-                var includeHidden: Swift.Bool?
+                public var includeHidden: Swift.Bool?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
                 ///   - subscriptionid: subscriptionid
                 ///   - includeHidden: include hidden widgets
-                init(subscriptionid: Swift.String? = nil,
-                     includeHidden: Swift.Bool? = nil) {
+                public init(subscriptionid: Swift.String? = nil,
+                            includeHidden: Swift.Bool? = nil) {
                     self.subscriptionid = subscriptionid
                     self.includeHidden = includeHidden
                 }
             }
 
-            var query: Operations.pollDataForPage.Input.Query
+            public var query: Operations.pollDataForPage.Input.Query
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
+                public var Accept_hyphen_Language: Swift.String?
                 /// X-Atmosphere-Transport for long polling
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/header/X-Atmosphere-Transport`.
-                var X_hyphen_Atmosphere_hyphen_Transport: Swift.String?
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForPage.AcceptableContentType>]
+                public var X_hyphen_Atmosphere_hyphen_Transport: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForPage.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
                 ///   - X_hyphen_Atmosphere_hyphen_Transport: X-Atmosphere-Transport for long polling
                 ///   - accept:
-                init(Accept_hyphen_Language: Swift.String? = nil,
-                     X_hyphen_Atmosphere_hyphen_Transport: Swift.String? = nil,
-                     accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForPage.AcceptableContentType>] = .defaultValues()) {
+                public init(Accept_hyphen_Language: Swift.String? = nil,
+                            X_hyphen_Atmosphere_hyphen_Transport: Swift.String? = nil,
+                            accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForPage.AcceptableContentType>] = .defaultValues()) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                     self.X_hyphen_Atmosphere_hyphen_Transport = X_hyphen_Atmosphere_hyphen_Transport
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.pollDataForPage.Input.Headers
+            public var headers: Operations.pollDataForPage.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - query:
             ///   - headers:
-            init(path: Operations.pollDataForPage.Input.Path,
-                 query: Operations.pollDataForPage.Input.Query = .init(),
-                 headers: Operations.pollDataForPage.Input.Headers = .init()) {
+            public init(path: Operations.pollDataForPage.Input.Path,
+                        query: Operations.pollDataForPage.Input.Query = .init(),
+                        headers: Operations.pollDataForPage.Input.Headers = .init()) {
                 self.path = path
                 self.query = query
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/{pageid}/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.PageDTO)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.PageDTO {
+                    public var json: Components.Schemas.PageDTO {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -5367,12 +5367,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.pollDataForPage.Output.Ok.Body
+                public var body: Operations.pollDataForPage.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.pollDataForPage.Output.Ok.Body) {
+                public init(body: Operations.pollDataForPage.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -5387,7 +5387,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.pollDataForPage.Output.Ok {
+            public var ok: Operations.pollDataForPage.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5401,9 +5401,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Invalid subscription id has been provided.
@@ -5416,7 +5416,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.pollDataForPage.Output.BadRequest {
+            public var badRequest: Operations.pollDataForPage.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -5430,9 +5430,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget
@@ -5445,7 +5445,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.pollDataForPage.Output.NotFound {
+            public var notFound: Operations.pollDataForPage.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -5465,10 +5465,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -5477,7 +5477,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -5486,7 +5486,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -5498,101 +5498,101 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /sitemaps/{sitemapname}/*`.
     /// - Remark: Generated from `#/paths//sitemaps/{sitemapname}/*/get(pollDataForSitemap)`.
-    enum pollDataForSitemap {
-        static let id: Swift.String = "pollDataForSitemap"
-        struct Input: Sendable, Hashable {
+    public enum pollDataForSitemap {
+        public static let id: Swift.String = "pollDataForSitemap"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// sitemap name
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/path/sitemapname`.
-                var sitemapname: Swift.String
+                public var sitemapname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - sitemapname: sitemap name
-                init(sitemapname: Swift.String) {
+                public init(sitemapname: Swift.String) {
                     self.sitemapname = sitemapname
                 }
             }
 
-            var path: Operations.pollDataForSitemap.Input.Path
+            public var path: Operations.pollDataForSitemap.Input.Path
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// subscriptionid
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/query/subscriptionid`.
-                var subscriptionid: Swift.String?
+                public var subscriptionid: Swift.String?
                 /// include hidden widgets
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/query/includeHidden`.
-                var includeHidden: Swift.Bool?
+                public var includeHidden: Swift.Bool?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
                 ///   - subscriptionid: subscriptionid
                 ///   - includeHidden: include hidden widgets
-                init(subscriptionid: Swift.String? = nil,
-                     includeHidden: Swift.Bool? = nil) {
+                public init(subscriptionid: Swift.String? = nil,
+                            includeHidden: Swift.Bool? = nil) {
                     self.subscriptionid = subscriptionid
                     self.includeHidden = includeHidden
                 }
             }
 
-            var query: Operations.pollDataForSitemap.Input.Query
+            public var query: Operations.pollDataForSitemap.Input.Query
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
+                public var Accept_hyphen_Language: Swift.String?
                 /// X-Atmosphere-Transport for long polling
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/header/X-Atmosphere-Transport`.
-                var X_hyphen_Atmosphere_hyphen_Transport: Swift.String?
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForSitemap.AcceptableContentType>]
+                public var X_hyphen_Atmosphere_hyphen_Transport: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForSitemap.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
                 ///   - X_hyphen_Atmosphere_hyphen_Transport: X-Atmosphere-Transport for long polling
                 ///   - accept:
-                init(Accept_hyphen_Language: Swift.String? = nil,
-                     X_hyphen_Atmosphere_hyphen_Transport: Swift.String? = nil,
-                     accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForSitemap.AcceptableContentType>] = .defaultValues()) {
+                public init(Accept_hyphen_Language: Swift.String? = nil,
+                            X_hyphen_Atmosphere_hyphen_Transport: Swift.String? = nil,
+                            accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.pollDataForSitemap.AcceptableContentType>] = .defaultValues()) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                     self.X_hyphen_Atmosphere_hyphen_Transport = X_hyphen_Atmosphere_hyphen_Transport
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.pollDataForSitemap.Input.Headers
+            public var headers: Operations.pollDataForSitemap.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - query:
             ///   - headers:
-            init(path: Operations.pollDataForSitemap.Input.Path,
-                 query: Operations.pollDataForSitemap.Input.Query = .init(),
-                 headers: Operations.pollDataForSitemap.Input.Headers = .init()) {
+            public init(path: Operations.pollDataForSitemap.Input.Path,
+                        query: Operations.pollDataForSitemap.Input.Query = .init(),
+                        headers: Operations.pollDataForSitemap.Input.Headers = .init()) {
                 self.path = path
                 self.query = query
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/*/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.SitemapDTO)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.SitemapDTO {
+                    public var json: Components.Schemas.SitemapDTO {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -5603,12 +5603,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.pollDataForSitemap.Output.Ok.Body
+                public var body: Operations.pollDataForSitemap.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.pollDataForSitemap.Output.Ok.Body) {
+                public init(body: Operations.pollDataForSitemap.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -5623,7 +5623,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.pollDataForSitemap.Output.Ok {
+            public var ok: Operations.pollDataForSitemap.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5637,9 +5637,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Invalid subscription id has been provided.
@@ -5652,7 +5652,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.pollDataForSitemap.Output.BadRequest {
+            public var badRequest: Operations.pollDataForSitemap.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -5666,9 +5666,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Sitemap with requested name does not exist
@@ -5681,7 +5681,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.pollDataForSitemap.Output.NotFound {
+            public var notFound: Operations.pollDataForSitemap.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -5701,10 +5701,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -5713,7 +5713,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -5722,7 +5722,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -5734,97 +5734,97 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /sitemaps/{sitemapname}`.
     /// - Remark: Generated from `#/paths//sitemaps/{sitemapname}/get(getSitemapByName)`.
-    enum getSitemapByName {
-        static let id: Swift.String = "getSitemapByName"
-        struct Input: Sendable, Hashable {
+    public enum getSitemapByName {
+        public static let id: Swift.String = "getSitemapByName"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// sitemap name
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/path/sitemapname`.
-                var sitemapname: Swift.String
+                public var sitemapname: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - sitemapname: sitemap name
-                init(sitemapname: Swift.String) {
+                public init(sitemapname: Swift.String) {
                     self.sitemapname = sitemapname
                 }
             }
 
-            var path: Operations.getSitemapByName.Input.Path
+            public var path: Operations.getSitemapByName.Input.Path
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/query/type`.
-                var _type: Swift.String?
+                public var _type: Swift.String?
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/query/jsoncallback`.
-                var jsoncallback: Swift.String?
+                public var jsoncallback: Swift.String?
                 /// include hidden widgets
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/query/includeHidden`.
-                var includeHidden: Swift.Bool?
+                public var includeHidden: Swift.Bool?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
                 ///   - _type:
                 ///   - jsoncallback:
                 ///   - includeHidden: include hidden widgets
-                init(_type: Swift.String? = nil,
-                     jsoncallback: Swift.String? = nil,
-                     includeHidden: Swift.Bool? = nil) {
+                public init(_type: Swift.String? = nil,
+                            jsoncallback: Swift.String? = nil,
+                            includeHidden: Swift.Bool? = nil) {
                     self._type = _type
                     self.jsoncallback = jsoncallback
                     self.includeHidden = includeHidden
                 }
             }
 
-            var query: Operations.getSitemapByName.Input.Query
+            public var query: Operations.getSitemapByName.Input.Query
             /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/header`.
-            struct Headers: Sendable, Hashable {
+            public struct Headers: Sendable, Hashable {
                 /// language
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/header/Accept-Language`.
-                var Accept_hyphen_Language: Swift.String?
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapByName.AcceptableContentType>]
+                public var Accept_hyphen_Language: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapByName.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - Accept_hyphen_Language: language
                 ///   - accept:
-                init(Accept_hyphen_Language: Swift.String? = nil,
-                     accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapByName.AcceptableContentType>] = .defaultValues()) {
+                public init(Accept_hyphen_Language: Swift.String? = nil,
+                            accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapByName.AcceptableContentType>] = .defaultValues()) {
                     self.Accept_hyphen_Language = Accept_hyphen_Language
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getSitemapByName.Input.Headers
+            public var headers: Operations.getSitemapByName.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - query:
             ///   - headers:
-            init(path: Operations.getSitemapByName.Input.Path,
-                 query: Operations.getSitemapByName.Input.Query = .init(),
-                 headers: Operations.getSitemapByName.Input.Headers = .init()) {
+            public init(path: Operations.getSitemapByName.Input.Path,
+                        query: Operations.getSitemapByName.Input.Query = .init(),
+                        headers: Operations.getSitemapByName.Input.Headers = .init()) {
                 self.path = path
                 self.query = query
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/sitemaps/{sitemapname}/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.SitemapDTO)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.SitemapDTO {
+                    public var json: Components.Schemas.SitemapDTO {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -5835,12 +5835,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getSitemapByName.Output.Ok.Body
+                public var body: Operations.getSitemapByName.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getSitemapByName.Output.Ok.Body) {
+                public init(body: Operations.getSitemapByName.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -5855,7 +5855,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getSitemapByName.Output.Ok {
+            public var ok: Operations.getSitemapByName.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5875,10 +5875,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -5887,7 +5887,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -5896,7 +5896,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -5908,57 +5908,57 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /sitemaps/events/{subscriptionid}/*`.
     /// - Remark: Generated from `#/paths//sitemaps/events/{subscriptionid}/*/get(getSitemapEvents)`.
-    enum getSitemapEvents {
-        static let id: Swift.String = "getSitemapEvents"
-        struct Input: Sendable, Hashable {
+    public enum getSitemapEvents {
+        public static let id: Swift.String = "getSitemapEvents"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/*/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// subscription id
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/*/GET/path/subscriptionid`.
-                var subscriptionid: Swift.String
+                public var subscriptionid: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - subscriptionid: subscription id
-                init(subscriptionid: Swift.String) {
+                public init(subscriptionid: Swift.String) {
                     self.subscriptionid = subscriptionid
                 }
             }
 
-            var path: Operations.getSitemapEvents.Input.Path
+            public var path: Operations.getSitemapEvents.Input.Path
             /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/*/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// sitemap name
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/*/GET/query/sitemap`.
-                var sitemap: Swift.String?
+                public var sitemap: Swift.String?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
                 ///   - sitemap: sitemap name
-                init(sitemap: Swift.String? = nil) {
+                public init(sitemap: Swift.String? = nil) {
                     self.sitemap = sitemap
                 }
             }
 
-            var query: Operations.getSitemapEvents.Input.Query
+            public var query: Operations.getSitemapEvents.Input.Query
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - query:
-            init(path: Operations.getSitemapEvents.Input.Path,
-                 query: Operations.getSitemapEvents.Input.Query = .init()) {
+            public init(path: Operations.getSitemapEvents.Input.Path,
+                        query: Operations.getSitemapEvents.Input.Query = .init()) {
                 self.path = path
                 self.query = query
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -5971,7 +5971,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getSitemapEvents.Output.Ok {
+            public var ok: Operations.getSitemapEvents.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -5985,9 +5985,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Missing sitemap parameter, or sitemap not linked successfully to the subscription.
@@ -6000,7 +6000,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.getSitemapEvents.Output.BadRequest {
+            public var badRequest: Operations.getSitemapEvents.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -6014,9 +6014,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Subscription not found.
@@ -6029,7 +6029,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.getSitemapEvents.Output.NotFound {
+            public var notFound: Operations.getSitemapEvents.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -6054,87 +6054,87 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /sitemaps/events/{subscriptionid}`.
     /// - Remark: Generated from `#/paths//sitemaps/events/{subscriptionid}/get(getSitemapEvents_1)`.
-    enum getSitemapEvents_1 {
-        static let id: Swift.String = "getSitemapEvents_1"
-        struct Input: Sendable, Hashable {
+    public enum getSitemapEvents_1 {
+        public static let id: Swift.String = "getSitemapEvents_1"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// subscription id
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/path/subscriptionid`.
-                var subscriptionid: Swift.String
+                public var subscriptionid: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - subscriptionid: subscription id
-                init(subscriptionid: Swift.String) {
+                public init(subscriptionid: Swift.String) {
                     self.subscriptionid = subscriptionid
                 }
             }
 
-            var path: Operations.getSitemapEvents_1.Input.Path
+            public var path: Operations.getSitemapEvents_1.Input.Path
             /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// sitemap name
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/query/sitemap`.
-                var sitemap: Swift.String?
+                public var sitemap: Swift.String?
                 /// page id
                 ///
                 /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/query/pageid`.
-                var pageid: Swift.String?
+                public var pageid: Swift.String?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
                 ///   - sitemap: sitemap name
                 ///   - pageid: page id
-                init(sitemap: Swift.String? = nil,
-                     pageid: Swift.String? = nil) {
+                public init(sitemap: Swift.String? = nil,
+                            pageid: Swift.String? = nil) {
                     self.sitemap = sitemap
                     self.pageid = pageid
                 }
             }
 
-            var query: Operations.getSitemapEvents_1.Input.Query
+            public var query: Operations.getSitemapEvents_1.Input.Query
             /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapEvents_1.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapEvents_1.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapEvents_1.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemapEvents_1.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getSitemapEvents_1.Input.Headers
+            public var headers: Operations.getSitemapEvents_1.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - query:
             ///   - headers:
-            init(path: Operations.getSitemapEvents_1.Input.Path,
-                 query: Operations.getSitemapEvents_1.Input.Query = .init(),
-                 headers: Operations.getSitemapEvents_1.Input.Headers = .init()) {
+            public init(path: Operations.getSitemapEvents_1.Input.Path,
+                        query: Operations.getSitemapEvents_1.Input.Query = .init(),
+                        headers: Operations.getSitemapEvents_1.Input.Headers = .init()) {
                 self.path = path
                 self.query = query
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/sitemaps/events/{subscriptionid}/GET/responses/200/content/text\/event-stream`.
                     case text_event_hyphen_stream(OpenAPIRuntime.HTTPBody)
                     /// The associated value of the enum case if `self` is `.text_event_hyphen_stream`.
                     ///
                     /// - Throws: An error if `self` is not `.text_event_hyphen_stream`.
                     /// - SeeAlso: `.text_event_hyphen_stream`.
-                    var text_event_hyphen_stream: OpenAPIRuntime.HTTPBody {
+                    public var text_event_hyphen_stream: OpenAPIRuntime.HTTPBody {
                         get throws {
                             switch self {
                             case let .text_event_hyphen_stream(body):
@@ -6154,7 +6154,7 @@ enum Operations {
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.SitemapWidgetEvent {
+                    public var json: Components.Schemas.SitemapWidgetEvent {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -6170,12 +6170,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getSitemapEvents_1.Output.Ok.Body
+                public var body: Operations.getSitemapEvents_1.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getSitemapEvents_1.Output.Ok.Body) {
+                public init(body: Operations.getSitemapEvents_1.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -6190,7 +6190,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getSitemapEvents_1.Output.Ok {
+            public var ok: Operations.getSitemapEvents_1.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -6204,9 +6204,9 @@ enum Operations {
                 }
             }
 
-            struct BadRequest: Sendable, Hashable {
+            public struct BadRequest: Sendable, Hashable {
                 /// Creates a new `BadRequest`.
-                init() {}
+                public init() {}
             }
 
             /// Missing sitemap or page parameter, or page not linked successfully to the subscription.
@@ -6219,7 +6219,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.badRequest`.
             /// - SeeAlso: `.badRequest`.
-            var badRequest: Operations.getSitemapEvents_1.Output.BadRequest {
+            public var badRequest: Operations.getSitemapEvents_1.Output.BadRequest {
                 get throws {
                     switch self {
                     case let .badRequest(response):
@@ -6233,9 +6233,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Subscription not found.
@@ -6248,7 +6248,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.getSitemapEvents_1.Output.NotFound {
+            public var notFound: Operations.getSitemapEvents_1.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -6268,11 +6268,11 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case text_event_hyphen_stream
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "text/event-stream":
                     self = .text_event_hyphen_stream
@@ -6283,7 +6283,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -6294,7 +6294,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .text_event_hyphen_stream,
                     .json
@@ -6307,42 +6307,42 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /sitemaps`.
     /// - Remark: Generated from `#/paths//sitemaps/get(getSitemaps)`.
-    enum getSitemaps {
-        static let id: Swift.String = "getSitemaps"
-        struct Input: Sendable, Hashable {
+    public enum getSitemaps {
+        public static let id: Swift.String = "getSitemaps"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/sitemaps/GET/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemaps.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemaps.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemaps.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getSitemaps.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getSitemaps.Input.Headers
+            public var headers: Operations.getSitemaps.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - headers:
-            init(headers: Operations.getSitemaps.Input.Headers = .init()) {
+            public init(headers: Operations.getSitemaps.Input.Headers = .init()) {
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/sitemaps/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/sitemaps/GET/responses/200/content/application\/json`.
                     case json([Components.Schemas.SitemapDTO])
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: [Components.Schemas.SitemapDTO] {
+                    public var json: [Components.Schemas.SitemapDTO] {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -6353,12 +6353,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getSitemaps.Output.Ok.Body
+                public var body: Operations.getSitemaps.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getSitemaps.Output.Ok.Body) {
+                public init(body: Operations.getSitemaps.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -6373,7 +6373,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getSitemaps.Output.Ok {
+            public var ok: Operations.getSitemaps.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -6393,10 +6393,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -6405,7 +6405,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -6414,7 +6414,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -6426,78 +6426,78 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /ui/components/{namespace}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/get(getRegisteredUIComponentsInNamespace)`.
-    enum getRegisteredUIComponentsInNamespace {
-        static let id: Swift.String = "getRegisteredUIComponentsInNamespace"
-        struct Input: Sendable, Hashable {
+    public enum getRegisteredUIComponentsInNamespace {
+        public static let id: Swift.String = "getRegisteredUIComponentsInNamespace"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/GET/path/namespace`.
-                var namespace: Swift.String
+                public var namespace: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - namespace:
-                init(namespace: Swift.String) {
+                public init(namespace: Swift.String) {
                     self.namespace = namespace
                 }
             }
 
-            var path: Operations.getRegisteredUIComponentsInNamespace.Input.Path
+            public var path: Operations.getRegisteredUIComponentsInNamespace.Input.Path
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/GET/query`.
-            struct Query: Sendable, Hashable {
+            public struct Query: Sendable, Hashable {
                 /// summary fields only
                 ///
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/GET/query/summary`.
-                var summary: Swift.Bool?
+                public var summary: Swift.Bool?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
                 ///   - summary: summary fields only
-                init(summary: Swift.Bool? = nil) {
+                public init(summary: Swift.Bool? = nil) {
                     self.summary = summary
                 }
             }
 
-            var query: Operations.getRegisteredUIComponentsInNamespace.Input.Query
+            public var query: Operations.getRegisteredUIComponentsInNamespace.Input.Query
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/GET/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getRegisteredUIComponentsInNamespace.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getRegisteredUIComponentsInNamespace.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getRegisteredUIComponentsInNamespace.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getRegisteredUIComponentsInNamespace.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getRegisteredUIComponentsInNamespace.Input.Headers
+            public var headers: Operations.getRegisteredUIComponentsInNamespace.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - query:
             ///   - headers:
-            init(path: Operations.getRegisteredUIComponentsInNamespace.Input.Path,
-                 query: Operations.getRegisteredUIComponentsInNamespace.Input.Query = .init(),
-                 headers: Operations.getRegisteredUIComponentsInNamespace.Input.Headers = .init()) {
+            public init(path: Operations.getRegisteredUIComponentsInNamespace.Input.Path,
+                        query: Operations.getRegisteredUIComponentsInNamespace.Input.Query = .init(),
+                        headers: Operations.getRegisteredUIComponentsInNamespace.Input.Headers = .init()) {
                 self.path = path
                 self.query = query
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/ui/components/{namespace}/GET/responses/200/content/application\/json`.
                     case json([Components.Schemas.RootUIComponent])
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: [Components.Schemas.RootUIComponent] {
+                    public var json: [Components.Schemas.RootUIComponent] {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -6508,12 +6508,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getRegisteredUIComponentsInNamespace.Output.Ok.Body
+                public var body: Operations.getRegisteredUIComponentsInNamespace.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getRegisteredUIComponentsInNamespace.Output.Ok.Body) {
+                public init(body: Operations.getRegisteredUIComponentsInNamespace.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -6528,7 +6528,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getRegisteredUIComponentsInNamespace.Output.Ok {
+            public var ok: Operations.getRegisteredUIComponentsInNamespace.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -6548,10 +6548,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -6560,7 +6560,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -6569,7 +6569,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -6581,69 +6581,69 @@ enum Operations {
     ///
     /// - Remark: HTTP `POST /ui/components/{namespace}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/post(addUIComponentToNamespace)`.
-    enum addUIComponentToNamespace {
-        static let id: Swift.String = "addUIComponentToNamespace"
-        struct Input: Sendable, Hashable {
+    public enum addUIComponentToNamespace {
+        public static let id: Swift.String = "addUIComponentToNamespace"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/POST/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/POST/path/namespace`.
-                var namespace: Swift.String
+                public var namespace: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - namespace:
-                init(namespace: Swift.String) {
+                public init(namespace: Swift.String) {
                     self.namespace = namespace
                 }
             }
 
-            var path: Operations.addUIComponentToNamespace.Input.Path
+            public var path: Operations.addUIComponentToNamespace.Input.Path
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/POST/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addUIComponentToNamespace.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addUIComponentToNamespace.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addUIComponentToNamespace.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.addUIComponentToNamespace.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.addUIComponentToNamespace.Input.Headers
+            public var headers: Operations.addUIComponentToNamespace.Input.Headers
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/POST/requestBody`.
-            enum Body: Sendable, Hashable {
+            @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/POST/requestBody/content/application\/json`.
                 case json(Components.Schemas.RootUIComponent)
             }
 
-            var body: Operations.addUIComponentToNamespace.Input.Body?
+            public var body: Operations.addUIComponentToNamespace.Input.Body?
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             ///   - body:
-            init(path: Operations.addUIComponentToNamespace.Input.Path,
-                 headers: Operations.addUIComponentToNamespace.Input.Headers = .init(),
-                 body: Operations.addUIComponentToNamespace.Input.Body? = nil) {
+            public init(path: Operations.addUIComponentToNamespace.Input.Path,
+                        headers: Operations.addUIComponentToNamespace.Input.Headers = .init(),
+                        body: Operations.addUIComponentToNamespace.Input.Body? = nil) {
                 self.path = path
                 self.headers = headers
                 self.body = body
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/POST/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/ui/components/{namespace}/POST/responses/200/content/application\/json`.
                     case json(Components.Schemas.RootUIComponent)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.RootUIComponent {
+                    public var json: Components.Schemas.RootUIComponent {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -6654,12 +6654,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.addUIComponentToNamespace.Output.Ok.Body
+                public var body: Operations.addUIComponentToNamespace.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.addUIComponentToNamespace.Output.Ok.Body) {
+                public init(body: Operations.addUIComponentToNamespace.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -6674,7 +6674,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.addUIComponentToNamespace.Output.Ok {
+            public var ok: Operations.addUIComponentToNamespace.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -6694,10 +6694,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -6706,7 +6706,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -6715,7 +6715,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -6727,64 +6727,64 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /ui/components/{namespace}/{componentUID}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/{componentUID}/get(getUIComponentInNamespace)`.
-    enum getUIComponentInNamespace {
-        static let id: Swift.String = "getUIComponentInNamespace"
-        struct Input: Sendable, Hashable {
+    public enum getUIComponentInNamespace {
+        public static let id: Swift.String = "getUIComponentInNamespace"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/GET/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/GET/path/namespace`.
-                var namespace: Swift.String
+                public var namespace: Swift.String
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/GET/path/componentUID`.
-                var componentUID: Swift.String
+                public var componentUID: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - namespace:
                 ///   - componentUID:
-                init(namespace: Swift.String,
-                     componentUID: Swift.String) {
+                public init(namespace: Swift.String,
+                            componentUID: Swift.String) {
                     self.namespace = namespace
                     self.componentUID = componentUID
                 }
             }
 
-            var path: Operations.getUIComponentInNamespace.Input.Path
+            public var path: Operations.getUIComponentInNamespace.Input.Path
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/GET/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUIComponentInNamespace.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUIComponentInNamespace.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUIComponentInNamespace.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUIComponentInNamespace.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getUIComponentInNamespace.Input.Headers
+            public var headers: Operations.getUIComponentInNamespace.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
-            init(path: Operations.getUIComponentInNamespace.Input.Path,
-                 headers: Operations.getUIComponentInNamespace.Input.Headers = .init()) {
+            public init(path: Operations.getUIComponentInNamespace.Input.Path,
+                        headers: Operations.getUIComponentInNamespace.Input.Headers = .init()) {
                 self.path = path
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.RootUIComponent)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.RootUIComponent {
+                    public var json: Components.Schemas.RootUIComponent {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -6795,12 +6795,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getUIComponentInNamespace.Output.Ok.Body
+                public var body: Operations.getUIComponentInNamespace.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getUIComponentInNamespace.Output.Ok.Body) {
+                public init(body: Operations.getUIComponentInNamespace.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -6815,7 +6815,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getUIComponentInNamespace.Output.Ok {
+            public var ok: Operations.getUIComponentInNamespace.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -6829,9 +6829,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Component not found
@@ -6844,7 +6844,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.getUIComponentInNamespace.Output.NotFound {
+            public var notFound: Operations.getUIComponentInNamespace.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -6864,10 +6864,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -6876,7 +6876,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -6885,7 +6885,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -6897,74 +6897,74 @@ enum Operations {
     ///
     /// - Remark: HTTP `PUT /ui/components/{namespace}/{componentUID}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/{componentUID}/put(updateUIComponentInNamespace)`.
-    enum updateUIComponentInNamespace {
-        static let id: Swift.String = "updateUIComponentInNamespace"
-        struct Input: Sendable, Hashable {
+    public enum updateUIComponentInNamespace {
+        public static let id: Swift.String = "updateUIComponentInNamespace"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/path/namespace`.
-                var namespace: Swift.String
+                public var namespace: Swift.String
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/path/componentUID`.
-                var componentUID: Swift.String
+                public var componentUID: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - namespace:
                 ///   - componentUID:
-                init(namespace: Swift.String,
-                     componentUID: Swift.String) {
+                public init(namespace: Swift.String,
+                            componentUID: Swift.String) {
                     self.namespace = namespace
                     self.componentUID = componentUID
                 }
             }
 
-            var path: Operations.updateUIComponentInNamespace.Input.Path
+            public var path: Operations.updateUIComponentInNamespace.Input.Path
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.updateUIComponentInNamespace.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.updateUIComponentInNamespace.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.updateUIComponentInNamespace.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.updateUIComponentInNamespace.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.updateUIComponentInNamespace.Input.Headers
+            public var headers: Operations.updateUIComponentInNamespace.Input.Headers
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/requestBody`.
-            enum Body: Sendable, Hashable {
+            @frozen public enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/requestBody/content/application\/json`.
                 case json(Components.Schemas.RootUIComponent)
             }
 
-            var body: Operations.updateUIComponentInNamespace.Input.Body?
+            public var body: Operations.updateUIComponentInNamespace.Input.Body?
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             ///   - body:
-            init(path: Operations.updateUIComponentInNamespace.Input.Path,
-                 headers: Operations.updateUIComponentInNamespace.Input.Headers = .init(),
-                 body: Operations.updateUIComponentInNamespace.Input.Body? = nil) {
+            public init(path: Operations.updateUIComponentInNamespace.Input.Path,
+                        headers: Operations.updateUIComponentInNamespace.Input.Headers = .init(),
+                        body: Operations.updateUIComponentInNamespace.Input.Body? = nil) {
                 self.path = path
                 self.headers = headers
                 self.body = body
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/PUT/responses/200/content/application\/json`.
                     case json(Components.Schemas.RootUIComponent)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: Components.Schemas.RootUIComponent {
+                    public var json: Components.Schemas.RootUIComponent {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -6975,12 +6975,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.updateUIComponentInNamespace.Output.Ok.Body
+                public var body: Operations.updateUIComponentInNamespace.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.updateUIComponentInNamespace.Output.Ok.Body) {
+                public init(body: Operations.updateUIComponentInNamespace.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -6995,7 +6995,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.updateUIComponentInNamespace.Output.Ok {
+            public var ok: Operations.updateUIComponentInNamespace.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -7009,9 +7009,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Component not found
@@ -7024,7 +7024,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.updateUIComponentInNamespace.Output.NotFound {
+            public var notFound: Operations.updateUIComponentInNamespace.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -7044,10 +7044,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -7056,7 +7056,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -7065,7 +7065,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]
@@ -7077,41 +7077,41 @@ enum Operations {
     ///
     /// - Remark: HTTP `DELETE /ui/components/{namespace}/{componentUID}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/{componentUID}/delete(removeUIComponentFromNamespace)`.
-    enum removeUIComponentFromNamespace {
-        static let id: Swift.String = "removeUIComponentFromNamespace"
-        struct Input: Sendable, Hashable {
+    public enum removeUIComponentFromNamespace {
+        public static let id: Swift.String = "removeUIComponentFromNamespace"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/DELETE/path`.
-            struct Path: Sendable, Hashable {
+            public struct Path: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/DELETE/path/namespace`.
-                var namespace: Swift.String
+                public var namespace: Swift.String
                 /// - Remark: Generated from `#/paths/ui/components/{namespace}/{componentUID}/DELETE/path/componentUID`.
-                var componentUID: Swift.String
+                public var componentUID: Swift.String
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - namespace:
                 ///   - componentUID:
-                init(namespace: Swift.String,
-                     componentUID: Swift.String) {
+                public init(namespace: Swift.String,
+                            componentUID: Swift.String) {
                     self.namespace = namespace
                     self.componentUID = componentUID
                 }
             }
 
-            var path: Operations.removeUIComponentFromNamespace.Input.Path
+            public var path: Operations.removeUIComponentFromNamespace.Input.Path
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            init(path: Operations.removeUIComponentFromNamespace.Input.Path) {
+            public init(path: Operations.removeUIComponentFromNamespace.Input.Path) {
                 self.path = path
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// Creates a new `Ok`.
-                init() {}
+                public init() {}
             }
 
             /// OK
@@ -7124,7 +7124,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.removeUIComponentFromNamespace.Output.Ok {
+            public var ok: Operations.removeUIComponentFromNamespace.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -7138,9 +7138,9 @@ enum Operations {
                 }
             }
 
-            struct NotFound: Sendable, Hashable {
+            public struct NotFound: Sendable, Hashable {
                 /// Creates a new `NotFound`.
-                init() {}
+                public init() {}
             }
 
             /// Component not found
@@ -7153,7 +7153,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            var notFound: Operations.removeUIComponentFromNamespace.Output.NotFound {
+            public var notFound: Operations.removeUIComponentFromNamespace.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -7178,42 +7178,42 @@ enum Operations {
     ///
     /// - Remark: HTTP `GET /ui/tiles`.
     /// - Remark: Generated from `#/paths//ui/tiles/get(getUITiles)`.
-    enum getUITiles {
-        static let id: Swift.String = "getUITiles"
-        struct Input: Sendable, Hashable {
+    public enum getUITiles {
+        public static let id: Swift.String = "getUITiles"
+        public struct Input: Sendable, Hashable {
             /// - Remark: Generated from `#/paths/ui/tiles/GET/header`.
-            struct Headers: Sendable, Hashable {
-                var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUITiles.AcceptableContentType>]
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUITiles.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUITiles.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getUITiles.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
 
-            var headers: Operations.getUITiles.Input.Headers
+            public var headers: Operations.getUITiles.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - headers:
-            init(headers: Operations.getUITiles.Input.Headers = .init()) {
+            public init(headers: Operations.getUITiles.Input.Headers = .init()) {
                 self.headers = headers
             }
         }
 
-        enum Output: Sendable, Hashable {
-            struct Ok: Sendable, Hashable {
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/ui/tiles/GET/responses/200/content`.
-                enum Body: Sendable, Hashable {
+                @frozen public enum Body: Sendable, Hashable {
                     /// - Remark: Generated from `#/paths/ui/tiles/GET/responses/200/content/application\/json`.
                     case json([Components.Schemas.TileDTO])
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    var json: [Components.Schemas.TileDTO] {
+                    public var json: [Components.Schemas.TileDTO] {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -7224,12 +7224,12 @@ enum Operations {
                 }
 
                 /// Received HTTP response body
-                var body: Operations.getUITiles.Output.Ok.Body
+                public var body: Operations.getUITiles.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                init(body: Operations.getUITiles.Output.Ok.Body) {
+                public init(body: Operations.getUITiles.Output.Ok.Body) {
                     self.body = body
                 }
             }
@@ -7244,7 +7244,7 @@ enum Operations {
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            var ok: Operations.getUITiles.Output.Ok {
+            public var ok: Operations.getUITiles.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -7264,10 +7264,10 @@ enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
 
-        enum AcceptableContentType: AcceptableProtocol {
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
             case json
             case other(Swift.String)
-            init?(rawValue: Swift.String) {
+            public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "application/json":
                     self = .json
@@ -7276,7 +7276,7 @@ enum Operations {
                 }
             }
 
-            var rawValue: Swift.String {
+            public var rawValue: Swift.String {
                 switch self {
                 case let .other(string):
                     string
@@ -7285,7 +7285,7 @@ enum Operations {
                 }
             }
 
-            static var allCases: [Self] {
+            public static var allCases: [Self] {
                 [
                     .json
                 ]

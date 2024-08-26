@@ -22,7 +22,7 @@ import struct Foundation.URL
 #endif
 import HTTPTypes
 
-struct Client: APIProtocol {
+public struct Client: APIProtocol {
     /// The underlying HTTP client.
     private let client: UniversalClient
     /// Creates a new client.
@@ -33,10 +33,10 @@ struct Client: APIProtocol {
     ///   - configuration: A set of configuration values for the client.
     ///   - transport: A transport that performs HTTP operations.
     ///   - middlewares: A list of middlewares to call before the transport.
-    init(serverURL: Foundation.URL,
-         configuration: Configuration = .init(),
-         transport: any ClientTransport,
-         middlewares: [any ClientMiddleware] = []) {
+    public init(serverURL: Foundation.URL,
+                configuration: Configuration = .init(),
+                transport: any ClientTransport,
+                middlewares: [any ClientMiddleware] = []) {
         client = .init(
             serverURL: serverURL,
             configuration: configuration,
@@ -53,7 +53,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `PUT /items/{itemName}/members/{memberItemName}`.
     /// - Remark: Generated from `#/paths//items/{itemName}/members/{memberItemName}/put(addMemberToGroupItem)`.
-    func addMemberToGroupItem(_ input: Operations.addMemberToGroupItem.Input) async throws -> Operations.addMemberToGroupItem.Output {
+    public func addMemberToGroupItem(_ input: Operations.addMemberToGroupItem.Input) async throws -> Operations.addMemberToGroupItem.Output {
         try await client.send(
             input: input,
             forOperation: Operations.addMemberToGroupItem.id,
@@ -97,7 +97,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `DELETE /items/{itemName}/members/{memberItemName}`.
     /// - Remark: Generated from `#/paths//items/{itemName}/members/{memberItemName}/delete(removeMemberFromGroupItem)`.
-    func removeMemberFromGroupItem(_ input: Operations.removeMemberFromGroupItem.Input) async throws -> Operations.removeMemberFromGroupItem.Output {
+    public func removeMemberFromGroupItem(_ input: Operations.removeMemberFromGroupItem.Input) async throws -> Operations.removeMemberFromGroupItem.Output {
         try await client.send(
             input: input,
             forOperation: Operations.removeMemberFromGroupItem.id,
@@ -141,7 +141,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}/metadata/{namespace}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/metadata/{namespace}/put(addMetadataToItem)`.
-    func addMetadataToItem(_ input: Operations.addMetadataToItem.Input) async throws -> Operations.addMetadataToItem.Output {
+    public func addMetadataToItem(_ input: Operations.addMetadataToItem.Input) async throws -> Operations.addMetadataToItem.Output {
         try await client.send(
             input: input,
             forOperation: Operations.addMetadataToItem.id,
@@ -197,7 +197,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `DELETE /items/{itemname}/metadata/{namespace}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/metadata/{namespace}/delete(removeMetadataFromItem)`.
-    func removeMetadataFromItem(_ input: Operations.removeMetadataFromItem.Input) async throws -> Operations.removeMetadataFromItem.Output {
+    public func removeMetadataFromItem(_ input: Operations.removeMetadataFromItem.Input) async throws -> Operations.removeMetadataFromItem.Output {
         try await client.send(
             input: input,
             forOperation: Operations.removeMetadataFromItem.id,
@@ -241,7 +241,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}/tags/{tag}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/tags/{tag}/put(addTagToItem)`.
-    func addTagToItem(_ input: Operations.addTagToItem.Input) async throws -> Operations.addTagToItem.Output {
+    public func addTagToItem(_ input: Operations.addTagToItem.Input) async throws -> Operations.addTagToItem.Output {
         try await client.send(
             input: input,
             forOperation: Operations.addTagToItem.id,
@@ -285,7 +285,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `DELETE /items/{itemname}/tags/{tag}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/tags/{tag}/delete(removeTagFromItem)`.
-    func removeTagFromItem(_ input: Operations.removeTagFromItem.Input) async throws -> Operations.removeTagFromItem.Output {
+    public func removeTagFromItem(_ input: Operations.removeTagFromItem.Input) async throws -> Operations.removeTagFromItem.Output {
         try await client.send(
             input: input,
             forOperation: Operations.removeTagFromItem.id,
@@ -329,7 +329,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/get(getItemByName)`.
-    func getItemByName(_ input: Operations.getItemByName.Input) async throws -> Operations.getItemByName.Output {
+    public func getItemByName(_ input: Operations.getItemByName.Input) async throws -> Operations.getItemByName.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getItemByName.id,
@@ -413,7 +413,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `POST /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/post(sendItemCommand)`.
-    func sendItemCommand(_ input: Operations.sendItemCommand.Input) async throws -> Operations.sendItemCommand.Output {
+    public func sendItemCommand(_ input: Operations.sendItemCommand.Input) async throws -> Operations.sendItemCommand.Output {
         try await client.send(
             input: input,
             forOperation: Operations.sendItemCommand.id,
@@ -464,7 +464,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/put(addOrUpdateItemInRegistry)`.
-    func addOrUpdateItemInRegistry(_ input: Operations.addOrUpdateItemInRegistry.Input) async throws -> Operations.addOrUpdateItemInRegistry.Output {
+    public func addOrUpdateItemInRegistry(_ input: Operations.addOrUpdateItemInRegistry.Input) async throws -> Operations.addOrUpdateItemInRegistry.Output {
         try await client.send(
             input: input,
             forOperation: Operations.addOrUpdateItemInRegistry.id,
@@ -548,7 +548,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `DELETE /items/{itemname}`.
     /// - Remark: Generated from `#/paths//items/{itemname}/delete(removeItemFromRegistry)`.
-    func removeItemFromRegistry(_ input: Operations.removeItemFromRegistry.Input) async throws -> Operations.removeItemFromRegistry.Output {
+    public func removeItemFromRegistry(_ input: Operations.removeItemFromRegistry.Input) async throws -> Operations.removeItemFromRegistry.Output {
         try await client.send(
             input: input,
             forOperation: Operations.removeItemFromRegistry.id,
@@ -589,7 +589,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /items`.
     /// - Remark: Generated from `#/paths//items/get(getItems)`.
-    func getItems(_ input: Operations.getItems.Input) async throws -> Operations.getItems.Output {
+    public func getItems(_ input: Operations.getItems.Input) async throws -> Operations.getItems.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getItems.id,
@@ -697,7 +697,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `PUT /items`.
     /// - Remark: Generated from `#/paths//items/put(addOrUpdateItemsInRegistry)`.
-    func addOrUpdateItemsInRegistry(_ input: Operations.addOrUpdateItemsInRegistry.Input) async throws -> Operations.addOrUpdateItemsInRegistry.Output {
+    public func addOrUpdateItemsInRegistry(_ input: Operations.addOrUpdateItemsInRegistry.Input) async throws -> Operations.addOrUpdateItemsInRegistry.Output {
         try await client.send(
             input: input,
             forOperation: Operations.addOrUpdateItemsInRegistry.id,
@@ -768,7 +768,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /items/{itemname}/state`.
     /// - Remark: Generated from `#/paths//items/{itemname}/state/get(getItemState_1)`.
-    func getItemState_1(_ input: Operations.getItemState_1.Input) async throws -> Operations.getItemState_1.Output {
+    public func getItemState_1(_ input: Operations.getItemState_1.Input) async throws -> Operations.getItemState_1.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getItemState_1.id,
@@ -833,7 +833,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `PUT /items/{itemname}/state`.
     /// - Remark: Generated from `#/paths//items/{itemname}/state/put(updateItemState)`.
-    func updateItemState(_ input: Operations.updateItemState.Input) async throws -> Operations.updateItemState.Output {
+    public func updateItemState(_ input: Operations.updateItemState.Input) async throws -> Operations.updateItemState.Output {
         try await client.send(
             input: input,
             forOperation: Operations.updateItemState.id,
@@ -889,7 +889,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /items/{itemname}/metadata/namespaces`.
     /// - Remark: Generated from `#/paths//items/{itemname}/metadata/namespaces/get(getItemNamespaces)`.
-    func getItemNamespaces(_ input: Operations.getItemNamespaces.Input) async throws -> Operations.getItemNamespaces.Output {
+    public func getItemNamespaces(_ input: Operations.getItemNamespaces.Input) async throws -> Operations.getItemNamespaces.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getItemNamespaces.id,
@@ -959,7 +959,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /items/{itemName}/semantic/{semanticClass}`.
     /// - Remark: Generated from `#/paths//items/{itemName}/semantic/{semanticClass}/get(getSemanticItem)`.
-    func getSemanticItem(_ input: Operations.getSemanticItem.Input) async throws -> Operations.getSemanticItem.Output {
+    public func getSemanticItem(_ input: Operations.getSemanticItem.Input) async throws -> Operations.getSemanticItem.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getSemanticItem.id,
@@ -1006,7 +1006,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `POST /items/metadata/purge`.
     /// - Remark: Generated from `#/paths//items/metadata/purge/post(purgeDatabase)`.
-    func purgeDatabase(_ input: Operations.purgeDatabase.Input) async throws -> Operations.purgeDatabase.Output {
+    public func purgeDatabase(_ input: Operations.purgeDatabase.Input) async throws -> Operations.purgeDatabase.Output {
         try await client.send(
             input: input,
             forOperation: Operations.purgeDatabase.id,
@@ -1043,7 +1043,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `POST /sitemaps/events/subscribe`.
     /// - Remark: Generated from `#/paths//sitemaps/events/subscribe/post(createSitemapEventSubscription)`.
-    func createSitemapEventSubscription(_ input: Operations.createSitemapEventSubscription.Input) async throws -> Operations.createSitemapEventSubscription.Output {
+    public func createSitemapEventSubscription(_ input: Operations.createSitemapEventSubscription.Input) async throws -> Operations.createSitemapEventSubscription.Output {
         try await client.send(
             input: input,
             forOperation: Operations.createSitemapEventSubscription.id,
@@ -1108,7 +1108,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /sitemaps/{sitemapname}/{pageid}`.
     /// - Remark: Generated from `#/paths//sitemaps/{sitemapname}/{pageid}/get(pollDataForPage)`.
-    func pollDataForPage(_ input: Operations.pollDataForPage.Input) async throws -> Operations.pollDataForPage.Output {
+    public func pollDataForPage(_ input: Operations.pollDataForPage.Input) async throws -> Operations.pollDataForPage.Output {
         try await client.send(
             input: input,
             forOperation: Operations.pollDataForPage.id,
@@ -1200,7 +1200,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /sitemaps/{sitemapname}/*`.
     /// - Remark: Generated from `#/paths//sitemaps/{sitemapname}/*/get(pollDataForSitemap)`.
-    func pollDataForSitemap(_ input: Operations.pollDataForSitemap.Input) async throws -> Operations.pollDataForSitemap.Output {
+    public func pollDataForSitemap(_ input: Operations.pollDataForSitemap.Input) async throws -> Operations.pollDataForSitemap.Output {
         try await client.send(
             input: input,
             forOperation: Operations.pollDataForSitemap.id,
@@ -1291,7 +1291,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /sitemaps/{sitemapname}`.
     /// - Remark: Generated from `#/paths//sitemaps/{sitemapname}/get(getSitemapByName)`.
-    func getSitemapByName(_ input: Operations.getSitemapByName.Input) async throws -> Operations.getSitemapByName.Output {
+    public func getSitemapByName(_ input: Operations.getSitemapByName.Input) async throws -> Operations.getSitemapByName.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getSitemapByName.id,
@@ -1380,7 +1380,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /sitemaps/events/{subscriptionid}/*`.
     /// - Remark: Generated from `#/paths//sitemaps/events/{subscriptionid}/*/get(getSitemapEvents)`.
-    func getSitemapEvents(_ input: Operations.getSitemapEvents.Input) async throws -> Operations.getSitemapEvents.Output {
+    public func getSitemapEvents(_ input: Operations.getSitemapEvents.Input) async throws -> Operations.getSitemapEvents.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getSitemapEvents.id,
@@ -1430,7 +1430,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /sitemaps/events/{subscriptionid}`.
     /// - Remark: Generated from `#/paths//sitemaps/events/{subscriptionid}/get(getSitemapEvents_1)`.
-    func getSitemapEvents_1(_ input: Operations.getSitemapEvents_1.Input) async throws -> Operations.getSitemapEvents_1.Output {
+    public func getSitemapEvents_1(_ input: Operations.getSitemapEvents_1.Input) async throws -> Operations.getSitemapEvents_1.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getSitemapEvents_1.id,
@@ -1520,7 +1520,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /sitemaps`.
     /// - Remark: Generated from `#/paths//sitemaps/get(getSitemaps)`.
-    func getSitemaps(_ input: Operations.getSitemaps.Input) async throws -> Operations.getSitemaps.Output {
+    public func getSitemaps(_ input: Operations.getSitemaps.Input) async throws -> Operations.getSitemaps.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getSitemaps.id,
@@ -1581,7 +1581,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /ui/components/{namespace}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/get(getRegisteredUIComponentsInNamespace)`.
-    func getRegisteredUIComponentsInNamespace(_ input: Operations.getRegisteredUIComponentsInNamespace.Input) async throws -> Operations.getRegisteredUIComponentsInNamespace.Output {
+    public func getRegisteredUIComponentsInNamespace(_ input: Operations.getRegisteredUIComponentsInNamespace.Input) async throws -> Operations.getRegisteredUIComponentsInNamespace.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getRegisteredUIComponentsInNamespace.id,
@@ -1651,7 +1651,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `POST /ui/components/{namespace}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/post(addUIComponentToNamespace)`.
-    func addUIComponentToNamespace(_ input: Operations.addUIComponentToNamespace.Input) async throws -> Operations.addUIComponentToNamespace.Output {
+    public func addUIComponentToNamespace(_ input: Operations.addUIComponentToNamespace.Input) async throws -> Operations.addUIComponentToNamespace.Output {
         try await client.send(
             input: input,
             forOperation: Operations.addUIComponentToNamespace.id,
@@ -1724,7 +1724,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /ui/components/{namespace}/{componentUID}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/{componentUID}/get(getUIComponentInNamespace)`.
-    func getUIComponentInNamespace(_ input: Operations.getUIComponentInNamespace.Input) async throws -> Operations.getUIComponentInNamespace.Output {
+    public func getUIComponentInNamespace(_ input: Operations.getUIComponentInNamespace.Input) async throws -> Operations.getUIComponentInNamespace.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getUIComponentInNamespace.id,
@@ -1790,7 +1790,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `PUT /ui/components/{namespace}/{componentUID}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/{componentUID}/put(updateUIComponentInNamespace)`.
-    func updateUIComponentInNamespace(_ input: Operations.updateUIComponentInNamespace.Input) async throws -> Operations.updateUIComponentInNamespace.Output {
+    public func updateUIComponentInNamespace(_ input: Operations.updateUIComponentInNamespace.Input) async throws -> Operations.updateUIComponentInNamespace.Output {
         try await client.send(
             input: input,
             forOperation: Operations.updateUIComponentInNamespace.id,
@@ -1866,7 +1866,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `DELETE /ui/components/{namespace}/{componentUID}`.
     /// - Remark: Generated from `#/paths//ui/components/{namespace}/{componentUID}/delete(removeUIComponentFromNamespace)`.
-    func removeUIComponentFromNamespace(_ input: Operations.removeUIComponentFromNamespace.Input) async throws -> Operations.removeUIComponentFromNamespace.Output {
+    public func removeUIComponentFromNamespace(_ input: Operations.removeUIComponentFromNamespace.Input) async throws -> Operations.removeUIComponentFromNamespace.Output {
         try await client.send(
             input: input,
             forOperation: Operations.removeUIComponentFromNamespace.id,
@@ -1908,7 +1908,7 @@ struct Client: APIProtocol {
     ///
     /// - Remark: HTTP `GET /ui/tiles`.
     /// - Remark: Generated from `#/paths//ui/tiles/get(getUITiles)`.
-    func getUITiles(_ input: Operations.getUITiles.Input) async throws -> Operations.getUITiles.Output {
+    public func getUITiles(_ input: Operations.getUITiles.Input) async throws -> Operations.getUITiles.Output {
         try await client.send(
             input: input,
             forOperation: Operations.getUITiles.id,
