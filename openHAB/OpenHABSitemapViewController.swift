@@ -249,7 +249,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-
         updateUI()
     }
 
@@ -595,21 +594,25 @@ extension OpenHABSitemapViewController {
                 } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
                     cell = tableView.dequeueReusableCell(for: indexPath, cellType: SwitchUITableViewCell.self)
                 } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                    cell = tableView.dequeueReusableCell(for: indexPath, cellType: RollershutterUITableViewCell.self)
+                    cell = tableView.dequeueReusableCell(for: indexPath, cellType: RollershutterCell.self)
                 } else if !widget.mappingsOrItemOptions.isEmpty {
                     cell = tableView.dequeueReusableCell(for: indexPath, cellType: SegmentedUITableViewCell.self)
                 } else {
                     cell = tableView.dequeueReusableCell(for: indexPath, cellType: SwitchUITableViewCell.self)
                 }
             case .setpoint:
-                cell = tableView.dequeueReusableCell(for: indexPath, cellType: SetpointUITableViewCell.self)
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: SetpointCell.self)
             case .slider:
-                cell = tableView.dequeueReusableCell(for: indexPath, cellType: SliderUITableViewCell.self)
+                if widget.switchSupport {
+                    cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
+                } else {
+                    cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
+                }
             case .selection:
                 cell = tableView.dequeueReusableCell(for: indexPath, cellType: SelectionUITableViewCell.self)
             case .colorpicker:
-                cell = tableView.dequeueReusableCell(for: indexPath, cellType: ColorPickerUITableViewCell.self)
-                (cell as? ColorPickerUITableViewCell)?.delegate = self
+                cell = tableView.dequeueReusableCell(for: indexPath, cellType: ColorPickerCell.self)
+                (cell as? ColorPickerCell)?.delegate = self
             case .image, .chart:
                 cell = tableView.dequeueReusableCell(for: indexPath, cellType: NewImageUITableViewCell.self)
                 (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in

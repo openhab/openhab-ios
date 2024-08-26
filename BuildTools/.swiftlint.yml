@@ -29,6 +29,8 @@ excluded:
   - ../fastlane
   - ../OpenHABCore/.build
   - .build
+  - ../OpenHABCore/Sources/OpenHABCore/GeneratedSources/*
+  - ../OpenHABCore/swift-openapi-generator
 
 nesting:
     type_level: 2

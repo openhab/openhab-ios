@@ -155,7 +155,6 @@ public class NetworkConnection {
 
             commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
 
-            os_log("Timeout %{PUBLIC}@", log: .default, type: .info, commandRequest.timeoutInterval)
             let link = item.link
             os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command ?? "", link)
             os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
