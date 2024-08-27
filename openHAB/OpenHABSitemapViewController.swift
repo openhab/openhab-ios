@@ -580,6 +580,8 @@ extension OpenHABSitemapViewController: ColorPickerCellDelegate {
 
 extension OpenHABSitemapViewController {
     private func makeDataSource() -> UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget> {
+        // Code from cellForItemAt transplanted into cell provider closure
+
         UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>(tableView: tableView) { [weak self] (tableView: UITableView, indexPath: IndexPath, widget: OpenHABWidget) -> UITableViewCell? in
 
             let cell: UITableViewCell
@@ -695,7 +697,7 @@ extension OpenHABSitemapViewController {
     }
 
     /// - Tag: WiFiUpdate
-    func updateUI(animated: Bool = true) {
+    func updateUI(animated: Bool = false) {
         currentSnapshot = NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>()
         currentSnapshot.appendSections([.main])
         currentSnapshot.appendItems(relevantPage?.widgets ?? [], toSection: .main)
