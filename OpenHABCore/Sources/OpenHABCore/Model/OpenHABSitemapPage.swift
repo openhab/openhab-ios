@@ -9,17 +9,35 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Collections
 import Foundation
 import os.log
 
-public class OpenHABSitemapPage: NSObject {
+public class OpenHABSitemapPage: NSObject, ObservableObject {
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
-    public var widgets: [OpenHABWidget] = []
+    public var widgets = OrderedDictionary<String, OpenHABWidget>()
     public var pageId = ""
     public var title = ""
     public var link = ""
     public var leaf = false
     public var icon = ""
+
+    public init(pageId: String, title: String, link: String, leaf: Bool, widgets: OrderedDictionary<String, OpenHABWidget>, icon: String) {
+        super.init()
+        self.pageId = pageId
+        self.title = title
+        self.link = link
+        self.leaf = leaf
+
+        self.widgets = widgets
+
+        for (_, widget) in self.widgets {
+            widget.sendCommand = { [weak self] item, command in
+                self?.sendCommand(item, commandToSend: command)
+            }
+        }
+        self.icon = icon
+    }
 
     public init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget], icon: String) {
         super.init()
@@ -29,8 +47,12 @@ public class OpenHABSitemapPage: NSObject {
         self.leaf = leaf
         var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
-        self.widgets = tempWidgets
-        for widget in self.widgets {
+
+        self.widgets = OrderedDictionary(
+            uniqueKeysWithValues: tempWidgets.map { ($0.id, $0) }
+        )
+
+        for (_, widget) in self.widgets {
             widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)
             }
@@ -47,7 +69,7 @@ public class OpenHABSitemapPage: NSObject {
 }
 
 public extension OpenHABSitemapPage {
-    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
+    func filter(_ isIncluded: (String, OpenHABWidget) throws -> Bool) rethrows -> OpenHABSitemapPage {
         let filteredOpenHABSitemapPage = try OpenHABSitemapPage(
             pageId: pageId,
             title: title,

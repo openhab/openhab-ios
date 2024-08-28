@@ -63,7 +63,6 @@ struct OpenHABImageProcessor: ImageProcessor {
 
 class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
     var pageUrl = ""
-    private var selectedWidgetRow: Int = 0
     private var currentPageOperation: Alamofire.Request?
     private var commandOperation: Alamofire.Request?
     private var iconType: IconType = .png
@@ -177,7 +176,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             // Set self as root view controller
             appData?.sitemapViewController = self
             if currentPage != nil {
-                currentPage?.widgets = []
+                currentPage?.widgets = [:]
                 updateUI()
             }
             os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
@@ -293,10 +292,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             appData?.sitemapViewController?.pageUrl = ""
             navigationController?.popToRootViewController(animated: true)
         }
-    }
-
-    func relevantWidget(indexPath: IndexPath) -> OpenHABWidget? {
-        relevantPage?.widgets[safe: indexPath.row]
     }
 
     private func updateWidgetTableView() {
@@ -493,8 +488,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     func filterContentForSearchText(_ searchText: String?, scope: String = "All") {
         guard let searchText else { return }
 
-        filteredPage = currentPage?.filter {
-            $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
+        filteredPage = currentPage?.filter { (_, widget) in
+            widget.label.lowercased().contains(searchText.lowercased()) && widget.type != .frame
         }
         filteredPage?.sendCommand = { [weak self] item, command in
             self?.sendCommand(item, commandToSend: command)
@@ -547,10 +542,9 @@ extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
 
 extension OpenHABSitemapViewController: OpenHABSelectionTableViewControllerDelegate {
     // send command on selected selection widget mapping
-    func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
-        let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
-        sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
+    func didSelectWidgetMapping(_ selectedMappingIndex: Int, widget: OpenHABWidget) {
+        let selectedMapping: OpenHABWidgetMapping? = widget.mappingsOrItemOptions[selectedMappingIndex]
+        sendCommand(widget.item, commandToSend: selectedMapping?.command)
     }
 }
 
@@ -566,13 +560,14 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
 
 extension OpenHABSitemapViewController: ColorPickerCellDelegate {
     func didPressColorButton(_ cell: ColorPickerCell?) {
-        let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
-        if let cell {
-            let widget = relevantPage?.widgets[tableView.indexPath(for: cell)?.row ?? 0]
-            colorPickerViewController?.title = widget?.labelText
-            colorPickerViewController?.widget = widget
-        }
-        if let colorPickerViewController {
+        if let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController,
+           let cell,
+           let indexPath = tableView.indexPath(for: cell),
+
+           let widget = dataSource.itemIdentifier(for: indexPath) {
+            colorPickerViewController.title = widget.labelText
+            colorPickerViewController.widget = widget
+
             navigationController?.pushViewController(colorPickerViewController, animated: true)
         }
     }
@@ -683,14 +678,15 @@ extension OpenHABSitemapViewController {
             }
 
             // Check if this is not the last row in the widgets list
-            if indexPath.row < (self?.relevantPage?.widgets.count ?? 1) - 1 {
-                let nextWidget: OpenHABWidget? = self?.relevantPage?.widgets[indexPath.row + 1]
-                if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
-                    cell.separatorInset = UIEdgeInsets.zero
-                } else if !(widget.type == .frame) {
-                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
-                }
-            }
+            // TODO Switch to separator layout guide https://developer.apple.com/videos/play/wwdc2020/10026/
+//            if indexPath.row < (self?.relevantPage?.widgets.count ?? 1) - 1 {
+//                let nextWidget: OpenHABWidget? = self?.relevantPage?.widgets[indexPath.row + 1]
+//                if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
+//                    cell.separatorInset = UIEdgeInsets.zero
+//                } else if !(widget.type == .frame) {
+//                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+//                }
+//            }
 
             return cell
         }
@@ -700,7 +696,9 @@ extension OpenHABSitemapViewController {
     func updateUI(animated: Bool = false) {
         currentSnapshot = NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>()
         currentSnapshot.appendSections([.main])
-        currentSnapshot.appendItems(relevantPage?.widgets ?? [], toSection: .main)
+        if let relevantPage {
+            currentSnapshot.appendItems(Array(relevantPage.widgets.values), toSection: .main)
+        }
         dataSource.apply(currentSnapshot, animatingDifferences: animated)
     }
 }
@@ -713,14 +711,14 @@ extension OpenHABSitemapViewController: UITableViewDelegate { // }, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let widget: OpenHABWidget? = relevantPage?.widgets[indexPath.row]
-        switch widget?.type {
+        guard let widget = dataSource.itemIdentifier(for: indexPath) else { return 44.0 }
+        switch widget.type {
         case .frame:
-            return widget?.label.count ?? 0 > 0 ? 35.0 : 0
+            return !widget.label.isEmpty ? 35.0 : 0
         case .image, .chart, .video:
             return UITableView.automaticDimension
         case .webview, .mapview:
-            if let height = widget?.height {
+            if let height = widget.height {
                 // calculate webview/mapview height and return it. Limited to UIScreen.main.bounds.height
                 let heightValue = height * 44
                 os_log("Webview/Mapview height would be %g", log: .viewCycle, type: .info, heightValue)
@@ -744,30 +742,28 @@ extension OpenHABSitemapViewController: UITableViewDelegate { // }, UITableViewD
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-        if widget?.linkedPage != nil {
-            if let link = widget?.linkedPage?.link {
+        guard let widget = dataSource.itemIdentifier(for: indexPath) else { return }
+
+        if widget.linkedPage != nil {
+            if let link = widget.linkedPage?.link {
                 os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
             }
-            selectedWidgetRow = indexPath.row
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-            newViewController.title = widget?.linkedPage?.title.components(separatedBy: "[")[0]
-            newViewController.pageUrl = widget?.linkedPage?.link ?? ""
+            newViewController.title = widget.linkedPage?.title.components(separatedBy: "[")[0]
+            newViewController.pageUrl = widget.linkedPage?.link ?? ""
             newViewController.openHABRootUrl = openHABRootUrl
             navigationController?.pushViewController(newViewController, animated: true)
-        } else if widget?.type == .selection {
+        } else if widget.type == .selection {
             os_log("Selected selection widget", log: .viewCycle, type: .info)
 
-            selectedWidgetRow = indexPath.row
             let layout = UICollectionViewCompositionalLayout.list(
                 using: UICollectionLayoutListConfiguration(appearance: .insetGrouped)
             )
             let selectionViewController = OpenHABSelectionCollectionViewController(collectionViewLayout: layout)
-            let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-            selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
+            selectionViewController.title = widget.labelText
+            selectionViewController.mappings = widget.mappingsOrItemOptions
             selectionViewController.delegate = self
-            selectionViewController.selectionItem = selectedWidget?.item
+            selectionViewController.selectionWidget = widget
             show(selectionViewController, sender: self)
         }
         if let index = tableView.indexPathForSelectedRow {

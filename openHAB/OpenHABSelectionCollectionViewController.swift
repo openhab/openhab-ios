@@ -15,7 +15,7 @@ import UIKit
 
 // swiftlint:disable:next type_name
 public protocol OpenHABSelectionTableViewControllerDelegate: NSObjectProtocol {
-    func didSelectWidgetMapping(_ selectedMapping: Int)
+    func didSelectWidgetMapping(_ selectedMapping: Int, widget: OpenHABWidget)
 }
 
 class OpenHABSelectionCollectionViewController: UICollectionViewController {
@@ -25,7 +25,7 @@ class OpenHABSelectionCollectionViewController: UICollectionViewController {
 
     var mappings: [OpenHABWidgetMapping] = []
     weak var delegate: OpenHABSelectionTableViewControllerDelegate?
-    var selectionItem: OpenHABItem?
+    var selectionWidget: OpenHABWidget?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,8 +38,8 @@ class OpenHABSelectionCollectionViewController: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         os_log("Selected mapping %d", log: .viewCycle, type: .info, indexPath.row)
-
-        delegate?.didSelectWidgetMapping(indexPath.row)
+        guard let selectionWidget else { fatalError("Not known selectionItem") }
+        delegate?.didSelectWidgetMapping(indexPath.row, widget: selectionWidget)
         navigationController?.popViewController(animated: true)
     }
 }
@@ -60,7 +60,7 @@ private extension OpenHABSelectionCollectionViewController {
 
             cell.contentConfiguration = content
 
-            if self.selectionItem?.state == mapping.command {
+            if self.selectionWidget?.item?.state == mapping.command {
                 os_log("This item is selected", log: .viewCycle, type: .info)
                 cell.accessories = [.checkmark()]
             } else {
