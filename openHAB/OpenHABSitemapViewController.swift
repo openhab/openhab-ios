@@ -678,7 +678,7 @@ extension OpenHABSitemapViewController {
             }
 
             // Check if this is not the last row in the widgets list
-            // TODO Switch to separator layout guide https://developer.apple.com/videos/play/wwdc2020/10026/
+            // TODO: Switch to separator layout guide https://developer.apple.com/videos/play/wwdc2020/10026/
 //            if indexPath.row < (self?.relevantPage?.widgets.count ?? 1) - 1 {
 //                let nextWidget: OpenHABWidget? = self?.relevantPage?.widgets[indexPath.row + 1]
 //                if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
