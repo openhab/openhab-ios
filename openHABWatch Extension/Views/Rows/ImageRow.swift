@@ -26,7 +26,7 @@ struct ImageRow: View {
                 os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, kingfisherError.localizedDescription)
             }
             .placeholder {
-                Image(systemSymbol: .arrow2CirclepathCircle)
+                Image(systemSymbol: .arrowTriangle2CirclepathCircle)
                     .font(.callout)
                     .opacity(0.3)
             }

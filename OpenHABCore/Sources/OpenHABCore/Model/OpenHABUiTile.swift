@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABUiTile: Decodable {
+public class OpenHABUiTile: Decodable, Hashable {
     public var name = ""
     public var url = ""
     public var imageUrl = ""
@@ -20,6 +20,14 @@ public class OpenHABUiTile: Decodable {
         self.name = name
         self.url = url
         self.imageUrl = imageUrl
+    }
+
+    public static func == (lhs: OpenHABUiTile, rhs: OpenHABUiTile) -> Bool {
+        lhs.name == rhs.name
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
     }
 }
 

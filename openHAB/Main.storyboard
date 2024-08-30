@@ -608,7 +608,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="N7h-KT-EtL"/>
                     <connections>
-                        <outlet property="widgetTableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
+                        <outlet property="tableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -1512,35 +1512,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="o8x-QB-mZ6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2753" y="1654"/>
-        </scene>
-        <!--OpenHAB Selection Table View Controller-->
-        <scene sceneID="0ai-k8-BoH">
-            <objects>
-                <tableViewController storyboardIdentifier="OpenHABSelectionTableViewController" id="ph5-ka-6sJ" customClass="OpenHABSelectionTableViewController" customModule="openHAB" sceneMemberID="viewController">
-                    <tableView key="view" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="m37-LD-lvF">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SelectionCell" id="gQe-g6-ibM">
-                                <rect key="frame" x="0.0" y="50" width="375" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="gQe-g6-ibM" id="uG8-D3-W03">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="ph5-ka-6sJ" id="xA2-8E-QG2"/>
-                            <outlet property="delegate" destination="ph5-ka-6sJ" id="ADj-0B-dZE"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" id="dBD-6t-7Di"/>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="umd-R3-6kf" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1975" y="1655"/>
         </scene>
         <!--Legal-->
         <scene sceneID="ftz-wU-zmi">
