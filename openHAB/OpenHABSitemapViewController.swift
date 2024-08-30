@@ -111,8 +111,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         search.isActive && !searchBarIsEmpty
     }
 
-    var dataSource: UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>! = nil
-    var currentSnapshot: NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>! = nil
+    var dataSource: UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>!
+    var currentSnapshot: NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>!
 
     @IBOutlet private var tableView: UITableView!
 
@@ -334,11 +334,10 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 if !NetworkConnection.atmosphereTrackingId.isEmpty {
                     os_log("Found X-Atmosphere-tracking-id: %{PUBLIC}@", log: .remoteAccess, type: .info, NetworkConnection.atmosphereTrackingId)
                 }
-                var openHABSitemapPage: OpenHABSitemapPage?
                 do {
                     // Self-executing closure
                     // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                    openHABSitemapPage = try {
+                    currentPage = try {
                         let sitemapPageCodingData = try data.decoded(as: OpenHABSitemapPage.CodingData.self)
                         return sitemapPageCodingData.openHABSitemapPage
                     }()
@@ -346,7 +345,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                 }
 
-                currentPage = openHABSitemapPage
                 if isFiltering {
                     filterContentForSearchText(search.searchBar.text)
                 }
@@ -563,8 +561,9 @@ extension OpenHABSitemapViewController: ColorPickerCellDelegate {
         if let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController,
            let cell,
            let indexPath = tableView.indexPath(for: cell),
-
            let widget = dataSource.itemIdentifier(for: indexPath) {
+//           let widgetId = dataSource.itemIdentifier(for: indexPath),
+//           let widget = relevantPage?.widgets[widgetId] {
             colorPickerViewController.title = widget.labelText
             colorPickerViewController.widget = widget
 
@@ -577,10 +576,10 @@ extension OpenHABSitemapViewController {
     private func makeDataSource() -> UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget> {
         // Code from cellForItemAt transplanted into cell provider closure
 
-        UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>(tableView: tableView) { [weak self] (tableView: UITableView, indexPath: IndexPath, widget: OpenHABWidget) -> UITableViewCell? in
+        UITableViewDiffableDataSource<ViewControllerSection, OpenHABWidget>(tableView: tableView) { [unowned self] (tableView: UITableView, indexPath: IndexPath, widget: OpenHABWidget) -> UITableViewCell? in
 
             let cell: UITableViewCell
-
+//            guard let widget = self?.relevantPage?.widgets[widgetId] else { return nil }
             switch widget.type {
             case .frame:
                 cell = tableView.dequeueReusableCell(for: indexPath, cellType: FrameUITableViewCell.self)
@@ -631,17 +630,17 @@ extension OpenHABSitemapViewController {
             }
 
             var iconColor = widget.iconColor
-            if iconColor.isEmpty, self?.traitCollection.userInterfaceStyle == .dark {
+            if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
                 iconColor = "white"
             }
             // No icon is needed for image, video, frame and web widgets
             if !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
                 if let urlc = Endpoint.icon(
-                    rootUrl: self?.openHABRootUrl ?? "",
-                    version: self?.appData?.openHABVersion ?? 2,
+                    rootUrl: openHABRootUrl ?? "",
+                    version: appData?.openHABVersion ?? 2,
                     icon: widget.icon,
                     state: widget.iconState(),
-                    iconType: self?.iconType ?? .svg,
+                    iconType: iconType ?? .svg,
                     iconColor: iconColor
                 ).url {
                     var imageRequest = URLRequest(url: urlc)
@@ -679,14 +678,16 @@ extension OpenHABSitemapViewController {
 
             // Check if this is not the last row in the widgets list
             // TODO: Switch to separator layout guide https://developer.apple.com/videos/play/wwdc2020/10026/
-//            if indexPath.row < (self?.relevantPage?.widgets.count ?? 1) - 1 {
-//                let nextWidget: OpenHABWidget? = self?.relevantPage?.widgets[indexPath.row + 1]
-//                if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
-//                    cell.separatorInset = UIEdgeInsets.zero
-//                } else if !(widget.type == .frame) {
-//                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
-//                }
-//            }
+            if indexPath.row < (relevantPage?.widgets.count ?? 1) - 1 {
+                let nextRow = indexPath.index(after: indexPath.row)
+                let nextIndexPath = IndexPath(row: nextRow, section: indexPath.section)
+                let nextWidget = dataSource.itemIdentifier(for: nextIndexPath)
+                if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
+                    cell.separatorInset = UIEdgeInsets.zero
+                } else if !(widget.type == .frame) {
+                    cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+                }
+            }
 
             return cell
         }
@@ -694,10 +695,11 @@ extension OpenHABSitemapViewController {
 
     /// - Tag: WiFiUpdate
     func updateUI(animated: Bool = false) {
-        currentSnapshot = NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>()
+        currentSnapshot = NSDiffableDataSourceSnapshot<ViewControllerSection, OpenHABWidget>() // Changed
         currentSnapshot.appendSections([.main])
         if let relevantPage {
             currentSnapshot.appendItems(Array(relevantPage.widgets.values), toSection: .main)
+//            currentSnapshot.appendItems(relevantPage.widgets.map(\.value.widgetId), toSection: .main)
         }
         dataSource.apply(currentSnapshot, animatingDifferences: animated)
     }
@@ -712,6 +714,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate { // }, UITableViewD
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         guard let widget = dataSource.itemIdentifier(for: indexPath) else { return 44.0 }
+
+//        guard let widgetId = dataSource.itemIdentifier(for: indexPath), let widget = relevantPage?.widgets[widgetId] else { return 44.0 }
+
         switch widget.type {
         case .frame:
             return !widget.label.isEmpty ? 35.0 : 0
@@ -743,6 +748,8 @@ extension OpenHABSitemapViewController: UITableViewDelegate { // }, UITableViewD
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let widget = dataSource.itemIdentifier(for: indexPath) else { return }
+
+        // guard let widgetId = dataSource.itemIdentifier(for: indexPath), let widget = relevantPage?.widgets[widgetId] else { return }
 
         if widget.linkedPage != nil {
             if let link = widget.linkedPage?.link {

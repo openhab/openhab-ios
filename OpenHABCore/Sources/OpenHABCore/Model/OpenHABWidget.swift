@@ -48,7 +48,7 @@ protocol Widget: AnyObject {
     func flatten(_: [ChildWidget])
 }
 
-public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
+public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     public enum WidgetType: String {
         case chart = "Chart"
         case colorpicker = "Colorpicker"
@@ -86,7 +86,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var labelcolor = ""
     public var valuecolor = ""
     public var service = ""
-    public var state = ""
+    @Published public var state = ""
     public var text = ""
     public var legend: Bool?
     public var encoding = ""

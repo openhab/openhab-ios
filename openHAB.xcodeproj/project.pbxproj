@@ -84,6 +84,7 @@
 		DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA077649234683BC0086C685 /* SwitchRow.swift */; };
 		DA0776F0234788010086C685 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0776EF234788010086C685 /* UserData.swift */; };
 		DA0F37D023D4ACC7007EAB48 /* SliderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */; };
+		DA11B2482C8125E8004D96C9 /* FrameCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA11B2472C8125E8004D96C9 /* FrameCellView.swift */; };
 		DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
@@ -339,6 +340,7 @@
 		DA077649234683BC0086C685 /* SwitchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchRow.swift; sourceTree = "<group>"; };
 		DA0776EF234788010086C685 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderRow.swift; sourceTree = "<group>"; };
+		DA11B2472C8125E8004D96C9 /* FrameCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameCellView.swift; sourceTree = "<group>"; };
 		DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABDataObject.swift; sourceTree = "<group>"; };
 		DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABGeneralTests.swift; sourceTree = "<group>"; };
 		DA1C2E4B230DC28F00FACFB0 /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
@@ -897,6 +899,7 @@
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 				DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */,
 				DA21EAE12339621C001AB415 /* Throttler.swift */,
+				DA11B2472C8125E8004D96C9 /* FrameCellView.swift */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -1478,6 +1481,7 @@
 				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */,
+				DA11B2482C8125E8004D96C9 /* FrameCellView.swift in Sources */,
 				DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */,
 				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
 				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */,
