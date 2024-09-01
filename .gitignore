@@ -17,3 +17,4 @@ openHAB.ipa
 build/
 BuildTools/.build
 OpenHABCore/Package.resolved
+OpenHABCore/swift-openapi-generator/

@@ -133,7 +133,7 @@ class OpenHABSettingsViewController: UITableViewController, UITextFieldDelegate 
     @objc
     private func crashReportingDummyPressed(_ sender: Any?) {
         if sendCrashReportsSwitch.isOn {
-            sendCrashReportsSwitch.setOn(!sendCrashReportsSwitch.isOn, animated: true)
+            sendCrashReportsSwitch.setOn(false, animated: true)
             Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
         } else {
             let alertController = UIAlertController(title: NSLocalizedString("crash_reporting", comment: ""), message: NSLocalizedString("crash_reporting_info", comment: ""), preferredStyle: .actionSheet)

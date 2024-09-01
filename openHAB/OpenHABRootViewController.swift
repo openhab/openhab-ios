@@ -15,6 +15,7 @@ import OpenHABCore
 import os.log
 import SafariServices
 import SideMenu
+import SwiftUI
 import UIKit
 
 enum TargetController {
@@ -398,9 +399,13 @@ extension OpenHABRootViewController: ModalHandler {
         case .sitemap:
             switchView(target: to)
         case .settings:
-            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
-                navigationController?.pushViewController(newViewController, animated: true)
-            }
+//            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
+//                navigationController?.pushViewController(newViewController, animated: true)
+//            }
+            // let hostingController = SettingsView().embeddedInHostingController()
+            let hostingController = UIHostingController(rootView: SettingsView())
+
+            navigationController?.pushViewController(hostingController, animated: true)
         case .notifications:
             if navigationController?.visibleViewController is OpenHABNotificationsViewController {
                 os_log("Notifications are already open", log: .notifications, type: .info)
