@@ -79,7 +79,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private var filteredPage: OpenHABSitemapPage?
     private var serverProperties: OpenHABServerProperties?
     private let search = UISearchController(searchResultsController: nil)
-    private var webViewController: OpenHABWebViewController?
     private var isUserInteracting = false
     private var isWaitingToReload = false
 

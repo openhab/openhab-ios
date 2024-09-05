@@ -186,7 +186,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
             cell.customImageView.image = UIImage(named: "openHABIcon")
             if let currentView = appData?.currentView {
                 // if we already are on the webview, pressing this again will force a refresh
-                if currentView == .webview {
+                if case .webview = currentView {
                     cell.accessoryView = UIImageView(image: UIImage(named: "arrow.triangle.2.circlepath"))
                 }
             }
@@ -287,7 +287,7 @@ class OpenHABDrawerTableViewController: UITableViewController {
                 appData?.sitemapViewController?.pageUrl = ""
                 dismiss(animated: true) {
                     os_log("self delegate %d", log: .viewCycle, type: .info, self.delegate != nil)
-                    self.delegate?.modalDismissed(to: .sitemap)
+                    self.delegate?.modalDismissed(to: .sitemap(""))
                 }
             }
         case 3:

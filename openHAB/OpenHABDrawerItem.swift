@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import SFSafeSymbols
 
 enum OpenHABDrawerItem {
     case settings
@@ -32,6 +33,13 @@ enum OpenHABDrawerItem {
             OpenHABDrawerItem.notifications
         default:
             OpenHABDrawerItem.settings
+        }
+    }
+
+    var icon: SFSymbol {
+        switch self {
+        case .notifications: .bell
+        case .settings: .gear
         }
     }
 }
