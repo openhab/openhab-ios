@@ -16,6 +16,31 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
+func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
+    var sitemaps = [OpenHABSitemap]()
+
+    if let response {
+        do {
+            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
+            let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
+            for sitemapCodingDatum in sitemapsCodingData {
+                os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
+                sitemaps.append(sitemapCodingDatum.openHABSitemap)
+            }
+        } catch {
+            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+        }
+    }
+
+    return sitemaps
+}
+
+struct UiTile: Decodable {
+    var name: String
+    var url: String
+    var imageUrl: String
+}
+
 struct DrawerView: View {
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
@@ -88,7 +113,10 @@ struct DrawerView: View {
             Section(header: Text("System")) {
                 HStack {
                     Image(systemSymbol: .gear)
-                    Text("Settings")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: openHABIconwidth)
+                    Text(LocalizedStringKey("settings"))
                 }
                 .onTapGesture {
                     dismiss()
@@ -100,7 +128,10 @@ struct DrawerView: View {
                 if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
                     HStack {
                         Image(systemSymbol: .bell)
-                        Text("Notifications")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: openHABIconwidth)
+                        Text(LocalizedStringKey("notifications"))
                     }
                     .onTapGesture {
                         dismiss()

@@ -15,31 +15,6 @@ import SafariServices
 import SFSafeSymbols
 import UIKit
 
-func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
-    var sitemaps = [OpenHABSitemap]()
-
-    if let response {
-        do {
-            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-            let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
-            for sitemapCodingDatum in sitemapsCodingData {
-                os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-                sitemaps.append(sitemapCodingDatum.openHABSitemap)
-            }
-        } catch {
-            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-        }
-    }
-
-    return sitemaps
-}
-
-struct UiTile: Decodable {
-    var name: String
-    var url: String
-    var imageUrl: String
-}
-
 class OpenHABDrawerTableViewController: UITableViewController {
     static let tableViewCellIdentifier = "DrawerCell"
 

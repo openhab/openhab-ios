@@ -293,6 +293,7 @@ struct SettingsView: View {
                 }
             }
         }
+        .formStyle(.grouped)
         .navigationBarBackButtonHidden(true)
         .navigationBarTitle("Settings")
         .toolbar {

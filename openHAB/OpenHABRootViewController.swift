@@ -51,7 +51,6 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
-
     var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
     }

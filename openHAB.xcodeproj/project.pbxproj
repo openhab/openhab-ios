@@ -104,6 +104,8 @@
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
 		DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */; };
 		DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */; };
+		DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */; };
+		DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */; };
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA7649DE23FC81A20085CE46 /* Unwrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7649DD23FC81A20085CE46 /* Unwrap.swift */; };
@@ -396,6 +398,8 @@
 		DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesHostingController.swift; sourceTree = "<group>"; };
 		DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerView.swift; sourceTree = "<group>"; };
 		DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
+		DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
 		DA7224D123828D3300712D20 /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
 		DA72E1B0236DE9F200B8EF3A /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = "openHABWatch Extension/app/AppState.swift"; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppMessageService.swift; path = "openHABWatch Extension/external/AppMessageService.swift"; sourceTree = "<group>"; };
@@ -778,6 +782,16 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		DA6B2EF32C89D2F200DF77CF /* Obsolete */ = {
+			isa = PBXGroup;
+			children = (
+				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */,
+				A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */,
+				DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */,
+			);
+			name = Obsolete;
+			sourceTree = "<group>";
+		};
 		DAE238252806E5C800196467 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
@@ -832,14 +846,14 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
-		DF4A02291CF3157B006C3456 /* Drawer */ = {
+		DF4A02291CF3157B006C3456 /* Drawer (obsolete) */ = {
 			isa = PBXGroup;
 			children = (
 				DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */,
 				DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift */,
 				DF4A022D1CF315D3006C3456 /* Widgets */,
 			);
-			name = Drawer;
+			name = "Drawer (obsolete)";
 			sourceTree = "<group>";
 		};
 		DF4A022D1CF315D3006C3456 /* Widgets */ = {
@@ -853,21 +867,20 @@
 		DF4B83FD18857FA100F34902 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				DF4A02291CF3157B006C3456 /* Drawer (obsolete) */,
+				DA6B2EF32C89D2F200DF77CF /* Obsolete */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
 				653B54BF285C0AC700298ECD /* OpenHABRootViewController.swift */,
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABSitemapViewController.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
-				DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */,
-				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */,
-				A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */,
+				DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */,
 				DA242C612C83588600AFB10D /* SettingsView.swift */,
 				DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */,
 				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
 				DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */,
 				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
 				DF4B84101886DA9900F34902 /* Widgets */,
-				DF4A02291CF3157B006C3456 /* Drawer */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
 			);
 			name = UI;
@@ -906,6 +919,7 @@
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 				DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */,
 				DA21EAE12339621C001AB415 /* Throttler.swift */,
+				DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -965,8 +979,8 @@
 				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
 				DFB2623A18830A3600D3244D /* AppDelegate.swift */,
 				DFDEE3FE1883228C008B26AC /* Models */,
-				DF4B83FD18857FA100F34902 /* UI */,
 				DF4B84051885AD4600F34902 /* Images */,
+				DF4B83FD18857FA100F34902 /* UI */,
 				DFDEE3FF18832293008B26AC /* Util */,
 				1224F78B228A89E300750965 /* Watch */,
 				DFB2623118830A3600D3244D /* Supporting Files */,
@@ -1483,8 +1497,10 @@
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
+				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
+				DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */,
 				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,

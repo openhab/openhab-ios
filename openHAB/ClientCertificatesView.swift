@@ -23,7 +23,7 @@ struct ClientCertificatesView: View {
                 indices.forEach { viewModel.deleteCertificate(at: $0) }
             }
         }
-        .navigationTitle(Text(NSLocalizedString("client_certificates", comment: "")))
+        .navigationTitle(Text(LocalizedStringKey("client_certificates")))
         .onAppear {
             viewModel.loadCertificates()
         }
