@@ -1743,7 +1743,7 @@
 				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1757,7 +1757,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
@@ -1786,7 +1786,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
@@ -1800,7 +1800,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
@@ -1827,7 +1827,7 @@
 				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1846,7 +1846,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.NotificationService;
@@ -1874,7 +1874,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
@@ -1893,7 +1893,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.NotificationService;
@@ -1920,7 +1920,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1932,7 +1932,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.uitests;
@@ -1967,7 +1967,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1979,7 +1979,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.uitests;
@@ -2013,7 +2013,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_ASSET_PATHS = "\"openHABWatch/Preview Content\"";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
@@ -2035,7 +2035,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 3.0.3;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watch;
@@ -2070,7 +2070,7 @@
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"openHABWatch/Preview Content\"";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
@@ -2092,7 +2092,8 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 3.0.3;
+				
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watch;
@@ -2125,7 +2126,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2137,7 +2138,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
@@ -2169,7 +2170,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2181,7 +2182,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.reg-labs.openHABTestsSwift";
@@ -2475,7 +2476,7 @@
 				CODE_SIGN_ENTITLEMENTS = openHAB/openHAB.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
@@ -2492,7 +2493,7 @@
 					"@loader_path/../../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG -Xfrontend -warn-long-expression-type-checking=200 -Xfrontend -warn-long-function-bodies=200";
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2521,7 +2522,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2539,7 +2540,7 @@
 					"@loader_path/../../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 3.0.5;
+				MARKETING_VERSION = 3.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
