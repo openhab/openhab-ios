@@ -143,7 +143,19 @@ public extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
 
-        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
+        return OpenHABItem(
+            name: name,
+            type: type,
+            state: state,
+            link: link,
+            label: label,
+            groupType: groupType,
+            stateDescription: stateDescription?.openHABStateDescription,
+            commandDescription: commandDescription?.openHABCommandDescription,
+            members: mappedMembers,
+            category: category,
+            options: options
+        )
     }
 }
 

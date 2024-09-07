@@ -1175,6 +1175,7 @@
                                                 </label>
                                             </subviews>
                                             <constraints>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="EsS-lC-iXU" secondAttribute="trailing" id="664-RV-UfZ"/>
                                                 <constraint firstItem="EsS-lC-iXU" firstAttribute="centerY" secondItem="7Uf-fl-adr" secondAttribute="centerY" id="PcY-qR-Osq"/>
                                                 <constraint firstItem="EsS-lC-iXU" firstAttribute="leading" secondItem="7Uf-fl-adr" secondAttribute="leadingMargin" constant="12" id="xgs-ga-gNW"/>
                                             </constraints>
@@ -1244,12 +1245,43 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="IpI-uV-VcH">
+                                        <rect key="frame" x="0.0" y="947.33333015441895" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="IpI-uV-VcH" id="HaM-aV-wZS">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Watch Sitemap" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F6d-sW-TTM">
+                                                    <rect key="frame" x="31.999999999999993" y="11.666666666666664" width="115.33333333333331" height="21"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                                    <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizationKey" value="WatchSitemap"/>
+                                                    </userDefinedRuntimeAttributes>
+                                                </label>
+                                                <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" horizontalCompressionResistancePriority="749" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="watch" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Wod-8q-XfR">
+                                                    <rect key="frame" x="311" y="14" width="34" height="16"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
+                                                    <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no"/>
+                                                </textField>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="Wod-8q-XfR" firstAttribute="centerY" secondItem="HaM-aV-wZS" secondAttribute="centerY" id="5O3-ad-8xk"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="Wod-8q-XfR" secondAttribute="trailing" constant="10" id="CCZ-lI-o8f"/>
+                                                <constraint firstItem="F6d-sW-TTM" firstAttribute="leading" secondItem="HaM-aV-wZS" secondAttribute="leadingMargin" constant="12" id="TUU-ZW-wQ3"/>
+                                                <constraint firstItem="Wod-8q-XfR" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="F6d-sW-TTM" secondAttribute="trailing" constant="20" id="li6-Sj-MHe"/>
+                                                <constraint firstItem="F6d-sW-TTM" firstAttribute="centerY" secondItem="HaM-aV-wZS" secondAttribute="centerY" id="mnv-KS-3Gg"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                             <tableViewSection headerTitle="About" id="GzA-1S-Jr6">
                                 <cells>
+
                                     <tableViewCell userInteractionEnabled="NO" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="K1V-oh-QdT">
-                                        <rect key="frame" x="0.0" y="995.33333015441895" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="1083.3333301544189" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="K1V-oh-QdT" id="Tqr-A3-HHs">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -1276,6 +1308,7 @@
                                                 <constraint firstAttribute="bottomMargin" secondItem="Qfh-lz-UXm" secondAttribute="bottom" constant="1" id="fn0-xK-s5a"/>
                                                 <constraint firstAttribute="trailing" secondItem="1gb-3M-iPN" secondAttribute="trailing" constant="20" id="h6K-rx-qCo"/>
                                                 <constraint firstItem="Qfh-lz-UXm" firstAttribute="leading" secondItem="Tqr-A3-HHs" secondAttribute="leadingMargin" constant="12" id="mws-cm-0mM"/>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Qfh-lz-UXm" secondAttribute="trailing" constant="10" id="v4p-cx-dml"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -1306,10 +1339,10 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell tag="888" contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="gOB-5d-9fY">
-                                        <rect key="frame" x="0.0" y="1083.3333301544189" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="1127.3333301544189" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="gOB-5d-9fY" id="9lh-Vk-icE">
-                                            <rect key="frame" x="0.0" y="0.0" width="356.66666666666669" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="344.66666666666669" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Privacy Policy" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vcs-uN-ETx">
@@ -1352,6 +1385,7 @@
                         <outlet property="sendCrashReportsDummy" destination="Hwl-Ux-Na9" id="lEi-hM-5GB"/>
                         <outlet property="sendCrashReportsSwitch" destination="qS5-yP-H2i" id="ePn-02-tM8"/>
                         <outlet property="settingsTableView" destination="Gpo-Jj-aMP" id="w5C-jq-jO6"/>
+                        <outlet property="sitemapWatchTextField" destination="Wod-8q-XfR" id="3I5-Xb-ake"/>
                         <outlet property="sortSitemapsBy" destination="XGP-Fi-vHF" id="F0q-Wu-vYY"/>
                         <outlet property="useCurrentMainUIPathButton" destination="qAE-lF-IwW" id="Ekq-qw-TOV"/>
                         <outlet property="usernameTextField" destination="7GO-er-lvr" id="nLw-7S-7YN"/>
@@ -1361,7 +1395,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YKX-NL-XyS" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="VQn-En-nLm" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="4230" y="32"/>
+            <point key="canvasLocation" x="4229.6000000000004" y="31.773399014778327"/>
         </scene>
         <!--OpenHAB Notifications View Controller-->
         <scene sceneID="rzB-s5-QOg">
@@ -1690,7 +1724,7 @@
             <color white="1" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
