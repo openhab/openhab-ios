@@ -165,35 +165,28 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
             if let state = item.state {
-                do {
-                    // Extract MIME type and base64 string
-                    let pattern = "^data:(.*?);base64,(.*)$"
-                    let regex = try NSRegularExpression(pattern: pattern, options: [])
-                    if let match = regex.firstMatch(in: state, options: [], range: NSRange(location: 0, length: state.utf16.count)) {
-                        let mimeTypeRange = Range(match.range(at: 1), in: state)
-                        let base64Range = Range(match.range(at: 2), in: state)
-                        if let mimeTypeRange, let base64Range {
-                            let mimeType = String(state[mimeTypeRange])
-                            let base64String = String(state[base64Range])
-                            if let imageData = Data(base64Encoded: base64String) {
-                                // Create a temporary file URL
-                                let tempDirectory = FileManager.default.temporaryDirectory
-                                let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
-                                do {
-                                    try imageData.write(to: tempFileURL)
-                                    os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
-                                    self.attachFile(localURL: tempFileURL, mimeType: mimeType, completion: completion)
-                                    return
-                                } catch {
-                                    os_log("Failed to write image data to file: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                                }
-                            } else {
-                                os_log("Failed to decode base64 string to Data", log: .default, type: .error)
-                            }
+                // Extract MIME type and base64 string
+                let pattern = /^data:(.*?);base64,(.*)$/
+                if let firstMatch = state.firstMatch(of: pattern) {
+                    let mimeType = String(firstMatch.1)
+                    let base64String = String(firstMatch.2)
+                    if let imageData = Data(base64Encoded: base64String) {
+                        // Create a temporary file URL
+                        let tempDirectory = FileManager.default.temporaryDirectory
+                        let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
+                        do {
+                            try imageData.write(to: tempFileURL)
+                            os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
+                            self.attachFile(localURL: tempFileURL, mimeType: mimeType, completion: completion)
+                            return
+                        } catch {
+                            os_log("Failed to write image data to file: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                         }
+                    } else {
+                        os_log("Failed to decode base64 string to Data", log: .default, type: .error)
                     }
-                } catch {
-                    os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                } else {
+                    os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "")
                 }
             }
             completion(nil)
