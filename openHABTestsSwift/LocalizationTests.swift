@@ -42,6 +42,7 @@ class LocalizationTests: XCTestCase {
                     continue
                 }
                 XCTAssertNotEqual(translation, "__MISSING__", "Missing translation for key '\(tuple.key)' in language '\(language)'.")
+                // swiftlint:disable:next opening_brace
                 let regex = /%(?:\d+\$)?[+-]?(?:[lh]{0,2})(?:[qLztj])?(?:[ 0]|'.{1})?\d*(?:\\.\d?)?[@dDiuUxXoOfeEgGcCsSpaAFn]/
                 let numberOfMatches = translation.matches(of: regex).count
                 XCTAssertEqual(numberOfMatches, tuple.arguments.count, "Invalid number of format specifiers for key '\(tuple.key)' in language '\(language)'.")

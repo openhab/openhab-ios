@@ -38,7 +38,7 @@ struct SettingsView: View {
     @State private var showCrashReportingAlert = false
     @State private var showUselastPathAlert = false
 
-    @State private var hasBeenLoaded: Bool = false
+    @State private var hasBeenLoaded = false
 
     @Environment(\.dismiss) private var dismiss
 

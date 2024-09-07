@@ -41,6 +41,33 @@ struct UiTile: Decodable {
     var imageUrl: String
 }
 
+struct ImageView: View {
+    let url: String
+
+    // App wide data access
+    var appData: OpenHABDataObject? {
+        AppDelegate.appDelegate.appData
+    }
+
+    var body: some View {
+        if !url.isEmpty {
+            switch url {
+            case _ where url.hasPrefix("data:image"):
+                let provider = Base64ImageDataProvider(base64String: url.deletingPrefix("data:image/png;base64,"), cacheKey: UUID().uuidString)
+                return KFImage(source: .provider(provider)).resizable()
+            case _ where url.hasPrefix("http"):
+                return KFImage(URL(string: url)).resizable()
+            default:
+                let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: url.prepare()).url
+                return KFImage(builtURL).resizable()
+            }
+        } else {
+            // This will always fallback to placeholder
+            return KFImage(URL(string: "bundle://openHABIcon")).placeholder { Image("openHABIcon").resizable() }
+        }
+    }
+}
+
 struct DrawerView: View {
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
@@ -204,33 +231,6 @@ struct DrawerView: View {
     mutating func loadSettings() {
         openHABUsername = Preferences.username
         openHABPassword = Preferences.password
-    }
-}
-
-struct ImageView: View {
-    let url: String
-
-    // App wide data access
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
-
-    var body: some View {
-        if !url.isEmpty {
-            switch url {
-            case _ where url.hasPrefix("data:image"):
-                let provider = Base64ImageDataProvider(base64String: url.deletingPrefix("data:image/png;base64,"), cacheKey: UUID().uuidString)
-                return KFImage(source: .provider(provider)).resizable()
-            case _ where url.hasPrefix("http"):
-                return KFImage(URL(string: url)).resizable()
-            default:
-                let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: url.prepare()).url
-                return KFImage(builtURL).resizable()
-            }
-        } else {
-            // This will always fallback to placeholder
-            return KFImage(URL(string: "bundle://openHABIcon")).placeholder { Image("openHABIcon").resizable() }
-        }
     }
 }
 

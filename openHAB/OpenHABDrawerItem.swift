@@ -25,6 +25,13 @@ enum OpenHABDrawerItem {
         }
     }
 
+    var icon: SFSymbol {
+        switch self {
+        case .notifications: .bell
+        case .settings: .gear
+        }
+    }
+
     static func openHABDrawerItem(localizedString: String) -> OpenHABDrawerItem {
         switch localizedString {
         case OpenHABDrawerItem.settings.localizedString:
@@ -33,13 +40,6 @@ enum OpenHABDrawerItem {
             OpenHABDrawerItem.notifications
         default:
             OpenHABDrawerItem.settings
-        }
-    }
-
-    var icon: SFSymbol {
-        switch self {
-        case .notifications: .bell
-        case .settings: .gear
         }
     }
 }
