@@ -107,11 +107,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 
     // Text between square brackets
     public var labelValue: String? {
-        // Swift 5 raw strings
-        let regex = try? NSRegularExpression(pattern: #"\[(.*?)\]"#, options: [.dotMatchesLineSeparators])
-        guard let match = regex?.firstMatch(in: label, options: [], range: NSRange(location: 0, length: (label as NSString).length)) else { return nil }
-        guard let range = Range(match.range(at: 1), in: label) else { return nil }
-        return String(label[range])
+        let pattern = /\[(.*?)\]/.dotMatchesNewlines()
+        guard let firstMatch = label.firstMatch(of: pattern) else { return nil }
+        return String(firstMatch.1)
     }
 
     public var coordinate: CLLocationCoordinate2D {

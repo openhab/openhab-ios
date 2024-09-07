@@ -224,17 +224,11 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     func getLeafCertificate(trust: SecTrust?) -> SecCertificate? {
         // Returns the leaf certificate from a SecTrust object (that is always the
         // certificate at index 0).
-        var result: SecCertificate?
 
-        if let trust {
-            if SecTrustGetCertificateCount(trust) > 0 {
-                result = SecTrustGetCertificateAtIndex(trust, 0)
-                return result
-            } else {
-                return nil
-            }
+        if let trust, SecTrustGetCertificateCount(trust) > 0, let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate] {
+            certificates[0]
         } else {
-            return nil
+            nil
         }
     }
 
