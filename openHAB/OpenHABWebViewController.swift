@@ -235,14 +235,12 @@ class OpenHABWebViewController: OpenHABViewController {
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
         if UIDevice.current.userInterfaceIdiom == .pad {
-            // since ios 13 Safari sets the user agent to desktop mode so the view renders correctly with larger screens like the iPad, otherwise everything is rendered too small, WkWebview does not do this, this is the only workaround
+            // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
             webView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
         }
-
         if #available(iOS 16.4, *) {
             webView.isInspectable = true
         }
-
         // watch for URL changes so we can store the last visited path
         observation = webView.observe(\.url, options: [.new]) { _, _ in
             if let webviewURL = webView.url {
