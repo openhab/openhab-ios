@@ -111,8 +111,6 @@ class OpenHABWebViewController: OpenHABViewController {
         if currentTarget == "" {
             showActivityIndicator(show: true)
         }
-        // TODO: we should remove the need for this.
-        // OpenHABTracker.shared.restart()
     }
 
     func loadWebView(force: Bool = false, path: String? = nil) {
