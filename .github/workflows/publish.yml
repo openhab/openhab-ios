@@ -9,6 +9,7 @@ on:
         type: choice
         description: 'Select version bump type:'
         options:
+        - none
         - patch
         - minor
         - major
@@ -41,6 +42,15 @@ jobs:
           ssh-private-key: |
             ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
 
+      - name: Set Fastlane Options
+        id: set_options
+        run: |
+          if [ "${{ github.event.inputs.bump_type }}" != "none" ]; then
+            echo "fastlane_options={ \"bump\": \"${{ github.event.inputs.bump_type }}\" }" >> $GITHUB_ENV
+          else
+            echo "fastlane_options={}" >> $GITHUB_ENV
+          fi
+
       - name: Deploy on TestFlight
         env:
           OH_CROWDIN_PROJECT_ID: openhab-ios
@@ -59,5 +69,5 @@ jobs:
         uses: maierj/fastlane-action@v3.1.0
         with:
           lane: beta
-          options: '{ "bump": "${{ github.event.inputs.bump_type }}" }'
+          options: ${{ steps.set_options.outputs.fastlane_options }}
           skip-tracking: true
