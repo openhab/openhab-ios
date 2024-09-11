@@ -27,7 +27,7 @@ public class HTTPClient: NSObject {
         super.init()
 
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForRequest = 10
         config.timeoutIntervalForResource = 60
 
         session = URLSession(configuration: config, delegate: self, delegateQueue: nil)

@@ -73,7 +73,28 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
-        OpenHABTracker.shared.multicastDelegate.add(self)
+        OpenHABTracker.shared.$state
+            .prepend(OpenHABTracker.shared.state) // trick to emit the current value first
+            .sink { newState in
+                if let error = newState.error {
+                    os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
+                    self.pageLoadError(message: error.localizedDescription)
+                    return
+                }
+
+                if let url = newState.openHABUrl {
+                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(url.absoluteString)")
+                    self.openHABTrackedRootUrl = url.absoluteString
+                    self.loadWebView(force: false)
+                }
+            }
+            .store(in: &trackerCancellables)
+
+        OpenHABTracker.shared.$progress.sink { message in
+            os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message)
+            self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message, theme: .info)
+        }
+        .store(in: &trackerCancellables)
         startTracker()
     }
 
@@ -82,7 +103,8 @@ class OpenHABWebViewController: OpenHABViewController {
         // Show the navigation bar on other view controllers
         navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
-        OpenHABTracker.shared.multicastDelegate.remove(self)
+        // OpenHABTracker.shared.multicastDelegate.remove(self)
+        trackerCancellables.removeAll()
     }
 
     func startTracker() {
@@ -90,7 +112,7 @@ class OpenHABWebViewController: OpenHABViewController {
             showActivityIndicator(show: true)
         }
         // TODO: we should remove the need for this.
-        OpenHABTracker.shared.restart()
+        // OpenHABTracker.shared.restart()
     }
 
     func loadWebView(force: Bool = false, path: String? = nil) {
@@ -184,6 +206,8 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = ""
         clearExistingPage()
         startTracker()
+        // force a network rescan
+        OpenHABTracker.shared.restart()
     }
 
     override func viewName() -> String {
@@ -401,25 +425,5 @@ extension OpenHABWebViewController: WKUIDelegate {
         }
 
         return nil
-    }
-}
-
-// MARK: - OpenHABTrackerDelegate
-
-extension OpenHABWebViewController: OpenHABTrackerDelegate {
-    func openHABTracked(_ openHABUrl: URL?, version: Int) {
-        os_log("OpenHABWebViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
-        openHABTrackedRootUrl = openHABUrl?.absoluteString ?? ""
-        loadWebView(force: false)
-    }
-
-    func openHABTrackingProgress(_ message: String?) {
-        os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message ?? "", theme: .info)
-    }
-
-    func openHABTrackingError(_ error: Error) {
-        os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        pageLoadError(message: error.localizedDescription)
     }
 }

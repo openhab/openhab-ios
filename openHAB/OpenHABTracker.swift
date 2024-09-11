@@ -10,25 +10,28 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Alamofire
+import Combine
 import Foundation
 import OpenHABCore
 import os.log
 import SystemConfiguration
 
-protocol OpenHABTrackerDelegate: AnyObject {
-    func openHABTracked(_ openHABUrl: URL?, version: Int)
-    func openHABTrackingProgress(_ message: String?)
-    func openHABTrackingError(_ error: Error)
-}
+class OpenHABTrackerState {
+    var openHABUrl: URL?
+    var openHABVersion: Int?
+    var error: Error?
 
-protocol OpenHABTrackerExtendedDelegate: OpenHABTrackerDelegate {
-    func openHABTrackingNetworkChange(_ networkStatus: NetworkReachabilityManager.NetworkReachabilityStatus)
+    init(openHABUrl: URL? = nil, openHABVersion: Int? = nil, error: Error? = nil) {
+        self.openHABUrl = openHABUrl
+        self.openHABVersion = openHABVersion
+        self.error = error
+    }
 }
 
 class OpenHABTracker: NSObject {
     static var shared = OpenHABTracker()
-
-    public var multicastDelegate = MulticastDelegate<OpenHABTrackerDelegate>()
+    @Published var state: OpenHABTrackerState = .init()
+    @Published var progress = ""
     private var oldReachabilityStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
     private let reach = NetworkReachabilityManager()
     private var openHABDemoMode = false
@@ -101,17 +104,17 @@ class OpenHABTracker: NSObject {
             }
         } else {
             os_log("OpenHABTracker network not available", log: .default, type: .info)
-            multicastDelegate.invoke { $0.openHABTrackingError(errorMessage("network_not_available")) }
+            state = OpenHABTrackerState(openHABUrl: nil, openHABVersion: nil, error: errorMessage("network_not_available"))
         }
     }
 
     private func tryDiscoveryUrl(_ discoveryUrl: URL?) {
-        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("connecting_discovered", comment: "")) }
+        progress = NSLocalizedString("connecting_discovered", comment: "")
         tryUrl(discoveryUrl)
     }
 
     private func tryDemoMode() {
-        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("running_demo_mode", comment: "")) }
+        progress = NSLocalizedString("running_demo_mode", comment: "")
         tryUrl(URL(staticString: "https://demo.openhab.org"))
     }
 
@@ -120,11 +123,11 @@ class OpenHABTracker: NSObject {
     private func tryUrl(_ tryUrl: URL?) {
         getServerInfoForUrl(tryUrl) { url, version, error in
             if let error {
-                self.multicastDelegate.invoke { $0.openHABTrackingError(error) }
+                self.state = OpenHABTrackerState(openHABUrl: nil, openHABVersion: nil, error: error)
             } else {
                 self.appData?.openHABVersion = version
                 self.appData?.openHABRootUrl = url?.absoluteString ?? ""
-                self.multicastDelegate.invoke { $0.openHABTracked(url, version: version) }
+                self.state = OpenHABTrackerState(openHABUrl: url, openHABVersion: version, error: nil)
             }
         }
     }
@@ -139,18 +142,18 @@ class OpenHABTracker: NSObject {
             urls[openHABRemoteUrl] = openHABLocalUrl.isEmpty ? 0 : 1.5
         }
         if urls.isEmpty {
-            multicastDelegate.invoke { $0.openHABTrackingError(errorMessage("error")) }
+            state = OpenHABTrackerState(openHABUrl: nil, openHABVersion: nil, error: errorMessage("error"))
             return
         }
-        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("connecting", comment: "")) }
+        progress = NSLocalizedString("connecting", comment: "")
         tryUrls(urls) { url, version, error in
             if let error {
                 os_log("OpenHABTracker failed %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
-                self.multicastDelegate.invoke { $0.openHABTrackingError(error) }
+                self.state = OpenHABTrackerState(openHABUrl: nil, openHABVersion: nil, error: error)
             } else {
                 self.appData?.openHABVersion = version
                 self.appData?.openHABRootUrl = url?.absoluteString ?? ""
-                self.multicastDelegate.invoke { $0.openHABTracked(url, version: version) }
+                self.state = OpenHABTrackerState(openHABUrl: url, openHABVersion: version, error: nil)
             }
         }
     }
@@ -246,7 +249,8 @@ class OpenHABTracker: NSObject {
 
     private func startDiscovery() {
         os_log("OpenHABTracking starting Bonjour discovery", log: .default, type: .info)
-        multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("discovering_oh", comment: "")) }
+        // multicastDelegate.invoke { $0.openHABTrackingProgress(NSLocalizedString("discovering_oh", comment: "")) }
+        progress = NSLocalizedString("discovering_oh", comment: "")
         netService = NetService(domain: "local.", type: "_openhab-server-ssl._tcp.", name: "openHAB-ssl")
         netService!.delegate = self
         netService!.resolve(withTimeout: 5.0)

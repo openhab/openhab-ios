@@ -12,6 +12,7 @@
 import Alamofire
 import AVFoundation
 import AVKit
+import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -163,6 +164,16 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         if idleOff {
             UIApplication.shared.isIdleTimerDisabled = true
         }
+
+        OpenHABTracker.shared.$progress
+            .dropFirst() // This ensures the closure only gets called on actual changes
+            .sink { message in
+                os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message)
+                self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message, theme: .info)
+            }
+            .store(in: &trackerCancellables)
+
+        var stateWatcher = OpenHABTracker.shared.$state.eraseToAnyPublisher()
         // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
         if pageUrl == "" {
             // Set self as root view controller
@@ -172,9 +183,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 widgetTableView.reloadData()
             }
             os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
-            OpenHABTracker.shared.multicastDelegate.add(self)
-            OpenHABTracker.shared.restart()
         } else {
+            // we only want to our watcher to notify us about changes, and not the inital value
+            stateWatcher = stateWatcher.dropFirst().eraseToAnyPublisher()
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
                 loadPage(false)
@@ -183,6 +194,23 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 restart()
             }
         }
+        // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will exectue imediately with current values and then again if the network changes, otherwise it will be called on changes only.
+        stateWatcher
+            .sink { newState in
+                if let error = newState.error {
+                    os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
+                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
+                    return
+                }
+
+                if let url = newState.openHABUrl {
+                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, url.absoluteString)
+                    self.openHABRootUrl = url.absoluteString
+                    self.selectSitemap()
+                }
+            }
+            .store(in: &trackerCancellables)
+
         ImageDownloader.default.authenticationChallengeResponder = self
     }
 
@@ -192,7 +220,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             currentPageOperation?.cancel()
             currentPageOperation = nil
         }
-        OpenHABTracker.shared.multicastDelegate.remove(self)
+
+        trackerCancellables.removeAll()
+
         super.viewWillDisappear(animated)
 
         if #unavailable(iOS 13.0) {
@@ -437,6 +467,36 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
     }
 
+    // This is mainly used for navigting to a specific sitemap and path from notifications
+    func pushSitemap(name: String, path: String?) {
+        var cancelable: AnyCancellable?
+        // makeConnectable() + connect() allows us to reference the cancelable var within our closure
+        let state = OpenHABTracker.shared.$state.makeConnectable()
+        // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
+        cancelable = state
+            .sink { [weak self] newState in
+                if let openHABUrl = newState.openHABUrl?.absoluteString, let self {
+                    os_log("pushSitemap: pushing page", log: .default, type: .error)
+                    let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
+                    if let path {
+                        newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)/\(path)"
+                    } else {
+                        newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)"
+                    }
+                    newViewController.openHABRootUrl = openHABUrl
+                    navigationController?.pushViewController(newViewController, animated: true)
+                }
+                if let cancelable {
+                    os_log("pushSitemap: canceling sink", log: .default, type: .error)
+                    cancelable.cancel()
+                }
+            }
+        // add it here just in case our view leaves and this is still running
+        cancelable?.store(in: &trackerCancellables)
+        // _ = removes warning about unused results.
+        _ = state.connect()
+    }
+
     // load app settings
     func loadSettings() {
         openHABUsername = Preferences.username
@@ -517,26 +577,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     override func viewName() -> String {
         "sitemap"
-    }
-}
-
-// MARK: - OpenHABTrackerDelegate
-
-extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
-    func openHABTracked(_ openHABUrl: URL?, version: Int) {
-        os_log("OpenHABSitemapViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
-        openHABRootUrl = openHABUrl?.absoluteString ?? ""
-        selectSitemap()
-    }
-
-    func openHABTrackingProgress(_ message: String?) {
-        os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message ?? "", theme: .info)
-    }
-
-    func openHABTrackingError(_ error: Error) {
-        os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
     }
 }
 

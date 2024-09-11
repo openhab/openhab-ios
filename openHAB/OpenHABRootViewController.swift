@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import FirebaseCrashlytics
 import Foundation
 import OpenHABCore
@@ -267,21 +268,30 @@ class OpenHABRootViewController: UIViewController {
         if let firstMatch = command.firstMatch(of: regexPattern) {
             let path = String(firstMatch.1)
             os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
-            if currentView != webViewController {
-                switchView(target: .webview)
-            }
             if path.starts(with: "/basicui/app?") {
-                // TODO: this is a sitemap, we should use the native renderer
-                // temp hack right now to just use a webview
-                webViewController.loadWebView(force: true, path: path)
-            } else if path.starts(with: "/") {
-                // have the webview load this path itself
-                webViewController.loadWebView(force: true, path: path)
+                if currentView != sitemapViewController {
+                    switchView(target: .sitemap(""))
+                }
+                if let urlComponents = URLComponents(string: path) {
+                    let queryItems = urlComponents.queryItems
+                    let sitemap = queryItems?.first(where: { $0.name == "sitemap" })?.value
+                    let subview = queryItems?.first(where: { $0.name == "w" })?.value
+                    if let sitemap {
+                        sitemapViewController.pushSitemap(name: sitemap, path: subview)
+                    }
+                }
             } else {
-                // have the mainUI handle the navigation
-                webViewController.navigateCommand(path)
+                if currentView != webViewController {
+                    switchView(target: .webview)
+                }
+                if path.starts(with: "/") {
+                    // have the webview load this path itself
+                    webViewController.loadWebView(force: true, path: path)
+                } else {
+                    // have the mainUI handle the navigation
+                    webViewController.navigateCommand(path)
+                }
             }
-
         } else {
             os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
         }
@@ -292,17 +302,33 @@ class OpenHABRootViewController: UIViewController {
         if components.count == 2 {
             let itemName = String(components[0])
             let itemCommand = String(components[1])
-            let client = HTTPClient(username: Preferences.username, password: Preferences.username)
-            client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
-                if let error {
-                    os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                } else {
-                    os_log("Request succeeded", log: .default, type: .info)
-                    if let data {
-                        os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+
+            var cancelable: AnyCancellable?
+            // makeConnectable() + connect() allows us to reference the cancelable var within our closure
+            let state = OpenHABTracker.shared.$state.makeConnectable()
+            // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
+            cancelable = state
+                .sink { newState in
+                    if let openHABUrl = newState.openHABUrl?.absoluteString {
+                        os_log("Sending comand", log: .default, type: .error)
+                        let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                        client.doPost(baseURLs: [openHABUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
+                            if let error {
+                                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                            } else {
+                                os_log("Request succeeded", log: .default, type: .info)
+                                if let data {
+                                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                                }
+                            }
+                        }
+                    }
+                    if let cancelable {
+                        os_log("pushSitemap: canceling sink", log: .default, type: .error)
+                        cancelable.cancel()
                     }
                 }
-            }
+            _ = state.connect()
         }
     }
 
@@ -359,17 +385,33 @@ class OpenHABRootViewController: UIViewController {
         } catch {
             // nothing
         }
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username)
-        client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
-            if let error {
-                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-            } else {
-                os_log("Request succeeded", log: .default, type: .info)
-                if let data {
-                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+
+        var cancelable: AnyCancellable?
+        // makeConnectable() + connect() allows us to reference the cancelable var within our closure
+        let state = OpenHABTracker.shared.$state.makeConnectable()
+        // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
+        cancelable = state
+            .sink { newState in
+                if let openHABUrl = newState.openHABUrl?.absoluteString {
+                    os_log("Sending comand", log: .default, type: .error)
+                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                    client.doPost(baseURLs: [openHABUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
+                        if let error {
+                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                        } else {
+                            os_log("Request succeeded", log: .default, type: .info)
+                            if let data {
+                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                            }
+                        }
+                    }
+                }
+                if let cancelable {
+                    os_log("pushSitemap: canceling sink", log: .default, type: .error)
+                    cancelable.cancel()
                 }
             }
-        }
+        _ = state.connect()
     }
 
     func showSideMenu() {

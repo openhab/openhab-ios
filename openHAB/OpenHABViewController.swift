@@ -9,12 +9,15 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import OpenHABCore
 import SideMenu
 import SwiftMessages
 import UIKit
 
 class OpenHABViewController: UIViewController {
+    var trackerCancellables = Set<AnyCancellable>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
