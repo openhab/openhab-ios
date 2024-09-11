@@ -486,10 +486,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     newViewController.openHABRootUrl = openHABUrl
                     navigationController?.pushViewController(newViewController, animated: true)
                 }
-                if let cancelable {
-                    os_log("pushSitemap: canceling sink", log: .default, type: .error)
-                    cancelable.cancel()
-                }
+                cancelable?.cancel()
             }
         // add it here just in case our view leaves and this is still running
         cancelable?.store(in: &trackerCancellables)

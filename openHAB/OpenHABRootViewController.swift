@@ -323,10 +323,7 @@ class OpenHABRootViewController: UIViewController {
                             }
                         }
                     }
-                    if let cancelable {
-                        os_log("pushSitemap: canceling sink", log: .default, type: .error)
-                        cancelable.cancel()
-                    }
+                    cancelable?.cancel()
                 }
             _ = state.connect()
         }
@@ -406,10 +403,7 @@ class OpenHABRootViewController: UIViewController {
                         }
                     }
                 }
-                if let cancelable {
-                    os_log("pushSitemap: canceling sink", log: .default, type: .error)
-                    cancelable.cancel()
-                }
+                cancelable?.cancel()
             }
         _ = state.connect()
     }
