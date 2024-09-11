@@ -74,7 +74,6 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
         OpenHABTracker.shared.$state
-            .prepend(OpenHABTracker.shared.state) // trick to emit the current value first
             .sink { newState in
                 if let error = newState.error {
                     os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
