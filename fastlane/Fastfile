@@ -100,7 +100,7 @@ platform :ios do
 
         type = options[:bump]
 
-        if !options[:isfeaturebuild]
+        if !options[:isfeaturebuild] && type != 'none'
             increment_version_number_in_xcodeproj(
                 bump_type: type,
                 xcodeproj: 'openHAB.xcodeproj',
