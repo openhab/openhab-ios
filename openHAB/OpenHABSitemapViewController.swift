@@ -340,7 +340,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                         return sitemapPageCodingData.openHABSitemapPage
                     }()
                 } catch {
-                    //Printing the error is the only way to actually get the real issue, localizedDescription is pretty useless here
+                    // Printing the error is the only way to actually get the real issue, localizedDescription is pretty useless here
                     print(error)
                     os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
                     DispatchQueue.main.async {
