@@ -28,11 +28,16 @@ final class OpenHABCoreGeneralTests: XCTestCase {
         XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
     }
 
-    func testLabelVale() {
+    func testLabelValue() {
         let widget = OpenHABWidget()
         widget.label = "llldl [llsl]"
         XCTAssertEqual(widget.labelValue, "llsl")
         widget.label = "llllsl[kkks] llls"
         XCTAssertEqual(widget.labelValue, "kkks")
+    }
+
+    func testOpenHABStateDescription() {
+        let openHABStateDescription = OpenHABStateDescription(minimum: 0.0, maximum: 1.0, step: 0.2, readOnly: true, options: nil, pattern: "MAP(foo.map):%s")
+        XCTAssertEqual(openHABStateDescription.numberPattern, "%s")
     }
 }

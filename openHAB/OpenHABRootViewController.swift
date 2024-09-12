@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import DynamicButton
 import FirebaseCrashlytics
 import Foundation
 import OpenHABCore
@@ -34,7 +33,6 @@ struct CommandItem: CommItem {
 }
 
 class OpenHABRootViewController: UIViewController {
-    var hamburgerButton: DynamicButton!
     var currentView: OpenHABViewController!
     var isDemoMode = false
 
@@ -118,21 +116,13 @@ class OpenHABRootViewController: UIViewController {
 
     fileprivate func setupSideMenu() {
         let hamburgerButtonItem: UIBarButtonItem
-        if #available(iOS 13.0, *) {
-            let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
-            let buttonImage = UIImage(systemName: "line.horizontal.3", withConfiguration: imageConfig)
-            let button = UIButton(type: .custom)
-            button.setImage(buttonImage, for: .normal)
-            button.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-            hamburgerButtonItem = UIBarButtonItem(customView: button)
-            hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        } else {
-            hamburgerButton = DynamicButton(frame: CGRect(x: 0, y: 0, width: 31, height: 31))
-            hamburgerButton.setStyle(.hamburger, animated: true)
-            hamburgerButton.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
-            hamburgerButton.strokeColor = view.tintColor
-            hamburgerButtonItem = UIBarButtonItem(customView: hamburgerButton)
-        }
+        let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
+        let buttonImage = UIImage(systemSymbol: .line3Horizontal, withConfiguration: imageConfig)
+        let button = UIButton(type: .custom)
+        button.setImage(buttonImage, for: .normal)
+        button.addTarget(self, action: #selector(OpenHABRootViewController.rightDrawerButtonPress(_:)), for: .touchUpInside)
+        hamburgerButtonItem = UIBarButtonItem(customView: button)
+        hamburgerButtonItem.customView?.heightAnchor.constraint(equalToConstant: 30).isActive = true
         navigationItem.setRightBarButton(hamburgerButtonItem, animated: true)
 
         // Define the menus
@@ -212,34 +202,27 @@ class OpenHABRootViewController: UIViewController {
 
     private func uiCommandAction(_ command: String) {
         os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
-        let pattern = "^(/basicui/app\\?.*|/.*|.*)$"
-
-        do {
-            let regex = try NSRegularExpression(pattern: pattern, options: [])
-            let nsString = command as NSString
-            let results = regex.matches(in: command, options: [], range: NSRange(location: 0, length: nsString.length))
-
-            if let match = results.first {
-                let pathRange = match.range(at: 1)
-                let path = nsString.substring(with: pathRange)
-                os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
-                if currentView != webViewController {
-                    switchView(target: .webview)
-                }
-                if path.starts(with: "/basicui/app?") {
-                    // TODO: this is a sitemap, we should use the native renderer
-                    // temp hack right now to just use a webview
-                    webViewController.loadWebView(force: true, path: path)
-                } else if path.starts(with: "/") {
-                    // have the webview load this path itself
-                    webViewController.loadWebView(force: true, path: path)
-                } else {
-                    // have the mainUI handle the navigation
-                    webViewController.navigateCommand(path)
-                }
+        let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
+        if let firstMatch = command.firstMatch(of: regexPattern) {
+            let path = String(firstMatch.1)
+            os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
+            if currentView != webViewController {
+                switchView(target: .webview)
             }
-        } catch {
-            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+            if path.starts(with: "/basicui/app?") {
+                // TODO: this is a sitemap, we should use the native renderer
+                // temp hack right now to just use a webview
+                webViewController.loadWebView(force: true, path: path)
+            } else if path.starts(with: "/") {
+                // have the webview load this path itself
+                webViewController.loadWebView(force: true, path: path)
+            } else {
+                // have the mainUI handle the navigation
+                webViewController.navigateCommand(path)
+            }
+
+        } else {
+            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
         }
     }
 

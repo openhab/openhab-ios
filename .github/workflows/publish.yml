@@ -9,6 +9,7 @@ on:
         type: choice
         description: 'Select version bump type:'
         options:
+        - none
         - patch
         - minor
         - major

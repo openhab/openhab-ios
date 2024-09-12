@@ -327,13 +327,14 @@ public class OpenHABSitemapWidgetEvent {
 
     convenience init?(_ event: Components.Schemas.SitemapWidgetEvent?) {
         guard let event else { return nil }
+        // swiftlint:disable:next line_length
         self.init(sitemapName: event.sitemapName, pageId: event.pageId, widgetId: event.widgetId, label: event.label, labelSource: event.labelSource, icon: event.icon, reloadIcon: event.reloadIcon, labelcolor: event.labelcolor, valuecolor: event.valuecolor, iconcolor: event.iconcolor, visibility: event.visibility, state: event.state, enrichedItem: OpenHABItem(event.item), descriptionChanged: event.descriptionChanged)
     }
 }
 
 extension OpenHABSitemapWidgetEvent: CustomStringConvertible {
     public var description: String {
-        "\(widgetId) \(label) \(enrichedItem?.state)"
+        "\(widgetId ?? "") \(label ?? "") \(enrichedItem?.state ?? "")"
     }
 }
 

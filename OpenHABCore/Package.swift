@@ -30,14 +30,16 @@ let package = Package(
                 .product(name: "Kingfisher", package: "Kingfisher", condition: .when(platforms: [.iOS, .watchOS])),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession")
-            ]
+            ],
+            swiftSettings: [.enableUpcomingFeature("BareSlashRegexLiterals")]
         ),
         .testTarget(
             name: "OpenHABCoreTests",
             dependencies: ["OpenHABCore"],
             resources: [
                 .process("Resources")
-            ]
+            ],
+            swiftSettings: [.enableUpcomingFeature("BareSlashRegexLiterals")]
         )
     ]
 )

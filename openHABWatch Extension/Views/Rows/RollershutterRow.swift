@@ -25,19 +25,19 @@ struct RollershutterRow: View {
             HStack {
                 Spacer()
 
-                EncircledIconWithAction(systemName: "chevron.up.circle.fill") {
+                EncircledIconWithAction(systemSymbol: .chevronUpCircleFill) {
                     widget.sendCommand("UP")
                 }
 
                 Spacer()
 
-                EncircledIconWithAction(systemName: "square") {
+                EncircledIconWithAction(systemSymbol: .square) {
                     widget.sendCommand("STOP")
                 }
 
                 Spacer()
 
-                EncircledIconWithAction(systemName: "chevron.down.circle.fill") {
+                EncircledIconWithAction(systemSymbol: .chevronDownCircleFill) {
                     widget.sendCommand("DOWN")
                 }
 

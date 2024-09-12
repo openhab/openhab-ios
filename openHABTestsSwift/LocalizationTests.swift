@@ -37,22 +37,19 @@ class LocalizationTests: XCTestCase {
         for language in LocalizationTests.localizations {
             print("Testing language: '\(language)'.")
             for tuple in LocalizationTests.localizedFormatStrings {
-                do {
-                    guard let translation = tuple.key.localized(for: language)?.replacingOccurrences(of: "%%", with: "") else {
-                        XCTFail("Failed to get translation for key '\(tuple.key)' in language '\(language)'.")
-                        continue
-                    }
-
-                    XCTAssertNotEqual(translation, "__MISSING__", "Missing translation for key '\(tuple.key)' in language '\(language)'.")
-                    let formatSpecifiersRegEx = try NSRegularExpression(pattern: "%(?:\\d+\\$)?[+-]?(?:[lh]{0,2})(?:[qLztj])?(?:[ 0]|'.{1})?\\d*(?:\\.\\d?)?[@dDiuUxXoOfeEgGcCsSpaAFn]")
-                    let numberOfMatches = formatSpecifiersRegEx.numberOfMatches(in: translation, options: [], range: NSRange(location: 0, length: translation.utf16.count))
-                    XCTAssertEqual(numberOfMatches, tuple.arguments.count, "Invalid number of format specifiers for key '\(tuple.key)' in language '\(language)'.")
-                } catch {
-                    XCTFail("Failed to create regular expression for key '\(tuple.key)' in language '\(language)'.")
+                guard let translation = tuple.key.localized(for: language)?.replacingOccurrences(of: "%%", with: "") else {
+                    XCTFail("Failed to get translation for key '\(tuple.key)' in language '\(language)'.")
+                    continue
                 }
-                let translation = tuple.key.localizedWithFormat(for: language, arguments: tuple.arguments)
-                XCTAssertNotNil(translation, "Failed to get translation for key '\(tuple.key)' in language '\(language)'.")
-                print("Translation: \(tuple.key) = \(translation ?? "FAILED")")
+                XCTAssertNotEqual(translation, "__MISSING__", "Missing translation for key '\(tuple.key)' in language '\(language)'.")
+                // swiftlint:disable:next opening_brace
+                let regex = /%(?:\d+\$)?[+-]?(?:[lh]{0,2})(?:[qLztj])?(?:[ 0]|'.{1})?\d*(?:\\.\d?)?[@dDiuUxXoOfeEgGcCsSpaAFn]/
+                let numberOfMatches = translation.matches(of: regex).count
+                XCTAssertEqual(numberOfMatches, tuple.arguments.count, "Invalid number of format specifiers for key '\(tuple.key)' in language '\(language)'.")
+
+                let translationResult = tuple.key.localizedWithFormat(for: language, arguments: tuple.arguments)
+                XCTAssertNotNil(translationResult, "Failed to get translation for key '\(tuple.key)' in language '\(language)'.")
+                print("Translation: \(tuple.key) = \(translation)")
             }
         }
     }
