@@ -15,7 +15,7 @@ import SwiftUI
 
 struct ImageRawRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     var body: some View {
         if let data = widget.item?.state?.components(separatedBy: ",")[safe: 1],
@@ -30,9 +30,8 @@ struct ImageRawRow: View {
     }
 }
 
-struct ImageRawRow_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[4]
-        return ImageRawRow(widget: widget)
-    }
+#Preview {
+    let widget = UserData().widgets[4]
+    return ImageRawRow(widget: widget)
+        .environmentObject(ObservableOpenHABDataObject())
 }

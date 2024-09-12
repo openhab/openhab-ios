@@ -33,13 +33,10 @@ struct NotificationView: View {
     }
 }
 
-struct NotificationView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            NotificationView()
-
-            NotificationView(customTextLabel: "Light 2", customDetailTextLabel: "Off")
-        }
-        .previewLayout(.sizeThatFits)
+#Preview {
+    Group {
+        NotificationView()
+        NotificationView(customTextLabel: "Light 2", customDetailTextLabel: "Off")
     }
+    .previewLayout(.sizeThatFits)
 }

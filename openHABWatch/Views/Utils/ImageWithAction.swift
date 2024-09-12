@@ -26,8 +26,6 @@ struct ImageWithAction: View {
     }
 }
 
-struct ImageWithAction_Previews: PreviewProvider {
-    static var previews: some View {
-        ImageWithAction(systemName: "chevron.up.circle.fill") {}
-    }
+#Preview {
+    ImageWithAction(systemName: "chevron.up.circle.fill") {}
 }

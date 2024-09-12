@@ -15,32 +15,31 @@ import SwiftUI
 import WatchConnectivity
 
 struct PreferencesSwiftUIView: View {
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
-
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    
     var applicationVersionNumber: String = {
-        let versionNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
-        let buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
-
-        return "V\(versionNumber).\(buildNumber)"
+        let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+        let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return "\(appVersionString ?? "") (\(appBuildString ?? ""))"
     }()
-
+    
     var body: some View {
         List {
-            PreferencesRowUIView(label: NSLocalizedString("version", comment: ""), content: applicationVersionNumber).font(.footnote)
-            PreferencesRowUIView(label: NSLocalizedString("active_url", comment: ""), content: settings.openHABRootUrl).font(.footnote)
-            PreferencesRowUIView(label: NSLocalizedString("local_url", comment: ""), content: settings.localUrl).font(.footnote)
-            PreferencesRowUIView(label: NSLocalizedString("remote_url", comment: ""), content: settings.remoteUrl).font(.footnote)
-            PreferencesRowUIView(label: NSLocalizedString("sitemap", comment: ""), content: settings.sitemapForWatch).font(.footnote)
-            PreferencesRowUIView(label: NSLocalizedString("username", comment: ""), content: settings.openHABUsername).font(.footnote)
-            HStack {
-                Button(action: { AppMessageService.singleton.requestApplicationContext() }, label: { Text(NSLocalizedString("sync_prefs", comment: "")) })
-            }
+            LabeledContent(LocalizedStringKey("active_url"), value: settings.openHABRootUrl)
+            LabeledContent(LocalizedStringKey("local_url"), value: settings.localUrl)
+            LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteUrl)
+            LabeledContent(LocalizedStringKey("sitemap"),  value: settings.sitemapForWatch)
+            LabeledContent(LocalizedStringKey("username"), value: settings.openHABUsername)
+            LabeledContent(LocalizedStringKey("version"), value: applicationVersionNumber)
         }
+            
+        Button { AppMessageService.singleton.requestApplicationContext()
+        } label: { Label("sync_prefs", systemSymbol: .arrowTriangle2Circlepath) }
+            .buttonStyle(.borderedProminent)
     }
 }
 
-struct PreferencesSwiftUIView_Previews: PreviewProvider {
-    static var previews: some View {
-        PreferencesSwiftUIView()
-    }
+#Preview {
+    PreferencesSwiftUIView()
+        .environmentObject(ObservableOpenHABDataObject())
 }

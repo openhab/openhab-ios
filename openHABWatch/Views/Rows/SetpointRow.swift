@@ -14,7 +14,7 @@ import SwiftUI
 
 struct SetpointRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     private var isIntStep: Bool {
         widget.step.truncatingRemainder(dividingBy: 1) == 0
@@ -80,9 +80,8 @@ struct SetpointRow: View {
     }
 }
 
-struct SetpointRow_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[3]
-        return SetpointRow(widget: widget)
-    }
+#Preview {
+    let widget = UserData().widgets[3]
+    return SetpointRow(widget: widget)
+        .environmentObject(ObservableOpenHABDataObject())
 }

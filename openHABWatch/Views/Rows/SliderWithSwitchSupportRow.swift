@@ -15,7 +15,7 @@ import SwiftUI
 
 struct SliderWithSwitchSupportRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     var body: some View {
         let valueBinding = Binding<Double>(
@@ -79,14 +79,13 @@ struct SliderWithSwitchSupportRow: View {
     }
 }
 
-struct SliderWithSwitchSupportRow_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[3]
-        return Group {
-            SliderRow(widget: widget)
-                .previewLayout(.fixed(width: 300, height: 70))
-            SliderRow(widget: widget)
-                .previewDevice("Apple Watch Series 4 - 44mm")
-        }
+#Preview {
+    let widget = UserData().widgets[3]
+    return Group {
+        SliderRow(widget: widget)
+            .previewLayout(.fixed(width: 300, height: 70))
+        SliderRow(widget: widget)
+            .previewDevice("Apple Watch Series 4 - 44mm")
     }
+    .environmentObject(ObservableOpenHABDataObject())
 }

@@ -18,6 +18,8 @@ import WatchKit
 // This class handles values that are passed from the ios app.
 class AppMessageService: NSObject, WCSessionDelegate {
     static let singleton = AppMessageService()
+    
+    private let logger = Logger(subsystem: "org.openhab.app.watch", category: "AppMessageService")
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
         if NetworkConnection.shared == nil {
@@ -76,20 +78,20 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 ["request": "Preferences"],
                 replyHandler: { (response) in
                     let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-                    os_log("Received %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
+                    self.logger.info("Received \(filteredMessages)")
 
                     DispatchQueue.main.async { () in
                         self.updateValuesFromApplicationContext(response as [String: AnyObject])
                     }
                 },
                 errorHandler: { (error) in
-                    os_log("Error sending message %{PUBLIC}@", log: .watch, type: .info, "\(error)")
+                    self.logger.error("Error sending message \(error.localizedDescription)")
                 }
             )
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
+        logger.info("activationDidCompleteWith activationState \(activationState.rawValue) error: \(String(describing: error))")
         DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(session.receivedApplicationContext as [String: AnyObject])
         }
@@ -97,7 +99,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        os_log("didReceiveApplicationContext %{PUBLIC}@", log: .watch, type: .info, "\(applicationContext)")
+        logger.info("didReceiveApplicationContext \(applicationContext)" )
         DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(applicationContext as [String: AnyObject])
         }
@@ -105,7 +107,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     /** Called on the delegate of the receiver. Will be called on startup if the user info finished transferring when the receiver was not running. */
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
-        os_log("didReceiveUserInfo %{PUBLIC}@", log: .watch, type: .info, "\(userInfo)")
+        logger.info("didReceiveUserInfo \(userInfo)")
         DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(userInfo as [String: AnyObject])
         }
@@ -113,7 +115,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-        os_log("didReceiveMessage some filtered messages: %{PUBLIC}@", log: .watch, type: .info, "\(filteredMessages)")
+        logger.info("didReceiveMessage some filtered messages: \(filteredMessages)")
         DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])
         }
@@ -121,7 +123,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Swift.Void) {
         let filteredMessages = message.filter { ["remoteUrl", "localUrl", "username", "defaultSitemap"].contains($0.key) }
-        os_log("didReceiveMessage some filtered messages: %{PUBLIC}@ with reply handler", log: .watch, type: .info, "\(filteredMessages)")
+        logger.info("didReceiveMessage some filtered messages: \(filteredMessages) with reply handler")
 
         DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(message as [String: AnyObject])

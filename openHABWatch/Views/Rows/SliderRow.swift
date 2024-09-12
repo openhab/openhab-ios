@@ -15,7 +15,7 @@ import SwiftUI
 
 struct SliderRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     var valueBinding: Binding<Double> {
         .init(
@@ -26,7 +26,7 @@ struct SliderRow: View {
             }
         )
     }
-
+    
     var body: some View {
         VStack(spacing: 3) {
             HStack {
@@ -35,7 +35,7 @@ struct SliderRow: View {
                 Spacer()
                 DetailTextLabelView(widget: widget)
             }.padding(.top, 8)
-
+            
             Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
                 .labelsHidden()
                 .focusable(true)
@@ -51,14 +51,14 @@ struct SliderRow: View {
     }
 }
 
-struct SliderRow_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[3]
-        return Group {
-            SliderRow(widget: widget)
-                .previewLayout(.fixed(width: 300, height: 70))
-            SliderRow(widget: widget)
-                .previewDevice("Apple Watch Series 4 - 44mm")
-        }
+#Preview {
+    let widget = UserData().widgets[3]
+    return Group {
+        SliderRow(widget: widget)
+            .previewLayout(.fixed(width: 300, height: 70))
+        SliderRow(widget: widget)
+            .previewDevice("Apple Watch Series 4 - 44mm")
     }
+    .environmentObject(ObservableOpenHABDataObject())
 }
+

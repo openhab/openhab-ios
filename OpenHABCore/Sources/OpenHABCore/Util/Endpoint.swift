@@ -80,7 +80,7 @@ public extension Endpoint {
             queryItems: []
         )
     }
-
+    
     static func sitemaps(openHABRootUrl: String) -> Endpoint {
         Endpoint(
             baseURL: openHABRootUrl,

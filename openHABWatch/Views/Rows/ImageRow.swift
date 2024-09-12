@@ -16,7 +16,7 @@ import SwiftUI
 
 struct ImageRow: View {
     @State var url: URL?
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     var body: some View {
         WebImage(
@@ -25,17 +25,16 @@ struct ImageRow: View {
             context: [
                 .imageThumbnailPixelSize: CGSize.zero
             ]
-        )
-        .onFailure { error in
-            os_log("Failure loading icon: %{PUBLIC}s", log: .notifications, type: .debug, error.localizedDescription)
-        }
-        .placeholder {
+        ) { image in
+            image.resizable()
+                
+        } placeholder: {
             Image(systemSymbol: .arrowTriangle2CirclepathCircle)
                 .font(.callout)
                 .opacity(0.3)
         }
         .cancelOnDisappear(true)
-        .resizable()
+        .transition(.fade(duration: 0.3))
         .scaledToFit()
     }
 }
@@ -46,9 +45,9 @@ struct ImageRow: View {
         version: 2,
         icon: "Switch",
         state: "ON",
-        iconType: .png,
+        iconType: .svg,
         iconColor: ""
     ).url
-    // let widget = UserData().widgets[8]
     return ImageRow(url: iconUrl)
+        .environmentObject(ObservableOpenHABDataObject())
 }

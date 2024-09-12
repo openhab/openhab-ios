@@ -22,9 +22,7 @@ struct TextLabelView: View {
     }
 }
 
-struct TextLabelView_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[2]
-        return TextLabelView(widget: widget)
-    }
+#Preview {
+    let widget = UserData().widgets[2]
+    return TextLabelView(widget: widget)
 }

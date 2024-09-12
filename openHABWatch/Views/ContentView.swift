@@ -15,7 +15,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
     @State var title = "openHAB"
 
     var body: some View {
@@ -29,7 +29,7 @@ struct ContentView: View {
                 }
                 ForEach(viewModel.widgets) { widget in
                     rowWidget(widget: widget)
-                        .environmentObject(settings)
+                        
                 }
             }
             .navigationBarTitle(Text(title))
@@ -111,23 +111,17 @@ struct ContentView: View {
     }
 }
 
-// TODO:
-// struct ContentView_Previews: PreviewProvider {
-//    static let envObject = UserData()
-//    static var previews: some View {
-//        Group {
-//            ContentView()
-////                .previewDevice("Apple Watch Series 4 - 44mm")
-//                .environmentObject({ () -> UserData in
-//                    let envObj = UserData()
-//                    return envObj
-//                }() )
-//
-//
-//
-//
-//            ContentView(viewModel: UserData())
-//                .previewDevice("Apple Watch Series 2 - 38mm")
-//        }
-//    }
-// }
+#Preview {
+    Group {
+        ContentView(viewModel: UserData())
+            .previewDevice("Apple Watch Series 4 - 44mm")
+            .environmentObject({ () -> UserData in
+                let envObj = UserData()
+                return envObj
+            }())
+
+        ContentView(viewModel: UserData())
+            .previewDevice("Apple Watch Series 2 - 38mm")
+    }
+    .environmentObject(ObservableOpenHABDataObject())
+}

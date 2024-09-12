@@ -41,6 +41,8 @@ final class UserData: ObservableObject {
     private var currentPageOperation: Alamofire.Request?
     private var tracker: OpenHABWatchTracker?
     private var dataObjectCancellable: AnyCancellable?
+    
+    private let logger = Logger(subsystem: "org.openhab.app.watch", category: "UserData")
 
     // Demo
     init() {
@@ -56,7 +58,7 @@ final class UserData: ObservableObject {
                 return sitemapPageCodingData.openHABSitemapPage
             }()
         } catch {
-            os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+            logger.error("Should not throw \(error.localizedDescription)")
         }
 
         widgets = openHABSitemapPage?.widgets ?? []
@@ -86,48 +88,10 @@ final class UserData: ObservableObject {
 
         dataObjectCancellable = ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
             // New settings updates from the phone app to start a reconnect
-            os_log("Settings update received, starting reconnect", log: .remoteAccess, type: .info)
+            self.logger.info("Settings update received, starting reconnect")
             self.refreshUrl()
         }
         refreshUrl()
-    }
-
-    func request(_ endpoint: Endpoint) -> OpenHABCore.Future<Data> {
-        // Start by constructing a Promise, that will later be
-        // returned as a Future
-        let promise = Promise<Data>()
-
-        // Immediately reject the promise in case the passed
-        // endpoint can't be converted into a valid URL
-        guard let url = endpoint.url else {
-            promise.reject(with: NetworkingError.invalidURL)
-            return promise
-        }
-
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
-
-        currentPageOperation = NetworkConnection.page(
-            url: url,
-            longPolling: true
-        ) { [weak self] response in
-            guard self != nil else { return }
-
-            switch response.result {
-            case let .success(data):
-                os_log("openHAB 2", log: OSLog.remoteAccess, type: .info)
-                promise.resolve(with: data)
-
-            case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                promise.reject(with: error)
-            }
-        }
-        currentPageOperation?.resume()
-
-        return promise
     }
 
     func loadPage(url: URL?,
@@ -146,7 +110,7 @@ final class UserData: ObservableObject {
 
             switch response.result {
             case let .success(data):
-                os_log("Page loaded with success", log: OSLog.remoteAccess, type: .info)
+                logger.info("Page loaded with success")
                 do {
                     // Self-executing closure
                     // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
@@ -155,7 +119,7 @@ final class UserData: ObservableObject {
                         return sitemapPageCodingData.openHABSitemapPage
                     }()
                 } catch {
-                    os_log("Should not throw %{PUBLIC}@", log: OSLog.remoteAccess, type: .error, error.localizedDescription)
+                    logger.error("Should not throw \(error.localizedDescription)")
                 }
 
                 openHABSitemapPage?.sendCommand = { [weak self] item, command in
@@ -172,7 +136,7 @@ final class UserData: ObservableObject {
                 ) }
 
             case let .failure(error):
-                os_log("On LoadPage %{PUBLIC}@ code: %d ", log: .remoteAccess, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                logger.error("On LoadPage \"\(error.localizedDescription)\" with code: \(response.response?.statusCode ?? 0)")
                 errorDescription = error.localizedDescription
                 widgets = []
                 showAlert = true
@@ -199,25 +163,12 @@ final class UserData: ObservableObject {
         }
     }
 
-    func loadPage(_ endpoint: Endpoint) {
-        request(endpoint)
-            .decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-            .trafo()
-            .observe { result in
-                switch result {
-                case let .failure(error):
-                    os_log("On LoadPage %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
-                case let .success(page):
-                    self.openHABSitemapPage = page
-                }
-            }
-    }
 }
 
 extension UserData: OpenHABWatchTrackerDelegate {
     func openHABTracked(_ openHABUrl: URL?, version: Int) {
         guard let urlString = openHABUrl?.absoluteString else { return }
-        os_log("openHABTracked: %{PUBLIC}@", log: .remoteAccess, type: .error, urlString)
+        logger.error("openHABTracked: \(urlString)")
 
         if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
             AppMessageService.singleton.requestApplicationContext()
@@ -234,10 +185,10 @@ extension UserData: OpenHABWatchTrackerDelegate {
     }
 
     func openHABTrackingProgress(_ message: String?) {
-        os_log("openHABTrackingProgress: %{PUBLIC}@", log: .remoteAccess, type: .error, message ?? "")
+        logger.error("openHABTrackingProgress: \(message ?? "")")
     }
 
     func openHABTrackingError(_ error: Error) {
-        os_log("openHABTrackingError: %{PUBLIC}@", log: .remoteAccess, type: .error, error.localizedDescription)
+        logger.error("openHABTrackingError: \(error.localizedDescription)")
     }
 }

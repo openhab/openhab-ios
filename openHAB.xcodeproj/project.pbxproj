@@ -113,7 +113,6 @@
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
-		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
 		DAC9AF4724F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */; };
 		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
@@ -415,7 +414,6 @@
 		DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		DAC6608B236F6F4200F4501E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSwiftUIView.swift; sourceTree = "<group>"; };
-		DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesRowUIView.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
 		DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABWidgetExtension.swift; sourceTree = "<group>"; };
@@ -845,7 +843,6 @@
 				DAF457A123DB6C640018B495 /* RollershutterRow.swift */,
 				DAF4579F23DA3E1C0018B495 /* SegmentRow.swift */,
 				DAF457A523DB9CE00018B495 /* SetpointRow.swift */,
-				DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */,
 				DAF457A823DBA4990018B495 /* FrameRow.swift */,
 				DAF4581523DC483F0018B495 /* GenericRow.swift */,
 				DAF4581723DC4A050018B495 /* ImageRow.swift */,
@@ -1535,7 +1532,6 @@
 				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
 				DA07752B2346705F0086C685 /* OpenHABWatchAppDelegate.swift in Sources */,
 				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
-				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
 				9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */,
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
@@ -2092,7 +2088,6 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				
 				MARKETING_VERSION = 3.0.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -2722,7 +2717,7 @@
 			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.18.9;
+				minimumVersion = 5.19.7;
 			};
 		};
 		DA2C4FD02B4F56CF00D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
@@ -2730,7 +2725,7 @@
 			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.6;
+				minimumVersion = 3.1.2;
 			};
 		};
 		DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */ = {

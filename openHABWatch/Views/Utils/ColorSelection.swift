@@ -122,8 +122,6 @@ struct ColorSelection: View {
     }
 }
 
-struct ColorSelection_Previews: PreviewProvider {
-    static var previews: some View {
-        ColorSelection()
-    }
+#Preview {
+    ColorSelection()
 }

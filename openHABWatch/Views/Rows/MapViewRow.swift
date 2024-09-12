@@ -13,7 +13,7 @@ import SwiftUI
 
 struct MapViewRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     var body: some View {
         VStack {
@@ -25,9 +25,8 @@ struct MapViewRow: View {
     }
 }
 
-struct MapViewRow_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[9]
-        return MapViewRow(widget: widget)
-    }
+#Preview {
+    let widget = UserData().widgets[9]
+    return MapViewRow(widget: widget)
+        .environmentObject(ObservableOpenHABDataObject())
 }

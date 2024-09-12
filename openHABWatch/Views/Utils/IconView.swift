@@ -47,9 +47,7 @@ struct IconView: View {
     }
 }
 
-struct IconView_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[3]
-        return IconView(widget: widget, settings: ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
-    }
+#Preview {
+    let widget = UserData().widgets[3]
+    return IconView(widget: widget, settings: ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
 }

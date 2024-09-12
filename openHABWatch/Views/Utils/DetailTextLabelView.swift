@@ -24,9 +24,7 @@ struct DetailTextLabelView: View {
     }
 }
 
-struct DetailTextLabelView_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[2]
-        return DetailTextLabelView(widget: widget)
-    }
+#Preview {
+    let widget = UserData().widgets[2]
+    return DetailTextLabelView(widget: widget)
 }

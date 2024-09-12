@@ -120,6 +120,14 @@ public class NetworkConnection {
             load(from: url, completionHandler: completionHandler)
         }
     }
+    
+    public static func tracker(openHABRootUrl: String) async throws -> DataResponse<Data, AFError> {
+        if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
+            return await load(from: url)
+        } else {
+            throw AFError.invalidURL(url: openHABRootUrl)
+        }
+    }
 
     public static func notification(urlString: String,
                                     completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
@@ -211,17 +219,21 @@ public class NetworkConnection {
         return page(url: pageToLoadUrl, longPolling: longPolling, completionHandler: completionHandler)
     }
 
+    @available(*, renamed: "load(from:timeout:)")
     static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
-        var request = URLRequest(url: url)
-        request.timeoutInterval = timeout ?? 10.0
-
-        os_log("Firing request", log: .viewCycle, type: .debug)
-        let task = NetworkConnection.shared.manager.request(request)
-            .validate()
-            .responseData(completionHandler: completionHandler)
-        task.resume()
+        Task {
+            let result = await load(from: url, timeout: timeout)
+            completionHandler(result)
+        }
     }
 
+    static func load(from url: URL, timeout: Double? = nil) async -> DataResponse<Data, AFError> {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = timeout ?? 10.0
+        os_log("Firing request", log: .viewCycle, type: .debug)
+        return await NetworkConnection.shared.manager.request(request).validate().serializingData().response
+    }
+    
     public func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
         serverCertificateManager.delegate = serverDelegate
         clientCertificateManager.delegate = clientDelegate

@@ -24,7 +24,7 @@ struct OpenHABWatch: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                ContentView(viewModel: userData, settings: settings)
+                ContentView(viewModel: userData )
                     .tabItem {
                         Label("Received", systemImage: "tray.and.arrow.down.fill")
                     }
@@ -33,6 +33,7 @@ struct OpenHABWatch: App {
                         Label("Preferences", systemImage: "person.crop.circle.fill")
                     }
             }
+            .environmentObject(settings)
             .task {
                 let center = UNUserNotificationCenter.current()
                 _ = try? await center.requestAuthorization(
@@ -40,32 +41,28 @@ struct OpenHABWatch: App {
                 )
             }
         }
-
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")
     }
 
     init() {
         // Initialize SVGCoder
-        SDImageCodersManager.shared.addCoder(SDImageSVGCoder.shared)
+        let SVGCoder = SDImageSVGCoder.shared
+        SDImageCodersManager.shared.addCoder(SVGCoder)
         SDWebImageDownloader.shared.config.operationClass = OpenHABImageDownloaderOperation.self
         let alwaysSendCreds = settings.openHABAlwaysSendCreds
         let openHABUsername = settings.openHABUsername
         let openHABPassword = settings.openHABPassword
-
         let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
-            var mutableRequest = request
             guard alwaysSendCreds || request.url?.host?.hasSuffix("myopenhab.org") == true else {
-                return mutableRequest
+                return request
             }
-
             guard !openHABUsername.isEmpty, !openHABPassword.isEmpty else {
-                return mutableRequest
+                return request
             }
-
-            mutableRequest.headers.add(.authorization(username: openHABUsername, password: openHABPassword))
-            return mutableRequest
+            var request = request
+            request.headers.add(.authorization(username: openHABUsername, password: openHABPassword))
+            return request
         }
-
         SDWebImageDownloader.shared.requestModifier = requestModifier
     }
 }

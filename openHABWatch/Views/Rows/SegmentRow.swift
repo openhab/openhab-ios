@@ -15,7 +15,7 @@ import SwiftUI
 
 struct SegmentRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     @State private var favoriteColor = 0
 
@@ -53,14 +53,14 @@ struct SegmentRow: View {
     }
 }
 
-struct SegmentRow_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[4]
-        return Group {
-            SegmentRow(widget: widget)
-                .previewLayout(.fixed(width: 300, height: 70))
-            SegmentRow(widget: widget)
-                .previewDevice("Apple Watch Series 4 - 44mm")
-        }
+#Preview {
+    let widget = UserData().widgets[4]
+    return Group {
+        SegmentRow(widget: widget)
+            .previewLayout(.fixed(width: 300, height: 70))
+        SegmentRow(widget: widget)
+            .previewDevice("Apple Watch Series 4 - 44mm")
     }
+    .environmentObject(ObservableOpenHABDataObject())
+    
 }

@@ -13,7 +13,7 @@ import SwiftUI
 
 struct FrameRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
     var body: some View {
         HStack {
             Text(widget.labelText?.uppercased() ?? "")
@@ -24,9 +24,8 @@ struct FrameRow: View {
     }
 }
 
-struct FrameRow_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[6]
-        return FrameRow(widget: widget)
-    }
+#Preview {
+    let widget = UserData().widgets[6]
+    return FrameRow(widget: widget)
+        .environmentObject(ObservableOpenHABDataObject())
 }

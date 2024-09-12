@@ -13,7 +13,7 @@ import SwiftUI
 
 struct RollershutterRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     var body: some View {
         VStack(spacing: -5) {
@@ -32,7 +32,7 @@ struct RollershutterRow: View {
                     widget.sendCommand("STOP")
                 }
                 Spacer()
-
+                
                 IconWithAction(systemSymbol: .chevronDownCircleFill) {
                     widget.sendCommand("DOWN")
                 }
@@ -43,9 +43,8 @@ struct RollershutterRow: View {
     }
 }
 
-struct Rollershutter_Previews: PreviewProvider {
-    static var previews: some View {
-        let widget = UserData().widgets[5]
-        return RollershutterRow(widget: widget)
-    }
+#Preview {
+    let widget = UserData().widgets[5]
+    return RollershutterRow(widget: widget)
+        .environmentObject(ObservableOpenHABDataObject())
 }

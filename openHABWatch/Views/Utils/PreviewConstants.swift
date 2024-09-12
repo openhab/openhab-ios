@@ -12,13 +12,13 @@
 import Foundation
 
 enum PreviewConstants {
-    static let remoteURLString = "http://192.168.2.15:8081"
+    static let remoteURLString = "http://192.168.2.10:8080"
 
     static let sitemapJson = """
     {
         "id": "watch",
         "title": "watch",
-        "link": "http://192.168.2.15:8081/rest/sitemaps/watch/watch",
+        "link": "http://192.168.2.10:8080/rest/sitemaps/watch/watch",
         "leaf": true,
         "timeout": false,
         "widgets": [
@@ -102,7 +102,7 @@ enum PreviewConstants {
                 "switchSupport": false,
                 "sendFrequency": 0,
                 "item": {
-                    "link": "http://192.168.2.15:8081/rest/items/lcnLightDimmer",
+                    "link": "http://192.168.2.10:8080/rest/items/lcnLightDimmer",
                     "state": "100",
                     "stateDescription": {
                         "pattern": "%s",
