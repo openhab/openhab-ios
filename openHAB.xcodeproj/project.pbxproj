@@ -107,7 +107,6 @@
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA7649DE23FC81A20085CE46 /* Unwrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7649DD23FC81A20085CE46 /* Unwrap.swift */; };
-		DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
@@ -460,6 +459,8 @@
 		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
 		DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABTracker.swift; sourceTree = "<group>"; };
+		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSettingsViewController.swift; sourceTree = "<group>"; };
+		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLegalViewController.swift; sourceTree = "<group>"; };
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UICircleButton.swift; sourceTree = "<group>"; };
@@ -969,14 +970,6 @@
 			name = Models;
 			sourceTree = "<group>";
 		};
-		DFDEE3FF18832293008B26AC /* Util */ = {
-			isa = PBXGroup;
-			children = (
-				DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */,
-			);
-			name = Util;
-			sourceTree = "<group>";
-		};
 		DFFD8FCE18EDBD30003B502A /* Util */ = {
 			isa = PBXGroup;
 			children = (
@@ -1441,7 +1434,6 @@
 				93B7B33128018301009EB296 /* Intents.intentdefinition in Sources */,
 				DA242C622C83588600AFB10D /* SettingsView.swift in Sources */,
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
-				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */,
 				DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,

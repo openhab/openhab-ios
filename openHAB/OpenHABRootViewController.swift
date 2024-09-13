@@ -39,6 +39,7 @@ struct CommandItem: CommItem {
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
+    var cancellables = Set<AnyCancellable>()
 
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
@@ -98,7 +99,7 @@ class OpenHABRootViewController: UIViewController {
         // save this so we know if its changed later
         isDemoMode = Preferences.demomode
         switchToSavedView()
-
+        setupTracker()
         // ready for push notifications
         NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
         // check if we were launched with a notification
@@ -116,6 +117,35 @@ class OpenHABRootViewController: UIViewController {
             switchToSavedView()
             isDemoMode = Preferences.demomode
         }
+    }
+
+    fileprivate func setupTracker() {
+        Publishers.CombineLatest(
+            Preferences.$localUrl,
+            Preferences.$remoteUrl
+        )
+        .sink { (localUrl, remoteUrl) in
+            print("Local URL: \(localUrl), Remote URL: \(remoteUrl)")
+            let connection1 = ConnectionObject(
+                url: localUrl,
+                priority: 0
+            )
+            let connection2 = ConnectionObject(
+                url: remoteUrl,
+                priority: 1
+            )
+            NetworkTracker.shared.startTracking(connectionObjects: [connection1, connection2])
+        }
+        .store(in: &cancellables)
+
+        NetworkTracker.shared.$activeServer
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] activeServer in
+                if let activeServer {
+                    self?.appData?.openHABRootUrl = activeServer.url
+                }
+            }
+            .store(in: &cancellables)
     }
 
     fileprivate func setupSideMenu() {
@@ -302,14 +332,11 @@ class OpenHABRootViewController: UIViewController {
         if components.count == 2 {
             let itemName = String(components[0])
             let itemCommand = String(components[1])
-
-            var cancelable: AnyCancellable?
-            // makeConnectable() + connect() allows us to reference the cancelable var within our closure
-            let state = OpenHABTracker.shared.$state.makeConnectable()
-            // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
-            cancelable = state
-                .sink { newState in
-                    if let openHABUrl = newState.openHABUrl?.absoluteString {
+            // This will only fire onece since we do not retain the return cancelable
+            _ = NetworkTracker.shared.$activeServer
+                .receive(on: DispatchQueue.main)
+                .sink { activeServer in
+                    if let openHABUrl = activeServer?.url {
                         os_log("Sending comand", log: .default, type: .error)
                         let client = HTTPClient(username: Preferences.username, password: Preferences.password)
                         client.doPost(baseURLs: [openHABUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
@@ -323,9 +350,7 @@ class OpenHABRootViewController: UIViewController {
                             }
                         }
                     }
-                    cancelable?.cancel()
                 }
-            _ = state.connect()
         }
     }
 
@@ -383,13 +408,11 @@ class OpenHABRootViewController: UIViewController {
             // nothing
         }
 
-        var cancelable: AnyCancellable?
-        // makeConnectable() + connect() allows us to reference the cancelable var within our closure
-        let state = OpenHABTracker.shared.$state.makeConnectable()
-        // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
-        cancelable = state
-            .sink { newState in
-                if let openHABUrl = newState.openHABUrl?.absoluteString {
+        // This will only fire onece since we do not retain the return cancelable
+        _ = NetworkTracker.shared.$activeServer
+            .receive(on: DispatchQueue.main)
+            .sink { activeServer in
+                if let openHABUrl = activeServer?.url {
                     os_log("Sending comand", log: .default, type: .error)
                     let client = HTTPClient(username: Preferences.username, password: Preferences.password)
                     client.doPost(baseURLs: [openHABUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
@@ -403,9 +426,7 @@ class OpenHABRootViewController: UIViewController {
                         }
                     }
                 }
-                cancelable?.cancel()
             }
-        _ = state.connect()
     }
 
     func showSideMenu() {

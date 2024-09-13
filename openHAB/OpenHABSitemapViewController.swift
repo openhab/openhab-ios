@@ -165,15 +165,23 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             UIApplication.shared.isIdleTimerDisabled = true
         }
 
-        OpenHABTracker.shared.$progress
-            .dropFirst() // This ensures the closure only gets called on actual changes
-            .sink { message in
-                os_log("OpenHABSitemapViewController %{PUBLIC}@", log: .viewCycle, type: .info, message)
-                self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message, theme: .info)
+        NetworkTracker.shared.$status
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                switch status {
+                case .connecting:
+                    self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                case .connectionFailed:
+                    os_log("Tracking error", log: .viewCycle, type: .info)
+                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+                case _:
+                    break
+                }
             }
             .store(in: &trackerCancellables)
 
-        var stateWatcher = OpenHABTracker.shared.$state.eraseToAnyPublisher()
+        var activeServerWatcher = NetworkTracker.shared.$activeServer.eraseToAnyPublisher()
         // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
         if pageUrl == "" {
             // Set self as root view controller
@@ -185,7 +193,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
         } else {
             // we only want to our watcher to notify us about changes, and not the inital value
-            stateWatcher = stateWatcher.dropFirst().eraseToAnyPublisher()
+            activeServerWatcher = activeServerWatcher.dropFirst().eraseToAnyPublisher()
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
                 loadPage(false)
@@ -195,17 +203,12 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             }
         }
         // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will exectue imediately with current values and then again if the network changes, otherwise it will be called on changes only.
-        stateWatcher
-            .sink { newState in
-                if let error = newState.error {
-                    os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
-                    return
-                }
-
-                if let url = newState.openHABUrl {
-                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, url.absoluteString)
-                    self.openHABRootUrl = url.absoluteString
+        activeServerWatcher
+            .receive(on: DispatchQueue.main)
+            .sink { activeServer in
+                if let activeServer {
+                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeServer.url)
+                    self.openHABRootUrl = activeServer.url
                     self.selectSitemap()
                 }
             }
@@ -469,13 +472,12 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     // This is mainly used for navigting to a specific sitemap and path from notifications
     func pushSitemap(name: String, path: String?) {
-        var cancelable: AnyCancellable?
-        // makeConnectable() + connect() allows us to reference the cancelable var within our closure
-        let state = OpenHABTracker.shared.$state.makeConnectable()
         // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
-        cancelable = state
-            .sink { [weak self] newState in
-                if let openHABUrl = newState.openHABUrl?.absoluteString, let self {
+        // since we do not reference the sink cancelable, this will only fire once
+        _ = NetworkTracker.shared.$activeServer
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] activeServer in
+                if let openHABUrl = activeServer?.url, let self {
                     os_log("pushSitemap: pushing page", log: .default, type: .error)
                     let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
                     if let path {
@@ -486,12 +488,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     newViewController.openHABRootUrl = openHABUrl
                     navigationController?.pushViewController(newViewController, animated: true)
                 }
-                cancelable?.cancel()
             }
-        // add it here just in case our view leaves and this is still running
-        cancelable?.store(in: &trackerCancellables)
-        // _ = removes warning about unused results.
-        _ = state.connect()
     }
 
     // load app settings

@@ -21,7 +21,6 @@ class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
     private var hideNavBar = false
-    private var tracker: OpenHABTracker?
     private var activityIndicator: UIActivityIndicatorView!
     private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
@@ -73,27 +72,31 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
-        OpenHABTracker.shared.$state
-            .sink { newState in
-                if let error = newState.error {
-                    os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
-                    self.pageLoadError(message: error.localizedDescription)
-                    return
-                }
-
-                if let url = newState.openHABUrl {
-                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(url.absoluteString)")
-                    self.openHABTrackedRootUrl = url.absoluteString
+        NetworkTracker.shared.$activeServer
+            .receive(on: DispatchQueue.main)
+            .sink { activeServer in
+                if let activeServer {
+                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeServer.url)")
+                    self.openHABTrackedRootUrl = activeServer.url
                     self.loadWebView(force: false)
                 }
             }
             .store(in: &trackerCancellables)
 
-        OpenHABTracker.shared.$progress.sink { message in
-            os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message)
-            self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message, theme: .info)
-        }
-        .store(in: &trackerCancellables)
+        NetworkTracker.shared.$status
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                switch status {
+                case .connecting:
+                    self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                case .connectionFailed:
+                    self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
+                case _:
+                    break
+                }
+            }
+            .store(in: &trackerCancellables)
         startTracker()
     }
 
@@ -203,8 +206,7 @@ class OpenHABWebViewController: OpenHABViewController {
         currentTarget = ""
         clearExistingPage()
         startTracker()
-        // force a network rescan
-        OpenHABTracker.shared.restart()
+        loadWebView(force: true)
     }
 
     override func viewName() -> String {
@@ -304,9 +306,6 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
                 sseTimer?.invalidate()
                 sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                    self.sseTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: false) { _ in
-                        self.reloadView()
-                    }
                     self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
                     self.acceptsCommands = false
                 }

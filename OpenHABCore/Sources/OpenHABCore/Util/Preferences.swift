@@ -9,64 +9,89 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import os.log
 import UIKit
 
-// Convenient access to UserDefaults
-
-// Much shorter as Property Wrappers are available with Swift 5.1
-// Inspired by https://www.avanderlee.com/swift/property-wrappers/
 @propertyWrapper
 public struct UserDefault<T> {
-    let key: String
-    let defaultValue: T
+    private let key: String
+    private let defaultValue: T
+    private let subject: CurrentValueSubject<T, Never>
 
     public var wrappedValue: T {
         get {
-            Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
+            let value = Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
+            return value
         }
         set {
             Preferences.sharedDefaults.set(newValue, forKey: key)
+            let subject = subject
+            DispatchQueue.main.async {
+                subject.send(newValue)
+            }
         }
     }
 
-    init(_ key: String, defaultValue: T) {
+    public init(_ key: String, defaultValue: T) {
         self.key = key
         self.defaultValue = defaultValue
+        let currentValue = Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
+        subject = CurrentValueSubject<T, Never>(currentValue)
+    }
+
+    public var projectedValue: AnyPublisher<T, Never> {
+        subject.eraseToAnyPublisher()
     }
 }
 
-// It would be nice to write something like  @UserDefault @TrimmedURL ("localUrl", defaultValue: "test") static var localUrl: String
-// As long as multiple property wrappers are not supported we need to add a little repetitive boiler plate code
-
 @propertyWrapper
 public struct UserDefaultURL {
-    let key: String
-    let defaultValue: String
+    private let key: String
+    private let defaultValue: String
+    private let subject: CurrentValueSubject<String, Never>
 
     public var wrappedValue: String {
         get {
-            guard let localUrl = Preferences.sharedDefaults.string(forKey: key) else { return defaultValue }
-            let trimmedUri = uriWithoutTrailingSlashes(localUrl).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if !trimmedUri.isValidURL { return defaultValue }
-            return trimmedUri
+            let storedValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
+            let trimmedUri = uriWithoutTrailingSlashes(storedValue).trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmedUri.isValidURL ? trimmedUri : defaultValue
         }
         set {
+            print("Setting Preferences")
             Preferences.sharedDefaults.set(newValue, forKey: key)
+            let subject = subject
+            let defaultValue = defaultValue
+            // Trim and validate the new URL
+            let trimmedUri = uriWithoutTrailingSlashes(newValue).trimmingCharacters(in: .whitespacesAndNewlines)
+            DispatchQueue.main.async {
+                if trimmedUri.isValidURL {
+                    print("Sending trimedUri change \(trimmedUri)")
+                    subject.send(trimmedUri)
+                } else {
+                    print("Sendingdefault URL change \(trimmedUri)")
+                    subject.send(defaultValue)
+                }
+            }
         }
     }
 
-    init(_ key: String, defaultValue: String) {
+    public init(_ key: String, defaultValue: String) {
         self.key = key
         self.defaultValue = defaultValue
+        let currentValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
+        subject = CurrentValueSubject<String, Never>(currentValue)
     }
 
-    func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
-        if !hostUri.hasSuffix("/") {
-            return hostUri
-        }
+    public var projectedValue: AnyPublisher<String, Never> {
+        subject.eraseToAnyPublisher()
+    }
 
-        return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
+    private func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
+        if hostUri.hasSuffix("/") {
+            return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
+        }
+        return hostUri
     }
 }
 
@@ -82,7 +107,6 @@ public enum Preferences {
     @UserDefault("password", defaultValue: "test") public static var password: String
     @UserDefault("alwaysSendCreds", defaultValue: false) public static var alwaysSendCreds: Bool
     @UserDefault("ignoreSSL", defaultValue: false) public static var ignoreSSL: Bool
-    // @UserDefault("sitemapName", defaultValue: "watch") static public var sitemapName: String
     @UserDefault("demomode", defaultValue: true) public static var demomode: Bool
     @UserDefault("idleOff", defaultValue: false) public static var idleOff: Bool
     @UserDefault("realTimeSliders", defaultValue: false) public static var realTimeSliders: Bool
