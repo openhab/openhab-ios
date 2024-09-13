@@ -540,17 +540,6 @@ extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
     }
 }
 
-// MARK: - OpenHABSelectionTableViewControllerDelegate
-
-extension OpenHABSitemapViewController: OpenHABSelectionTableViewControllerDelegate {
-    // send command on selected selection widget mapping
-    func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
-        let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
-        sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
-    }
-}
-
 // MARK: - UISearchResultsUpdating
 
 extension OpenHABSitemapViewController: UISearchResultsUpdating {

@@ -71,7 +71,6 @@ struct ImageView: View {
 struct DrawerView: View {
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
-    @State private var drawerItems: [OpenHABDrawerItem] = []
     @State private var selectedSection: Int?
 
     var openHABUsername = ""
@@ -197,11 +196,8 @@ struct DrawerView: View {
                 case .label: sitemaps.sort { $0.label < $1.label }
                 case .name: sitemaps.sort { $0.name < $1.name }
                 }
-
-                drawerItems.removeAll()
             case let .failure(error):
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                drawerItems.removeAll()
             }
         }
     }
