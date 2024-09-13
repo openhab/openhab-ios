@@ -234,6 +234,6 @@ struct DrawerView: View {
     }
 }
 
-// #Preview {
-//     DrawerView(onDismiss: {.webview -> Void})
-// }
+#Preview {
+    DrawerView { _ in }
+}
