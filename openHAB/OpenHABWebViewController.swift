@@ -197,7 +197,6 @@ class OpenHABWebViewController: OpenHABViewController {
     func pageLoadError(message: String) {
         os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
         showActivityIndicator(show: false)
-        // webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
         currentTarget = ""
     }

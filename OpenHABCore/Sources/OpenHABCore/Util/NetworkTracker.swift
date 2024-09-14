@@ -40,7 +40,6 @@ public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
     @Published public private(set) var activeServer: ConnectionObject?
     @Published public private(set) var status: NetworkStatus = .notConnected
-    private var sseTask: URLSessionDataTask?
     private var monitor: NWPathMonitor
     private var monitorQueue = DispatchQueue.global(qos: .background)
     private var connectionObjects: [ConnectionObject] = []
