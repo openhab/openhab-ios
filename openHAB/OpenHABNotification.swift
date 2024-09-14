@@ -12,12 +12,12 @@
 import Foundation
 
 class OpenHABNotification: NSObject {
-    var message = ""
+    var message: String?
     var created: Date?
-    var icon = ""
-    var severity = ""
+    var icon: String?
+    var severity: String?
 
-    init(message: String, created: Date?) {
+    init(message: String?, created: Date?) {
         self.message = message
         self.created = created
     }
@@ -46,8 +46,8 @@ class OpenHABNotification: NSObject {
 // Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
 extension OpenHABNotification {
     public struct CodingData: Decodable {
-        let id: String
-        let message: String
+        let id: String?
+        let message: String?
         let v: Int
         let created: Date?
 
