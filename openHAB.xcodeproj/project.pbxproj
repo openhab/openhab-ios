@@ -68,7 +68,6 @@
 		93F8065027AE7A830035A6B0 /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8064F27AE7A830035A6B0 /* SideMenu */; };
 		93F8065327AE7B580035A6B0 /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 93F8065227AE7B580035A6B0 /* SVGKit */; };
 		A07ED02E2402EE6E006588FE /* OpenHABWatchTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07ED02D2402EE6E006588FE /* OpenHABWatchTracker.swift */; };
-		A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */; };
 		A3F4C3A51A49A5940019A09F /* MainLaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */; };
 		B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */; };
 		DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0749DD23E0B5950057FA83 /* ColorPickerRow.swift */; };
@@ -87,6 +86,7 @@
 		DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
+		DA242C622C83588600AFB10D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA242C612C83588600AFB10D /* SettingsView.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA2DC23221F2736C00830730 /* OpenHABJSONParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */; };
 		DA2E0AA423DC96E9009B0A99 /* EncircledIconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0AA323DC96E9009B0A99 /* EncircledIconWithAction.swift */; };
@@ -97,8 +97,14 @@
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
+		DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */; };
+		DA5ED9C02C8509C2004875E0 /* ClientCertificatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
 		DA6587222370C9D8007E2E7F /* PreferencesHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */; };
+		DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */; };
+		DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */; };
+		DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */; };
+		DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */; };
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA7649DE23FC81A20085CE46 /* Unwrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7649DD23FC81A20085CE46 /* Unwrap.swift */; };
@@ -107,6 +113,7 @@
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
 		DA9721C324E29A8F0092CCFD /* UserDefaultsBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */; };
+		DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9F81862C85020F00B47B72 /* RTFTextView.swift */; };
 		DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */; };
 		DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */; };
 		DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */; };
@@ -118,7 +125,6 @@
 		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
 		DACB636227D3FC6500041931 /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = DACB636127D3FC6500041931 /* error.png */; };
 		DACB636327D3FC6500041931 /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = DACB636127D3FC6500041931 /* error.png */; };
-		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */; };
@@ -142,13 +148,9 @@
 		DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581723DC4A050018B495 /* ImageRow.swift */; };
 		DAF4581E23DC60020018B495 /* ImageRawRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4581D23DC60020018B495 /* ImageRawRow.swift */; };
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
-		DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
-		DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
 		DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
-		DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift */; };
-		DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.swift */; };
 		DF4B84071885AE0E00F34902 /* blankicon.png in Resources */ = {isa = PBXBuildFile; fileRef = DF4B84061885AE0E00F34902 /* blankicon.png */; };
 		DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */; };
@@ -163,8 +165,6 @@
 		DFB2624418830A3600D3244D /* OpenHABSitemapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB2624318830A3600D3244D /* OpenHABSitemapViewController.swift */; };
 		DFB2624618830A3600D3244D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFB2624518830A3600D3244D /* Images.xcassets */; };
 		DFDA3CEA193CADB200888039 /* ping.wav in Resources */ = {isa = PBXBuildFile; fileRef = DFDA3CE9193CADB200888039 /* ping.wav */; };
-		DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */; };
-		DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */; };
 		DFDF45311932042B00A6E581 /* legal.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFDF45301932042B00A6E581 /* legal.rtf */; };
 		DFE10414197415F900D94943 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE10413197415F900D94943 /* Security.framework */; };
 		DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */; };
@@ -318,7 +318,6 @@
 		938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Localization.swift"; sourceTree = "<group>"; };
 		938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScaleAspectFitImageView.swift; sourceTree = "<group>"; };
 		A07ED02D2402EE6E006588FE /* OpenHABWatchTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OpenHABWatchTracker.swift; path = "openHABWatch Extension/OpenHABWatchTracker.swift"; sourceTree = SOURCE_ROOT; };
-		A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABClientCertificatesViewController.swift; sourceTree = "<group>"; };
 		A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainLaunchScreen.xib; path = ../MainLaunchScreen.xib; sourceTree = "<group>"; };
 		B7D5ECE021499E55001B0EC6 /* MapViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewTableViewCell.swift; sourceTree = "<group>"; };
 		DA0749DD23E0B5950057FA83 /* ColorPickerRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerRow.swift; sourceTree = "<group>"; };
@@ -374,6 +373,7 @@
 		DA1C2E6D230DC28F00FACFB0 /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
 		DA1C2E6E230DC28F00FACFB0 /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
+		DA242C612C83588600AFB10D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23121F2736C00830730 /* OpenHABJSONParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABJSONParserTests.swift; sourceTree = "<group>"; };
@@ -385,8 +385,14 @@
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportRow.swift; sourceTree = "<group>"; };
 		DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportUITableViewCell.swift; sourceTree = "<group>"; };
+		DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesViewModel.swift; sourceTree = "<group>"; };
+		DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesView.swift; sourceTree = "<group>"; };
 		DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		DA6587212370C9D8007E2E7F /* PreferencesHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesHostingController.swift; sourceTree = "<group>"; };
+		DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerView.swift; sourceTree = "<group>"; };
+		DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
+		DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
 		DA7224D123828D3300712D20 /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
 		DA72E1B0236DE9F200B8EF3A /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppState.swift; path = "openHABWatch Extension/app/AppState.swift"; sourceTree = "<group>"; };
 		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppMessageService.swift; path = "openHABWatch Extension/external/AppMessageService.swift"; sourceTree = "<group>"; };
@@ -397,6 +403,7 @@
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
 		DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsBacked.swift; sourceTree = "<group>"; };
+		DA9F81862C85020F00B47B72 /* RTFTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTFTextView.swift; sourceTree = "<group>"; };
 		DAA42BA721DC97DF00244B2A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BA921DC983B00244B2A /* VideoUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUITableViewCell.swift; sourceTree = "<group>"; };
 		DAA42BAB21DC984A00244B2A /* WebUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebUITableViewCell.swift; sourceTree = "<group>"; };
@@ -413,7 +420,6 @@
 		DAD488B3287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = Resources/nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		DAD488B4287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABNotificationsViewController.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollershutterCell.swift; sourceTree = "<group>"; };
@@ -435,13 +441,9 @@
 		DAF4581723DC4A050018B495 /* ImageRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRow.swift; sourceTree = "<group>"; };
 		DAF4581D23DC60020018B495 /* ImageRawRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRawRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
-		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
-		DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSelectionTableViewController.swift; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
 		DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABNotification.swift; sourceTree = "<group>"; };
-		DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDrawerTableViewController.swift; sourceTree = "<group>"; };
-		DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDrawerItem.swift; sourceTree = "<group>"; };
 		DF4B84031885A53700F34902 /* OpenHABDataObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDataObject.swift; sourceTree = "<group>"; };
 		DF4B84061885AE0E00F34902 /* blankicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blankicon.png; sourceTree = "<group>"; };
 		DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameUITableViewCell.swift; sourceTree = "<group>"; };
@@ -459,9 +461,7 @@
 		DFB2624518830A3600D3244D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		DFB2624C18830A3600D3244D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		DFDA3CE9193CADB200888039 /* ping.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ping.wav; sourceTree = "<group>"; };
-		DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABSettingsViewController.swift; sourceTree = "<group>"; };
 		DFDEE4161883C6A5008B26AC /* OpenHABTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABTracker.swift; sourceTree = "<group>"; };
-		DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABLegalViewController.swift; sourceTree = "<group>"; };
 		DFDF45301932042B00A6E581 /* legal.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = legal.rtf; sourceTree = "<group>"; };
 		DFE10413197415F900D94943 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UICircleButton.swift; sourceTree = "<group>"; };
@@ -824,24 +824,6 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
-		DF4A02291CF3157B006C3456 /* Drawer */ = {
-			isa = PBXGroup;
-			children = (
-				DF4A02411CF34096006C3456 /* OpenHABDrawerItem.swift */,
-				DF4A022B1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift */,
-				DF4A022D1CF315D3006C3456 /* Widgets */,
-			);
-			name = Drawer;
-			sourceTree = "<group>";
-		};
-		DF4A022D1CF315D3006C3456 /* Widgets */ = {
-			isa = PBXGroup;
-			children = (
-				DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */,
-			);
-			name = Widgets;
-			sourceTree = "<group>";
-		};
 		DF4B83FD18857FA100F34902 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -850,13 +832,13 @@
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABSitemapViewController.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
-				DFDEE3FC18831099008B26AC /* OpenHABSettingsViewController.swift */,
-				DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */,
-				DFDF452E1932032B00A6E581 /* OpenHABLegalViewController.swift */,
-				DF06F1F518FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift */,
-				A07EF79F2230C0A20040919F /* OpenHABClientCertificatesViewController.swift */,
+				DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */,
+				DA242C612C83588600AFB10D /* SettingsView.swift */,
+				DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */,
+				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
+				DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */,
+				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
 				DF4B84101886DA9900F34902 /* Widgets */,
-				DF4A02291CF3157B006C3456 /* Drawer */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
 			);
 			name = UI;
@@ -895,6 +877,7 @@
 				DAEAA89E21E6B16600267EA3 /* UITableView.swift */,
 				DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */,
 				DA21EAE12339621C001AB415 /* Throttler.swift */,
+				DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -954,8 +937,8 @@
 				A3F4C3A41A49A5940019A09F /* MainLaunchScreen.xib */,
 				DFB2623A18830A3600D3244D /* AppDelegate.swift */,
 				DFDEE3FE1883228C008B26AC /* Models */,
-				DF4B83FD18857FA100F34902 /* UI */,
 				DF4B84051885AD4600F34902 /* Images */,
+				DF4B83FD18857FA100F34902 /* UI */,
 				DFDEE3FF18832293008B26AC /* Util */,
 				1224F78B228A89E300750965 /* Watch */,
 				DFB2623118830A3600D3244D /* Supporting Files */,
@@ -983,6 +966,7 @@
 			children = (
 				DF4B84031885A53700F34902 /* OpenHABDataObject.swift */,
 				DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */,
+				DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -1458,6 +1442,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				93B7B33128018301009EB296 /* Intents.intentdefinition in Sources */,
+				DA242C622C83588600AFB10D /* SettingsView.swift in Sources */,
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				DA7E1E492230227E002AEFD8 /* OpenHABTracker.swift in Sources */,
 				65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */,
@@ -1465,29 +1450,28 @@
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
-				DF05EF121D00696200DD646D /* DrawerUITableViewCell.swift in Sources */,
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
+				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
+				DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */,
 				DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
-				DF4A02421CF34096006C3456 /* OpenHABDrawerItem.swift in Sources */,
+				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
+				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
 				DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */,
-				DF4A022C1CF315BA006C3456 /* OpenHABDrawerTableViewController.swift in Sources */,
-				DFDF452F1932032B00A6E581 /* OpenHABLegalViewController.swift in Sources */,
+				DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */,
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
-				DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */,
 				DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */,
+				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
 				938BF9D324EFD0B700E6B52F /* UIViewController+Localization.swift in Sources */,
-				DF06F1F618FE7A160011E7B9 /* OpenHABSelectionTableViewController.swift in Sources */,
 				DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */,
 				DAF0A28F2C56F1EE00A14A6A /* ColorPickerCell.swift in Sources */,
 				6595667E28E0BE8E00E8A53B /* MulticastDelegate.swift in Sources */,
-				DFDEE3FD18831099008B26AC /* OpenHABSettingsViewController.swift in Sources */,
 				938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABSitemapViewController.swift in Sources */,
@@ -1499,8 +1483,8 @@
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
-				A07EF7A02230C0A30040919F /* OpenHABClientCertificatesViewController.swift in Sources */,
 				938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */,
+				DA5ED9C02C8509C2004875E0 /* ClientCertificatesView.swift in Sources */,
 				653B54C0285C0AC700298ECD /* OpenHABRootViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1652,12 +1636,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
@@ -1674,7 +1656,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app.openHABIntents";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -1740,12 +1721,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1766,7 +1745,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app.NotificationService";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1922,13 +1901,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "openHABWatch Extension/openHABWatch Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
-				"DEVELOPMENT_TEAM[sdk=watchos*]" = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = openHABWatch/Info.plist;
@@ -1943,7 +1920,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=watchos*]" = "match AppStore org.openhab.app.watchkitapp";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -2213,11 +2189,9 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = openHAB/openHAB.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -2236,7 +2210,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INSTALL_OBJC_HEADER = NO;

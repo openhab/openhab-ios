@@ -15,13 +15,16 @@ import OpenHABCore
 import os.log
 import SafariServices
 import SideMenu
+import SwiftUI
 import UIKit
 
 enum TargetController {
-    case sitemap
-    case settings
-    case notifications
     case webview
+    case settings
+    case sitemap(String)
+    case notifications
+    case browser(String)
+    case tile(String)
 }
 
 protocol ModalHandler: AnyObject {
@@ -127,13 +130,6 @@ class OpenHABRootViewController: UIViewController {
 
         // Define the menus
 
-        SideMenuManager.default.rightMenuNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? SideMenuNavigationController
-
-        // Enable gestures. The left and/or right menus must be set up above for these to work.
-        // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
-        SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
-        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
-
         let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
         presentationStyle.presentingEndAlpha = 1
         presentationStyle.onTopShadowOpacity = 0.5
@@ -142,9 +138,74 @@ class OpenHABRootViewController: UIViewController {
         settings.statusBarEndAlpha = 0
 
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
-        if let menu = SideMenuManager.default.rightMenuNavigationController {
-            let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
-            drawer?.delegate = self
+
+        let drawerView = DrawerView { mode in
+            self.handleDismiss(mode: mode)
+        }
+        let hostingController = UIHostingController(rootView: drawerView)
+        let menu = SideMenuNavigationController(rootViewController: hostingController)
+
+        SideMenuManager.default.rightMenuNavigationController = menu
+
+        // Enable gestures. The left and/or right menus must be set up above for these to work.
+        // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
+        SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
+        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
+    }
+
+    private func openTileURL(_ urlString: String) {
+        // Use SFSafariViewController in SwiftUI with UIViewControllerRepresentable
+        // Dependent on $OPENHAB_CONF/services/runtime.cfg
+        // Can either be an absolute URL, a path (sometimes malformed)
+        if !urlString.isEmpty {
+            let url: URL? = if urlString.hasPrefix("http") {
+                URL(string: urlString)
+            } else {
+                Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: urlString.prepare()).url
+            }
+            openURL(url: url)
+        }
+    }
+
+    private func openURL(url: URL?) {
+        if let url {
+            let config = SFSafariViewController.Configuration()
+            config.entersReaderIfAvailable = true
+            let vc = SFSafariViewController(url: url, configuration: config)
+            present(vc, animated: true)
+        }
+    }
+
+    private func handleDismiss(mode: TargetController) {
+        switch mode {
+        case .webview:
+            // Handle webview navigation or state update
+            print("Dismissed to WebView")
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
+            switchView(target: .webview)
+        case .settings:
+            print("Dismissed to Settings")
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .settings)
+            }
+        case let .sitemap(sitemap):
+            Preferences.defaultSitemap = sitemap
+            appData?.sitemapViewController?.pageUrl = ""
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .sitemap(sitemap))
+            }
+        case .notifications:
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .notifications)
+            }
+        case let .browser(urlString):
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .browser(urlString))
+            }
+        case let .tile(urlString):
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .tile(urlString))
+            }
         }
     }
 
@@ -316,11 +377,9 @@ class OpenHABRootViewController: UIViewController {
         if let menu = SideMenuManager.default.rightMenuNavigationController {
             // don't try and push an already visible menu less you crash the app
             dismiss(animated: false) {
-                var topMostViewController: UIViewController? = if #available(iOS 13, *) {
+                var topMostViewController: UIViewController? =
                     UIApplication.shared.connectedScenes.flatMap { ($0 as? UIWindowScene)?.windows ?? [] }.last { $0.isKeyWindow }?.rootViewController
-                } else {
-                    UIApplication.shared.keyWindow?.rootViewController
-                }
+
                 while let presentedViewController = topMostViewController?.presentedViewController {
                     topMostViewController = presentedViewController
                 }
@@ -344,7 +403,12 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchView(target: TargetController) {
-        let targetView = target == .sitemap ? sitemapViewController : webViewController
+        let targetView =
+            if case .sitemap = target {
+                sitemapViewController
+            } else {
+                webViewController
+            }
 
         if currentView != targetView {
             if currentView != nil {
@@ -367,10 +431,10 @@ class OpenHABRootViewController: UIViewController {
 
     private func switchToSavedView() {
         if Preferences.demomode {
-            switchView(target: .sitemap)
+            switchView(target: .sitemap(""))
         } else {
             os_log("OpenHABRootViewController switchToSavedView %@", log: .viewCycle, type: .info, Preferences.defaultView == "sitemap" ? "sitemap" : "web")
-            switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
+            switchView(target: Preferences.defaultView == "sitemap" ? .sitemap("") : .webview)
         }
     }
 }
@@ -391,19 +455,17 @@ extension OpenHABRootViewController: ModalHandler {
         case .sitemap:
             switchView(target: to)
         case .settings:
-            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
-                navigationController?.pushViewController(newViewController, animated: true)
-            }
+            let hostingController = UIHostingController(rootView: SettingsView())
+            navigationController?.pushViewController(hostingController, animated: true)
         case .notifications:
-            if navigationController?.visibleViewController is OpenHABNotificationsViewController {
-                os_log("Notifications are already open", log: .notifications, type: .info)
-            } else {
-                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
-                    navigationController?.pushViewController(newViewController, animated: true)
-                }
-            }
+            let hostingController = UIHostingController(rootView: NotificationsView())
+            navigationController?.pushViewController(hostingController, animated: true)
         case .webview:
             switchView(target: to)
+        case .browser:
+            break
+        case let .tile(urlString):
+            openTileURL(urlString)
         }
     }
 }

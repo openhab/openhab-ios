@@ -16,15 +16,19 @@ class OpenHABNotification: NSObject {
     var created: Date?
     var icon = ""
     var severity = ""
+    var id = ""
 
-    init(message: String, created: Date?) {
+    init(message: String = "", created: Date? = nil, icon: String = "", severity: String = "", id: String = "") {
         self.message = message
         self.created = created
+        self.icon = icon
+        self.severity = severity
+        self.id = id
     }
 
-    init(dictionary: [String: Any]) {
+    convenience init(dictionary: [String: Any]) {
         let propertyNames: Set = ["message", "icon", "severity"]
-        super.init()
+        self.init()
         let keyArray = dictionary.keys
         for key in keyArray {
             if key as String == "created" {
@@ -63,6 +67,6 @@ extension OpenHABNotification {
 // Convenience method to convert a decoded value into a proper OpenHABNotification instance
 extension OpenHABNotification.CodingData {
     var openHABNotification: OpenHABNotification {
-        OpenHABNotification(message: message, created: created)
+        OpenHABNotification(message: message, created: created, id: id)
     }
 }
