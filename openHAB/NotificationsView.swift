@@ -32,7 +32,7 @@ struct NotificationRow: View {
                 .frame(width: 40, height: 40)
                 .cornerRadius(8)
             VStack(alignment: .leading) {
-                Text(notification.message)
+                Text(notification.message ?? "")
                     .font(.body)
                 if let timeStamp = notification.created {
                     Text(dateString(from: timeStamp))
