@@ -11,6 +11,7 @@
 
 import Combine
 import OpenHABCore
+import os
 import SwiftUI
 
 struct ColorPickerView: View {
@@ -22,6 +23,8 @@ struct ColorPickerView: View {
     @ObservedObject var throttler = Throttler(maxInterval: 0.3)
 
     var widget: OpenHABWidget? // OpenHAB widget for sending commands
+
+    private let logger = Logger(subsystem: "org.openhab.app", category: "ColorPickerView")
 
     var body: some View {
         VStack {
@@ -64,7 +67,7 @@ struct ColorPickerView: View {
     // Send the color update to the widget
     func sendColorUpdate() {
         let command = "\(hue),\(saturation),\(brightness)"
-        print("Sending command: \(command)")
+        logger.debug("Sending command: \(command)")
         widget?.sendCommand(command)
     }
 }

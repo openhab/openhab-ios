@@ -552,11 +552,14 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
 
 extension OpenHABSitemapViewController: ColorPickerCellDelegate {
     func didPressColorButton(_ cell: ColorPickerCell?) {
+        let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell {
             let widget = relevantPage?.widgets[widgetTableView.indexPath(for: cell)?.row ?? 0]
-            let hostingController = UIHostingController(rootView: ColorPickerView(widget: widget))
-            hostingController.title = widget?.labelText
-            navigationController?.pushViewController(hostingController, animated: true)
+            colorPickerViewController?.title = widget?.labelText
+            colorPickerViewController?.widget = widget
+        }
+        if let colorPickerViewController {
+            navigationController?.pushViewController(colorPickerViewController, animated: true)
         }
     }
 }
@@ -679,7 +682,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                         os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
                     }
                 }
-
                 cell.imageView?.kf.setImage(
                     with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                     placeholder: UIImage(named: "blankicon.png"),
@@ -740,14 +742,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         } else if widget?.type == .selection {
             os_log("Selected selection widget", log: .viewCycle, type: .info)
             selectedWidgetRow = indexPath.row
-//            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-//            selectionViewController.title = selectedWidget?.labelText
-//            selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
-//            selectionViewController.delegate = self
-//            selectionViewController.selectionItem = selectedWidget?.item
-//            navigationController?.pushViewController(selectionViewController, animated: true)
-
             let hostingController = UIHostingController(rootView: SelectionView(
                 mappings: selectedWidget?.mappingsOrItemOptions ?? [],
                 selectionItem:
@@ -756,7 +751,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     set: { selectedWidget?.item = $0 }
                 ),
                 onSelection: { selectedMappingIndex in
-
                     let selectedWidget: OpenHABWidget? = self.relevantPage?.widgets[self.selectedWidgetRow]
                     let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
                     self.sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
