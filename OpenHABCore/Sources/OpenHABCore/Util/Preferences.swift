@@ -58,7 +58,6 @@ public struct UserDefaultURL {
             return trimmedUri.isValidURL ? trimmedUri : defaultValue
         }
         set {
-            print("Setting Preferences")
             Preferences.sharedDefaults.set(newValue, forKey: key)
             let subject = subject
             let defaultValue = defaultValue
@@ -66,10 +65,8 @@ public struct UserDefaultURL {
             let trimmedUri = uriWithoutTrailingSlashes(newValue).trimmingCharacters(in: .whitespacesAndNewlines)
             DispatchQueue.main.async {
                 if trimmedUri.isValidURL {
-                    print("Sending trimedUri change \(trimmedUri)")
                     subject.send(trimmedUri)
                 } else {
-                    print("Sendingdefault URL change \(trimmedUri)")
                     subject.send(defaultValue)
                 }
             }

@@ -12,6 +12,7 @@
 import Alamofire
 import Foundation
 import Network
+import os.log
 
 // TODO: these strings should reference Localizable keys
 public enum NetworkStatus: String {
@@ -48,10 +49,10 @@ public final class NetworkTracker: ObservableObject {
         monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { [weak self] path in
             if path.status == .satisfied {
-                print("Network status: Connected")
+                os_log("Network status: Connected", log: OSLog.default, type: .info)
                 self?.attemptConnection()
             } else {
-                print("Network status: Disconnected")
+                os_log("Network status: Disconnected", log: OSLog.default, type: .info)
                 self?.updateStatus(.notConnected)
             }
         }
@@ -73,10 +74,10 @@ public final class NetworkTracker: ObservableObject {
         NetworkConnection.tracker(openHABRootUrl: activeServer.url) { [weak self] response in
             switch response.result {
             case .success:
-                print("Network status: Active server is reachable: \(activeServer.url)")
+                os_log("Network status: Active server is reachable: %{PUBLIC}@", log: OSLog.default, type: .info, activeServer.url)
                 self?.updateStatus(.connected) // If reachable, we're done
             case .failure:
-                print("Network status: Active server is not reachable: \(activeServer.url)")
+                os_log("Network status: Active server is not reachable: %{PUBLIC}@", log: OSLog.default, type: .error, activeServer.url)
                 self?.attemptConnection() // If not reachable, run the connection logic
             }
         }
@@ -84,7 +85,7 @@ public final class NetworkTracker: ObservableObject {
 
     private func attemptConnection() {
         guard !connectionObjects.isEmpty else {
-            print("Network status: No connection objects available.")
+            os_log("Network status: No connection objects available.", log: OSLog.default, type: .error)
             updateStatus(.notConnected)
             return
         }
@@ -121,11 +122,11 @@ public final class NetworkTracker: ObservableObject {
                         }
                         dispatchGroup.leave()
                     } else {
-                        print("Network status: Failed version when connecting to: \(connection.url)")
+                        os_log("Network status: Failed version when connecting to: %{PUBLIC}@", log: OSLog.default, type: .error, connection.url)
                         dispatchGroup.leave()
                     }
                 case let .failure(error):
-                    print("Network status: Failed connection to: \(connection.url) : \(error.localizedDescription)")
+                    os_log("Network status: Failed connection to: %{PUBLIC}@ : %{PUBLIC}@", log: OSLog.default, type: .error, connection.url, error.localizedDescription)
                     dispatchGroup.leave()
                 }
             }
@@ -144,18 +145,18 @@ public final class NetworkTracker: ObservableObject {
 
         dispatchGroup.notify(queue: .main) {
             if let highestPriorityConnection {
-                print("Network status: Highest priority connection established: \(highestPriorityConnection.url)")
+                os_log("Network status: Highest priority connection established: %{PUBLIC}@", log: OSLog.default, type: .info, highestPriorityConnection.url)
             } else if let nonPriorityConnection {
-                print("Network status: Non-priority connection established: \(nonPriorityConnection.url)")
+                os_log("Network status: Non-priority connection established: %{PUBLIC}@", log: OSLog.default, type: .info, nonPriorityConnection.url)
             } else {
-                print("Network status: No server responded.")
+                os_log("Network status: No server responded.", log: OSLog.default, type: .error)
                 self.updateStatus(.connectionFailed)
             }
         }
     }
 
     private func setActiveServer(_ server: ConnectionObject) {
-        print("Network status: setActiveServer: \(server.url)")
+        os_log("Network status: setActiveServer: %{PUBLIC}@", log: OSLog.default, type: .info, server.url)
 
         if activeServer != server {
             activeServer = server
@@ -172,7 +173,7 @@ public final class NetworkTracker: ObservableObject {
     private func getServerInfoFromData(data: Data) -> Int {
         do {
             let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
-            // OH versions 2.0 through 2.4 return "1" as thier version, so set the floor to 2 so we do not think this is a OH 1.x serevr
+            // OH versions 2.0 through 2.4 return "1" as their version, so set the floor to 2 so we do not think this is an OH 1.x server
             return max(2, Int(serverProperties.version) ?? 2)
         } catch {
             return -1

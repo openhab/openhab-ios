@@ -125,7 +125,6 @@ class OpenHABRootViewController: UIViewController {
             Preferences.$remoteUrl
         )
         .sink { (localUrl, remoteUrl) in
-            print("Local URL: \(localUrl), Remote URL: \(remoteUrl)")
             let connection1 = ConnectionObject(
                 url: localUrl,
                 priority: 0
