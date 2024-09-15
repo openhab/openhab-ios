@@ -14,7 +14,7 @@ import OpenHABCore
 import SwiftUI
 
 struct MapView: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(
             latitude: 40,
@@ -38,10 +38,10 @@ struct MapView: View {
     }
 }
 
-struct MapView_Previews: PreviewProvider {
+ struct MapView_Previews: PreviewProvider {
     static var previews: some View {
         let widget = UserData().widgets[9]
         return MapView(widget: widget)
             .previewDevice("Apple Watch Series 5 - 44mm")
     }
-}
+ }

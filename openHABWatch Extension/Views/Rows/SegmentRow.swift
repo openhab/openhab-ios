@@ -14,7 +14,7 @@ import os.log
 import SwiftUI
 
 struct SegmentRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     @State private var favoriteColor = 0

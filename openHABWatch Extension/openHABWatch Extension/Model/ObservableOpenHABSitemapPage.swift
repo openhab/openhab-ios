@@ -15,19 +15,19 @@ import os.log
 
 class ObservableOpenHABSitemapPage: NSObject {
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
-    var widgets: [ObservableOpenHABWidget] = []
+    var widgets: [OpenHABWidget] = []
     var pageId = ""
     var title = ""
     var link = ""
     var leaf = false
 
-    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [ObservableOpenHABWidget]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, widgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title
         self.link = link
         self.leaf = leaf
-        var tempWidgets = [ObservableOpenHABWidget]()
+        var tempWidgets = [OpenHABWidget]()
         tempWidgets.flatten(widgets)
         self.widgets = tempWidgets
         for widget in self.widgets {
@@ -37,7 +37,7 @@ class ObservableOpenHABSitemapPage: NSObject {
         }
     }
 
-    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [ObservableOpenHABWidget]) {
+    init(pageId: String, title: String, link: String, leaf: Bool, expandedWidgets: [OpenHABWidget]) {
         super.init()
         self.pageId = pageId
         self.title = title
@@ -65,7 +65,7 @@ extension ObservableOpenHABSitemapPage {
         let title: String?
         let link: String?
         let leaf: Bool?
-        let widgets: [ObservableOpenHABWidget.CodingData]?
+        let widgets: [OpenHABWidget.CodingData]?
 
         private enum CodingKeys: String, CodingKey {
             case pageId = "id"
@@ -85,7 +85,7 @@ extension ObservableOpenHABSitemapPage.CodingData {
 }
 
 extension ObservableOpenHABSitemapPage {
-    func filter(_ isIncluded: (ObservableOpenHABWidget) throws -> Bool) rethrows -> ObservableOpenHABSitemapPage {
+    func filter(_ isIncluded: (OpenHABWidget) throws -> Bool) rethrows -> ObservableOpenHABSitemapPage {
         let filteredOpenHABSitemapPage = try ObservableOpenHABSitemapPage(
             pageId: pageId,
             title: title,

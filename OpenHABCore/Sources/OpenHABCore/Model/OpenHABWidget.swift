@@ -14,41 +14,29 @@ import Foundation
 import MapKit
 import os.log
 
-protocol Widget: AnyObject {
-    //  Recursive constraints possible as of Swift 4.1
-    associatedtype ChildWidget: Widget
+public enum WidgetTypeEnum {
+    case switcher(Bool)
+    case slider //
+    case segmented(Int)
+    case unassigned
+    case rollershutter
+    case frame
+    case setpoint
+    case selection
+    case colorpicker
+    case chart
+    case image
+    case video
+    case webview
+    case mapview
 
-    var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)? { get set }
-    var widgetId: String { get set }
-    var label: String { get set }
-    var icon: String { get set }
-    var type: String { get set }
-    var url: String { get set }
-    var period: String { get set }
-    var minValue: Double { get set }
-    var maxValue: Double { get set }
-    var step: Double { get set }
-    var refresh: Int { get set }
-    var height: Double { get set }
-    var isLeaf: Bool { get set }
-    var iconColor: String { get set }
-    var labelcolor: String { get set }
-    var valuecolor: String { get set }
-    var service: String { get set }
-    var state: String { get set }
-    var text: String { get set }
-    var legend: Bool { get set }
-    var encoding: String { get set }
-    var item: OpenHABItem? { get set }
-    var linkedPage: OpenHABPage? { get set }
-    var mappings: [OpenHABWidgetMapping] { get set }
-    var image: UIImage? { get set }
-    var widgets: [ChildWidget] { get set }
-
-    func flatten(_: [ChildWidget])
+    public var boolState: Bool {
+        guard case let .switcher(value) = self else { return false }
+        return value
+    }
 }
 
-public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
+public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     public enum WidgetType: String {
         case chart = "Chart"
         case colorpicker = "Colorpicker"
@@ -71,7 +59,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
-    public var label = ""
+    @Published public var label = ""
     public var icon = ""
     public var type: WidgetType?
     public var url = ""
@@ -86,18 +74,20 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public var labelcolor = ""
     public var valuecolor = ""
     public var service = ""
-    public var state = ""
+    @Published public var state = ""
     public var text = ""
     public var legend: Bool?
     public var encoding = ""
     public var forceAsItem: Bool?
-    public var item: OpenHABItem?
+    @Published public var item: OpenHABItem?
     public var linkedPage: OpenHABPage?
     public var mappings: [OpenHABWidgetMapping] = []
     public var image: UIImage?
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
     public var switchSupport = false
+
+    @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
     // Text prior to "["
     public var labelText: String? {
@@ -140,6 +130,54 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
 
     public var stateValueAsNumberState: NumberState? {
         item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
+    }
+
+    public var adjustedValue: Double {
+        if let item {
+            adj(item.stateAsDouble())
+        } else {
+            minValue
+        }
+    }
+
+    public var stateEnum: WidgetTypeEnum {
+        switch type {
+        case .frame:
+            .frame
+        case .switchWidget:
+            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
+            if !mappings.isEmpty {
+                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+            } else if item?.isOfTypeOrGroupType(.switchItem) ?? false {
+                .switcher(item?.state == "ON" ? true : false)
+            } else if item?.isOfTypeOrGroupType(.rollershutter) ?? false {
+                .rollershutter
+            } else if !mappingsOrItemOptions.isEmpty {
+                .segmented(Int(mappingIndex(byCommand: item?.state) ?? -1))
+            } else {
+                .switcher(item?.state == "ON" ? true : false)
+            }
+        case .setpoint:
+            .setpoint
+        case .slider:
+            .slider
+        case .selection:
+            .selection
+        case .colorpicker:
+            .colorpicker
+        case .chart:
+            .chart
+        case .image:
+            .image
+        case .video:
+            .video
+        case .webview:
+            .webview
+        case .mapview:
+            .mapview
+        default:
+            .unassigned
+        }
     }
 
     public func sendItemUpdate(state: NumberState?) {
@@ -202,6 +240,12 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
         }
         return iconState
     }
+
+    private func adj(_ raw: Double) -> Double {
+        var valueAdjustedToStep = floor((raw - minValue) / step) * step
+        valueAdjustedToStep += minValue
+        return valueAdjustedToStep.clamped(to: minValue ... maxValue)
+    }
 }
 
 extension OpenHABWidget.WidgetType: Decodable {}
@@ -252,6 +296,7 @@ public extension OpenHABWidget {
         self.switchSupport = switchSupport ?? false
 
         self.forceAsItem = forceAsItem
+        stateEnumBinding = stateEnum
     }
 }
 
@@ -288,7 +333,7 @@ public extension OpenHABWidget {
     }
 }
 
-extension OpenHABWidget.CodingData {
+public extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
         // swiftlint:disable:next line_length

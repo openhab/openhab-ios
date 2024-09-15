@@ -18,28 +18,6 @@ import MapKit
 import OpenHABCore
 import os.log
 
-enum WidgetTypeEnum {
-    case switcher(Bool)
-    case slider //
-    case segmented(Int)
-    case unassigned
-    case rollershutter
-    case frame
-    case setpoint
-    case selection
-    case colorpicker
-    case chart
-    case image
-    case video
-    case webview
-    case mapview
-
-    var boolState: Bool {
-        guard case let .switcher(value) = self else { return false }
-        return value
-    }
-}
-
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     var id: String = ""
@@ -74,7 +52,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
     public var switchSupport = false
     public var forceAsItem: Bool?
 
-    @Published var stateEnumBinding: WidgetTypeEnum = .unassigned
+    @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
     // Text prior to "["
     var labelText: String? {
@@ -295,7 +273,7 @@ extension ObservableOpenHABWidget.CodingData {
 }
 
 //  Recursive parsing of nested widget structure
-extension [ObservableOpenHABWidget] {
+extension [OpenHABWidget] {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)

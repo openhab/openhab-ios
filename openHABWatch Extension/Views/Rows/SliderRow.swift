@@ -14,7 +14,7 @@ import os.log
 import SwiftUI
 
 struct SliderRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {

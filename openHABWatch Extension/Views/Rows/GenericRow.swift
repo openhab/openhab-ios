@@ -9,11 +9,12 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import os.log
 import SwiftUI
 
 struct GenericRow: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var body: some View {

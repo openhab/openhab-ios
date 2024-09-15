@@ -58,7 +58,7 @@ struct ContentView: View {
     }
 
     // https://www.swiftbysundell.com/tips/adding-swiftui-viewbuilder-to-functions/
-    @ViewBuilder func rowWidget(widget: ObservableOpenHABWidget) -> some View {
+    @ViewBuilder func rowWidget(widget: OpenHABWidget) -> some View {
         switch widget.stateEnum {
         case .switcher:
             SwitchRow(widget: widget)

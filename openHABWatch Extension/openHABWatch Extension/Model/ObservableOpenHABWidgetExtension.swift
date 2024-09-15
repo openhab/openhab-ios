@@ -10,10 +10,11 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
 import os.log
 import SwiftUI
 
-extension ObservableOpenHABWidget {
+extension OpenHABWidget {
     @ViewBuilder func makeView(settings: ObservableOpenHABDataObject) -> some View {
         if let linkedPage {
             let title = linkedPage.title.components(separatedBy: "[")[0]

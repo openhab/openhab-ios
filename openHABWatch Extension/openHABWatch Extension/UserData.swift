@@ -17,7 +17,7 @@ import os.log
 import SwiftUI
 
 final class UserData: ObservableObject {
-    @Published var widgets: [ObservableOpenHABWidget] = []
+    @Published var widgets: [OpenHABWidget] = []
     @Published var showAlert = false
     @Published var errorDescription = ""
     @Published var showCertificateAlert = false

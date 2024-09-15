@@ -419,7 +419,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 default: break
                 }
                 widgetTableView.reloadData()
-            } catch let error as APIActorError {
+            } catch _ as APIActorError {
                 logger.debug("APIActorError on OpenHABSitemapViewController")
             } catch {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
