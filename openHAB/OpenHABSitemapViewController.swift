@@ -684,7 +684,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 }
                 cell.imageView?.kf.setImage(
                     with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                    placeholder: UIImage(named: "blankicon.png"),
+                    placeholder: nil,
                     options: [.processor(OpenHABImageProcessor())],
                     completionHandler: reportOnResults
                 )
