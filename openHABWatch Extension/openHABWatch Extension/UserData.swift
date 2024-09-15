@@ -25,7 +25,7 @@ final class UserData: ObservableObject {
 
     let decoder = JSONDecoder()
 
-    var openHABSitemapPage: ObservableOpenHABSitemapPage?
+    var openHABSitemapPage: OpenHABPage?
 
     private var commandOperation: Alamofire.Request?
     private var currentPageOperation: Alamofire.Request?
@@ -42,7 +42,7 @@ final class UserData: ObservableObject {
             // Self-executing closure
             // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
             openHABSitemapPage = try {
-                let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+                let sitemapPageCodingData = try data.decoded(as: OpenHABPage.CodingData.self)
                 return sitemapPageCodingData.openHABSitemapPage
             }()
         } catch {
@@ -111,7 +111,7 @@ final class UserData: ObservableObject {
                     // Self-executing closure
                     // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
                     openHABSitemapPage = try {
-                        let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+                        let sitemapPageCodingData = try data.decoded(as: OpenHABPage.CodingData.self)
                         return sitemapPageCodingData.openHABSitemapPage
                     }()
                 } catch {

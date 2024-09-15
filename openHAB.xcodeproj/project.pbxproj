@@ -27,8 +27,6 @@
 		934E592728F16EBA00162004 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592628F16EBA00162004 /* Kingfisher */; };
 		934E592928F16EBA00162004 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592828F16EBA00162004 /* DeviceKit */; };
 		934E592B28F16EBA00162004 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 934E592A28F16EBA00162004 /* Alamofire */; };
-		9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */; };
-		9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */; };
 		935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B484525342B8E00E44CF0 /* URL+Static.swift */; };
 		93685A7A2ADE755C0077A9A6 /* openHABTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 93685A792ADE755C0077A9A6 /* openHABTests.xctestplan */; };
 		937C8B0C2800A738009C055E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 935D340A257B7DC00020A404 /* Intents.intentdefinition */; };
@@ -121,13 +119,12 @@
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
-		DAC9AF4724F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */; };
+		DAC9AF4724F9669F006DAE93 /* OpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */; };
 		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
 		DACB636227D3FC6500041931 /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = DACB636127D3FC6500041931 /* error.png */; };
 		DACB636327D3FC6500041931 /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = DACB636127D3FC6500041931 /* error.png */; };
 		DACE664A2C63B0760069E514 /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = DACE66492C63B0760069E514 /* OpenAPIURLSession */; };
 		DACE664D2C63B0840069E514 /* OpenAPIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = DACE664C2C63B0840069E514 /* OpenAPIRuntime */; };
-		DAEAA89B21E2611000267EA3 /* OpenHABNotificationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89A21E2611000267EA3 /* OpenHABNotificationsViewController.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */; };
@@ -295,8 +292,6 @@
 		933D7F0822E7015100621A03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		933D7F0E22E7030600621A03 /* SnapshotHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapshotHelper.swift; path = fastlane/SnapshotHelper.swift; sourceTree = SOURCE_ROOT; };
 		934B610B2348D2F9009112D5 /* Color+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
-		9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABWidget.swift; sourceTree = "<group>"; };
-		9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABSitemapPage.swift; sourceTree = "<group>"; };
 		935B484525342B8E00E44CF0 /* URL+Static.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Static.swift"; sourceTree = "<group>"; };
 		935D3412257B7E2F0020A404 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = Resources/nl.lproj/Intents.strings; sourceTree = "<group>"; };
 		935D3419257B7E820020A404 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = Base; path = Resources/Base.lproj/Intents.intentdefinition; sourceTree = "<group>"; };
@@ -415,7 +410,7 @@
 		DAC6608E236F80BA00F4501E /* PreferencesRowUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesRowUIView.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
-		DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABWidgetExtension.swift; sourceTree = "<group>"; };
+		DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWidgetExtension.swift; sourceTree = "<group>"; };
 		DAC9AF4824F966FA006DAE93 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
 		DACB636127D3FC6500041931 /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = error.png; sourceTree = "<group>"; };
 		DAD488B2287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Interface.strings; sourceTree = "<group>"; };
@@ -444,7 +439,6 @@
 		DAF4581D23DC60020018B495 /* ImageRawRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRawRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DAF6F4112C67E83B0083883E /* openapiCorrected.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapiCorrected.json; sourceTree = "<group>"; };
-		DF05EF111D00696200DD646D /* DrawerUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawerUITableViewCell.swift; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
 		DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABNotification.swift; sourceTree = "<group>"; };
@@ -641,10 +635,8 @@
 			isa = PBXGroup;
 			children = (
 				DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */,
-				9350F17823814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift */,
-				9350F17723814FAC00054BA8 /* ObservableOpenHABWidget.swift */,
 				DA9721C224E29A8F0092CCFD /* UserDefaultsBacked.swift */,
-				DAC9AF4624F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift */,
+				DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */,
 				DAC9AF4824F966FA006DAE93 /* LazyView.swift */,
 			);
 			name = Model;
@@ -1399,7 +1391,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA7649DE23FC81A20085CE46 /* Unwrap.swift in Sources */,
-				DAC9AF4724F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift in Sources */,
+				DAC9AF4724F9669F006DAE93 /* OpenHABWidgetExtension.swift in Sources */,
 				DAF4581423DC1F5D0018B495 /* AppState.swift in Sources */,
 				DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */,
 				DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */,
@@ -1422,7 +1414,6 @@
 				DA07752B2346705F0086C685 /* ExtensionDelegate.swift in Sources */,
 				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
 				DAC6608F236F80BA00F4501E /* PreferencesRowUIView.swift in Sources */,
-				9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */,
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */,
@@ -1433,7 +1424,6 @@
 				DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */,
 				DAF457A623DB9CE00018B495 /* SetpointRow.swift in Sources */,
 				DAF4581823DC4A050018B495 /* ImageRow.swift in Sources */,
-				9350F17923814FAC00054BA8 /* ObservableOpenHABWidget.swift in Sources */,
 				DA07752F2346705F0086C685 /* NotificationView.swift in Sources */,
 				DA0775312346705F0086C685 /* ComplicationController.swift in Sources */,
 				DAF4578523D7807A0018B495 /* Color+Extension.swift in Sources */,
