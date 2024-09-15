@@ -17,14 +17,34 @@ public enum ChartStyle {
     case light
 }
 
-public enum IconType: Int {
+public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible {
     case png
     case svg
+
+    public var id: Self { self }
+
+    public var description: String {
+        switch self {
+        case .png:
+            "PNG"
+        case .svg:
+            "SVG"
+        }
+    }
 }
 
-public enum SortSitemapsOrder: Int {
+public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
     case label
     case name
+
+    public var description: String {
+        switch self {
+        case .label:
+            "Label"
+        case .name:
+            "Name"
+        }
+    }
 }
 
 public struct Endpoint {

@@ -25,12 +25,14 @@ disabled_rules: # rule identifiers to exclude from running
 
 included:
   - ../
+
 excluded:
   - ../fastlane
   - ../OpenHABCore/.build
   - .build
   - ../OpenHABCore/Sources/OpenHABCore/GeneratedSources/*
   - ../OpenHABCore/swift-openapi-generator
+
 nesting:
     type_level: 2
 

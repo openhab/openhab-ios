@@ -81,7 +81,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private var filteredPage: OpenHABPage?
     private var serverProperties: OpenHABServerProperties?
     private let search = UISearchController(searchResultsController: nil)
-    private var webViewController: OpenHABWebViewController?
     private var isUserInteracting = false
     private var isWaitingToReload = false
     private var asyncOperation: Task<Int, Never>?
@@ -540,17 +539,6 @@ extension OpenHABSitemapViewController: OpenHABTrackerDelegate {
     }
 }
 
-// MARK: - OpenHABSelectionTableViewControllerDelegate
-
-extension OpenHABSitemapViewController: OpenHABSelectionTableViewControllerDelegate {
-    // send command on selected selection widget mapping
-    func didSelectWidgetMapping(_ selectedMappingIndex: Int) {
-        let selectedWidget: OpenHABWidget? = relevantPage?.widgets[selectedWidgetRow]
-        let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
-        sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
-    }
-}
-
 // MARK: - UISearchResultsUpdating
 
 extension OpenHABSitemapViewController: UISearchResultsUpdating {
@@ -693,7 +681,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                         os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
                     }
                 }
-
                 cell.imageView?.kf.setImage(
                     with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                     placeholder: UIImage(named: "blankicon.png"),
@@ -744,6 +731,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             if let link = widget?.linkedPage?.link {
                 os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
             }
+
             selectedWidgetRow = indexPath.row
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
             newViewController.title = widget?.linkedPage?.title.components(separatedBy: "[")[0]
@@ -752,15 +740,23 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget?.type == .selection {
             os_log("Selected selection widget", log: .viewCycle, type: .info)
-
             selectedWidgetRow = indexPath.row
-            let selectionViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABSelectionTableViewController") as? OpenHABSelectionTableViewController)!
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-            selectionViewController.title = selectedWidget?.labelText
-            selectionViewController.mappings = selectedWidget?.mappingsOrItemOptions ?? []
-            selectionViewController.delegate = self
-            selectionViewController.selectionItem = selectedWidget?.item
-            navigationController?.pushViewController(selectionViewController, animated: true)
+            let hostingController = UIHostingController(rootView: SelectionView(
+                mappings: selectedWidget?.mappingsOrItemOptions ?? [],
+                selectionItem:
+                Binding(
+                    get: { selectedWidget?.item },
+                    set: { selectedWidget?.item = $0 }
+                ),
+                onSelection: { selectedMappingIndex in
+                    let selectedWidget: OpenHABWidget? = self.relevantPage?.widgets[self.selectedWidgetRow]
+                    let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
+                    self.sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
+                }
+            ))
+            hostingController.title = widget?.labelText
+            navigationController?.pushViewController(hostingController, animated: true)
         }
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)

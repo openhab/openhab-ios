@@ -12,7 +12,7 @@
 import Foundation
 
 // Inspired by http://danielemargutti.com/2017/10/19/throttle-in-swift/
-public class Throttler {
+public class Throttler: ObservableObject {
     private let queue: DispatchQueue = .global(qos: .background)
 
     private var job = DispatchWorkItem {}
