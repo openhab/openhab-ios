@@ -47,9 +47,12 @@ struct OpenHABImageProcessor: ImageProcessor {
                 let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
                 let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
                 if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData), image.hasSize() {
+                    if image.size.width > 1000 || image.size.height > 1000 {
+                        return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
+                    }
                     return image.uiImage
                 } else {
-                    return UIImage(named: "error.png")
+                    return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
                 }
             default:
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
@@ -718,7 +721,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 }
                 cell.imageView?.kf.setImage(
                     with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                    placeholder: UIImage(named: "blankicon.png"),
+                    placeholder: nil,
                     options: [.processor(OpenHABImageProcessor())],
                     completionHandler: reportOnResults
                 )
