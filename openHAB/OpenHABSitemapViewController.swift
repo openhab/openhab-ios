@@ -47,11 +47,11 @@ struct OpenHABImageProcessor: ImageProcessor {
                 let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
                 if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData), image.hasSize() {
                     if image.size.width > 1000 || image.size.height > 1000 {
-                        return UIImage(named: "error.png") // Avoid too-large images which cause memory issues
+                        return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
                     }
                     return image.uiImage
                 } else {
-                    return UIImage(named: "error.png")
+                    return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
                 }
             default:
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
