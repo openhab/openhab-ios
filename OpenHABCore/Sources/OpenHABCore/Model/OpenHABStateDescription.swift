@@ -59,3 +59,13 @@ extension OpenHABStateDescription.CodingData {
         OpenHABStateDescription(minimum: minimum, maximum: maximum, step: step, readOnly: readOnly, options: options, pattern: pattern)
     }
 }
+
+extension OpenHABStateDescription {
+    convenience init?(_ state: Components.Schemas.StateDescription?) {
+        if let state {
+            self.init(minimum: state.minimum, maximum: state.maximum, step: state.step, readOnly: state.readOnly, options: state.options?.compactMap { OpenHABOptions($0) }, pattern: state.pattern)
+        } else {
+            return nil
+        }
+    }
+}

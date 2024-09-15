@@ -51,42 +51,14 @@ public final class OpenHABSitemap: NSObject {
     }
 }
 
-public extension OpenHABSitemap {
-    struct CodingData: Decodable {
-        public let name: String
-        public let label: String
-        public let page: OpenHABPage.CodingData?
-        public let link: String
-        public let icon: String?
-
-        private enum CodingKeys: String, CodingKey {
-            case page = "homepage"
-            case name
-            case label
-            case link
-            case icon
-        }
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-
-            name = try container.decode(forKey: .name)
-            label = try container.decode(forKey: .label, default: name)
-            page = try container.decode(forKey: .page)
-            link = try container.decode(forKey: .link)
-            icon = try container.decodeIfPresent(forKey: .icon)
-        }
-    }
-}
-
-public extension OpenHABSitemap.CodingData {
-    var openHABSitemap: OpenHABSitemap {
-        OpenHABSitemap(
-            name: name,
-            icon: icon.orEmpty,
-            label: label,
-            link: link,
-            page: page?.openHABSitemapPage
+extension OpenHABSitemap {
+    convenience init(_ sitemap: Components.Schemas.SitemapDTO) {
+        self.init(
+            name: sitemap.name.orEmpty,
+            icon: sitemap.icon.orEmpty,
+            label: sitemap.label.orEmpty,
+            link: sitemap.link.orEmpty,
+            page: OpenHABPage(sitemap.homepage)
         )
     }
 }

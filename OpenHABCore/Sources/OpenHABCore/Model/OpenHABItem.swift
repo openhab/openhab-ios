@@ -148,14 +148,13 @@ public extension OpenHABItem.CodingData {
     }
 }
 
-extension CGFloat {
-    init(state string: String, divisor: Float) {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.locale = Locale(identifier: "US")
-        if let number = numberFormatter.number(from: string) {
-            self.init(number.floatValue / divisor)
+extension OpenHABItem {
+    convenience init?(_ item: Components.Schemas.EnrichedItemDTO?) {
+        if let item {
+            // swiftlint:disable:next line_length
+            self.init(name: item.name.orEmpty, type: item._type.orEmpty, state: item.state.orEmpty, link: item.link.orEmpty, label: item.label.orEmpty, groupType: nil, stateDescription: OpenHABStateDescription(item.stateDescription), commandDescription: OpenHABCommandDescription(item.commandDescription), members: [], category: item.category, options: [])
         } else {
-            self.init(0)
+            return nil
         }
     }
 }

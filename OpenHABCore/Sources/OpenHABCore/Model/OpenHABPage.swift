@@ -86,3 +86,20 @@ public extension OpenHABPage.CodingData {
         return OpenHABPage(pageId: pageId.orEmpty, title: title.orEmpty, link: link.orEmpty, leaf: leaf ?? false, widgets: mappedWidgets, icon: icon.orEmpty)
     }
 }
+
+extension OpenHABPage {
+    convenience init?(_ page: Components.Schemas.PageDTO?) {
+        if let page {
+            self.init(
+                pageId: page.id.orEmpty,
+                title: page.title.orEmpty,
+                link: page.link.orEmpty,
+                leaf: page.leaf ?? false,
+                widgets: page.widgets?.compactMap { OpenHABWidget($0) } ?? [],
+                icon: page.icon.orEmpty
+            )
+        } else {
+            return nil
+        }
+    }
+}

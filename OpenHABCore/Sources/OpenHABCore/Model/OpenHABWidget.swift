@@ -305,3 +305,56 @@ extension [OpenHABWidget] {
         }
     }
 }
+
+extension OpenHABWidget {
+    convenience init(_ widget: Components.Schemas.WidgetDTO) {
+        self.init(
+            widgetId: widget.widgetId.orEmpty,
+            label: widget.label.orEmpty,
+            icon: widget.icon.orEmpty,
+            type: OpenHABWidget.WidgetType(rawValue: widget._type!),
+            url: widget.url,
+            period: widget.period,
+            minValue: widget.minValue,
+            maxValue: widget.maxValue,
+            step: widget.step,
+            refresh: widget.refresh.map(Int.init),
+            height: 50, // TODO:
+            isLeaf: true,
+            iconColor: widget.iconcolor,
+            labelColor: widget.labelcolor,
+            valueColor: widget.valuecolor,
+            service: widget.service,
+            state: widget.state,
+            text: "",
+            legend: widget.legend,
+            encoding: widget.encoding,
+            item: OpenHABItem(widget.item),
+            linkedPage: OpenHABPage(widget.linkedPage),
+            mappings: widget.mappings?.compactMap(OpenHABWidgetMapping.init) ?? [],
+            widgets: widget.widgets?.compactMap { OpenHABWidget($0) } ?? [],
+            visibility: widget.visibility,
+            switchSupport: widget.switchSupport,
+            forceAsItem: widget.forceAsItem
+        )
+    }
+}
+
+extension OpenHABWidget {
+    func update(with event: OpenHABSitemapWidgetEvent) {
+        state = event.state ?? state
+        icon = event.icon ?? icon
+        label = event.label ?? label
+        iconColor = event.iconcolor ?? ""
+        labelcolor = event.labelcolor ?? ""
+        valuecolor = event.valuecolor ?? ""
+        visibility = event.visibility ?? visibility
+
+        if let enrichedItem = event.enrichedItem {
+            if let link = item?.link {
+                enrichedItem.link = link
+            }
+            item = enrichedItem
+        }
+    }
+}

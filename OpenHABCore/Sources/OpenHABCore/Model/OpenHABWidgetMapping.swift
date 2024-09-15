@@ -20,3 +20,9 @@ public class OpenHABWidgetMapping: NSObject, Decodable {
         self.label = label.orEmpty
     }
 }
+
+extension OpenHABWidgetMapping {
+    convenience init(_ mapping: Components.Schemas.MappingDTO) {
+        self.init(command: mapping.command, label: mapping.label)
+    }
+}

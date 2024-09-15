@@ -30,3 +30,13 @@ extension OpenHABCommandDescription.CodingData {
         OpenHABCommandDescription(commandOptions: commandOptions)
     }
 }
+
+extension OpenHABCommandDescription {
+    convenience init?(_ commands: Components.Schemas.CommandDescription?) {
+        if let commands {
+            self.init(commandOptions: commands.commandOptions?.compactMap { OpenHABCommandOptions($0) })
+        } else {
+            return nil
+        }
+    }
+}
