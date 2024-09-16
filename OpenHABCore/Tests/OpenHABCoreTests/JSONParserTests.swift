@@ -32,8 +32,8 @@ final class JSONParserTests: XCTestCase {
     func testJSONSitemapDecoder() {
         let data = Data(jsonSitemap3.utf8)
         do {
-            let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: data)
-            XCTAssertEqual(codingData[0].openHABSitemap.homepageLink, "https://192.168.2.63:8444/rest/sitemaps/myHome/myHome", "Sitemap properly parsed")
+            let codingData = try decoder.decode([Components.Schemas.SitemapDTO].self, from: data)
+            XCTAssertEqual(codingData[0].homepage?.link, "https://192.168.2.63:8444/rest/sitemaps/myHome/myHome", "Sitemap properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -47,8 +47,8 @@ final class JSONParserTests: XCTestCase {
         """
         let data = Data(json.utf8)
         do {
-            let codingData = try decoder.decode([OpenHABSitemap.CodingData].self, from: data)
-            XCTAssertEqual(codingData[0].openHABSitemap.homepageLink, "http://192.xxx:8080/rest/sitemaps/Haus/Haus", "Sitemap properly parsed")
+            let codingData = try decoder.decode([Components.Schemas.SitemapDTO].self, from: data)
+            XCTAssertEqual(codingData[0].homepage?.link, "http://192.xxx:8080/rest/sitemaps/Haus/Haus", "Sitemap properly parsed")
         } catch {
             XCTFail("Whoops, an error occured: \(error)")
         }
@@ -384,8 +384,8 @@ final class JSONParserTests: XCTestCase {
         {"name":"watch","label":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch","homepage":{"id":"watch","title":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch/watch","leaf":false,"timeout":false,"widgets":[{"widgetId":"00","type":"Frame","label":"Ground floor","icon":"frame","mappings":[],"widgets":[{"widgetId":"0000","type":"Switch","label":"Licht Oberlicht","icon":"switch","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch14_1","label":"Licht Oberlicht","tags":["Lighting"],"groupNames":["G_PresenceSimulation","gLcn"]},"widgets":[]},{"widgetId":"0001","type":"Switch","label":"Licht Keller WC Decke","icon":"colorpicker","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch6_1","label":"Licht Keller WC Decke","category":"colorpicker","tags":["Lighting"],"groupNames":["gKellerLicht","gLcn"]},"widgets":[]}]}]}}
         """.data(using: .utf8)!
         do {
-            let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: json)
-            XCTAssertEqual(codingData.page?.link, "https://192.168.2.15:8444/rest/sitemaps/watch/watch", "OpenHABSitemapPage properly parsed")
+            let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: json)
+            XCTAssertEqual(codingData.homepage?.link, "https://192.168.2.15:8444/rest/sitemaps/watch/watch", "OpenHABSitemapPage properly parsed")
             //        XCTAssert(codingData.openHABSitemapPage. widgets[0].type == "Frame", "")
             //        XCTAssert(.widgets[0].linkedPage?.pageId == "0000", "widget properly parsed")
         } catch {
@@ -481,7 +481,7 @@ final class JSONParserTests: XCTestCase {
                 signpostID: signpostID,
                 "Begin"
             )
-            let codingData = try decoder.decode(OpenHABSitemap.CodingData.self, from: contents)
+            let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: contents)
             os_signpost(
                 .end,
                 log: log,
@@ -490,13 +490,13 @@ final class JSONParserTests: XCTestCase {
                 "End"
             )
 
-            let widgets: [OpenHABWidget.CodingData] = try XCTUnwrap(codingData.page?.widgets)
+            let widgets = try XCTUnwrap(codingData.homepage?.widgets)
             let widget = widgets[0]
             XCTAssertEqual(widget.label, "Flat Scenes")
-            XCTAssertEqual(widget.widgets[0].label, "Scenes")
-            XCTAssertEqual(codingData.page?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
+            XCTAssertEqual(widget.widgets?[0].label, "Scenes")
+            XCTAssertEqual(codingData.homepage?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
             let widget2 = widgets[10]
-            XCTAssertEqual(widget2.widgets[0].label, "Admin Items")
+            XCTAssertEqual(widget2.widgets?[0].label, "Admin Items")
         }
     }
 
