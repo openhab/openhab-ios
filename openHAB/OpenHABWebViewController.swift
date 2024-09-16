@@ -105,7 +105,6 @@ class OpenHABWebViewController: OpenHABViewController {
         // Show the navigation bar on other view controllers
         navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
-        // OpenHABTracker.shared.multicastDelegate.remove(self)
         trackerCancellables.removeAll()
     }
 
@@ -369,7 +368,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
 
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
-            // openHABTracker takes care of triggering server trust prompts
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
                     completionHandler(.performDefaultHandling, nil)
