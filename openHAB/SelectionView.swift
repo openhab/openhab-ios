@@ -15,8 +15,10 @@ import SwiftUI
 
 struct SelectionView: View {
     var mappings: [OpenHABWidgetMapping] // List of mappings (instead of AnyHashable, we use a concrete type)
-    @Binding var selectionItem: OpenHABItem? // Binding to track the selected item state
+    @State var selectionItemState: String? // To track the selected item state
     var onSelection: (Int) -> Void // Closure to handle selection
+
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SelectionView")
 
     var body: some View {
         List(0 ..< mappings.count, id: \.self) { index in
@@ -24,30 +26,31 @@ struct SelectionView: View {
             HStack {
                 Text(mapping.label)
                 Spacer()
-                if selectionItem?.state == mapping.command {
+                if selectionItemState == mapping.command {
                     Image(systemSymbol: .checkmark)
                         .foregroundColor(.blue)
                 }
             }
-            .contentShape(Rectangle()) // Ensures entire row is tappable
+            .contentShape(.interaction, Rectangle()) // Ensures entire row is tappable
             .onTapGesture {
-                os_log("Selected mapping %d", log: .viewCycle, type: .info, index)
+                selectionItemState = mappings[index].command
+                logger.info("Selected mapping \(index)")
                 onSelection(index)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
         }
         .navigationTitle("Select Mapping") // Navigation title
     }
 }
 
 #Preview {
-    let selectedItem: OpenHABItem? = OpenHABItem(name: "", type: "", state: "command2", link: "", label: nil, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
-
-    return SelectionView(
+    SelectionView(
         mappings: [
             OpenHABWidgetMapping(command: "command1", label: "Option 1"),
             OpenHABWidgetMapping(command: "command2", label: "Option 2")
         ],
-        selectionItem: .constant(selectedItem)
+        selectionItemState: "command2"
     ) { selectedMappingIndex in
         print("Selected mapping at index \(selectedMappingIndex)")
     }
