@@ -86,10 +86,10 @@ class OpenHABWebViewController: OpenHABViewController {
         NetworkTracker.shared.$status
             .receive(on: DispatchQueue.main)
             .sink { status in
-                os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                os_log("OpenHABWebViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
                 switch status {
                 case .connecting:
-                    self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
                 case .connectionFailed:
                     self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 case _:
