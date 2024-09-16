@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import FirebaseCrashlytics
 import Foundation
 import OpenHABCore
@@ -38,6 +39,7 @@ struct CommandItem: CommItem {
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
+    var cancellables = Set<AnyCancellable>()
 
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
@@ -97,7 +99,7 @@ class OpenHABRootViewController: UIViewController {
         // save this so we know if its changed later
         isDemoMode = Preferences.demomode
         switchToSavedView()
-
+        setupTracker()
         // ready for push notifications
         NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
         // check if we were launched with a notification
@@ -115,6 +117,34 @@ class OpenHABRootViewController: UIViewController {
             switchToSavedView()
             isDemoMode = Preferences.demomode
         }
+    }
+
+    fileprivate func setupTracker() {
+        Publishers.CombineLatest(
+            Preferences.$localUrl,
+            Preferences.$remoteUrl
+        )
+        .sink { (localUrl, remoteUrl) in
+            let connection1 = ConnectionObject(
+                url: localUrl,
+                priority: 0
+            )
+            let connection2 = ConnectionObject(
+                url: remoteUrl,
+                priority: 1
+            )
+            NetworkTracker.shared.startTracking(connectionObjects: [connection1, connection2])
+        }
+        .store(in: &cancellables)
+
+        NetworkTracker.shared.$activeServer
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] activeServer in
+                if let activeServer {
+                    self?.appData?.openHABRootUrl = activeServer.url
+                }
+            }
+            .store(in: &cancellables)
     }
 
     fileprivate func setupSideMenu() {
@@ -267,21 +297,30 @@ class OpenHABRootViewController: UIViewController {
         if let firstMatch = command.firstMatch(of: regexPattern) {
             let path = String(firstMatch.1)
             os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
-            if currentView != webViewController {
-                switchView(target: .webview)
-            }
             if path.starts(with: "/basicui/app?") {
-                // TODO: this is a sitemap, we should use the native renderer
-                // temp hack right now to just use a webview
-                webViewController.loadWebView(force: true, path: path)
-            } else if path.starts(with: "/") {
-                // have the webview load this path itself
-                webViewController.loadWebView(force: true, path: path)
+                if currentView != sitemapViewController {
+                    switchView(target: .sitemap(""))
+                }
+                if let urlComponents = URLComponents(string: path) {
+                    let queryItems = urlComponents.queryItems
+                    let sitemap = queryItems?.first(where: { $0.name == "sitemap" })?.value
+                    let subview = queryItems?.first(where: { $0.name == "w" })?.value
+                    if let sitemap {
+                        sitemapViewController.pushSitemap(name: sitemap, path: subview)
+                    }
+                }
             } else {
-                // have the mainUI handle the navigation
-                webViewController.navigateCommand(path)
+                if currentView != webViewController {
+                    switchView(target: .webview)
+                }
+                if path.starts(with: "/") {
+                    // have the webview load this path itself
+                    webViewController.loadWebView(force: true, path: path)
+                } else {
+                    // have the mainUI handle the navigation
+                    webViewController.navigateCommand(path)
+                }
             }
-
         } else {
             os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
         }
@@ -292,17 +331,25 @@ class OpenHABRootViewController: UIViewController {
         if components.count == 2 {
             let itemName = String(components[0])
             let itemCommand = String(components[1])
-            let client = HTTPClient(username: Preferences.username, password: Preferences.username)
-            client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
-                if let error {
-                    os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                } else {
-                    os_log("Request succeeded", log: .default, type: .info)
-                    if let data {
-                        os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+            // This will only fire onece since we do not retain the return cancelable
+            _ = NetworkTracker.shared.$activeServer
+                .receive(on: DispatchQueue.main)
+                .sink { activeServer in
+                    if let openHABUrl = activeServer?.url {
+                        os_log("Sending comand", log: .default, type: .error)
+                        let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                        client.doPost(baseURLs: [openHABUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
+                            if let error {
+                                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                            } else {
+                                os_log("Request succeeded", log: .default, type: .info)
+                                if let data {
+                                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                                }
+                            }
+                        }
                     }
                 }
-            }
         }
     }
 
@@ -359,17 +406,26 @@ class OpenHABRootViewController: UIViewController {
         } catch {
             // nothing
         }
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username)
-        client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
-            if let error {
-                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-            } else {
-                os_log("Request succeeded", log: .default, type: .info)
-                if let data {
-                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+
+        // This will only fire onece since we do not retain the return cancelable
+        _ = NetworkTracker.shared.$activeServer
+            .receive(on: DispatchQueue.main)
+            .sink { activeServer in
+                if let openHABUrl = activeServer?.url {
+                    os_log("Sending comand", log: .default, type: .error)
+                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                    client.doPost(baseURLs: [openHABUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
+                        if let error {
+                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                        } else {
+                            os_log("Request succeeded", log: .default, type: .info)
+                            if let data {
+                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                            }
+                        }
+                    }
                 }
             }
-        }
     }
 
     func showSideMenu() {
