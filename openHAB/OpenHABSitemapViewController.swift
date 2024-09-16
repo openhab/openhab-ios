@@ -777,16 +777,13 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             newViewController.openHABRootUrl = openHABRootUrl
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget?.type == .selection {
-            os_log("Selected selection widget", log: .viewCycle, type: .info)
             selectedWidgetRow = indexPath.row
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
+            let selectionItemState = selectedWidget?.item?.state
+            logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
             let hostingController = UIHostingController(rootView: SelectionView(
                 mappings: selectedWidget?.mappingsOrItemOptions ?? [],
-                selectionItem:
-                Binding(
-                    get: { selectedWidget?.item },
-                    set: { selectedWidget?.item = $0 }
-                ),
+                selectionItemState: selectionItemState,
                 onSelection: { selectedMappingIndex in
                     let selectedWidget: OpenHABWidget? = self.relevantPage?.widgets[self.selectedWidgetRow]
                     let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
