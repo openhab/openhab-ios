@@ -32,90 +32,33 @@ public final class OpenHABSitemap: NSObject {
     public var icon = ""
     public var label = ""
     public var link = ""
-    public var leaf: Bool?
-    public var homepageLink = ""
+    public var page: OpenHABPage?
 
-    public init(name: String, icon: String, label: String, link: String, leaf: Bool, homepageLink: String) {
+    public var leaf: Bool? {
+        page?.leaf
+    }
+
+    public var homepageLink: String {
+        page?.link ?? ""
+    }
+
+    public init(name: String, icon: String, label: String, link: String, page: OpenHABPage?) {
         self.name = name
         self.icon = icon
         self.label = label
         self.link = link
-        self.leaf = leaf
-        self.homepageLink = homepageLink
+        self.page = page
     }
 }
 
-public extension OpenHABSitemap {
-    struct CodingData: Decodable {
-        public let name: String
-        public let label: String
-        public let page: HomePage
-        public let link: String
-        public let icon: String?
-
-        private enum CodingKeys: String, CodingKey {
-            case page = "homepage"
-            case name
-            case label
-            case link
-            case icon
-        }
-
-        public init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-
-            name = try container.decode(forKey: .name)
-            label = try container.decode(forKey: .label, default: name)
-            page = try container.decode(forKey: .page)
-            link = try container.decode(forKey: .link)
-            icon = try container.decodeIfPresent(forKey: .icon)
-        }
-    }
-
-    internal enum PageType: Decodable {
-        case homepage(HomePage)
-        case linkedPage(HomePage)
-
-        private enum CodingKeys: String, CodingKey {
-            case homepage
-            case linkedPage
-        }
-
-        enum PostTypeCodingError: Error {
-            case decoding(String)
-        }
-
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            if let homePageValue = try? container.decode(HomePage.self, forKey: .homepage) {
-                self = .homepage(homePageValue)
-                return
-            }
-            if let linkedPageValue = try? container.decode(HomePage.self, forKey: .linkedPage) {
-                self = .linkedPage(linkedPageValue)
-                return
-            }
-            throw PostTypeCodingError.decoding("Whoops! \(dump(container))")
-        }
-    }
-
-    struct HomePage: Decodable {
-        public let link: String
-        public let leaf: Bool
-        public let timeout: ValueOrFalse<String>?
-        public let widgets: [OpenHABWidget.CodingData]?
-    }
-}
-
-public extension OpenHABSitemap.CodingData {
-    var openHABSitemap: OpenHABSitemap {
-        OpenHABSitemap(
-            name: name,
-            icon: icon.orEmpty,
-            label: label,
-            link: link,
-            leaf: page.leaf,
-            homepageLink: page.link
+extension OpenHABSitemap {
+    convenience init(_ sitemap: Components.Schemas.SitemapDTO) {
+        self.init(
+            name: sitemap.name.orEmpty,
+            icon: sitemap.icon.orEmpty,
+            label: sitemap.label.orEmpty,
+            link: sitemap.link.orEmpty,
+            page: OpenHABPage(sitemap.homepage)
         )
     }
 }

@@ -15,7 +15,7 @@ import os.log
 import SwiftUI
 
 struct IconView: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
 
     var iconURL: URL? {

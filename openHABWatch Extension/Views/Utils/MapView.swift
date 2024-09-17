@@ -14,7 +14,7 @@ import OpenHABCore
 import SwiftUI
 
 struct MapView: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(
             latitude: 40,

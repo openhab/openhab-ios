@@ -16,31 +16,6 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
-    var sitemaps = [OpenHABSitemap]()
-
-    if let response {
-        do {
-            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-            let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
-            for sitemapCodingDatum in sitemapsCodingData {
-                os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-                sitemaps.append(sitemapCodingDatum.openHABSitemap)
-            }
-        } catch {
-            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-        }
-    }
-
-    return sitemaps
-}
-
-struct UiTile: Decodable {
-    var name: String
-    var url: String
-    var imageUrl: String
-}
-
 struct ImageView: View {
     let url: String
 
@@ -167,66 +142,39 @@ struct DrawerView: View {
             }
         }
         .listStyle(.inset)
-        .onAppear(perform: loadData)
-    }
-
-    private func loadData() {
-        // TODO: Replace network calls with appropriate @EnvironmentObject or other state management
-        loadSitemaps()
-        loadUiTiles()
-    }
-
-    private func loadSitemaps() {
-        // Perform network call to load sitemaps and decode
-        // Update the sitemaps state
-
-        NetworkConnection.sitemaps(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
-            switch response.result {
-            case let .success(data):
-                os_log("Sitemap response", log: .viewCycle, type: .info)
-
-                sitemaps = deriveSitemaps(data)
-
-                if sitemaps.last?.name == "_default", sitemaps.count > 1 {
-                    sitemaps = Array(sitemaps.dropLast())
-                }
-
-                // Sort the sitemaps according to Settings selection.
-                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
-                case .label: sitemaps.sort { $0.label < $1.label }
-                case .name: sitemaps.sort { $0.name < $1.name }
-                }
-            case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-            }
-        }
-    }
-
-    private func loadUiTiles() {
-        // Perform network call to load UI Tiles and decode
-        // Update the uiTiles state
-        NetworkConnection.uiTiles(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
-            switch response.result {
-            case .success:
-                os_log("ui tiles response", log: .viewCycle, type: .info)
-                guard let responseData = response.data else {
-                    os_log("Error: did not receive data", log: OSLog.remoteAccess, type: .info)
-                    return
-                }
+        .task {
+            let apiactor = await APIActor()
+            Task {
                 do {
-                    uiTiles = try JSONDecoder().decode([OpenHABUiTile].self, from: responseData)
+                    await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
+
+                    sitemaps = try await apiactor.openHABSitemaps()
+                    if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                        sitemaps = Array(sitemaps.dropLast())
+                    }
+                    // Sort the sitemaps according to Settings selection.
+                    switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+                    case .label: sitemaps.sort { $0.label < $1.label }
+                    case .name: sitemaps.sort { $0.name < $1.name }
+                    }
+
                 } catch {
-                    os_log("Error: did not receive data %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, error.localizedDescription)
+                    os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                    sitemaps = []
                 }
-            case let .failure(error):
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            }
+
+            Task {
+                do {
+                    await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
+                    uiTiles = try await apiactor.openHABTiles()
+                    os_log("ui tiles response", log: .viewCycle, type: .info)
+                } catch {
+                    os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                    uiTiles = []
+                }
             }
         }
-    }
-
-    mutating func loadSettings() {
-        openHABUsername = Preferences.username
-        openHABPassword = Preferences.password
     }
 }
 

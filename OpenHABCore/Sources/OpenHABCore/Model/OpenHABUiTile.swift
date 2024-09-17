@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABUiTile: Decodable {
+public class OpenHABUiTile {
     public var name = ""
     public var url = ""
     public var imageUrl = ""
@@ -23,10 +23,8 @@ public class OpenHABUiTile: Decodable {
     }
 }
 
-public extension OpenHABUiTile {
-    struct CodingData: Decodable {
-        public let name: String
-        public let url: String
-        public let imageUrl: String
+extension OpenHABUiTile {
+    convenience init(_ tile: Components.Schemas.TileDTO) {
+        self.init(name: tile.name.orEmpty, url: tile.url.orEmpty, imageUrl: tile.imageUrl.orEmpty)
     }
 }

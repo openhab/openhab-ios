@@ -13,7 +13,7 @@ import CoreLocation
 import os.log
 import UIKit
 
-public final class OpenHABItem: NSObject, CommItem {
+public class OpenHABItem: NSObject, CommItem {
     public enum ItemType: String {
         case color = "Color"
         case contact = "Contact"
@@ -28,6 +28,7 @@ public final class OpenHABItem: NSObject, CommItem {
         case rollershutter = "Rollershutter"
         case stringItem = "String"
         case switchItem = "Switch"
+        case undetermind = "" // Relevant only for SitemapWidgetEvent
     }
 
     public var type: ItemType?
@@ -125,10 +126,10 @@ public extension OpenHABItem {
 
 public extension OpenHABItem {
     struct CodingData: Decodable {
-        let type: String
+        let type: String?
         let groupType: String?
         let name: String
-        let link: String
+        let link: String?
         let state: String?
         let label: String?
         let stateDescription: OpenHABStateDescription.CodingData?
@@ -143,18 +144,17 @@ public extension OpenHABItem.CodingData {
     var openHABItem: OpenHABItem {
         let mappedMembers = members?.map(\.openHABItem) ?? []
         // swiftlint:disable:next line_length
-        return OpenHABItem(name: name, type: type, state: state, link: link, label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
+        return OpenHABItem(name: name, type: type ?? "", state: state, link: link ?? "", label: label, groupType: groupType, stateDescription: stateDescription?.openHABStateDescription, commandDescription: commandDescription?.openHABCommandDescription, members: mappedMembers, category: category, options: options)
     }
 }
 
-extension CGFloat {
-    init(state string: String, divisor: Float) {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.locale = Locale(identifier: "US")
-        if let number = numberFormatter.number(from: string) {
-            self.init(number.floatValue / divisor)
+extension OpenHABItem {
+    convenience init?(_ item: Components.Schemas.EnrichedItemDTO?) {
+        if let item {
+            // swiftlint:disable:next line_length
+            self.init(name: item.name.orEmpty, type: item._type.orEmpty, state: item.state.orEmpty, link: item.link.orEmpty, label: item.label.orEmpty, groupType: nil, stateDescription: OpenHABStateDescription(item.stateDescription), commandDescription: OpenHABCommandDescription(item.commandDescription), members: [], category: item.category, options: [])
         } else {
-            self.init(0)
+            return nil
         }
     }
 }

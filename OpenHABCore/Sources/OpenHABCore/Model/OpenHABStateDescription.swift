@@ -21,7 +21,7 @@ public class OpenHABStateDescription {
 
     public var numberPattern: String?
 
-    init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?, pattern tobeSearched: String?) {
+    public init(minimum: Double?, maximum: Double?, step: Double?, readOnly: Bool?, options: [OpenHABOptions]?, pattern tobeSearched: String?) {
         self.minimum = minimum ?? 0.0
         self.maximum = maximum ?? 100.0
         self.step = step ?? 1.0
@@ -57,5 +57,15 @@ public extension OpenHABStateDescription {
 extension OpenHABStateDescription.CodingData {
     var openHABStateDescription: OpenHABStateDescription {
         OpenHABStateDescription(minimum: minimum, maximum: maximum, step: step, readOnly: readOnly, options: options, pattern: pattern)
+    }
+}
+
+extension OpenHABStateDescription {
+    convenience init?(_ state: Components.Schemas.StateDescription?) {
+        if let state {
+            self.init(minimum: state.minimum, maximum: state.maximum, step: state.step, readOnly: state.readOnly, options: state.options?.compactMap { OpenHABOptions($0) }, pattern: state.pattern)
+        } else {
+            return nil
+        }
     }
 }

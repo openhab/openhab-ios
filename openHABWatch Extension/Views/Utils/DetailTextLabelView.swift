@@ -9,10 +9,11 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SwiftUI
 
 struct DetailTextLabelView: View {
-    @ObservedObject var widget: ObservableOpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
         Unwrap(widget.labelValue) {
