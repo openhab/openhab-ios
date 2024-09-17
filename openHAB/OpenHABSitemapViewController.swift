@@ -175,7 +175,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 switch status {
                 case .connecting:
                     self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .connectionFailed:
+                case .notConnected:
                     os_log("Tracking error", log: .viewCycle, type: .info)
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
                 case _:
@@ -478,6 +478,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
         // since we do not reference the sink cancelable, this will only fire once
         _ = NetworkTracker.shared.$activeServer
+            .filter { $0 != nil } // Only proceed if activeServer is not nil
+            .first() // Automatically cancels after the first non-nil value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeServer in
                 if let openHABUrl = activeServer?.url, let self {

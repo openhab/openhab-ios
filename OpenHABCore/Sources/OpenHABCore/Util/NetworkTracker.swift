@@ -19,7 +19,6 @@ public enum NetworkStatus: String {
     case notConnected = "Not Connected"
     case connecting = "Connecting"
     case connected = "Connected"
-    case connectionFailed = "Connection Failed"
 }
 
 // Anticipating supporting more robust configuration options where we allow multiple url/user/pass options for users
@@ -41,10 +40,10 @@ public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
     @Published public private(set) var activeServer: ConnectionObject?
-    @Published public private(set) var status: NetworkStatus = .notConnected
+    @Published public private(set) var status: NetworkStatus = .connecting
 
-    private var monitor: NWPathMonitor
-    private var monitorQueue = DispatchQueue.global(qos: .background)
+    private let monitor: NWPathMonitor
+    private let monitorQueue = DispatchQueue.global(qos: .background)
     private var connectionObjects: [ConnectionObject] = []
 
     private var retryTimer: DispatchSourceTimer?
@@ -57,7 +56,7 @@ public final class NetworkTracker: ObservableObject {
                 self?.checkActiveServer()
             } else {
                 os_log("Network status: Disconnected", log: OSLog.default, type: .info)
-                self?.updateStatus(.notConnected)
+                self?.setActiveServer(nil)
                 self?.startRetryTimer(10) // try every 10 seconds connect
             }
         }
@@ -69,19 +68,18 @@ public final class NetworkTracker: ObservableObject {
         attemptConnection()
     }
 
+    // This gets called periodically when we have an active server to make sure its still the best choice
     private func checkActiveServer() {
         guard let activeServer, activeServer.priority == 0 else {
             // No primary active server, proceed with the normal connection attempt
             attemptConnection()
             return
         }
-        // Check if the last active server is reachable
+        // Check if the primary (priority = 0)  active server is reachable if thats what is currenty connected.
         NetworkConnection.tracker(openHABRootUrl: activeServer.url) { [weak self] response in
             switch response.result {
             case .success:
                 os_log("Network status: Active server is reachable: %{PUBLIC}@", log: OSLog.default, type: .info, activeServer.url)
-                self?.updateStatus(.connected) // If reachable, we're done
-                self?.cancelRetryTimer()
             case .failure:
                 os_log("Network status: Active server is not reachable: %{PUBLIC}@", log: OSLog.default, type: .error, activeServer.url)
                 self?.attemptConnection() // If not reachable, run the connection logic
@@ -92,7 +90,7 @@ public final class NetworkTracker: ObservableObject {
     private func attemptConnection() {
         guard !connectionObjects.isEmpty else {
             os_log("Network status: No connection objects available.", log: OSLog.default, type: .error)
-            updateStatus(.notConnected)
+            setActiveServer(nil)
             return
         }
         os_log("Network status: checking available servers....", log: OSLog.default, type: .error)
@@ -114,7 +112,7 @@ public final class NetworkTracker: ObservableObject {
                 os_log("Network status: No server responded in 2 seconds, waiting for checks to finish.", log: OSLog.default, type: .info)
             } else {
                 os_log("Network status: No server responded in 2 seconds and no checks are outstanding.", log: OSLog.default, type: .error)
-                updateStatus(.connectionFailed)
+                setActiveServer(nil)
             }
         }
 
@@ -176,7 +174,7 @@ public final class NetworkTracker: ObservableObject {
                 os_log("Network status: First available connection established with %{PUBLIC}@", log: OSLog.default, type: .info, firstAvailableConnection.url)
             } else {
                 os_log("Network status: No server responded, connection failed.", log: OSLog.default, type: .error)
-                updateStatus(.connectionFailed)
+                setActiveServer(nil)
             }
         }
     }
@@ -199,13 +197,18 @@ public final class NetworkTracker: ObservableObject {
         retryTimer = nil
     }
 
-    private func setActiveServer(_ server: ConnectionObject) {
-        os_log("Network status: setActiveServer: %{PUBLIC}@", log: OSLog.default, type: .info, server.url)
+    private func setActiveServer(_ server: ConnectionObject? = nil) {
+        os_log("Network status: setActiveServer: %{PUBLIC}@", log: OSLog.default, type: .info, server?.url ?? "no server")
         if activeServer != server {
             activeServer = server
+            if let activeServer {
+                updateStatus(.connected)
+                startRetryTimer(60) // check every 60 seconds to see if a better server is available.
+            } else {
+                updateStatus(.notConnected)
+                startRetryTimer(30) // check every 30 seconds to see if a server is available.
+            }
         }
-        updateStatus(.connected)
-        startRetryTimer(60) // check every 60 seconds to see if a better server is available.
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {
