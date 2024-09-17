@@ -85,6 +85,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private let search = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
+    private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
