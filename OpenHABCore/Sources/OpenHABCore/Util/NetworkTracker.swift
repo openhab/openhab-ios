@@ -47,6 +47,7 @@ public final class NetworkTracker: ObservableObject {
     private var connectionObjects: [ConnectionObject] = []
 
     private var retryTimer: DispatchSourceTimer?
+    private let timerQueue = DispatchQueue(label: "com.openhab.networktracker.timerQueue")
 
     private init() {
         monitor = NWPathMonitor()
@@ -182,19 +183,22 @@ public final class NetworkTracker: ObservableObject {
     // Start the retry timer to attempt connection every N seconds
     private func startRetryTimer(_ retryInterval: TimeInterval) {
         cancelRetryTimer()
-        retryTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.global())
-        retryTimer?.schedule(deadline: .now() + retryInterval, repeating: retryInterval)
-        retryTimer?.setEventHandler { [weak self] in
-            os_log("Network status: Retry timer firing", log: OSLog.default, type: .info)
-            self?.attemptConnection()
+        timerQueue.sync {
+            retryTimer = DispatchSource.makeTimerSource(queue: timerQueue)
+            retryTimer?.schedule(deadline: .now() + retryInterval, repeating: retryInterval)
+            retryTimer?.setEventHandler { [weak self] in
+                os_log("Network status: Retry timer firing", log: OSLog.default, type: .info)
+                self?.attemptConnection()
+            }
+            retryTimer?.resume()
         }
-        retryTimer?.resume()
     }
 
-    // Cancel the retry timer
     private func cancelRetryTimer() {
-        retryTimer?.cancel()
-        retryTimer = nil
+        timerQueue.sync {
+            retryTimer?.cancel()
+            retryTimer = nil
+        }
     }
 
     private func setActiveServer(_ server: ConnectionObject? = nil) {
