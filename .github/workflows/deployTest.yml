@@ -1,0 +1,64 @@
+name: Deploy on TestFlight ===Test===
+
+on:
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        type: choice
+        description: 'Select version bump type:'
+        options:
+        - none
+        - patch
+        - minor
+        - major
+
+jobs:
+  build_and_deploy:
+    runs-on: macos-14
+
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+            bundle install --redownload
+
+      - name: SSH Config
+        run: |
+          echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - name: SSH Keys
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: |
+            ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+
+      - name: Deploy on TestFlight
+        env:
+          OH_CROWDIN_PROJECT_ID: openhab-ios
+          OH_CROWDIN_USERNAME: ${{ secrets.OH_CROWDIN_USERNAME }}
+          OH_CROWDIN_ACCOUNT_KEY: ${{ secrets.OH_CROWDIN_ACCOUNT_KEY }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          ASC_API_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_API_KEY_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
+          ASC_API_KEY: ${{ secrets.ASC_API_KEY }}
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 60
+          FASTLANE_GITHUB_RELEASE_API_BEARER: ${{ secrets.ACCESS_TOKEN }}
+        uses: maierj/fastlane-action@v3.1.0
+        with:
+          lane: beta
+          options: '{ "bump": "${{ github.event.inputs.bump_type }}" }'
+          skip-tracking: true
