@@ -89,6 +89,7 @@ platform :ios do
         # ensure branch is clean
         ensure_git_status_clean
         
+        # Set up manual signing, independently of what is set in "Signing" with Xcode frontend
         update_code_signing_settings(
             use_automatic_signing: false,
             code_sign_identity: 'Apple Distribution',
@@ -119,7 +120,7 @@ platform :ios do
         certificates
 
         # run unit tests
-        # unittests
+        unittests
 
         increment_build
 
