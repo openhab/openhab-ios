@@ -30,10 +30,6 @@ public struct ConnectionObject: Equatable {
         self.url = url
         self.priority = priority
     }
-
-    public static func == (lhs: ConnectionObject, rhs: ConnectionObject) -> Bool {
-        lhs.url == rhs.url && lhs.priority == rhs.priority
-    }
 }
 
 public final class NetworkTracker: ObservableObject {
@@ -48,6 +44,9 @@ public final class NetworkTracker: ObservableObject {
 
     private var retryTimer: DispatchSourceTimer?
     private let timerQueue = DispatchQueue(label: "com.openhab.networktracker.timerQueue")
+
+    private let connectedRetryInterval: TimeInterval = 60 // amount of time we scan for better connections when connected
+    private let disconnectedRetryInterval: TimeInterval = 30 // amount of time we scan when not connected
 
     private init() {
         monitor = NWPathMonitor()
@@ -201,17 +200,16 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
-    private func setActiveServer(_ server: ConnectionObject? = nil) {
+    private func setActiveServer(_ server: ConnectionObject?) {
         os_log("Network status: setActiveServer: %{PUBLIC}@", log: OSLog.default, type: .info, server?.url ?? "no server")
-        if activeServer != server {
-            activeServer = server
-            if let activeServer {
-                updateStatus(.connected)
-                startRetryTimer(60) // check every 60 seconds to see if a better server is available.
-            } else {
-                updateStatus(.notConnected)
-                startRetryTimer(30) // check every 30 seconds to see if a server is available.
-            }
+        guard activeServer != server else { return }
+        activeServer = server
+        if activeServer != nil {
+            updateStatus(.connected)
+            startRetryTimer(connectedRetryInterval)
+        } else {
+            updateStatus(.notConnected)
+            startRetryTimer(disconnectedRetryInterval)
         }
     }
 

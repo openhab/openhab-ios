@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -72,6 +73,7 @@ struct DrawerView: View {
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
     @State private var selectedSection: Int?
+    @State private var connectedUrl: String = "Not connected" // Default label text
 
     var openHABUsername = ""
     var openHABPassword = ""
@@ -88,98 +90,126 @@ struct DrawerView: View {
     @ScaledMetric var tilesIconwidth = 20.0
     @ScaledMetric var sitemapIconwidth = 20.0
 
+    // Combine cancellable
+    @State private var trackerCancellable: AnyCancellable?
+
     var body: some View {
-        List {
-            Section(header: Text("Main")) {
-                HStack {
-                    Image("openHABIcon")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: openHABIconwidth)
-                    Text("Home")
-                }
-                .onTapGesture {
-                    dismiss()
-                    onDismiss(.webview)
-                }
-            }
-
-            Section(header: Text("Tiles")) {
-                ForEach(uiTiles, id: \.url) { tile in
+        VStack {
+            List {
+                Section(header: Text("Main")) {
                     HStack {
-                        ImageView(url: tile.imageUrl)
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: tilesIconwidth)
-                        Text(tile.name)
-                    }
-                    .onTapGesture {
-                        dismiss()
-                        onDismiss(.tile(tile.url))
-                    }
-                }
-            }
-
-            Section(header: Text("Sitemaps")) {
-                ForEach(sitemaps, id: \.name) { sitemap in
-                    HStack {
-                        let url = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", icon: sitemap.icon).url
-                        KFImage(url).placeholder { Image("openHABIcon").resizable() }
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: sitemapIconwidth)
-                        Text(sitemap.label)
-                    }
-                    .onTapGesture {
-                        dismiss()
-                        onDismiss(.sitemap(sitemap.name))
-                    }
-                }
-            }
-
-            Section(header: Text("System")) {
-                HStack {
-                    Image(systemSymbol: .gear)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: openHABIconwidth)
-                    Text(LocalizedStringKey("settings"))
-                }
-                .onTapGesture {
-                    dismiss()
-                    onDismiss(.settings)
-                }
-
-                // check if we are using my.openHAB, add notifications menu item then
-                // Actually this should better test whether the host of the remoteUrl is on openhab.org
-                if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
-                    HStack {
-                        Image(systemSymbol: .bell)
+                        Image("openHABIcon")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: openHABIconwidth)
-                        Text(LocalizedStringKey("notifications"))
+                        Text("Home")
                     }
                     .onTapGesture {
                         dismiss()
-                        onDismiss(.notifications)
+                        onDismiss(.webview)
+                    }
+                }
+
+                Section(header: Text("Tiles")) {
+                    ForEach(uiTiles, id: \.url) { tile in
+                        HStack {
+                            ImageView(url: tile.imageUrl)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: tilesIconwidth)
+                            Text(tile.name)
+                        }
+                        .onTapGesture {
+                            dismiss()
+                            onDismiss(.tile(tile.url))
+                        }
+                    }
+                }
+
+                Section(header: Text("Sitemaps")) {
+                    ForEach(sitemaps, id: \.name) { sitemap in
+                        HStack {
+                            let url = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", icon: sitemap.icon).url
+                            KFImage(url).placeholder { Image("openHABIcon").resizable() }
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: sitemapIconwidth)
+                            Text(sitemap.label)
+                        }
+                        .onTapGesture {
+                            dismiss()
+                            onDismiss(.sitemap(sitemap.name))
+                        }
+                    }
+                }
+
+                Section(header: Text("System")) {
+                    HStack {
+                        Image(systemSymbol: .gear)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: openHABIconwidth)
+                        Text(LocalizedStringKey("settings"))
+                    }
+                    .onTapGesture {
+                        dismiss()
+                        onDismiss(.settings)
+                    }
+
+                    if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
+                        HStack {
+                            Image(systemSymbol: .bell)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: openHABIconwidth)
+                            Text(LocalizedStringKey("notifications"))
+                        }
+                        .onTapGesture {
+                            dismiss()
+                            onDismiss(.notifications)
+                        }
                     }
                 }
             }
+            .listStyle(.inset)
+            .onAppear(perform: loadData)
+
+            Spacer()
+
+            // Display the connected URL
+            HStack {
+                Image(systemName: "cloud.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                Text(connectedUrl)
+                    .font(.footnote)
+            }
+            .padding(.bottom, 5)
+            .onAppear(perform: trackActiveServer)
+            .onDisappear {
+                trackerCancellable?.cancel()
+            }
         }
-        .listStyle(.inset)
-        .onAppear(perform: loadData)
+    }
+
+    private func trackActiveServer() {
+        trackerCancellable = NetworkTracker.shared.$activeServer
+            .receive(on: DispatchQueue.main)
+            .sink { activeServer in
+                if let activeServer {
+                    connectedUrl = activeServer.url
+                } else {
+                    connectedUrl = NSLocalizedString("connecting", comment: "")
+                }
+            }
     }
 
     private func loadData() {
-        // TODO: Replace network calls with appropriate @EnvironmentObject or other state management
         loadSitemaps()
         loadUiTiles()
     }
 
     private func loadSitemaps() {
-        // Perform network call to load sitemaps and decode
-        // Update the sitemaps state
-
         NetworkConnection.sitemaps(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
             switch response.result {
             case let .success(data):
@@ -191,7 +221,6 @@ struct DrawerView: View {
                     sitemaps = Array(sitemaps.dropLast())
                 }
 
-                // Sort the sitemaps according to Settings selection.
                 switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
                 case .label: sitemaps.sort { $0.label < $1.label }
                 case .name: sitemaps.sort { $0.name < $1.name }
@@ -203,8 +232,6 @@ struct DrawerView: View {
     }
 
     private func loadUiTiles() {
-        // Perform network call to load UI Tiles and decode
-        // Update the uiTiles state
         NetworkConnection.uiTiles(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
             switch response.result {
             case .success:
@@ -222,11 +249,6 @@ struct DrawerView: View {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
             }
         }
-    }
-
-    mutating func loadSettings() {
-        openHABUsername = Preferences.username
-        openHABPassword = Preferences.password
     }
 }
 
