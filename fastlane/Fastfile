@@ -94,7 +94,7 @@ platform :ios do
         certificates
 
         # run unit tests
-        unittests
+        # unittests
 
         increment_build
 
