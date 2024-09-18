@@ -33,15 +33,15 @@ public struct UserDefault<T> {
         }
     }
 
+    public var projectedValue: AnyPublisher<T, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
     public init(_ key: String, defaultValue: T) {
         self.key = key
         self.defaultValue = defaultValue
         let currentValue = Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
         subject = CurrentValueSubject<T, Never>(currentValue)
-    }
-
-    public var projectedValue: AnyPublisher<T, Never> {
-        subject.eraseToAnyPublisher()
     }
 }
 
@@ -73,15 +73,15 @@ public struct UserDefaultURL {
         }
     }
 
+    public var projectedValue: AnyPublisher<String, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
     public init(_ key: String, defaultValue: String) {
         self.key = key
         self.defaultValue = defaultValue
         let currentValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
         subject = CurrentValueSubject<String, Never>(currentValue)
-    }
-
-    public var projectedValue: AnyPublisher<String, Never> {
-        subject.eraseToAnyPublisher()
     }
 
     private func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
