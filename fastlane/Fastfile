@@ -133,10 +133,6 @@ platform :ios do
 
         clean_build_artifacts
         
-        xcodes(
-            version: '15.4'
-        )
-
         # build and upload to TestFlight
         build_app(
             scheme: 'openHAB',
