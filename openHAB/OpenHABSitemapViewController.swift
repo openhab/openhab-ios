@@ -85,6 +85,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private let search = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
+    private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
 
     var relevantPage: OpenHABSitemapPage? {
         if isFiltering {
@@ -175,7 +176,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 switch status {
                 case .connecting:
                     self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .connectionFailed:
+                case .notConnected:
                     os_log("Tracking error", log: .viewCycle, type: .info)
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
                 case _:
@@ -478,6 +479,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
         // since we do not reference the sink cancelable, this will only fire once
         _ = NetworkTracker.shared.$activeServer
+            .filter { $0 != nil } // Only proceed if activeServer is not nil
+            .first() // Automatically cancels after the first non-nil value
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeServer in
                 if let openHABUrl = activeServer?.url, let self {
@@ -776,16 +779,13 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             newViewController.openHABRootUrl = openHABRootUrl
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget?.type == .selection {
-            os_log("Selected selection widget", log: .viewCycle, type: .info)
             selectedWidgetRow = indexPath.row
             let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
+            let selectionItemState = selectedWidget?.item?.state
+            logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
             let hostingController = UIHostingController(rootView: SelectionView(
                 mappings: selectedWidget?.mappingsOrItemOptions ?? [],
-                selectionItem:
-                Binding(
-                    get: { selectedWidget?.item },
-                    set: { selectedWidget?.item = $0 }
-                ),
+                selectionItemState: selectionItemState,
                 onSelection: { selectedMappingIndex in
                     let selectedWidget: OpenHABWidget? = self.relevantPage?.widgets[self.selectedWidgetRow]
                     let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
