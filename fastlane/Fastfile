@@ -88,6 +88,32 @@ platform :ios do
 
         # ensure branch is clean
         ensure_git_status_clean
+        
+        # Set up manual signing, independently of what is set in "Signing" with Xcode frontend
+        update_code_signing_settings(
+            use_automatic_signing: false,
+            code_sign_identity: 'Apple Distribution',
+        )
+        
+        update_code_signing_settings(
+            targets: 'openHAB',
+            profile_name: 'match AppStore org.openhab.app',
+        )
+        
+        update_code_signing_settings(
+            targets: 'openHABWatch',
+            profile_name: 'match AppStore org.openhab.app.watchkitapp',
+        )
+        
+        update_code_signing_settings(
+            targets: 'openHABIntents',
+            profile_name: 'match AppStore org.openhab.app.openHABIntents',
+        )
+        
+        update_code_signing_settings(
+            targets: 'NotificationService',
+            profile_name: 'match AppStore org.openhab.app.NotificationService',
+        )
 
         # setup code signing
         setup_keychain
@@ -132,7 +158,7 @@ platform :ios do
         end
 
         clean_build_artifacts
-
+        
         # build and upload to TestFlight
         build_app(
             scheme: 'openHAB',
