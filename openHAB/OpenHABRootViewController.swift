@@ -120,20 +120,30 @@ class OpenHABRootViewController: UIViewController {
     }
 
     fileprivate func setupTracker() {
-        Publishers.CombineLatest(
+        Publishers.CombineLatest3(
             Preferences.$localUrl,
-            Preferences.$remoteUrl
+            Preferences.$remoteUrl,
+            Preferences.$demomode
         )
-        .sink { (localUrl, remoteUrl) in
-            let connection1 = ConnectionObject(
-                url: localUrl,
-                priority: 0
-            )
-            let connection2 = ConnectionObject(
-                url: remoteUrl,
-                priority: 1
-            )
-            NetworkTracker.shared.startTracking(connectionObjects: [connection1, connection2])
+        .sink { (localUrl, remoteUrl, demomode) in
+            if demomode {
+                NetworkTracker.shared.startTracking(connectionObjects: [
+                    ConnectionObject(
+                        url: "https://demo.openhab.org",
+                        priority: 0
+                    )
+                ])
+            } else {
+                let connection1 = ConnectionObject(
+                    url: localUrl,
+                    priority: 0
+                )
+                let connection2 = ConnectionObject(
+                    url: remoteUrl,
+                    priority: 1
+                )
+                NetworkTracker.shared.startTracking(connectionObjects: [connection1, connection2])
+            }
         }
         .store(in: &cancellables)
 

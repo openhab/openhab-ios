@@ -90,7 +90,7 @@ class OpenHABWebViewController: OpenHABViewController {
                 switch status {
                 case .connecting:
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .connectionFailed:
+                case .notConnected:
                     self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 case _:
                     break
@@ -304,7 +304,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
                 sseTimer?.invalidate()
                 sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
                     self.acceptsCommands = false
                 }
             default: break
