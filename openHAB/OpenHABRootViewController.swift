@@ -313,8 +313,8 @@ class OpenHABRootViewController: UIViewController {
                 }
                 if let urlComponents = URLComponents(string: path) {
                     let queryItems = urlComponents.queryItems
-                    let sitemap = queryItems?.first(where: { $0.name == "sitemap" })?.value
-                    let subview = queryItems?.first(where: { $0.name == "w" })?.value
+                    let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
+                    let subview = queryItems?.first { $0.name == "w" }?.value
                     if let sitemap {
                         sitemapViewController.pushSitemap(name: sitemap, path: subview)
                     }
