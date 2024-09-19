@@ -185,7 +185,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             }
             .store(in: &trackerCancellables)
 
-        var activeServerWatcher = NetworkTracker.shared.$activeServer.eraseToAnyPublisher()
+        var activeServerWatcher = NetworkTracker.shared.$activeConnection.eraseToAnyPublisher()
         // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
         if pageUrl == "" {
             // Set self as root view controller
@@ -209,10 +209,10 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will exectue imediately with current values and then again if the network changes, otherwise it will be called on changes only.
         activeServerWatcher
             .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let activeServer {
-                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeServer.url)
-                    self.openHABRootUrl = activeServer.url
+            .sink { activeConnection in
+                if let activeConnection {
+                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
+                    self.openHABRootUrl = activeConnection.configuration.url
                     self.selectSitemap()
                 }
             }
@@ -478,12 +478,12 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     func pushSitemap(name: String, path: String?) {
         // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
         // since we do not reference the sink cancelable, this will only fire once
-        _ = NetworkTracker.shared.$activeServer
+        _ = NetworkTracker.shared.$activeConnection
             .filter { $0 != nil } // Only proceed if activeServer is not nil
             .first() // Automatically cancels after the first non-nil value
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeServer in
-                if let openHABUrl = activeServer?.url, let self {
+            .sink { [weak self] activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url, let self {
                     os_log("pushSitemap: pushing page", log: .default, type: .error)
                     let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
                     if let path {

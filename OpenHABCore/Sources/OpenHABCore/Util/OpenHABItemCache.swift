@@ -24,15 +24,15 @@ public class OpenHABItemCache {
         if NetworkConnection.shared == nil {
             NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
         }
-        let connection1 = ConnectionObject(
+        let connection1 = ConnectionConfiguration(
             url: Preferences.localUrl,
             priority: 0
         )
-        let connection2 = ConnectionObject(
+        let connection2 = ConnectionConfiguration(
             url: Preferences.remoteUrl,
             priority: 1
         )
-        NetworkTracker.shared.startTracking(connectionObjects: [connection1, connection2])
+        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
@@ -75,12 +75,12 @@ public class OpenHABItemCache {
 
     @available(iOS 12.0, *)
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
-        NetworkTracker.shared.$activeServer
+        NetworkTracker.shared.$activeConnection
             .filter { $0 != nil } // Only proceed if activeServer is not nil
             .first() // Automatically cancels after the first non-nil value
             .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let urlString = activeServer?.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
+            .sink { activeConnection in
+                if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
                     os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
                     self.lastLoad = Date().timeIntervalSince1970
                     NetworkConnection.load(from: url, timeout: self.timeout) { response in
@@ -105,12 +105,12 @@ public class OpenHABItemCache {
 
     @available(iOS 12.0, *)
     public func reload(name: String, completion: @escaping (OpenHABItem?) -> Void) {
-        NetworkTracker.shared.$activeServer
+        NetworkTracker.shared.$activeConnection
             .filter { $0 != nil } // Only proceed if activeServer is not nil
             .first() // Automatically cancels after the first non-nil value
             .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let urlString = activeServer?.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
+            .sink { activeConnection in
+                if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
                     os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
                     self.lastLoad = Date().timeIntervalSince1970
                     NetworkConnection.load(from: url, timeout: self.timeout) { response in
