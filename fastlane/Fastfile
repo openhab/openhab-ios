@@ -168,65 +168,10 @@ platform :ios do
             disable_package_automatic_updates: true
         )
 
-        upload_to_testflight(
-            skip_submission: options[:isfeaturebuild],
-            distribute_external: !options[:isfeaturebuild],
-            notify_external_testers: !options[:isfeaturebuild],
-            changelog: changelog,
-            groups: ['Beta Testers']
-        )
+	upload_symbols_to_crashlytics(gsp_path: "openHAB/GoogleService-Info.plist")
 
         clean_build_artifacts
 
-        # commit to git the changes from bumping version number
-        commit_version_bump(
-            message: "committed version bump: #{version} (#{build_number})",
-            xcodeproj: 'openHAB.xcodeproj',
-            include: %w[CHANGELOG.md]
-        )
-        if is_ci?
-            sh 'git commit --amend --no-edit --signoff --author="openhab-bot <info@openhabfoundation.org>"'
-        else
-            sh 'git commit --amend --no-edit --signoff'
-        end
-
-        # push bump commit
-        ensure_git_status_clean
-        push_to_git_remote
-
-        # tag if not a feature build
-        if !options[:isfeaturebuild]
-            #sh 'git checkout main && git merge develop --no-ff'
-            add_git_tag(
-                message: changelog,
-                tag: version.to_s
-            )
-            push_to_git_remote(tags: true)
-            #sh 'git checkout develop'
-
-            if is_ci?
-                set_github_release(
-                  api_bearer: ENV['FASTLANE_GITHUB_RELEASE_API_BEARER'],
-                  repository_name: 'openhab/openhab-ios',
-                  name: "#{type.capitalize} version #{version}",
-                  tag_name: version.to_s,
-                  description: changelog,
-                  commitish: 'develop'
-                  # upload_assets: no assets supported
-                )
-            else
-                set_github_release(
-                  api_token: ENV['GITHUB_API_TOKEN'],
-                  repository_name: 'openhab/openhab-ios',
-                  name: "#{type.capitalize} version #{version}",
-                  tag_name: version.to_s,
-                  description: changelog,
-                  commitish: 'develop'
-                  # upload_assets: no assets supported
-                )
-            end
-
-        end
 
     end
 
