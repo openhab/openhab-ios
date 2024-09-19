@@ -176,6 +176,11 @@ platform :ios do
             groups: ['Beta Testers']
         )
 
+	upload_symbols_to_crashlytics(
+		gsp_path: "openHAB/GoogleService-Info.plist",
+		binary_path: './scripts/upload-symbols'
+	)
+
         clean_build_artifacts
 
         # commit to git the changes from bumping version number
