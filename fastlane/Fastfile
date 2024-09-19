@@ -164,7 +164,10 @@ platform :ios do
             disable_package_automatic_updates: true
         )
 
-	upload_symbols_to_crashlytics(gsp_path: "openHAB/GoogleService-Info.plist")
+	upload_symbols_to_crashlytics(
+		gsp_path: "openHAB/GoogleService-Info.plist",
+		binary_path: './scripts/upload-symbols'
+	)
 
         clean_build_artifacts
 
