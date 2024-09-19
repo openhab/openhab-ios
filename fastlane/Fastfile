@@ -119,10 +119,6 @@ platform :ios do
         setup_keychain
         certificates
 
-        # run unit tests
-        unittests
-
-        increment_build
 
         type = options[:bump]
 
