@@ -193,11 +193,11 @@ struct DrawerView: View {
     }
 
     private func trackActiveServer() {
-        trackerCancellable = NetworkTracker.shared.$activeServer
+        trackerCancellable = NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let activeServer {
-                    connectedUrl = activeServer.url
+            .sink { activeConnection in
+                if let activeConnection {
+                    connectedUrl = activeConnection.configuration.url
                 } else {
                     connectedUrl = NSLocalizedString("connecting", comment: "")
                 }

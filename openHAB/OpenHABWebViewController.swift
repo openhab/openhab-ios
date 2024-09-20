@@ -72,12 +72,12 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
-        NetworkTracker.shared.$activeServer
+        NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let activeServer {
-                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeServer.url)")
-                    self.openHABTrackedRootUrl = activeServer.url
+            .sink { activeConnection in
+                if let activeConnection {
+                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeConnection.configuration.url)")
+                    self.openHABTrackedRootUrl = activeConnection.configuration.url
                     self.loadWebView(force: false)
                 }
             }
@@ -92,8 +92,8 @@ class OpenHABWebViewController: OpenHABViewController {
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
                 case .notConnected:
                     self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
-                case _:
-                    break
+                case .connected:
+                    self.hidePopupMessages()
                 }
             }
             .store(in: &trackerCancellables)
@@ -115,15 +115,15 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func loadWebView(force: Bool = false, path: String? = nil) {
-        os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl)
+        os_log("loadWebView tracked URL: %{PUBLIC}@ forced %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl, force ? "true" : "false")
 
         let authStr = "\(Preferences.username):\(Preferences.password)"
         let newTarget = "\(openHABTrackedRootUrl):\(authStr)"
+
         if !force, currentTarget == newTarget {
             showActivityIndicator(show: false)
             return
         }
-
         currentTarget = newTarget
         let url = URL(string: openHABTrackedRootUrl)
 
@@ -197,7 +197,6 @@ class OpenHABWebViewController: OpenHABViewController {
         os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
         showActivityIndicator(show: false)
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
-        currentTarget = ""
     }
 
     override func reloadView() {

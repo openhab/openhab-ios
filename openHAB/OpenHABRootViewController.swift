@@ -127,31 +127,32 @@ class OpenHABRootViewController: UIViewController {
         )
         .sink { (localUrl, remoteUrl, demomode) in
             if demomode {
-                NetworkTracker.shared.startTracking(connectionObjects: [
-                    ConnectionObject(
+                NetworkTracker.shared.startTracking(connectionConfigurations: [
+                    ConnectionConfiguration(
                         url: "https://demo.openhab.org",
                         priority: 0
                     )
                 ])
             } else {
-                let connection1 = ConnectionObject(
+                let connection1 = ConnectionConfiguration(
                     url: localUrl,
                     priority: 0
                 )
-                let connection2 = ConnectionObject(
+                let connection2 = ConnectionConfiguration(
                     url: remoteUrl,
                     priority: 1
                 )
-                NetworkTracker.shared.startTracking(connectionObjects: [connection1, connection2])
+                NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
             }
         }
         .store(in: &cancellables)
 
-        NetworkTracker.shared.$activeServer
+        NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeServer in
-                if let activeServer {
-                    self?.appData?.openHABRootUrl = activeServer.url
+            .sink { [weak self] activeConnection in
+                if let activeConnection {
+                    self?.appData?.openHABRootUrl = activeConnection.configuration.url
+                    self?.appData?.openHABVersion = activeConnection.version
                 }
             }
             .store(in: &cancellables)
@@ -342,10 +343,10 @@ class OpenHABRootViewController: UIViewController {
             let itemName = String(components[0])
             let itemCommand = String(components[1])
             // This will only fire onece since we do not retain the return cancelable
-            _ = NetworkTracker.shared.$activeServer
+            _ = NetworkTracker.shared.$activeConnection
                 .receive(on: DispatchQueue.main)
-                .sink { activeServer in
-                    if let openHABUrl = activeServer?.url {
+                .sink { activeConnection in
+                    if let openHABUrl = activeConnection?.configuration.url {
                         os_log("Sending comand", log: .default, type: .error)
                         let client = HTTPClient(username: Preferences.username, password: Preferences.password)
                         client.doPost(baseURLs: [openHABUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
@@ -418,10 +419,10 @@ class OpenHABRootViewController: UIViewController {
         }
 
         // This will only fire onece since we do not retain the return cancelable
-        _ = NetworkTracker.shared.$activeServer
+        _ = NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let openHABUrl = activeServer?.url {
+            .sink { activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url {
                     os_log("Sending comand", log: .default, type: .error)
                     let client = HTTPClient(username: Preferences.username, password: Preferences.password)
                     client.doPost(baseURLs: [openHABUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
