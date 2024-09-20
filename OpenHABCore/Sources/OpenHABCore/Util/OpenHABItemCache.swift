@@ -32,7 +32,7 @@ public class OpenHABItemCache {
             url: Preferences.remoteUrl,
             priority: 1
         )
-        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
     }
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
@@ -75,62 +75,54 @@ public class OpenHABItemCache {
 
     @available(iOS 12.0, *)
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
-        NetworkTracker.shared.$activeConnection
-            .filter { $0 != nil } // Only proceed if activeServer is not nil
-            .first() // Automatically cancels after the first non-nil value
-            .receive(on: DispatchQueue.main)
-            .sink { activeConnection in
-                if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
-                    os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
-                    self.lastLoad = Date().timeIntervalSince1970
-                    NetworkConnection.load(from: url, timeout: self.timeout) { response in
-                        switch response.result {
-                        case let .success(data):
-                            do {
-                                try self.decodeItemsData(data)
-                                let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) } ?? []
-                                completion(ret)
-                            } catch {
-                                print(error)
-                                os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                            }
-                        case let .failure(error):
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
+                os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
+                self.lastLoad = Date().timeIntervalSince1970
+                NetworkConnection.load(from: url, timeout: self.timeout) { response in
+                    switch response.result {
+                    case let .success(data):
+                        do {
+                            try self.decodeItemsData(data)
+                            let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) } ?? []
+                            completion(ret)
+                        } catch {
+                            print(error)
                             os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                         }
+                    case let .failure(error):
+                        os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
                 }
             }
-            .store(in: &cancellables)
+        }
+        .store(in: &cancellables)
     }
 
     @available(iOS 12.0, *)
     public func reload(name: String, completion: @escaping (OpenHABItem?) -> Void) {
-        NetworkTracker.shared.$activeConnection
-            .filter { $0 != nil } // Only proceed if activeServer is not nil
-            .first() // Automatically cancels after the first non-nil value
-            .receive(on: DispatchQueue.main)
-            .sink { activeConnection in
-                if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
-                    os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
-                    self.lastLoad = Date().timeIntervalSince1970
-                    NetworkConnection.load(from: url, timeout: self.timeout) { response in
-                        switch response.result {
-                        case let .success(data):
-                            do {
-                                try self.decodeItemsData(data)
-                                let item = self.getItem(name)
-                                completion(item)
-                            } catch {
-                                os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                            }
-                        case let .failure(error):
-                            print(error)
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
+                os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
+                self.lastLoad = Date().timeIntervalSince1970
+                NetworkConnection.load(from: url, timeout: self.timeout) { response in
+                    switch response.result {
+                    case let .success(data):
+                        do {
+                            try self.decodeItemsData(data)
+                            let item = self.getItem(name)
+                            completion(item)
+                        } catch {
                             os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                         }
+                    case let .failure(error):
+                        print(error)
+                        os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
                 }
             }
-            .store(in: &cancellables)
+        }
+        .store(in: &cancellables)
     }
 
     private func decodeItemsData(_ data: Data) throws {

@@ -120,32 +120,45 @@ class OpenHABRootViewController: UIViewController {
     }
 
     fileprivate func setupTracker() {
-        Publishers.CombineLatest3(
+        let serverInfo = Publishers.CombineLatest4(
             Preferences.$localUrl,
             Preferences.$remoteUrl,
-            Preferences.$demomode
+            Preferences.$username,
+            Preferences.$password
         )
-        .sink { (localUrl, remoteUrl, demomode) in
-            if demomode {
-                NetworkTracker.shared.startTracking(connectionConfigurations: [
-                    ConnectionConfiguration(
-                        url: "https://demo.openhab.org",
+        .eraseToAnyPublisher()
+
+        let misc = Publishers.CombineLatest(
+            Preferences.$demomode,
+            Preferences.$alwaysSendCreds
+        )
+        .eraseToAnyPublisher()
+
+        Publishers.CombineLatest(serverInfo, misc)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
+            .sink { (serverInfoTuple, miscTuple) in
+                let (localUrl, remoteUrl, username, password) = serverInfoTuple
+                let (demomode, alwaysSendCreds) = miscTuple
+                if demomode {
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [
+                        ConnectionConfiguration(
+                            url: "https://demo.openhab.org",
+                            priority: 0
+                        )
+                    ], username: "", password: "", alwaysSendBasicAuth: false)
+                } else {
+                    let connection1 = ConnectionConfiguration(
+                        url: localUrl,
                         priority: 0
                     )
-                ])
-            } else {
-                let connection1 = ConnectionConfiguration(
-                    url: localUrl,
-                    priority: 0
-                )
-                let connection2 = ConnectionConfiguration(
-                    url: remoteUrl,
-                    priority: 1
-                )
-                NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+                    let connection2 = ConnectionConfiguration(
+                        url: remoteUrl,
+                        priority: 1
+                    )
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: username, password: password, alwaysSendBasicAuth: alwaysSendCreds)
+                }
             }
-        }
-        .store(in: &cancellables)
+            .store(in: &cancellables)
 
         NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
@@ -342,25 +355,23 @@ class OpenHABRootViewController: UIViewController {
         if components.count == 2 {
             let itemName = String(components[0])
             let itemCommand = String(components[1])
-            // This will only fire onece since we do not retain the return cancelable
-            _ = NetworkTracker.shared.$activeConnection
-                .receive(on: DispatchQueue.main)
-                .sink { activeConnection in
-                    if let openHABUrl = activeConnection?.configuration.url {
-                        os_log("Sending comand", log: .default, type: .error)
-                        let client = HTTPClient(username: Preferences.username, password: Preferences.password)
-                        client.doPost(baseURLs: [openHABUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
-                            if let error {
-                                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                            } else {
-                                os_log("Request succeeded", log: .default, type: .info)
-                                if let data {
-                                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
-                                }
+            NetworkTracker.shared.waitForActiveConnection { activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                    os_log("Sending comand", log: .default, type: .error)
+                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                    client.doPost(baseURL: url, path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
+                        if let error {
+                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                        } else {
+                            os_log("Request succeeded", log: .default, type: .info)
+                            if let data {
+                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
                             }
                         }
                     }
                 }
+            }
+            .store(in: &cancellables)
         }
     }
 
@@ -418,25 +429,23 @@ class OpenHABRootViewController: UIViewController {
             // nothing
         }
 
-        // This will only fire onece since we do not retain the return cancelable
-        _ = NetworkTracker.shared.$activeConnection
-            .receive(on: DispatchQueue.main)
-            .sink { activeConnection in
-                if let openHABUrl = activeConnection?.configuration.url {
-                    os_log("Sending comand", log: .default, type: .error)
-                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
-                    client.doPost(baseURLs: [openHABUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
-                        if let error {
-                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                        } else {
-                            os_log("Request succeeded", log: .default, type: .info)
-                            if let data {
-                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
-                            }
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                os_log("Sending comand", log: .default, type: .error)
+                let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                client.doPost(baseURL: url, path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
+                    if let error {
+                        os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                    } else {
+                        os_log("Request succeeded", log: .default, type: .info)
+                        if let data {
+                            os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
                         }
                     }
                 }
             }
+        }
+        .store(in: &cancellables)
     }
 
     func showSideMenu() {
