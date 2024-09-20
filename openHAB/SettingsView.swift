@@ -260,7 +260,7 @@ struct SettingsView: View {
 
                 Picker(selection: $settingsIconType) {
                     ForEach(IconType.allCases, id: \.self) { icontype in
-                        Text("\(icontype)").tag(icontype)
+                        Text(verbatim: "\(icontype)").tag(icontype)
                     }
                 } label: {
                     Text("Icon Type")
@@ -268,7 +268,7 @@ struct SettingsView: View {
 
                 Picker(selection: $settingsSortSitemapsBy) {
                     ForEach(SortSitemapsOrder.allCases, id: \.self) { sortsitemaporder in
-                        Text("\(sortsitemaporder)").tag(sortsitemaporder)
+                        Text(verbatim: "\(sortsitemaporder)").tag(sortsitemaporder)
                     }
                 } label: {
                     Text("Sort sitemaps by")
