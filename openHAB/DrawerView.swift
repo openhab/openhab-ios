@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
@@ -34,12 +33,6 @@ func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
     }
 
     return sitemaps
-}
-
-struct UiTile: Decodable {
-    var name: String
-    var url: String
-    var imageUrl: String
 }
 
 struct ImageView: View {
@@ -69,11 +62,35 @@ struct ImageView: View {
     }
 }
 
+// Display the connected URL
+struct ConnectionView: View {
+    @ObservedObject private var networkTracker = NetworkTracker.shared
+
+    var body: some View {
+        HStack {
+            if let activeConnection = networkTracker.activeConnection {
+                Image(systemSymbol: .cloudFill)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                Text(activeConnection.configuration.url).font(.footnote)
+            } else {
+                Image(systemSymbol: .exclamationmarkIcloudFill)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                Text("connecting").font(.footnote)
+            }
+        }
+    }
+}
+
 struct DrawerView: View {
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
     @State private var selectedSection: Int?
     @State private var connectedUrl: String = "Not connected" // Default label text
+    @ObservedObject private var networkTracker = NetworkTracker.shared
 
     var openHABUsername = ""
     var openHABPassword = ""
@@ -89,9 +106,6 @@ struct DrawerView: View {
     @ScaledMetric var openHABIconwidth = 20.0
     @ScaledMetric var tilesIconwidth = 20.0
     @ScaledMetric var sitemapIconwidth = 20.0
-
-    // Combine cancellable
-    @State private var trackerCancellable: AnyCancellable?
 
     var body: some View {
         VStack {
@@ -174,34 +188,9 @@ struct DrawerView: View {
             .onAppear(perform: loadData)
 
             Spacer()
-
-            // Display the connected URL
-            HStack {
-                Image(systemName: "cloud.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
-                Text(connectedUrl)
-                    .font(.footnote)
-            }
-            .padding(.bottom, 5)
-            .onAppear(perform: trackActiveServer)
-            .onDisappear {
-                trackerCancellable?.cancel()
-            }
+            ConnectionView()
+                .padding(.bottom, 5)
         }
-    }
-
-    private func trackActiveServer() {
-        trackerCancellable = NetworkTracker.shared.$activeConnection
-            .receive(on: DispatchQueue.main)
-            .sink { activeConnection in
-                if let activeConnection {
-                    connectedUrl = activeConnection.configuration.url
-                } else {
-                    connectedUrl = NSLocalizedString("connecting", comment: "")
-                }
-            }
     }
 
     private func loadData() {
