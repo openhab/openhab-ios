@@ -100,8 +100,6 @@ class OpenHABRootViewController: UIViewController {
         isDemoMode = Preferences.demomode
         switchToSavedView()
         setupTracker()
-        // ready for push notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
         // check if we were launched with a notification
         if let userInfo = appData?.lastNotificationInfo {
             handleNotification(userInfo)
@@ -289,33 +287,38 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    @objc func handleApnsMessage(notification: Notification) {
-        // actionIdentifier is the result of a action button being pressed
-        if let userInfo = notification.userInfo {
-            handleNotification(userInfo)
-        }
-    }
-
-    private func handleNotification(_ userInfo: [AnyHashable: Any]) {
+    func handleNotification(_ userInfo: [AnyHashable: Any], completionHandler: (() -> Void)? = nil) {
         // actionIdentifier is the result of a action button being pressed
         // if not actionIdentifier, then the notification was clicked, so use "on-click" if there
         if let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String {
             let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
             if action.hasPrefix("ui") {
-                uiCommandAction(cmd)
+                uiCommandAction(cmd, completionHandler: completionHandler)
             } else if action.hasPrefix("command") {
-                sendCommandAction(cmd)
+                sendCommandAction(cmd, completionHandler: completionHandler)
             } else if action.hasPrefix("http") {
-                httpCommandAction(action)
+                httpCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("app") {
-                appCommandAction(action)
+                appCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("rule") {
-                ruleCommandAction(action)
+                ruleCommandAction(action, completionHandler: completionHandler)
+            } else {
+                if let completionHandler {
+                    DispatchQueue.main.async {
+                        completionHandler()
+                    }
+                }
+            }
+        } else {
+            if let completionHandler {
+                DispatchQueue.main.async {
+                    completionHandler()
+                }
             }
         }
     }
 
-    private func uiCommandAction(_ command: String) {
+    private func uiCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
         let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
         if let firstMatch = command.firstMatch(of: regexPattern) {
@@ -348,9 +351,14 @@ class OpenHABRootViewController: UIViewController {
         } else {
             os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func sendCommandAction(_ action: String) {
+    private func sendCommandAction(_ action: String, completionHandler: (() -> Void)? = nil) {
         let components = action.split(separator: ":")
         if components.count == 2 {
             let itemName = String(components[0])
@@ -362,27 +370,68 @@ class OpenHABRootViewController: UIViewController {
                     client.doPost(baseURL: url, path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
                         if let error {
                             os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                            self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
                         } else {
                             os_log("Request succeeded", log: .default, type: .info)
                             if let data {
                                 os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
                             }
                         }
+                        if let completionHandler {
+                            DispatchQueue.main.async {
+                                completionHandler()
+                            }
+                        }
+                    }
+                } else {
+                    self.displayErrorNotification("Could not find server")
+                    if let completionHandler {
+                        DispatchQueue.main.async {
+                            completionHandler()
+                        }
                     }
                 }
             }
             .store(in: &cancellables)
+        } else {
+            if let completionHandler {
+                DispatchQueue.main.async {
+                    completionHandler()
+                }
+            }
         }
     }
 
-    private func httpCommandAction(_ command: String) {
+    private func displayErrorNotification(_ message: String, completionHandler: (() -> Void)? = nil) {
+        let content = UNMutableNotificationContent()
+        content.title = "Could not send command"
+        content.body = message
+        content.sound = UNNotificationSound.default
+
+        // Create the request
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+
+        // Schedule the request with the notification center
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                print("Error scheduling notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func httpCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         if let url = URL(string: command) {
             let vc = SFSafariViewController(url: url)
             present(vc, animated: true)
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func appCommandAction(_ command: String) {
+    private func appCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         let content = command.dropFirst(4) // Remove "app:"
         let pairs = content.split(separator: ",")
         for pair in pairs {
@@ -396,9 +445,14 @@ class OpenHABRootViewController: UIViewController {
                 }
             }
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func ruleCommandAction(_ command: String) {
+    private func ruleCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         let components = command.split(separator: ":", maxSplits: 2)
 
         guard components.count == 3,
@@ -436,11 +490,24 @@ class OpenHABRootViewController: UIViewController {
                 client.doPost(baseURL: url, path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
                     if let error {
                         os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                        self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
                     } else {
                         os_log("Request succeeded", log: .default, type: .info)
                         if let data {
                             os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
                         }
+                    }
+                    if let completionHandler {
+                        DispatchQueue.main.async {
+                            completionHandler()
+                        }
+                    }
+                }
+            } else {
+                self.displayErrorNotification("Could not find active server")
+                if let completionHandler {
+                    DispatchQueue.main.async {
+                        completionHandler()
                     }
                 }
             }
