@@ -478,23 +478,20 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     func pushSitemap(name: String, path: String?) {
         // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
         // since we do not reference the sink cancelable, this will only fire once
-        _ = NetworkTracker.shared.$activeConnection
-            .filter { $0 != nil } // Only proceed if activeServer is not nil
-            .first() // Automatically cancels after the first non-nil value
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeConnection in
-                if let openHABUrl = activeConnection?.configuration.url, let self {
-                    os_log("pushSitemap: pushing page", log: .default, type: .error)
-                    let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-                    if let path {
-                        newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)/\(path)"
-                    } else {
-                        newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)"
-                    }
-                    newViewController.openHABRootUrl = openHABUrl
-                    navigationController?.pushViewController(newViewController, animated: true)
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url {
+                os_log("pushSitemap: pushing page", log: .default, type: .error)
+                let newViewController = (self.storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
+                if let path {
+                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)/\(path)"
+                } else {
+                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)"
                 }
+                newViewController.openHABRootUrl = openHABUrl
+                self.navigationController?.pushViewController(newViewController, animated: true)
             }
+        }
+        .store(in: &trackerCancellables)
     }
 
     // load app settings
