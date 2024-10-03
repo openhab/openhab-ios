@@ -199,10 +199,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             if actionIdentifier != UNNotificationDefaultActionIdentifier {
                 userInfo["actionIdentifier"] = actionIdentifier
             }
-            notifyNotificationListeners(userInfo)
+            notifyNotificationListeners(userInfo, withCompletionHandler: completionHandler)
             appData.lastNotificationInfo = userInfo
+        } else {
+            completionHandler()
         }
-        completionHandler()
     }
 
     private func displayNotification(userInfo: [AnyHashable: Any]) {
@@ -248,8 +249,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
     }
 
-    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) {
-        NotificationCenter.default.post(name: .apnsReceived, object: nil, userInfo: userInfo)
+    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any], withCompletionHandler completionHandler: (() -> Void)? = nil) {
+        if let navigationController = window?.rootViewController as? UINavigationController {
+            if let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
+                rootViewController.handleNotification(userInfo, completionHandler: completionHandler)
+            }
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -285,8 +290,4 @@ extension AppDelegate: MessagingDelegate {
         ]
         NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
     }
-}
-
-extension Notification.Name {
-    static let apnsReceived = Notification.Name("apnsReceived")
 }
