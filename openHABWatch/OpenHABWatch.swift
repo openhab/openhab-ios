@@ -24,7 +24,7 @@ struct OpenHABWatch: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                ContentView(viewModel: userData )
+                ContentView(viewModel: userData)
                     .tabItem {
                         Label("Received", systemImage: "tray.and.arrow.down.fill")
                     }

@@ -56,4 +56,3 @@ struct SwitchRow: View {
         .previewLayout(.fixed(width: 300, height: 70))
         .environmentObject(ObservableOpenHABDataObject())
 }
-

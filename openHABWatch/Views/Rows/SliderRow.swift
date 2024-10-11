@@ -26,7 +26,7 @@ struct SliderRow: View {
             }
         )
     }
-    
+
     var body: some View {
         VStack(spacing: 3) {
             HStack {
@@ -35,7 +35,7 @@ struct SliderRow: View {
                 Spacer()
                 DetailTextLabelView(widget: widget)
             }.padding(.top, 8)
-            
+
             Slider(value: valueBinding, in: widget.minValue ... widget.maxValue, step: widget.step)
                 .labelsHidden()
                 .focusable(true)
@@ -61,4 +61,3 @@ struct SliderRow: View {
     }
     .environmentObject(ObservableOpenHABDataObject())
 }
-

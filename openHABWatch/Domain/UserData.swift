@@ -41,7 +41,7 @@ final class UserData: ObservableObject {
     private var currentPageOperation: Alamofire.Request?
     private var tracker: OpenHABWatchTracker?
     private var dataObjectCancellable: AnyCancellable?
-    
+
     private let logger = Logger(subsystem: "org.openhab.app.watch", category: "UserData")
 
     // Demo
@@ -162,7 +162,6 @@ final class UserData: ObservableObject {
             tracker?.selectUrl()
         }
     }
-
 }
 
 extension UserData: OpenHABWatchTrackerDelegate {

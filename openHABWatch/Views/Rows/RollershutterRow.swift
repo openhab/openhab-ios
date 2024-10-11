@@ -32,7 +32,7 @@ struct RollershutterRow: View {
                     widget.sendCommand("STOP")
                 }
                 Spacer()
-                
+
                 IconWithAction(systemSymbol: .chevronDownCircleFill) {
                     widget.sendCommand("DOWN")
                 }

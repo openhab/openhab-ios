@@ -120,7 +120,7 @@ public class NetworkConnection {
             load(from: url, completionHandler: completionHandler)
         }
     }
-    
+
     public static func tracker(openHABRootUrl: String) async throws -> DataResponse<Data, AFError> {
         if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
             return await load(from: url)
@@ -233,7 +233,7 @@ public class NetworkConnection {
         os_log("Firing request", log: .viewCycle, type: .debug)
         return await NetworkConnection.shared.manager.request(request).validate().serializingData().response
     }
-    
+
     public func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
         serverCertificateManager.delegate = serverDelegate
         clientCertificateManager.delegate = clientDelegate

@@ -18,7 +18,7 @@ import WatchKit
 // This class handles values that are passed from the ios app.
 class AppMessageService: NSObject, WCSessionDelegate {
     static let singleton = AppMessageService()
-    
+
     private let logger = Logger(subsystem: "org.openhab.app.watch", category: "AppMessageService")
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
@@ -99,7 +99,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
 
     /** Called on the delegate of the receiver. Will be called on startup if an applicationContext is available. */
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        logger.info("didReceiveApplicationContext \(applicationContext)" )
+        logger.info("didReceiveApplicationContext \(applicationContext)")
         DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(applicationContext as [String: AnyObject])
         }

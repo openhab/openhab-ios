@@ -27,7 +27,7 @@ struct ImageRow: View {
             ]
         ) { image in
             image.resizable()
-                
+
         } placeholder: {
             Image(systemSymbol: .arrowTriangle2CirclepathCircle)
                 .font(.callout)

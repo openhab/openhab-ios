@@ -29,7 +29,6 @@ struct ContentView: View {
                 }
                 ForEach(viewModel.widgets) { widget in
                     rowWidget(widget: widget)
-                        
                 }
             }
             .navigationBarTitle(Text(title))

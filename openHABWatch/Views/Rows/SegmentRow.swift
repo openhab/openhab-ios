@@ -62,5 +62,4 @@ struct SegmentRow: View {
             .previewDevice("Apple Watch Series 4 - 44mm")
     }
     .environmentObject(ObservableOpenHABDataObject())
-    
 }
