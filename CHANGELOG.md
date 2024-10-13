@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Update SVGKit to fix crash on new iPhone models (#838)
 - Prefer commandDescription options over stateDescription options if an item has them
 
 ## [Version 2.4.59, Build 1580410537] - 2023-08-19Z
