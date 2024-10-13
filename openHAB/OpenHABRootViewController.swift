@@ -9,19 +9,23 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import FirebaseCrashlytics
 import Foundation
 import OpenHABCore
 import os.log
 import SafariServices
 import SideMenu
+import SwiftUI
 import UIKit
 
 enum TargetController {
-    case sitemap
-    case settings
-    case notifications
     case webview
+    case settings
+    case sitemap(String)
+    case notifications
+    case browser(String)
+    case tile(String)
 }
 
 protocol ModalHandler: AnyObject {
@@ -35,6 +39,7 @@ struct CommandItem: CommItem {
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
+    var cancellables = Set<AnyCancellable>()
 
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
@@ -94,9 +99,7 @@ class OpenHABRootViewController: UIViewController {
         // save this so we know if its changed later
         isDemoMode = Preferences.demomode
         switchToSavedView()
-
-        // ready for push notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
+        setupTracker()
         // check if we were launched with a notification
         if let userInfo = appData?.lastNotificationInfo {
             handleNotification(userInfo)
@@ -114,6 +117,58 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
+    fileprivate func setupTracker() {
+        let serverInfo = Publishers.CombineLatest4(
+            Preferences.$localUrl,
+            Preferences.$remoteUrl,
+            Preferences.$username,
+            Preferences.$password
+        )
+        .eraseToAnyPublisher()
+
+        let misc = Publishers.CombineLatest(
+            Preferences.$demomode,
+            Preferences.$alwaysSendCreds
+        )
+        .eraseToAnyPublisher()
+
+        Publishers.CombineLatest(serverInfo, misc)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
+            .sink { (serverInfoTuple, miscTuple) in
+                let (localUrl, remoteUrl, username, password) = serverInfoTuple
+                let (demomode, alwaysSendCreds) = miscTuple
+                if demomode {
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [
+                        ConnectionConfiguration(
+                            url: "https://demo.openhab.org",
+                            priority: 0
+                        )
+                    ], username: "", password: "", alwaysSendBasicAuth: false)
+                } else {
+                    let connection1 = ConnectionConfiguration(
+                        url: localUrl,
+                        priority: 0
+                    )
+                    let connection2 = ConnectionConfiguration(
+                        url: remoteUrl,
+                        priority: 1
+                    )
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: username, password: password, alwaysSendBasicAuth: alwaysSendCreds)
+                }
+            }
+            .store(in: &cancellables)
+
+        NetworkTracker.shared.$activeConnection
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] activeConnection in
+                if let activeConnection {
+                    self?.appData?.openHABRootUrl = activeConnection.configuration.url
+                    self?.appData?.openHABVersion = activeConnection.version
+                }
+            }
+            .store(in: &cancellables)
+    }
+
     fileprivate func setupSideMenu() {
         let hamburgerButtonItem: UIBarButtonItem
         let imageConfig = UIImage.SymbolConfiguration(textStyle: .largeTitle)
@@ -127,13 +182,6 @@ class OpenHABRootViewController: UIViewController {
 
         // Define the menus
 
-        SideMenuManager.default.rightMenuNavigationController = storyboard!.instantiateViewController(withIdentifier: "RightMenuNavigationController") as? SideMenuNavigationController
-
-        // Enable gestures. The left and/or right menus must be set up above for these to work.
-        // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
-        SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
-        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
-
         let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuIn
         presentationStyle.presentingEndAlpha = 1
         presentationStyle.onTopShadowOpacity = 0.5
@@ -142,9 +190,74 @@ class OpenHABRootViewController: UIViewController {
         settings.statusBarEndAlpha = 0
 
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
-        if let menu = SideMenuManager.default.rightMenuNavigationController {
-            let drawer = menu.viewControllers.first as? OpenHABDrawerTableViewController
-            drawer?.delegate = self
+
+        let drawerView = DrawerView { mode in
+            self.handleDismiss(mode: mode)
+        }
+        let hostingController = UIHostingController(rootView: drawerView)
+        let menu = SideMenuNavigationController(rootViewController: hostingController)
+
+        SideMenuManager.default.rightMenuNavigationController = menu
+
+        // Enable gestures. The left and/or right menus must be set up above for these to work.
+        // Note that these continue to work on the Navigation Controller independent of the View Controller it displays!
+        SideMenuManager.default.addPanGestureToPresent(toView: navigationController!.navigationBar)
+        SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: navigationController!.view, forMenu: .right)
+    }
+
+    private func openTileURL(_ urlString: String) {
+        // Use SFSafariViewController in SwiftUI with UIViewControllerRepresentable
+        // Dependent on $OPENHAB_CONF/services/runtime.cfg
+        // Can either be an absolute URL, a path (sometimes malformed)
+        if !urlString.isEmpty {
+            let url: URL? = if urlString.hasPrefix("http") {
+                URL(string: urlString)
+            } else {
+                Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: urlString.prepare()).url
+            }
+            openURL(url: url)
+        }
+    }
+
+    private func openURL(url: URL?) {
+        if let url {
+            let config = SFSafariViewController.Configuration()
+            config.entersReaderIfAvailable = true
+            let vc = SFSafariViewController(url: url, configuration: config)
+            present(vc, animated: true)
+        }
+    }
+
+    private func handleDismiss(mode: TargetController) {
+        switch mode {
+        case .webview:
+            // Handle webview navigation or state update
+            print("Dismissed to WebView")
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true)
+            switchView(target: .webview)
+        case .settings:
+            print("Dismissed to Settings")
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .settings)
+            }
+        case let .sitemap(sitemap):
+            Preferences.defaultSitemap = sitemap
+            appData?.sitemapViewController?.pageUrl = ""
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .sitemap(sitemap))
+            }
+        case .notifications:
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .notifications)
+            }
+        case let .browser(urlString):
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .browser(urlString))
+            }
+        case let .tile(urlString):
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .tile(urlString))
+            }
         }
     }
 
@@ -174,85 +287,151 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    @objc func handleApnsMessage(notification: Notification) {
-        // actionIdentifier is the result of a action button being pressed
-        if let userInfo = notification.userInfo {
-            handleNotification(userInfo)
-        }
-    }
-
-    private func handleNotification(_ userInfo: [AnyHashable: Any]) {
+    func handleNotification(_ userInfo: [AnyHashable: Any], completionHandler: (() -> Void)? = nil) {
         // actionIdentifier is the result of a action button being pressed
         // if not actionIdentifier, then the notification was clicked, so use "on-click" if there
         if let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String {
             let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
             if action.hasPrefix("ui") {
-                uiCommandAction(cmd)
+                uiCommandAction(cmd, completionHandler: completionHandler)
             } else if action.hasPrefix("command") {
-                sendCommandAction(cmd)
+                sendCommandAction(cmd, completionHandler: completionHandler)
             } else if action.hasPrefix("http") {
-                httpCommandAction(action)
+                httpCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("app") {
-                appCommandAction(action)
+                appCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("rule") {
-                ruleCommandAction(action)
-            }
-        }
-    }
-
-    private func uiCommandAction(_ command: String) {
-        os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
-        let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
-        if let firstMatch = command.firstMatch(of: regexPattern) {
-            let path = String(firstMatch.1)
-            os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
-            if currentView != webViewController {
-                switchView(target: .webview)
-            }
-            if path.starts(with: "/basicui/app?") {
-                // TODO: this is a sitemap, we should use the native renderer
-                // temp hack right now to just use a webview
-                webViewController.loadWebView(force: true, path: path)
-            } else if path.starts(with: "/") {
-                // have the webview load this path itself
-                webViewController.loadWebView(force: true, path: path)
+                ruleCommandAction(action, completionHandler: completionHandler)
             } else {
-                // have the mainUI handle the navigation
-                webViewController.navigateCommand(path)
-            }
-
-        } else {
-            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
-        }
-    }
-
-    private func sendCommandAction(_ action: String) {
-        let components = action.split(separator: ":")
-        if components.count == 2 {
-            let itemName = String(components[0])
-            let itemCommand = String(components[1])
-            let client = HTTPClient(username: Preferences.username, password: Preferences.username)
-            client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
-                if let error {
-                    os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                } else {
-                    os_log("Request succeeded", log: .default, type: .info)
-                    if let data {
-                        os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                if let completionHandler {
+                    DispatchQueue.main.async {
+                        completionHandler()
                     }
+                }
+            }
+        } else {
+            if let completionHandler {
+                DispatchQueue.main.async {
+                    completionHandler()
                 }
             }
         }
     }
 
-    private func httpCommandAction(_ command: String) {
+    private func uiCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
+        os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
+        let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
+        if let firstMatch = command.firstMatch(of: regexPattern) {
+            let path = String(firstMatch.1)
+            os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
+            if path.starts(with: "/basicui/app?") {
+                if currentView != sitemapViewController {
+                    switchView(target: .sitemap(""))
+                }
+                if let urlComponents = URLComponents(string: path) {
+                    let queryItems = urlComponents.queryItems
+                    let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
+                    let subview = queryItems?.first { $0.name == "w" }?.value
+                    if let sitemap {
+                        sitemapViewController.pushSitemap(name: sitemap, path: subview)
+                    }
+                }
+            } else {
+                if currentView != webViewController {
+                    switchView(target: .webview)
+                }
+                if path.starts(with: "/") {
+                    // have the webview load this path itself
+                    webViewController.loadWebView(force: true, path: path)
+                } else {
+                    // have the mainUI handle the navigation
+                    webViewController.navigateCommand(path)
+                }
+            }
+        } else {
+            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
+        }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
+    }
+
+    private func sendCommandAction(_ action: String, completionHandler: (() -> Void)? = nil) {
+        let components = action.split(separator: ":")
+        if components.count == 2 {
+            let itemName = String(components[0])
+            let itemCommand = String(components[1])
+            NetworkTracker.shared.waitForActiveConnection { activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                    os_log("Sending comand", log: .default, type: .error)
+                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                    client.doPost(baseURL: url, path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
+                        if let error {
+                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                            self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
+                        } else {
+                            os_log("Request succeeded", log: .default, type: .info)
+                            if let data {
+                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                            }
+                        }
+                        if let completionHandler {
+                            DispatchQueue.main.async {
+                                completionHandler()
+                            }
+                        }
+                    }
+                } else {
+                    self.displayErrorNotification("Could not find server")
+                    if let completionHandler {
+                        DispatchQueue.main.async {
+                            completionHandler()
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        } else {
+            if let completionHandler {
+                DispatchQueue.main.async {
+                    completionHandler()
+                }
+            }
+        }
+    }
+
+    private func displayErrorNotification(_ message: String, completionHandler: (() -> Void)? = nil) {
+        let content = UNMutableNotificationContent()
+        content.title = "Could not send command"
+        content.body = message
+        content.sound = UNNotificationSound.default
+
+        // Create the request
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+
+        // Schedule the request with the notification center
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                print("Error scheduling notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func httpCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         if let url = URL(string: command) {
             let vc = SFSafariViewController(url: url)
             present(vc, animated: true)
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func appCommandAction(_ command: String) {
+    private func appCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         let content = command.dropFirst(4) // Remove "app:"
         let pairs = content.split(separator: ",")
         for pair in pairs {
@@ -266,9 +445,14 @@ class OpenHABRootViewController: UIViewController {
                 }
             }
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func ruleCommandAction(_ command: String) {
+    private func ruleCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         let components = command.split(separator: ":", maxSplits: 2)
 
         guard components.count == 3,
@@ -298,17 +482,37 @@ class OpenHABRootViewController: UIViewController {
         } catch {
             // nothing
         }
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username)
-        client.doPost(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
-            if let error {
-                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                os_log("Sending comand", log: .default, type: .error)
+                let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                client.doPost(baseURL: url, path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
+                    if let error {
+                        os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                        self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
+                    } else {
+                        os_log("Request succeeded", log: .default, type: .info)
+                        if let data {
+                            os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                        }
+                    }
+                    if let completionHandler {
+                        DispatchQueue.main.async {
+                            completionHandler()
+                        }
+                    }
+                }
             } else {
-                os_log("Request succeeded", log: .default, type: .info)
-                if let data {
-                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                self.displayErrorNotification("Could not find active server")
+                if let completionHandler {
+                    DispatchQueue.main.async {
+                        completionHandler()
+                    }
                 }
             }
         }
+        .store(in: &cancellables)
     }
 
     func showSideMenu() {
@@ -316,11 +520,9 @@ class OpenHABRootViewController: UIViewController {
         if let menu = SideMenuManager.default.rightMenuNavigationController {
             // don't try and push an already visible menu less you crash the app
             dismiss(animated: false) {
-                var topMostViewController: UIViewController? = if #available(iOS 13, *) {
+                var topMostViewController: UIViewController? =
                     UIApplication.shared.connectedScenes.flatMap { ($0 as? UIWindowScene)?.windows ?? [] }.last { $0.isKeyWindow }?.rootViewController
-                } else {
-                    UIApplication.shared.keyWindow?.rootViewController
-                }
+
                 while let presentedViewController = topMostViewController?.presentedViewController {
                     topMostViewController = presentedViewController
                 }
@@ -344,7 +546,12 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchView(target: TargetController) {
-        let targetView = target == .sitemap ? sitemapViewController : webViewController
+        let targetView =
+            if case .sitemap = target {
+                sitemapViewController
+            } else {
+                webViewController
+            }
 
         if currentView != targetView {
             if currentView != nil {
@@ -367,10 +574,10 @@ class OpenHABRootViewController: UIViewController {
 
     private func switchToSavedView() {
         if Preferences.demomode {
-            switchView(target: .sitemap)
+            switchView(target: .sitemap(""))
         } else {
             os_log("OpenHABRootViewController switchToSavedView %@", log: .viewCycle, type: .info, Preferences.defaultView == "sitemap" ? "sitemap" : "web")
-            switchView(target: Preferences.defaultView == "sitemap" ? .sitemap : .webview)
+            switchView(target: Preferences.defaultView == "sitemap" ? .sitemap("") : .webview)
         }
     }
 }
@@ -391,19 +598,17 @@ extension OpenHABRootViewController: ModalHandler {
         case .sitemap:
             switchView(target: to)
         case .settings:
-            if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABSettingsViewController") as? OpenHABSettingsViewController {
-                navigationController?.pushViewController(newViewController, animated: true)
-            }
+            let hostingController = UIHostingController(rootView: SettingsView())
+            navigationController?.pushViewController(hostingController, animated: true)
         case .notifications:
-            if navigationController?.visibleViewController is OpenHABNotificationsViewController {
-                os_log("Notifications are already open", log: .notifications, type: .info)
-            } else {
-                if let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABNotificationsViewController") as? OpenHABNotificationsViewController {
-                    navigationController?.pushViewController(newViewController, animated: true)
-                }
-            }
+            let hostingController = UIHostingController(rootView: NotificationsView())
+            navigationController?.pushViewController(hostingController, animated: true)
         case .webview:
             switchView(target: to)
+        case .browser:
+            break
+        case let .tile(urlString):
+            openTileURL(urlString)
         }
     }
 }

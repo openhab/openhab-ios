@@ -38,5 +38,4 @@ struct NotificationView: View {
         NotificationView()
         NotificationView(customTextLabel: "Light 2", customDetailTextLabel: "Off")
     }
-    .previewLayout(.sizeThatFits)
 }

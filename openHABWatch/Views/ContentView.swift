@@ -113,14 +113,13 @@ struct ContentView: View {
 #Preview {
     Group {
         ContentView(viewModel: UserData())
-            .previewDevice("Apple Watch Series 4 - 44mm")
+
             .environmentObject({ () -> UserData in
                 let envObj = UserData()
                 return envObj
             }())
 
         ContentView(viewModel: UserData())
-            .previewDevice("Apple Watch Series 2 - 38mm")
     }
     .environmentObject(ObservableOpenHABDataObject())
 }

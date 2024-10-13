@@ -36,7 +36,7 @@ struct PreferencesSwiftUIView: View {
         Button { AppMessageService.singleton.requestApplicationContext()
         } label: { Label("sync_prefs", systemSymbol: .arrowTriangle2Circlepath)
         }
-            .buttonStyle(.borderedProminent)
+        .buttonStyle(.borderedProminent)
     }
 }
 

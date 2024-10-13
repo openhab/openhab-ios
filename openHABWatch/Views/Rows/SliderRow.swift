@@ -55,9 +55,7 @@ struct SliderRow: View {
     let widget = UserData().widgets[3]
     return Group {
         SliderRow(widget: widget)
-            .previewLayout(.fixed(width: 300, height: 70))
         SliderRow(widget: widget)
-            .previewDevice("Apple Watch Series 4 - 44mm")
     }
     .environmentObject(ObservableOpenHABDataObject())
 }

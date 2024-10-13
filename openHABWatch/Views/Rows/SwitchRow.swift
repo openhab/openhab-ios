@@ -53,6 +53,5 @@ struct SwitchRow: View {
 #Preview {
     let widget = UserData().widgets[2]
     return SwitchRow(widget: widget)
-        .previewLayout(.fixed(width: 300, height: 70))
         .environmentObject(ObservableOpenHABDataObject())
 }

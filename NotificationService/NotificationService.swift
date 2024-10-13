@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -18,6 +19,7 @@ import UserNotifications
 class NotificationService: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
+    var cancellables = Set<AnyCancellable>()
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
@@ -142,9 +144,23 @@ class NotificationService: UNNotificationServiceExtension {
             self.attachFile(localURL: localURL, mimeType: response?.mimeType, completion: completion)
         }
         if url.starts(with: "/") {
-            client.downloadFile(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], path: url, completionHandler: downloadCompletionHandler)
-        } else {
-            client.downloadFile(url: url, completionHandler: downloadCompletionHandler)
+            let connection1 = ConnectionConfiguration(
+                url: Preferences.localUrl,
+                priority: 0
+            )
+            let connection2 = ConnectionConfiguration(
+                url: Preferences.remoteUrl,
+                priority: 1
+            )
+            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+            NetworkTracker.shared.waitForActiveConnection { activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url, let uurl = URL(string: openHABUrl) {
+                    client.downloadFile(url: uurl.appendingPathComponent(url), completionHandler: downloadCompletionHandler)
+                }
+            }
+            .store(in: &cancellables)
+        } else if let uurl = URL(string: url) {
+            client.downloadFile(url: uurl, completionHandler: downloadCompletionHandler)
         }
     }
 
@@ -158,39 +174,53 @@ class NotificationService: UNNotificationServiceExtension {
         let itemName = String(itemURI.absoluteString.dropFirst(scheme.count + 1))
 
         let client = HTTPClient(username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
-        client.getItem(baseURLs: [Preferences.localUrl, Preferences.remoteUrl], itemName: itemName) { item, error in
-            guard let item else {
-                os_log("Could not find item %{PUBLIC}@", log: .default, type: .info, itemName)
-                completion(nil)
-                return
-            }
-            if let state = item.state {
-                // Extract MIME type and base64 string
-                let pattern = /^data:(.*?);base64,(.*)$/
-                if let firstMatch = state.firstMatch(of: pattern) {
-                    let mimeType = String(firstMatch.1)
-                    let base64String = String(firstMatch.2)
-                    if let imageData = Data(base64Encoded: base64String) {
-                        // Create a temporary file URL
-                        let tempDirectory = FileManager.default.temporaryDirectory
-                        let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
-                        do {
-                            try imageData.write(to: tempFileURL)
-                            os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
-                            self.attachFile(localURL: tempFileURL, mimeType: mimeType, completion: completion)
-                            return
-                        } catch {
-                            os_log("Failed to write image data to file: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                        }
-                    } else {
-                        os_log("Failed to decode base64 string to Data", log: .default, type: .error)
+        let connection1 = ConnectionConfiguration(
+            url: Preferences.localUrl,
+            priority: 0
+        )
+        let connection2 = ConnectionConfiguration(
+            url: Preferences.remoteUrl,
+            priority: 1
+        )
+        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                client.getItem(baseURL: url, itemName: itemName) { item, error in
+                    guard let item else {
+                        os_log("Could not find item %{PUBLIC}@", log: .default, type: .info, itemName)
+                        completion(nil)
+                        return
                     }
-                } else {
-                    os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "")
+                    if let state = item.state {
+                        // Extract MIME type and base64 string
+                        let pattern = /^data:(.*?);base64,(.*)$/
+                        if let firstMatch = state.firstMatch(of: pattern) {
+                            let mimeType = String(firstMatch.1)
+                            let base64String = String(firstMatch.2)
+                            if let imageData = Data(base64Encoded: base64String) {
+                                // Create a temporary file URL
+                                let tempDirectory = FileManager.default.temporaryDirectory
+                                let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
+                                do {
+                                    try imageData.write(to: tempFileURL)
+                                    os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
+                                    self.attachFile(localURL: tempFileURL, mimeType: mimeType, completion: completion)
+                                    return
+                                } catch {
+                                    os_log("Failed to write image data to file: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                                }
+                            } else {
+                                os_log("Failed to decode base64 string to Data", log: .default, type: .error)
+                            }
+                        } else {
+                            os_log("Failed to parse data: %{PUBLIC}@", log: .default, type: .error, error?.localizedDescription ?? "")
+                        }
+                    }
+                    completion(nil)
                 }
             }
-            completion(nil)
         }
+        .store(in: &cancellables)
     }
 
     func attachFile(localURL: URL, mimeType: String?, completion: @escaping (UNNotificationAttachment?) -> Void) {

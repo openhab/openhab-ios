@@ -57,9 +57,7 @@ struct SegmentRow: View {
     let widget = UserData().widgets[4]
     return Group {
         SegmentRow(widget: widget)
-            .previewLayout(.fixed(width: 300, height: 70))
         SegmentRow(widget: widget)
-            .previewDevice("Apple Watch Series 4 - 44mm")
     }
     .environmentObject(ObservableOpenHABDataObject())
 }

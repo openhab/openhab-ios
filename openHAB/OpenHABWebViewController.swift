@@ -21,7 +21,6 @@ class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
     private var hideNavBar = false
-    private var tracker: OpenHABTracker?
     private var activityIndicator: UIActivityIndicatorView!
     private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
@@ -73,7 +72,31 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
         parent?.navigationItem.title = "Main View"
-        OpenHABTracker.shared.multicastDelegate.add(self)
+        NetworkTracker.shared.$activeConnection
+            .receive(on: DispatchQueue.main)
+            .sink { activeConnection in
+                if let activeConnection {
+                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeConnection.configuration.url)")
+                    self.openHABTrackedRootUrl = activeConnection.configuration.url
+                    self.loadWebView(force: false)
+                }
+            }
+            .store(in: &trackerCancellables)
+
+        NetworkTracker.shared.$status
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                os_log("OpenHABWebViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                switch status {
+                case .connecting:
+                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                case .notConnected:
+                    self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
+                case .connected:
+                    self.hidePopupMessages()
+                }
+            }
+            .store(in: &trackerCancellables)
         startTracker()
     }
 
@@ -82,27 +105,25 @@ class OpenHABWebViewController: OpenHABViewController {
         // Show the navigation bar on other view controllers
         navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = true
-        OpenHABTracker.shared.multicastDelegate.remove(self)
+        trackerCancellables.removeAll()
     }
 
     func startTracker() {
         if currentTarget == "" {
             showActivityIndicator(show: true)
         }
-        // TODO: we should remove the need for this.
-        OpenHABTracker.shared.restart()
     }
 
     func loadWebView(force: Bool = false, path: String? = nil) {
-        os_log("loadWebView %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl)
+        os_log("loadWebView tracked URL: %{PUBLIC}@ forced %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl, force ? "true" : "false")
 
         let authStr = "\(Preferences.username):\(Preferences.password)"
         let newTarget = "\(openHABTrackedRootUrl):\(authStr)"
+
         if !force, currentTarget == newTarget {
             showActivityIndicator(show: false)
             return
         }
-
         currentTarget = newTarget
         let url = URL(string: openHABTrackedRootUrl)
 
@@ -175,15 +196,14 @@ class OpenHABWebViewController: OpenHABViewController {
     func pageLoadError(message: String) {
         os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
         showActivityIndicator(show: false)
-        // webView.loadHTMLString("Page Not Found", baseURL: URL(string: "https://openHAB.org/"))
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
-        currentTarget = ""
     }
 
     override func reloadView() {
         currentTarget = ""
         clearExistingPage()
         startTracker()
+        loadWebView(force: true)
     }
 
     override func viewName() -> String {
@@ -224,6 +244,7 @@ class OpenHABWebViewController: OpenHABViewController {
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
         config.userContentController.add(self, name: "Native")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+
         let webView = WKWebView(frame: view.bounds, configuration: config)
         // Alow rotation of webview
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -233,6 +254,10 @@ class OpenHABWebViewController: OpenHABViewController {
         // support dark mode and avoid white flashing when loading
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
+            webView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        }
         if #available(iOS 16.4, *) {
             webView.isInspectable = true
         }
@@ -278,10 +303,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
                 sseTimer?.invalidate()
                 sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                    self.sseTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: false) { _ in
-                        self.reloadView()
-                    }
-                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .error)
+                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
                     self.acceptsCommands = false
                 }
             default: break
@@ -345,7 +367,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
 
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
-            // openHABTracker takes care of triggering server trust prompts
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
                     completionHandler(.performDefaultHandling, nil)
@@ -396,25 +417,5 @@ extension OpenHABWebViewController: WKUIDelegate {
         }
 
         return nil
-    }
-}
-
-// MARK: - OpenHABTrackerDelegate
-
-extension OpenHABWebViewController: OpenHABTrackerDelegate {
-    func openHABTracked(_ openHABUrl: URL?, version: Int) {
-        os_log("OpenHABWebViewController openHAB URL =  %{PUBLIC}@", log: .remoteAccess, type: .error, "\(openHABUrl!)")
-        openHABTrackedRootUrl = openHABUrl?.absoluteString ?? ""
-        loadWebView(force: false)
-    }
-
-    func openHABTrackingProgress(_ message: String?) {
-        os_log("OpenHABViewController %{PUBLIC}@", log: .viewCycle, type: .info, message ?? "")
-        showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: message ?? "", theme: .info)
-    }
-
-    func openHABTrackingError(_ error: Error) {
-        os_log("Tracking error: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-        pageLoadError(message: error.localizedDescription)
     }
 }

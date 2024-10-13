@@ -41,5 +41,4 @@ struct MapView: View {
 #Preview {
     let widget = UserData().widgets[9]
     return MapView(widget: widget)
-        .previewDevice("Apple Watch Series 5 - 44mm")
 }

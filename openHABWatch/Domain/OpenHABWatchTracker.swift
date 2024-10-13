@@ -347,7 +347,7 @@ class OpenHABWatchTracker: NSObject {
     }
 }
 
-extension NWPath: CustomStringConvertible {
+extension NWPath: @retroactive CustomStringConvertible {
     public var description: String {
         switch status {
         case .unsatisfied, .requiresConnection:
