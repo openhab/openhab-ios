@@ -13,7 +13,7 @@ import Alamofire
 import Foundation
 import os.log
 
-public protocol ServerCertificateManagerDelegate: AnyObject {
+public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
     // delegate should ask user for a decision on what to do with invalid certificate
     func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
     // certificate received from openHAB doesn't match our record, ask user for a decision
