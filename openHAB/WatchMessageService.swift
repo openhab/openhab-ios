@@ -21,7 +21,6 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        // TODO: Use RemoteUrl, TOO
         os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
 
         if message["request"] != nil {
@@ -54,9 +53,11 @@ class WatchMessageService: NSObject, WCSessionDelegate {
                 "username": Preferences.username,
                 "password": Preferences.password,
                 "alwaysSendCreds": Preferences.alwaysSendCreds,
-                "defaultSitemap": "watch",
+                "defaultSitemap": Preferences.defaultSitemap,
                 "ignoreSSL": Preferences.ignoreSSL,
-                "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates
+                "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates,
+                "sitemapForWatch": Preferences.sitemapForWatch,
+                "iconType": Preferences.iconType
             ]
 
         return applicationDict
