@@ -39,8 +39,7 @@ final class UserData: ObservableObject {
 
     private var commandOperation: Alamofire.Request?
     private var currentPageOperation: Alamofire.Request?
-    private var tracker: OpenHABWatchTracker?
-    private var dataObjectCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
 
     private let logger = Logger(subsystem: "org.openhab.app.watch", category: "UserData")
 
@@ -68,30 +67,35 @@ final class UserData: ObservableObject {
         }
     }
 
-    init(url: URL?, refresh: Bool = true) {
-        loadPage(
-            url: url,
-            longPolling: true,
-            refresh: refresh
-        )
-    }
-
-    init(url: URL?) {
-        tracker = OpenHABWatchTracker()
-        tracker?.delegate = self
-    }
-
     init(sitemapName: String = "watch") {
-        tracker = OpenHABWatchTracker()
-        tracker?.delegate = self
-        tracker?.start()
+        NetworkTracker.shared.$activeConnection
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] activeConnection in
+                if let activeConnection {
+                    self?.logger.error("openHABTracked: \(activeConnection.configuration.url)")
 
-        dataObjectCancellable = ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
+                    if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
+                        AppMessageService.singleton.requestApplicationContext()
+                        self?.errorDescription = NSLocalizedString("settings_not_received", comment: "")
+                        self?.showAlert = true
+                        return
+                    }
+
+                    ObservableOpenHABDataObject.shared.openHABRootUrl = activeConnection.configuration.url
+                    ObservableOpenHABDataObject.shared.openHABVersion = activeConnection.version
+
+                    let url = Endpoint.watchSitemap(openHABRootUrl: activeConnection.configuration.url, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
+                    self?.loadPage(url: url, longPolling: false, refresh: true)
+                }
+            }
+            .store(in: &cancellables)
+
+        ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
             // New settings updates from the phone app to start a reconnect
             self.logger.info("Settings update received, starting reconnect")
             self.refreshUrl()
         }
-        refreshUrl()
+        .store(in: &cancellables)
     }
 
     func loadPage(url: URL?,
@@ -157,37 +161,10 @@ final class UserData: ObservableObject {
     }
 
     func refreshUrl() {
-        if ObservableOpenHABDataObject.shared.haveReceivedAppContext {
+        if ObservableOpenHABDataObject.shared.haveReceivedAppContext, !ObservableOpenHABDataObject.shared.openHABRootUrl.isEmpty {
             showAlert = false
-            tracker?.selectUrl()
+            let url = Endpoint.watchSitemap(openHABRootUrl: ObservableOpenHABDataObject.shared.openHABRootUrl, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
+            loadPage(url: url, longPolling: false, refresh: true)
         }
-    }
-}
-
-extension UserData: OpenHABWatchTrackerDelegate {
-    func openHABTracked(_ openHABUrl: URL?, version: Int) {
-        guard let urlString = openHABUrl?.absoluteString else { return }
-        logger.error("openHABTracked: \(urlString)")
-
-        if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
-            AppMessageService.singleton.requestApplicationContext()
-            errorDescription = NSLocalizedString("settings_not_received", comment: "")
-            showAlert = true
-            return
-        }
-
-        ObservableOpenHABDataObject.shared.openHABRootUrl = urlString
-        ObservableOpenHABDataObject.shared.openHABVersion = version
-
-        let url = Endpoint.watchSitemap(openHABRootUrl: urlString, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
-        loadPage(url: url, longPolling: false, refresh: true)
-    }
-
-    func openHABTrackingProgress(_ message: String?) {
-        logger.error("openHABTrackingProgress: \(message ?? "")")
-    }
-
-    func openHABTrackingError(_ error: Error) {
-        logger.error("openHABTrackingError: \(error.localizedDescription)")
     }
 }
