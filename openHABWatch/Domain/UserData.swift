@@ -68,6 +68,7 @@ final class UserData: ObservableObject {
     }
 
     init(sitemapName: String = "watch") {
+        updateNetworkTracker()
         NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
@@ -93,9 +94,23 @@ final class UserData: ObservableObject {
         ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
             // New settings updates from the phone app to start a reconnect
             self.logger.info("Settings update received, starting reconnect")
-            self.refreshUrl()
+            self.updateNetworkTracker()
         }
         .store(in: &cancellables)
+    }
+
+    func updateNetworkTracker() {
+        if !ObservableOpenHABDataObject.shared.localUrl.isEmpty || !ObservableOpenHABDataObject.shared.remoteUrl.isEmpty {
+            let connection1 = ConnectionConfiguration(
+                url: ObservableOpenHABDataObject.shared.localUrl,
+                priority: 0
+            )
+            let connection2 = ConnectionConfiguration(
+                url: ObservableOpenHABDataObject.shared.remoteUrl,
+                priority: 1
+            )
+            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: ObservableOpenHABDataObject.shared.openHABUsername, password: ObservableOpenHABDataObject.shared.openHABPassword, alwaysSendBasicAuth: ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds)
+        }
     }
 
     func loadPage(url: URL?,

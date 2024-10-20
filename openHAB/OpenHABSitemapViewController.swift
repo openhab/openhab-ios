@@ -179,6 +179,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 case .notConnected:
                     os_log("Tracking error", log: .viewCycle, type: .info)
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+                case .connected:
+                    self.hidePopupMessages()
                 case _:
                     break
                 }

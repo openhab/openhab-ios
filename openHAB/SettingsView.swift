@@ -33,12 +33,15 @@ struct SettingsView: View {
     @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
     @State var settingsDefaultMainUIPath = ""
     @State var settingsAlwaysAllowWebRTC = true
+    @State var settingsSitemapForWatch = ""
 
     @State private var showingCacheAlert = false
     @State private var showCrashReportingAlert = false
     @State private var showUselastPathAlert = false
 
     @State private var hasBeenLoaded = false
+
+    @State private var sitemaps: [OpenHABSitemap] = []
 
     @Environment(\.dismiss) private var dismiss
 
@@ -154,6 +157,7 @@ struct SettingsView: View {
                     // Setting .onAppear of view required here because onAppear of entire view is run after onChange is active
                     // when migrating to iOS17 this
                     settingsSendCrashReports = Preferences.sendCrashReports
+                    loadSitemaps()
                     hasBeenLoaded = true
                 }
                 .onChange(of: settingsSendCrashReports) { newValue in
@@ -273,6 +277,14 @@ struct SettingsView: View {
                 } label: {
                     Text("Sort sitemaps by")
                 }
+
+                Picker(selection: $settingsSitemapForWatch) {
+                    ForEach(sitemaps, id: \.name) { sitemap in
+                        Text(sitemap.name).tag(sitemap as OpenHABSitemap?)
+                    }
+                } label: {
+                    Text("Sitemap For Apple Watch")
+                }
             }
 
             Section(header: Text(LocalizedStringKey("about_settings"))) {
@@ -344,6 +356,7 @@ struct SettingsView: View {
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
         settingsDefaultMainUIPath = Preferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.alwaysAllowWebRTC
+        settingsSitemapForWatch = Preferences.sitemapForWatch
     }
 
     func saveSettings() {
@@ -361,9 +374,32 @@ struct SettingsView: View {
         Preferences.sortSitemapsby = settingsSortSitemapsBy.rawValue
         Preferences.defaultMainUIPath = settingsDefaultMainUIPath
         Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+        Preferences.sitemapForWatch = settingsSitemapForWatch
         WatchMessageService.singleton.syncPreferencesToWatch()
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(settingsSendCrashReports)
         logger.debug("setCrashlyticsCollectionEnabled to \(settingsSendCrashReports)")
+    }
+
+    private func loadSitemaps() {
+        NetworkConnection.sitemaps(openHABRootUrl: appData?.openHABRootUrl ?? "") { response in
+            switch response.result {
+            case let .success(data):
+                os_log("Sitemap response", log: .viewCycle, type: .info)
+
+                sitemaps = deriveSitemaps(data)
+
+                if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                    sitemaps = Array(sitemaps.dropLast())
+                }
+
+                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+                case .label: sitemaps.sort { $0.label < $1.label }
+                case .name: sitemaps.sort { $0.name < $1.name }
+                }
+            case let .failure(error):
+                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            }
+        }
     }
 }
 
