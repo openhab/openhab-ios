@@ -71,6 +71,7 @@ public final class NetworkTracker: ObservableObject {
     public func startTracking(connectionConfigurations: [ConnectionConfiguration], username: String, password: String, alwaysSendBasicAuth: Bool) {
         self.connectionConfigurations = connectionConfigurations
         httpClient = HTTPClient(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth)
+        setActiveConnection(nil)
         attemptConnection()
     }
 
