@@ -137,7 +137,7 @@ struct DrawerView: View {
         var sitemaps: [OpenHABSitemap]
         var sitemapIconwidth: CGFloat
         var appData: OpenHABDataObject?
-        @Binding var sitemapForWatch: OpenHABSitemap?
+        @Binding var sitemapForWatch: String?
         var onDismiss: (TargetController) -> Void
         var dismiss: DismissAction
 
@@ -148,16 +148,16 @@ struct DrawerView: View {
                         sitemap: sitemap,
                         sitemapIconwidth: sitemapIconwidth,
                         appData: appData,
-                        isWatchSitemap: sitemap.name == sitemapForWatch?.name,
+                        isWatchSitemap: sitemap.name == sitemapForWatch,
                         onDismiss: onDismiss,
                         dismiss: dismiss
                     )
                     .onTapGesture(count: 2) {
-                        if sitemap.name == sitemapForWatch?.name {
+                        if sitemap.name == sitemapForWatch {
                             sitemapForWatch = nil
                             Preferences.sitemapForWatch = ""
                         } else {
-                            sitemapForWatch = sitemap
+                            sitemapForWatch = sitemap.name
                             Preferences.sitemapForWatch = sitemap.name
                         }
                     }
@@ -251,7 +251,7 @@ struct DrawerView: View {
     @ScaledMetric var tilesIconwidth = 20.0
     @ScaledMetric var sitemapIconwidth = 20.0
 
-    @State private var sitemapForWatch: OpenHABSitemap?
+    @State private var sitemapForWatch: String?
 
     var body: some View {
         VStack {
@@ -276,6 +276,7 @@ struct DrawerView: View {
     private func loadData() {
         loadSitemaps()
         loadUiTiles()
+        sitemapForWatch = Preferences.sitemapForWatch
     }
 
     private func loadSitemaps() {

@@ -280,7 +280,7 @@ struct SettingsView: View {
 
                 Picker(selection: $settingsSitemapForWatch) {
                     ForEach(sitemaps, id: \.name) { sitemap in
-                        Text(sitemap.name).tag(sitemap as OpenHABSitemap?)
+                        Text(sitemap.label)
                     }
                 } label: {
                     Text("Sitemap For Apple Watch")
