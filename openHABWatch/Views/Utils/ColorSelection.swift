@@ -117,7 +117,7 @@ struct ColorSelection: View {
             .foregroundColor(.white)
             .frame(width: 25, height: 25, alignment: .center)
             .position(limitCircle(CGPoint(x: xpos, y: ypos), geometry.size, thumb.translation))
-            .animation(.interactiveSpring())
+            .animation(.interactiveSpring(), value: thumb.isDragging)
             .gesture(longPressDrag)
     }
 }
