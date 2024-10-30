@@ -197,7 +197,9 @@ platform :ios do
         end
 
         # push bump commit
-        ensure_git_status_clean
+        ensure_git_status_clean(
+            ignore_files: ["openHAB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"]
+        )
         push_to_git_remote
 
         # tag if not a feature build
