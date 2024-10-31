@@ -79,6 +79,7 @@
 		DA0776F0234788010086C685 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0776EF234788010086C685 /* UserData.swift */; };
 		DA0F37D023D4ACC7007EAB48 /* SliderRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */; };
 		DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */; };
+		DA162BEC2CD3B53E0040DAE5 /* LogsViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA162BEB2CD3B53E0040DAE5 /* LogsViewer.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
 		DA242C622C83588600AFB10D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA242C612C83588600AFB10D /* SettingsView.swift */; };
@@ -346,6 +347,7 @@
 		DA0776EF234788010086C685 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		DA0F37CF23D4ACC7007EAB48 /* SliderRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderRow.swift; sourceTree = "<group>"; };
 		DA15BFBC23C6726400BD8ADA /* ObservableOpenHABDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableOpenHABDataObject.swift; sourceTree = "<group>"; };
+		DA162BEB2CD3B53E0040DAE5 /* LogsViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsViewer.swift; sourceTree = "<group>"; };
 		DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABGeneralTests.swift; sourceTree = "<group>"; };
 		DA1C2E4B230DC28F00FACFB0 /* Appfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
 		DA1C2E4C230DC28F00FACFB0 /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
@@ -775,6 +777,7 @@
 			isa = PBXGroup;
 			children = (
 				DA0775262346705F0086C685 /* ContentView.swift */,
+				DA162BEB2CD3B53E0040DAE5 /* LogsViewer.swift */,
 				DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */,
 				DAF457A323DB7A820018B495 /* Rows */,
 				DAF457A723DBA2C40018B495 /* Utils */,
@@ -1460,6 +1463,7 @@
 				DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */,
 				DA07764A234683BC0086C685 /* SwitchRow.swift in Sources */,
 				DA2E0AA423DC96E9009B0A99 /* ImageWithAction.swift in Sources */,
+				DA162BEC2CD3B53E0040DAE5 /* LogsViewer.swift in Sources */,
 				DAF4578723D798A50018B495 /* TextLabelView.swift in Sources */,
 				DA0749DE23E0B5950057FA83 /* ColorPickerRow.swift in Sources */,
 				DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */,

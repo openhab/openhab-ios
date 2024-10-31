@@ -32,6 +32,10 @@ struct OpenHABWatch: App {
                     .tabItem {
                         Label("Preferences", systemSymbol: .circleFill)
                     }
+                LogsViewer()
+                    .tabItem {
+                        Label("Debug", systemSymbol: .circleFill)
+                    }
             }
             .tabViewStyle(.page)
             .environmentObject(settings)
