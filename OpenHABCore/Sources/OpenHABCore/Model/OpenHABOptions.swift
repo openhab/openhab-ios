@@ -13,5 +13,5 @@ import Foundation
 
 public class OpenHABOptions: Decodable {
     public var value = ""
-    public var label = ""
+    public var label: String?
 }

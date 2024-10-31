@@ -97,7 +97,7 @@ class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableO
         if mappings.isEmpty, let commandOptions = item?.commandDescription?.commandOptions {
             commandOptions.map { OpenHABWidgetMapping(command: $0.command, label: $0.label ?? "") }
         } else if mappings.isEmpty, let stateOptions = item?.stateDescription?.options {
-            stateOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label) }
+            stateOptions.map { OpenHABWidgetMapping(command: $0.value, label: $0.label ?? "") }
         } else {
             mappings
         }
