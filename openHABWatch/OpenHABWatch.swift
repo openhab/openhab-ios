@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SDWebImage
 import SDWebImageSVGCoder
 import SwiftUI
@@ -32,7 +33,7 @@ struct OpenHABWatch: App {
                     .tabItem {
                         Label("Preferences", systemSymbol: .circleFill)
                     }
-                LogsViewer()
+                LogsViewer(logService: LogService())
                     .tabItem {
                         Label("Debug", systemSymbol: .circleFill)
                     }

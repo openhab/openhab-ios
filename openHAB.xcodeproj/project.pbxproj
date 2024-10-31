@@ -1093,6 +1093,7 @@
 				39C91164B60A5677322E8DE2 /* Frameworks */,
 				DA07751D2346705F0086C685 /* Sources */,
 				93F38C61238034AE001B1451 /* Embed Frameworks */,
+				DA162BEE2CD3EDFE0040DAE5 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1397,6 +1398,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		DA162BEE2CD3EDFE0040DAE5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd BuildTools\nSDKROOT=(xcrun --sdk macosx --show-sdk-path)\n\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory \"$SRCROOT\" swiftformat \"$SRCROOT\" --config ./.swiftformat --cache /private/tmp/\nswift package plugin --allow-writing-to-package-directory --allow-writing-to-directory ../ swiftlint --cache-path /private/tmp/\n# Type a script or drag a script file from your workspace to insert its path.\n";
+		};
 		DAF0A2902C56FE9F00A14A6A /* Run swiftformat & swiftlint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
