@@ -43,6 +43,8 @@ struct SettingsView: View {
 
     @State private var sitemaps: [OpenHABSitemap] = []
 
+    @State private var exportShown = false
+
     @Environment(\.dismiss) private var dismiss
 
     var appData: OpenHABDataObject? {
@@ -286,6 +288,19 @@ struct SettingsView: View {
                     Text("Sitemap For Apple Watch")
                 }
             }
+
+//            Section(header: Text(LocalizedStringKey("debug"))) {
+//                ShareLink(items: [logs.entries.joined(separator: "\n")]) {
+//                    Text("Share Logs")
+//                }
+//                Button("exportLogs") {
+//                    logs.export()
+//                    exportShown.toggle()
+//                }
+//                .sheet(isPresented: $exportShown) {
+//                    ShareView(items: [logs.entries.joined(separator: "\n")])
+//                }
+//            }
 
             Section(header: Text(LocalizedStringKey("about_settings"))) {
                 LabeledContent("App Version", value: appVersion)

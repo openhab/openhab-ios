@@ -16,6 +16,7 @@ import SwiftUI
 
 // Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
 
+// swiftlint:disable:next file_types_order
 struct LogsViewer: View {
     let template = NSPredicate(
         format: "(subsystem BEGINSWITH $PREFIX)"
@@ -27,10 +28,15 @@ struct LogsViewer: View {
     var logService: LogServiceProtocol
 
     var body: some View {
-        ScrollView {
-            Text(text)
-                .font(myFont)
-                .padding()
+        VStack {
+            ShareLink(item: text) {
+                Label("Share Logs", systemSymbol: .squareAndArrowUp)
+            }
+            ScrollView {
+                Text(text)
+                    .font(myFont)
+                    .padding()
+            }
         }
         .task {
             text = await logService.fetchLogs(with: template)
