@@ -13,7 +13,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct ContentView: View {
+struct SitemapView: View {
     @ObservedObject var viewModel: UserData
     @EnvironmentObject var settings: ObservableOpenHABDataObject
     @State var title = "openHAB"
@@ -21,17 +21,16 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             ScrollView {
-                HStack {
-                    Text(viewModel.openHABSitemapPage?.title ?? "Sitemap without title")
-                        .font(.body)
-                        .lineLimit(1)
-                    Spacer()
-                }
                 ForEach(viewModel.widgets) { widget in
                     rowWidget(widget: widget)
                 }
+
+                if viewModel.widgets.isEmpty {
+                    Text("No sitemap to show")
+                        .foregroundStyle(.gray)
+                }
             }
-            .navigationBarTitle(Text(title))
+            .navigationTitle(Text(title))
             .actionSheet(isPresented: $viewModel.showCertificateAlert) {
                 ActionSheet(
                     title: Text(NSLocalizedString("warning", comment: "")),
@@ -111,15 +110,18 @@ struct ContentView: View {
 }
 
 #Preview {
-    Group {
-        ContentView(viewModel: UserData())
+    SitemapView(viewModel: UserData())
 
-            .environmentObject({ () -> UserData in
-                let envObj = UserData()
-                return envObj
-            }())
+        .environmentObject({ () -> UserData in
+            let envObj = UserData()
+            return envObj
+        }())
 
-        ContentView(viewModel: UserData())
-    }
-    .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(ObservableOpenHABDataObject())
+}
+
+#Preview {
+    SitemapView(viewModel: UserData())
+
+        .environmentObject(ObservableOpenHABDataObject())
 }

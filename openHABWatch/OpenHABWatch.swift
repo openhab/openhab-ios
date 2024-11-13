@@ -24,28 +24,14 @@ struct OpenHABWatch: App {
 
     var body: some Scene {
         WindowGroup {
-            TabView {
-                ContentView(viewModel: userData)
-                    .tabItem {
-                        Label("Sitemap", systemSymbol: .circleFill)
-                    }
-                PreferencesSwiftUIView()
-                    .tabItem {
-                        Label("Preferences", systemSymbol: .circleFill)
-                    }
-                LogsViewer(logService: LogService())
-                    .tabItem {
-                        Label("Debug", systemSymbol: .circleFill)
-                    }
-            }
-            .tabViewStyle(.page)
-            .environmentObject(settings)
-            .task {
-                let center = UNUserNotificationCenter.current()
-                _ = try? await center.requestAuthorization(
-                    options: [.alert, .sound, .badge]
-                )
-            }
+            ContentView(viewModel: userData)
+                .environmentObject(settings)
+                .task {
+                    let center = UNUserNotificationCenter.current()
+                    _ = try? await center.requestAuthorization(
+                        options: [.alert, .sound, .badge]
+                    )
+                }
         }
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")
     }

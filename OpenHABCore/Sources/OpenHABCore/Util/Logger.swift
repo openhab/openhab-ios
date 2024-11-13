@@ -9,7 +9,10 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CoreTransferable
 import OSLog
+
+// Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
 
 // swiftlint:disable:next file_types_order
 private extension OSLogEntryLog.Level {
@@ -75,8 +78,8 @@ public struct LogService {
 extension LogService: LogServiceProtocol {
     public func fetchLogs(with template: NSPredicate) async -> String {
         let calendar = Calendar.current
-        guard let dayAgo = calendar.date(
-            byAdding: .day,
+        guard let hourAgo = calendar.date(
+            byAdding: .hour,
             value: -1,
             to: Date.now
         ) else {
@@ -90,7 +93,7 @@ extension LogService: LogServiceProtocol {
                 ])
 
             let logs = try await Logger.fetch(
-                since: dayAgo,
+                since: hourAgo,
                 predicateFormat: predicate.predicateFormat
             )
             return logs.joined()
@@ -99,3 +102,14 @@ extension LogService: LogServiceProtocol {
         }
     }
 }
+
+// extension LogService: Transferable {
+//
+//    static var containerUrl = FileManager.default.url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent("Documents", isDirectory: true)
+//
+//    public static var transferRepresentation: some TransferRepresentation {
+//        FileRepresentation(exportedContentType: .commaSeparatedText) { csvFile in
+//            SentTransferredFile(csvFile.url)
+//        }
+//    }
+// }

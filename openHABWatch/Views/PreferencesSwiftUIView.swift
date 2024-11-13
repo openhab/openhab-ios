@@ -32,11 +32,14 @@ struct PreferencesSwiftUIView: View {
             LabeledContent(LocalizedStringKey("username"), value: settings.openHABUsername)
             LabeledContent(LocalizedStringKey("version"), value: applicationVersionNumber)
         }
-
-        Button { AppMessageService.singleton.requestApplicationContext()
-        } label: { Label("sync_prefs", systemSymbol: .arrowTriangle2Circlepath)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { AppMessageService.singleton.requestApplicationContext()
+                } label: { Label("sync_prefs", systemSymbol: .arrowTriangle2Circlepath)
+                }
+            }
         }
-        .buttonStyle(.borderedProminent)
+        .navigationTitle("Preferences")
     }
 }
 

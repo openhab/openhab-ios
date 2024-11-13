@@ -289,18 +289,13 @@ struct SettingsView: View {
                 }
             }
 
-//            Section(header: Text(LocalizedStringKey("debug"))) {
-//                ShareLink(items: [logs.entries.joined(separator: "\n")]) {
-//                    Text("Share Logs")
-//                }
-//                Button("exportLogs") {
-//                    logs.export()
-//                    exportShown.toggle()
-//                }
-//                .sheet(isPresented: $exportShown) {
-//                    ShareView(items: [logs.entries.joined(separator: "\n")])
-//                }
-//            }
+            Section(header: Text(LocalizedStringKey("debug"))) {
+                NavigationLink {
+                    LogsViewer(logService: LogService())
+                } label: {
+                    Text("Logs")
+                }
+            }
 
             Section(header: Text(LocalizedStringKey("about_settings"))) {
                 LabeledContent("App Version", value: appVersion)

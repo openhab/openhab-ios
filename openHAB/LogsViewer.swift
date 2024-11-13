@@ -9,12 +9,32 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+// import SwiftUI
+//
+// struct LogView: View {
+//    let logs: [OSLogEntryLog]
+//
+//    var body: some View {
+//        List(logs, id: \.self) { log in
+//            VStack(alignment: .leading) {
+//                Text(log.composedMessage)
+//                HStack {
+//                    Text(log.subsystem)
+//                    Text(log.date, format: .dateTime)
+//                }.bold()
+//            }
+//        }
+//    }
+// }
+//
+// #Preview {
+//    LogView(logs: .init([]))
+// }
+
 import Foundation
 import OpenHABCore
 import OSLog
 import SwiftUI
-
-// Thanks to https://useyourloaf.com/blog/fetching-oslog-messages-in-swift/
 
 // swiftlint:disable:next file_types_order
 struct LogsViewer: View {
@@ -36,7 +56,7 @@ struct LogsViewer: View {
             ToolbarItem(placement: .primaryAction) {
                 ShareLink(
                     item: text,
-                    preview: SharePreview("Logs")
+                    preview: SharePreview("Logs", image: Image(.openHABIcon))
                 ) {
                     Label("Share Logs", systemSymbol: .squareAndArrowUp)
                 }
@@ -51,11 +71,16 @@ struct LogsViewer: View {
     @State private var text = "Loading..."
 }
 
+#if DEBUG
 struct MockLogService: LogServiceProtocol {
     func fetchLogs(with template: NSPredicate) async -> String {
-        "Mocked Data"
+        """
+        Mocked Data
+        Test data
+        """
     }
 }
+#endif
 
 #Preview {
     LogsViewer(logService: MockLogService())
