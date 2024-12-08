@@ -34,7 +34,7 @@ struct PreferencesSwiftUIView: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button { AppMessageService.singleton.requestApplicationContext()
+                Button { WatchConnectivitySessionManager.singleton.requestApplicationContext()
                 } label: { Label("sync_prefs", systemSymbol: .arrowTriangle2Circlepath)
                 }
             }

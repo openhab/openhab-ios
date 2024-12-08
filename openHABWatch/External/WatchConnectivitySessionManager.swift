@@ -16,8 +16,8 @@ import WatchConnectivity
 import WatchKit
 
 // This class handles values that are passed from the ios app.
-class AppMessageService: NSObject, WCSessionDelegate {
-    static let singleton = AppMessageService()
+class WatchConnectivitySessionManager: NSObject, WCSessionDelegate {
+    static let singleton = WatchConnectivitySessionManager()
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "AppMessageService")
 
@@ -130,3 +130,17 @@ class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 }
+
+
+extension WatchConnectivitySessionManager {
+
+    func transferFile(file: URL, metadata: [String : AnyObject]) -> WCSessionFileTransfer? {
+        return WCSession.default.transferFile(file, metadata: metadata)
+    }
+
+    func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?) {
+        // handle filed transfer completion
+    }
+
+}
+

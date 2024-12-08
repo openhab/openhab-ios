@@ -76,7 +76,7 @@ final class UserData: ObservableObject {
                     self?.logger.error("openHABTracked: \(activeConnection.configuration.url)")
 
                     if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
-                        AppMessageService.singleton.requestApplicationContext()
+                        WatchConnectivitySessionManager.singleton.requestApplicationContext()
                         self?.errorDescription = NSLocalizedString("settings_not_received", comment: "")
                         self?.showAlert = true
                         return

@@ -9,28 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-// import SwiftUI
-//
-// struct LogView: View {
-//    let logs: [OSLogEntryLog]
-//
-//    var body: some View {
-//        List(logs, id: \.self) { log in
-//            VStack(alignment: .leading) {
-//                Text(log.composedMessage)
-//                HStack {
-//                    Text(log.subsystem)
-//                    Text(log.date, format: .dateTime)
-//                }.bold()
-//            }
-//        }
-//    }
-// }
-//
-// #Preview {
-//    LogView(logs: .init([]))
-// }
-
 import Foundation
 import OpenHABCore
 import OSLog

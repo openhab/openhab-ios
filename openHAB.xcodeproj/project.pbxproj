@@ -107,7 +107,7 @@
 		DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */; };
 		DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */; };
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
-		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
+		DA72E1B8236DEA0900B8EF3A /* WatchConnectivitySessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* WatchConnectivitySessionManager.swift */; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
@@ -407,7 +407,7 @@
 		DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
 		DA7224D123828D3300712D20 /* PreviewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewConstants.swift; sourceTree = "<group>"; };
-		DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppMessageService.swift; sourceTree = "<group>"; };
+		DA72E1B5236DEA0900B8EF3A /* WatchConnectivitySessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchConnectivitySessionManager.swift; sourceTree = "<group>"; };
 		DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		DA817E79234BF39B00C91824 /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		DA88F8C522EC377100B408E5 /* ReleaseNotes.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = ReleaseNotes.md; sourceTree = "<group>"; };
@@ -593,7 +593,7 @@
 		1224F7C9228A8ED100750965 /* External */ = {
 			isa = PBXGroup;
 			children = (
-				DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */,
+				DA72E1B5236DEA0900B8EF3A /* WatchConnectivitySessionManager.swift */,
 			);
 			name = External;
 			path = openHABWatch/External;
@@ -1498,7 +1498,7 @@
 				DA0749E023E0BF510057FA83 /* ColorSelection.swift in Sources */,
 				DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */,
 				DA9721C324E29A8F0092CCFD /* UserDefaultsBacked.swift in Sources */,
-				DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */,
+				DA72E1B8236DEA0900B8EF3A /* WatchConnectivitySessionManager.swift in Sources */,
 				DA07752B2346705F0086C685 /* OpenHABWatchAppDelegate.swift in Sources */,
 				DAF4581623DC48400018B495 /* GenericRow.swift in Sources */,
 				9350F17A23814FAC00054BA8 /* ObservableOpenHABSitemapPage.swift in Sources */,
@@ -1708,13 +1708,11 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = openHABIntents/openHABIntents.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 29;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1731,8 +1729,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.openHABIntents;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.openHABIntents";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app.openHABIntents";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1795,13 +1792,11 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 29;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1823,8 +1818,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.NotificationService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.NotificationService";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app.NotificationService";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1979,13 +1973,11 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "openHABWatch Extension/openHABWatch Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 29;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=watchos*]" = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2007,8 +1999,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app.watchkitapp";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=watchos*]" = "match AppStore org.openhab.app.watchkitapp";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -2435,12 +2426,10 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = openHAB/openHAB.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 29;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
+				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -2462,8 +2451,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.openhab.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore org.openhab.app";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.openhab.app";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "";

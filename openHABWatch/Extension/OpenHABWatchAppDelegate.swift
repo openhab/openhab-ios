@@ -20,7 +20,7 @@ class OpenHABWatchAppDelegate: NSObject {
     let delegate: WCSessionDelegate
 
     override init() {
-        delegate = AppMessageService.singleton
+        delegate = WatchConnectivitySessionManager.singleton
         session = .default
         session.delegate = delegate
         session.activate()
