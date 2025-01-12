@@ -19,11 +19,17 @@ public class HTTPClient: NSObject {
     private let username: String
     private let password: String
     private let alwaysSendBasicAuth: Bool
+    private let ignoreSSL: Bool
 
-    public init(username: String, password: String, alwaysSendBasicAuth: Bool = false) {
+    // this can be changed if we detect another server
+    public var baseURL: URL?
+
+    public init(baseURL: URL? = nil, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
+        self.baseURL = baseURL
         self.username = username
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
+        self.ignoreSSL = ignoreSSL
         super.init()
 
         let config = URLSessionConfiguration.default
@@ -44,7 +50,7 @@ public class HTTPClient: NSObject {
      - response: The URL response object providing response metadata, such as HTTP headers and status code.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func doGet(baseURL: URL, path: String?, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    public func doGet(baseURL: URL? = nil, path: String?, completion: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
         doRequest(baseURL: baseURL, path: path, method: "GET") { result, response, error in
             let data = result as? Data
             completion(data, response, error)
@@ -63,7 +69,7 @@ public class HTTPClient: NSObject {
      - response: The URL response object providing response metadata, such as HTTP headers and status code.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func doPost(baseURL: URL, path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    public func doPost(baseURL: URL? = nil, path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
         doRequest(baseURL: baseURL, path: path, method: "POST", body: body) { result, response, error in
             let data = result as? Data
             completion(data, response, error)
@@ -82,7 +88,7 @@ public class HTTPClient: NSObject {
      - response: The URL response object providing response metadata, such as HTTP headers and status code.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func doPut(baseURL: URL, path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    public func doPut(baseURL: URL? = nil, path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
         doRequest(baseURL: baseURL, path: path, method: "PUT", body: body) { result, response, error in
             let data = result as? Data
             completion(data, response, error)
@@ -99,8 +105,7 @@ public class HTTPClient: NSObject {
      - item: An `OpenHABItem` object returned by the server. This will be `nil` if the request fails.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func getItem(baseURL: URL, itemName: String, completion: @escaping (OpenHABItem?, Error?) -> Void) {
-        os_log("getItem from URL %{public}@ and item %{public}@", log: .networking, type: .info, baseURL.absoluteString, itemName)
+    public func getItem(baseURL: URL? = nil, itemName: String, completion: @escaping (OpenHABItem?, Error?) -> Void) -> URLSessionTask? {
         doGet(baseURL: baseURL, path: "/rest/items/\(itemName)") { data, _, error in
             if let error {
                 completion(nil, error)
@@ -122,8 +127,7 @@ public class HTTPClient: NSObject {
         }
     }
 
-    public func getServerProperties(baseURL: URL, completion: @escaping (OpenHABServerProperties?, Error?) -> Void) {
-        os_log("getServerProperties from URL %{public}@", log: .networking, type: .info, baseURL.absoluteString)
+    public func getServerProperties(baseURL: URL? = nil, completion: @escaping (OpenHABServerProperties?, Error?) -> Void) -> URLSessionTask? {
         doGet(baseURL: baseURL, path: "/rest/") { data, _, error in
             if let error {
                 completion(nil, error)
@@ -156,53 +160,98 @@ public class HTTPClient: NSObject {
      - response: The URL response object providing response metadata, such as HTTP headers and status code.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func downloadFile(url: URL, completionHandler: @escaping @Sendable (URL?, URLResponse?, (any Error)?) -> Void) {
+    public func downloadFile(url: URL, completionHandler: @escaping @Sendable (URL?, URLResponse?, (any Error)?) -> Void) -> URLSessionTask? {
         doRequest(baseURL: url, path: nil, method: "GET", download: true) { result, response, error in
             let fileURL = result as? URL
             completionHandler(fileURL, response, error)
         }
     }
 
-    // MARK: - Basic Authentication
-
-    private func basicAuthHeader() -> String {
-        let authString = "\(username):\(password)"
-        let authData = authString.data(using: .utf8)!
-        return "Basic \(authData.base64EncodedString())"
+    public func sendCommand(url: URL? = nil, itemName: String, command: String, completion: @escaping (String?, Error?) -> Void) -> URLSessionTask? {
+        os_log("sendCommand  %{public}@  %{public}@", log: .default, type: .debug, command, itemName)
+        return doPost(baseURL: url, path: "/rest/items/\(itemName)", body: command) { data, _, error in
+            if let error {
+                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                completion(nil, error)
+            } else {
+                os_log("Request succeeded", log: .default, type: .info)
+                var returnValue = ""
+                if let data {
+                    returnValue = String(data: data, encoding: .utf8) ?? ""
+                    os_log("Data: %{public}@", log: .default, type: .debug, returnValue)
+                }
+                completion(returnValue, nil)
+            }
+        }
     }
 
-    private func doRequest(baseURL: URL, path: String?, method: String, body: String? = nil, download: Bool = false, completion: @escaping (Any?, URLResponse?, Error?) -> Void) {
-        var url = baseURL
+    public func loadSitemapData(url: URL? = nil,
+                                longPolling: Bool,
+                                refresh: Bool,
+                                completion: @escaping (Data?, Error?) -> Void) -> URLSessionTask? {
+        let timeout: TimeInterval = longPolling ? 35.0 : 10.0 // for long polling, the server will return in 30 seconds
+        var headers: [String: String] = [:]
+        if longPolling {
+            headers["X-Atmosphere-Transport"] = "0"
+        }
+
+        os_log("Fetching page from URL %{public}@", log: .networking, type: .info, url?.absoluteString ?? "")
+
+        return doRequest(baseURL: url, path: nil, method: "GET", headers: headers, timeout: timeout) { result, _, error in
+            if let error {
+                os_log("error fetching page from URL %{public}@ %{public}@", log: .networking, type: .error, url?.absoluteString ?? "", error.localizedDescription)
+                completion(nil, error)
+            } else if let data = result as? Data {
+                os_log("Finsihed Fetching page from URL %{public}@", log: .networking, type: .info, url?.absoluteString ?? "")
+                completion(data, nil)
+            } else {
+                os_log("No data from URL %{public}@", log: .networking, type: .error, url?.absoluteString ?? "")
+                completion(nil, URLError(.unknown, userInfo: [NSLocalizedDescriptionKey: "No valid data received from server."]))
+            }
+        }
+    }
+
+    public func doRequest(baseURL: URL?, path: String?, method: String, headers: [String: String]? = nil,
+                          timeout: TimeInterval = 60.0, body: String? = nil, download: Bool = false, completion: @escaping (Any?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
+        guard var url = baseURL ?? self.baseURL else {
+            os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
+            completion(nil, nil, NSError(domain: "HTTPClient", code: -1, userInfo: [NSLocalizedDescriptionKey: "Base URL is nil"]))
+            return nil
+        }
+
         if let path {
             url.appendPathComponent(path)
         }
 
-        func sendRequest() {
-            var request = URLRequest(url: url)
-            request.httpMethod = method
-            if let body {
-                request.httpBody = body.data(using: .utf8)
-                request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.timeoutInterval = timeout
+        if let headers {
+            for (key, value) in headers {
+                request.setValue(value, forHTTPHeaderField: key)
             }
-            performRequest(request: request, download: download) { result, response, error in
-                if let error {
-                    os_log("Error with URL %{public}@ : %{public}@", log: .networking, type: .error, url.absoluteString, error.localizedDescription)
-                    completion(nil, response, error)
-                } else if let response = response as? HTTPURLResponse {
-                    if (400 ... 599).contains(response.statusCode) {
-                        os_log("HTTP error from URL %{public}@ : %{public}d", log: .networking, type: .error, url.absoluteString, response.statusCode)
-                        completion(nil, response, NSError(domain: "HTTPClient", code: response.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP error \(response.statusCode)"]))
-                    } else {
-                        os_log("Response from URL %{public}@ : %{public}d", log: .networking, type: .info, url.absoluteString, response.statusCode)
-                        completion(result, response, nil)
-                    }
+        }
+        if let body {
+            request.httpBody = body.data(using: .utf8)
+            request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
+        }
+        return performRequest(request: request, download: download) { result, response, error in
+            if let error {
+                os_log("Error with URL %{public}@ : %{public}@", log: .networking, type: .error, url.absoluteString, error.localizedDescription)
+                completion(nil, response, error)
+            } else if let response = response as? HTTPURLResponse {
+                if (400 ... 599).contains(response.statusCode) {
+                    os_log("HTTP error from URL %{public}@ : %{public}d", log: .networking, type: .error, url.absoluteString, response.statusCode)
+                    completion(nil, response, NSError(domain: "HTTPClient", code: response.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP error \(response.statusCode)"]))
+                } else {
+                    os_log("Response from URL %{public}@ : %{public}d", log: .networking, type: .info, url.absoluteString, response.statusCode)
+                    completion(result, response, nil)
                 }
             }
         }
-        sendRequest()
     }
 
-    private func performRequest(request: URLRequest, download: Bool, completion: @escaping (Any?, URLResponse?, Error?) -> Void) {
+    private func performRequest(request: URLRequest, download: Bool, completion: @escaping (Any?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
         var request = request
         if alwaysSendBasicAuth {
             request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
@@ -218,6 +267,7 @@ public class HTTPClient: NSObject {
             }
         }
         task.resume()
+        return task
     }
 
     @available(watchOS 8.0, *)
@@ -232,6 +282,14 @@ public class HTTPClient: NSObject {
         } else {
             return try await session.data(for: request)
         }
+    }
+
+    // MARK: - Basic Authentication
+
+    private func basicAuthHeader() -> String {
+        let authString = "\(username):\(password)"
+        let authData = authString.data(using: .utf8)!
+        return "Basic \(authData.base64EncodedString())"
     }
 }
 
@@ -271,11 +329,14 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
     }
 
     private func handleServerTrust(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        guard let serverTrust = challenge.protectionSpace.serverTrust else {
-            return (.performDefaultHandling, nil)
+        if ignoreSSL {
+            os_log("Ignoring SSL certificate validation", log: .networking, type: .info)
+            if let serverTrust = challenge.protectionSpace.serverTrust {
+                let credential = URLCredential(trust: serverTrust)
+                return (.useCredential, credential)
+            }
         }
-        let credential = URLCredential(trust: serverTrust)
-        return (.useCredential, credential)
+        return (.performDefaultHandling, nil)
     }
 
     private func handleBasicAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {

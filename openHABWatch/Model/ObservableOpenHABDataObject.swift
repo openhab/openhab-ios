@@ -74,7 +74,6 @@ final class ObservableOpenHABDataObject: DataObject, ObservableObject {
     var ignoreSSL: Bool {
         willSet {
             objectWillChange.send()
-            NetworkConnection.shared.serverCertificateManager.ignoreSSL = newValue
         }
     }
 

@@ -152,7 +152,7 @@ class NotificationService: UNNotificationServiceExtension {
                 url: Preferences.remoteUrl,
                 priority: 1
             )
-            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
             NetworkTracker.shared.waitForActiveConnection { activeConnection in
                 if let openHABUrl = activeConnection?.configuration.url, let uurl = URL(string: openHABUrl) {
                     client.downloadFile(url: uurl.appendingPathComponent(url), completionHandler: downloadCompletionHandler)
@@ -182,7 +182,7 @@ class NotificationService: UNNotificationServiceExtension {
             url: Preferences.remoteUrl,
             priority: 1
         )
-        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
         NetworkTracker.shared.waitForActiveConnection { activeConnection in
             if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
                 client.getItem(baseURL: url, itemName: itemName) { item, error in

@@ -22,9 +22,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "AppMessageService")
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
-        if NetworkConnection.shared == nil {
-            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
-        }
         if !applicationContext.isEmpty {
             if let localUrl = applicationContext["localUrl"] as? String {
                 ObservableOpenHABDataObject.shared.localUrl = localUrl
@@ -55,8 +52,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
             }
 
             if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
-                NetworkConnection.shared.serverCertificateManager.trustedCertificates = trustedCertificates
-                NetworkConnection.shared.serverCertificateManager.saveTrustedCertificates()
+                // do we need to do anything here?  We load from the shared keychain.
             }
 
             if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {

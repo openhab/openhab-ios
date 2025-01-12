@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
+// import Alamofire
 import Combine
 import Foundation
 import OpenHABCore
@@ -32,13 +32,12 @@ final class UserData: ObservableObject {
     @Published var errorDescription = ""
     @Published var showCertificateAlert = false
     @Published var certificateErrorDescription = ""
-
     let decoder = JSONDecoder()
 
     var openHABSitemapPage: ObservableOpenHABSitemapPage?
 
-    private var commandOperation: Alamofire.Request?
-    private var currentPageOperation: Alamofire.Request?
+    private var commandOperation: URLSessionTask?
+    private var currentPageOperation: URLSessionTask?
     private var cancellables = Set<AnyCancellable>()
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
@@ -63,17 +62,17 @@ final class UserData: ObservableObject {
         widgets = openHABSitemapPage?.widgets ?? []
 
         openHABSitemapPage?.sendCommand = { [weak self] item, command in
-            self?.sendCommand(item, commandToSend: command)
+            self?.sendCommand(item, command: command)
         }
     }
 
     init(sitemapName: String = "watch") {
-        updateNetworkTracker()
+        updateNetwork()
         NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
                 if let activeConnection {
-                    self?.logger.error("openHABTracked: \(activeConnection.configuration.url)")
+                    self?.logger.info("openHABTracked: \(activeConnection.configuration.url)")
 
                     if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
                         AppMessageService.singleton.requestApplicationContext()
@@ -94,12 +93,12 @@ final class UserData: ObservableObject {
         ObservableOpenHABDataObject.shared.objectRefreshed.sink { _ in
             // New settings updates from the phone app to start a reconnect
             self.logger.info("Settings update received, starting reconnect")
-            self.updateNetworkTracker()
+            self.updateNetwork()
         }
         .store(in: &cancellables)
     }
 
-    func updateNetworkTracker() {
+    func updateNetwork() {
         if !ObservableOpenHABDataObject.shared.localUrl.isEmpty || !ObservableOpenHABDataObject.shared.remoteUrl.isEmpty {
             let connection1 = ConnectionConfiguration(
                 url: ObservableOpenHABDataObject.shared.localUrl,
@@ -109,69 +108,80 @@ final class UserData: ObservableObject {
                 url: ObservableOpenHABDataObject.shared.remoteUrl,
                 priority: 1
             )
-            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: ObservableOpenHABDataObject.shared.openHABUsername, password: ObservableOpenHABDataObject.shared.openHABPassword, alwaysSendBasicAuth: ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds)
+            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: ObservableOpenHABDataObject.shared.openHABUsername, password: ObservableOpenHABDataObject.shared.openHABPassword, alwaysSendBasicAuth: ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds, ignoreSSLVerification: ObservableOpenHABDataObject.shared.ignoreSSL)
         }
     }
 
-    func loadPage(url: URL?,
-                  longPolling: Bool,
-                  refresh: Bool) {
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
+    func loadPage(url: URL? = nil, longPolling: Bool, refresh: Bool) {
+        logger.info("Loading page \(url?.absoluteString ?? "") longPolling \(longPolling) refresh \(refresh)")
+
+        // Cancel any running operation
+        if let currentPageOperation, currentPageOperation.state == .running {
+            currentPageOperation.cancel()
         }
 
-        currentPageOperation = NetworkConnection.page(
-            url: url,
-            longPolling: longPolling
-        ) { [weak self] response in
+        currentPageOperation = NetworkTracker.shared.httpClient?.loadSitemapData(url: url, longPolling: longPolling, refresh: refresh) { [weak self] data, error in
             guard let self else { return }
+            currentPageOperation = nil
 
-            switch response.result {
-            case let .success(data):
-                logger.info("Page loaded with success")
+            if let error = error as? URLError, error.code == .cancelled {
+                logger.info("Task was canceled")
+                return
+            }
+
+            var errorString: String?
+
+            if error != nil || data == nil {
+                errorString = error?.localizedDescription ?? "No data received"
+            }
+
+            if errorString == nil {
                 do {
-                    // Self-executing closure
-                    // Inspired by https://www.swiftbysundell.com/posts/inline-types-and-functions-in-swift
-                    openHABSitemapPage = try {
-                        let sitemapPageCodingData = try data.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
-                        return sitemapPageCodingData.openHABSitemapPage
-                    }()
+                    let sitemapPageCodingData = try data!.decoded(as: ObservableOpenHABSitemapPage.CodingData.self)
+                    openHABSitemapPage = sitemapPageCodingData.openHABSitemapPage
                 } catch {
-                    logger.error("Should not throw \(error.localizedDescription)")
+                    logger.error("Decoding error: \(error.localizedDescription)")
+                    errorString = error.localizedDescription
                 }
+            }
 
-                openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                    self?.sendCommand(item, commandToSend: command)
+            if let errorString {
+                DispatchQueue.main.async {
+                    self.logger.error("On LoadPage \"\(errorString)\"")
+                    self.errorDescription = errorString
+                    self.widgets = []
+                    self.showAlert = true
                 }
+                return
+            }
 
-                widgets = openHABSitemapPage?.widgets ?? []
+            // Configures then sendCommand closure (existing logic)
+            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                self?.sendCommand(item, command: command)
+            }
 
-                showAlert = widgets.isEmpty ? true : false
-                if refresh { loadPage(
-                    url: url,
-                    longPolling: true,
-                    refresh: true
-                ) }
-
-            case let .failure(error):
-                logger.error("On LoadPage \"\(error.localizedDescription)\" with code: \(response.response?.statusCode ?? 0)")
-                errorDescription = error.localizedDescription
-                widgets = []
-                showAlert = true
+            // Always update UI on the main thread
+            DispatchQueue.main.async {
+                self.widgets = self.openHABSitemapPage?.widgets ?? []
+                self.showAlert = self.widgets.isEmpty
+                if refresh {
+                    self.loadPage(url: url, longPolling: true, refresh: true)
+                }
             }
         }
-        currentPageOperation?.resume()
     }
 
-    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
-        if commandOperation != nil {
-            commandOperation?.cancel()
-            commandOperation = nil
+    func sendCommand(_ item: OpenHABItem?, command: String?) {
+        if let commandOperation, commandOperation.state == .running {
+            commandOperation.cancel()
         }
         if let item, let command {
-            commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
-            commandOperation?.resume()
+            commandOperation = NetworkTracker.shared.httpClient?.sendCommand(itemName: item.name, command: command) { _, error in
+                if error != nil {
+                    self.logger.error("Error sending command \(command) to \(item.name): \(error!.localizedDescription)")
+                }
+                self.commandOperation = nil
+            }
         }
     }
 

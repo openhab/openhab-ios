@@ -22,7 +22,7 @@ struct ContentView: View {
         ZStack {
             ScrollView {
                 HStack {
-                    Text(viewModel.openHABSitemapPage?.title ?? "Sitemap without title")
+                    Text(viewModel.openHABSitemapPage?.title ?? "Waiting...")
                         .font(.body)
                         .lineLimit(1)
                     Spacer()
@@ -32,23 +32,24 @@ struct ContentView: View {
                 }
             }
             .navigationBarTitle(Text(title))
-            .actionSheet(isPresented: $viewModel.showCertificateAlert) {
-                ActionSheet(
-                    title: Text(NSLocalizedString("warning", comment: "")),
-                    message: Text(viewModel.certificateErrorDescription),
-                    buttons: [
-                        .default(Text(NSLocalizedString("abort", comment: ""))) {
-                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
-                        },
-                        .default(Text(NSLocalizedString("once", comment: ""))) {
-                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
-                        },
-                        .default(Text(NSLocalizedString("always", comment: ""))) {
-                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
-                        }
-                    ]
-                )
-            }
+            //  Appearently this was never implemented
+//            .actionSheet(isPresented: $viewModel.showCertificateAlert) {
+//                ActionSheet(
+//                    title: Text(NSLocalizedString("warning", comment: "")),
+//                    message: Text(viewModel.certificateErrorDescription),
+//                    buttons: [
+//                        .default(Text(NSLocalizedString("abort", comment: ""))) {
+//                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
+//                        },
+//                        .default(Text(NSLocalizedString("once", comment: ""))) {
+//                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
+//                        },
+//                        .default(Text(NSLocalizedString("always", comment: ""))) {
+//                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
+//                        }
+//                    ]
+//                )
+//            }
             if viewModel.showAlert {
                 Text("Refreshing...")
                     .onAppear {

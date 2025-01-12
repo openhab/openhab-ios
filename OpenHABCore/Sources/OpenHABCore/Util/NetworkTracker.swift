@@ -41,21 +41,21 @@ public final class NetworkTracker: ObservableObject {
 
     @Published public private(set) var activeConnection: ConnectionInfo?
     @Published public private(set) var status: NetworkStatus = .connecting
+    public private(set) var httpClient: HTTPClient?
 
     private let monitor: NWPathMonitor
     private let monitorQueue = DispatchQueue.global(qos: .background)
     private var priorityWorkItem: DispatchWorkItem?
     private var connectionConfigurations: [ConnectionConfiguration] = []
-    private var httpClient: HTTPClient?
     private var retryTimer: DispatchSourceTimer?
     private let timerQueue = DispatchQueue(label: "com.openhab.networktracker.timerQueue")
-
     private let connectedRetryInterval: TimeInterval = 60 // amount of time we scan for better connections when connected
     private let disconnectedRetryInterval: TimeInterval = 30 // amount of time we scan when not connected
 
     private init() {
         monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { [weak self] path in
+            guard self?.httpClient != nil else { return }
             if path.status == .satisfied {
                 os_log("Network status: Connected", log: OSLog.default, type: .info)
                 self?.checkActiveConnection()
@@ -68,9 +68,10 @@ public final class NetworkTracker: ObservableObject {
         monitor.start(queue: monitorQueue)
     }
 
-    public func startTracking(connectionConfigurations: [ConnectionConfiguration], username: String, password: String, alwaysSendBasicAuth: Bool) {
+    public func startTracking(connectionConfigurations: [ConnectionConfiguration], username: String, password: String, alwaysSendBasicAuth: Bool, ignoreSSLVerification: Bool) {
+        os_log("NetworkConnection: startTracking", log: OSLog.default, type: .info)
         self.connectionConfigurations = connectionConfigurations
-        httpClient = HTTPClient(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth)
+        httpClient = HTTPClient(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
         setActiveConnection(nil)
         attemptConnection()
     }
@@ -78,7 +79,9 @@ public final class NetworkTracker: ObservableObject {
     public func waitForActiveConnection(
         perform action: @escaping (ConnectionInfo?) -> Void
     ) -> AnyCancellable {
-        $activeConnection
+        os_log("NetworkConnection: waitForActiveConnection", log: OSLog.default, type: .info)
+
+        return $activeConnection
             .filter { $0 != nil } // Only proceed if activeConnection is not nil
             .first() // Automatically cancels after the first non-nil value
             .receive(on: DispatchQueue.main)
@@ -91,12 +94,15 @@ public final class NetworkTracker: ObservableObject {
     private func checkActiveConnection() {
         guard let activeConnection else {
             // No active connection, proceed with the normal connection attempt
+            os_log("NetworkConnection: checkActiveConnection attemptConnection", log: OSLog.default, type: .info)
             attemptConnection()
             return
         }
 
         // Check if the active connection is reachable
         if let url = URL(string: activeConnection.configuration.url) {
+            os_log("checkActiveConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, url.absoluteString)
+
             httpClient?.getServerProperties(baseURL: url) { [weak self] _, error in
                 if let error {
                     os_log("Network status: Active connection is not reachable: %{PUBLIC}@ %{PUBLIC}@", log: OSLog.default, type: .error, activeConnection.configuration.url, error.localizedDescription)
@@ -141,6 +147,7 @@ public final class NetworkTracker: ObservableObject {
         for configuration in connectionConfigurations {
             dispatchGroup.enter()
             checkOutstanding = true // Signal that checks are outstanding
+            os_log("attemptConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, configuration.url)
             if let url = URL(string: configuration.url) {
                 httpClient?.getServerProperties(baseURL: url) { [weak self] props, error in
                     guard let self else { return }
@@ -228,7 +235,8 @@ public final class NetworkTracker: ObservableObject {
         activeConnection = connection
         if activeConnection != nil {
             updateStatus(.connected)
-            startRetryTimer(connectedRetryInterval)
+            httpClient?.baseURL = URL(string: activeConnection!.configuration.url)
+            // startRetryTimer(connectedRetryInterval)
         } else {
             updateStatus(.notConnected)
             startRetryTimer(disconnectedRetryInterval)

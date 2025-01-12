@@ -55,7 +55,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
                 "alwaysSendCreds": Preferences.alwaysSendCreds,
                 "defaultSitemap": Preferences.defaultSitemap,
                 "ignoreSSL": Preferences.ignoreSSL,
-                "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates,
+                // "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates,
                 "sitemapForWatch": Preferences.sitemapForWatch,
                 "iconType": Preferences.iconType
             ]

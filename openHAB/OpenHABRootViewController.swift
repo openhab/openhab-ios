@@ -126,9 +126,10 @@ class OpenHABRootViewController: UIViewController {
         )
         .eraseToAnyPublisher()
 
-        let misc = Publishers.CombineLatest(
+        let misc = Publishers.CombineLatest3(
             Preferences.$demomode,
-            Preferences.$alwaysSendCreds
+            Preferences.$alwaysSendCreds,
+            Preferences.$ignoreSSL
         )
         .eraseToAnyPublisher()
 
@@ -136,14 +137,14 @@ class OpenHABRootViewController: UIViewController {
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
             .sink { (serverInfoTuple, miscTuple) in
                 let (localUrl, remoteUrl, username, password) = serverInfoTuple
-                let (demomode, alwaysSendCreds) = miscTuple
+                let (demomode, alwaysSendCreds, ignoreSSL) = miscTuple
                 if demomode {
                     NetworkTracker.shared.startTracking(connectionConfigurations: [
                         ConnectionConfiguration(
                             url: "https://demo.openhab.org",
                             priority: 0
                         )
-                    ], username: "", password: "", alwaysSendBasicAuth: false)
+                    ], username: "", password: "", alwaysSendBasicAuth: false, ignoreSSLVerification: true)
                 } else {
                     let connection1 = ConnectionConfiguration(
                         url: localUrl,
@@ -153,7 +154,7 @@ class OpenHABRootViewController: UIViewController {
                         url: remoteUrl,
                         priority: 1
                     )
-                    NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: username, password: password, alwaysSendBasicAuth: alwaysSendCreds)
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: username, password: password, alwaysSendBasicAuth: alwaysSendCreds, ignoreSSLVerification: ignoreSSL)
                 }
             }
             .store(in: &cancellables)
