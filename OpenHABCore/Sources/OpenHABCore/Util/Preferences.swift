@@ -55,16 +55,17 @@ public struct UserDefaultURL {
         get {
             let storedValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
             let trimmedUri = uriWithoutTrailingSlashes(storedValue).trimmingCharacters(in: .whitespacesAndNewlines)
-            return adjustURLIfNeeded(for: key, url: storedValue)
+            return trimmedUri.isValidURL ? trimmedUri : defaultValue
         }
         set {
-            let formattedValue = adjustURLIfNeeded(for: key, url: newValue)
-            Preferences.sharedDefaults.set(formattedValue, forKey: key)
+            Preferences.sharedDefaults.set(newValue, forKey: key)
             let subject = subject
             let defaultValue = defaultValue
+            // Trim and validate the new URL
+            let trimmedUri = uriWithoutTrailingSlashes(newValue).trimmingCharacters(in: .whitespacesAndNewlines)
             DispatchQueue.main.async {
-                if formattedValue.isValidURL {
-                    subject.send(formattedValue)
+                if trimmedUri.isValidURL {
+                    subject.send(trimmedUri)
                 } else {
                     subject.send(defaultValue)
                 }
@@ -88,28 +89,6 @@ public struct UserDefaultURL {
             return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
         }
         return hostUri
-    }
-
-    private func adjustURLIfNeeded(for key: String, url: String) -> String {
-        // Step 1: Remove trailing slashes
-        let trimmedUrl = uriWithoutTrailingSlashes(url).trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Step 2: Apply special logic only for "remoteUrl"
-        if key == "remoteUrl" {
-            guard let urlComponents = URLComponents(string: trimmedUrl),
-                  let host = urlComponents.host else {
-                return defaultValue
-            }
-
-            // Adjust the host if it contains "myopenhab.org" but isn't "home.myopenhab.org"
-            if host.contains("myopenhab.org"), host != "home.myopenhab.org" {
-                var newComponents = urlComponents
-                newComponents.host = "home.myopenhab.org"
-                return newComponents.url?.absoluteString ?? defaultValue
-            }
-        }
-
-        return trimmedUrl
     }
 }
 

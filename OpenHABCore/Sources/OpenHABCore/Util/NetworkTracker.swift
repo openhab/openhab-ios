@@ -70,7 +70,7 @@ public final class NetworkTracker: ObservableObject {
 
     public func startTracking(connectionConfigurations: [ConnectionConfiguration], username: String, password: String, alwaysSendBasicAuth: Bool, ignoreSSLVerification: Bool) {
         os_log("NetworkConnection: startTracking", log: OSLog.default, type: .info)
-        self.connectionConfigurations = connectionConfigurations
+        self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
         httpClient = HTTPClient(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
         setActiveConnection(nil)
         attemptConnection()
@@ -246,6 +246,22 @@ public final class NetworkTracker: ObservableObject {
     private func updateStatus(_ newStatus: NetworkStatus) {
         if status != newStatus {
             status = newStatus
+        }
+    }
+
+    private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
+        configurations.map { configuration in
+            let updatedURL: String
+            if let urlComponents = URLComponents(string: configuration.url),
+               let host = urlComponents.host,
+               host.contains("myopenhab.org"), host != "home.myopenhab.org" {
+                var newComponents = urlComponents
+                newComponents.host = "home.myopenhab.org"
+                updatedURL = newComponents.url?.absoluteString ?? configuration.url
+            } else {
+                updatedURL = configuration.url
+            }
+            return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
         }
     }
 }

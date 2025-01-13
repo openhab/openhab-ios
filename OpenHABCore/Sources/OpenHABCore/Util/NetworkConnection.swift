@@ -23,8 +23,7 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
     } else if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
         let localUrl = URL(string: Preferences.localUrl)
         let remoteUrl = URL(string: Preferences.remoteUrl)
-
-        if challenge.protectionSpace.host == localUrl?.host || challenge.protectionSpace.host == remoteUrl?.host {
+        if challenge.protectionSpace.host == localUrl?.host || challenge.protectionSpace.host == remoteUrl?.host || challenge.protectionSpace.host == "home.myopenhab.org" {
             credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
             disposition = .useCredential
             os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
@@ -192,7 +191,7 @@ public class NetworkConnection {
         }
         pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
 
-        os_log("NetworkConnection: sending new request", log: .remoteAccess, type: .error)
+        os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
 
         return NetworkConnection.shared.manager.request(pageRequest)
             .validate()
