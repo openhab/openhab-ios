@@ -140,6 +140,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             return clientCertificateManager.startImportClientCertificate(url: url)
         }
 
+        // remove the 'openhab' from the url
+        let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
+        notifyNotificationListeners(["actionIdentifier": action])
         return true
     }
 
