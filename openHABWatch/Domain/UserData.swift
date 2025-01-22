@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-// import Alamofire
 import Combine
 import Foundation
 import OpenHABCore
