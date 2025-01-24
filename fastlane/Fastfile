@@ -57,7 +57,7 @@ platform :ios do
             scheme: 'openHABTestsSwift',
             xcargs: '-skipPackagePluginValidation',
             testplan: 'openHABTests',
-            devices: ['iPhone 15 Pro'],
+            devices: ['iPhone 15 Pro (17.5)'],
             clean: true
         )
     end
