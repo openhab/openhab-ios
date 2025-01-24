@@ -10,7 +10,7 @@ jobs:
     runs-on: macos-latest
     if: ${{ github.event.pull_request.draft == false }}
     steps:
-      - uses: maxim-lobanov/setup-xcode@v1
+      - uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
           xcode-version: latest-stable
 
