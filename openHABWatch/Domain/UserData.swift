@@ -41,7 +41,10 @@ final class UserData: ObservableObject {
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
 
-    // Demo
+    // Add property near other published properties
+    var currentClient: HTTPClient?
+
+    // Add to init() after decoder setup
     init() {
         decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
 
@@ -66,7 +69,49 @@ final class UserData: ObservableObject {
     }
 
     init(sitemapName: String = "watch") {
+        NotificationCenter.default.addObserver(
+            forName: .evaluateServerTrust,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let summary = notification.userInfo?["summary"] as? String,
+                  let domain = notification.userInfo?["domain"] as? String,
+                  let client = notification.object as? HTTPClient else { return }
+
+            certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), summary, domain)
+            currentClient = client
+            DispatchQueue.main.async {
+                self.showCertificateAlert = true
+            }
+        }
+        NotificationCenter.default.addObserver(
+            forName: .evaluateCertificateMismatch,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let summary = notification.userInfo?["summary"] as? String,
+                  let domain = notification.userInfo?["domain"] as? String,
+                  let client = notification.object as? HTTPClient else { return }
+
+            certificateErrorDescription = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), summary, domain)
+            currentClient = client
+            DispatchQueue.main.async {
+                self.showCertificateAlert = true
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .acceptedServerCertificatesChanged,
+            object: nil,
+            queue: nil
+        ) { _ in
+            NetworkTracker.shared.restartTracking()
+        }
+
         updateNetwork()
+
         NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in

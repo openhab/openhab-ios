@@ -10,19 +10,34 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import os.log
+import os
+
+private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient")
+
+private enum HTTPClientError: Error {
+    case serverTrustEvaluationFailed(reason: String)
+}
 
 public class HTTPClient: NSObject {
     // MARK: - Properties
+
+    public enum CertificateEvaluateResult {
+        case undecided
+        case deny
+        case permitOnce
+        case permitAlways
+    }
+
+    // this can be changed if we detect another server
+    public var baseURL: URL?
 
     private var session: URLSession!
     private let username: String
     private let password: String
     private let alwaysSendBasicAuth: Bool
     private let ignoreSSL: Bool
-
-    // this can be changed if we detect another server
-    public var baseURL: URL?
+    private var evaluateContinuation: CheckedContinuation<CertificateEvaluateResult, Never>?
+    private var trustedCertificates: [String: Data] = [:]
 
     public init(baseURL: URL? = nil, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
         self.baseURL = baseURL
@@ -37,6 +52,7 @@ public class HTTPClient: NSObject {
         config.timeoutIntervalForResource = 60
 
         session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+        initializeCertificatesStore()
     }
 
     /**
@@ -291,6 +307,90 @@ public class HTTPClient: NSObject {
         let authData = authString.data(using: .utf8)!
         return "Basic \(authData.base64EncodedString())"
     }
+
+    // MARK: - SSL Certificate Handling
+
+    private func initializeCertificatesStore() {
+        os_log("Initializing cert store", log: .default, type: .info)
+        loadTrustedCertificates()
+        if trustedCertificates.isEmpty {
+            os_log("No cert store, creating", log: .default, type: .info)
+            trustedCertificates = [:]
+            saveTrustedCertificates()
+        } else {
+            os_log("Loaded existing cert store", log: .default, type: .info)
+        }
+    }
+
+    private func getPersistensePath() -> URL {
+        #if os(watchOS)
+        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        #else
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
+        #endif
+    }
+
+    private func saveTrustedCertificates() {
+        do {
+            let data = try PropertyListEncoder().encode(trustedCertificates)
+            try data.write(to: getPersistensePath())
+        } catch {
+            os_log("Could not save trusted certificates", log: .default)
+        }
+    }
+
+    private func loadTrustedCertificates() {
+        var decodableTrustedCertificates: [String: Data] = [:]
+        do {
+            let rawdata = try Data(contentsOf: getPersistensePath())
+            let decoder = PropertyListDecoder()
+            decodableTrustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
+            trustedCertificates = decodableTrustedCertificates
+        } catch {
+            // if Decodable fails, fall back to NSKeyedArchiver
+            do {
+                let rawdata = try Data(contentsOf: getPersistensePath())
+                if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
+                    trustedCertificates = unarchivedTrustedCertificates
+                    saveTrustedCertificates() // Ensure that data is written in new format
+                }
+            } catch {
+                os_log("Could not load trusted certificates", log: .default)
+            }
+        }
+    }
+
+    private func storeCertificateData(_ certificate: CFData?, forDomain domain: String) {
+        let certificateData = certificate as Data?
+        trustedCertificates[domain] = certificateData
+        saveTrustedCertificates()
+    }
+
+    private func certificateData(forDomain domain: String) -> CFData? {
+        guard let certificateData = trustedCertificates[domain] else { return nil }
+        return certificateData as CFData
+    }
+
+    private func getLeafCertificate(trust: SecTrust?) -> SecCertificate? {
+        if let trust, SecTrustGetCertificateCount(trust) > 0,
+           let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate] {
+            return certificates[0]
+        }
+        return nil
+    }
+
+    private func waitForEvaluation() async -> CertificateEvaluateResult {
+        await withCheckedContinuation { continuation in
+            evaluateContinuation = continuation
+        }
+    }
+
+    public func completeEvaluation(_ result: CertificateEvaluateResult) {
+        logger.info("Completing evaluation with result: \(String(describing: result))")
+        evaluateContinuation?.resume(returning: result)
+        evaluateContinuation = nil
+    }
 }
 
 extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
@@ -329,14 +429,91 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
     }
 
     private func handleServerTrust(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        if ignoreSSL {
-            os_log("Ignoring SSL certificate validation", log: .networking, type: .info)
-            if let serverTrust = challenge.protectionSpace.serverTrust {
-                let credential = URLCredential(trust: serverTrust)
-                return (.useCredential, credential)
+        let domain = challenge.protectionSpace.host
+        logger.info("Handling server trust for domain: \(domain)")
+
+        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+            logger.error("No server trust object available")
+            return (.cancelAuthenticationChallenge, nil)
+        }
+
+        var result: SecTrustResultType = .invalid
+        if #available(iOS 12.0, *) {
+            var error: CFError?
+            _ = SecTrustEvaluateWithError(serverTrust, &error)
+            SecTrustGetTrustResult(serverTrust, &result)
+            logger.info("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
+        } else {
+            SecTrustEvaluate(serverTrust, &result)
+            logger.info("Trust evaluation result: \(result.rawValue)")
+        }
+
+        if result.isAny(of: .unspecified, .proceed) || ignoreSSL {
+            logger.info("Certificate is trusted or SSL verification ignored")
+            return (.useCredential, URLCredential(trust: serverTrust))
+        }
+
+        guard let certificate = getLeafCertificate(trust: serverTrust) else {
+            logger.error("Could not get leaf certificate")
+            return (.cancelAuthenticationChallenge, nil)
+        }
+
+        let certificateSummary = SecCertificateCopySubjectSummary(certificate)
+        let certificateData = SecCertificateCopyData(certificate)
+
+        // If we have a certificate for this domain
+        if let previousCertificateData = self.certificateData(forDomain: domain) {
+            if CFEqual(previousCertificateData, certificateData) {
+                logger.info("Using previously trusted certificate for domain: \(domain)")
+                return (.useCredential, URLCredential(trust: serverTrust))
+            } else {
+                logger.warning("Certificate mismatch detected for domain: \(domain)")
+                // Certificate mismatch - possible MitM attack
+                NotificationCenter.default.post(
+                    name: .evaluateCertificateMismatch,
+                    object: self,
+                    userInfo: ["summary": certificateSummary as Any, "domain": domain]
+                )
+                let evaluateResult = await waitForEvaluation()
+                logger.info("User decision for certificate mismatch: \(String(describing: evaluateResult))")
+
+                switch evaluateResult {
+                case .deny:
+                    return (.cancelAuthenticationChallenge, nil)
+                case .permitOnce:
+                    return (.useCredential, URLCredential(trust: serverTrust))
+                case .permitAlways:
+                    storeCertificateData(certificateData, forDomain: domain)
+                    NotificationCenter.default.post(name: .acceptedServerCertificatesChanged, object: self)
+                    return (.useCredential, URLCredential(trust: serverTrust))
+                case .undecided:
+                    return (.cancelAuthenticationChallenge, nil)
+                }
             }
         }
-        return (.performDefaultHandling, nil)
+
+        // New certificate
+        logger.info("New untrusted certificate for domain: \(domain)")
+        NotificationCenter.default.post(
+            name: .evaluateServerTrust,
+            object: self,
+            userInfo: ["summary": certificateSummary as Any, "domain": domain]
+        )
+        let evaluateResult = await waitForEvaluation()
+        logger.info("User decision for new certificate: \(String(describing: evaluateResult))")
+
+        switch evaluateResult {
+        case .deny:
+            return (.cancelAuthenticationChallenge, nil)
+        case .permitOnce:
+            return (.useCredential, URLCredential(trust: serverTrust))
+        case .permitAlways:
+            storeCertificateData(certificateData, forDomain: domain)
+            NotificationCenter.default.post(name: .acceptedServerCertificatesChanged, object: self)
+            return (.useCredential, URLCredential(trust: serverTrust))
+        case .undecided:
+            return (.cancelAuthenticationChallenge, nil)
+        }
     }
 
     private func handleBasicAuth(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
@@ -362,4 +539,10 @@ extension URLSessionTask {
             objc_setAssociatedObject(self, &URLSessionTask.authAttemptCountKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
+}
+
+public extension Notification.Name {
+    static let evaluateServerTrust = Notification.Name("evaluateServerTrust")
+    static let evaluateCertificateMismatch = Notification.Name("evaluateCertificateMismatch")
+    static let acceptedServerCertificatesChanged = Notification.Name("acceptedServerCertificatesChanged")
 }

@@ -9,6 +9,8 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+// swiftlint:disable body_length
+
 import Combine
 import FirebaseCrashlytics
 import Foundation
@@ -36,6 +38,7 @@ struct CommandItem: CommItem {
     var link: String
 }
 
+// swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
@@ -132,6 +135,32 @@ class OpenHABRootViewController: UIViewController {
             Preferences.$ignoreSSL
         )
         .eraseToAnyPublisher()
+
+        // Register for certificate trust notifications
+        NotificationCenter.default.addObserver(
+            forName: .evaluateServerTrust,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_invalid", comment: ""))
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .evaluateCertificateMismatch,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_no_match", comment: ""))
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .acceptedServerCertificatesChanged,
+            object: nil,
+            queue: nil
+        ) { _ in
+            WatchMessageService.singleton.syncPreferencesToWatch()
+            NetworkTracker.shared.restartTracking()
+        }
 
         Publishers.CombineLatest(serverInfo, misc)
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
@@ -579,6 +608,36 @@ class OpenHABRootViewController: UIViewController {
         } else {
             os_log("OpenHABRootViewController switchToSavedView %@", log: .viewCycle, type: .info, Preferences.defaultView == "sitemap" ? "sitemap" : "web")
             switchView(target: Preferences.defaultView == "sitemap" ? .sitemap("") : .webview)
+        }
+    }
+
+    @objc func handleCertificateTrust(_ notification: Notification, message: String) {
+        guard let summary = notification.userInfo?["summary"] as? String,
+              let domain = notification.userInfo?["domain"] as? String,
+              let client = notification.object as? HTTPClient else { return }
+        let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+        let message = String(format: NSLocalizedString(message, comment: ""), summary, domain)
+        DispatchQueue.main.async {
+            // Show alert to user
+            let alert = UIAlertController(
+                title: title,
+                message: message,
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: "Always", style: .default) { _ in
+                client.completeEvaluation(.permitAlways)
+            })
+
+            alert.addAction(UIAlertAction(title: "Once", style: .default) { _ in
+                client.completeEvaluation(.permitOnce)
+            })
+
+            alert.addAction(UIAlertAction(title: "Deny", style: .cancel) { _ in
+                client.completeEvaluation(.deny)
+            })
+
+            self.present(alert, animated: true)
         }
     }
 }

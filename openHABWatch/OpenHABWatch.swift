@@ -69,5 +69,8 @@ struct OpenHABWatch: App {
             return request
         }
         SDWebImageDownloader.shared.requestModifier = requestModifier
+        DispatchQueue.main.async {
+            AppMessageService.singleton.requestApplicationContext()
+        }
     }
 }

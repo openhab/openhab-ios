@@ -32,24 +32,22 @@ struct ContentView: View {
                 }
             }
             .navigationBarTitle(Text(title))
-            //  Appearently this was never implemented
-//            .actionSheet(isPresented: $viewModel.showCertificateAlert) {
-//                ActionSheet(
-//                    title: Text(NSLocalizedString("warning", comment: "")),
-//                    message: Text(viewModel.certificateErrorDescription),
-//                    buttons: [
-//                        .default(Text(NSLocalizedString("abort", comment: ""))) {
-//                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .deny
-//                        },
-//                        .default(Text(NSLocalizedString("once", comment: ""))) {
-//                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitOnce
-//                        },
-//                        .default(Text(NSLocalizedString("always", comment: ""))) {
-//                            NetworkConnection.shared.serverCertificateManager.evaluateResult = .permitAlways
-//                        }
-//                    ]
-//                )
-//            }
+            .alert(isPresented: $viewModel.showCertificateAlert) {
+                Alert(
+                    title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
+                    message: Text(viewModel.certificateErrorDescription),
+                    primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
+                        if let client = viewModel.currentClient {
+                            client.completeEvaluation(.permitAlways)
+                        }
+                    },
+                    secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
+                        if let client = viewModel.currentClient {
+                            client.completeEvaluation(.deny)
+                        }
+                    }
+                )
+            }
             if viewModel.showAlert {
                 Text("Refreshing...")
                     .onAppear {

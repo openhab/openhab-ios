@@ -90,6 +90,10 @@ public final class NetworkTracker: ObservableObject {
             }
     }
 
+    public func restartTracking() {
+        attemptConnection()
+    }
+
     // This gets called periodically when we have an active connection to make sure it's still the best choice
     private func checkActiveConnection() {
         guard let activeConnection else {
