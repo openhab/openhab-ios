@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2024 Contributors to the openHAB project
+// Copyright (c) 2010-2025 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -13,7 +13,7 @@ import Foundation
 import os.log
 import Security
 
-public protocol ClientCertificateManagerDelegate: NSObjectProtocol {
+public protocol ClientCertificateManagerDelegate: AnyObject {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?)
     // delegate should ask user for the export password used to decode the PKCS#12

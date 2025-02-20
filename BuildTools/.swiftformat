@@ -2,6 +2,7 @@
 --exclude ../fastlane
 --exclude ../OpenHABCore/.build
 --exclude ./build
+--exclude ../OpenHABCore/swift-openapi-generator
 --symlinks ignore
 
 # disabled rules

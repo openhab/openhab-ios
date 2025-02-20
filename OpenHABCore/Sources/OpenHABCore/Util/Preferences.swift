@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2024 Contributors to the openHAB project
+// Copyright (c) 2010-2025 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -33,15 +33,15 @@ public struct UserDefault<T> {
         }
     }
 
+    public var projectedValue: AnyPublisher<T, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
     public init(_ key: String, defaultValue: T) {
         self.key = key
         self.defaultValue = defaultValue
         let currentValue = Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
         subject = CurrentValueSubject<T, Never>(currentValue)
-    }
-
-    public var projectedValue: AnyPublisher<T, Never> {
-        subject.eraseToAnyPublisher()
     }
 }
 
@@ -73,15 +73,15 @@ public struct UserDefaultURL {
         }
     }
 
+    public var projectedValue: AnyPublisher<String, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
     public init(_ key: String, defaultValue: String) {
         self.key = key
         self.defaultValue = defaultValue
         let currentValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
         subject = CurrentValueSubject<String, Never>(currentValue)
-    }
-
-    public var projectedValue: AnyPublisher<String, Never> {
-        subject.eraseToAnyPublisher()
     }
 
     private func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
@@ -113,6 +113,7 @@ public enum Preferences {
     @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
+    @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
 
     // MARK: - Private
 

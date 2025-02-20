@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2024 Contributors to the openHAB project
+// Copyright (c) 2010-2025 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -183,16 +183,18 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 switch status {
                 case .connecting:
                     self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .connectionFailed:
+                case .notConnected:
                     os_log("Tracking error", log: .viewCycle, type: .info)
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+                case .connected:
+                    self.hidePopupMessages()
                 case _:
                     break
                 }
             }
             .store(in: &trackerCancellables)
 
-        var activeServerWatcher = NetworkTracker.shared.$activeServer.eraseToAnyPublisher()
+        var activeServerWatcher = NetworkTracker.shared.$activeConnection.eraseToAnyPublisher()
         // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
         if pageUrl == "" {
             // Set self as root view controller
@@ -217,10 +219,10 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will exectue imediately with current values and then again if the network changes, otherwise it will be called on changes only.
         activeServerWatcher
             .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let activeServer {
-                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeServer.url)
-                    self.openHABRootUrl = activeServer.url
+            .sink { activeConnection in
+                if let activeConnection {
+                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
+                    self.openHABRootUrl = activeConnection.configuration.url
                     self.selectSitemap()
                 }
             }
@@ -475,21 +477,20 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     func pushSitemap(name: String, path: String?) {
         // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
         // since we do not reference the sink cancelable, this will only fire once
-        _ = NetworkTracker.shared.$activeServer
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeServer in
-                if let openHABUrl = activeServer?.url, let self {
-                    os_log("pushSitemap: pushing page", log: .default, type: .error)
-                    let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-                    if let path {
-                        newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)/\(path)"
-                    } else {
-                        newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)"
-                    }
-                    newViewController.openHABRootUrl = openHABUrl
-                    navigationController?.pushViewController(newViewController, animated: true)
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url {
+                os_log("pushSitemap: pushing page", log: .default, type: .error)
+                let newViewController = (self.storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
+                if let path {
+                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)/\(path)"
+                } else {
+                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)"
                 }
+                newViewController.openHABRootUrl = openHABUrl
+                self.navigationController?.pushViewController(newViewController, animated: true)
             }
+        }
+        .store(in: &trackerCancellables)
     }
 
     // load app settings
@@ -602,7 +603,7 @@ extension OpenHABSitemapViewController: ColorPickerCellDelegate {
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
-extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource {
+extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if currentPage != nil {
             if isFiltering {
@@ -640,22 +641,29 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
+        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else {
+            // this should never be the case
+            let cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+            cell.displayWidget()
+            cell.touchEventDelegate = self
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
+            return cell
+        }
 
         let cell: UITableViewCell
 
-        switch widget?.type {
+        switch widget.type {
         case .frame:
             cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
         case .switchWidget:
             // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if !(widget?.mappings ?? []).isEmpty {
+            if !widget.mappings.isEmpty {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else if widget?.item?.isOfTypeOrGroupType(.switchItem) ?? false {
+            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            } else if widget?.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
+            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
                 cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterCell
-            } else if !(widget?.mappingsOrItemOptions ?? []).isEmpty {
+            } else if !widget.mappingsOrItemOptions.isEmpty {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
@@ -663,7 +671,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         case .setpoint:
             cell = tableView.dequeueReusableCell(for: indexPath) as SetpointCell
         case .slider:
-            if let switchSupport = widget?.switchSupport, switchSupport {
+            if widget.switchSupport {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
             } else {
                 cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
@@ -687,43 +695,48 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
         case .mapview:
             cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
-        case .group, .text:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
-        default:
+        case .input:
+            if [.date, .time, .datetime].contains(widget.inputHint) {
+                let pickerCell = tableView.dequeueReusableCell(for: indexPath) as DatePickerUITableViewCell
+                pickerCell.controller = self
+                cell = pickerCell
+            } else {
+                cell = tableView.dequeueReusableCell(for: indexPath) as TextInputUITableViewCell
+            }
+        case .group, .text, .defaultWidget, .unknown:
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
-        var iconColor = widget?.iconColor
-        if iconColor == nil || iconColor!.isEmpty, traitCollection.userInterfaceStyle == .dark {
+        var iconColor = widget.iconColor
+        if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
             iconColor = "white"
         }
         // No icon is needed for image, video, frame and web widgets
-        if widget?.icon != nil, !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
+        if !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
             if let urlc = Endpoint.icon(
                 rootUrl: openHABRootUrl,
                 version: appData?.openHABVersion ?? 2,
-                icon: widget?.icon,
-                state: widget?.iconState() ?? "",
+                icon: widget.icon,
+                state: widget.iconState(),
                 iconType: iconType,
-                iconColor: iconColor!
+                iconColor: iconColor
             ).url {
                 var imageRequest = URLRequest(url: urlc)
                 imageRequest.timeoutInterval = 10.0
-
-                let reportOnResults: ((Swift.Result<RetrieveImageResult, KingfisherError>) -> Void)? = { result in
-                    switch result {
-                    case let .success(value):
-                        os_log("Task done for: %{PUBLIC}@", log: .viewCycle, type: .info, value.source.url?.absoluteString ?? "")
-                    case let .failure(error):
-                        os_log("Job failed: %{PUBLIC}@", log: .viewCycle, type: .info, error.localizedDescription)
-                    }
-                }
                 cell.imageView?.kf.setImage(
                     with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
                     placeholder: nil,
-                    options: [.processor(OpenHABImageProcessor())],
-                    completionHandler: reportOnResults
-                )
+                    options: [.processor(OpenHABImageProcessor())]
+                ) { result in
+                    switch result {
+                    case .success:
+                        DispatchQueue.main.async {
+                            cell.setNeedsLayout()
+                        }
+                    case let .failure(error):
+                        os_log("Image loading failed: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
+                    }
+                }
             }
         }
 
@@ -744,7 +757,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             let nextWidget: OpenHABWidget? = relevantPage?.widgets[indexPath.row + 1]
             if let type = nextWidget?.type, type.isAny(of: .frame, .image, .video, .webview, .chart) {
                 cell.separatorInset = UIEdgeInsets.zero
-            } else if !(widget?.type == .frame) {
+            } else if !(widget.type == .frame) {
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 60, bottom: 0, right: 0)
             }
         }
@@ -795,6 +808,79 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)
         }
+
+        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else {
+            return
+        }
+
+        if widget.linkedPage != nil {
+            if let link = widget.linkedPage?.link {
+                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
+            }
+            let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
+            newViewController.title = widget.linkedPage?.title.components(separatedBy: "[")[0]
+            newViewController.pageUrl = widget.linkedPage?.link ?? ""
+            newViewController.openHABRootUrl = openHABRootUrl
+            navigationController?.pushViewController(newViewController, animated: true)
+        } else if widget.type == .selection {
+            let selectionItemState = widget.item?.state
+            logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
+            let hostingController = UIHostingController(rootView: SelectionView(
+                mappings: widget.mappingsOrItemOptions,
+                selectionItemState: selectionItemState,
+                onSelection: { selectedMappingIndex in
+                    let selectedMapping: OpenHABWidgetMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
+                    self.sendCommand(widget.item, commandToSend: selectedMapping.command)
+                }
+            ))
+            hostingController.title = widget.labelText
+            navigationController?.pushViewController(hostingController, animated: true)
+        } else if widget.type == .input {
+            let hint = widget.inputHint
+            let textExtractor: ((UIAlertController) -> String?)?
+            let textFieldAdder: ((UITextField) -> Void)?
+
+            switch hint {
+            case .date, .time, .datetime:
+                // value setting is handeled by the cell itself
+                textExtractor = nil
+                textFieldAdder = nil
+            case .number:
+                textFieldAdder = { textField in
+                    textField.text = widget.state
+                    textField.clearButtonMode = .always
+                    textField.delegate = self
+                    textField.keyboardType = .numbersAndPunctuation
+                }
+                // replace expected decimal separator
+                textExtractor = { $0.textFields?[0].text?.replacingOccurrences(of: NSLocale.current.decimalSeparator ?? "", with: ".") }
+            case .text:
+                textFieldAdder = { textField in
+                    textField.text = widget.state
+                    textField.clearButtonMode = .always
+                    textField.keyboardType = .default
+                }
+                textExtractor = { $0.textFields?[0].text }
+            }
+            guard let textExtractor, let textFieldAdder else {
+                return
+            }
+
+            // TODO: proper texts instead of hardcoded values
+            let alert = UIAlertController(
+                title: "Enter new value",
+                message: "Current value for \(widget.label) is \(widget.state)",
+                preferredStyle: .alert
+            )
+            alert.addTextField(configurationHandler: textFieldAdder)
+            let sendAction = UIAlertAction(title: "Set value", style: .destructive, handler: { [weak self] _ in
+                self?.sendCommand(widget.item, commandToSend: textExtractor(alert))
+            })
+            alert.addAction(sendAction)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            alert.preferredAction = sendAction
+            present(alert, animated: true)
+        }
     }
 
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -819,6 +905,40 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         }
 
         return nil
+    }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let decimalSeparator = NSLocale.current.decimalSeparator ?? ""
+        let oldString = (textField.text ?? "")
+        let wholeNumberRegex = /^-?[0-9]*$/
+
+        // check for deletion
+        return string.isEmpty
+            // check for new negative sign
+            || (
+                !string.starts(with: "-") // new string does not add negative sign
+                    || range.location == 0 // new string adds negative sign to beginning
+                    && (
+                        !oldString.starts(with: "-") // old string does not contain negative sign
+                            || range.length > 0
+                    )
+            ) // new string replaces negative sign in old string
+            // check for old negative sign
+            && (
+                oldString.isEmpty
+                    || !oldString.starts(with: "-") // old string does not start with negative sign
+                    || range.location > 0 // new string starts after negative sign in old string
+                    || range.length > 0
+            ) // new string replaces negative sign in old string
+            // check for decimal signs
+            && (
+                string.firstRange(of: wholeNumberRegex) != nil // new string is whole number
+                    || (
+                        string.replacing(decimalSeparator, with: "", maxReplacements: 1)
+                            .firstRange(of: wholeNumberRegex) != nil // new string is valid decimal number
+                            && !(oldString as NSString).replacingCharacters(in: range, with: "").contains(decimalSeparator)
+                    )
+            ) // old string without replaced range not yet contains decimal separator
     }
 }
 

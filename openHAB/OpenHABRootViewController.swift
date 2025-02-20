@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2024 Contributors to the openHAB project
+// Copyright (c) 2010-2025 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -8,6 +8,8 @@
 // http://www.eclipse.org/legal/epl-2.0
 //
 // SPDX-License-Identifier: EPL-2.0
+
+// swiftlint:disable body_length
 
 import Combine
 import FirebaseCrashlytics
@@ -36,6 +38,7 @@ struct CommandItem: CommItem {
     var link: String
 }
 
+// swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
@@ -100,8 +103,6 @@ class OpenHABRootViewController: UIViewController {
         isDemoMode = Preferences.demomode
         switchToSavedView()
         setupTracker()
-        // ready for push notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(handleApnsMessage(notification:)), name: .apnsReceived, object: nil)
         // check if we were launched with a notification
         if let userInfo = appData?.lastNotificationInfo {
             handleNotification(userInfo)
@@ -120,28 +121,79 @@ class OpenHABRootViewController: UIViewController {
     }
 
     fileprivate func setupTracker() {
-        Publishers.CombineLatest(
+        let serverInfo = Publishers.CombineLatest4(
             Preferences.$localUrl,
-            Preferences.$remoteUrl
+            Preferences.$remoteUrl,
+            Preferences.$username,
+            Preferences.$password
         )
-        .sink { (localUrl, remoteUrl) in
-            let connection1 = ConnectionObject(
-                url: localUrl,
-                priority: 0
-            )
-            let connection2 = ConnectionObject(
-                url: remoteUrl,
-                priority: 1
-            )
-            NetworkTracker.shared.startTracking(connectionObjects: [connection1, connection2])
-        }
-        .store(in: &cancellables)
+        .eraseToAnyPublisher()
 
-        NetworkTracker.shared.$activeServer
+        let misc = Publishers.CombineLatest3(
+            Preferences.$demomode,
+            Preferences.$alwaysSendCreds,
+            Preferences.$ignoreSSL
+        )
+        .eraseToAnyPublisher()
+
+        // Register for certificate trust notifications
+        NotificationCenter.default.addObserver(
+            forName: .evaluateServerTrust,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_invalid", comment: ""))
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .evaluateCertificateMismatch,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_no_match", comment: ""))
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .acceptedServerCertificatesChanged,
+            object: nil,
+            queue: nil
+        ) { _ in
+            WatchMessageService.singleton.syncPreferencesToWatch()
+            NetworkTracker.shared.restartTracking()
+        }
+
+        Publishers.CombineLatest(serverInfo, misc)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
+            .sink { (serverInfoTuple, miscTuple) in
+                let (localUrl, remoteUrl, username, password) = serverInfoTuple
+                let (demomode, alwaysSendCreds, ignoreSSL) = miscTuple
+                if demomode {
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [
+                        ConnectionConfiguration(
+                            url: "https://demo.openhab.org",
+                            priority: 0
+                        )
+                    ], username: "", password: "", alwaysSendBasicAuth: false, ignoreSSLVerification: true)
+                } else {
+                    let connection1 = ConnectionConfiguration(
+                        url: localUrl,
+                        priority: 0
+                    )
+                    let connection2 = ConnectionConfiguration(
+                        url: remoteUrl,
+                        priority: 1
+                    )
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: username, password: password, alwaysSendBasicAuth: alwaysSendCreds, ignoreSSLVerification: ignoreSSL)
+                }
+            }
+            .store(in: &cancellables)
+
+        NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] activeServer in
-                if let activeServer {
-                    self?.appData?.openHABRootUrl = activeServer.url
+            .sink { [weak self] activeConnection in
+                if let activeConnection {
+                    self?.appData?.openHABRootUrl = activeConnection.configuration.url
+                    self?.appData?.openHABVersion = activeConnection.version
                 }
             }
             .store(in: &cancellables)
@@ -265,33 +317,38 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    @objc func handleApnsMessage(notification: Notification) {
-        // actionIdentifier is the result of a action button being pressed
-        if let userInfo = notification.userInfo {
-            handleNotification(userInfo)
-        }
-    }
-
-    private func handleNotification(_ userInfo: [AnyHashable: Any]) {
+    func handleNotification(_ userInfo: [AnyHashable: Any], completionHandler: (() -> Void)? = nil) {
         // actionIdentifier is the result of a action button being pressed
         // if not actionIdentifier, then the notification was clicked, so use "on-click" if there
         if let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String {
             let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
             if action.hasPrefix("ui") {
-                uiCommandAction(cmd)
+                uiCommandAction(cmd, completionHandler: completionHandler)
             } else if action.hasPrefix("command") {
-                sendCommandAction(cmd)
+                sendCommandAction(cmd, completionHandler: completionHandler)
             } else if action.hasPrefix("http") {
-                httpCommandAction(action)
+                httpCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("app") {
-                appCommandAction(action)
+                appCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("rule") {
-                ruleCommandAction(action)
+                ruleCommandAction(action, completionHandler: completionHandler)
+            } else {
+                if let completionHandler {
+                    DispatchQueue.main.async {
+                        completionHandler()
+                    }
+                }
+            }
+        } else {
+            if let completionHandler {
+                DispatchQueue.main.async {
+                    completionHandler()
+                }
             }
         }
     }
 
-    private func uiCommandAction(_ command: String) {
+    private func uiCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
         let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
         if let firstMatch = command.firstMatch(of: regexPattern) {
@@ -303,8 +360,8 @@ class OpenHABRootViewController: UIViewController {
                 }
                 if let urlComponents = URLComponents(string: path) {
                     let queryItems = urlComponents.queryItems
-                    let sitemap = queryItems?.first(where: { $0.name == "sitemap" })?.value
-                    let subview = queryItems?.first(where: { $0.name == "w" })?.value
+                    let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
+                    let subview = queryItems?.first { $0.name == "w" }?.value
                     if let sitemap {
                         sitemapViewController.pushSitemap(name: sitemap, path: subview)
                     }
@@ -324,43 +381,87 @@ class OpenHABRootViewController: UIViewController {
         } else {
             os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func sendCommandAction(_ action: String) {
+    private func sendCommandAction(_ action: String, completionHandler: (() -> Void)? = nil) {
         let components = action.split(separator: ":")
         if components.count == 2 {
             let itemName = String(components[0])
             let itemCommand = String(components[1])
-            // This will only fire onece since we do not retain the return cancelable
-            _ = NetworkTracker.shared.$activeServer
-                .receive(on: DispatchQueue.main)
-                .sink { activeServer in
-                    if let openHABUrl = activeServer?.url {
-                        os_log("Sending comand", log: .default, type: .error)
-                        let client = HTTPClient(username: Preferences.username, password: Preferences.password)
-                        client.doPost(baseURLs: [openHABUrl], path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
-                            if let error {
-                                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                            } else {
-                                os_log("Request succeeded", log: .default, type: .info)
-                                if let data {
-                                    os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
-                                }
+            NetworkTracker.shared.waitForActiveConnection { activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                    os_log("Sending comand", log: .default, type: .error)
+                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                    client.doPost(baseURL: url, path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
+                        if let error {
+                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                            self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
+                        } else {
+                            os_log("Request succeeded", log: .default, type: .info)
+                            if let data {
+                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                            }
+                        }
+                        if let completionHandler {
+                            DispatchQueue.main.async {
+                                completionHandler()
                             }
                         }
                     }
+                } else {
+                    self.displayErrorNotification("Could not find server")
+                    if let completionHandler {
+                        DispatchQueue.main.async {
+                            completionHandler()
+                        }
+                    }
                 }
+            }
+            .store(in: &cancellables)
+        } else {
+            if let completionHandler {
+                DispatchQueue.main.async {
+                    completionHandler()
+                }
+            }
         }
     }
 
-    private func httpCommandAction(_ command: String) {
+    private func displayErrorNotification(_ message: String, completionHandler: (() -> Void)? = nil) {
+        let content = UNMutableNotificationContent()
+        content.title = "Could not send command"
+        content.body = message
+        content.sound = UNNotificationSound.default
+
+        // Create the request
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+
+        // Schedule the request with the notification center
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                print("Error scheduling notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func httpCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         if let url = URL(string: command) {
             let vc = SFSafariViewController(url: url)
             present(vc, animated: true)
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func appCommandAction(_ command: String) {
+    private func appCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         let content = command.dropFirst(4) // Remove "app:"
         let pairs = content.split(separator: ",")
         for pair in pairs {
@@ -374,9 +475,14 @@ class OpenHABRootViewController: UIViewController {
                 }
             }
         }
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
     }
 
-    private func ruleCommandAction(_ command: String) {
+    private func ruleCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         let components = command.split(separator: ":", maxSplits: 2)
 
         guard components.count == 3,
@@ -407,25 +513,36 @@ class OpenHABRootViewController: UIViewController {
             // nothing
         }
 
-        // This will only fire onece since we do not retain the return cancelable
-        _ = NetworkTracker.shared.$activeServer
-            .receive(on: DispatchQueue.main)
-            .sink { activeServer in
-                if let openHABUrl = activeServer?.url {
-                    os_log("Sending comand", log: .default, type: .error)
-                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
-                    client.doPost(baseURLs: [openHABUrl], path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
-                        if let error {
-                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                        } else {
-                            os_log("Request succeeded", log: .default, type: .info)
-                            if let data {
-                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
-                            }
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                os_log("Sending comand", log: .default, type: .error)
+                let client = HTTPClient(username: Preferences.username, password: Preferences.password)
+                client.doPost(baseURL: url, path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
+                    if let error {
+                        os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                        self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
+                    } else {
+                        os_log("Request succeeded", log: .default, type: .info)
+                        if let data {
+                            os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
+                        }
+                    }
+                    if let completionHandler {
+                        DispatchQueue.main.async {
+                            completionHandler()
                         }
                     }
                 }
+            } else {
+                self.displayErrorNotification("Could not find active server")
+                if let completionHandler {
+                    DispatchQueue.main.async {
+                        completionHandler()
+                    }
+                }
             }
+        }
+        .store(in: &cancellables)
     }
 
     func showSideMenu() {
@@ -491,6 +608,36 @@ class OpenHABRootViewController: UIViewController {
         } else {
             os_log("OpenHABRootViewController switchToSavedView %@", log: .viewCycle, type: .info, Preferences.defaultView == "sitemap" ? "sitemap" : "web")
             switchView(target: Preferences.defaultView == "sitemap" ? .sitemap("") : .webview)
+        }
+    }
+
+    @objc func handleCertificateTrust(_ notification: Notification, message: String) {
+        guard let summary = notification.userInfo?["summary"] as? String,
+              let domain = notification.userInfo?["domain"] as? String,
+              let client = notification.object as? HTTPClient else { return }
+        let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+        let message = String(format: NSLocalizedString(message, comment: ""), summary, domain)
+        DispatchQueue.main.async {
+            // Show alert to user
+            let alert = UIAlertController(
+                title: title,
+                message: message,
+                preferredStyle: .alert
+            )
+
+            alert.addAction(UIAlertAction(title: "Always", style: .default) { _ in
+                client.completeEvaluation(.permitAlways)
+            })
+
+            alert.addAction(UIAlertAction(title: "Once", style: .default) { _ in
+                client.completeEvaluation(.permitOnce)
+            })
+
+            alert.addAction(UIAlertAction(title: "Deny", style: .cancel) { _ in
+                client.completeEvaluation(.deny)
+            })
+
+            self.present(alert, animated: true)
         }
     }
 }

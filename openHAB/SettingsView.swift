@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2024 Contributors to the openHAB project
+// Copyright (c) 2010-2025 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -33,12 +33,15 @@ struct SettingsView: View {
     @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
     @State var settingsDefaultMainUIPath = ""
     @State var settingsAlwaysAllowWebRTC = true
+    @State var settingsSitemapForWatch = ""
 
     @State private var showingCacheAlert = false
     @State private var showCrashReportingAlert = false
     @State private var showUselastPathAlert = false
 
     @State private var hasBeenLoaded = false
+
+    @State private var sitemaps: [OpenHABSitemap] = []
 
     @Environment(\.dismiss) private var dismiss
 
@@ -154,6 +157,7 @@ struct SettingsView: View {
                     // Setting .onAppear of view required here because onAppear of entire view is run after onChange is active
                     // when migrating to iOS17 this
                     settingsSendCrashReports = Preferences.sendCrashReports
+//                    loadSitemaps()
                     hasBeenLoaded = true
                 }
                 .onChange(of: settingsSendCrashReports) { newValue in
@@ -260,7 +264,7 @@ struct SettingsView: View {
 
                 Picker(selection: $settingsIconType) {
                     ForEach(IconType.allCases, id: \.self) { icontype in
-                        Text("\(icontype)").tag(icontype)
+                        Text(verbatim: "\(icontype)").tag(icontype)
                     }
                 } label: {
                     Text("Icon Type")
@@ -268,10 +272,18 @@ struct SettingsView: View {
 
                 Picker(selection: $settingsSortSitemapsBy) {
                     ForEach(SortSitemapsOrder.allCases, id: \.self) { sortsitemaporder in
-                        Text("\(sortsitemaporder)").tag(sortsitemaporder)
+                        Text(verbatim: "\(sortsitemaporder)").tag(sortsitemaporder)
                     }
                 } label: {
                     Text("Sort sitemaps by")
+                }
+
+                Picker(selection: $settingsSitemapForWatch) {
+                    ForEach(sitemaps, id: \.name) { sitemap in
+                        Text(sitemap.label)
+                    }
+                } label: {
+                    Text("Sitemap For Apple Watch")
                 }
             }
 
@@ -344,6 +356,7 @@ struct SettingsView: View {
         settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
         settingsDefaultMainUIPath = Preferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.alwaysAllowWebRTC
+        settingsSitemapForWatch = Preferences.sitemapForWatch
     }
 
     func saveSettings() {
@@ -361,6 +374,7 @@ struct SettingsView: View {
         Preferences.sortSitemapsby = settingsSortSitemapsBy.rawValue
         Preferences.defaultMainUIPath = settingsDefaultMainUIPath
         Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+        Preferences.sitemapForWatch = settingsSitemapForWatch
         WatchMessageService.singleton.syncPreferencesToWatch()
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(settingsSendCrashReports)
         logger.debug("setCrashlyticsCollectionEnabled to \(settingsSendCrashReports)")

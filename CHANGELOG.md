@@ -4,6 +4,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [Version 3.0.7, Build 29] - 2024-10-31Z
+- Integration of new watch app
+- Handling of SVG files on watch app
+
+## [Version 3.0.6, Build 24] - 2024-10-30Z
+
+- Update SVGKit to fix crash on new iPhone models (#838)
+- Correct the bundle identifiers for test targets
+
 ## [Version 3.0.1, Build 5] - 2024-07-07Z
 
 - Prefer commandDescription options over stateDescription options if an item has them

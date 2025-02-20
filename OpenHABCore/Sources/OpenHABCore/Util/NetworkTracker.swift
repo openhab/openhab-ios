@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2024 Contributors to the openHAB project
+// Copyright (c) 2010-2025 Contributors to the openHAB project
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information.
@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
+import Combine
 import Foundation
 import Network
 import os.log
@@ -19,11 +19,9 @@ public enum NetworkStatus: String {
     case notConnected = "Not Connected"
     case connecting = "Connecting"
     case connected = "Connected"
-    case connectionFailed = "Connection Failed"
 }
 
-// Anticipating supporting more robust configuration options where we allow multiple url/user/pass options for users
-public struct ConnectionObject: Equatable {
+public struct ConnectionConfiguration: Equatable {
     public let url: String
     public let priority: Int // Lower is higher priority, 0 is primary
 
@@ -31,125 +29,158 @@ public struct ConnectionObject: Equatable {
         self.url = url
         self.priority = priority
     }
+}
 
-    public static func == (lhs: ConnectionObject, rhs: ConnectionObject) -> Bool {
-        lhs.url == rhs.url && lhs.priority == rhs.priority
-    }
+public struct ConnectionInfo: Equatable {
+    public let configuration: ConnectionConfiguration
+    public let version: Int
 }
 
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
-    @Published public private(set) var activeServer: ConnectionObject?
-    @Published public private(set) var status: NetworkStatus = .notConnected
+    @Published public private(set) var activeConnection: ConnectionInfo?
+    @Published public private(set) var status: NetworkStatus = .connecting
+    public private(set) var httpClient: HTTPClient?
 
-    private var monitor: NWPathMonitor
-    private var monitorQueue = DispatchQueue.global(qos: .background)
-    private var connectionObjects: [ConnectionObject] = []
-
+    private let monitor: NWPathMonitor
+    private let monitorQueue = DispatchQueue.global(qos: .background)
+    private var priorityWorkItem: DispatchWorkItem?
+    private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTimer: DispatchSourceTimer?
+    private let timerQueue = DispatchQueue(label: "com.openhab.networktracker.timerQueue")
+    private let connectedRetryInterval: TimeInterval = 60 // amount of time we scan for better connections when connected
+    private let disconnectedRetryInterval: TimeInterval = 30 // amount of time we scan when not connected
 
     private init() {
         monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { [weak self] path in
+            guard self?.httpClient != nil else { return }
             if path.status == .satisfied {
                 os_log("Network status: Connected", log: OSLog.default, type: .info)
-                self?.checkActiveServer()
+                self?.checkActiveConnection()
             } else {
                 os_log("Network status: Disconnected", log: OSLog.default, type: .info)
-                self?.updateStatus(.notConnected)
+                self?.setActiveConnection(nil)
                 self?.startRetryTimer(10) // try every 10 seconds connect
             }
         }
         monitor.start(queue: monitorQueue)
     }
 
-    public func startTracking(connectionObjects: [ConnectionObject]) {
-        self.connectionObjects = connectionObjects
+    public func startTracking(connectionConfigurations: [ConnectionConfiguration], username: String, password: String, alwaysSendBasicAuth: Bool, ignoreSSLVerification: Bool) {
+        os_log("NetworkConnection: startTracking", log: OSLog.default, type: .info)
+        self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
+        httpClient = HTTPClient(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
+        setActiveConnection(nil)
         attemptConnection()
     }
 
-    private func checkActiveServer() {
-        guard let activeServer, activeServer.priority == 0 else {
-            // No primary active server, proceed with the normal connection attempt
+    public func waitForActiveConnection(
+        perform action: @escaping (ConnectionInfo?) -> Void
+    ) -> AnyCancellable {
+        os_log("NetworkConnection: waitForActiveConnection", log: OSLog.default, type: .info)
+
+        return $activeConnection
+            .filter { $0 != nil } // Only proceed if activeConnection is not nil
+            .first() // Automatically cancels after the first non-nil value
+            .receive(on: DispatchQueue.main)
+            .sink { activeConnection in
+                action(activeConnection)
+            }
+    }
+
+    public func restartTracking() {
+        attemptConnection()
+    }
+
+    // This gets called periodically when we have an active connection to make sure it's still the best choice
+    private func checkActiveConnection() {
+        guard let activeConnection else {
+            // No active connection, proceed with the normal connection attempt
+            os_log("NetworkConnection: checkActiveConnection attemptConnection", log: OSLog.default, type: .info)
             attemptConnection()
             return
         }
-        // Check if the last active server is reachable
-        NetworkConnection.tracker(openHABRootUrl: activeServer.url) { [weak self] response in
-            switch response.result {
-            case .success:
-                os_log("Network status: Active server is reachable: %{PUBLIC}@", log: OSLog.default, type: .info, activeServer.url)
-                self?.updateStatus(.connected) // If reachable, we're done
-                self?.cancelRetryTimer()
-            case .failure:
-                os_log("Network status: Active server is not reachable: %{PUBLIC}@", log: OSLog.default, type: .error, activeServer.url)
-                self?.attemptConnection() // If not reachable, run the connection logic
+
+        // Check if the active connection is reachable
+        if let url = URL(string: activeConnection.configuration.url) {
+            os_log("checkActiveConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, url.absoluteString)
+
+            httpClient?.getServerProperties(baseURL: url) { [weak self] _, error in
+                if let error {
+                    os_log("Network status: Active connection is not reachable: %{PUBLIC}@ %{PUBLIC}@", log: OSLog.default, type: .error, activeConnection.configuration.url, error.localizedDescription)
+                    self?.attemptConnection() // If not reachable, run the connection logic
+                } else {
+                    os_log("Network status: Active connection is reachable: %{PUBLIC}@", log: OSLog.default, type: .info, activeConnection.configuration.url)
+                }
             }
         }
     }
 
     private func attemptConnection() {
-        guard !connectionObjects.isEmpty else {
-            os_log("Network status: No connection objects available.", log: OSLog.default, type: .error)
-            updateStatus(.notConnected)
+        guard !connectionConfigurations.isEmpty else {
+            os_log("Network status: No connection configurations available.", log: OSLog.default, type: .error)
+            setActiveConnection(nil)
             return
         }
-        os_log("Network status: checking available servers....", log: OSLog.default, type: .error)
+        priorityWorkItem?.cancel()
+        os_log("Network status: Checking available connections....", log: OSLog.default, type: .info)
         let dispatchGroup = DispatchGroup()
-        var highestPriorityConnection: ConnectionObject?
-        var firstAvailableConnection: ConnectionObject?
+        var highestPriorityConnection: ConnectionInfo?
+        var firstAvailableConnection: ConnectionInfo?
         var checkOutstanding = false // Track if there are any checks still in progress
 
         let priorityWaitTime: TimeInterval = 2.0
-        var priorityWorkItem: DispatchWorkItem?
 
         // Set up the work item to handle the 2-second timeout
         priorityWorkItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
             // After 2 seconds, if no high-priority connection was found, check for first available connection
             if let firstAvailableConnection, highestPriorityConnection == nil {
-                setActiveServer(firstAvailableConnection)
+                setActiveConnection(firstAvailableConnection)
             } else if highestPriorityConnection == nil, checkOutstanding {
-                os_log("Network status: No server responded in 2 seconds, waiting for checks to finish.", log: OSLog.default, type: .info)
+                os_log("Network status: No connection responded in 2 seconds, waiting for checks to finish.", log: OSLog.default, type: .info)
             } else {
-                os_log("Network status: No server responded in 2 seconds and no checks are outstanding.", log: OSLog.default, type: .error)
-                updateStatus(.connectionFailed)
+                os_log("Network status: No connection responded in 2 seconds and no checks are outstanding.", log: OSLog.default, type: .error)
+                setActiveConnection(nil)
             }
         }
 
-        // Begin checking each connection object in parallel
-        for connection in connectionObjects {
+        // Begin checking each connection configuration in parallel
+        for configuration in connectionConfigurations {
             dispatchGroup.enter()
             checkOutstanding = true // Signal that checks are outstanding
-
-            NetworkConnection.tracker(openHABRootUrl: connection.url) { [weak self] response in
-                guard let self else { return }
-                defer {
-                    dispatchGroup.leave() // When each check completes, this signals the group that it's done
-                }
-
-                switch response.result {
-                case let .success(data):
-                    let version = getServerInfoFromData(data: data)
-                    if version > 0 {
-                        if connection.priority == 0, highestPriorityConnection == nil {
-                            // Found a high-priority (0)  connection
-                            highestPriorityConnection = connection
-                            priorityWorkItem?.cancel() // Stop the 2-second wait if highest priority succeeds
-                            setActiveServer(connection)
-                        } else if highestPriorityConnection == nil {
-                            // Check if this connection has a higher priority than the current firstAvailableConnection
-                            if firstAvailableConnection == nil || connection.priority < firstAvailableConnection!.priority {
-                                os_log("Network status: Found a higher priority available connection: %{PUBLIC}@", log: OSLog.default, type: .info, connection.url)
-                                firstAvailableConnection = connection
-                            }
-                        }
-                    } else {
-                        os_log("Network status: Invalid server version from %{PUBLIC}@", log: OSLog.default, type: .error, connection.url)
+            os_log("attemptConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, configuration.url)
+            if let url = URL(string: configuration.url) {
+                httpClient?.getServerProperties(baseURL: url) { [weak self] props, error in
+                    guard let self else { return }
+                    defer {
+                        dispatchGroup.leave() // When each check completes, this signals the group that it's done
                     }
-                case let .failure(error):
-                    os_log("Network status: Failed to connect to %{PUBLIC}@ : %{PUBLIC}@", log: OSLog.default, type: .error, connection.url, error.localizedDescription)
+                    if let error {
+                        os_log("Network status: Failed to connect to %{PUBLIC}@ : %{PUBLIC}@", log: OSLog.default, type: .error, configuration.url, error.localizedDescription)
+                    } else {
+                        let version = Int(props?.version ?? "0")
+                        if let version, version > 1 {
+                            let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
+                            if configuration.priority == 0, highestPriorityConnection == nil {
+                                // Found a high-priority (0) connection
+                                highestPriorityConnection = connectionInfo
+                                priorityWorkItem?.cancel() // Stop the 2-second wait if highest priority succeeds
+                                setActiveConnection(connectionInfo)
+                            } else if highestPriorityConnection == nil {
+                                // Check if this connection has a higher priority than the current firstAvailableConnection
+                                let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
+                                if firstAvailableConnection == nil || configuration.priority < firstAvailableConnection!.configuration.priority {
+                                    os_log("Network status: Found a higher priority available connection: %{PUBLIC}@", log: OSLog.default, type: .info, configuration.url)
+                                    firstAvailableConnection = connectionInfo
+                                }
+                            }
+                        } else {
+                            os_log("Network status: Invalid server version from %{PUBLIC}@", log: OSLog.default, type: .error, configuration.url)
+                        }
+                    }
                 }
             }
         }
@@ -166,17 +197,17 @@ public final class NetworkTracker: ObservableObject {
 
             // If a high-priority connection was already established, we are done
             if let highestPriorityConnection {
-                os_log("Network status: High-priority connection established with %{PUBLIC}@", log: OSLog.default, type: .info, highestPriorityConnection.url)
+                os_log("Network status: High-priority connection established with %{PUBLIC}@", log: OSLog.default, type: .info, highestPriorityConnection.configuration.url)
                 return
             }
 
             // If we have an available connection and no high-priority connection, set the first available
             if let firstAvailableConnection {
-                setActiveServer(firstAvailableConnection)
-                os_log("Network status: First available connection established with %{PUBLIC}@", log: OSLog.default, type: .info, firstAvailableConnection.url)
+                setActiveConnection(firstAvailableConnection)
+                os_log("Network status: First available connection established with %{PUBLIC}@", log: OSLog.default, type: .info, firstAvailableConnection.configuration.url)
             } else {
-                os_log("Network status: No server responded, connection failed.", log: OSLog.default, type: .error)
-                updateStatus(.connectionFailed)
+                os_log("Network status: No connection responded, connection failed.", log: OSLog.default, type: .error)
+                setActiveConnection(nil)
             }
         }
     }
@@ -184,28 +215,36 @@ public final class NetworkTracker: ObservableObject {
     // Start the retry timer to attempt connection every N seconds
     private func startRetryTimer(_ retryInterval: TimeInterval) {
         cancelRetryTimer()
-        retryTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.global())
-        retryTimer?.schedule(deadline: .now() + retryInterval, repeating: retryInterval)
-        retryTimer?.setEventHandler { [weak self] in
-            os_log("Network status: Retry timer firing", log: OSLog.default, type: .info)
-            self?.attemptConnection()
+        timerQueue.sync {
+            retryTimer = DispatchSource.makeTimerSource(queue: timerQueue)
+            retryTimer?.schedule(deadline: .now() + retryInterval, repeating: retryInterval)
+            retryTimer?.setEventHandler { [weak self] in
+                os_log("Network status: Retry timer firing", log: OSLog.default, type: .info)
+                self?.attemptConnection()
+            }
+            retryTimer?.resume()
         }
-        retryTimer?.resume()
     }
 
-    // Cancel the retry timer
     private func cancelRetryTimer() {
-        retryTimer?.cancel()
-        retryTimer = nil
+        timerQueue.sync {
+            retryTimer?.cancel()
+            retryTimer = nil
+        }
     }
 
-    private func setActiveServer(_ server: ConnectionObject) {
-        os_log("Network status: setActiveServer: %{PUBLIC}@", log: OSLog.default, type: .info, server.url)
-        if activeServer != server {
-            activeServer = server
+    private func setActiveConnection(_ connection: ConnectionInfo?) {
+        os_log("Network status: setActiveConnection: %{PUBLIC}@", log: OSLog.default, type: .info, connection?.configuration.url ?? "no connection")
+        guard activeConnection != connection else { return }
+        activeConnection = connection
+        if activeConnection != nil {
+            updateStatus(.connected)
+            httpClient?.baseURL = URL(string: activeConnection!.configuration.url)
+            // startRetryTimer(connectedRetryInterval)
+        } else {
+            updateStatus(.notConnected)
+            startRetryTimer(disconnectedRetryInterval)
         }
-        updateStatus(.connected)
-        startRetryTimer(60) // check every 60 seconds to see if a better server is available.
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {
@@ -214,13 +253,19 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
-    private func getServerInfoFromData(data: Data) -> Int {
-        do {
-            let serverProperties = try data.decoded(as: OpenHABServerProperties.self)
-            // OH versions 2.0 through 2.4 return "1" as their version, so set the floor to 2 so we do not think this is an OH 1.x server
-            return max(2, Int(serverProperties.version) ?? 2)
-        } catch {
-            return -1
+    private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
+        configurations.map { configuration in
+            let updatedURL: String
+            if let urlComponents = URLComponents(string: configuration.url),
+               let host = urlComponents.host,
+               host.contains("myopenhab.org"), host != "home.myopenhab.org" {
+                var newComponents = urlComponents
+                newComponents.host = "home.myopenhab.org"
+                updatedURL = newComponents.url?.absoluteString ?? configuration.url
+            } else {
+                updatedURL = configuration.url
+            }
+            return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
         }
     }
 }
