@@ -9,8 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-// swiftlint:disable body_length
-
 import Combine
 import FirebaseCrashlytics
 import Foundation

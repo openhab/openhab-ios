@@ -16,24 +16,16 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
-// func deriveSitemaps(_ response: Data?) -> [OpenHABSitemap] {
-//    var sitemaps = [OpenHABSitemap]()
-//
-//    if let response {
-//        do {
-//            os_log("Response will be decoded by JSON", log: .remoteAccess, type: .info)
-//            let sitemapsCodingData = try response.decoded(as: [OpenHABSitemap.CodingData].self)
-//            for sitemapCodingDatum in sitemapsCodingData {
-//                os_log("Sitemap %{PUBLIC}@", log: .remoteAccess, type: .info, sitemapCodingDatum.label)
-//                sitemaps.append(sitemapCodingDatum.openHABSitemap)
-//            }
-//        } catch {
-//            os_log("Should not throw %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-//        }
-//    }
-//
-//    return sitemaps
-// }
+enum DrawerViewError: Error, CustomDebugStringConvertible {
+    case noRootURL
+
+    var debugDescription: String {
+        switch self {
+        case .noRootURL:
+            "No root URL"
+        }
+    }
+}
 
 struct ImageView: View {
     let url: String
@@ -275,9 +267,9 @@ struct DrawerView: View {
             let apiactor = await APIActor()
             Task {
                 do {
-                    guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                    guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw DrawerViewError.noRootURL }
                     await apiactor.updateBaseURL(with: url)
-                    
+
                     sitemaps = try await apiactor.openHABSitemaps()
                     if sitemaps.last?.name == "_default", sitemaps.count > 1 {
                         sitemaps = Array(sitemaps.dropLast())
@@ -296,9 +288,9 @@ struct DrawerView: View {
 
             Task {
                 do {
-                    guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                    guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw DrawerViewError.noRootURL }
                     await apiactor.updateBaseURL(with: url)
-                    
+
                     uiTiles = try await apiactor.openHABTiles()
                     os_log("ui tiles response", log: .viewCycle, type: .info)
                 } catch {
