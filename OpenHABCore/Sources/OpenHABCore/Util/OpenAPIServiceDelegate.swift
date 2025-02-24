@@ -17,6 +17,7 @@ import os
 class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     private let username: String
     private let password: String
+    private var authAttemptCounts = [URLSessionTask: Int]()
 
     init(username: String, password: String) {
         self.username = username
@@ -39,8 +40,8 @@ class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelega
             return await handleServerTrust(challenge: challenge)
         case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
             if let task {
-                task.authAttemptCount += 1
-                if task.authAttemptCount > 1 {
+                authAttemptCounts[task, default: 0] += 1
+                if authAttemptCounts[task]! > 1 {
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
                     return await handleBasicAuth(challenge: challenge)

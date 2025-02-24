@@ -57,6 +57,7 @@ public class HTTPClient: NSObject {
     private let ignoreSSL: Bool
     private var evaluateContinuation: CheckedContinuation<CertificateEvaluateResult, Never>?
     private var trustedCertificates: [String: Data] = [:]
+    private var authAttemptCounts = [URLSessionTask: Int]()
 
     public init(baseURL: URL? = nil, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
         self.baseURL = baseURL
@@ -431,8 +432,8 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
             return await handleServerTrust(challenge: challenge)
         case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
             if let task {
-                task.authAttemptCount += 1
-                if task.authAttemptCount > 1 {
+                authAttemptCounts[task, default: 0] += 1
+                if authAttemptCounts[task]! > 1 {
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
                     return await handleBasicAuth(challenge: challenge)
@@ -544,19 +545,6 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
         let certificateManager = ClientCertificateManager()
         let (disposition, credential) = certificateManager.evaluateTrust(with: challenge)
         return (disposition, credential)
-    }
-}
-
-extension URLSessionTask {
-    private static var authAttemptCountKey: UInt8 = 0
-
-    var authAttemptCount: Int {
-        get {
-            objc_getAssociatedObject(self, &URLSessionTask.authAttemptCountKey) as? Int ?? 0
-        }
-        set {
-            objc_setAssociatedObject(self, &URLSessionTask.authAttemptCountKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
     }
 }
 
