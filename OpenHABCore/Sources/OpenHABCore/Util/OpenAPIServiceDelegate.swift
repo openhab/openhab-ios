@@ -14,7 +14,7 @@ import os
 
 // MARK: - URLSessionDelegate for Client Certificates and Basic Auth
 
-class APIActorDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
+class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     private let username: String
     private let password: String
 

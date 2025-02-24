@@ -18,6 +18,8 @@ private enum HTTPClientError: Error {
     case serverTrustEvaluationFailed(reason: String)
     case noDataforItem
     case noDataForProperties
+    case baseURLIsNil
+    case httpError(Int)
 
     var debugDescription: String {
         switch self {
@@ -27,6 +29,10 @@ private enum HTTPClientError: Error {
             "server trust evaluation failed: \(reason)"
         case .noDataForProperties:
             "No data for properties"
+        case .baseURLIsNil:
+            "Base URL is nil"
+        case let .httpError(statusCode):
+            "HTTP error \(statusCode)"
         }
     }
 }
@@ -79,7 +85,7 @@ public class HTTPClient: NSObject {
      - response: The URL response object providing response metadata, such as HTTP headers and status code.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func doGet(baseURL: URL? = nil, path: String?, completion: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
+    public func doGet(baseURL: URL? = nil, path: String?, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
         doRequest(baseURL: baseURL, path: path, method: "GET") { result, response, error in
             let data = result as? Data
             completion(data, response, error)
@@ -244,7 +250,7 @@ public class HTTPClient: NSObject {
                           timeout: TimeInterval = 60.0, body: String? = nil, download: Bool = false, completion: @escaping (Any?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
         guard var url = baseURL ?? self.baseURL else {
             os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
-            completion(nil, nil, NSError(domain: "HTTPClient", code: -1, userInfo: [NSLocalizedDescriptionKey: "Base URL is nil"]))
+            completion(nil, nil, HTTPClientError.baseURLIsNil)
             return nil
         }
 
@@ -271,7 +277,7 @@ public class HTTPClient: NSObject {
             } else if let response = response as? HTTPURLResponse {
                 if (400 ... 599).contains(response.statusCode) {
                     os_log("HTTP error from URL %{public}@ : %{public}d", log: .networking, type: .error, url.absoluteString, response.statusCode)
-                    completion(nil, response, NSError(domain: "HTTPClient", code: response.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP error \(response.statusCode)"]))
+                    completion(nil, response, HTTPClientError.httpError(response.statusCode))
                 } else {
                     os_log("Response from URL %{public}@ : %{public}d", log: .networking, type: .info, url.absoluteString, response.statusCode)
                     completion(result, response, nil)

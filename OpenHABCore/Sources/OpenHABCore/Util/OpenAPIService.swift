@@ -24,19 +24,19 @@ public protocol OpenHABUiTileService {
 }
 
 public enum OpenAPIServiceError: Error {
-    case undocumented
+    case undocumented(statusCode: Swift.Int, undocumentedPayload: OpenAPIRuntime.UndocumentedPayload)
     case noRootURL
 }
 
 public actor OpenAPIService {
-    private var client: APIProtocol
+    private var client: Client
     private var url: URL?
     private var longPolling = false
     private var alwaysSendBasicAuth = false
     private var username: String
     private var password: String
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "apiactor")
+    private let logger = Logger(subsystem: "org.openhab.app", category: "OpenAPIService")
 
     public init(username: String = "", password: String = "", alwaysSendBasicAuth: Bool = true, url: URL = URL(staticString: "about:blank")) async {
         // TODO: Make use of prepareURLSessionConfiguration
@@ -44,7 +44,7 @@ public actor OpenAPIService {
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
 //        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
 
-        let delegate = APIActorDelegate(username: username, password: password)
+        let delegate = OpenAPIServiceDelegate(username: username, password: password)
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
         self.username = username
         self.password = password
@@ -69,36 +69,36 @@ public actor OpenAPIService {
     }
 
     public func updateBaseURL(with newURL: URL) async {
-        if newURL != url {
-            let config = prepareURLSessionConfiguration(longPolling: longPolling)
-            let session = URLSession(configuration: config)
-            url = newURL
-            client = Client(
-                serverURL: newURL.appending(path: "/rest"),
-                transport: URLSessionTransport(configuration: .init(session: session)),
-                middlewares: [
-                    AuthorisationMiddleware(username: username, password: password),
-                    LoggingMiddleware()
-                ]
-            )
-        }
+        guard newURL != url else { return }
+        url = newURL
+
+        let config = prepareURLSessionConfiguration(longPolling: longPolling)
+        let session = URLSession(configuration: config)
+        client = Client(
+            serverURL: newURL.appending(path: "/rest"),
+            transport: URLSessionTransport(configuration: .init(session: session)),
+            middlewares: [
+                AuthorisationMiddleware(username: username, password: password),
+                LoggingMiddleware()
+            ]
+        )
     }
 
     // timeoutIntervalForRequest/timeoutIntervalForResource need to be passed through URLSessionConfiguration when URLSession is created. Therefore create a new APIClient to change values.
     public func updateForLongPolling(_ newlongPolling: Bool) async {
-        if newlongPolling != longPolling {
-            let config = prepareURLSessionConfiguration(longPolling: longPolling)
-            let session = URLSession(configuration: config)
-            longPolling = newlongPolling
-            client = Client(
-                serverURL: url!.appending(path: "/rest"),
-                transport: URLSessionTransport(configuration: .init(session: session)),
-                middlewares: [
-                    AuthorisationMiddleware(username: username, password: password),
-                    LoggingMiddleware()
-                ]
-            )
-        }
+        guard newlongPolling != longPolling else { return }
+        longPolling = newlongPolling
+
+        let config = prepareURLSessionConfiguration(longPolling: longPolling)
+        let session = URLSession(configuration: config)
+        client = Client(
+            serverURL: url!.appending(path: "/rest"),
+            transport: URLSessionTransport(configuration: .init(session: session)),
+            middlewares: [
+                AuthorisationMiddleware(username: username, password: password),
+                LoggingMiddleware()
+            ]
+        )
     }
 }
 
@@ -108,9 +108,12 @@ extension OpenAPIService: OpenHABSitemapsService {
         guard let url else { throw OpenAPIServiceError.noRootURL }
 
         logger.log("Trying to getSitemaps for : \(url.debugDescription)")
-        switch try await client.getSitemaps(.init()) {
-        case let .ok(okresponse): return try okresponse.body.json.map(OpenHABSitemap.init)
-        case .undocumented: throw OpenAPIServiceError.undocumented
+        let response = try await client.getSitemaps(.init())
+        switch response {
+        case let .ok(okresponse):
+            return try okresponse.body.json.map(OpenHABSitemap.init)
+        case let .undocumented(statusCode, undocumentedPayload):
+            throw OpenAPIServiceError.undocumented(statusCode: statusCode, undocumentedPayload: undocumentedPayload)
         }
     }
 }

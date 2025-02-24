@@ -31,11 +31,17 @@ class OpenHABSVGTests: XCTestCase {
             let data = try Data(contentsOf: url!)
             let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
             let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
+
             XCTAssertEqual(parseResults?.parsedDocument, nil, "parsedDocument not empty though it was expected to be because XML is invalid")
             XCTAssertEqual(parseResults?.errorsFatal.count ?? 0, 0, "No errorsFatal expected")
-            XCTAssertEqual((parseResults?.warnings[0] as! NSError).localizedDescription, "xmlns: URI &ns_svg; is not absolute\n")
+
+            if let firstWarning = parseResults?.warnings.first as? Error {
+                XCTAssertEqual(firstWarning.localizedDescription, "xmlns: URI &ns_svg; is not absolute\n")
+            } else {
+                XCTFail("Expected a warning but found none or an unexpected type")
+            }
         } catch {
-            XCTFail("Whoops, an unexpected error occured while unit testing SVG rendering")
+            XCTFail("Whoops, an unexpected error occurred while unit testing SVG rendering: \(error)")
         }
     }
 
@@ -49,8 +55,11 @@ class OpenHABSVGTests: XCTestCase {
             let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
             XCTAssertNotEqual(parseResults?.parsedDocument, nil, "Non nil parsedDocument expected")
             XCTAssertNotEqual(parseResults?.errorsFatal.count, 0, "errorsFatal are 0")
-            let fatalError = parseResults?.errorsFatal[0] as! NSError
-            XCTAssertEqual(fatalError.localizedDescription, "Exception = Found an SVG <use> tag that points to a non-existent element. Missing element: id = e")
+            if let fatalError = parseResults?.errorsFatal.first as? Error {
+                XCTAssertEqual(fatalError.localizedDescription, "Exception = Found an SVG <use> tag that points to a non-existent element. Missing element: id = e")
+            } else {
+                XCTFail("Expected a fatal error but found none or an unexpected type")
+            }
         } catch {
             XCTFail("Whoops, an unexpected error occured while unit testing SVG rendering")
         }

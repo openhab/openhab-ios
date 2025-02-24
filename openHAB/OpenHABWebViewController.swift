@@ -349,10 +349,10 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         os_log("didFail - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
-        let nserror = error as NSError
-        if nserror.code != NSURLErrorCancelled {
-            pageLoadError(message: nserror.localizedDescription)
+        if let urlError = error as? URLError, urlError.code == .cancelled {
+            return // Ignore cancelled requests
         }
+        pageLoadError(message: error.localizedDescription)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

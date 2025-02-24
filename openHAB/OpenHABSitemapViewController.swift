@@ -116,7 +116,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         search.isActive && !searchBarIsEmpty
     }
 
-    private var apiactor: OpenAPIService?
+    private var openAPIService: OpenAPIService?
 
     @IBOutlet private var widgetTableView: UITableView!
 
@@ -128,7 +128,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
-        Task { await apiactor = OpenAPIService(username: openHABUsername, password: openHABPassword, alwaysSendBasicAuth: openHABAlwaysSendCreds, url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")) }
+        Task { await openAPIService = OpenAPIService(username: openHABUsername, password: openHABPassword, alwaysSendBasicAuth: openHABAlwaysSendCreds, url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")) }
 
         registerTableViewCells()
         configureTableView()
@@ -205,7 +205,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             }
             os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
         } else {
-            Task { await apiactor?.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!) }
+            Task { await openAPIService?.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!) }
             // we only want to our watcher to notify us about changes, and not the inital value
             activeServerWatcher = activeServerWatcher.dropFirst().eraseToAnyPublisher()
             if !pageNetworkStatusChanged() {
@@ -382,7 +382,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 //                    }
 //                }
 
-                currentPage = try await apiactor?.openHABpollPage(sitemapname: defaultSitemap, longPolling: longPolling)
+                currentPage = try await openAPIService?.openHABpollPage(sitemapname: defaultSitemap, longPolling: longPolling)
 
                 if isFiltering {
                     filterContentForSearchText(search.searchBar.text)
@@ -403,19 +403,25 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 loadPage(true)
             } catch let error as DecodingError {
                 os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                //            } catch let error as NSError where error.code == -1001 {
-                //                os_log("Timeout, restarting requests", log: OSLog.remoteAccess, type: .error)
-                //                loadPage(false)
-
             } catch {
                 os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription)
                 NetworkConnection.atmosphereTrackingId = ""
                 // Error
                 DispatchQueue.main.async {
-                    if (error as NSError?)?.code == -1012 {
-                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
+                    if let urlError = error as? URLError, urlError.code == .clientCertificateRejected {
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: NSLocalizedString("ssl_certificate_error", comment: ""),
+                            theme: .error
+                        )
                     } else {
-                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: error.localizedDescription,
+                            theme: .error
+                        )
                     }
                 }
             }
@@ -430,8 +436,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         Task {
             do {
                 logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
-                apiactor = await OpenAPIService(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
-                sitemaps = try await apiactor?.openHABSitemaps() ?? []
+                openAPIService = await OpenAPIService(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
+                sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
                 switch sitemaps.count {
                 case 2...:
@@ -458,15 +464,24 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 }
                 widgetTableView.reloadData()
             } catch _ as OpenAPIServiceError {
-                logger.debug("APIActorError on OpenHABSitemapViewController")
+                logger.debug("OpenAPIService Error on OpenHABSitemapViewController")
             } catch {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 DispatchQueue.main.async {
-                    // Error
-                    if (error as NSError?)?.code == -1012 {
-                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("ssl_certificate_error", comment: ""), theme: .error)
+                    if let urlError = error as? URLError, urlError.code == .clientCertificateRejected {
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: NSLocalizedString("ssl_certificate_error", comment: ""),
+                            theme: .error
+                        )
                     } else {
-                        self.showPopupMessage(seconds: 5, title: NSLocalizedString("error", comment: ""), message: error.localizedDescription, theme: .error)
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: error.localizedDescription,
+                            theme: .error
+                        )
                     }
                 }
             }
@@ -563,7 +578,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 
     func sendCommand(itemname: String, command: String) {
-        Task { try await apiactor?.openHABSendItemCommand(itemname: itemname, command: command) }
+        Task { try await openAPIService?.openHABSendItemCommand(itemname: itemname, command: command) }
     }
 
     override func reloadView() {
