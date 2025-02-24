@@ -116,7 +116,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         search.isActive && !searchBarIsEmpty
     }
 
-    private var apiactor: APIActor?
+    private var apiactor: OpenAPIService?
 
     @IBOutlet private var widgetTableView: UITableView!
 
@@ -128,7 +128,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
-        Task { await apiactor = APIActor(username: openHABUsername, password: openHABPassword, alwaysSendBasicAuth: openHABAlwaysSendCreds, url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")) }
+        Task { await apiactor = OpenAPIService(username: openHABUsername, password: openHABPassword, alwaysSendBasicAuth: openHABAlwaysSendCreds, url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")) }
 
         registerTableViewCells()
         configureTableView()
@@ -430,7 +430,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         Task {
             do {
                 logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
-                apiactor = await APIActor(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
+                apiactor = await OpenAPIService(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
                 sitemaps = try await apiactor?.openHABSitemaps() ?? []
 
                 switch sitemaps.count {
@@ -457,7 +457,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 default: break
                 }
                 widgetTableView.reloadData()
-            } catch _ as APIActorError {
+            } catch _ as OpenAPIServiceError {
                 logger.debug("APIActorError on OpenHABSitemapViewController")
             } catch {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)

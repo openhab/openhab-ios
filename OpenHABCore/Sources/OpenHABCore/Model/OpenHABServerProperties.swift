@@ -12,16 +12,16 @@
 import Foundation
 
 public class OpenHABServerProperties: Decodable {
-    class OpenHABLink: Decodable {
-        public var type = ""
-        public var url = ""
-    }
-
-    public let version: String
+    public let version: String?
     let links: [OpenHABLink]
 
     public var habPanelUrl: String? {
         linkUrl(byType: "habpanel")
+    }
+
+    init(version: String?, links: [OpenHABLink]) {
+        self.version = version
+        self.links = links
     }
 
     public func linkUrl(byType type: String?) -> String? {
@@ -30,5 +30,14 @@ public class OpenHABServerProperties: Decodable {
         } else {
             nil
         }
+    }
+}
+
+extension OpenHABServerProperties {
+    convenience init(_ rootBean: Components.Schemas.RootBean) {
+        self.init(
+            version: rootBean.version,
+            links: rootBean.links?.compactMap { OpenHABLink($0) } ?? []
+        )
     }
 }

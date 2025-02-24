@@ -16,6 +16,19 @@ private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient
 
 private enum HTTPClientError: Error {
     case serverTrustEvaluationFailed(reason: String)
+    case noDataforItem
+    case noDataForProperties
+
+    var debugDescription: String {
+        switch self {
+        case .noDataforItem:
+            "No data for item"
+        case let .serverTrustEvaluationFailed(reason):
+            "server trust evaluation failed: \(reason)"
+        case .noDataForProperties:
+            "No data for properties"
+        }
+    }
 }
 
 public class HTTPClient: NSObject {
@@ -121,7 +134,7 @@ public class HTTPClient: NSObject {
      - item: An `OpenHABItem` object returned by the server. This will be `nil` if the request fails.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func getItem(baseURL: URL? = nil, itemName: String, completion: @escaping (OpenHABItem?, Error?) -> Void) -> URLSessionTask? {
+    public func getItem(baseURL: URL? = nil, itemName: String, completion: @escaping (OpenHABItem?, Error?) -> Void) {
         doGet(baseURL: baseURL, path: "/rest/items/\(itemName)") { data, _, error in
             if let error {
                 completion(nil, error)
@@ -133,7 +146,7 @@ public class HTTPClient: NSObject {
                         let item = try data.decoded(as: OpenHABItem.CodingData.self, using: decoder)
                         completion(item.openHABItem, nil)
                     } else {
-                        completion(nil, NSError(domain: "HTTPClient", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data for item"]))
+                        completion(nil, HTTPClientError.noDataforItem)
                     }
                 } catch {
                     os_log("getItemsInternal ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))
@@ -143,7 +156,7 @@ public class HTTPClient: NSObject {
         }
     }
 
-    public func getServerProperties(baseURL: URL? = nil, completion: @escaping (OpenHABServerProperties?, Error?) -> Void) -> URLSessionTask? {
+    public func getServerProperties(baseURL: URL? = nil, completion: @escaping (OpenHABServerProperties?, Error?) -> Void) {
         doGet(baseURL: baseURL, path: "/rest/") { data, _, error in
             if let error {
                 completion(nil, error)
@@ -155,7 +168,7 @@ public class HTTPClient: NSObject {
                         let properties = try data.decoded(as: OpenHABServerProperties.self, using: decoder)
                         completion(properties, nil)
                     } else {
-                        completion(nil, NSError(domain: "HTTPClient", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data for properties"]))
+                        completion(nil, HTTPClientError.noDataForProperties)
                     }
                 } catch {
                     os_log("getServerProperties ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))

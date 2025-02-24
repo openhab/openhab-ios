@@ -20,20 +20,21 @@ public protocol OpenHABSitemapsService {
 }
 
 public protocol OpenHABUiTileService {
-    func openHABTiles() async throws -> [OpenHABUiTile]
+    func getUITiles() async throws -> [OpenHABUiTile]
 }
 
-public enum APIActorError: Error {
+public enum OpenAPIServiceError: Error {
     case undocumented
+    case noRootURL
 }
 
-public actor APIActor {
-    var api: APIProtocol
-    var url: URL?
-    var longPolling = false
-    var alwaysSendBasicAuth = false
-    var username: String
-    var password: String
+public actor OpenAPIService {
+    private var client: APIProtocol
+    private var url: URL?
+    private var longPolling = false
+    private var alwaysSendBasicAuth = false
+    private var username: String
+    private var password: String
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "apiactor")
 
@@ -50,7 +51,7 @@ public actor APIActor {
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
         self.url = url
 
-        api = Client(
+        client = Client(
             serverURL: url.appending(path: "/rest"),
             transport: URLSessionTransport(configuration: .init(session: session)),
             middlewares: [
@@ -72,7 +73,7 @@ public actor APIActor {
             let config = prepareURLSessionConfiguration(longPolling: longPolling)
             let session = URLSession(configuration: config)
             url = newURL
-            api = Client(
+            client = Client(
                 serverURL: newURL.appending(path: "/rest"),
                 transport: URLSessionTransport(configuration: .init(session: session)),
                 middlewares: [
@@ -89,7 +90,7 @@ public actor APIActor {
             let config = prepareURLSessionConfiguration(longPolling: longPolling)
             let session = URLSession(configuration: config)
             longPolling = newlongPolling
-            api = Client(
+            client = Client(
                 serverURL: url!.appending(path: "/rest"),
                 transport: URLSessionTransport(configuration: .init(session: session)),
                 middlewares: [
@@ -101,29 +102,48 @@ public actor APIActor {
     }
 }
 
-extension APIActor: OpenHABSitemapsService {
+extension OpenAPIService: OpenHABSitemapsService {
     public func openHABSitemaps() async throws -> [OpenHABSitemap] {
         // swiftformat:disable:next redundantSelf
-        logger.log("Trying to getSitemaps for : \(self.url?.debugDescription ?? "No URL")")
-        switch try await api.getSitemaps(.init()) {
+        guard let url else { throw OpenAPIServiceError.noRootURL }
+
+        logger.log("Trying to getSitemaps for : \(url.debugDescription)")
+        switch try await client.getSitemaps(.init()) {
         case let .ok(okresponse): return try okresponse.body.json.map(OpenHABSitemap.init)
-        case .undocumented: throw APIActorError.undocumented
+        case .undocumented: throw OpenAPIServiceError.undocumented
         }
     }
 }
 
-extension APIActor: OpenHABUiTileService {
-    public func openHABTiles() async throws -> [OpenHABUiTile] {
-        try await api.getUITiles(.init())
+extension OpenAPIService: OpenHABUiTileService {
+    public func getUITiles() async throws -> [OpenHABUiTile] {
+        try await client.getUITiles(.init())
             .ok.body.json
             .map(OpenHABUiTile.init)
     }
 }
 
-public extension APIActor {
+public extension OpenAPIService {
+    func getRoot() async throws -> OpenHABServerProperties {
+        let result = try await client.getRoot()
+            .ok.body.json
+        return OpenHABServerProperties(result)
+    }
+}
+
+public extension OpenAPIService {
+    func getItemByName(id: String) async throws -> OpenHABItem? {
+        let path = Operations.getItemByName.Input.Path(itemname: id)
+        let result = try await client.getItemByName(path: path)
+            .ok.body.json
+        return OpenHABItem(result)
+    }
+}
+
+public extension OpenAPIService {
     func openHABcreateSubscription() async throws -> String? {
         logger.info("Creating subscription")
-        let result = try await api.createSitemapEventSubscription()
+        let result = try await client.createSitemapEventSubscription()
         guard let urlString = try result.ok.body.json.context?.headers?.Location?.first else { return nil }
         return URL(string: urlString)?.lastPathComponent
     }
@@ -132,19 +152,19 @@ public extension APIActor {
     func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> AsyncCompactMapSequence<AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<Components.Schemas.SitemapWidgetEvent>>, OpenHABSitemapWidgetEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-        let decodedSequence = try await api.getSitemapEvents_1(path: path, query: query)
+        let decodedSequence = try await client.getSitemapEvents_1(path: path, query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
         return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
     }
 }
 
-extension APIActor {
+extension OpenAPIService {
     // Internal function for pollPage
     func openHABpollPage(path: Operations.pollDataForPage.Input.Path,
                          query: Operations.pollDataForPage.Input.Query = .init(),
                          headers: Operations.pollDataForPage.Input.Headers) async throws -> OpenHABPage? {
-        let result = try await api.pollDataForPage(path: path, query: query, headers: headers)
+        let result = try await client.pollDataForPage(path: path, query: query, headers: headers)
             .ok.body.json
         return OpenHABPage(result)
     }
@@ -170,7 +190,7 @@ extension APIActor {
     func openHABpollSitemap(path: Operations.pollDataForSitemap.Input.Path,
                             query: Operations.pollDataForSitemap.Input.Query = .init(),
                             headers: Operations.pollDataForSitemap.Input.Headers) async throws -> OpenHABSitemap? {
-        let result = try await api.pollDataForSitemap(path: path, query: query, headers: headers)
+        let result = try await client.pollDataForSitemap(path: path, query: query, headers: headers)
             .ok.body.json
         return OpenHABSitemap(result)
     }
@@ -192,18 +212,18 @@ extension APIActor {
 
 // MARK: State changes and commands
 
-public extension APIActor {
+public extension OpenAPIService {
     func openHABUpdateItemState(itemname: String, with state: String) async throws {
         let path = Operations.updateItemState.Input.Path(itemname: itemname)
         let body = Operations.updateItemState.Input.Body.plainText(.init(state))
-        let response = try await api.updateItemState(path: path, body: body)
+        let response = try await client.updateItemState(path: path, body: body)
         _ = try response.accepted
     }
 
     func openHABSendItemCommand(itemname: String, command: String) async throws {
         let path = Operations.sendItemCommand.Input.Path(itemname: itemname)
         let body = Operations.sendItemCommand.Input.Body.plainText(.init(command))
-        let response = try await api.sendItemCommand(path: path, body: body)
+        let response = try await client.sendItemCommand(path: path, body: body)
         _ = try response.ok
     }
 }

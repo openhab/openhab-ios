@@ -264,13 +264,13 @@ struct DrawerView: View {
         }
         .listStyle(.inset)
         .task {
-            let apiactor = await APIActor()
+            let openAPIService = await OpenAPIService()
             Task {
                 do {
                     guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw DrawerViewError.noRootURL }
-                    await apiactor.updateBaseURL(with: url)
+                    await openAPIService.updateBaseURL(with: url)
 
-                    sitemaps = try await apiactor.openHABSitemaps()
+                    sitemaps = try await openAPIService.openHABSitemaps()
                     if sitemaps.last?.name == "_default", sitemaps.count > 1 {
                         sitemaps = Array(sitemaps.dropLast())
                     }
@@ -289,9 +289,9 @@ struct DrawerView: View {
             Task {
                 do {
                     guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw DrawerViewError.noRootURL }
-                    await apiactor.updateBaseURL(with: url)
+                    await openAPIService.updateBaseURL(with: url)
 
-                    uiTiles = try await apiactor.openHABTiles()
+                    uiTiles = try await openAPIService.getUITiles()
                     os_log("ui tiles response", log: .viewCycle, type: .info)
                 } catch {
                     os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
