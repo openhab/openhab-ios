@@ -196,11 +196,25 @@ public class HTTPClient: NSObject {
      - response: The URL response object providing response metadata, such as HTTP headers and status code.
      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
      */
-    public func downloadFile(url: URL, completionHandler: @escaping @Sendable (URL?, URLResponse?, (any Error)?) -> Void) -> URLSessionTask? {
+    public func downloadFile(url: URL, completionHandler: @escaping @Sendable (URL?, URLResponse?, (any Error)?) -> Void) {
         doRequest(baseURL: url, path: nil, method: "GET", download: true) { result, response, error in
             let fileURL = result as? URL
             completionHandler(fileURL, response, error)
         }
+    }
+
+    public func downloadFile(url: URL) async throws -> (URL, URLResponse) {
+        let (result, response) = try await doRequest(baseURL: url, path: nil, method: "GET", download: true)
+
+        let fileURL = result as? URL
+
+        guard let fileURL1 = fileURL else {
+            fatalError("Expected non-nil result 'fileURL1' in the non-error case")
+        }
+        guard let response1 = response else {
+            fatalError("Expected non-nil result 'response1' in the non-error case")
+        }
+        return (fileURL1, response1)
     }
 
     public func sendCommand(url: URL? = nil, itemName: String, command: String, completion: @escaping (String?, Error?) -> Void) -> URLSessionTask? {
@@ -287,6 +301,48 @@ public class HTTPClient: NSObject {
         }
     }
 
+    public func doRequest(baseURL: URL?,
+                          path: String?,
+                          method: String,
+                          headers: [String: String]? = nil,
+                          timeout: TimeInterval = 60.0,
+                          body: String? = nil,
+                          download: Bool = false) async throws -> (Any?, URLResponse?) {
+        guard var url = baseURL ?? self.baseURL else {
+            os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
+            throw HTTPClientError.baseURLIsNil
+        }
+
+        if let path {
+            url.appendPathComponent(path)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.timeoutInterval = timeout
+        if let headers {
+            for (key, value) in headers {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
+        if let body {
+            request.httpBody = body.data(using: .utf8)
+            request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
+        }
+
+        let (result, response) = try await performRequest(request: request, download: download)
+        if let response = response as? HTTPURLResponse {
+            if (400 ... 599).contains(response.statusCode) {
+                os_log("HTTP error from URL %{public}@ : %{public}d", log: .networking, type: .error, url.absoluteString, response.statusCode)
+                throw HTTPClientError.httpError(response.statusCode)
+            } else {
+                os_log("Response from URL %{public}@ : %{public}d", log: .networking, type: .info, url.absoluteString, response.statusCode)
+                return (result, response)
+            }
+        }
+        fatalError()
+    }
+
     private func performRequest(request: URLRequest, download: Bool, completion: @escaping (Any?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
         var request = request
         if alwaysSendBasicAuth {
@@ -306,8 +362,6 @@ public class HTTPClient: NSObject {
         return task
     }
 
-    @available(watchOS 8.0, *)
-    @available(iOS 15.0, *)
     private func performRequest(request: URLRequest, download: Bool) async throws -> (Any?, URLResponse?) {
         var request = request
         if alwaysSendBasicAuth {

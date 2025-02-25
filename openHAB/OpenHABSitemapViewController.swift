@@ -128,7 +128,14 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
-        Task { await openAPIService = OpenAPIService(username: openHABUsername, password: openHABPassword, alwaysSendBasicAuth: openHABAlwaysSendCreds, url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")) }
+        Task {
+            await openAPIService = OpenAPIService(
+                username: openHABUsername,
+                password: openHABPassword,
+                alwaysSendBasicAuth: openHABAlwaysSendCreds,
+                url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")
+            )
+        }
 
         registerTableViewCells()
         configureTableView()

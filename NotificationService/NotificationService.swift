@@ -16,6 +16,29 @@ import os.log
 import UniformTypeIdentifiers
 import UserNotifications
 
+enum NotificationServiceError: Error {
+    case unknown
+    case noScheme(String?)
+    case failedToParse
+    case failedToDecode
+    case handleNotificationCouldNotAttach
+
+    var localizedDescription: String {
+        switch self {
+        case .unknown:
+            "Unknown error"
+        case let .noScheme(searched):
+            "Could not find scheme \(searched ?? "<none>")"
+        case .failedToParse:
+            "Failed to parse JSON"
+        case .failedToDecode:
+            "Failed to decode base64 string to Data"
+        case .handleNotificationCouldNotAttach:
+            "HandleNotification could not attach"
+        }
+    }
+}
+
 class NotificationService: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
@@ -24,79 +47,96 @@ class NotificationService: UNNotificationServiceExtension {
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        if let bestAttemptContent {
-            var notificationActions: [UNNotificationAction] = []
-            let userInfo = bestAttemptContent.userInfo
+        guard let bestAttemptContent else { return }
 
-            os_log("didReceive userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
+        var notificationActions: [UNNotificationAction] = []
+        let userInfo = bestAttemptContent.userInfo
 
-            if let title = userInfo["title"] as? String {
-                bestAttemptContent.title = title
-            }
-            if let message = userInfo["message"] as? String {
-                bestAttemptContent.body = message
-            }
+        os_log("didReceive userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
 
-            // Check if the user has defined custom actions in the payload
-            if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
-                for actionDict in actionsArray {
-                    if let action = actionDict["action"],
-                       let title = actionDict["title"] {
-                        var options: UNNotificationActionOptions = []
-                        // navigate/browser options need to bring the app to the foreground
-                        if action.hasPrefix("ui") || action.hasPrefix("http") || action.hasPrefix("app") {
-                            options = [.foreground]
-                        }
-                        let notificationAction = UNNotificationAction(
-                            identifier: action,
-                            title: title,
-                            options: options
-                        )
-                        notificationActions.append(notificationAction)
+        if let title = userInfo["title"] as? String {
+            bestAttemptContent.title = title
+        }
+        if let message = userInfo["message"] as? String {
+            bestAttemptContent.body = message
+        }
+
+        // Check if the user has defined custom actions in the payload
+        if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
+            for actionDict in actionsArray {
+                if let action = actionDict["action"],
+                   let title = actionDict["title"] {
+                    var options: UNNotificationActionOptions = []
+                    // navigate/browser options need to bring the app to the foreground
+                    if action.hasPrefix("ui") || action.hasPrefix("http") || action.hasPrefix("app") {
+                        options = [.foreground]
                     }
-                }
-                if !notificationActions.isEmpty {
-                    os_log("didReceive registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
-                    let notificationCategory =
-                        UNNotificationCategory(
-                            identifier: category,
-                            actions: notificationActions,
-                            intentIdentifiers: [],
-                            options: .customDismissAction
-                        )
-                    UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
-                        var updatedCategories = existingCategories
-                        os_log("handleNotification adding category %{PUBLIC}@", log: .default, type: .info, category)
-                        updatedCategories.insert(notificationCategory)
-                        UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
-                    }
+                    let notificationAction = UNNotificationAction(
+                        identifier: action,
+                        title: title,
+                        options: options
+                    )
+                    notificationActions.append(notificationAction)
                 }
             }
+            if !notificationActions.isEmpty {
+                os_log("didReceive registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
+                let notificationCategory =
+                    UNNotificationCategory(
+                        identifier: category,
+                        actions: notificationActions,
+                        intentIdentifiers: [],
+                        options: .customDismissAction
+                    )
+                UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
+                    var updatedCategories = existingCategories
+                    os_log("handleNotification adding category %{PUBLIC}@", log: .default, type: .info, category)
+                    updatedCategories.insert(notificationCategory)
+                    UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
+                }
+            }
+        }
 
-            // check if there is an attachment to put on the notification
-            // this should be last as we need to wait for media
-            // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
-            if let attachmentURLString = userInfo["media-attachment-url"] as? String {
-                let isItem = attachmentURLString.starts(with: "item:")
+        // check if there is an attachment to put on the notification
+        // this should be last as we need to wait for media
+        // TODO: we should support relative paths and try the user's openHAB (local,remote) for content
+        if let attachmentURLString = userInfo["media-attachment-url"] as? String {
+            /// HERE we switch  to async usage
+//            let downloadCompletionHandler: @Sendable (UNNotificationAttachment?) -> Void = { attachment in
+//                if let attachment {
+//                    os_log("handleNotification attaching %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+//                    bestAttemptContent.attachments = [attachment]
+//                } else {
+//                    os_log("handleNotification could not attach %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+//                }
+//                contentHandler(bestAttemptContent)
+//            }
 
-                let downloadCompletionHandler: @Sendable (UNNotificationAttachment?) -> Void = { attachment in
-                    if let attachment {
-                        os_log("handleNotification attaching %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
-                        bestAttemptContent.attachments = [attachment]
+//            if attachmentURLString.starts(with: "item:") {
+//                downloadAndAttachItemImage(itemURI: attachmentURLString, completion: downloadCompletionHandler)
+//            } else {
+//                downloadAndAttachMedia(url: attachmentURLString, completion: downloadCompletionHandler)
+//            }
+            Task {
+                do {
+                    let unNotificationAttachment = if attachmentURLString.starts(with: "item:") {
+                        try await downloadAndAttachItemImage(itemURI: attachmentURLString)
                     } else {
-                        os_log("handleNotification could not attach %{PUBLIC}@", log: .default, type: .info, attachmentURLString)
+                        try await downloadAndAttachMedia(url: attachmentURLString)
                     }
-                    contentHandler(bestAttemptContent)
+                    if let unNotificationAttachment {
+                        bestAttemptContent.attachments = [unNotificationAttachment]
+                    } else {
+                        throw NotificationServiceError.handleNotificationCouldNotAttach
+                    }
+                } catch {
+                    os_log("Error fetching data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 }
-
-                if isItem {
-                    downloadAndAttachItemImage(itemURI: attachmentURLString, completion: downloadCompletionHandler)
-                } else {
-                    downloadAndAttachMedia(url: attachmentURLString, completion: downloadCompletionHandler)
-                }
-            } else {
                 contentHandler(bestAttemptContent)
             }
+
+        } else {
+            contentHandler(bestAttemptContent)
         }
     }
 
@@ -164,6 +204,35 @@ class NotificationService: UNNotificationServiceExtension {
         }
     }
 
+    // Async version
+    private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
+        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+        if url.starts(with: "/") {
+            let connection1 = ConnectionConfiguration(
+                url: Preferences.localUrl,
+                priority: 0
+            )
+            let connection2 = ConnectionConfiguration(
+                url: Preferences.remoteUrl,
+                priority: 1
+            )
+            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
+            NetworkTracker.shared.waitForActiveConnection { activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url, let uurl = URL(string: openHABUrl) {
+                    Task {
+                        let (url, urlResponse) = try await client.downloadFile(url: uurl.appendingPathComponent(url))
+                        return await self.attachFile(localURL: url, mimeType: urlResponse.mimeType)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        } else if let uurl = URL(string: url) {
+            let (url, urlResponse) = try await client.downloadFile(url: uurl.appendingPathComponent(url))
+            return await attachFile(localURL: url, mimeType: urlResponse.mimeType)
+        }
+        return nil
+    }
+
     func downloadAndAttachItemImage(itemURI: String, completion: @escaping (UNNotificationAttachment?) -> Void) {
         guard let itemURI = URL(string: itemURI), let scheme = itemURI.scheme else {
             os_log("Could not find scheme %{PUBLIC}@", log: .default, type: .info)
@@ -223,6 +292,63 @@ class NotificationService: UNNotificationServiceExtension {
         .store(in: &cancellables)
     }
 
+    // Async version
+    func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
+        guard let itemURI = URL(string: itemURI), let scheme = itemURI.scheme else {
+            throw NotificationServiceError.noScheme(itemURI)
+        }
+
+        let itemName = String(itemURI.absoluteString.dropFirst(scheme.count + 1))
+
+        let connection1 = ConnectionConfiguration(
+            url: Preferences.localUrl,
+            priority: 0
+        )
+        let connection2 = ConnectionConfiguration(
+            url: Preferences.remoteUrl,
+            priority: 1
+        )
+        NetworkTracker.shared.startTracking(
+            connectionConfigurations: [connection1, connection2],
+            username: Preferences.username,
+            password: Preferences.password,
+            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
+            ignoreSSLVerification: Preferences.ignoreSSL
+        )
+
+        return try await withCheckedThrowingContinuation { _ in
+            NetworkTracker.shared.waitForActiveConnection { [self] activeConnection in
+                if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                    Task {
+                        let client = await OpenAPIService(
+                            username: Preferences.username,
+                            password: Preferences.password,
+                            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
+                            url: url
+                        )
+                        let item = try await client.getItemByName(id: itemName)
+                        guard let state = item?.state else { return nil as UNNotificationAttachment? }
+
+                        // Extract MIME type and base64 string
+                        let pattern = /^data:(.*?);base64,(.*)$/
+                        guard let firstMatch = state.firstMatch(of: pattern) else { throw NotificationServiceError.failedToParse }
+
+                        let mimeType = String(firstMatch.1)
+                        let base64String = String(firstMatch.2)
+                        guard let imageData = Data(base64Encoded: base64String) else { throw NotificationServiceError.failedToDecode }
+                        // Create a temporary file URL
+                        let tempDirectory = FileManager.default.temporaryDirectory
+                        let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
+                        try imageData.write(to: tempFileURL)
+                        os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
+                        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        }
+    }
+
     func attachFile(localURL: URL, mimeType: String?, completion: @escaping (UNNotificationAttachment?) -> Void) {
         do {
             let fileManager = FileManager.default
@@ -248,5 +374,32 @@ class NotificationService: UNNotificationServiceExtension {
             os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
         }
         completion(nil)
+    }
+
+    // Async version
+    func attachFile(localURL: URL, mimeType: String?) async -> UNNotificationAttachment? {
+        do {
+            let fileManager = FileManager.default
+            let tempDirectory = NSTemporaryDirectory()
+            let tempFile = URL(fileURLWithPath: tempDirectory).appendingPathComponent(UUID().uuidString)
+
+            try fileManager.moveItem(at: localURL, to: tempFile)
+            let attachment: UNNotificationAttachment?
+
+            if let mimeType,
+               let utType = UTType(mimeType: mimeType),
+               utType.conforms(to: .data) {
+                let newTempFile = tempFile.appendingPathExtension(utType.preferredFilenameExtension ?? "")
+                try fileManager.moveItem(at: tempFile, to: newTempFile)
+                attachment = try UNNotificationAttachment(identifier: UUID().uuidString, url: newTempFile, options: nil)
+            } else {
+                os_log("Unrecognized MIME type or file extension", log: .default, type: .error)
+                attachment = nil
+            }
+            return attachment
+        } catch {
+            os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+        }
+        return nil
     }
 }
