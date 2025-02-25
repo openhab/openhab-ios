@@ -44,6 +44,8 @@ class NotificationService: UNNotificationServiceExtension {
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
 
+    let logger = Logger(subsystem: "com.yourapp.network", category: "NotificationService")
+
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
@@ -321,10 +323,10 @@ class NotificationService: UNNotificationServiceExtension {
                 if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
                     Task {
                         let client = await OpenAPIService(
+                            baseURL: url,
                             username: Preferences.username,
                             password: Preferences.password,
-                            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
-                            url: url
+                            alwaysSendBasicAuth: Preferences.alwaysSendCreds
                         )
                         let item = try await client.getItemByName(id: itemName)
                         guard let state = item?.state else { return nil as UNNotificationAttachment? }

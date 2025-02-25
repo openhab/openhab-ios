@@ -32,13 +32,21 @@ public actor OpenAPIService {
     private var client: Client
     private var url: URL?
     private var longPolling = false
-    private var alwaysSendBasicAuth = false
-    private var username: String
-    private var password: String
+
+    private let username: String
+    private let password: String
+    private let alwaysSendBasicAuth: Bool
+    private let ignoreSSL: Bool
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenAPIService")
 
-    public init(username: String = "", password: String = "", alwaysSendBasicAuth: Bool = true, url: URL = URL(staticString: "about:blank")) async {
+    public init(
+        baseURL url: URL = URL(staticString: "about:blank"),
+        username: String,
+        password: String,
+        alwaysSendBasicAuth: Bool = false,
+        ignoreSSL: Bool = false
+    ) async {
         // TODO: Make use of prepareURLSessionConfiguration
         let config = URLSessionConfiguration.default
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
@@ -50,6 +58,7 @@ public actor OpenAPIService {
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
         self.url = url
+        self.ignoreSSL = ignoreSSL
 
         client = Client(
             serverURL: url.appending(path: "/rest"),

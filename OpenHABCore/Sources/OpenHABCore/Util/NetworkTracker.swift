@@ -36,12 +36,24 @@ public struct ConnectionInfo: Equatable {
     public let version: Int
 }
 
+enum NetworkTrackerError: Error, CustomDebugStringConvertible {
+    case invalidServerVersion
+
+    var debugDescription: String {
+        switch self {
+        case .invalidServerVersion:
+            "Invalid server version"
+        }
+    }
+}
+
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
     @Published public private(set) var activeConnection: ConnectionInfo?
     @Published public private(set) var status: NetworkStatus = .connecting
     public private(set) var httpClient: HTTPClient?
+    public private(set) var openApiService: OpenAPIService?
 
     private let monitor: NWPathMonitor
     private let monitorQueue = DispatchQueue.global(qos: .background)
@@ -51,6 +63,8 @@ public final class NetworkTracker: ObservableObject {
     private let timerQueue = DispatchQueue(label: "com.openhab.networktracker.timerQueue")
     private let connectedRetryInterval: TimeInterval = 60 // amount of time we scan for better connections when connected
     private let disconnectedRetryInterval: TimeInterval = 30 // amount of time we scan when not connected
+
+    let logger = Logger(subsystem: "com.yourapp.network", category: "NetworkTracker")
 
     private init() {
         monitor = NWPathMonitor()
@@ -72,6 +86,9 @@ public final class NetworkTracker: ObservableObject {
         os_log("NetworkConnection: startTracking", log: OSLog.default, type: .info)
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
         httpClient = HTTPClient(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
+        Task {
+            openApiService = await OpenAPIService(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
+        }
         setActiveConnection(nil)
         attemptConnection()
     }
@@ -153,33 +170,34 @@ public final class NetworkTracker: ObservableObject {
             checkOutstanding = true // Signal that checks are outstanding
             os_log("attemptConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, configuration.url)
             if let url = URL(string: configuration.url) {
-                httpClient?.getServerProperties(baseURL: url) { [weak self] props, error in
-                    guard let self else { return }
+                Task {
                     defer {
                         dispatchGroup.leave() // When each check completes, this signals the group that it's done
                     }
-                    if let error {
-                        os_log("Network status: Failed to connect to %{PUBLIC}@ : %{PUBLIC}@", log: OSLog.default, type: .error, configuration.url, error.localizedDescription)
-                    } else {
-                        let version = Int(props?.version ?? "0")
-                        if let version, version > 1 {
+                    do {
+                        await openApiService?.updateBaseURL(with: url)
+                        let serverProperties = try await openApiService?.getRoot()
+
+                        let version = Int(serverProperties?.version ?? "0")
+                        guard let version, version > 1 else { throw NetworkTrackerError.invalidServerVersion }
+                        let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
+                        if configuration.priority == 0, highestPriorityConnection == nil {
+                            // Found a high-priority (0) connection
+                            highestPriorityConnection = connectionInfo
+                            priorityWorkItem?.cancel() // Stop the 2-second wait if highest priority succeeds
+                            setActiveConnection(connectionInfo)
+                        } else if highestPriorityConnection == nil {
+                            // Check if this connection has a higher priority than the current firstAvailableConnection
                             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
-                            if configuration.priority == 0, highestPriorityConnection == nil {
-                                // Found a high-priority (0) connection
-                                highestPriorityConnection = connectionInfo
-                                priorityWorkItem?.cancel() // Stop the 2-second wait if highest priority succeeds
-                                setActiveConnection(connectionInfo)
-                            } else if highestPriorityConnection == nil {
-                                // Check if this connection has a higher priority than the current firstAvailableConnection
-                                let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
-                                if firstAvailableConnection == nil || configuration.priority < firstAvailableConnection!.configuration.priority {
-                                    os_log("Network status: Found a higher priority available connection: %{PUBLIC}@", log: OSLog.default, type: .info, configuration.url)
-                                    firstAvailableConnection = connectionInfo
-                                }
+                            if firstAvailableConnection == nil || configuration.priority < firstAvailableConnection!.configuration.priority {
+                                logger.info("Found a higher priority available connection: \(configuration.url)")
+                                firstAvailableConnection = connectionInfo
                             }
-                        } else {
-                            os_log("Network status: Invalid server version from %{PUBLIC}@", log: OSLog.default, type: .error, configuration.url)
                         }
+                    } catch let error as NetworkTrackerError {
+                        logger.error("\(error.debugDescription)")
+                    } catch {
+                        logger.error("Failed to connect to \(configuration.url)")
                     }
                 }
             }

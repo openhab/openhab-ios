@@ -130,10 +130,10 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         widgetTableView.tableFooterView = UIView()
         Task {
             await openAPIService = OpenAPIService(
+                baseURL: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank"),
                 username: openHABUsername,
                 password: openHABPassword,
-                alwaysSendBasicAuth: openHABAlwaysSendCreds,
-                url: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank")
+                alwaysSendBasicAuth: openHABAlwaysSendCreds
             )
         }
 
@@ -443,7 +443,12 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         Task {
             do {
                 logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
-                openAPIService = await OpenAPIService(username: appData!.openHABUsername, password: appData!.openHABPassword, alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds, url: URL(string: appData?.openHABRootUrl ?? "")!)
+                openAPIService = await OpenAPIService(
+                    baseURL: URL(string: appData?.openHABRootUrl ?? "")!,
+                    username: appData!.openHABUsername,
+                    password: appData!.openHABPassword,
+                    alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds
+                )
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
                 switch sitemaps.count {

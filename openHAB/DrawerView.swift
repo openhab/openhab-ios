@@ -264,7 +264,8 @@ struct DrawerView: View {
         }
         .listStyle(.inset)
         .task {
-            let openAPIService = await OpenAPIService()
+            let openAPIService = await OpenAPIService(username: appData?.openHABUsername ?? "", password: appData?.openHABPassword ?? "", alwaysSendBasicAuth: appData?.openHABAlwaysSendCreds ?? false, ignoreSSL: false)
+
             Task {
                 do {
                     guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw DrawerViewError.noRootURL }
