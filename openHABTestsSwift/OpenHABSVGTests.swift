@@ -35,7 +35,7 @@ class OpenHABSVGTests: XCTestCase {
             XCTAssertEqual(parseResults?.parsedDocument, nil, "parsedDocument not empty though it was expected to be because XML is invalid")
             XCTAssertEqual(parseResults?.errorsFatal.count ?? 0, 0, "No errorsFatal expected")
 
-            if let firstWarning = parseResults?.warnings.first as? Error {
+            if let firstWarning = parseResults?.warnings[0] as? Error {
                 XCTAssertEqual(firstWarning.localizedDescription, "xmlns: URI &ns_svg; is not absolute\n")
             } else {
                 XCTFail("Expected a warning but found none or an unexpected type")
@@ -55,7 +55,7 @@ class OpenHABSVGTests: XCTestCase {
             let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
             XCTAssertNotEqual(parseResults?.parsedDocument, nil, "Non nil parsedDocument expected")
             XCTAssertNotEqual(parseResults?.errorsFatal.count, 0, "errorsFatal are 0")
-            if let fatalError = parseResults?.errorsFatal.first as? Error {
+            if let fatalError = parseResults?.errorsFatal[0] as? Error {
                 XCTAssertEqual(fatalError.localizedDescription, "Exception = Found an SVG <use> tag that points to a non-existent element. Missing element: id = e")
             } else {
                 XCTFail("Expected a fatal error but found none or an unexpected type")
