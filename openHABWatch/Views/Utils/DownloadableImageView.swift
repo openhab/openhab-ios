@@ -16,9 +16,7 @@ import WatchKit
 
 struct DownloadableImageView: View {
     let url: URL?
-    //@State private var uiImage: UIImage?
     @StateObject private var imageLoader = SVGImageLoader()
-    
     @State private var isLoading = true
     @State private var task: URLSessionTask?
     
