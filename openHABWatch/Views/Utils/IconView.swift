@@ -34,16 +34,9 @@ struct IconView: View {
     }
 
     var body: some View {
-        // Inspired by https://anoop4real.medium.com/display-svg-in-swiftui-ios-watchos-260120557e3a
-        WebImage(
-            url: iconURL,
-            options: settings.ignoreSSL ? [.allowInvalidSSLCertificates] : [],
-            context: [.imageThumbnailPixelSize: CGSize.zero]
-        )
-        .cancelOnDisappear(true)
-        .resizable()
-        .scaledToFit()
-        .frame(width: 20.0, height: 20.0)
+        DownloadableImageView(url: iconURL)
+            .transition(.fade(duration: 0.3))
+        .frame(width: 20.0, height: 20.0).id(iconURL?.absoluteString ?? "")
     }
 }
 

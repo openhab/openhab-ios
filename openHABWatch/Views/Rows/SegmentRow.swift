@@ -16,8 +16,7 @@ import SwiftUI
 struct SegmentRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @EnvironmentObject var settings: ObservableOpenHABDataObject
-
-    @State private var favoriteColor = 0
+    @State private var pendingValue: String?
 
     var valueBinding: Binding<Int> {
         .init(
@@ -25,10 +24,19 @@ struct SegmentRow: View {
                 guard case let .segmented(value) = widget.stateEnumBinding else { return 0 }
                 return value
             },
-            set: {
-                os_log("Slider new value = %g", log: .default, type: .info, $0)
-                // self.widget.sendCommand($0)
-                widget.stateEnumBinding = .segmented($0)
+            set: { newValue in
+                print("Picker new value = \(newValue)")
+                widget.stateEnumBinding = .segmented(newValue)
+                if let selectedCommand = widget.mappingsOrItemOptions[safe: newValue]?.command {
+                    pendingValue = selectedCommand
+                    print("Selected command: \(selectedCommand)")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
+                        if pendingValue == selectedCommand { // Ensure no new updates came in
+                            widget.sendCommand(selectedCommand)
+                            pendingValue = nil
+                        }
+                    }
+                }
             }
         )
     }

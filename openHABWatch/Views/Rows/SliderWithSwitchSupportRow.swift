@@ -16,17 +16,22 @@ import SwiftUI
 struct SliderWithSwitchSupportRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @State private var pendingValue: Double?
 
     var body: some View {
         let valueBinding = Binding<Double>(
             get: {
-                widget.adjustedValue
+                pendingValue ?? widget.adjustedValue
             },
-            set: {
-                os_log("Slider new value = %g", log: .default, type: .info, $0)
-                widget.sendCommand($0.valueText(step: widget.step))
-
-                // self.widget.stateEnumBinding = .slider($0)
+            set: { newValue in
+                os_log("SliderWithSwitchSupportRow new value = %g", log: .default, type: .info, newValue)
+                pendingValue = newValue
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
+                    if pendingValue == newValue { // Ensure no new updates came in
+                        widget.sendCommand(newValue.valueText(step: widget.step))
+                        pendingValue = nil
+                    }
+                }
             }
         )
 

@@ -107,7 +107,7 @@ public final class NetworkTracker: ObservableObject {
         if let url = URL(string: activeConnection.configuration.url) {
             os_log("checkActiveConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, url.absoluteString)
 
-            httpClient?.getServerProperties(baseURL: url) { [weak self] _, error in
+            _ = httpClient?.getServerProperties(baseURL: url) { [weak self] _, error in
                 if let error {
                     os_log("Network status: Active connection is not reachable: %{PUBLIC}@ %{PUBLIC}@", log: OSLog.default, type: .error, activeConnection.configuration.url, error.localizedDescription)
                     self?.attemptConnection() // If not reachable, run the connection logic
@@ -153,7 +153,7 @@ public final class NetworkTracker: ObservableObject {
             checkOutstanding = true // Signal that checks are outstanding
             os_log("attemptConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, configuration.url)
             if let url = URL(string: configuration.url) {
-                httpClient?.getServerProperties(baseURL: url) { [weak self] props, error in
+                _ = httpClient?.getServerProperties(baseURL: url) { [weak self] props, error in
                     guard let self else { return }
                     defer {
                         dispatchGroup.leave() // When each check completes, this signals the group that it's done
@@ -233,6 +233,7 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
+    
     private func setActiveConnection(_ connection: ConnectionInfo?) {
         os_log("Network status: setActiveConnection: %{PUBLIC}@", log: OSLog.default, type: .info, connection?.configuration.url ?? "no connection")
         guard activeConnection != connection else { return }

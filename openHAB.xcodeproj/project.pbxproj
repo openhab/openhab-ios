@@ -21,6 +21,7 @@
 		657144512C1E438700C8A1F3 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657144502C1E438700C8A1F3 /* NotificationService.swift */; };
 		657144552C1E438700C8A1F3 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6571444E2C1E438700C8A1F3 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		657144962C30A16700C8A1F3 /* OpenHABCore in Frameworks */ = {isa = PBXBuildFile; productRef = 657144952C30A16700C8A1F3 /* OpenHABCore */; };
+		65DAE9122D6FCB1A00E99582 /* DownloadableImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DAE9112D6FCB1A00E99582 /* DownloadableImageView.swift */; };
 		932602EE2382892B00EAD685 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAC6608B236F6F4200F4501E /* Assets.xcassets */; };
 		933D7F0722E7015100621A03 /* OpenHABUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0622E7015000621A03 /* OpenHABUITests.swift */; };
 		933D7F0F22E7030600621A03 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933D7F0E22E7030600621A03 /* SnapshotHelper.swift */; };
@@ -294,6 +295,7 @@
 		657144502C1E438700C8A1F3 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		657144522C1E438700C8A1F3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		657144972C30A3E300C8A1F3 /* NotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotificationService.entitlements; sourceTree = "<group>"; };
+		65DAE9112D6FCB1A00E99582 /* DownloadableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadableImageView.swift; sourceTree = "<group>"; };
 		931384B324F259BC00A73AB5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		931384B424F259BD00A73AB5 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		931384BB24F2691B00A73AB5 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -855,6 +857,7 @@
 		DAF457A723DBA2C40018B495 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				65DAE9112D6FCB1A00E99582 /* DownloadableImageView.swift */,
 				DA7224D123828D3300712D20 /* PreviewConstants.swift */,
 				934B610B2348D2F9009112D5 /* Color+Extension.swift */,
 				DAF4578123D630C70018B495 /* IconView.swift */,
@@ -1462,6 +1465,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				65DAE9122D6FCB1A00E99582 /* DownloadableImageView.swift in Sources */,
 				DAC9AF4724F9669F006DAE93 /* ObservableOpenHABWidgetExtension.swift in Sources */,
 				DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */,
 				DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */,

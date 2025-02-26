@@ -16,13 +16,21 @@ import SwiftUI
 struct SliderRow: View {
     @ObservedObject var widget: ObservableOpenHABWidget
     @EnvironmentObject var settings: ObservableOpenHABDataObject
-
+    @State private var pendingValue: Double?
     var valueBinding: Binding<Double> {
         .init(
-            get: { widget.adjustedValue },
-            set: {
-                os_log("Slider new value = %g", log: .default, type: .info, $0)
-                widget.sendCommand($0.valueText(step: widget.step))
+            get: {
+                pendingValue ?? widget.adjustedValue
+            },
+            set: { newValue in
+                os_log("SliderRow new value = %g", log: .default, type: .info, newValue)
+                pendingValue = newValue
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { // 500ms delay
+                    if pendingValue == newValue { // Ensure no new updates came in
+                        widget.sendCommand(newValue.valueText(step: widget.step))
+                        pendingValue = nil
+                    }
+                }
             }
         )
     }
