@@ -9,3 +9,4 @@ filter:
         - items
         - root
         - systeminfo
+        - rules

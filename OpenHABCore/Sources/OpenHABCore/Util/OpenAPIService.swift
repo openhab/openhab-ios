@@ -153,6 +153,18 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
+    func runNow(ruleUID: String, payload: [String: any Sendable]) async throws -> Operations.runRuleNow_1.Output {
+        let path = Operations.runRuleNow_1.Input.Path(ruleUID: ruleUID)
+        let jsonPayload = try Operations.runRuleNow_1.Input.Body.jsonPayload(
+            additionalProperties: OpenAPIObjectContainer(unvalidatedValue: payload))
+        return try await client.runRuleNow_1(
+            path: Operations.runRuleNow_1.Input.Path(ruleUID: ruleUID),
+            body: .json(jsonPayload)
+        )
+    }
+}
+
+public extension OpenAPIService {
     func openHABcreateSubscription() async throws -> String? {
         logger.info("Creating subscription")
         let result = try await client.createSitemapEventSubscription()

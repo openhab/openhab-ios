@@ -36,6 +36,8 @@ struct CommandItem: CommItem {
     var link: String
 }
 
+private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
+
 // swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
@@ -483,10 +485,7 @@ class OpenHABRootViewController: UIViewController {
     private func ruleCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
         let components = command.split(separator: ":", maxSplits: 2)
 
-        guard components.count == 3,
-              components[0] == "rule" else {
-            return
-        }
+        guard components.count == 3, components[0] == "rule" else { return }
 
         let uuid = String(components[1])
         let propertiesString = String(components[2])
@@ -503,27 +502,17 @@ class OpenHABRootViewController: UIViewController {
             }
         }
 
-        var jsonString = ""
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: properties, options: [.prettyPrinted])
-            jsonString = String(data: jsonData, encoding: .utf8)!
-        } catch {
-            // nothing
-        }
-
         NetworkTracker.shared.waitForActiveConnection { activeConnection in
             if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
                 os_log("Sending comand", log: .default, type: .error)
-                let client = HTTPClient(username: Preferences.username, password: Preferences.password)
-                client.doPost(baseURL: url, path: "/rest/rules/rules/\(uuid)/runnow", body: jsonString) { data, _, error in
-                    if let error {
-                        os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                Task {
+                    do {
+                        let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
+                        let data = try await openAPIService.runNow(ruleUID: uuid, payload: properties)
+                        logger.info("Request succeeded")
+                    } catch {
+                        logger.error("Could not send data \(error.localizedDescription)")
                         self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
-                    } else {
-                        os_log("Request succeeded", log: .default, type: .info)
-                        if let data {
-                            os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
-                        }
                     }
                     if let completionHandler {
                         DispatchQueue.main.async {

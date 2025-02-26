@@ -885,17 +885,16 @@
           }
         ],
         "requestBody": {
-          "description": "the context for running this rule",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "object"
+            "description": "the context for running this rule",
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "nullable": true
+                    }
                 }
-              }
             }
-          }
         },
         "responses": {
           "200": {

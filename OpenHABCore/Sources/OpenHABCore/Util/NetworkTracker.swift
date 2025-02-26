@@ -60,16 +60,17 @@ public final class NetworkTracker: ObservableObject {
     private var priorityWorkItem: DispatchWorkItem?
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTimer: DispatchSourceTimer?
-    private let timerQueue = DispatchQueue(label: "com.openhab.networktracker.timerQueue")
+    private let timerQueue = DispatchQueue(label: "org.openhab.networktracker.timerQueue")
     private let connectedRetryInterval: TimeInterval = 60 // amount of time we scan for better connections when connected
     private let disconnectedRetryInterval: TimeInterval = 30 // amount of time we scan when not connected
 
-    let logger = Logger(subsystem: "com.yourapp.network", category: "NetworkTracker")
+    let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
     private init() {
         monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { [weak self] path in
             guard self?.httpClient != nil else { return }
+            guard self?.openApiService != nil else { return }
             if path.status == .satisfied {
                 os_log("Network status: Connected", log: OSLog.default, type: .info)
                 self?.checkActiveConnection()
@@ -124,12 +125,13 @@ public final class NetworkTracker: ObservableObject {
         if let url = URL(string: activeConnection.configuration.url) {
             os_log("checkActiveConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, url.absoluteString)
 
-            httpClient?.getServerProperties(baseURL: url) { [weak self] _, error in
-                if let error {
-                    os_log("Network status: Active connection is not reachable: %{PUBLIC}@ %{PUBLIC}@", log: OSLog.default, type: .error, activeConnection.configuration.url, error.localizedDescription)
-                    self?.attemptConnection() // If not reachable, run the connection logic
-                } else {
-                    os_log("Network status: Active connection is reachable: %{PUBLIC}@", log: OSLog.default, type: .info, activeConnection.configuration.url)
+            Task {
+                do {
+                    let serverProperties = try await openApiService?.getRoot()
+                    logger.info("Network status: Active connection is reachable: \(activeConnection.configuration.url)")
+                } catch {
+                    logger.error("Network status: Active connection is not reachable:  \(activeConnection.configuration.url)  \(error.localizedDescription)")
+                    self.attemptConnection() // If not reachable, run the connection logic
                 }
             }
         }
@@ -255,9 +257,12 @@ public final class NetworkTracker: ObservableObject {
         os_log("Network status: setActiveConnection: %{PUBLIC}@", log: OSLog.default, type: .info, connection?.configuration.url ?? "no connection")
         guard activeConnection != connection else { return }
         activeConnection = connection
-        if activeConnection != nil {
+        if let activeConnection {
             updateStatus(.connected)
-            httpClient?.baseURL = URL(string: activeConnection!.configuration.url)
+            httpClient?.baseURL = URL(string: activeConnection.configuration.url)
+            Task {
+                await openApiService?.updateBaseURL(with: URL(string: activeConnection.configuration.url) ?? URL(staticString: "about:blank"))
+            }
             // startRetryTimer(connectedRetryInterval)
         } else {
             updateStatus(.notConnected)

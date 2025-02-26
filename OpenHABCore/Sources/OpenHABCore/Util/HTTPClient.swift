@@ -76,24 +76,6 @@ public class HTTPClient: NSObject {
     }
 
     /**
-     Sends a GET request to a specified base URL for a specified path and returns the response data via a completion handler.
-
-     - Parameters:
-     - baseURL: The base URL to attempt the request from.
-     - path: An optional path component to append to the base URL.
-     - completion: A closure to be executed once the request is complete. The closure takes three parameters:
-     - data: The data returned by the server. This will be `nil` if the request fails.
-     - response: The URL response object providing response metadata, such as HTTP headers and status code.
-     - error: An error object that indicates why the request failed, or `nil` if the request was successful.
-     */
-    public func doGet(baseURL: URL? = nil, path: String?, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        doRequest(baseURL: baseURL, path: path, method: "GET") { result, response, error in
-            let data = result as? Data
-            completion(data, response, error)
-        }
-    }
-
-    /**
      Sends a POST request to a specified base URL for a specified path and returns the response data via a completion handler.
 
      - Parameters:
@@ -113,95 +95,14 @@ public class HTTPClient: NSObject {
     }
 
     /**
-     Sends a PUT request to a specified base URL for a specified path and returns the response data via a completion handler.
+      Initiates a download request to a specified base URL for a specified path and returns the file URL via a completion handler.
 
-     - Parameters:
-     - baseURL: The base URL to attempt the request from.
-     - path: An optional path component to append to the base URL.
-     - body: The string to include as the HTTP body of the request.
-     - completion: A closure to be executed once the request is complete. The closure takes three parameters:
-     - data: The data returned by the server. This will be `nil` if the request fails.
-     - response: The URL response object providing response metadata, such as HTTP headers and status code.
-     - error: An error object that indicates why the request failed, or `nil` if the request was successful.
-     */
-    public func doPut(baseURL: URL? = nil, path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
-        doRequest(baseURL: baseURL, path: path, method: "PUT", body: body) { result, response, error in
-            let data = result as? Data
-            completion(data, response, error)
-        }
-    }
-
-    /**
-     Fetches a specific OpenHAB item from a specified base URL and returns the item via a completion handler.
-
-     - Parameters:
-     - baseURL: The base URL to attempt the request from.
-     - itemName: The name of the OpenHAB item to fetch.
-     - completion: A closure to be executed once the request is complete. The closure takes two parameters:
-     - item: An `OpenHABItem` object returned by the server. This will be `nil` if the request fails.
-     - error: An error object that indicates why the request failed, or `nil` if the request was successful.
-     */
-    public func getItem(baseURL: URL? = nil, itemName: String, completion: @escaping (OpenHABItem?, Error?) -> Void) {
-        doGet(baseURL: baseURL, path: "/rest/items/\(itemName)") { data, _, error in
-            if let error {
-                completion(nil, error)
-            } else {
-                do {
-                    if let data {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let item = try data.decoded(as: OpenHABItem.CodingData.self, using: decoder)
-                        completion(item.openHABItem, nil)
-                    } else {
-                        completion(nil, HTTPClientError.noDataforItem)
-                    }
-                } catch {
-                    os_log("getItemsInternal ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))
-                    completion(nil, error)
-                }
-            }
-        }
-    }
-
-    public func getServerProperties(baseURL: URL? = nil, completion: @escaping (OpenHABServerProperties?, Error?) -> Void) {
-        doGet(baseURL: baseURL, path: "/rest/") { data, _, error in
-            if let error {
-                completion(nil, error)
-            } else {
-                do {
-                    if let data {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let properties = try data.decoded(as: OpenHABServerProperties.self, using: decoder)
-                        completion(properties, nil)
-                    } else {
-                        completion(nil, HTTPClientError.noDataForProperties)
-                    }
-                } catch {
-                    os_log("getServerProperties ERROR: %{PUBLIC}@", log: .networking, type: .info, String(describing: error))
-                    completion(nil, error)
-                }
-            }
-        }
-    }
-
-    /**
-     Initiates a download request to a specified base URL for a specified path and returns the file URL via a completion handler.
-
-     - Parameters:
-     - baseURL: The base URL to attempt the download from.
-     - path: The optional  path component to append to the base URL.
-     - completionHandler: A closure to be executed once the download is complete. The closure takes three parameters:
-     - fileURL: The local URL where the downloaded file is stored. This will be `nil` if the download fails.
-     - response: The URL response object providing response metadata, such as HTTP headers and status code.
-     - error: An error object that indicates why the request failed, or `nil` if the request was successful.
-     */
-    public func downloadFile(url: URL, completionHandler: @escaping @Sendable (URL?, URLResponse?, (any Error)?) -> Void) {
-        doRequest(baseURL: url, path: nil, method: "GET", download: true) { result, response, error in
-            let fileURL = result as? URL
-            completionHandler(fileURL, response, error)
-        }
-    }
+      - Parameters:
+     - url
+      - Returns:
+      - response: The URL response object providing response metadata, such as HTTP headers and status code.
+      - error: An error object that indicates why the request failed, or `nil` if the request was successful.
+      */
 
     public func downloadFile(url: URL) async throws -> (URL, URLResponse) {
         let (result, response) = try await doRequest(baseURL: url, path: nil, method: "GET", download: true)
