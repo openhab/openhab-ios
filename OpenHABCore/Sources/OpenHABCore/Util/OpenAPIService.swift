@@ -158,7 +158,7 @@ public extension OpenAPIService {
         let jsonPayload = try Operations.runRuleNow_1.Input.Body.jsonPayload(
             additionalProperties: OpenAPIObjectContainer(unvalidatedValue: payload))
         return try await client.runRuleNow_1(
-            path: Operations.runRuleNow_1.Input.Path(ruleUID: ruleUID),
+            path: path,
             body: .json(jsonPayload)
         )
     }
@@ -244,7 +244,7 @@ public extension OpenAPIService {
         _ = try response.accepted
     }
 
-    func openHABSendItemCommand(itemname: String, command: String) async throws {
+    func sendItemCommand(itemname: String, command: String) async throws {
         let path = Operations.sendItemCommand.Input.Path(itemname: itemname)
         let body = Operations.sendItemCommand.Input.Body.plainText(.init(command))
         let response = try await client.sendItemCommand(path: path, body: body)

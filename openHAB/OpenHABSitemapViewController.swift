@@ -444,7 +444,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             do {
                 logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
                 openAPIService = await OpenAPIService(
-                    baseURL: URL(string: appData?.openHABRootUrl ?? "")!,
+                    baseURL: URL(string: appData!.openHABRootUrl) ?? URL(staticString: "about:blank"),
                     username: appData!.openHABUsername,
                     password: appData!.openHABPassword,
                     alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds
@@ -590,7 +590,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 
     func sendCommand(itemname: String, command: String) {
-        Task { try await openAPIService?.openHABSendItemCommand(itemname: itemname, command: command) }
+        Task { try await openAPIService?.sendItemCommand(itemname: itemname, command: command) }
     }
 
     override func reloadView() {

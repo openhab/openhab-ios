@@ -396,16 +396,14 @@ class OpenHABRootViewController: UIViewController {
             NetworkTracker.shared.waitForActiveConnection { activeConnection in
                 if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
                     os_log("Sending comand", log: .default, type: .error)
-                    let client = HTTPClient(username: Preferences.username, password: Preferences.password)
-                    client.doPost(baseURL: url, path: "/rest/items/\(itemName)", body: itemCommand) { data, _, error in
-                        if let error {
-                            os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
+                    Task {
+                        do {
+                            let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
+                            await openAPIService.updateBaseURL(with: url)
+                            try await openAPIService.sendItemCommand(itemname: itemName, command: itemCommand)
+                        } catch {
+                            logger.error("Could not send data \(error.localizedDescription)")
                             self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
-                        } else {
-                            os_log("Request succeeded", log: .default, type: .info)
-                            if let data {
-                                os_log("Data: %{public}@", log: .default, type: .debug, String(data: data, encoding: .utf8) ?? "")
-                            }
                         }
                         if let completionHandler {
                             DispatchQueue.main.async {
@@ -628,6 +626,8 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 }
+
+// swiftlint:enable type_body_length
 
 // MARK: - UISideMenuNavigationControllerDelegate
 
