@@ -47,7 +47,7 @@ public class OpenHABItemCache {
         ret.append(contentsOf: items
             .filter {
                 (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
-                (types == nil || ($0.type != nil && types!.contains($0.type!)))
+                    (types == nil || ($0.type != nil && types!.contains($0.type!)))
             }
             .sorted(by: \.name)
             .map { NSString(string: $0.name) })

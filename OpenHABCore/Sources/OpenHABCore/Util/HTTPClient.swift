@@ -38,7 +38,6 @@ private enum HTTPClientError: Error {
 }
 
 public class HTTPClient: NSObject {
-
     // MARK: - Properties
 
     public enum CertificateEvaluateResult {

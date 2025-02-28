@@ -91,7 +91,7 @@ public final class NetworkTracker: ObservableObject {
         attemptConnection()
     }
 
-    @discardableResult 
+    @discardableResult
     public func waitForActiveConnection(
         perform action: @escaping (ConnectionInfo?) -> Void
     ) -> AnyCancellable {
@@ -171,7 +171,6 @@ public final class NetworkTracker: ObservableObject {
             os_log("attemptConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, configuration.url)
             if let url = URL(string: configuration.url) {
                 Task {
-
                     defer {
                         dispatchGroup.leave() // When each check completes, this signals the group that it's done
                     }
