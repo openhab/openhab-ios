@@ -136,6 +136,7 @@ extension OpenAPIService: OpenHABUiTileService {
 }
 
 public extension OpenAPIService {
+    @discardableResult
     func getRoot() async throws -> OpenHABServerProperties {
         let result = try await client.getRoot()
             .ok.body.json
@@ -212,8 +213,8 @@ public extension OpenAPIService {
 
     // Internal function for pollSitemap
     internal func pollDataForSitemap(path: Operations.pollDataForSitemap.Input.Path,
-                            query: Operations.pollDataForSitemap.Input.Query = .init(),
-                            headers: Operations.pollDataForSitemap.Input.Headers) async throws -> OpenHABSitemap? {
+                                     query: Operations.pollDataForSitemap.Input.Query = .init(),
+                                     headers: Operations.pollDataForSitemap.Input.Headers) async throws -> OpenHABSitemap? {
         let result = try await client.pollDataForSitemap(path: path, query: query, headers: headers)
             .ok.body.json
         return OpenHABSitemap(result)
@@ -234,10 +235,19 @@ public extension OpenAPIService {
     }
 }
 
+// Array of items
+public extension OpenAPIService {
+    func getItems() async throws -> [OpenHABItem] {
+        try await client.getItems()
+            .ok.body.json
+            .compactMap(OpenHABItem.init)
+    }
+}
+
 // MARK: State changes and commands
 
 public extension OpenAPIService {
-    func openHABUpdateItemState(itemname: String, with state: String) async throws {
+    func updateItemState(itemname: String, with state: String) async throws {
         let path = Operations.updateItemState.Input.Path(itemname: itemname)
         let body = Operations.updateItemState.Input.Body.plainText(.init(state))
         let response = try await client.updateItemState(path: path, body: body)

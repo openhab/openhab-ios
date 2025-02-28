@@ -60,9 +60,8 @@ class OpenHABWebViewController: OpenHABViewController {
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
-        if #available(iOS 13.0, *) {
-            activityIndicator.style = UIActivityIndicatorView.Style.large
-        }
+        activityIndicator.style = UIActivityIndicatorView.Style.large
+
         view.addSubview(activityIndicator)
     }
 

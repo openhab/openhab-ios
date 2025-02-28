@@ -16,13 +16,10 @@ public enum OHInterfaceStyle: Int {
 
     public static var current: OHInterfaceStyle {
         #if os(iOS)
-        if #available(iOS 13.0, *) {
-            if UITraitCollection.current.userInterfaceStyle == .dark {
-                return .dark
-            }
+        if UITraitCollection.current.userInterfaceStyle == .dark {
+            return .dark
         }
         #endif
-
         return .light
     }
 }

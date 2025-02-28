@@ -79,34 +79,4 @@ final class RESTAPITests: XCTestCase {
         // then
         wait(for: [expectation], timeout: 3)
     }
-
-    func testSitemap() {
-        // given
-        MockURLProtocol.responseWithStatusCode(code: 200)
-
-        let expectation = XCTestExpectation(description: "Register App")
-
-        // when
-        NetworkConnection.sitemaps(openHABRootUrl: "") { response in
-            XCTAssertEqual(response.response?.statusCode, 200)
-            expectation.fulfill()
-        }
-        // then
-        wait(for: [expectation], timeout: 3)
-    }
-
-    func testTracker() {
-        // given
-        MockURLProtocol.responseWithStatusCode(code: 200)
-
-        let expectation = XCTestExpectation(description: "Register App")
-
-        // when
-        NetworkConnection.tracker(openHABRootUrl: "") { response in
-            XCTAssertEqual(response.response?.statusCode, 200)
-            expectation.fulfill()
-        }
-        // then
-        wait(for: [expectation], timeout: 3)
-    }
 }

@@ -100,27 +100,6 @@ public class NetworkConnection {
         }
     }
 
-    public static func sitemaps(openHABRootUrl: String,
-                                completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
-        if let url = Endpoint.sitemaps(openHABRootUrl: openHABRootUrl).url {
-            load(from: url, completionHandler: completionHandler)
-        }
-    }
-
-    public static func uiTiles(openHABRootUrl: String,
-                               completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
-        if let url = Endpoint.uiTiles(openHABRootUrl: openHABRootUrl).url {
-            load(from: url, completionHandler: completionHandler)
-        }
-    }
-
-    public static func tracker(openHABRootUrl: String,
-                               completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
-        if let url = Endpoint.tracker(openHABRootUrl: openHABRootUrl).url {
-            load(from: url, completionHandler: completionHandler)
-        }
-    }
-
     public static func notification(urlString: String,
                                     completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
@@ -171,44 +150,6 @@ public class NetworkConnection {
                 }
         }
         return nil
-    }
-
-    public static func page(url: URL?,
-                            longPolling: Bool,
-                            completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
-        guard let url else { return nil }
-
-        var pageRequest = URLRequest(url: url)
-
-        pageRequest.setValue("1.0", forHTTPHeaderField: "X-Atmosphere-Framework")
-        if longPolling {
-            os_log("long polling, so setting atmosphere transport", log: OSLog.remoteAccess, type: .info)
-            pageRequest.setValue("long-polling", forHTTPHeaderField: "X-Atmosphere-Transport")
-            pageRequest.timeoutInterval = 300.0
-        } else {
-            atmosphereTrackingId = "0"
-            pageRequest.timeoutInterval = 10.0
-        }
-        pageRequest.setValue(atmosphereTrackingId, forHTTPHeaderField: "X-Atmosphere-tracking-id")
-
-        os_log("OpenHABViewController sending new request", log: .remoteAccess, type: .error)
-
-        return NetworkConnection.shared.manager.request(pageRequest)
-            .validate()
-            .responseData(completionHandler: completionHandler)
-    }
-
-    public static func page(pageUrl: String,
-                            longPolling: Bool,
-                            completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) -> DataRequest? {
-        if pageUrl == "" {
-            return nil
-        }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
-
-        guard let pageToLoadUrl = URL(string: pageUrl) else { return nil }
-
-        return page(url: pageToLoadUrl, longPolling: longPolling, completionHandler: completionHandler)
     }
 
     static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {

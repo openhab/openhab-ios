@@ -99,88 +99,6 @@ public class HTTPClient: NSObject {
         return (fileURL1, response1)
     }
 
-    public func loadSitemapData(url: URL? = nil,
-                                longPolling: Bool,
-                                refresh: Bool,
-                                completion: @escaping (Data?, Error?) -> Void) -> URLSessionTask? {
-        let timeout: TimeInterval = longPolling ? 35.0 : 10.0 // for long polling, the server will return in 30 seconds
-        var headers: [String: String] = [:]
-        if longPolling {
-            headers["X-Atmosphere-Transport"] = "0"
-        }
-
-        os_log("Fetching page from URL %{public}@", log: .networking, type: .info, url?.absoluteString ?? "")
-
-        Task {
-            do {
-                let (data, _) = try await doRequest(baseURL: url, path: nil, method: "GET", headers: headers, timeout: timeout)
-                if let data = data as? Data {
-                    logger.info("Finsihed Fetching page from URL \(url?.absoluteString ?? "")")
-                    completion(data, nil)
-                } else {
-                    logger.error("No data from URL \(url?.absoluteString ?? "")")
-                    completion(nil, URLError(.unknown, userInfo: [NSLocalizedDescriptionKey: "No valid data received from server."]))
-                }
-            } catch {
-                logger.error("error fetching page from URL \(url?.absoluteString ?? "")")
-                completion(nil, error)
-            }
-        }
-
-        return doRequest(baseURL: url, path: nil, method: "GET", headers: headers, timeout: timeout) { result, _, error in
-            if let error {
-                os_log("error fetching page from URL %{public}@ %{public}@", log: .networking, type: .error, url?.absoluteString ?? "", error.localizedDescription)
-                completion(nil, error)
-            } else if let data = result as? Data {
-                os_log("Finsihed Fetching page from URL %{public}@", log: .networking, type: .info, url?.absoluteString ?? "")
-                completion(data, nil)
-            } else {
-                os_log("No data from URL %{public}@", log: .networking, type: .error, url?.absoluteString ?? "")
-                completion(nil, URLError(.unknown, userInfo: [NSLocalizedDescriptionKey: "No valid data received from server."]))
-            }
-        }
-    }
-
-    public func doRequest(baseURL: URL?, path: String?, method: String, headers: [String: String]? = nil,
-                          timeout: TimeInterval = 60.0, body: String? = nil, download: Bool = false, completion: @escaping (Any?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
-        guard var url = baseURL ?? self.baseURL else {
-            os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
-            completion(nil, nil, HTTPClientError.baseURLIsNil)
-            return nil
-        }
-
-        if let path {
-            url.appendPathComponent(path)
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.timeoutInterval = timeout
-        if let headers {
-            for (key, value) in headers {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-        }
-        if let body {
-            request.httpBody = body.data(using: .utf8)
-            request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
-        }
-        return performRequest(request: request, download: download) { result, response, error in
-            if let error {
-                os_log("Error with URL %{public}@ : %{public}@", log: .networking, type: .error, url.absoluteString, error.localizedDescription)
-                completion(nil, response, error)
-            } else if let response = response as? HTTPURLResponse {
-                if (400 ... 599).contains(response.statusCode) {
-                    os_log("HTTP error from URL %{public}@ : %{public}d", log: .networking, type: .error, url.absoluteString, response.statusCode)
-                    completion(nil, response, HTTPClientError.httpError(response.statusCode))
-                } else {
-                    os_log("Response from URL %{public}@ : %{public}d", log: .networking, type: .info, url.absoluteString, response.statusCode)
-                    completion(result, response, nil)
-                }
-            }
-        }
-    }
-
     public func doRequest(baseURL: URL?,
                           path: String?,
                           method: String,
@@ -223,25 +141,6 @@ public class HTTPClient: NSObject {
         fatalError()
     }
 
-    private func performRequest(request: URLRequest, download: Bool, completion: @escaping (Any?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
-        var request = request
-        if alwaysSendBasicAuth {
-            request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
-        }
-
-        let task: URLSessionTask = if download {
-            session.downloadTask(with: request) { url, response, error in
-                completion(url, response, error)
-            }
-        } else {
-            session.dataTask(with: request) { data, response, error in
-                completion(data, response, error)
-            }
-        }
-        task.resume()
-        return task
-    }
-
     private func performRequest(request: URLRequest, download: Bool) async throws -> (Any?, URLResponse?) {
         var request = request
         if alwaysSendBasicAuth {
@@ -276,7 +175,7 @@ public class HTTPClient: NSObject {
         }
     }
 
-    private func getPersistensePath() -> URL {
+    private func getPersistencePath() -> URL {
         #if os(watchOS)
         let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
@@ -288,7 +187,7 @@ public class HTTPClient: NSObject {
     private func saveTrustedCertificates() {
         do {
             let data = try PropertyListEncoder().encode(trustedCertificates)
-            try data.write(to: getPersistensePath())
+            try data.write(to: getPersistencePath())
         } catch {
             os_log("Could not save trusted certificates", log: .default)
         }
@@ -297,14 +196,14 @@ public class HTTPClient: NSObject {
     private func loadTrustedCertificates() {
         var decodableTrustedCertificates: [String: Data] = [:]
         do {
-            let rawdata = try Data(contentsOf: getPersistensePath())
+            let rawdata = try Data(contentsOf: getPersistencePath())
             let decoder = PropertyListDecoder()
             decodableTrustedCertificates = try decoder.decode([String: Data].self, from: rawdata)
             trustedCertificates = decodableTrustedCertificates
         } catch {
             // if Decodable fails, fall back to NSKeyedArchiver
             do {
-                let rawdata = try Data(contentsOf: getPersistensePath())
+                let rawdata = try Data(contentsOf: getPersistencePath())
                 if let unarchivedTrustedCertificates = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSDictionary.self, NSString.self, NSData.self], from: rawdata) as? [String: Data] {
                     trustedCertificates = unarchivedTrustedCertificates
                     saveTrustedCertificates() // Ensure that data is written in new format
@@ -392,15 +291,10 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
         }
 
         var result: SecTrustResultType = .invalid
-        if #available(iOS 12.0, *) {
-            var error: CFError?
-            _ = SecTrustEvaluateWithError(serverTrust, &error)
-            SecTrustGetTrustResult(serverTrust, &result)
-            logger.info("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
-        } else {
-            SecTrustEvaluate(serverTrust, &result)
-            logger.info("Trust evaluation result: \(result.rawValue)")
-        }
+        var error: CFError?
+        _ = SecTrustEvaluateWithError(serverTrust, &error)
+        SecTrustGetTrustResult(serverTrust, &result)
+        logger.info("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
 
         if result.isAny(of: .unspecified, .proceed) || ignoreSSL {
             logger.info("Certificate is trusted or SSL verification ignored")

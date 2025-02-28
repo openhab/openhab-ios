@@ -69,9 +69,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            if #available(iOS 10.0, *) {
-                try audioSession.setCategory(.playback, mode: .default, options: [])
-            }
+            try audioSession.setCategory(.playback, mode: .default, options: [])
         } catch {
             os_log("Setting category to AVAudioSessionCategoryPlayback failed.", log: .default, type: .info)
         }

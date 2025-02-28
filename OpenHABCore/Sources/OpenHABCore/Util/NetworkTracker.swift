@@ -124,7 +124,7 @@ public final class NetworkTracker: ObservableObject {
 
             Task {
                 do {
-                    let serverProperties = try await openApiService?.getRoot()
+                    try await openApiService?.getRoot()
                     logger.info("Network status: Active connection is reachable: \(activeConnection.configuration.url)")
                 } catch {
                     logger.error("Network status: Active connection is not reachable:  \(activeConnection.configuration.url)  \(error.localizedDescription)")

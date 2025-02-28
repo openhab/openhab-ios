@@ -43,12 +43,17 @@ public class OpenHABItemCache {
             return
         }
 
-        ret.append(contentsOf: items.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) })
+        ret.append(contentsOf: items
+            .filter {
+                (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
+                (types == nil || ($0.type != nil && types!.contains($0.type!)))
+            }
+            .sorted(by: \.name)
+            .map { NSString(string: $0.name) })
 
         completion(ret)
     }
 
-    @available(iOS 12.0, *)
     public func getItem(name: String, completion: @escaping (OpenHABItem?) -> Void) {
         let now = Date().timeIntervalSince1970
 
@@ -73,24 +78,26 @@ public class OpenHABItemCache {
         commandOperation?.resume()
     }
 
-    @available(iOS 12.0, *)
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
-                os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
+            if (activeConnection?.configuration.url) != nil {
+                os_log("OpenHABItemCache Loading items ")
                 self.lastLoad = Date().timeIntervalSince1970
-                NetworkConnection.load(from: url, timeout: self.timeout) { response in
-                    switch response.result {
-                    case let .success(data):
-                        do {
-                            try self.decodeItemsData(data)
-                            let ret = self.items?.filter { (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) && (types == nil || ($0.type != nil && types!.contains($0.type!))) }.sorted(by: \.name).map { NSString(string: $0.name) } ?? []
-                            completion(ret)
-                        } catch {
-                            print(error)
-                            os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                        }
-                    case let .failure(error):
+                Task {
+                    do {
+                        self.items = try await NetworkTracker.shared.openApiService?.getItems()
+                        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
+
+                        let ret = self.items?
+                            .filter {
+                                $0.type != .group &&
+                                    (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
+                                    (types == nil || ($0.type != nil && types!.contains($0.type!)))
+                            }
+                            .sorted(by: \.name)
+                            .map { NSString(string: $0.name) } ?? []
+                        completion(ret)
+                    } catch {
                         os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
                 }
@@ -99,40 +106,24 @@ public class OpenHABItemCache {
         .store(in: &cancellables)
     }
 
-    @available(iOS 12.0, *)
     public func reload(name: String, completion: @escaping (OpenHABItem?) -> Void) {
         NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let urlString = activeConnection?.configuration.url, let url = Endpoint.items(openHABRootUrl: urlString).url {
-                os_log("OpenHABItemCache Loading items from %{PUBLIC}@", log: .default, type: .info, urlString)
-                self.lastLoad = Date().timeIntervalSince1970
-                NetworkConnection.load(from: url, timeout: self.timeout) { response in
-                    switch response.result {
-                    case let .success(data):
-                        do {
-                            try self.decodeItemsData(data)
-                            let item = self.getItem(name)
-                            completion(item)
-                        } catch {
-                            os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+            if (activeConnection?.configuration.url) != nil {
+                Task {
+                    do {
+                        self.items = try await NetworkTracker.shared.openApiService?.getItems()
+                        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
+                        let ret = self.items?.filter {
+                            $0.type != .group
                         }
-                    case let .failure(error):
-                        print(error)
+                        .first { $0.name == name }
+                        completion(ret)
+                    } catch {
                         os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
                     }
                 }
             }
         }
         .store(in: &cancellables)
-    }
-
-    private func decodeItemsData(_ data: Data) throws {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-        let codingDatas = try data.decoded(as: [OpenHABItem.CodingData].self, using: decoder)
-        items = [OpenHABItem]()
-        for codingDatum in codingDatas where codingDatum.openHABItem.type != OpenHABItem.ItemType.group {
-            self.items?.append(codingDatum.openHABItem)
-        }
-        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, items?.count ?? 0)
     }
 }

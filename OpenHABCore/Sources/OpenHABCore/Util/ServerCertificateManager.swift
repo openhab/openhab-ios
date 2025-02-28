@@ -131,19 +131,13 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     func wrapperSecTrustEvaluate(serverTrust: SecTrust) -> SecTrustResultType {
         var result: SecTrustResultType = .invalid
 
-        if #available(iOS 12.0, *) {
-            // SecTrustEvaluate is deprecated.
-            // Wrap new API to have same calling pattern as we had prior to deprecation.
+        // SecTrustEvaluate is deprecated.
+        // Wrap new API to have same calling pattern as we had prior to deprecation.
 
-            var error: CFError?
-            _ = SecTrustEvaluateWithError(serverTrust, &error)
-            SecTrustGetTrustResult(serverTrust, &result)
-            return result
-
-        } else {
-            SecTrustEvaluate(serverTrust, &result)
-            return result
-        }
+        var error: CFError?
+        _ = SecTrustEvaluateWithError(serverTrust, &error)
+        SecTrustGetTrustResult(serverTrust, &result)
+        return result
     }
 
     public func evaluate(_ serverTrust: SecTrust, forHost domain: String) throws {

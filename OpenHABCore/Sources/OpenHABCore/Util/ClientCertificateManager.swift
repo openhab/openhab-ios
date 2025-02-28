@@ -283,13 +283,9 @@ public class ClientCertificateManager {
         guard status == errSecSuccess else { return nil }
         let trust = optionalTrust!
         var trustResult = SecTrustResultType.proceed
-        if #available(iOS 12.0, *) {
-            var trustError: CFError?
-            if SecTrustEvaluateWithError(trust, &trustError) != true {
-                SecTrustGetTrustResult(trust, &trustResult)
-            }
-        } else {
-            SecTrustEvaluate(trust, &trustResult)
+        var trustError: CFError?
+        if SecTrustEvaluateWithError(trust, &trustError) != true {
+            SecTrustGetTrustResult(trust, &trustResult)
         }
 
         let chainSize = SecTrustGetCertificateCount(trust)
@@ -301,16 +297,10 @@ public class ClientCertificateManager {
             os_log("Setting anchor for trust evaluation to %s", log: .default, type: .info, SecCertificateCopySubjectSummary(rootCA)! as String)
             SecTrustSetAnchorCertificates(trust, anchors as CFArray)
             trustResult = SecTrustResultType.proceed
-            if #available(iOS 12.0, *) {
-                var trustError: CFError?
-                if SecTrustEvaluateWithError(trust, &trustError) != true {
-                    os_log("Trust evaluation failed building client certificate chain after anchor has been set: %s", log: .default, type: .info, trustError.debugDescription)
-                    SecTrustGetTrustResult(trust, &trustResult)
-                }
-            } else {
-                if SecTrustEvaluate(trust, &trustResult) != errSecSuccess {
-                    os_log("Trust evaluation failed building client certificate chain after anchor has been set: SecTrustResultType=%u", log: .default, type: .info, trustResult.rawValue)
-                }
+            var trustError: CFError?
+            if SecTrustEvaluateWithError(trust, &trustError) != true {
+                os_log("Trust evaluation failed building client certificate chain after anchor has been set: %s", log: .default, type: .info, trustError.debugDescription)
+                SecTrustGetTrustResult(trust, &trustResult)
             }
         }
         if trustResult != .proceed {
