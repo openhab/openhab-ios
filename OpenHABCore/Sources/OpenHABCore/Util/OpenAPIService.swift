@@ -183,11 +183,11 @@ public extension OpenAPIService {
     }
 }
 
-extension OpenAPIService {
+public extension OpenAPIService {
     // Internal function for pollPage
-    func openHABpollPage(path: Operations.pollDataForPage.Input.Path,
-                         query: Operations.pollDataForPage.Input.Query = .init(),
-                         headers: Operations.pollDataForPage.Input.Headers) async throws -> OpenHABPage? {
+    internal func pollDataForPage(path: Operations.pollDataForPage.Input.Path,
+                                  query: Operations.pollDataForPage.Input.Query = .init(),
+                                  headers: Operations.pollDataForPage.Input.Headers) async throws -> OpenHABPage? {
         let result = try await client.pollDataForPage(path: path, query: query, headers: headers)
             .ok.body.json
         return OpenHABPage(result)
@@ -197,7 +197,7 @@ extension OpenAPIService {
     /// - Parameters:
     ///   - sitemapname: name of sitemap
     ///   - longPolling: set to true for long-polling
-    public func openHABpollPage(sitemapname: String, longPolling: Bool) async throws -> OpenHABPage? {
+    func pollDataForPage(sitemapname: String, longPolling: Bool) async throws -> OpenHABPage? {
         var headers = Operations.pollDataForPage.Input.Headers()
         if longPolling {
             logger.info("Long-polling, setting X-Atmosphere-Transport")
@@ -207,11 +207,11 @@ extension OpenAPIService {
         }
         let path = Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: sitemapname)
         await updateForLongPolling(longPolling)
-        return try await openHABpollPage(path: path, headers: headers)
+        return try await pollDataForPage(path: path, headers: headers)
     }
 
     // Internal function for pollSitemap
-    func openHABpollSitemap(path: Operations.pollDataForSitemap.Input.Path,
+    internal func pollDataForSitemap(path: Operations.pollDataForSitemap.Input.Path,
                             query: Operations.pollDataForSitemap.Input.Query = .init(),
                             headers: Operations.pollDataForSitemap.Input.Headers) async throws -> OpenHABSitemap? {
         let result = try await client.pollDataForSitemap(path: path, query: query, headers: headers)
@@ -219,7 +219,7 @@ extension OpenAPIService {
         return OpenHABSitemap(result)
     }
 
-    public func openHABpollSitemap(sitemapname: String, longPolling: Bool, subscriptionId: String? = nil) async throws -> OpenHABSitemap? {
+    func pollDataForSitemap(sitemapname: String, longPolling: Bool, subscriptionId: String? = nil) async throws -> OpenHABSitemap? {
         var headers = Operations.pollDataForSitemap.Input.Headers()
         if longPolling {
             logger.info("Long-polling, setting X-Atmosphere-Transport")
@@ -230,7 +230,7 @@ extension OpenAPIService {
         let query = Operations.pollDataForSitemap.Input.Query(subscriptionid: subscriptionId)
         let path = Operations.pollDataForSitemap.Input.Path(sitemapname: sitemapname)
         await updateForLongPolling(longPolling)
-        return try await openHABpollSitemap(path: path, query: query, headers: headers)
+        return try await pollDataForSitemap(path: path, query: query, headers: headers)
     }
 }
 

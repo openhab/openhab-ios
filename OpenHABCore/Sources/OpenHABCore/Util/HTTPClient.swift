@@ -76,25 +76,6 @@ public class HTTPClient: NSObject {
     }
 
     /**
-     Sends a POST request to a specified base URL for a specified path and returns the response data via a completion handler.
-
-     - Parameters:
-     - baseURL: The base URL to attempt the request from.
-     - path: An optional path component to append to the base URL.
-     - body: The string to include as the HTTP body of the request.
-     - completion: A closure to be executed once the request is complete. The closure takes three parameters:
-     - data: The data returned by the server. This will be `nil` if the request fails.
-     - response: The URL response object providing response metadata, such as HTTP headers and status code.
-     - error: An error object that indicates why the request failed, or `nil` if the request was successful.
-     */
-    public func doPost(baseURL: URL? = nil, path: String?, body: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionTask? {
-        doRequest(baseURL: baseURL, path: path, method: "POST", body: body) { result, response, error in
-            let data = result as? Data
-            completion(data, response, error)
-        }
-    }
-
-    /**
       Initiates a download request to a specified base URL for a specified path and returns the file URL via a completion handler.
 
       - Parameters:
@@ -118,24 +99,6 @@ public class HTTPClient: NSObject {
         return (fileURL1, response1)
     }
 
-    public func sendCommand(url: URL? = nil, itemName: String, command: String, completion: @escaping (String?, Error?) -> Void) -> URLSessionTask? {
-        os_log("sendCommand  %{public}@  %{public}@", log: .default, type: .debug, command, itemName)
-        return doPost(baseURL: url, path: "/rest/items/\(itemName)", body: command) { data, _, error in
-            if let error {
-                os_log("Could not send data %{public}@", log: .default, type: .error, error.localizedDescription)
-                completion(nil, error)
-            } else {
-                os_log("Request succeeded", log: .default, type: .info)
-                var returnValue = ""
-                if let data {
-                    returnValue = String(data: data, encoding: .utf8) ?? ""
-                    os_log("Data: %{public}@", log: .default, type: .debug, returnValue)
-                }
-                completion(returnValue, nil)
-            }
-        }
-    }
-
     public func loadSitemapData(url: URL? = nil,
                                 longPolling: Bool,
                                 refresh: Bool,
@@ -147,6 +110,22 @@ public class HTTPClient: NSObject {
         }
 
         os_log("Fetching page from URL %{public}@", log: .networking, type: .info, url?.absoluteString ?? "")
+
+        Task {
+            do {
+                let (data, _) = try await doRequest(baseURL: url, path: nil, method: "GET", headers: headers, timeout: timeout)
+                if let data = data as? Data {
+                    logger.info("Finsihed Fetching page from URL \(url?.absoluteString ?? "")")
+                    completion(data, nil)
+                } else {
+                    logger.error("No data from URL \(url?.absoluteString ?? "")")
+                    completion(nil, URLError(.unknown, userInfo: [NSLocalizedDescriptionKey: "No valid data received from server."]))
+                }
+            } catch {
+                logger.error("error fetching page from URL \(url?.absoluteString ?? "")")
+                completion(nil, error)
+            }
+        }
 
         return doRequest(baseURL: url, path: nil, method: "GET", headers: headers, timeout: timeout) { result, _, error in
             if let error {

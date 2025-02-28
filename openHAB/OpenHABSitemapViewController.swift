@@ -240,10 +240,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     override func viewWillDisappear(_ animated: Bool) {
         os_log("OpenHABSitemapViewController viewWillDisappear", log: .viewCycle, type: .info)
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
 
         trackerCancellables.removeAll()
 
@@ -271,10 +267,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     override func didEnterBackground(_ notification: Notification?) {
         super.didEnterBackground(notification)
         os_log("OpenHABSitemapViewController didEnterBackground", log: .viewCycle, type: .info)
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
     }
 
     @objc
@@ -354,16 +346,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     // load our page and show it into UITableView
     func loadPage(_ longPolling: Bool) {
-        if currentPageOperation != nil {
-            currentPageOperation?.cancel()
-            currentPageOperation = nil
-        }
-
-        //        if asyncOperation != nil {
-        //            asyncOperation?.cancel()
-        //            asyncOperation = nil
-        //        }
-
         if pageUrl == "" {
             return
         }
@@ -389,7 +371,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 //                    }
 //                }
 
-                currentPage = try await openAPIService?.openHABpollPage(sitemapname: defaultSitemap, longPolling: longPolling)
+                currentPage = try await openAPIService?.pollDataForPage(sitemapname: defaultSitemap, longPolling: longPolling)
 
                 if isFiltering {
                     filterContentForSearchText(search.searchBar.text)

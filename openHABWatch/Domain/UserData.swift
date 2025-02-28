@@ -28,6 +28,7 @@ final class UserData: ObservableObject {
 
     private var commandOperation: URLSessionTask?
     private var currentPageOperation: URLSessionTask?
+    private var activePageTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
@@ -119,8 +120,8 @@ final class UserData: ObservableObject {
                     ObservableOpenHABDataObject.shared.openHABRootUrl = activeConnection.configuration.url
                     ObservableOpenHABDataObject.shared.openHABVersion = activeConnection.version
 
-                    let url = Endpoint.watchSitemap(openHABRootUrl: activeConnection.configuration.url, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
-                    self?.loadPage(url: url, longPolling: false, refresh: true)
+                    // TODE Update RootURL
+                    self?.loadPage(sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch, longPolling: false, refresh: true)
                 }
             }
             .store(in: &cancellables)
@@ -147,60 +148,39 @@ final class UserData: ObservableObject {
         }
     }
 
-    func loadPage(url: URL? = nil, longPolling: Bool, refresh: Bool) {
-        logger.info("Loading page \(url?.absoluteString ?? "") longPolling \(longPolling) refresh \(refresh)")
+    func loadPage(sitemapName: String, longPolling: Bool, refresh: Bool) {
+        logger.info("Loading page \(sitemapName) longPolling \(longPolling) refresh \(refresh)")
 
-        // Cancel any running operation
-        if let currentPageOperation, currentPageOperation.state == .running {
-            currentPageOperation.cancel()
-        }
+        // Cancel the active task if it is running
+        activePageTask?.cancel()
 
-        currentPageOperation = NetworkTracker.shared.httpClient?.loadSitemapData(url: url, longPolling: longPolling, refresh: refresh) { [weak self] data, error in
+        activePageTask = Task { [weak self] in
             guard let self else { return }
-            currentPageOperation = nil
-
-            if let error = error as? URLError, error.code == .cancelled {
-                logger.info("Task was canceled")
-                return
-            }
-
-            var errorString: String?
-
-            if error != nil || data == nil {
-                errorString = error?.localizedDescription ?? "No data received"
-            }
-
-            if errorString == nil {
-                do {
-                    let sitemapPageCodingData = try data!.decoded(as: OpenHABPage.CodingData.self)
-                    openHABSitemapPage = sitemapPageCodingData.openHABSitemapPage
-                } catch {
-                    logger.error("Decoding error: \(error.localizedDescription)")
-                    errorString = error.localizedDescription
+            do {
+                guard let openAPIService = NetworkTracker.shared.openApiService else { return }
+                openHABSitemapPage = try await openAPIService.pollDataForPage(sitemapname: sitemapName, longPolling: longPolling)
+                // Configures then sendCommand closure (existing logic)
+                openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                    self?.sendCommand(item, command: command)
                 }
-            }
-
-            if let errorString {
-                DispatchQueue.main.async {
-                    self.logger.error("On LoadPage \"\(errorString)\"")
-                    self.errorDescription = errorString
-                    self.widgets = []
-                    self.showAlert = true
+                // Always update UI on the main thread
+                await MainActor.run {
+                    self.widgets = self.openHABSitemapPage?.widgets ?? []
+                    self.showAlert = self.widgets.isEmpty
+                    if refresh {
+                        self.loadPage(sitemapName: sitemapName, longPolling: true, refresh: true)
+                    }
                 }
-                return
-            }
-
-            // Configures then sendCommand closure (existing logic)
-            openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                self?.sendCommand(item, command: command)
-            }
-
-            // Always update UI on the main thread
-            DispatchQueue.main.async {
-                self.widgets = self.openHABSitemapPage?.widgets ?? []
-                self.showAlert = self.widgets.isEmpty
-                if refresh {
-                    self.loadPage(url: url, longPolling: true, refresh: true)
+            } catch {
+                if Task.isCancelled {
+                    logger.info("Task was canceled")
+                } else {
+                    logger.error("Polling failed with error \(error)")
+                    await MainActor.run {
+                        self.logger.error("On LoadPage \"\(error.localizedDescription)\"")
+                        self.widgets = []
+                        self.showAlert = true
+                    }
                 }
             }
         }
@@ -211,11 +191,12 @@ final class UserData: ObservableObject {
             commandOperation.cancel()
         }
         if let item, let command {
-            commandOperation = NetworkTracker.shared.httpClient?.sendCommand(itemName: item.name, command: command) { _, error in
-                if error != nil {
-                    self.logger.error("Error sending command \(command) to \(item.name): \(error!.localizedDescription)")
+            Task {
+                do {
+                    try await NetworkTracker.shared.openApiService?.sendItemCommand(itemname: item.name, command: command)
+                } catch {
+                    logger.error("Error sending command \(command) to \(item.name): \(error.localizedDescription)")
                 }
-                self.commandOperation = nil
             }
         }
     }
@@ -223,8 +204,8 @@ final class UserData: ObservableObject {
     func refreshUrl() {
         if ObservableOpenHABDataObject.shared.haveReceivedAppContext, !ObservableOpenHABDataObject.shared.openHABRootUrl.isEmpty {
             showAlert = false
-            let url = Endpoint.watchSitemap(openHABRootUrl: ObservableOpenHABDataObject.shared.openHABRootUrl, sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch).url
-            loadPage(url: url, longPolling: false, refresh: true)
+            // TODO: Update
+            loadPage(sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch, longPolling: false, refresh: true)
         }
     }
 }

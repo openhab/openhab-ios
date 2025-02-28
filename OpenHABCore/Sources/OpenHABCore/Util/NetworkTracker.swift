@@ -52,7 +52,6 @@ public final class NetworkTracker: ObservableObject {
 
     @Published public private(set) var activeConnection: ConnectionInfo?
     @Published public private(set) var status: NetworkStatus = .connecting
-    public private(set) var httpClient: HTTPClient?
     public private(set) var openApiService: OpenAPIService?
 
     private let monitor: NWPathMonitor
@@ -69,7 +68,6 @@ public final class NetworkTracker: ObservableObject {
     private init() {
         monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { [weak self] path in
-            guard self?.httpClient != nil else { return }
             guard self?.openApiService != nil else { return }
             if path.status == .satisfied {
                 os_log("Network status: Connected", log: OSLog.default, type: .info)
@@ -86,7 +84,6 @@ public final class NetworkTracker: ObservableObject {
     public func startTracking(connectionConfigurations: [ConnectionConfiguration], username: String, password: String, alwaysSendBasicAuth: Bool, ignoreSSLVerification: Bool) {
         os_log("NetworkConnection: startTracking", log: OSLog.default, type: .info)
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
-        httpClient = HTTPClient(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
         Task {
             openApiService = await OpenAPIService(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
         }
@@ -259,7 +256,6 @@ public final class NetworkTracker: ObservableObject {
         activeConnection = connection
         if let activeConnection {
             updateStatus(.connected)
-            httpClient?.baseURL = URL(string: activeConnection.configuration.url)
             Task {
                 await openApiService?.updateBaseURL(with: URL(string: activeConnection.configuration.url) ?? URL(staticString: "about:blank"))
             }
