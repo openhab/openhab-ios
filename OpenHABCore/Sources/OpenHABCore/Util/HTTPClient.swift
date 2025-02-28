@@ -38,6 +38,7 @@ private enum HTTPClientError: Error {
 }
 
 public class HTTPClient: NSObject {
+
     // MARK: - Properties
 
     public enum CertificateEvaluateResult {
@@ -46,6 +47,8 @@ public class HTTPClient: NSObject {
         case permitOnce
         case permitAlways
     }
+
+    public static let share = HTTPClient()
 
     // this can be changed if we detect another server
     public var baseURL: URL?
@@ -59,7 +62,7 @@ public class HTTPClient: NSObject {
     private var trustedCertificates: [String: Data] = [:]
     private var authAttemptCounts = [URLSessionTask: Int]()
 
-    public init(baseURL: URL? = nil, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
+    public init(baseURL: URL? = nil, username: String = "", password: String = "", alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
         self.baseURL = baseURL
         self.username = username
         self.password = password
@@ -73,6 +76,28 @@ public class HTTPClient: NSObject {
 
         session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         initializeCertificatesStore()
+    }
+
+    @discardableResult
+    public func register(prefsURL: String,
+                         deviceToken: String,
+                         deviceId: String,
+                         deviceName: String) async throws -> Data? {
+        if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
+            let (data, _) = try await doRequest(endPoint: url, method: "GET", download: false)
+            return data as? Data
+        } else {
+            throw NetworkConnectionError.couldNotRegister
+        }
+    }
+
+    public func notification(urlString: String) async throws -> Data? {
+        if let url = Endpoint.notification(prefsURL: urlString).url {
+            let (data, _) = try await doRequest(endPoint: url, method: "GET", download: false)
+            return data as? Data
+        } else {
+            throw NetworkConnectionError.couldNotLoadNotification
+        }
     }
 
     /**
@@ -99,22 +124,12 @@ public class HTTPClient: NSObject {
         return (fileURL1, response1)
     }
 
-    public func doRequest(baseURL: URL?,
-                          path: String?,
+    public func doRequest(endPoint url: URL,
                           method: String,
                           headers: [String: String]? = nil,
                           timeout: TimeInterval = 60.0,
                           body: String? = nil,
                           download: Bool = false) async throws -> (Any?, URLResponse?) {
-        guard var url = baseURL ?? self.baseURL else {
-            os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
-            throw HTTPClientError.baseURLIsNil
-        }
-
-        if let path {
-            url.appendPathComponent(path)
-        }
-
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.timeoutInterval = timeout
@@ -139,6 +154,24 @@ public class HTTPClient: NSObject {
             }
         }
         fatalError()
+    }
+
+    public func doRequest(baseURL: URL?,
+                          path: String?,
+                          method: String,
+                          headers: [String: String]? = nil,
+                          timeout: TimeInterval = 60.0,
+                          body: String? = nil,
+                          download: Bool = false) async throws -> (Any?, URLResponse?) {
+        guard var url = baseURL ?? self.baseURL else {
+            os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
+            throw HTTPClientError.baseURLIsNil
+        }
+
+        if let path {
+            url.appendPathComponent(path)
+        }
+        return try await doRequest(endPoint: url, method: method, headers: headers, timeout: timeout, body: body, download: download)
     }
 
     private func performRequest(request: URLRequest, download: Bool) async throws -> (Any?, URLResponse?) {

@@ -85,21 +85,17 @@ struct NotificationsView: View {
     }
 
     private func loadNotifications() {
-        NetworkConnection.notification(urlString: Preferences.remoteUrl) { response in
-            DispatchQueue.main.async {
-                switch response.result {
-                case let .success(data):
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
-                        notifications = codingDatas.map(\.openHABNotification)
-                    } catch {
-                        os_log("%{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                    }
-                case let .failure(error):
-                    os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+        Task {
+            do {
+                let data = try await NetworkConnection.notification(urlString: Preferences.remoteUrl)
+                try await MainActor.run {
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                    let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+                    notifications = codingDatas.map(\.openHABNotification)
                 }
+            } catch {
+                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
             }
         }
     }

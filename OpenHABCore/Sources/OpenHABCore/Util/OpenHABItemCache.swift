@@ -32,6 +32,7 @@ public class OpenHABItemCache {
             url: Preferences.remoteUrl,
             priority: 1
         )
+
         NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
     }
 
@@ -69,22 +70,35 @@ public class OpenHABItemCache {
     }
 
     public func sendCommand(_ item: OpenHABItem, commandToSend command: String) {
-        let commandOperation = NetworkConnection.sendCommand(item: item, commandToSend: command)
-        commandOperation?.resume()
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                Task {
+                    await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
+                    try await NetworkTracker.shared.openApiService?.sendItemCommand(itemname: item.name, command: command)
+                }
+            }
+        }
     }
 
-    public func sendState(_ item: OpenHABItem, stateToSend command: String) {
-        let commandOperation = NetworkConnection.sendState(item: item, stateToSend: command)
-        commandOperation?.resume()
+    public func sendState(_ item: OpenHABItem, stateToSend state: String) {
+        NetworkTracker.shared.waitForActiveConnection { activeConnection in
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
+                Task {
+                    await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
+                    try await NetworkTracker.shared.openApiService?.updateItemState(itemname: item.name, with: state)
+                }
+            }
+        }
     }
 
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
         NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if (activeConnection?.configuration.url) != nil {
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
                 os_log("OpenHABItemCache Loading items ")
                 self.lastLoad = Date().timeIntervalSince1970
                 Task {
                     do {
+                        await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
                         self.items = try await NetworkTracker.shared.openApiService?.getItems()
                         os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
 
@@ -108,9 +122,10 @@ public class OpenHABItemCache {
 
     public func reload(name: String, completion: @escaping (OpenHABItem?) -> Void) {
         NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if (activeConnection?.configuration.url) != nil {
+            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
                 Task {
                     do {
+                        await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
                         self.items = try await NetworkTracker.shared.openApiService?.getItems()
                         os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
                         let ret = self.items?.filter {

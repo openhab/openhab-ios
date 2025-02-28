@@ -60,6 +60,11 @@ public protocol CommItem {
     var link: String { get set }
 }
 
+enum NetworkConnectionError: Error {
+    case couldNotRegister
+    case couldNotLoadNotification
+}
+
 public class NetworkConnection {
     public static var shared: NetworkConnection!
 
@@ -91,76 +96,44 @@ public class NetworkConnection {
         )
     }
 
+    @discardableResult
     public static func register(prefsURL: String,
                                 deviceToken: String,
                                 deviceId: String,
-                                deviceName: String, completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
+                                deviceName: String) async throws -> Data {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-            load(from: url, completionHandler: completionHandler)
+            return try await load(from: url)
+        } else {
+            throw NetworkConnectionError.couldNotRegister
         }
     }
 
-    public static func notification(urlString: String,
-                                    completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
+    public static func notification(urlString: String) async throws -> Data {
         if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
-            load(from: notificationsUrl, completionHandler: completionHandler)
+            return try await load(from: notificationsUrl)
+        } else {
+            throw NetworkConnectionError.couldNotLoadNotification
         }
     }
 
-    public static func sendState(item: CommItem, stateToSend state: String?) -> DataRequest? {
-        sendCommandOrState(item: item, commandToSend: state, state: true)
-    }
-
-    public static func sendCommand(item: CommItem, commandToSend command: String?) -> DataRequest? {
-        sendCommandOrState(item: item, commandToSend: command, state: false)
-    }
-
-    public static func sendCommandOrState(item: CommItem, commandToSend command: String?, state: Bool) -> DataRequest? {
-        if var commandUrl = URL(string: item.link) {
-            if state {
-                commandUrl = commandUrl.appendingPathComponent("/state")
-            }
-
-            var commandRequest = URLRequest(url: commandUrl)
-
-            if state {
-                commandRequest.httpMethod = "PUT"
-            } else {
-                commandRequest.httpMethod = "POST"
-            }
-
-            commandRequest.httpBody = command?.data(using: .utf8)
-
-            commandRequest.setValue("text/plain", forHTTPHeaderField: "Content-type")
-
-            os_log("Timeout %{PUBLIC}g", log: .default, type: .info, commandRequest.timeoutInterval)
-            let link = item.link
-            os_log("OpenHABViewController posting %{PUBLIC}@ command to %{PUBLIC}@", log: .default, type: .info, command ?? "", link)
-            os_log("%{PUBLIC}@", log: .default, type: .info, commandRequest.debugDescription)
-
-            return NetworkConnection.shared.manager.request(commandRequest)
-                .validate()
-                .responseData { response in
-                    switch response.result {
-                    case .success:
-                        os_log("Command sent!", log: .remoteAccess, type: .info)
-                    case let .failure(error):
-                        os_log("%{PUBLIC}@ %d", log: .default, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
-                    }
-                }
-        }
-        return nil
-    }
-
-    static func load(from url: URL, timeout: Double? = nil, completionHandler: @escaping (DataResponse<Data, AFError>) -> Void) {
+    static func load(from url: URL, timeout: Double? = nil) async throws -> Data {
         var request = URLRequest(url: url)
         request.timeoutInterval = timeout ?? 10.0
 
         os_log("Firing request", log: .viewCycle, type: .debug)
-        let task = NetworkConnection.shared.manager.request(request)
-            .validate()
-            .responseData(completionHandler: completionHandler)
-        task.resume()
+
+        return try await withCheckedThrowingContinuation { continuation in
+            NetworkConnection.shared.manager.request(request)
+                .validate()
+                .responseData { response in
+                    switch response.result {
+                    case let .success(data):
+                        continuation.resume(returning: data)
+                    case let .failure(error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+        }
     }
 
     public func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {

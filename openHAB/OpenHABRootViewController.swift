@@ -305,12 +305,12 @@ class OpenHABRootViewController: UIViewController {
             if prefsURL.contains("openhab.org") {
                 guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
-                NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) { response in
-                    switch response.result {
-                    case .success:
+                Task {
+                    do {
+                        try await NetworkConnection.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
                         os_log("my.openHAB registration sent", log: .notifications, type: .info)
-                    case let .failure(error):
-                        os_log("my.openHAB registration failed %{PUBLIC}@ %d", log: .notifications, type: .error, error.localizedDescription, response.response?.statusCode ?? 0)
+                    } catch {
+                        os_log("my.openHAB registration failed %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
                     }
                 }
             }
