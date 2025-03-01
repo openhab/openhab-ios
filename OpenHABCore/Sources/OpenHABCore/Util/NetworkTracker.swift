@@ -53,6 +53,7 @@ public final class NetworkTracker: ObservableObject {
     @Published public private(set) var activeConnection: ConnectionInfo?
     @Published public private(set) var status: NetworkStatus = .connecting
     public private(set) var openApiService: OpenAPIService?
+    public private(set) var httpClient: HTTPClient?
 
     private let monitor: NWPathMonitor
     private let monitorQueue = DispatchQueue.global(qos: .background)

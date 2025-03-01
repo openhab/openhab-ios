@@ -19,23 +19,8 @@ struct ImageRow: View {
     @EnvironmentObject var settings: ObservableOpenHABDataObject
 
     var body: some View {
-        WebImage(
-            url: url,
-            options: settings.ignoreSSL ? [.allowInvalidSSLCertificates] : [],
-            context: [
-                .imageThumbnailPixelSize: CGSize.zero
-            ]
-        ) { image in
-            image.resizable()
-
-        } placeholder: {
-            Image(systemSymbol: .arrowTriangle2CirclepathCircle)
-                .font(.callout)
-                .opacity(0.3)
-        }
-        .cancelOnDisappear(true)
-        .transition(.fade(duration: 0.3))
-        .scaledToFit()
+        DownloadableImageView(url: url)
+            .transition(.fade(duration: 0.3)).id(url?.absoluteString ?? "")
     }
 }
 
