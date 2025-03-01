@@ -22,88 +22,6 @@ enum DownloadableImageError: Error {
     case nohttpClient
 }
 
-struct DownloadableImageView: View {
-    let url: URL?
-    @StateObject private var imageLoader = SVGImageLoader()
-    @State private var isLoading = true
-    private var asyncOperation: Task<Int, Never>?
-    private let logger = Logger(subsystem: "org.openhab.app", category: "DownloadableImageView")
-
-    var body: some View {
-        Group {
-            if let uiImage = imageLoader.uiImage {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .id(uiImage) // Forces re-render
-            } else if isLoading {
-                ProgressView()
-            } else {
-                Image(systemSymbol: .arrowTriangle2CirclepathCircle)
-                    .font(.callout)
-                    .opacity(0.3)
-            }
-        }
-        .onAppear {
-            fetchImage()
-        }
-        .onDisappear { cancelDownload() }
-        .scaledToFit()
-    }
-
-    // Add an explicit initializer
-    init(url: URL?) {
-        self.url = url
-    }
-
-    private func fetchImage() {
-        print("Fetching Image from \(String(describing: url))")
-        guard let url else {
-            print("fetchImage() skipped: URL is nil")
-            isLoading = false
-            return
-        }
-
-        // Check cache first
-        if let cachedImage = ImageCacheManager.shared.getCachedImage(for: url) {
-            print("Loaded from cache: \(url)")
-            imageLoader.updateImage(cachedImage)
-            return
-        }
-
-        print("Fetching fresh image from \(url)")
-        let asyncOperation = Task {
-            do {
-                guard let client = NetworkTracker.shared.httpClient else {
-                    throw DownloadableImageError.nohttpClient
-                }
-                let (data, urlresponse): (Data, URLResponse) = try await client.doRequest(baseURL: url, type: .data)
-                try await MainActor.run {
-                    let scaleFactor = WKInterfaceDevice.current().screenScale
-                    let options: [SDImageCoderOption: Any] = [
-                        .decodeScaleFactor: scaleFactor,
-                        .decodeThumbnailPixelSize: CGSize(width: 200, height: 200)
-                    ]
-
-                    if let image = SDImageCodersManager.shared.decodedImage(with: data, options: options) {
-                        logger.info("Downloaded and decoded image from \(url)")
-                        ImageCacheManager.shared.cacheImage(image, for: url) // Cache it
-                        imageLoader.updateImage(image)
-                    } else {
-                        throw DownloadableImageError.failedToDecode
-                    }
-                }
-            } catch {
-                logger.error("Image loading failed")
-            }
-        }
-    }
-
-    private func cancelDownload() {
-        asyncOperation?.cancel()
-    }
-}
-
 class SVGImageLoader: ObservableObject {
     @Published var uiImage: UIImage?
 
@@ -149,5 +67,87 @@ class CachedImage: NSObject {
     init(image: UIImage, timestamp: Date) {
         self.image = image
         self.timestamp = timestamp
+    }
+}
+
+struct DownloadableImageView: View {
+    let url: URL?
+    @StateObject private var imageLoader = SVGImageLoader()
+    @State private var isLoading = true
+    @State private var asyncOperation: Task<Void, Never>?
+    private let logger = Logger(subsystem: "org.openhab.app", category: "DownloadableImageView")
+
+    var body: some View {
+        Group {
+            if let uiImage = imageLoader.uiImage {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .id(uiImage) // Forces re-render
+            } else if isLoading {
+                ProgressView()
+            } else {
+                Image(systemSymbol: .arrowTriangle2CirclepathCircle)
+                    .font(.callout)
+                    .opacity(0.3)
+            }
+        }
+        .onAppear {
+            fetchImage()
+        }
+        .onDisappear { cancelDownload() }
+        .scaledToFit()
+    }
+
+    // Add an explicit initializer
+    init(url: URL?) {
+        self.url = url
+    }
+
+    private func fetchImage() {
+        print("Fetching Image from \(String(describing: url))")
+        guard let url else {
+            print("fetchImage() skipped: URL is nil")
+            isLoading = false
+            return
+        }
+
+        // Check cache first
+        if let cachedImage = ImageCacheManager.shared.getCachedImage(for: url) {
+            print("Loaded from cache: \(url)")
+            imageLoader.updateImage(cachedImage)
+            return
+        }
+
+        print("Fetching fresh image from \(url)")
+        asyncOperation = Task {
+            do {
+                guard let client = NetworkTracker.shared.httpClient else {
+                    throw DownloadableImageError.nohttpClient
+                }
+                let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, type: .data)
+                try await MainActor.run {
+                    let scaleFactor = WKInterfaceDevice.current().screenScale
+                    let options: [SDImageCoderOption: Any] = [
+                        .decodeScaleFactor: scaleFactor,
+                        .decodeThumbnailPixelSize: CGSize(width: 200, height: 200)
+                    ]
+
+                    if let image = SDImageCodersManager.shared.decodedImage(with: data, options: options) {
+                        logger.info("Downloaded and decoded image from \(url)")
+                        ImageCacheManager.shared.cacheImage(image, for: url) // Cache it
+                        imageLoader.updateImage(image)
+                    } else {
+                        throw DownloadableImageError.failedToDecode
+                    }
+                }
+            } catch {
+                logger.error("Image loading failed")
+            }
+        }
+    }
+
+    private func cancelDownload() {
+        asyncOperation?.cancel()
     }
 }

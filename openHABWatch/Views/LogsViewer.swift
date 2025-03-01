@@ -66,14 +66,25 @@ public extension Logger {
 }
 
 struct LogsViewer: View {
-    @State private var text = "Loading..."
-
     private static let template = NSPredicate(format:
         "(subsystem BEGINSWITH $PREFIX)")
+
+    @State private var text = "Loading..."
 
     let myFont = Font
         .system(size: 10)
         .monospaced()
+
+    var body: some View {
+        ScrollView {
+            Text(text)
+                .font(myFont)
+                .padding()
+        }
+        .task {
+            text = await fetchLogs()
+        }
+    }
 
     private func fetchLogs() async -> String {
         let calendar = Calendar.current
@@ -98,17 +109,6 @@ struct LogsViewer: View {
             return logs.joined()
         } catch {
             return error.localizedDescription
-        }
-    }
-
-    var body: some View {
-        ScrollView {
-            Text(text)
-                .font(myFont)
-                .padding()
-        }
-        .task {
-            text = await fetchLogs()
         }
     }
 }
