@@ -122,9 +122,9 @@ public final class NetworkTracker: ObservableObject {
         // Check if the active connection is reachable
         if let url = URL(string: activeConnection.configuration.url) {
             os_log("checkActiveConnection trying %{PUBLIC}@", log: OSLog.default, type: .info, url.absoluteString)
-
             Task {
                 do {
+                    await openApiService?.updateBaseURL(with: url)
                     try await openApiService?.getRoot()
                     logger.info("Network status: Active connection is reachable: \(activeConnection.configuration.url)")
                 } catch {

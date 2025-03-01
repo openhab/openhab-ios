@@ -12,8 +12,6 @@
 import Foundation
 import os
 
-private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient")
-
 private enum HTTPClientError: Error {
     case serverTrustEvaluationFailed(reason: String)
     case noDataforItem
@@ -76,6 +74,8 @@ public class HTTPClient: NSObject {
     private var trustedCertificates: [String: Data] = [:]
     private var authAttemptCounts = [URLSessionTask: Int]()
 
+    private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient")
+
     public init(baseURL: URL? = nil, username: String = "", password: String = "", alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
         self.baseURL = baseURL
         self.username = username
@@ -92,9 +92,9 @@ public class HTTPClient: NSObject {
         initializeCertificatesStore()
     }
 
-    private func processStream(url: URL) async throws -> (URLSession.AsyncBytes, URLResponse) {
+    public func processStream(url: URL) async throws -> (URLSession.AsyncBytes, URLResponse) {
         do {
-            return try await doRequest(baseURL: url, method: "GET", type: .bytes)
+            return try await doRequest(baseURL: url, type: .bytes)
         } catch {
             os_log("Failed to fetch MJPEG stream: %@", log: .default, type: .error, error.localizedDescription)
             throw HTTPClientError.failedtoFetchMJPEG
@@ -107,7 +107,7 @@ public class HTTPClient: NSObject {
                          deviceId: String,
                          deviceName: String) async throws -> Data? {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-            let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, method: "GET", type: .data)
+            let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, type: .data)
             return data
         } else {
             throw HTTPClientError.couldNotRegister
@@ -116,7 +116,7 @@ public class HTTPClient: NSObject {
 
     public func notification(urlString: String) async throws -> Data {
         if let url = Endpoint.notification(prefsURL: urlString).url {
-            let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, method: "GET", type: .data)
+            let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, type: .data)
             return data
         } else {
             throw HTTPClientError.couldNotLoadNotification
@@ -134,14 +134,13 @@ public class HTTPClient: NSObject {
       */
 
     public func downloadFile(url: URL) async throws -> (URL, URLResponse) {
-        let (fileURL, response): (URL, URLResponse) = try await doRequest(baseURL: url, path: nil, method: "GET", type: .download)
+        let (fileURL, response): (URL, URLResponse) = try await doRequest(baseURL: url, path: nil, type: .download)
 
         return (fileURL, response)
     }
 
     public func doRequest<T>(baseURL: URL?,
                              path: String? = nil,
-                             method: String,
                              headers: [String: String]? = nil,
                              timeout: TimeInterval = 60.0,
                              body: String? = nil,
@@ -156,7 +155,7 @@ public class HTTPClient: NSObject {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = method
+        request.httpMethod = "GET"
         request.timeoutInterval = timeout
         if let headers {
             for (key, value) in headers {

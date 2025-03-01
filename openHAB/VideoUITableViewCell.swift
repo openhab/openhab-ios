@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import AVFoundation
 import AVKit
 import OpenHABCore
@@ -39,7 +38,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
     private var mainImageView: UIImageView!
     private var playerObserver: NSKeyValueObservation?
     private var aspectRatioConstraint: NSLayoutConstraint?
-    private var mjpegRequest: Alamofire.Request?
+    private var activeTask: Task<Void, Never>?
     private var session: URLSession!
     private var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -154,7 +153,7 @@ class VideoUITableViewCell: GenericUITableViewCell {
             return
         }
 
-        if mjpegRequest != nil {
+        if activeTask != nil {
             return
         }
 
@@ -164,38 +163,44 @@ class VideoUITableViewCell: GenericUITableViewCell {
         streamRequest.timeoutInterval = 10.0
 
         let streamImageInitialBytePattern = Data([255, 216])
-        var imageData = Data()
-        mjpegRequest = NetworkConnection.shared.manager.streamRequest(streamRequest)
-            .validate()
-            .responseStream { stream in
-                switch stream.event {
-                case let .stream(result):
-                    switch result {
-                    case let .success(data):
-                        if data.starts(with: streamImageInitialBytePattern) {
-                            if let image = UIImage(data: imageData) {
-                                DispatchQueue.main.async {
-                                    if self.mainImageView?.image == nil {
-                                        let aspectRatio = image.size.width / image.size.height
-                                        self.activityIndicator.isHidden = true
-                                        self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                            self.didLoad?()
-                                        }
-                                    }
-                                    self.mainImageView?.image = image
+
+        activeTask = Task {
+            do {
+                let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+                let (byteStream, _) = try await client.processStream(url: url)
+                await handleMJPEGStream(byteStream)
+            } catch {
+                os_log("Failed to start MJPEG stream: %@", log: .decoding, type: .error, error.localizedDescription)
+            }
+        }
+
+        func handleMJPEGStream(_ byteStream: URLSession.AsyncBytes) async {
+            var imageData = Data()
+
+            do {
+                for try await byte in byteStream {
+                    imageData.append(byte)
+
+                    if imageData.starts(with: streamImageInitialBytePattern), let image = UIImage(data: imageData) {
+                        await MainActor.run {
+                            if self.mainImageView?.image == nil {
+                                let aspectRatio = image.size.width / image.size.height
+                                self.activityIndicator.isHidden = true
+                                self.updateAspectRatio(forView: self.mainImageView, aspectRatio: aspectRatio)
+                                Task {
+                                    try? await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
+                                    self.didLoad?()
                                 }
                             }
-                            imageData = Data()
+                            self.mainImageView?.image = image
                         }
-                        imageData.append(data)
+                        imageData = Data() // Reset for the next image
                     }
-                case let .complete(completion):
-                    os_log("Failed to decode stream", log: .decoding, type: .debug, completion.error?.localizedDescription ?? "")
                 }
+            } catch {
+                os_log("Failed to process MJPEG stream: %@", log: .decoding, type: .error, error.localizedDescription)
             }
-
-        mjpegRequest?.resume()
+        }
     }
 
     private func updateAspectRatio(forView view: UIView?, aspectRatio: CGFloat) {
@@ -228,8 +233,9 @@ class VideoUITableViewCell: GenericUITableViewCell {
         }
         playerObserver = nil
         playerView?.playerLayer.player = nil
-        mjpegRequest?.cancel()
-        mjpegRequest = nil
+        // Cancel the active task if it is running
+        activeTask?.cancel()
+        activeTask = nil
         mainImageView?.image = nil
     }
 }
