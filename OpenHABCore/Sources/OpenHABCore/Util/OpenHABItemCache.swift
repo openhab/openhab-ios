@@ -21,9 +21,6 @@ public class OpenHABItemCache {
     var lastLoad = Date().timeIntervalSince1970
 
     private init() {
-        if NetworkConnection.shared == nil {
-            NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: nil)
-        }
         let connection1 = ConnectionConfiguration(
             url: Preferences.localUrl,
             priority: 0

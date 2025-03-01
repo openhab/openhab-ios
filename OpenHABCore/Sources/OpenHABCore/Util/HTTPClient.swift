@@ -20,6 +20,9 @@ private enum HTTPClientError: Error {
     case noDataForProperties
     case baseURLIsNil
     case httpError(Int)
+    case couldNotRegister
+    case couldNotLoadNotification
+    case failedtoFetchMJPEG
 
     var debugDescription: String {
         switch self {
@@ -33,6 +36,12 @@ private enum HTTPClientError: Error {
             "Base URL is nil"
         case let .httpError(statusCode):
             "HTTP error \(statusCode)"
+        case .couldNotRegister:
+            "Could not register"
+        case .couldNotLoadNotification:
+            "Could not load notification"
+        case .failedtoFetchMJPEG:
+            "Failed to fetch MJPEG"
         }
     }
 }
@@ -45,6 +54,12 @@ public class HTTPClient: NSObject {
         case deny
         case permitOnce
         case permitAlways
+    }
+
+    public enum SessionType {
+        case download
+        case data
+        case bytes
     }
 
     public static let share = HTTPClient()
@@ -77,25 +92,34 @@ public class HTTPClient: NSObject {
         initializeCertificatesStore()
     }
 
+    private func processStream(url: URL) async throws -> (URLSession.AsyncBytes, URLResponse) {
+        do {
+            return try await doRequest(baseURL: url, method: "GET", type: .bytes)
+        } catch {
+            os_log("Failed to fetch MJPEG stream: %@", log: .default, type: .error, error.localizedDescription)
+            throw HTTPClientError.failedtoFetchMJPEG
+        }
+    }
+
     @discardableResult
     public func register(prefsURL: String,
                          deviceToken: String,
                          deviceId: String,
                          deviceName: String) async throws -> Data? {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-            let (data, _) = try await doRequest(endPoint: url, method: "GET", download: false)
-            return data as? Data
+            let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, method: "GET", type: .data)
+            return data
         } else {
-            throw NetworkConnectionError.couldNotRegister
+            throw HTTPClientError.couldNotRegister
         }
     }
 
-    public func notification(urlString: String) async throws -> Data? {
+    public func notification(urlString: String) async throws -> Data {
         if let url = Endpoint.notification(prefsURL: urlString).url {
-            let (data, _) = try await doRequest(endPoint: url, method: "GET", download: false)
-            return data as? Data
+            let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, method: "GET", type: .data)
+            return data
         } else {
-            throw NetworkConnectionError.couldNotLoadNotification
+            throw HTTPClientError.couldNotLoadNotification
         }
     }
 
@@ -110,25 +134,27 @@ public class HTTPClient: NSObject {
       */
 
     public func downloadFile(url: URL) async throws -> (URL, URLResponse) {
-        let (result, response) = try await doRequest(baseURL: url, path: nil, method: "GET", download: true)
+        let (fileURL, response): (URL, URLResponse) = try await doRequest(baseURL: url, path: nil, method: "GET", type: .download)
 
-        let fileURL = result as? URL
-
-        guard let fileURL1 = fileURL else {
-            fatalError("Expected non-nil result 'fileURL1' in the non-error case")
-        }
-        guard let response1 = response else {
-            fatalError("Expected non-nil result 'response1' in the non-error case")
-        }
-        return (fileURL1, response1)
+        return (fileURL, response)
     }
 
-    public func doRequest(endPoint url: URL,
-                          method: String,
-                          headers: [String: String]? = nil,
-                          timeout: TimeInterval = 60.0,
-                          body: String? = nil,
-                          download: Bool = false) async throws -> (Any?, URLResponse?) {
+    public func doRequest<T>(baseURL: URL?,
+                             path: String? = nil,
+                             method: String,
+                             headers: [String: String]? = nil,
+                             timeout: TimeInterval = 60.0,
+                             body: String? = nil,
+                             type: SessionType) async throws -> (T, URLResponse) {
+        guard var url = baseURL ?? self.baseURL else {
+            os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
+            throw HTTPClientError.baseURLIsNil
+        }
+
+        if let path {
+            url.appendPathComponent(path)
+        }
+
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.timeoutInterval = timeout
@@ -142,7 +168,7 @@ public class HTTPClient: NSObject {
             request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
         }
 
-        let (result, response) = try await performRequest(request: request, download: download)
+        let (result, response): (T, URLResponse) = try await performRequest(request: request, type: type)
         if let response = response as? HTTPURLResponse {
             if (400 ... 599).contains(response.statusCode) {
                 os_log("HTTP error from URL %{public}@ : %{public}d", log: .networking, type: .error, url.absoluteString, response.statusCode)
@@ -155,33 +181,19 @@ public class HTTPClient: NSObject {
         fatalError()
     }
 
-    public func doRequest(baseURL: URL?,
-                          path: String?,
-                          method: String,
-                          headers: [String: String]? = nil,
-                          timeout: TimeInterval = 60.0,
-                          body: String? = nil,
-                          download: Bool = false) async throws -> (Any?, URLResponse?) {
-        guard var url = baseURL ?? self.baseURL else {
-            os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
-            throw HTTPClientError.baseURLIsNil
-        }
-
-        if let path {
-            url.appendPathComponent(path)
-        }
-        return try await doRequest(endPoint: url, method: method, headers: headers, timeout: timeout, body: body, download: download)
-    }
-
-    private func performRequest(request: URLRequest, download: Bool) async throws -> (Any?, URLResponse?) {
+    private func performRequest<T>(request: URLRequest, type: SessionType = .data) async throws -> (T, URLResponse) {
         var request = request
         if alwaysSendBasicAuth {
             request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
         }
-        if download {
-            return try await session.download(for: request)
-        } else {
-            return try await session.data(for: request)
+
+        switch type {
+        case .download:
+            return try await session.download(for: request) as! (T, URLResponse) // Ensure correct type
+        case .data:
+            return try await session.data(for: request) as! (T, URLResponse)
+        case .bytes:
+            return try await session.bytes(for: request) as! (T, URLResponse)
         }
     }
 

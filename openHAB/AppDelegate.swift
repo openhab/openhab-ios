@@ -57,8 +57,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         Preferences.migrateUserDefaultsIfRequired()
 
-        NetworkConnection.initialize(ignoreSSL: Preferences.ignoreSSL, interceptor: OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))
-
         NetworkActivityIndicatorManager.shared.isEnabled = true
         NetworkActivityIndicatorManager.shared.startDelay = 1.0
 
@@ -132,11 +130,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         os_log("Calling Application Bundle ID: %{PUBLIC}@", log: .notifications, type: .info, options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")
         os_log("URL scheme: %{PUBLIC}@", log: .notifications, type: .info, url.scheme ?? "")
         os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
-
-        if url.isFileURL {
-            let clientCertificateManager = NetworkConnection.shared.clientCertificateManager
-            return clientCertificateManager.startImportClientCertificate(url: url)
-        }
 
         // remove the 'openhab' from the url
         let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")

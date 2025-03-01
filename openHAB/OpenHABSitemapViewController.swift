@@ -394,7 +394,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
             } catch {
                 os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription)
-                NetworkConnection.atmosphereTrackingId = ""
                 // Error
                 DispatchQueue.main.async {
                     if let urlError = error as? URLError, urlError.code == .clientCertificateRejected {

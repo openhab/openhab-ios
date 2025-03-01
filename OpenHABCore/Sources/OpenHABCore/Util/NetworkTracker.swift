@@ -82,7 +82,7 @@ public final class NetworkTracker: ObservableObject {
     }
 
     public func startTracking(connectionConfigurations: [ConnectionConfiguration], username: String, password: String, alwaysSendBasicAuth: Bool, ignoreSSLVerification: Bool) {
-        os_log("NetworkConnection: startTracking", log: OSLog.default, type: .info)
+        os_log("StartTracking", log: OSLog.default, type: .info)
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
         Task {
             openApiService = await OpenAPIService(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth, ignoreSSL: ignoreSSLVerification)
@@ -95,7 +95,7 @@ public final class NetworkTracker: ObservableObject {
     public func waitForActiveConnection(
         perform action: @escaping (ConnectionInfo?) -> Void
     ) -> AnyCancellable {
-        os_log("NetworkConnection: waitForActiveConnection", log: OSLog.default, type: .info)
+        os_log("WaitForActiveConnection", log: OSLog.default, type: .info)
 
         return $activeConnection
             .filter { $0 != nil } // Only proceed if activeConnection is not nil
@@ -114,7 +114,7 @@ public final class NetworkTracker: ObservableObject {
     private func checkActiveConnection() {
         guard let activeConnection else {
             // No active connection, proceed with the normal connection attempt
-            os_log("NetworkConnection: checkActiveConnection attemptConnection", log: OSLog.default, type: .info)
+            os_log("CheckActiveConnection attemptConnection", log: OSLog.default, type: .info)
             attemptConnection()
             return
         }

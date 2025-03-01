@@ -87,7 +87,8 @@ struct NotificationsView: View {
     private func loadNotifications() {
         Task {
             do {
-                let data = try await NetworkConnection.notification(urlString: Preferences.remoteUrl)
+                let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+                let data = try await client.notification(urlString: Preferences.remoteUrl)
                 try await MainActor.run {
                     let decoder = JSONDecoder()
                     decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)

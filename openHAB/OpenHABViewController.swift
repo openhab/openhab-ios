@@ -24,11 +24,6 @@ class OpenHABViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        NetworkConnection.shared.assignDelegates(serverDelegate: self, clientDelegate: self)
-    }
-
     func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: seconds)

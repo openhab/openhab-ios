@@ -60,11 +60,6 @@ public protocol CommItem {
     var link: String { get set }
 }
 
-enum NetworkConnectionError: Error {
-    case couldNotRegister
-    case couldNotLoadNotification
-}
-
 public class NetworkConnection {
     public static var shared: NetworkConnection!
 
@@ -82,7 +77,6 @@ public class NetworkConnection {
     }
 
     public class func initialize(ignoreSSL: Bool, interceptor: RequestInterceptor?) {
-        let logger = OpenHABLogger()
         shared = NetworkConnection(
             ignoreSSL: ignoreSSL,
             manager: Session(
@@ -90,50 +84,9 @@ public class NetworkConnection {
                 delegate: OpenHABSessionDelegate(),
                 startRequestsImmediately: false,
                 interceptor: interceptor,
-                serverTrustManager: ServerCertificateManager(ignoreSSL: ignoreSSL),
-                eventMonitors: [logger]
+                serverTrustManager: ServerCertificateManager(ignoreSSL: ignoreSSL)
             )
         )
-    }
-
-    @discardableResult
-    public static func register(prefsURL: String,
-                                deviceToken: String,
-                                deviceId: String,
-                                deviceName: String) async throws -> Data {
-        if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
-            return try await load(from: url)
-        } else {
-            throw NetworkConnectionError.couldNotRegister
-        }
-    }
-
-    public static func notification(urlString: String) async throws -> Data {
-        if let notificationsUrl = Endpoint.notification(prefsURL: urlString).url {
-            return try await load(from: notificationsUrl)
-        } else {
-            throw NetworkConnectionError.couldNotLoadNotification
-        }
-    }
-
-    static func load(from url: URL, timeout: Double? = nil) async throws -> Data {
-        var request = URLRequest(url: url)
-        request.timeoutInterval = timeout ?? 10.0
-
-        os_log("Firing request", log: .viewCycle, type: .debug)
-
-        return try await withCheckedThrowingContinuation { continuation in
-            NetworkConnection.shared.manager.request(request)
-                .validate()
-                .responseData { response in
-                    switch response.result {
-                    case let .success(data):
-                        continuation.resume(returning: data)
-                    case let .failure(error):
-                        continuation.resume(throwing: error)
-                    }
-                }
-        }
     }
 
     public func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
