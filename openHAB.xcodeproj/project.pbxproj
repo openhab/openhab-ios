@@ -121,8 +121,8 @@
 		DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */; };
 		DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */; };
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
-		DAC9AF4724F9669F006DAE93 /* OpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */; };
 		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
+		DACA368E2D7440B9003CD237 /* OpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */; };
 		DACE664A2C63B0760069E514 /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = DACE66492C63B0760069E514 /* OpenAPIURLSession */; };
 		DACE664D2C63B0840069E514 /* OpenAPIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = DACE664C2C63B0840069E514 /* OpenAPIRuntime */; };
 		DAD085712AE4782D001D36BE /* OpenHABWatchAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD085702AE4782D001D36BE /* OpenHABWatchAppTests.swift */; };
@@ -1477,10 +1477,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAC9AF4724F9669F006DAE93 /* OpenHABWidgetExtension.swift in Sources */,
+				DACA368E2D7440B9003CD237 /* OpenHABWidgetExtension.swift in Sources */,
 				65DAE9122D6FCB1A00E99582 /* DownloadableImageView.swift in Sources */,
-				DAC9AF4724F9669F006DAE93 /* OpenHABWidgetExtension.swift in Sources */,
 				DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */,
+				DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */,
 				DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */,
 				DA0F37D023D4ACC7007EAB48 /* SliderRow.swift in Sources */,
 				DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */,
@@ -1503,7 +1503,6 @@
 				DAF457A023DA3E1C0018B495 /* SegmentRow.swift in Sources */,
 				DAF4578923D79AA50018B495 /* DetailTextLabelView.swift in Sources */,
 				DAAC30872CBBF0420041927F /* ContentView.swift in Sources */,
-				DA15BFBD23C6726400BD8ADA /* ObservableOpenHABDataObject.swift in Sources */,
 				DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */,
 				DA0776F0234788010086C685 /* UserData.swift in Sources */,
 				DAC6608D236F771600F4501E /* PreferencesSwiftUIView.swift in Sources */,
