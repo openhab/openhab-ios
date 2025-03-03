@@ -55,8 +55,6 @@ public final class NetworkTracker: ObservableObject {
     @Published public private(set) var status: NetworkStatus = .connecting
 
     public var openApiService: OpenAPIService?
-    private let monitor: NWPathMonitor
-    private let monitorQueue = DispatchQueue.global(qos: .background)
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
     public private(set) var httpClient: HTTPClient?
@@ -64,11 +62,13 @@ public final class NetworkTracker: ObservableObject {
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
     private init() {
-        monitor = NWPathMonitor()
-        monitor.pathUpdateHandler = { [weak self] path in
-            Task { await self?.handleNetworkChange(isConnected: path.status == .satisfied) }
+        // The `for await` loop automatically handles updates from NWPathMonitor, so there’s no need for a callback.
+        Task {
+            let monitor = NWPathMonitor()
+            for await path in monitor {
+                await handleNetworkChange(isConnected: path.status == .satisfied)
+            }
         }
-        monitor.start(queue: monitorQueue)
     }
 
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
@@ -98,7 +98,7 @@ public final class NetworkTracker: ObservableObject {
                               password: String,
                               alwaysSendBasicAuth: Bool,
                               ignoreSSLVerification: Bool) {
-        os_log("StartTracking", log: OSLog.default, type: .info)
+        logger.info("Start Tracking")
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
 
         Task {
@@ -115,17 +115,18 @@ public final class NetworkTracker: ObservableObject {
     public func restartTracking() {
         Task { await attemptConnection() }
     }
-
+    
     private func handleNetworkChange(isConnected: Bool) async {
         if isConnected {
-            os_log("Network status: Connected", log: OSLog.default, type: .info)
+            logger.info("Network status: Connected")
             await checkActiveConnection()
         } else {
-            os_log("Network status: Disconnected", log: OSLog.default, type: .info)
+            logger.info("Network status: Disconnected")
             await updateActiveConnection(nil)
             startRetryTask()
         }
     }
+
 
     private func checkActiveConnection() async {
         guard let activeConnection else {
