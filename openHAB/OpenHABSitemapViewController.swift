@@ -485,11 +485,11 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     func pushSitemap(name: String, path: String?) async {
         do {
             guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-                os_log("pushSitemap: No active connection available", log: .default, type: .error)
+                logger.error("pushSiteMap: No active connection available")
                 return
             }
 
-            os_log("pushSitemap: pushing page", log: .default, type: .error)
+            logger.info("pushSitemap: pushing page")
 
             guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
                 os_log("pushSitemap: Failed to instantiate OpenHABSitemapViewController", log: .default, type: .error)

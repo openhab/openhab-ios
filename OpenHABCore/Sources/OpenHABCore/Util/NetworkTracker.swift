@@ -197,12 +197,7 @@ public final class NetworkTracker: ObservableObject {
                 username: Preferences.username,
                 password: Preferences.password
             )
-            let serverProperties = try await service.getRoot()
-
-            guard let version = Int(serverProperties.version ?? "0"), version > 1 else {
-                throw NetworkTrackerError.invalidServerVersion
-            }
-
+            let version = try await service.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
             logger.info("Successfully connected to \(configuration.url)")
             return connectionInfo
@@ -215,7 +210,7 @@ public final class NetworkTracker: ObservableObject {
     private func startRetryTask() {
         retryTask?.cancel()
         retryTask = Task {
-            try? await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+            try? await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
             await attemptConnection()
         }
     }
@@ -223,11 +218,13 @@ public final class NetworkTracker: ObservableObject {
     @MainActor
     private func updateActiveConnection(_ connection: ConnectionInfo?) async {
         guard activeConnection != connection else { return }
+
         activeConnection = connection
-        status = (connection != nil) ? .connected : .notConnected
         if let connection {
+            status = .connected
             await openApiService?.updateBaseURL(with: URL(string: connection.configuration.url) ?? URL(string: "about:blank")!)
         } else {
+            status = .notConnected
             startRetryTask()
         }
     }
@@ -236,7 +233,9 @@ public final class NetworkTracker: ObservableObject {
         configurations.map { configuration in
             var updatedURL = configuration.url
             if let urlComponents = URLComponents(string: configuration.url),
-               let host = urlComponents.host, host.contains("myopenhab.org"), host != "home.myopenhab.org" {
+               let host = urlComponents.host,
+               host.contains("myopenhab.org"),
+               host != "home.myopenhab.org" {
                 var newComponents = urlComponents
                 newComponents.host = "home.myopenhab.org"
                 updatedURL = newComponents.url?.absoluteString ?? configuration.url

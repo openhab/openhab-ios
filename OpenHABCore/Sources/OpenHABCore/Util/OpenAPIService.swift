@@ -15,19 +15,14 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 import os
 
-public protocol OpenHABSitemapsService {
-    func openHABSitemaps() async throws -> [OpenHABSitemap]
-}
-
-public protocol OpenHABUiTileService {
-    func getUITiles() async throws -> [OpenHABUiTile]
-}
-
 public enum OpenAPIServiceError: Error {
     case undocumented(statusCode: Swift.Int, undocumentedPayload: OpenAPIRuntime.UndocumentedPayload)
     case noRootURL
 }
 
+// The generated OpenAPI client is wrapped by this curated API.
+// The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
+// It will require the migration to Swift 6.1 before this can be changed.
 public actor OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
@@ -35,12 +30,12 @@ public actor OpenAPIService {
 
     private var username: String = ""
     private var password: String = ""
-    private var alwaysSendBasicAuth: Bool = false
-    private var ignoreSSL: Bool = false
+    private var alwaysSendBasicAuth = false
+    private var ignoreSSL = false
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenAPIService")
 
-    /// Creates a new client for GreetingService.
+    /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
         self.client = client
     }
@@ -116,8 +111,8 @@ public actor OpenAPIService {
     }
 }
 
-extension OpenAPIService: OpenHABSitemapsService {
-    public func openHABSitemaps() async throws -> [OpenHABSitemap] {
+public extension OpenAPIService {
+    func openHABSitemaps() async throws -> [OpenHABSitemap] {
         // swiftformat:disable:next redundantSelf
         guard let url else { throw OpenAPIServiceError.noRootURL }
 
@@ -132,8 +127,8 @@ extension OpenAPIService: OpenHABSitemapsService {
     }
 }
 
-extension OpenAPIService: OpenHABUiTileService {
-    public func getUITiles() async throws -> [OpenHABUiTile] {
+public extension OpenAPIService {
+    func getUITiles() async throws -> [OpenHABUiTile] {
         try await client.getUITiles(.init())
             .ok.body.json
             .map(OpenHABUiTile.init)
@@ -143,12 +138,20 @@ extension OpenAPIService: OpenHABUiTileService {
 public extension OpenAPIService {
     @discardableResult
     func getRoot() async throws -> OpenHABServerProperties {
-        let interimResult = try await client.getRoot()
-        let result = try interimResult
-            .ok
-            .body
-            .json
+        let result = try await client.getRoot()
+            .ok.body.json
         return OpenHABServerProperties(result)
+    }
+
+    func getRootVersion() async throws -> Int {
+        let result = try await client.getRoot()
+            .ok.body.json
+        let serverProperties = OpenHABServerProperties(result)
+        guard let version = Int(serverProperties.version ?? "0"),
+              version > 1 else {
+            throw NetworkTrackerError.invalidServerVersion
+        }
+        return version
     }
 }
 
@@ -162,11 +165,11 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    func runNow(ruleUID: String, payload: [String: any Sendable]) async throws -> Operations.runRuleNow_1.Output {
+    func runNow(ruleUID: String, payload: [String: any Sendable]) async throws {
         let path = Operations.runRuleNow_1.Input.Path(ruleUID: ruleUID)
         let jsonPayload = try Operations.runRuleNow_1.Input.Body.jsonPayload(
             additionalProperties: OpenAPIObjectContainer(unvalidatedValue: payload))
-        return try await client.runRuleNow_1(
+        _ = try await client.runRuleNow_1(
             path: path,
             body: .json(jsonPayload)
         )

@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import OpenHABCore
 import os.log
 import UIKit
@@ -25,7 +24,6 @@ class NewImageUITableViewCell: GenericUITableViewCell {
 
     private var mainImageView: ScaleAspectFitImageView!
     private var refreshTimer: Timer?
-    private var downloadRequest: Alamofire.Request?
     private var chartStyle: ChartStyle = .light
     private var activeTask: Task<Void, Never>?
 

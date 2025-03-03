@@ -323,37 +323,38 @@ class OpenHABRootViewController: UIViewController {
         // if not actionIdentifier, then the notification was clicked, so use "on-click" if there
         if let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String {
             let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
-            if action.hasPrefix("ui") {
-                uiCommandAction(cmd, completionHandler: completionHandler)
-            } else if action.hasPrefix("command") {
-                Task {
-                    await sendCommandAction(cmd, completionHandler: completionHandler)
-                }
-            } else if action.hasPrefix("http") {
-                httpCommandAction(action, completionHandler: completionHandler)
-            } else if action.hasPrefix("app") {
-                appCommandAction(action, completionHandler: completionHandler)
-            } else if action.hasPrefix("rule") {
-                Task {
-                    await ruleCommandAction(action, completionHandler: completionHandler)
-                }
-            } else {
-                if let completionHandler {
-                    DispatchQueue.main.async {
-                        completionHandler()
-                    }
-                }
-            }
-        } else {
-            if let completionHandler {
-                DispatchQueue.main.async {
-                    completionHandler()
-                }
+            switch true {
+            case action.hasPrefix("ui"):
+                uiCommandAction(cmd)
+                callCompletionHandler(completionHandler)
+            case action.hasPrefix("command"):
+                sendCommandAction(cmd)
+                callCompletionHandler(completionHandler)
+            case action.hasPrefix("http"):
+                httpCommandAction(action)
+                callCompletionHandler(completionHandler)
+            case action.hasPrefix("app"):
+                appCommandAction(action)
+                callCompletionHandler(completionHandler)
+            case action.hasPrefix("rule"):
+                ruleCommandAction(action)
+                callCompletionHandler(completionHandler)
+            default:
+                callCompletionHandler(completionHandler)
             }
         }
     }
 
-    private func uiCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
+    // Helper function to safely call the completion handler on the main thread
+    private func callCompletionHandler(_ completionHandler: (() -> Void)?) {
+        if let completionHandler {
+            DispatchQueue.main.async {
+                completionHandler()
+            }
+        }
+    }
+
+    private func uiCommandAction(_ command: String) {
         os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
         let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
         if let firstMatch = command.firstMatch(of: regexPattern) {
@@ -388,47 +389,39 @@ class OpenHABRootViewController: UIViewController {
         } else {
             os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
         }
-        if let completionHandler {
-            DispatchQueue.main.async {
-                completionHandler()
-            }
-        }
     }
 
-    private func sendCommandAction(_ action: String, completionHandler: (() -> Void)? = nil) async {
+    private func sendCommandAction(_ action: String) {
         let components = action.split(separator: ":")
         guard components.count == 2 else {
-            completionHandler?()
             return
         }
 
         let itemName = String(components[0])
         let itemCommand = String(components[1])
+        Task {
+            do {
+                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+                      let url = URL(string: activeConnection.configuration.url) else {
+                    displayErrorNotification("Could not find server")
+                    return
+                }
 
-        do {
-            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-                  let url = URL(string: activeConnection.configuration.url) else {
-                displayErrorNotification("Could not find server")
-                completionHandler?()
-                return
+                os_log("Sending command", log: .default, type: .error)
+
+                let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
+                await openAPIService.updateBaseURL(with: url)
+
+                try await openAPIService.sendItemCommand(itemname: itemName, command: itemCommand)
+
+            } catch {
+                displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
+                // TODOD
+                //            logger.error("Could not send data \(error.localizedDescription)")
+                //
+                //            self.displayErrorNotification("Request to \(url) failed: \(error.localizedDescription)")
             }
-
-            os_log("Sending command", log: .default, type: .error)
-
-            let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
-            await openAPIService.updateBaseURL(with: url)
-
-            try await openAPIService.sendItemCommand(itemname: itemName, command: itemCommand)
-
-        } catch {
-            displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
-            // TODOD
-//            logger.error("Could not send data \(error.localizedDescription)")
-//
-//            self.displayErrorNotification("Request to \(url) failed: \(error.localizedDescription)")
         }
-
-        completionHandler?()
     }
 
     private func displayErrorNotification(_ message: String, completionHandler: (() -> Void)? = nil) {
@@ -448,19 +441,14 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func httpCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
+    private func httpCommandAction(_ command: String) {
         if let url = URL(string: command) {
             let vc = SFSafariViewController(url: url)
             present(vc, animated: true)
         }
-        if let completionHandler {
-            DispatchQueue.main.async {
-                completionHandler()
-            }
-        }
     }
 
-    private func appCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
+    private func appCommandAction(_ command: String) {
         let content = command.dropFirst(4) // Remove "app:"
         let pairs = content.split(separator: ",")
         for pair in pairs {
@@ -474,14 +462,9 @@ class OpenHABRootViewController: UIViewController {
                 }
             }
         }
-        if let completionHandler {
-            DispatchQueue.main.async {
-                completionHandler()
-            }
-        }
     }
 
-    private func ruleCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) async {
+    private func ruleCommandAction(_ command: String) {
         let components = command.split(separator: ":", maxSplits: 2)
 
         guard components.count == 3, components[0] == "rule" else { return }
@@ -500,29 +483,23 @@ class OpenHABRootViewController: UIViewController {
                 properties[key] = value
             }
         }
+        Task {
+            do {
+                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+                    displayErrorNotification("Could not find active server")
+                    return
+                }
 
-        do {
-            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-                  let url = URL(string: activeConnection.configuration.url) else {
-                displayErrorNotification("Could not find active server")
-                completionHandler?()
-                return
+                os_log("Sending command", log: .default, type: .error)
+
+                let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
+                try await openAPIService.runNow(ruleUID: uuid, payload: properties)
+                logger.info("Request succeeded")
+
+            } catch {
+                logger.error("Could not send data \(error.localizedDescription)")
+                displayErrorNotification("Request to server failed: \(error.localizedDescription)")
             }
-
-            os_log("Sending command", log: .default, type: .error)
-
-            let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
-            let data = try await openAPIService.runNow(ruleUID: uuid, payload: properties)
-            logger.info("Request succeeded")
-
-        } catch {
-            logger.error("Could not send data \(error.localizedDescription)")
-            displayErrorNotification("Request to server failed: \(error.localizedDescription)")
-        }
-
-        // Ensure completionHandler is executed on the main thread
-        DispatchQueue.main.async {
-            completionHandler?()
         }
     }
 
