@@ -66,8 +66,6 @@ struct OpenHABImageProcessor: ImageProcessor {
 class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
     var pageUrl = ""
     private var selectedWidgetRow: Int = 0
-    private var currentPageOperation: Alamofire.Request?
-    private var commandOperation: Alamofire.Request?
     private var iconType: IconType = .png
     private var openHABRootUrl = ""
     private var openHABUsername = ""

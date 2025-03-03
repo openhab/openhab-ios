@@ -144,7 +144,8 @@ public class HTTPClient: NSObject {
                              headers: [String: String]? = nil,
                              timeout: TimeInterval = 60.0,
                              body: String? = nil,
-                             type: SessionType) async throws -> (T, URLResponse) {
+                             type: SessionType,
+                             cacheingPolicy: URLRequest.CachePolicy = .useProtocolCachePolicy) async throws -> (T, URLResponse) {
         guard var url = baseURL ?? self.baseURL else {
             os_log("doRequest ERROR: Base URL is nil", log: .networking, type: .info)
             throw HTTPClientError.baseURLIsNil
@@ -165,6 +166,10 @@ public class HTTPClient: NSObject {
         if let body {
             request.httpBody = body.data(using: .utf8)
             request.setValue("text/plain", forHTTPHeaderField: "Content-Type")
+        }
+
+        if cacheingPolicy != .useProtocolCachePolicy {
+            request.cachePolicy = cacheingPolicy
         }
 
         let (result, response): (T, URLResponse) = try await performRequest(request: request, type: type)
@@ -188,7 +193,7 @@ public class HTTPClient: NSObject {
 
         switch type {
         case .download:
-            return try await session.download(for: request) as! (T, URLResponse) // Ensure correct type
+            return try await session.download(for: request) as! (T, URLResponse)
         case .data:
             return try await session.data(for: request) as! (T, URLResponse)
         case .bytes:

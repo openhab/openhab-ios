@@ -27,6 +27,7 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     private var refreshTimer: Timer?
     private var downloadRequest: Alamofire.Request?
     private var chartStyle: ChartStyle = .light
+    private var activeTask: Task<Void, Never>?
 
     private var appData: OpenHABDataObject? {
         AppDelegate.appDelegate.appData
@@ -151,32 +152,24 @@ class NewImageUITableViewCell: GenericUITableViewCell {
     private func loadRemoteImage(withURL url: URL) {
         os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
 
-        var imageRequest = URLRequest(url: url)
-        imageRequest.timeoutInterval = 10.0
-        if !shouldCache {
-            imageRequest.cachePolicy = .reloadIgnoringCacheData
+        if activeTask != nil {
+            activeTask?.cancel()
+            activeTask = nil
         }
 
-        if downloadRequest != nil {
-            downloadRequest?.cancel()
-            downloadRequest = nil
-        }
-
-        downloadRequest = NetworkConnection.shared.manager.request(imageRequest)
-            .validate(statusCode: 200 ..< 300)
-            .responseData { [weak self] response in
-                switch response.result {
-                case .success:
-                    if let data = response.data {
-                        self?.mainImageView?.image = UIImage(data: data)
-                        self?.widget?.image = UIImage(data: data)
-                        self?.didLoad?()
-                    }
-                case let .failure(error):
-                    os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+        activeTask = Task {
+            do {
+                let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+                let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
+                await MainActor.run {
+                    self.mainImageView?.image = UIImage(data: data)
+                    self.widget?.image = UIImage(data: data)
+                    self.didLoad?()
                 }
+            } catch {
+                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
             }
-        downloadRequest?.resume()
+        }
     }
 
     @objc
