@@ -85,14 +85,6 @@ public extension Endpoint {
         )
     }
 
-    static func items(openHABRootUrl: String) -> Endpoint {
-        Endpoint(
-            baseURL: openHABRootUrl,
-            path: "/rest/items",
-            queryItems: []
-        )
-    }
-
     static func resource(openHABRootUrl: String, path: String) -> Endpoint {
         Endpoint(
             baseURL: openHABRootUrl,

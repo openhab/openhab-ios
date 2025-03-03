@@ -29,16 +29,21 @@ public enum OpenAPIServiceError: Error {
 }
 
 public actor OpenAPIService {
-    private var client: Client
+    private var client: any APIProtocol
     private var url: URL?
     private var longPolling = false
 
-    private let username: String
-    private let password: String
-    private let alwaysSendBasicAuth: Bool
-    private let ignoreSSL: Bool
+    private var username: String = ""
+    private var password: String = ""
+    private var alwaysSendBasicAuth: Bool = false
+    private var ignoreSSL: Bool = false
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenAPIService")
+
+    /// Creates a new client for GreetingService.
+    public init(client: any APIProtocol) {
+        self.client = client
+    }
 
     public init(
         baseURL url: URL = URL(staticString: "about:blank"),
@@ -138,8 +143,11 @@ extension OpenAPIService: OpenHABUiTileService {
 public extension OpenAPIService {
     @discardableResult
     func getRoot() async throws -> OpenHABServerProperties {
-        let result = try await client.getRoot()
-            .ok.body.json
+        let interimResult = try await client.getRoot()
+        let result = try interimResult
+            .ok
+            .body
+            .json
         return OpenHABServerProperties(result)
     }
 }

@@ -16,19 +16,17 @@ import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil)
+        let retItems = INObjectCollection<NSString>(items: items)
+        // Call the completion handler, passing the collection.
+        completion(retItems, nil)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil)
+        let retItems = INObjectCollection<NSString>(items: items)
+        // Call the completion handler, passing the collection.
+        completion(retItems, nil)
     }
 
     func confirm(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
@@ -43,7 +41,8 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
             return
         }
 
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
+        Task {
+            let item = await OpenHABItemCache.instance.getItem(name: itemName)
             guard let item else {
                 completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(itemName))
                 return

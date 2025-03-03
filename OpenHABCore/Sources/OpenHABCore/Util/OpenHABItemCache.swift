@@ -33,109 +33,83 @@ public class OpenHABItemCache {
         NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
     }
 
-    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
-        var ret = [NSString]()
-
+    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) -> [NSString] {
         guard let items else {
-            reload(searchTerm: searchTerm, types: types, completion: completion)
-            return
+            return []
         }
 
-        ret.append(contentsOf: items
+        return items
             .filter {
                 (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
                     (types == nil || ($0.type != nil && types!.contains($0.type!)))
             }
             .sorted(by: \.name)
-            .map { NSString(string: $0.name) })
-
-        completion(ret)
+            .map { NSString(string: $0.name) }
     }
 
-    public func getItem(name: String, completion: @escaping (OpenHABItem?) -> Void) {
+    public func getItem(name: String) async -> OpenHABItem? {
         let now = Date().timeIntervalSince1970
 
-        if items == nil || (now - lastLoad) > 10 { // More than 10 seconds - reload
-            reload(name: name, completion: completion)
-            return
+        if items == nil || (now - lastLoad) > 10 {
+            return await reload(name: name)
         }
-        completion(getItem(name))
+        return getItem(name)
     }
 
     func getItem(_ name: String) -> OpenHABItem? {
         items?.first { $0.name == name }
     }
 
-    public func sendCommand(_ item: OpenHABItem, commandToSend command: String) {
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                Task {
-                    await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-                    try await NetworkTracker.shared.openApiService?.sendItemCommand(itemname: item.name, command: command)
-                }
-            }
+    public func sendCommand(_ item: OpenHABItem, commandToSend command: String) async {
+        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+           let url = URL(string: activeConnection.configuration.url) {
+            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
+            try? await NetworkTracker.shared.openApiService?.sendItemCommand(itemname: item.name, command: command)
         }
     }
 
-    public func sendState(_ item: OpenHABItem, stateToSend state: String) {
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                Task {
-                    await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-                    try await NetworkTracker.shared.openApiService?.updateItemState(itemname: item.name, with: state)
-                }
-            }
+    public func sendState(_ item: OpenHABItem, stateToSend state: String) async {
+        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+           let url = URL(string: activeConnection.configuration.url) {
+            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
+            try? await NetworkTracker.shared.openApiService?.updateItemState(itemname: item.name, with: state)
         }
     }
 
-    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?, completion: @escaping ([NSString]) -> Void) {
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                os_log("OpenHABItemCache Loading items ")
-                self.lastLoad = Date().timeIntervalSince1970
-                Task {
-                    do {
-                        await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-                        self.items = try await NetworkTracker.shared.openApiService?.getItems()
-                        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
-
-                        let ret = self.items?
-                            .filter {
-                                $0.type != .group &&
-                                    (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
-                                    (types == nil || ($0.type != nil && types!.contains($0.type!)))
-                            }
-                            .sorted(by: \.name)
-                            .map { NSString(string: $0.name) } ?? []
-                        completion(ret)
-                    } catch {
-                        os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                    }
-                }
-            }
+    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [NSString] {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+              let url = URL(string: activeConnection.configuration.url) else {
+            return []
         }
-        .store(in: &cancellables)
+
+        os_log("OpenHABItemCache Loading items ")
+        lastLoad = Date().timeIntervalSince1970
+
+        do {
+            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
+            items = try await NetworkTracker.shared.openApiService?.getItems()
+            os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
+            return getItemNames(searchTerm: searchTerm, types: types)
+        } catch {
+            os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+            return []
+        }
     }
 
-    public func reload(name: String, completion: @escaping (OpenHABItem?) -> Void) {
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                Task {
-                    do {
-                        await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-                        self.items = try await NetworkTracker.shared.openApiService?.getItems()
-                        os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
-                        let ret = self.items?.filter {
-                            $0.type != .group
-                        }
-                        .first { $0.name == name }
-                        completion(ret)
-                    } catch {
-                        os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
-                    }
-                }
-            }
+    public func reload(name: String) async -> OpenHABItem? {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+              let url = URL(string: activeConnection.configuration.url) else {
+            return nil
         }
-        .store(in: &cancellables)
+
+        do {
+            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
+            items = try await NetworkTracker.shared.openApiService?.getItems()
+            os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
+            return items?.first { $0.name == name }
+        } catch {
+            os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+            return nil
+        }
     }
 }

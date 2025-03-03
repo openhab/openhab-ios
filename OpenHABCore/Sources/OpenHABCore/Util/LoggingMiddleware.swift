@@ -40,6 +40,7 @@ extension LoggingMiddleware: ClientMiddleware {
         do {
             let (response, responseBody) = try await next(request, requestBodyForNext, baseURL)
             let (responseBodyToLog, responseBodyForNext) = try await bodyLoggingPolicy.process(responseBody)
+            logger.debug("Trying URL: \(baseURL) for operation ID:\(operationID)")
             log(request, response, responseBodyToLog)
             return (response, responseBodyForNext)
         } catch {
@@ -52,7 +53,7 @@ extension LoggingMiddleware: ClientMiddleware {
 extension LoggingMiddleware {
     func log(_ request: HTTPRequest, _ requestBody: BodyLoggingPolicy.BodyLog) {
         logger.debug(
-            "Request: \(request.method, privacy: .public) \(request.path ?? "<nil>", privacy: .public) body: \(requestBody, privacy: .auto)"
+            "Request: \(request.method, privacy: .public) \(request.debugDescription, privacy: .public) body: \(requestBody, privacy: .auto)"
         )
     }
 

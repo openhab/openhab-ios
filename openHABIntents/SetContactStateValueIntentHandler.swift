@@ -28,19 +28,17 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.contact]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.contact])
+        let retItems = INObjectCollection<NSString>(items: items)
+        // Call the completion handler, passing the collection.
+        completion(retItems, nil)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.contact]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.contact])
+        let retItems = INObjectCollection<NSString>(items: items)
+        // Call the completion handler, passing the collection.
+        completion(retItems, nil)
     }
 
     func confirm(intent: OpenHABSetContactStateValueIntent, completion: @escaping (OpenHABSetContactStateValueIntentResponse) -> Void) {
@@ -65,13 +63,13 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
             completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: state, item: itemName))
             return
         }
-
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
+        Task {
+            let item = await OpenHABItemCache.instance.getItem(name: itemName)
             guard let item else {
                 completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(itemName))
                 return
             }
-            OpenHABItemCache.instance.sendState(item, stateToSend: realState)
+            await OpenHABItemCache.instance.sendState(item, stateToSend: realState)
 
             completion(OpenHABSetContactStateValueIntentResponse.success(item: itemName, state: state))
         }

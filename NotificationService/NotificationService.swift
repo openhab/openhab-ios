@@ -22,6 +22,7 @@ enum NotificationServiceError: Error {
     case failedToParse
     case failedToDecode
     case handleNotificationCouldNotAttach
+    case noActiveConnection
 
     var localizedDescription: String {
         switch self {
@@ -35,6 +36,8 @@ enum NotificationServiceError: Error {
             "Failed to decode base64 string to Data"
         case .handleNotificationCouldNotAttach:
             "HandleNotification could not attach"
+        case .noActiveConnection:
+            "No active connection"
         }
     }
 }
@@ -160,48 +163,51 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
-        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+        let client = HTTPClient(
+            username: Preferences.username,
+            password: Preferences.password,
+            alwaysSendBasicAuth: Preferences.alwaysSendCreds
+        )
+
         if url.starts(with: "/") {
-            let connection1 = ConnectionConfiguration(
-                url: Preferences.localUrl,
-                priority: 0
+            let connection1 = ConnectionConfiguration(url: Preferences.localUrl, priority: 0)
+            let connection2 = ConnectionConfiguration(url: Preferences.remoteUrl, priority: 1)
+
+            NetworkTracker.shared.startTracking(
+                connectionConfigurations: [connection1, connection2],
+                username: Preferences.username,
+                password: Preferences.password,
+                alwaysSendBasicAuth: Preferences.alwaysSendCreds,
+                ignoreSSLVerification: Preferences.ignoreSSL
             )
-            let connection2 = ConnectionConfiguration(
-                url: Preferences.remoteUrl,
-                priority: 1
-            )
-            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
-            NetworkTracker.shared.waitForActiveConnection { activeConnection in
-                if let openHABUrl = activeConnection?.configuration.url, let uurl = URL(string: openHABUrl) {
-                    Task {
-                        let (url, urlResponse) = try await client.downloadFile(url: uurl.appendingPathComponent(url))
-                        return await self.attachFile(localURL: url, mimeType: urlResponse.mimeType)
-                    }
-                }
+
+            // Await the active connection
+            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+                  let fullURL = URL(string: activeConnection.configuration.url)?.appendingPathComponent(url) else {
+                return nil
             }
-            .store(in: &cancellables)
-        } else if let uurl = URL(string: url) {
-            let (url, urlResponse) = try await client.downloadFile(url: uurl.appendingPathComponent(url))
-            return await attachFile(localURL: url, mimeType: urlResponse.mimeType)
+
+            let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
+            return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)
+
+        } else if let fullURL = URL(string: url) {
+            let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
+            return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)
         }
+
         return nil
     }
 
     func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
-        guard let itemURI = URL(string: itemURI), let scheme = itemURI.scheme else {
+        guard let itemURL = URL(string: itemURI), let scheme = itemURL.scheme else {
             throw NotificationServiceError.noScheme(itemURI)
         }
 
-        let itemName = String(itemURI.absoluteString.dropFirst(scheme.count + 1))
+        let itemName = String(itemURL.absoluteString.dropFirst(scheme.count + 1))
 
-        let connection1 = ConnectionConfiguration(
-            url: Preferences.localUrl,
-            priority: 0
-        )
-        let connection2 = ConnectionConfiguration(
-            url: Preferences.remoteUrl,
-            priority: 1
-        )
+        let connection1 = ConnectionConfiguration(url: Preferences.localUrl, priority: 0)
+        let connection2 = ConnectionConfiguration(url: Preferences.remoteUrl, priority: 1)
+
         NetworkTracker.shared.startTracking(
             connectionConfigurations: [connection1, connection2],
             username: Preferences.username,
@@ -210,37 +216,41 @@ class NotificationService: UNNotificationServiceExtension {
             ignoreSSLVerification: Preferences.ignoreSSL
         )
 
-        return try await withCheckedThrowingContinuation { _ in
-            NetworkTracker.shared.waitForActiveConnection { [self] activeConnection in
-                if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                    Task {
-                        let client = await OpenAPIService(
-                            baseURL: url,
-                            username: Preferences.username,
-                            password: Preferences.password,
-                            alwaysSendBasicAuth: Preferences.alwaysSendCreds
-                        )
-                        let item = try await client.getItemByName(id: itemName)
-                        guard let state = item?.state else { return nil as UNNotificationAttachment? }
-
-                        // Extract MIME type and base64 string
-                        let pattern = /^data:(.*?);base64,(.*)$/
-                        guard let firstMatch = state.firstMatch(of: pattern) else { throw NotificationServiceError.failedToParse }
-
-                        let mimeType = String(firstMatch.1)
-                        let base64String = String(firstMatch.2)
-                        guard let imageData = Data(base64Encoded: base64String) else { throw NotificationServiceError.failedToDecode }
-                        // Create a temporary file URL
-                        let tempDirectory = FileManager.default.temporaryDirectory
-                        let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
-                        try imageData.write(to: tempFileURL)
-                        os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
-                        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
-                    }
-                }
-            }
-            .store(in: &cancellables)
+        // Await the active connection
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+              let baseURL = URL(string: activeConnection.configuration.url) else {
+            throw NotificationServiceError.noActiveConnection
         }
+
+        let client = await OpenAPIService(
+            baseURL: baseURL,
+            username: Preferences.username,
+            password: Preferences.password,
+            alwaysSendBasicAuth: Preferences.alwaysSendCreds
+        )
+
+        let item = try await client.getItemByName(id: itemName)
+        guard let state = item?.state else { return nil }
+
+        // Extract MIME type and base64 string
+        let pattern = /^data:(.*?);base64,(.*)$/
+        guard let firstMatch = state.firstMatch(of: pattern) else {
+            throw NotificationServiceError.failedToParse
+        }
+
+        let mimeType = String(firstMatch.1)
+        let base64String = String(firstMatch.2)
+        guard let imageData = Data(base64Encoded: base64String) else {
+            throw NotificationServiceError.failedToDecode
+        }
+
+        // Create a temporary file URL
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
+        try imageData.write(to: tempFileURL)
+
+        os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
+        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
     }
 
     func attachFile(localURL: URL, mimeType: String?) async -> UNNotificationAttachment? {

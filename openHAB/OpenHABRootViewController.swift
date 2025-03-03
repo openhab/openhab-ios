@@ -326,13 +326,17 @@ class OpenHABRootViewController: UIViewController {
             if action.hasPrefix("ui") {
                 uiCommandAction(cmd, completionHandler: completionHandler)
             } else if action.hasPrefix("command") {
-                sendCommandAction(cmd, completionHandler: completionHandler)
+                Task {
+                    await sendCommandAction(cmd, completionHandler: completionHandler)
+                }
             } else if action.hasPrefix("http") {
                 httpCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("app") {
                 appCommandAction(action, completionHandler: completionHandler)
             } else if action.hasPrefix("rule") {
-                ruleCommandAction(action, completionHandler: completionHandler)
+                Task {
+                    await ruleCommandAction(action, completionHandler: completionHandler)
+                }
             } else {
                 if let completionHandler {
                     DispatchQueue.main.async {
@@ -364,7 +368,9 @@ class OpenHABRootViewController: UIViewController {
                     let sitemap = queryItems?.first { $0.name == "sitemap" }?.value
                     let subview = queryItems?.first { $0.name == "w" }?.value
                     if let sitemap {
-                        sitemapViewController.pushSitemap(name: sitemap, path: subview)
+                        Task {
+                            await sitemapViewController.pushSitemap(name: sitemap, path: subview)
+                        }
                     }
                 }
             } else {
@@ -389,46 +395,40 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func sendCommandAction(_ action: String, completionHandler: (() -> Void)? = nil) {
+    private func sendCommandAction(_ action: String, completionHandler: (() -> Void)? = nil) async {
         let components = action.split(separator: ":")
-        if components.count == 2 {
-            let itemName = String(components[0])
-            let itemCommand = String(components[1])
-            NetworkTracker.shared.waitForActiveConnection { activeConnection in
-                if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                    os_log("Sending comand", log: .default, type: .error)
-                    Task {
-                        do {
-                            let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
-                            await openAPIService.updateBaseURL(with: url)
-                            try await openAPIService.sendItemCommand(itemname: itemName, command: itemCommand)
-                        } catch {
-                            logger.error("Could not send data \(error.localizedDescription)")
-                            self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
-                        }
-                        if let completionHandler {
-                            DispatchQueue.main.async {
-                                completionHandler()
-                            }
-                        }
-                    }
-                } else {
-                    self.displayErrorNotification("Could not find server")
-                    if let completionHandler {
-                        DispatchQueue.main.async {
-                            completionHandler()
-                        }
-                    }
-                }
-            }
-            .store(in: &cancellables)
-        } else {
-            if let completionHandler {
-                DispatchQueue.main.async {
-                    completionHandler()
-                }
-            }
+        guard components.count == 2 else {
+            completionHandler?()
+            return
         }
+
+        let itemName = String(components[0])
+        let itemCommand = String(components[1])
+
+        do {
+            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+                  let url = URL(string: activeConnection.configuration.url) else {
+                displayErrorNotification("Could not find server")
+                completionHandler?()
+                return
+            }
+
+            os_log("Sending command", log: .default, type: .error)
+
+            let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
+            await openAPIService.updateBaseURL(with: url)
+
+            try await openAPIService.sendItemCommand(itemname: itemName, command: itemCommand)
+
+        } catch {
+            displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
+            // TODOD
+//            logger.error("Could not send data \(error.localizedDescription)")
+//
+//            self.displayErrorNotification("Request to \(url) failed: \(error.localizedDescription)")
+        }
+
+        completionHandler?()
     }
 
     private func displayErrorNotification(_ message: String, completionHandler: (() -> Void)? = nil) {
@@ -481,7 +481,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    private func ruleCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) {
+    private func ruleCommandAction(_ command: String, completionHandler: (() -> Void)? = nil) async {
         let components = command.split(separator: ":", maxSplits: 2)
 
         guard components.count == 3, components[0] == "rule" else { return }
@@ -501,34 +501,29 @@ class OpenHABRootViewController: UIViewController {
             }
         }
 
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url, let url = URL(string: openHABUrl) {
-                os_log("Sending comand", log: .default, type: .error)
-                Task {
-                    do {
-                        let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
-                        let data = try await openAPIService.runNow(ruleUID: uuid, payload: properties)
-                        logger.info("Request succeeded")
-                    } catch {
-                        logger.error("Could not send data \(error.localizedDescription)")
-                        self.displayErrorNotification("request to \(openHABUrl) \(error.localizedDescription)")
-                    }
-                    if let completionHandler {
-                        DispatchQueue.main.async {
-                            completionHandler()
-                        }
-                    }
-                }
-            } else {
-                self.displayErrorNotification("Could not find active server")
-                if let completionHandler {
-                    DispatchQueue.main.async {
-                        completionHandler()
-                    }
-                }
+        do {
+            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
+                  let url = URL(string: activeConnection.configuration.url) else {
+                displayErrorNotification("Could not find active server")
+                completionHandler?()
+                return
             }
+
+            os_log("Sending command", log: .default, type: .error)
+
+            let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
+            let data = try await openAPIService.runNow(ruleUID: uuid, payload: properties)
+            logger.info("Request succeeded")
+
+        } catch {
+            logger.error("Could not send data \(error.localizedDescription)")
+            displayErrorNotification("Request to server failed: \(error.localizedDescription)")
         }
-        .store(in: &cancellables)
+
+        // Ensure completionHandler is executed on the main thread
+        DispatchQueue.main.async {
+            completionHandler?()
+        }
     }
 
     func showSideMenu() {

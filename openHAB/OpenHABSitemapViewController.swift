@@ -480,23 +480,32 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 
     // This is mainly used for navigting to a specific sitemap and path from notifications
-    func pushSitemap(name: String, path: String?) {
-        // this will be called imediately after connecting for the initial state, otherwise it will wait for the state to change
-        // since we do not reference the sink cancelable, this will only fire once
-        NetworkTracker.shared.waitForActiveConnection { activeConnection in
-            if let openHABUrl = activeConnection?.configuration.url {
-                os_log("pushSitemap: pushing page", log: .default, type: .error)
-                let newViewController = (self.storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-                if let path {
-                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)/\(path)"
-                } else {
-                    newViewController.pageUrl = "\(openHABUrl)/rest/sitemaps/\(name)"
-                }
-                newViewController.openHABRootUrl = openHABUrl
-                self.navigationController?.pushViewController(newViewController, animated: true)
+
+    // This is mainly used for navigating to a specific sitemap and path from notifications
+    func pushSitemap(name: String, path: String?) async {
+        do {
+            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+                os_log("pushSitemap: No active connection available", log: .default, type: .error)
+                return
             }
+
+            os_log("pushSitemap: pushing page", log: .default, type: .error)
+
+            guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
+                os_log("pushSitemap: Failed to instantiate OpenHABSitemapViewController", log: .default, type: .error)
+                return
+            }
+            let openHABUrl = activeConnection.configuration.url
+
+            newViewController.pageUrl = path != nil
+                ? "\(openHABUrl)/rest/sitemaps/\(name)/\(path!)"
+                : "\(openHABUrl)/rest/sitemaps/\(name)"
+            newViewController.openHABRootUrl = openHABUrl
+
+            navigationController?.pushViewController(newViewController, animated: true)
+        } catch {
+            os_log("pushSitemap: Error waiting for active connection: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
         }
-        .store(in: &trackerCancellables)
     }
 
     // load app settings

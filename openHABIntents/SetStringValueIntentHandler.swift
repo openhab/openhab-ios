@@ -16,19 +16,17 @@ import os.log
 
 class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling {
     func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.stringItem]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.stringItem])
+        let retItems = INObjectCollection<NSString>(items: items)
+        // Call the completion handler, passing the collection.
+        completion(retItems, nil)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.stringItem]) { items in
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.stringItem])
+        let retItems = INObjectCollection<NSString>(items: items)
+        // Call the completion handler, passing the collection.
+        completion(retItems, nil)
     }
 
     func confirm(intent: OpenHABSetStringValueIntent, completion: @escaping (OpenHABSetStringValueIntentResponse) -> Void) {
@@ -48,12 +46,13 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
             return
         }
 
-        OpenHABItemCache.instance.getItem(name: itemName) { item in
+        Task {
+            let item = await OpenHABItemCache.instance.getItem(name: itemName)
             guard let item else {
                 completion(OpenHABSetStringValueIntentResponse.failureInvalidItem(itemName))
                 return
             }
-            OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
+            await OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
 
             completion(OpenHABSetStringValueIntentResponse.success(value: value, item: itemName))
         }
