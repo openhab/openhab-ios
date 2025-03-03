@@ -24,7 +24,7 @@ public enum NetworkStatus: String {
 public struct ConnectionConfiguration: Equatable {
     public let url: String
     public let priority: Int // Lower is higher priority, 0 is primary
-
+    
     public init(url: String, priority: Int = 10) {
         self.url = url
         self.priority = priority
@@ -39,7 +39,7 @@ public struct ConnectionInfo: Equatable {
 enum NetworkTrackerError: Error, CustomDebugStringConvertible {
     case invalidServerVersion
     case failedConnection(String)
-
+    
     var debugDescription: String {
         switch self {
         case .invalidServerVersion: "Invalid server version"
@@ -50,31 +50,40 @@ enum NetworkTrackerError: Error, CustomDebugStringConvertible {
 
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
-
+    
     @Published public private(set) var activeConnection: ConnectionInfo?
     @Published public private(set) var status: NetworkStatus = .connecting
 
+    private let monitor: NWPathMonitor
+    private let monitorQueue = DispatchQueue.global(qos: .background)
     public var openApiService: OpenAPIService?
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
     public private(set) var httpClient: HTTPClient?
-
+    
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
-
+    
     private init() {
-        // The `for await` loop automatically handles updates from NWPathMonitor, so there’s no need for a callback.
-        Task {
-            let monitor = NWPathMonitor()
-            for await path in monitor {
-                await handleNetworkChange(isConnected: path.status == .satisfied)
-            }
+        monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            Task { await self?.handleNetworkChange(isConnected: path.status == .satisfied) }
         }
-    }
+        monitor.start(queue: monitorQueue)
+//        if #available(iOS 17, watchOS 10, *) {
+//            // The `for await` loop automatically handles updates from NWPathMonitor, so there’s no need for a callback.
+//            Task {
+//                let monitor = NWPathMonitor()
+//                for await path in monitor {
+//                    await handleNetworkChange(isConnected: path.status == .satisfied)
+//                }
+//            }
 
+    }
+    
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
         await withCheckedContinuation { continuation in
             let deadline = Date().addingTimeInterval(timeout)
-
+            
             func checkConnection() {
                 Task { @MainActor in
                     if let activeConnection = self.activeConnection {
@@ -88,11 +97,11 @@ public final class NetworkTracker: ObservableObject {
                     }
                 }
             }
-
+            
             checkConnection()
         }
     }
-
+    
     public func startTracking(connectionConfigurations: [ConnectionConfiguration],
                               username: String,
                               password: String,
@@ -100,7 +109,7 @@ public final class NetworkTracker: ObservableObject {
                               ignoreSSLVerification: Bool) {
         logger.info("Start Tracking")
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
-
+        
         Task {
             openApiService = await OpenAPIService(
                 username: username,
@@ -111,7 +120,7 @@ public final class NetworkTracker: ObservableObject {
             await attemptConnection()
         }
     }
-
+    
     public func restartTracking() {
         Task { await attemptConnection() }
     }
@@ -126,15 +135,15 @@ public final class NetworkTracker: ObservableObject {
             startRetryTask()
         }
     }
-
-
+    
+    
     private func checkActiveConnection() async {
         guard let activeConnection else {
             os_log("No active connection, attempting to reconnect...", log: OSLog.default, type: .info)
             await attemptConnection()
             return
         }
-
+        
         do {
             guard let url = URL(string: activeConnection.configuration.url) else { return }
             await openApiService?.updateBaseURL(with: url)
@@ -145,26 +154,26 @@ public final class NetworkTracker: ObservableObject {
             await attemptConnection()
         }
     }
-
+    
     private func attemptConnection() async {
         guard !connectionConfigurations.isEmpty else {
             logger.error("No connection configurations available.")
             await updateActiveConnection(nil)
             return
         }
-
+        
         logger.info("Checking available connections...")
-
+        
         let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
         var bestConnection: ConnectionInfo?
-
+        
         await withTaskGroup(of: ConnectionInfo?.self) { group in
             for config in sortedConfigs {
                 group.addTask {
                     await self.testConnection(configuration: config)
                 }
             }
-
+            
             for await connection in group {
                 if let connection {
                     if connection.configuration.priority == 0 {
@@ -177,13 +186,13 @@ public final class NetworkTracker: ObservableObject {
                 }
             }
         }
-
+        
         await updateActiveConnection(bestConnection)
     }
-
+    
     private func testConnection(configuration: ConnectionConfiguration) async -> ConnectionInfo? {
         guard let url = URL(string: configuration.url) else { return nil }
-
+        
         do {
             let service = await OpenAPIService(
                 baseURL: url,
@@ -191,11 +200,11 @@ public final class NetworkTracker: ObservableObject {
                 password: Preferences.password
             )
             let serverProperties = try await service.getRoot()
-
+            
             guard let version = Int(serverProperties.version ?? "0"), version > 1 else {
                 throw NetworkTrackerError.invalidServerVersion
             }
-
+            
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
             logger.info("Successfully connected to \(configuration.url)")
             return connectionInfo
@@ -204,7 +213,7 @@ public final class NetworkTracker: ObservableObject {
             return nil
         }
     }
-
+    
     private func startRetryTask() {
         retryTask?.cancel()
         retryTask = Task {
@@ -212,7 +221,7 @@ public final class NetworkTracker: ObservableObject {
             await attemptConnection()
         }
     }
-
+    
     @MainActor
     private func updateActiveConnection(_ connection: ConnectionInfo?) async {
         guard activeConnection != connection else { return }
@@ -224,7 +233,7 @@ public final class NetworkTracker: ObservableObject {
             startRetryTask()
         }
     }
-
+    
     private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
         configurations.map { configuration in
             var updatedURL = configuration.url
