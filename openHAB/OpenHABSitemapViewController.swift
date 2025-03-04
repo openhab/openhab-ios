@@ -188,11 +188,29 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
                 case .connected:
                     self.hidePopupMessages()
-                case _:
-                    break
                 }
             }
             .store(in: &trackerCancellables)
+
+        func trackNetworkStatus() {
+            let task = Task {
+                for await status in NetworkTracker.shared.$status.values {
+                    os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                    await MainActor.run {
+                        switch status {
+                        case .connecting:
+                            self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                        case .notConnected:
+                            os_log("Tracking error", log: .viewCycle, type: .info)
+                            self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+                        case .connected:
+                            self.hidePopupMessages()
+                        }
+                    }
+                }
+            }
+            activeTasks.insert(task)
+        }
 
         var activeServerWatcher = NetworkTracker.shared.$activeConnection.eraseToAnyPublisher()
         // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
@@ -218,7 +236,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 restart()
             }
         }
-        // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will exectue imediately with current values and then again if the network changes, otherwise it will be called on changes only.
+        // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will execute imediately with current values and then again if the network changes, otherwise it will be called on changes only.
         activeServerWatcher
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
@@ -230,13 +248,36 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             }
             .store(in: &trackerCancellables)
 
+        func startWatchingActiveServer() {
+            let task = Task {
+                for await activeConnection in NetworkTracker.shared.$activeConnection.values {
+                    await MainActor.run {
+                        if let activeConnection {
+                            os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
+                            self.openHABRootUrl = activeConnection.configuration.url
+                            self.selectSitemap()
+                        }
+                    }
+                }
+            }
+            activeTasks.insert(task)
+        }
+
         ImageDownloader.default.authenticationChallengeResponder = self
+    }
+
+    func stopAllTasks() {
+        for task in activeTasks {
+            task.cancel()
+        }
+        activeTasks.removeAll()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         os_log("OpenHABSitemapViewController viewWillDisappear", log: .viewCycle, type: .info)
 
         trackerCancellables.removeAll()
+        stopAllTasks()
 
         super.viewWillDisappear(animated)
 
@@ -535,14 +576,15 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         return nil
     }
 
-    @discardableResult    
+    @discardableResult
     func pageNetworkStatusChanged() -> Bool {
         os_log("OpenHABSitemapViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
-        
+
         guard !pageUrl.isEmpty else { return false }
 
-        let currentStatus = pageNetworkStatus
+        let currentStatus = NetworkReachabilityManager(host: pageUrl)?.status ?? .notReachable
 
+        // First run
         if !pageNetworkStatusAvailable {
             pageNetworkStatus = currentStatus
             pageNetworkStatusAvailable = true

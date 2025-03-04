@@ -18,6 +18,8 @@ import UIKit
 class OpenHABViewController: UIViewController {
     var trackerCancellables = Set<AnyCancellable>()
 
+    var activeTasks = Set<Task<Void, Never>>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
