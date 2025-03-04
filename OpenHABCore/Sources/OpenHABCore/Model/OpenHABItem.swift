@@ -13,7 +13,7 @@ import CoreLocation
 import os.log
 import UIKit
 
-public class OpenHABItem: NSObject, CommItem {
+public class OpenHABItem: NSObject {
     public enum ItemType: String {
         case color = "Color"
         case contact = "Contact"

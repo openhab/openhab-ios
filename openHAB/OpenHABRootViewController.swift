@@ -32,10 +32,6 @@ protocol ModalHandler: AnyObject {
     func modalDismissed(to: TargetController)
 }
 
-struct CommandItem: CommItem {
-    var link: String
-}
-
 private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
 
 // swiftlint:disable type_body_length

@@ -23,11 +23,6 @@ import SVGKit
 import SwiftUI
 import UIKit
 
-enum Action<I, O> {
-    typealias Sync = (UIViewController, I) -> O
-    typealias Async = (UIViewController, I, @escaping (O) -> Void) -> Void
-}
-
 struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
@@ -210,7 +205,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             }
             os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
         } else {
-            Task { await openAPIService?.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!) }
+            Task {
+                await openAPIService?.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!)
+            }
             // we only want to our watcher to notify us about changes, and not the inital value
             activeServerWatcher = activeServerWatcher.dropFirst().eraseToAnyPublisher()
             if !pageNetworkStatusChanged() {
@@ -538,25 +535,26 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         return nil
     }
 
-    @discardableResult
+    @discardableResult    
     func pageNetworkStatusChanged() -> Bool {
         os_log("OpenHABSitemapViewController pageNetworkStatusChange", log: .remoteAccess, type: .info)
-        if !pageUrl.isEmpty {
-            let pageReachability = NetworkReachabilityManager(host: pageUrl)
-            if !pageNetworkStatusAvailable {
-                pageNetworkStatus = pageReachability?.status
-                pageNetworkStatusAvailable = true
-                return false
-            } else {
-                if pageNetworkStatus == pageReachability?.status {
-                    return false
-                } else {
-                    pageNetworkStatus = pageReachability?.status
-                    return true
-                }
-            }
+        
+        guard !pageUrl.isEmpty else { return false }
+
+        let currentStatus = pageNetworkStatus
+
+        if !pageNetworkStatusAvailable {
+            pageNetworkStatus = currentStatus
+            pageNetworkStatusAvailable = true
+            return false
         }
-        return false
+
+        if pageNetworkStatus == currentStatus {
+            return false
+        } else {
+            pageNetworkStatus = currentStatus
+            return true
+        }
     }
 
     func filterContentForSearchText(_ searchText: String?, scope: String = "All") {

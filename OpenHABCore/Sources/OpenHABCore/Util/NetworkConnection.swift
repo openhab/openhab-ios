@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import Foundation
 import os.log
 
@@ -40,7 +39,7 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
     switch challenge.protectionSpace.authenticationMethod {
     case NSURLAuthenticationMethodServerTrust:
         // TODO:
-        return (NetworkTracker.shared.serverCertificateManager?.evaluateTrust(with: challenge))!
+        return NetworkTracker.shared.serverCertificateManager.evaluateTrust(with: challenge)
     case NSURLAuthenticationMethodClientCertificate:
         return NetworkTracker.shared.clientCertificateManager.evaluateTrust(with: challenge)
     // attemptCredentialAuthentication
@@ -55,8 +54,4 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
         }
         return (disposition, credential)
     }
-}
-
-public protocol CommItem {
-    var link: String { get set }
 }

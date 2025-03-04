@@ -58,12 +58,6 @@ extension OpenHABWatchAppDelegate: WKApplicationDelegate {
             }
         }
     }
-
-    func applicationDidFinishLaunching() {
-//        // Kingfisher setup
-//        ImageDownloader.default.authenticationChallengeResponder = self
-//        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: ObservableOpenHABDataObject.shared))]
-    }
 }
 
 // MARK: - ClientCertificateManagerDelegate

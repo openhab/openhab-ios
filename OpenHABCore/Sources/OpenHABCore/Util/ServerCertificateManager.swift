@@ -22,7 +22,7 @@ public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
     func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?)
 }
 
-public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating {
+public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
     // Handle the different responses of the user
     public enum EvaluateResult {
         case undecided
@@ -47,12 +47,10 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
     public var trustedCertificates: [String: Data] = [:]
 
     // Init a ServerCertificateManager and set ignore certificates setting
-    public init(ignoreSSL: Bool) {
-        super.init(evaluators: [:])
+    public init(ignoreSSL: Bool = false) {
+//        super.init(evaluators: [:])
         self.ignoreSSL = ignoreSSL
-    }
 
-    func initializeCertificatesStore() {
         os_log("Initializing cert store", log: .remoteAccess, type: .info)
         loadTrustedCertificates()
         if trustedCertificates.isEmpty {
@@ -224,9 +222,5 @@ public class ServerCertificateManager: ServerTrustManager, ServerTrustEvaluating
         } else {
             nil
         }
-    }
-
-    override public func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
-        self as ServerTrustEvaluating
     }
 }

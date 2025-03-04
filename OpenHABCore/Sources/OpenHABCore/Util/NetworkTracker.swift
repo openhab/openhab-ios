@@ -61,7 +61,7 @@ public final class NetworkTracker: ObservableObject {
     private var retryTask: Task<Void, Never>?
     public private(set) var httpClient: HTTPClient?
     public var clientCertificateManager = ClientCertificateManager()
-    public var serverCertificateManager: ServerCertificateManager?
+    public var serverCertificateManager = ServerCertificateManager()
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
@@ -79,8 +79,6 @@ public final class NetworkTracker: ObservableObject {
 //                    await handleNetworkChange(isConnected: path.status == .satisfied)
 //                }
 //            }
-        serverCertificateManager = ServerCertificateManager(ignoreSSL: false)
-        serverCertificateManager?.initializeCertificatesStore()
     }
 
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {

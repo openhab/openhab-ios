@@ -11,7 +11,6 @@
 
 import OpenHABCore
 import os.log
-import SDWebImageSwiftUI
 import SwiftUI
 
 struct ImageRow: View {
