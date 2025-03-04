@@ -39,15 +39,16 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
 
     switch challenge.protectionSpace.authenticationMethod {
     case NSURLAuthenticationMethodServerTrust:
-        return NetworkConnection.shared.serverCertificateManager.evaluateTrust(with: challenge)
+        // TODO:
+        return (NetworkTracker.shared.serverCertificateManager?.evaluateTrust(with: challenge))!
     case NSURLAuthenticationMethodClientCertificate:
-        return NetworkConnection.shared.clientCertificateManager.evaluateTrust(with: challenge)
+        return NetworkTracker.shared.clientCertificateManager.evaluateTrust(with: challenge)
     // attemptCredentialAuthentication
     default:
         if challenge.previousFailureCount > 0 {
             disposition = .cancelAuthenticationChallenge
         } else {
-            credential = NetworkConnection.shared.manager.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
+            credential = NetworkTracker.shared.httpClient?.session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace)
             if credential != nil {
                 disposition = .useCredential
             }
@@ -58,39 +59,4 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
 
 public protocol CommItem {
     var link: String { get set }
-}
-
-public class NetworkConnection {
-    public static var shared: NetworkConnection!
-
-    public static var atmosphereTrackingId = ""
-
-    public var clientCertificateManager = ClientCertificateManager()
-    public var serverCertificateManager: ServerCertificateManager!
-    public var manager: Alamofire.Session
-    public var rootUrl: URL?
-
-    init(ignoreSSL: Bool, manager: Session) {
-        serverCertificateManager = ServerCertificateManager(ignoreSSL: ignoreSSL)
-        serverCertificateManager.initializeCertificatesStore()
-        self.manager = manager
-    }
-
-    public class func initialize(ignoreSSL: Bool, interceptor: RequestInterceptor?) {
-        shared = NetworkConnection(
-            ignoreSSL: ignoreSSL,
-            manager: Session(
-                configuration: URLSessionConfiguration.default,
-                delegate: OpenHABSessionDelegate(),
-                startRequestsImmediately: false,
-                interceptor: interceptor,
-                serverTrustManager: ServerCertificateManager(ignoreSSL: ignoreSSL)
-            )
-        )
-    }
-
-    public func assignDelegates(serverDelegate: ServerCertificateManagerDelegate?, clientDelegate: ClientCertificateManagerDelegate) {
-        serverCertificateManager.delegate = serverDelegate
-        clientCertificateManager.delegate = clientDelegate
-    }
 }

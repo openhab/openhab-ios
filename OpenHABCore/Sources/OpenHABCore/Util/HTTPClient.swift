@@ -60,12 +60,10 @@ public class HTTPClient: NSObject {
         case bytes
     }
 
-    public static let share = HTTPClient()
-
     // this can be changed if we detect another server
     public var baseURL: URL?
 
-    private var session: URLSession!
+    public var session: URLSession!
     private let username: String
     private let password: String
     private let alwaysSendBasicAuth: Bool

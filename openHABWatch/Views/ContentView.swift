@@ -50,11 +50,9 @@ struct ContentView: View {
             }
             if viewModel.showAlert {
                 Text("Refreshing...")
-                    .onAppear {
-                        DispatchQueue.main.async {
-                            viewModel.refreshUrl()
-                            os_log("reload after alert", log: .default, type: .info)
-                        }
+                    .task {
+                        await viewModel.refreshUrl()
+                        os_log("reload after alert", log: .default, type: .info)
                         viewModel.showAlert = false
                     }
             }

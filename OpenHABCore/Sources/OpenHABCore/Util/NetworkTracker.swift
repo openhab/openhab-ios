@@ -60,6 +60,8 @@ public final class NetworkTracker: ObservableObject {
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
     public private(set) var httpClient: HTTPClient?
+    public var clientCertificateManager = ClientCertificateManager()
+    public var serverCertificateManager: ServerCertificateManager?
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
@@ -77,6 +79,8 @@ public final class NetworkTracker: ObservableObject {
 //                    await handleNetworkChange(isConnected: path.status == .satisfied)
 //                }
 //            }
+        serverCertificateManager = ServerCertificateManager(ignoreSSL: false)
+        serverCertificateManager?.initializeCertificatesStore()
     }
 
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
@@ -241,6 +245,17 @@ public final class NetworkTracker: ObservableObject {
                 updatedURL = newComponents.url?.absoluteString ?? configuration.url
             }
             return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
+        }
+    }
+}
+
+public extension NetworkTracker {
+    func activeConnectionStream() -> AsyncStream<ConnectionInfo?> {
+        AsyncStream { continuation in
+            let cancellable = self.$activeConnection
+                .sink { continuation.yield($0) }
+
+            continuation.onTermination = { _ in cancellable.cancel() }
         }
     }
 }
