@@ -176,22 +176,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             UIApplication.shared.isIdleTimerDisabled = true
         }
 
-        NetworkTracker.shared.$status
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
-                switch status {
-                case .connecting:
-                    self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                case .notConnected:
-                    os_log("Tracking error", log: .viewCycle, type: .info)
-                    self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
-                case .connected:
-                    self.hidePopupMessages()
-                }
-            }
-            .store(in: &trackerCancellables)
-
         func trackNetworkStatus() {
             let task = Task {
                 for await status in NetworkTracker.shared.$status.values {
@@ -212,10 +196,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             activeTasks.insert(task)
         }
 
-        var activeServerWatcher = NetworkTracker.shared.$activeConnection.eraseToAnyPublisher()
         // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
         if pageUrl == "" {
-            // Set self as root view controller
             appData?.sitemapViewController = self
             if currentPage != nil {
                 currentPage?.widgets = []
@@ -226,8 +208,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             Task {
                 await openAPIService?.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!)
             }
-            // we only want to our watcher to notify us about changes, and not the inital value
-            activeServerWatcher = activeServerWatcher.dropFirst().eraseToAnyPublisher()
+
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
                 loadPage(false)
@@ -236,21 +217,18 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 restart()
             }
         }
-        // listen for network changes, if stateWatcher.dropFirst() was NOT called, then this will execute imediately with current values and then again if the network changes, otherwise it will be called on changes only.
-        activeServerWatcher
-            .receive(on: DispatchQueue.main)
-            .sink { activeConnection in
-                if let activeConnection {
-                    os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
-                    self.openHABRootUrl = activeConnection.configuration.url
-                    self.selectSitemap()
-                }
-            }
-            .store(in: &trackerCancellables)
 
         func startWatchingActiveServer() {
             let task = Task {
+                var isFirst = true // Track first value
+
                 for await activeConnection in NetworkTracker.shared.$activeConnection.values {
+                    // we only want our watcher to notify us about changes, and not the inital value
+                    if isFirst {
+                        isFirst = false
+                        continue
+                    }
+
                     await MainActor.run {
                         if let activeConnection {
                             os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
@@ -260,17 +238,14 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     }
                 }
             }
-            activeTasks.insert(task)
+            activeTasks.insert(task) // Store the task for cancellation
         }
+
+//      TODO: consider this feature to get rid of NetworkReachability
+        trackNetworkStatus()
+        startWatchingActiveServer()
 
         ImageDownloader.default.authenticationChallengeResponder = self
-    }
-
-    func stopAllTasks() {
-        for task in activeTasks {
-            task.cancel()
-        }
-        activeTasks.removeAll()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -324,6 +299,13 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         super.traitCollectionDidChange(previousTraitCollection)
 
         widgetTableView.reloadData()
+    }
+
+    func stopAllTasks() {
+        for task in activeTasks {
+            task.cancel()
+        }
+        activeTasks.removeAll()
     }
 
     /// Implementation of GenericUITableViewCellTouchEventDelegate
