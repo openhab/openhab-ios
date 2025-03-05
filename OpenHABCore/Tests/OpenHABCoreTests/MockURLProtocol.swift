@@ -39,7 +39,7 @@ final class MockURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        activeTask = session.dataTask(with: request.urlRequest!)
+        activeTask = session.dataTask(with: request)
         activeTask?.cancel()
     }
 

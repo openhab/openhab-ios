@@ -42,7 +42,7 @@ public class OpenHABAccessTokenAdapter {
         // We are handling URLRequests here, so we need to set the header fields
         // to the request object with String and cannot use the type safe way of HTTPRequest
         // like request.headerFields[.authorization] = basicAuthHeader()
-        // TODO revert this!!
+        // TODO: revert this!!
         urlRequest.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
         return urlRequest
     }
