@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import AVFoundation
 import AVKit
 import Combine
@@ -71,7 +70,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private var sitemaps: [OpenHABSitemap] = []
     private var currentPage: OpenHABPage?
     private var selectionPicker: UIPickerView?
-    private var pageNetworkStatus: NetworkReachabilityManager.NetworkReachabilityStatus?
+    private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
     private var toggle: Int = 0
     private var refreshControl: UIRefreshControl?
@@ -176,26 +175,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             UIApplication.shared.isIdleTimerDisabled = true
         }
 
-        func trackNetworkStatus() {
-            let task = Task {
-                for await status in NetworkTracker.shared.$status.values {
-                    os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
-                    await MainActor.run {
-                        switch status {
-                        case .connecting:
-                            self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                        case .notConnected:
-                            os_log("Tracking error", log: .viewCycle, type: .info)
-                            self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
-                        case .connected:
-                            self.hidePopupMessages()
-                        }
-                    }
-                }
-            }
-            activeTasks.insert(task)
-        }
-
         // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
         if pageUrl == "" {
             appData?.sitemapViewController = self
@@ -218,31 +197,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             }
         }
 
-        func startWatchingActiveServer() {
-            let task = Task {
-                var isFirst = true // Track first value
-
-                for await activeConnection in NetworkTracker.shared.$activeConnection.values {
-                    // we only want our watcher to notify us about changes, and not the inital value
-                    if isFirst {
-                        isFirst = false
-                        continue
-                    }
-
-                    await MainActor.run {
-                        if let activeConnection {
-                            os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
-                            self.openHABRootUrl = activeConnection.configuration.url
-                            self.selectSitemap()
-                        }
-                    }
-                }
-            }
-            activeTasks.insert(task) // Store the task for cancellation
-        }
-
-//      TODO: consider this feature to get rid of NetworkReachability
-        trackNetworkStatus()
+        startTrackNetworkStatus()
         startWatchingActiveServer()
 
         ImageDownloader.default.authenticationChallengeResponder = self
@@ -299,6 +254,49 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         super.traitCollectionDidChange(previousTraitCollection)
 
         widgetTableView.reloadData()
+    }
+
+    private func startTrackNetworkStatus() {
+        let task = Task {
+            for await status in NetworkTracker.shared.$status.values {
+                os_log("OpenHABViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                await MainActor.run {
+                    switch status {
+                    case .connecting:
+                        self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                    case .notConnected:
+                        os_log("Tracking error", log: .viewCycle, type: .info)
+                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+                    case .connected:
+                        self.hidePopupMessages()
+                    }
+                }
+            }
+        }
+        activeTasks.insert(task)
+    }
+
+    func startWatchingActiveServer() {
+        let task = Task {
+            var isFirst = true // Track first value
+
+            for await activeConnection in NetworkTracker.shared.$activeConnection.values {
+                // we only want our watcher to notify us about changes, and not the inital value
+                if isFirst {
+                    isFirst = false
+                    continue
+                }
+
+                await MainActor.run {
+                    if let activeConnection {
+                        os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
+                        self.openHABRootUrl = activeConnection.configuration.url
+                        self.selectSitemap()
+                    }
+                }
+            }
+        }
+        activeTasks.insert(task) // Store the task for cancellation
     }
 
     func stopAllTasks() {
@@ -564,7 +562,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
         guard !pageUrl.isEmpty else { return false }
 
-        let currentStatus = NetworkReachabilityManager(host: pageUrl)?.status ?? .notReachable
+        let currentStatus = NetworkTracker.shared.status
 
         // First run
         if !pageNetworkStatusAvailable {

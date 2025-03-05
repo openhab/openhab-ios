@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import AlamofireNetworkActivityIndicator
 import AVFoundation
 import Firebase
 import FirebaseMessaging
@@ -56,9 +55,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         UserDefaults.standard.register(defaults: appDefaults)
 
         Preferences.migrateUserDefaultsIfRequired()
-
-        NetworkActivityIndicatorManager.shared.isEnabled = true
-        NetworkActivityIndicatorManager.shared.startDelay = 1.0
 
         registerForPushNotifications()
 

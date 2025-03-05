@@ -65,7 +65,17 @@ struct OpenHABWatch: App {
                 return request
             }
             var request = request
-            request.headers.add(.authorization(username: openHABUsername, password: openHABPassword))
+
+            func basicAuthHeader() -> String {
+                let authString = "\(openHABUsername):\(openHABPassword)"
+                let authData = authString.data(using: .utf8)!
+                return "Basic \(authData.base64EncodedString())"
+            }
+            // We are handling URLRequests here, so we need to set the header fields
+            // to the request object with String and cannot use the type safe way of HTTPRequest
+            // like request.headerFields[.authorization] = basicAuthHeader()
+            // TODO revert this
+            request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
             return request
         }
         SDWebImageDownloader.shared.requestModifier = requestModifier

@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Alamofire
 import Foundation
 import os.log
 
@@ -20,6 +19,10 @@ public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
     func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
     // notify delegate that the certificagtes that a user is willing to trust has changed
     func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?)
+}
+
+enum ServerCertificateManagerError: Error {
+    case serverTrustEvaluationFailed
 }
 
 public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvaluating {
@@ -167,7 +170,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
                     switch self.evaluateResult {
                     case .deny:
                         // User decided to abort connection
-                        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
+                        throw ServerCertificateManagerError.serverTrustEvaluationFailed
                     case .permitOnce:
                         // User decided to accept invalid certificate once
                         return
@@ -179,10 +182,10 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
                         return
                     case .undecided:
                         // Something went wrong, abort connection
-                        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
+                        throw ServerCertificateManagerError.serverTrustEvaluationFailed
                     }
                 }
-                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
+                throw ServerCertificateManagerError.serverTrustEvaluationFailed
             }
         }
         // Warn user about invalid certificate and wait for user's decision
@@ -195,7 +198,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             switch self.evaluateResult {
             case .deny:
                 // User decided to abort connection
-                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
+                throw ServerCertificateManagerError.serverTrustEvaluationFailed
             case .permitOnce:
                 // User decided to accept invalid certificate once
                 return
@@ -206,11 +209,11 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
                 delegate.acceptedServerCertificatesChanged(self)
                 return
             case .undecided:
-                throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
+                throw ServerCertificateManagerError.serverTrustEvaluationFailed
             }
         }
         // We have no way of handling it so no access!
-        throw AFError.serverTrustEvaluationFailed(reason: .noCertificatesFound)
+        throw ServerCertificateManagerError.serverTrustEvaluationFailed
     }
 
     func getLeafCertificate(trust: SecTrust?) -> SecCertificate? {
