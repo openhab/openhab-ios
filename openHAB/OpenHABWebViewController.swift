@@ -92,6 +92,7 @@ class OpenHABWebViewController: OpenHABViewController {
                     self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 case .connected:
                     self.hidePopupMessages()
+                default: break
                 }
             }
             .store(in: &trackerCancellables)

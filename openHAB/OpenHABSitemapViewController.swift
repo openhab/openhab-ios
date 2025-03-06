@@ -269,6 +269,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                         self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
                     case .connected:
                         self.hidePopupMessages()
+                    default:
+                        break
                     }
                 }
             }

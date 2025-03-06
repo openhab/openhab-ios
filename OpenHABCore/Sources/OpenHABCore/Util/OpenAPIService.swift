@@ -20,6 +20,12 @@ public enum OpenAPIServiceError: Error {
     case noRootURL
 }
 
+public enum OpenAPIServiceConfiguration {
+    case asDefault
+    case shorTerm
+    case longTerm
+}
+
 // The generated OpenAPI client is wrapped by this curated API.
 // The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
 // It will require the migration to Swift 6.1 before this can be changed.
@@ -45,12 +51,22 @@ public actor OpenAPIService {
         username: String,
         password: String,
         alwaysSendBasicAuth: Bool = false,
-        ignoreSSL: Bool = false
+        ignoreSSL: Bool = false,
+        configuration: OpenAPIServiceConfiguration = .asDefault
     ) async {
         // TODO: Make use of prepareURLSessionConfiguration
+
         let config = URLSessionConfiguration.default
-//        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
-//        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
+        switch configuration {
+        case .asDefault:
+            break
+        case .longTerm:
+            config.timeoutIntervalForRequest = 35.0
+            config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
+        case .shorTerm:
+            config.timeoutIntervalForRequest = 2.0
+            config.timeoutIntervalForResource = 2.0
+        }
 
         let delegate = OpenAPIServiceDelegate(username: username, password: password)
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)

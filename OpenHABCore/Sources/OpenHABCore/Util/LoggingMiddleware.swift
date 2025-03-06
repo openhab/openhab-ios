@@ -44,7 +44,9 @@ extension LoggingMiddleware: ClientMiddleware {
             log(request, response, responseBodyToLog)
             return (response, responseBodyForNext)
         } catch {
-            log(request, failedWith: error)
+            if operationID != "getRoot", operationID != "getRootVersion" {
+                log(request, failedWith: error)
+            }
             throw error
         }
     }

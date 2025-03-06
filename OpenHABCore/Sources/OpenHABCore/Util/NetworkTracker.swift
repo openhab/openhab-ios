@@ -16,9 +16,11 @@ import os.log
 
 // TODO: these strings should reference Localizable keys
 public enum NetworkStatus: String {
-    case notConnected = "Not Connected"
     case connecting = "Connecting"
     case connected = "Connected"
+    case notConnected = "Not Connected"
+    case someConnected = "Some Connected"
+    case allConnected = "All Connected"
 }
 
 public struct ConnectionConfiguration: Equatable {
@@ -54,14 +56,18 @@ public final class NetworkTracker: ObservableObject {
     @Published public private(set) var activeConnection: ConnectionInfo?
     @Published public private(set) var status: NetworkStatus = .connecting
 
+    private var retryCount = 0
+    private let maxRetries = 5
     private let monitor: NWPathMonitor
     private let monitorQueue = DispatchQueue.global(qos: .background)
     public var openApiService: OpenAPIService?
+    private var openAPIServices: [OpenAPIService?] = []
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
     public private(set) var httpClient: HTTPClient?
     public var clientCertificateManager = ClientCertificateManager()
     public var serverCertificateManager = ServerCertificateManager()
+    private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
@@ -103,6 +109,21 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
+//    private func getOrCreateService(for configuration: ConnectionConfiguration) async -> OpenAPIService {
+//        if let cachedService = serviceCache[configuration.url] {
+//            return cachedService
+//        }
+//
+//        let newService = await OpenAPIService(
+//            baseURL: URL(string: configuration.url),
+//            username: Preferences.username,
+//            password: Preferences.password
+//        )
+//
+//        serviceCache[configuration.url] = newService
+//        return newService
+//    }
+
     public func startTracking(connectionConfigurations: [ConnectionConfiguration],
                               username: String,
                               password: String,
@@ -110,13 +131,14 @@ public final class NetworkTracker: ObservableObject {
                               ignoreSSLVerification: Bool) {
         logger.info("Start Tracking")
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
-
         Task {
+            // TODO: Remove
             openApiService = await OpenAPIService(
                 username: username,
                 password: password,
                 alwaysSendBasicAuth: alwaysSendBasicAuth,
-                ignoreSSL: ignoreSSLVerification
+                ignoreSSL: ignoreSSLVerification,
+                configuration: .shorTerm
             )
             await attemptConnection()
         }
@@ -133,7 +155,7 @@ public final class NetworkTracker: ObservableObject {
         } else {
             logger.info("Network status: Disconnected")
             await updateActiveConnection(nil)
-            startRetryTask()
+            startRetryTask(10)
         }
     }
 
@@ -166,6 +188,7 @@ public final class NetworkTracker: ObservableObject {
 
         let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
         var bestConnection: ConnectionInfo?
+        var connectedCounts = 0
 
         await withTaskGroup(of: ConnectionInfo?.self) { group in
             for config in sortedConfigs {
@@ -175,14 +198,13 @@ public final class NetworkTracker: ObservableObject {
             }
 
             for await connection in group {
-                if let connection {
-                    if connection.configuration.priority == 0 {
-                        await updateActiveConnection(connection)
-                        return
-                    }
-                    if bestConnection == nil || connection.configuration.priority < bestConnection!.configuration.priority {
-                        bestConnection = connection
-                    }
+                guard let connection else { continue }
+                if connection.configuration.priority == 0 {
+                    await updateActiveConnection(connection)
+                    return
+                }
+                if bestConnection == nil || connection.configuration.priority < bestConnection!.configuration.priority {
+                    bestConnection = connection
                 }
             }
         }
@@ -197,22 +219,29 @@ public final class NetworkTracker: ObservableObject {
             let service = await OpenAPIService(
                 baseURL: url,
                 username: Preferences.username,
-                password: Preferences.password
+                password: Preferences.password,
+                alwaysSendBasicAuth: Preferences.alwaysSendCreds,
+                ignoreSSL: Preferences.ignoreSSL,
+                configuration: .shorTerm
             )
             let version = try await service.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
             logger.info("Successfully connected to \(configuration.url)")
             return connectionInfo
+        } catch NetworkTrackerError.invalidServerVersion {
+            logger.info("Invalid server version from \(configuration.url)")
+            return nil
         } catch {
-            logger.error("Failed to connect to \(configuration.url) - \(error.localizedDescription)")
+            logger.info("Failed to connect to \(configuration.url)")
             return nil
         }
     }
 
-    private func startRetryTask() {
+    private func startRetryTask(_ retryInterval: UInt64) {
         retryTask?.cancel()
         retryTask = Task {
-            try? await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
+            let retryInterval = retryInterval * 1_000_000_000
+            try? await Task.sleep(nanoseconds: retryInterval)
             await attemptConnection()
         }
     }
@@ -227,10 +256,11 @@ public final class NetworkTracker: ObservableObject {
             await openApiService?.updateBaseURL(with: URL(string: connection.configuration.url) ?? URL(string: "about:blank")!)
         } else {
             status = .notConnected
-            startRetryTask()
+            startRetryTask(disconnectedRetryInterval)
         }
     }
 
+    // Ensures that all URLs pointing to "myopenhab.org" are standardized to "home.myopenhab.org".
     private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
         configurations.map { configuration in
             var updatedURL = configuration.url
