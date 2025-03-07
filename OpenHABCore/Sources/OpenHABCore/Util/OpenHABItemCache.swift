@@ -61,33 +61,19 @@ public class OpenHABItemCache {
     }
 
     public func sendCommand(_ item: OpenHABItem, commandToSend command: String) async {
-        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-           let url = URL(string: activeConnection.configuration.url) {
-            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-            try? await NetworkTracker.shared.openApiService?.sendItemCommand(itemname: item.name, command: command)
-        }
+        await NetworkTracker.shared.send(to: item, command: command)
     }
 
     public func sendState(_ item: OpenHABItem, stateToSend state: String) async {
-        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-           let url = URL(string: activeConnection.configuration.url) {
-            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-            try? await NetworkTracker.shared.openApiService?.updateItemState(itemname: item.name, with: state)
-        }
+        await NetworkTracker.shared.updateState(for: item, state: state)
     }
 
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [NSString] {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-              let url = URL(string: activeConnection.configuration.url) else {
-            return []
-        }
-
         os_log("OpenHABItemCache Loading items ")
         lastLoad = Date().timeIntervalSince1970
 
         do {
-            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-            items = try await NetworkTracker.shared.openApiService?.getItems()
+            items = try await NetworkTracker.shared.getItems()
             os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
             return getItemNames(searchTerm: searchTerm, types: types)
         } catch {
@@ -97,14 +83,8 @@ public class OpenHABItemCache {
     }
 
     public func reload(name: String) async -> OpenHABItem? {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-              let url = URL(string: activeConnection.configuration.url) else {
-            return nil
-        }
-
         do {
-            await NetworkTracker.shared.openApiService?.updateBaseURL(with: url)
-            items = try await NetworkTracker.shared.openApiService?.getItems()
+            items = try await NetworkTracker.shared.getItems()
             os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
             return items?.first { $0.name == name }
         } catch {

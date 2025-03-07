@@ -132,8 +132,7 @@ final class UserData: ObservableObject {
         logger.info("Loading page \(sitemapName) longPolling \(longPolling) refresh \(refresh)")
 
         do {
-            guard let openAPIService = NetworkTracker.shared.openApiService else { return }
-            openHABSitemapPage = try await openAPIService.pollDataForPage(sitemapname: sitemapName, longPolling: longPolling)
+            openHABSitemapPage = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, longPolling: longPolling)
 
             openHABSitemapPage?.sendCommand = { [weak self] item, command in
                 Task { await self?.sendCommand(item, command: command) }
@@ -154,12 +153,7 @@ final class UserData: ObservableObject {
 
     func sendCommand(_ item: OpenHABItem?, command: String?) async {
         guard let item, let command else { return }
-
-        do {
-            try await NetworkTracker.shared.openApiService?.sendItemCommand(itemname: item.name, command: command)
-        } catch {
-            logger.error("Error sending command \(command) to \(item.name): \(error.localizedDescription)")
-        }
+        await NetworkTracker.shared.send(to: item, command: command)
     }
 
     func refreshUrl() async {

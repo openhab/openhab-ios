@@ -50,15 +50,19 @@ enum NetworkTrackerError: Error, CustomDebugStringConvertible {
     }
 }
 
+// Prevent race conditions.
+// Ensure thread-safe dictionary access.
+// Avoid memory corruption errors like unrecognized selector.
 actor ConnectionPool {
     private var services: [ConnectionConfiguration: OpenAPIService] = [:]
 
-    func getOrCreateService(for configuration: ConnectionConfiguration, url: URL) async -> OpenAPIService {
+    @discardableResult
+    func getOrCreateService(for configuration: ConnectionConfiguration) async -> OpenAPIService {
         if let existingService = services[configuration] {
             return existingService
         }
         let newService = await OpenAPIService(
-            baseURL: url,
+            baseURL: URL(string: configuration.url) ?? URL(staticString: "about:blank"),
             username: Preferences.username,
             password: Preferences.password,
             alwaysSendBasicAuth: Preferences.alwaysSendCreds,
@@ -80,8 +84,6 @@ public final class NetworkTracker: ObservableObject {
     private let maxRetries = 5
     private let monitor: NWPathMonitor
     private let monitorQueue = DispatchQueue.global(qos: .background)
-    public var openApiService: OpenAPIService?
-    private var openAPIServices: [OpenAPIService?] = []
     private var connectionPool: ConnectionPool = .init()
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
@@ -132,14 +134,9 @@ public final class NetworkTracker: ObservableObject {
         logger.info("Start Tracking")
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
         Task {
-            // TODO: Remove
-            openApiService = await OpenAPIService(
-                username: username,
-                password: password,
-                alwaysSendBasicAuth: alwaysSendBasicAuth,
-                ignoreSSL: ignoreSSLVerification,
-                configuration: .shortTerm
-            )
+            for configuration in connectionConfigurations {
+                await connectionPool.getOrCreateService(for: configuration)
+            }
             await setActiveConnection(nil)
             await attemptConnection()
         }
@@ -179,9 +176,9 @@ public final class NetworkTracker: ObservableObject {
         }
 
         do {
-            guard let url = URL(string: activeConnection.configuration.url) else { return }
-            await openApiService?.updateBaseURL(with: url)
-            try await openApiService?.getRoot()
+            try await connectionPool
+                .getOrCreateService(for: activeConnection.configuration)
+                .getRoot()
             logger.info("Active connection is reachable: \(activeConnection.configuration.url)")
         } catch {
             logger.error("Active connection failed: \(activeConnection.configuration.url) - \(error.localizedDescription)")
@@ -225,11 +222,10 @@ public final class NetworkTracker: ObservableObject {
     }
 
     private func testConnection(configuration: ConnectionConfiguration) async -> ConnectionInfo? {
-        guard let url = URL(string: configuration.url) else { return nil }
+        guard URL(string: configuration.url) != nil else { return nil }
 
         do {
-            let service = await connectionPool.getOrCreateService(for: configuration, url: url)
-            let version = try await service.getRootVersion()
+            let version = try await connectionPool.getOrCreateService(for: configuration).getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
             logger.info("Successfully connected to \(configuration.url)")
             return connectionInfo
@@ -269,7 +265,6 @@ public final class NetworkTracker: ObservableObject {
         activeConnection = connection
         if let connection {
             status = .connected
-            await openApiService?.updateBaseURL(with: URL(string: connection.configuration.url) ?? URL(string: "about:blank")!)
         } else {
             status = .notConnected
             startRetryTask(disconnectedRetryInterval)
@@ -289,6 +284,44 @@ public final class NetworkTracker: ObservableObject {
                 updatedURL = newComponents.url?.absoluteString ?? configuration.url
             }
             return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
+        }
+    }
+}
+
+public extension NetworkTracker {
+    func send(to item: OpenHABItem, command: String) async {
+        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
+            let configuration = activeConnection.configuration
+            let service = await connectionPool.getOrCreateService(for: configuration)
+            try? await service.sendItemCommand(itemname: item.name, command: command)
+        }
+    }
+
+    func updateState(for item: OpenHABItem, state: String) async {
+        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
+            let configuration = activeConnection.configuration
+            let service = await connectionPool.getOrCreateService(for: configuration)
+            try? await service.updateItemState(itemname: item.name, with: state)
+        }
+    }
+
+    func getItems() async throws -> [OpenHABItem] {
+        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
+            let configuration = activeConnection.configuration
+            let service = await connectionPool.getOrCreateService(for: configuration)
+            return try await service.getItems()
+        } else {
+            return []
+        }
+    }
+
+    func pollDataForPage(sitemapname: String, longPolling: Bool = false) async throws -> OpenHABPage? {
+        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
+            let configuration = activeConnection.configuration
+            let service = await connectionPool.getOrCreateService(for: configuration)
+            return try await service.pollDataForPage(sitemapname: sitemapname, longPolling: longPolling)
+        } else {
+            return nil
         }
     }
 }
