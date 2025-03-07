@@ -22,7 +22,7 @@ public enum OpenAPIServiceError: Error {
 
 public enum OpenAPIServiceConfiguration {
     case asDefault
-    case shorTerm
+    case shortTerm
     case longTerm
 }
 
@@ -63,7 +63,7 @@ public actor OpenAPIService {
         case .longTerm:
             config.timeoutIntervalForRequest = 35.0
             config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
-        case .shorTerm:
+        case .shortTerm:
             config.timeoutIntervalForRequest = 2.0
             config.timeoutIntervalForResource = 2.0
         }

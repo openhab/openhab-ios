@@ -138,7 +138,7 @@ public final class NetworkTracker: ObservableObject {
                 password: password,
                 alwaysSendBasicAuth: alwaysSendBasicAuth,
                 ignoreSSL: ignoreSSLVerification,
-                configuration: .shorTerm
+                configuration: .shortTerm
             )
             await attemptConnection()
         }
@@ -222,7 +222,7 @@ public final class NetworkTracker: ObservableObject {
                 password: Preferences.password,
                 alwaysSendBasicAuth: Preferences.alwaysSendCreds,
                 ignoreSSL: Preferences.ignoreSSL,
-                configuration: .shorTerm
+                configuration: .shortTerm
             )
             let version = try await service.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
