@@ -23,7 +23,7 @@ public enum NetworkStatus: String {
     case allConnected = "All Connected"
 }
 
-public struct ConnectionConfiguration: Equatable {
+public struct ConnectionConfiguration: Hashable {
     public let url: String
     public let priority: Int // Lower is higher priority, 0 is primary
 
@@ -50,6 +50,26 @@ enum NetworkTrackerError: Error, CustomDebugStringConvertible {
     }
 }
 
+actor ConnectionPool {
+    private var services: [ConnectionConfiguration: OpenAPIService] = [:]
+
+    func getOrCreateService(for configuration: ConnectionConfiguration, url: URL) async -> OpenAPIService {
+        if let existingService = services[configuration] {
+            return existingService
+        }
+        let newService = await OpenAPIService(
+            baseURL: url,
+            username: Preferences.username,
+            password: Preferences.password,
+            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
+            ignoreSSL: Preferences.ignoreSSL,
+            configuration: .shortTerm
+        )
+        services[configuration] = newService
+        return newService
+    }
+}
+
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
@@ -62,6 +82,7 @@ public final class NetworkTracker: ObservableObject {
     private let monitorQueue = DispatchQueue.global(qos: .background)
     public var openApiService: OpenAPIService?
     private var openAPIServices: [OpenAPIService?] = []
+    private var connectionPool: ConnectionPool = .init()
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
     public private(set) var httpClient: HTTPClient?
@@ -72,11 +93,6 @@ public final class NetworkTracker: ObservableObject {
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
     private init() {
-        monitor = NWPathMonitor()
-        monitor.pathUpdateHandler = { [weak self] path in
-            Task { await self?.handleNetworkChange(isConnected: path.status == .satisfied) }
-        }
-        monitor.start(queue: monitorQueue)
 //        if #available(iOS 17, watchOS 10, *) {
 //            // The `for await` loop automatically handles updates from NWPathMonitor, so there’s no need for a callback.
 //            Task {
@@ -85,28 +101,12 @@ public final class NetworkTracker: ObservableObject {
 //                    await handleNetworkChange(isConnected: path.status == .satisfied)
 //                }
 //            }
-    }
-
-    public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
-        await withCheckedContinuation { continuation in
-            let deadline = Date().addingTimeInterval(timeout)
-
-            func checkConnection() {
-                Task { @MainActor in
-                    if let activeConnection = self.activeConnection {
-                        continuation.resume(returning: activeConnection)
-                    } else if Date() >= deadline {
-                        continuation.resume(returning: nil)
-                    } else {
-                        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
-                            checkConnection()
-                        }
-                    }
-                }
-            }
-
-            checkConnection()
+//        } else {
+        monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            Task { await self?.handleNetworkChange(isConnected: path.status == .satisfied) }
         }
+        monitor.start(queue: monitorQueue)
     }
 
 //    private func getOrCreateService(for configuration: ConnectionConfiguration) async -> OpenAPIService {
@@ -140,23 +140,35 @@ public final class NetworkTracker: ObservableObject {
                 ignoreSSL: ignoreSSLVerification,
                 configuration: .shortTerm
             )
+            await setActiveConnection(nil)
             await attemptConnection()
+        }
+    }
+
+    public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
+        await withCheckedContinuation { continuation in
+            let deadline = Date().addingTimeInterval(timeout)
+
+            func checkConnection() {
+                Task { @MainActor in
+                    if let activeConnection = self.activeConnection {
+                        continuation.resume(returning: activeConnection)
+                    } else if Date() >= deadline {
+                        continuation.resume(returning: nil)
+                    } else {
+                        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
+                            checkConnection()
+                        }
+                    }
+                }
+            }
+
+            checkConnection()
         }
     }
 
     public func restartTracking() {
         Task { await attemptConnection() }
-    }
-
-    private func handleNetworkChange(isConnected: Bool) async {
-        if isConnected {
-            logger.info("Network status: Connected")
-            await checkActiveConnection()
-        } else {
-            logger.info("Network status: Disconnected")
-            await updateActiveConnection(nil)
-            startRetryTask(10)
-        }
     }
 
     private func checkActiveConnection() async {
@@ -180,7 +192,7 @@ public final class NetworkTracker: ObservableObject {
     private func attemptConnection() async {
         guard !connectionConfigurations.isEmpty else {
             logger.error("No connection configurations available.")
-            await updateActiveConnection(nil)
+            await setActiveConnection(nil)
             return
         }
 
@@ -197,33 +209,26 @@ public final class NetworkTracker: ObservableObject {
                 }
             }
 
-            for await connection in group {
-                guard let connection else { continue }
-                if connection.configuration.priority == 0 {
-                    await updateActiveConnection(connection)
+            for await connectionInfo in group {
+                guard let connectionInfo else { continue }
+                if connectionInfo.configuration.priority == 0 {
+                    await setActiveConnection(connectionInfo)
                     return
                 }
-                if bestConnection == nil || connection.configuration.priority < bestConnection!.configuration.priority {
-                    bestConnection = connection
+                if bestConnection == nil || connectionInfo.configuration.priority < bestConnection!.configuration.priority {
+                    bestConnection = connectionInfo
                 }
             }
         }
 
-        await updateActiveConnection(bestConnection)
+        await setActiveConnection(bestConnection)
     }
 
     private func testConnection(configuration: ConnectionConfiguration) async -> ConnectionInfo? {
         guard let url = URL(string: configuration.url) else { return nil }
 
         do {
-            let service = await OpenAPIService(
-                baseURL: url,
-                username: Preferences.username,
-                password: Preferences.password,
-                alwaysSendBasicAuth: Preferences.alwaysSendCreds,
-                ignoreSSL: Preferences.ignoreSSL,
-                configuration: .shortTerm
-            )
+            let service = await connectionPool.getOrCreateService(for: configuration, url: url)
             let version = try await service.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
             logger.info("Successfully connected to \(configuration.url)")
@@ -246,8 +251,19 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
+    private func handleNetworkChange(isConnected: Bool) async {
+        if isConnected {
+            logger.info("Network status: Connected")
+            await checkActiveConnection()
+        } else {
+            logger.info("Network status: Disconnected")
+            await setActiveConnection(nil)
+            startRetryTask(10)
+        }
+    }
+
     @MainActor
-    private func updateActiveConnection(_ connection: ConnectionInfo?) async {
+    private func setActiveConnection(_ connection: ConnectionInfo?) async {
         guard activeConnection != connection else { return }
 
         activeConnection = connection
