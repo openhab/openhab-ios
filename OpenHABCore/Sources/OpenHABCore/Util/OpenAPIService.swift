@@ -54,8 +54,6 @@ public actor OpenAPIService {
         ignoreSSL: Bool = false,
         configuration: OpenAPIServiceConfiguration = .asDefault
     ) async {
-        // TODO: Make use of prepareURLSessionConfiguration
-
         let config = URLSessionConfiguration.default
         switch configuration {
         case .asDefault:
