@@ -156,6 +156,7 @@ public class HTTPClient: NSObject {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.timeoutInterval = timeout
+
         if let headers {
             for (key, value) in headers {
                 request.setValue(value, forHTTPHeaderField: key)
