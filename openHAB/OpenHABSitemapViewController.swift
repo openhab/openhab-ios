@@ -434,7 +434,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             return 0
         }
 
-        os_log("OpenHABSitemapViewController request sent", log: .remoteAccess, type: .error)
+        logger.info("OpenHABSitemapViewController request sent")
     }
 
     // Select sitemap
@@ -750,28 +750,30 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         }
         // No icon is needed for image, video, frame and web widgets
         if !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
-            if let urlc = Endpoint.icon(
-                rootUrl: openHABRootUrl,
-                version: appData?.openHABVersion ?? 2,
-                icon: widget.icon,
-                state: widget.iconState(),
-                iconType: iconType,
-                iconColor: iconColor
-            ).url {
-                var imageRequest = URLRequest(url: urlc)
-                imageRequest.timeoutInterval = 10.0
-                cell.imageView?.kf.setImage(
-                    with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                    placeholder: nil,
-                    options: [.processor(OpenHABImageProcessor())]
-                ) { result in
-                    switch result {
-                    case .success:
-                        DispatchQueue.main.async {
-                            cell.setNeedsLayout()
+            if !widget.icon.isEmpty {
+                if let urlc = Endpoint.icon(
+                    rootUrl: openHABRootUrl,
+                    version: appData?.openHABVersion ?? 2,
+                    icon: widget.icon,
+                    state: widget.iconState(),
+                    iconType: iconType,
+                    iconColor: iconColor
+                ).url {
+                    var imageRequest = URLRequest(url: urlc)
+                    imageRequest.timeoutInterval = 10.0
+                    cell.imageView?.kf.setImage(
+                        with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                        placeholder: nil,
+                        options: [.processor(OpenHABImageProcessor())]
+                    ) { result in
+                        switch result {
+                        case .success:
+                            DispatchQueue.main.async {
+                                cell.setNeedsLayout()
+                            }
+                        case let .failure(error):
+                            os_log("Image loading failed: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
                         }
-                    case let .failure(error):
-                        os_log("Image loading failed: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
                     }
                 }
             }

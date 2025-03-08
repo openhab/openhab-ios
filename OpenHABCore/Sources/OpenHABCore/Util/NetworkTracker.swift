@@ -227,6 +227,24 @@ public final class NetworkTracker: ObservableObject {
         return bestConnection
     }
 
+    private func withTimeout<T>(seconds: Double, operation: @escaping () async -> T?) async -> T? {
+        await withTaskGroup(of: T?.self) { group in
+            // Start the operation
+            group.addTask {
+                await operation()
+            }
+
+            // Start the timeout countdown
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                return nil
+            }
+
+            // Return the first task that finishes (operation or timeout)
+            return await group.first { $0 != nil } ?? nil
+        }
+    }
+
     private func testConnection(configuration: ConnectionConfiguration) async -> ConnectionInfo? {
         guard URL(string: configuration.url) != nil else { return nil }
 
@@ -247,8 +265,7 @@ public final class NetworkTracker: ObservableObject {
     private func startRetryTask(_ retryInterval: UInt64) {
         retryTask?.cancel()
         retryTask = Task {
-            let retryInterval = retryInterval * 1_000_000_000
-            try? await Task.sleep(nanoseconds: retryInterval)
+            try? await Task.sleep(nanoseconds: UInt64(retryInterval * 1_000_000_000))
             await attemptConnection()
         }
     }

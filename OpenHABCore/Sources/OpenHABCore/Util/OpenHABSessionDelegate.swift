@@ -17,7 +17,6 @@ import Foundation
 //// The alternative method is explained by jshier in https://github.com/Alamofire/Alamofire/issues/2886#issuecomment-517951747
 //
 // class OpenHABSessionDelegate: SessionDelegate {
-//    // swiftlint:disable:next large_tuple
 //    typealias ChallengeEvaluation = (disposition: URLSession.AuthChallengeDisposition, credential: URLCredential?, error: AFError?)
 //
 //    var eventMonitor: EventMonitor?
