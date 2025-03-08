@@ -397,19 +397,10 @@ class OpenHABRootViewController: UIViewController {
         let itemCommand = String(components[1])
         Task {
             do {
-                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-                      let url = URL(string: activeConnection.configuration.url) else {
-                    displayErrorNotification("Could not find server")
-                    return
-                }
-
-                os_log("Sending command", log: .default, type: .error)
-
-                let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
-                await openAPIService.updateBaseURL(with: url)
-
-                try await openAPIService.sendItemCommand(itemname: itemName, command: itemCommand)
-
+                logger.info("Sending command")
+                try await NetworkTracker.shared.send(to: itemName, command: itemCommand)
+            } catch NetworkTrackerError.noActiveConnection {
+                displayErrorNotification("Could not find server")
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
                 // TODOD
@@ -481,17 +472,11 @@ class OpenHABRootViewController: UIViewController {
         }
         Task {
             do {
-                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-                    displayErrorNotification("Could not find active server")
-                    return
-                }
-
-                os_log("Sending command", log: .default, type: .error)
-
-                let openAPIService = await OpenAPIService(username: Preferences.username, password: Preferences.password)
-                try await openAPIService.runNow(ruleUID: uuid, payload: properties)
+                logger.error("Sending command")
+                try await NetworkTracker.shared.runNow(ruleUID: uuid, payload: properties)
                 logger.info("Request succeeded")
-
+            } catch let error as NetworkTrackerError {
+                displayErrorNotification("\(error.localizedDescription)")
             } catch {
                 logger.error("Could not send data \(error.localizedDescription)")
                 displayErrorNotification("Request to server failed: \(error.localizedDescription)")

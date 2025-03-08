@@ -153,7 +153,11 @@ final class UserData: ObservableObject {
 
     func sendCommand(_ item: OpenHABItem?, command: String?) async {
         guard let item, let command else { return }
-        await NetworkTracker.shared.send(to: item, command: command)
+        do {
+            try await NetworkTracker.shared.send(to: item, command: command)
+        } catch {
+            logger.info("Could not send command \(command) to \(item.name)")
+        }
     }
 
     func refreshUrl() async {

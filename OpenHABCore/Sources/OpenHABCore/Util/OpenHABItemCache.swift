@@ -20,6 +20,8 @@ public class OpenHABItemCache {
     var timeout: Double = 20
     var lastLoad = Date().timeIntervalSince1970
 
+    private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "OpenHABItemCache")
+
     private init() {
         let connection1 = ConnectionConfiguration(
             url: Preferences.localUrl,
@@ -61,11 +63,19 @@ public class OpenHABItemCache {
     }
 
     public func sendCommand(_ item: OpenHABItem, commandToSend command: String) async {
-        await NetworkTracker.shared.send(to: item, command: command)
+        do {
+            try await NetworkTracker.shared.send(to: item, command: command)
+        } catch {
+            logger.info("Could not send command: \(error.localizedDescription)")
+        }
     }
 
     public func sendState(_ item: OpenHABItem, stateToSend state: String) async {
-        await NetworkTracker.shared.updateState(for: item, state: state)
+        do {
+            try await NetworkTracker.shared.updateState(for: item, state: state)
+        } catch {
+            logger.info("Could not send state: \(error.localizedDescription)")
+        }
     }
 
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [NSString] {

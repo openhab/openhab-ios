@@ -38,14 +38,16 @@ public struct ConnectionInfo: Equatable {
     public let version: Int
 }
 
-enum NetworkTrackerError: Error, CustomDebugStringConvertible {
+public enum NetworkTrackerError: Error, CustomDebugStringConvertible {
     case invalidServerVersion
     case failedConnection(String)
+    case noActiveConnection
 
-    var debugDescription: String {
+    public var debugDescription: String {
         switch self {
         case .invalidServerVersion: "Invalid server version"
         case let .failedConnection(url): "Failed to connect to \(url)"
+        case .noActiveConnection: "No active server found"
         }
     }
 }
@@ -200,7 +202,7 @@ public final class NetworkTracker: ObservableObject {
 
     private func findBestConnection() async -> ConnectionInfo? {
         let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
-        var bestConnection: ConnectionInfo? = nil
+        var bestConnection: ConnectionInfo?
         // var connectedCounts = 0
 
         await withTaskGroup(of: ConnectionInfo?.self) { group in
@@ -312,40 +314,43 @@ public final class NetworkTracker: ObservableObject {
 }
 
 public extension NetworkTracker {
-    func send(to item: OpenHABItem, command: String) async {
-        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
-            let configuration = activeConnection.configuration
-            let service = await connectionPool.getOrCreateService(for: configuration)
-            try? await service.sendItemCommand(itemname: item.name, command: command)
-        }
+    func send(to item: OpenHABItem, command: String) async throws {
+        try await send(to: item.name, command: command)
     }
 
-    func updateState(for item: OpenHABItem, state: String) async {
-        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
-            let configuration = activeConnection.configuration
-            let service = await connectionPool.getOrCreateService(for: configuration)
-            try? await service.updateItemState(itemname: item.name, with: state)
-        }
+    func send(to item: String, command: String) async throws {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return }
+        let configuration = activeConnection.configuration
+        let service = await connectionPool.getOrCreateService(for: configuration)
+        try await service.sendItemCommand(itemname: item, command: command)
+    }
+
+    func updateState(for item: OpenHABItem, state: String) async throws {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return }
+        let configuration = activeConnection.configuration
+        let service = await connectionPool.getOrCreateService(for: configuration)
+        try await service.updateItemState(itemname: item.name, with: state)
     }
 
     func getItems() async throws -> [OpenHABItem] {
-        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
-            let configuration = activeConnection.configuration
-            let service = await connectionPool.getOrCreateService(for: configuration)
-            return try await service.getItems()
-        } else {
-            return []
-        }
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return [] }
+        let configuration = activeConnection.configuration
+        let service = await connectionPool.getOrCreateService(for: configuration)
+        return try await service.getItems()
     }
 
     func pollDataForPage(sitemapname: String, longPolling: Bool = false) async throws -> OpenHABPage? {
-        if let activeConnection = await NetworkTracker.shared.waitForActiveConnection() {
-            let configuration = activeConnection.configuration
-            let service = await connectionPool.getOrCreateService(for: configuration)
-            return try await service.pollDataForPage(sitemapname: sitemapname, longPolling: longPolling)
-        } else {
-            return nil
-        }
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return nil }
+        let configuration = activeConnection.configuration
+        let service = await connectionPool.getOrCreateService(for: configuration)
+        return try await service.pollDataForPage(sitemapname: sitemapname, longPolling: longPolling)
+    }
+
+    func runNow(ruleUID: String, payload: [String: String]) async throws {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { throw NetworkTrackerError.noActiveConnection }
+        let configuration = activeConnection.configuration
+        let service = await connectionPool.getOrCreateService(for: configuration)
+        try await service.runNow(ruleUID: ruleUID, payload: payload)
     }
 }
 
