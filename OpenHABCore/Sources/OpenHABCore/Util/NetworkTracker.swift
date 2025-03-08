@@ -111,27 +111,12 @@ public final class NetworkTracker: ObservableObject {
         monitor.start(queue: monitorQueue)
     }
 
-//    private func getOrCreateService(for configuration: ConnectionConfiguration) async -> OpenAPIService {
-//        if let cachedService = serviceCache[configuration.url] {
-//            return cachedService
-//        }
-//
-//        let newService = await OpenAPIService(
-//            baseURL: URL(string: configuration.url),
-//            username: Preferences.username,
-//            password: Preferences.password
-//        )
-//
-//        serviceCache[configuration.url] = newService
-//        return newService
-//    }
-
     public func startTracking(connectionConfigurations: [ConnectionConfiguration],
                               username: String,
                               password: String,
                               alwaysSendBasicAuth: Bool,
                               ignoreSSLVerification: Bool) {
-        logger.info("Start Tracking")
+        logger.info("Start Network Tracking")
         self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
         Task {
             for configuration in connectionConfigurations {
@@ -143,38 +128,52 @@ public final class NetworkTracker: ObservableObject {
     }
 
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
-        await withCheckedContinuation { continuation in
-            let deadline = Date().addingTimeInterval(timeout)
-
-            func checkConnection() {
-                Task { @MainActor in
-                    if let activeConnection = self.activeConnection {
-                        continuation.resume(returning: activeConnection)
-                    } else if Date() >= deadline {
-                        continuation.resume(returning: nil)
-                    } else {
-                        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
-                            checkConnection()
-                        }
-                    }
-                }
+        logger.info("NetworkConnection: waitForActiveConnection")
+        // Utilize for await to listen for changes in $activeConnection
+        // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
+        // Wait until a non-nil value is received
+        for await connection in $activeConnection.values {
+            if let connection {
+                return connection
             }
-
-            checkConnection()
         }
+
+        return nil
+//        await withCheckedContinuation { continuation in
+//            let deadline = Date().addingTimeInterval(timeout)
+//
+//            func checkConnection() {
+//                Task { @MainActor in
+//                    if let activeConnection = self.activeConnection {
+//                        continuation.resume(returning: activeConnection)
+//                    } else if Date() >= deadline {
+//                        continuation.resume(returning: nil)
+//                    } else {
+//                        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
+//                            checkConnection()
+//                        }
+//                    }
+//                }
+//            }
+//
+//            checkConnection()
+//        }
     }
 
     public func restartTracking() {
         Task { await attemptConnection() }
     }
 
+    // This gets called periodically when we have an active connection to make sure it's still the best choice
     private func checkActiveConnection() async {
         guard let activeConnection else {
+            // No active connection, proceed with the normal connection attempt
             os_log("No active connection, attempting to reconnect...", log: OSLog.default, type: .info)
             await attemptConnection()
             return
         }
 
+        // Check if the active connection is reachable
         do {
             try await connectionPool
                 .getOrCreateService(for: activeConnection.configuration)
@@ -195,9 +194,14 @@ public final class NetworkTracker: ObservableObject {
 
         logger.info("Checking available connections...")
 
+        let bestConnection = await findBestConnection()
+        await setActiveConnection(bestConnection)
+    }
+
+    private func findBestConnection() async -> ConnectionInfo? {
         let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
-        var bestConnection: ConnectionInfo?
-        var connectedCounts = 0
+        var bestConnection: ConnectionInfo? = nil
+        // var connectedCounts = 0
 
         await withTaskGroup(of: ConnectionInfo?.self) { group in
             for config in sortedConfigs {
@@ -208,17 +212,19 @@ public final class NetworkTracker: ObservableObject {
 
             for await connectionInfo in group {
                 guard let connectionInfo else { continue }
+
                 if connectionInfo.configuration.priority == 0 {
-                    await setActiveConnection(connectionInfo)
-                    return
+                    bestConnection = connectionInfo
+                    group.cancelAll() // Stop further tasks if we found the highest-priority connection
+                    break
                 }
+
                 if bestConnection == nil || connectionInfo.configuration.priority < bestConnection!.configuration.priority {
                     bestConnection = connectionInfo
                 }
             }
         }
-
-        await setActiveConnection(bestConnection)
+        return bestConnection
     }
 
     private func testConnection(configuration: ConnectionConfiguration) async -> ConnectionInfo? {
@@ -263,7 +269,7 @@ public final class NetworkTracker: ObservableObject {
         guard activeConnection != connection else { return }
 
         activeConnection = connection
-        if let connection {
+        if connection != nil {
             status = .connected
         } else {
             status = .notConnected
