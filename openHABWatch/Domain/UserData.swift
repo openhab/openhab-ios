@@ -41,10 +41,6 @@ final class UserData: ObservableObject {
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
 
     init(sitemapName: String = "watch") {
-        Task {
-            await observeNetworkChanges()
-        }
-
         NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,
             object: nil,
@@ -83,6 +79,11 @@ final class UserData: ObservableObject {
             queue: nil
         ) { _ in
             NetworkTracker.shared.restartTracking()
+        }
+
+        Task {
+            await updateNetwork()
+            await observeNetworkChanges()
         }
     }
 
@@ -129,7 +130,7 @@ final class UserData: ObservableObject {
     }
 
     func loadPage(sitemapName: String, longPolling: Bool, refresh: Bool) async {
-        logger.info("Loading page \(sitemapName) longPolling \(longPolling) refresh \(refresh)")
+        logger.info("Loading page: \(sitemapName) longPolling: \(longPolling) refresh: \(refresh)")
 
         do {
             openHABSitemapPage = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, longPolling: longPolling)

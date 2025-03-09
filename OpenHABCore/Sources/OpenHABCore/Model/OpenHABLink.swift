@@ -11,18 +11,13 @@
 
 import Foundation
 
-class OpenHABLink: Decodable {
+struct OpenHABLink: Decodable, Sendable {
     public var type: String?
     public var url: String?
-
-    init(type: String?, url: String?) {
-        self.type = type
-        self.url = url
-    }
 }
 
 extension OpenHABLink {
-    convenience init?(_ links: Components.Schemas.Links?) {
+    init?(_ links: Components.Schemas.Links?) {
         if let links {
             self.init(type: links._type, url: links.url)
         } else {

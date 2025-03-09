@@ -168,11 +168,18 @@ struct DrawerView: View {
 
         var body: some View {
             HStack {
-                let url = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", icon: sitemap.icon).url
-                KFImage(url).placeholder { Image("openHABIcon").resizable() }
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: sitemapIconwidth)
+                if sitemap.icon.isEmpty {
+                    Image("openHABIcon")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: sitemapIconwidth)
+                } else {
+                    let url = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", icon: sitemap.icon).url
+                    KFImage(url).placeholder { Image("openHABIcon").resizable() }
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: sitemapIconwidth)
+                }
                 Text(sitemap.label)
                 if isWatchSitemap {
                     Spacer()

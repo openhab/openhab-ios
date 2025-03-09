@@ -23,7 +23,7 @@ public enum NetworkStatus: String {
     case allConnected = "All Connected"
 }
 
-public struct ConnectionConfiguration: Hashable {
+public struct ConnectionConfiguration: Hashable, Sendable {
     public let url: String
     public let priority: Int // Lower is higher priority, 0 is primary
 
@@ -33,7 +33,7 @@ public struct ConnectionConfiguration: Hashable {
     }
 }
 
-public struct ConnectionInfo: Equatable {
+public struct ConnectionInfo: Equatable, Sendable {
     public let configuration: ConnectionConfiguration
     public let version: Int
 }

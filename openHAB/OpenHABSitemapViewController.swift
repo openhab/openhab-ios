@@ -419,11 +419,18 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             } catch let error as DecodingError {
                 os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
             } catch let error as ClientError {
-                self.showPopupMessage(
-                    seconds: 5,
-                    title: NSLocalizedString("error", comment: ""),
-                    message: NSLocalizedString("ssl_certificate_error", comment: ""),
-                    theme: .error)
+                if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
+                    logger.info("Task was cancelled - URLError code: .cancelled")
+                } else {
+                    logger.error("\(error.localizedDescription)")
+
+                    self.showPopupMessage(
+                        seconds: 5,
+                        title: NSLocalizedString("error", comment: ""),
+                        message: error.localizedDescription,
+                        theme: .error
+                    )
+                }
             } catch {
                 logger.error("On LoadPage \(error.localizedDescription)")
                 self.showPopupMessage(

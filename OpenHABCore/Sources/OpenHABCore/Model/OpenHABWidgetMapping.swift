@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABWidgetMapping: NSObject, Decodable {
+public struct OpenHABWidgetMapping: Decodable, Sendable {
     public var command = ""
     public var label = ""
 
@@ -22,7 +22,7 @@ public class OpenHABWidgetMapping: NSObject, Decodable {
 }
 
 extension OpenHABWidgetMapping {
-    convenience init(_ mapping: Components.Schemas.MappingDTO) {
+    init(_ mapping: Components.Schemas.MappingDTO) {
         self.init(command: mapping.command, label: mapping.label)
     }
 }

@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABUiTile {
+public struct OpenHABUiTile: Sendable {
     public var name = ""
     public var url = ""
     public var imageUrl = ""
@@ -24,7 +24,7 @@ public class OpenHABUiTile {
 }
 
 extension OpenHABUiTile {
-    convenience init(_ tile: Components.Schemas.TileDTO) {
+    init(_ tile: Components.Schemas.TileDTO) {
         self.init(name: tile.name.orEmpty, url: tile.url.orEmpty, imageUrl: tile.imageUrl.orEmpty)
     }
 }
