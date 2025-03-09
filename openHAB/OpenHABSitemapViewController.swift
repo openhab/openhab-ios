@@ -815,35 +815,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let widget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-        if widget?.linkedPage != nil {
-            if let link = widget?.linkedPage?.link {
-                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
-            }
-
-            selectedWidgetRow = indexPath.row
-            let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-            newViewController.title = widget?.linkedPage?.title.components(separatedBy: "[")[0]
-            newViewController.pageUrl = widget?.linkedPage?.link ?? ""
-            newViewController.openHABRootUrl = openHABRootUrl
-            navigationController?.pushViewController(newViewController, animated: true)
-        } else if widget?.type == .selection {
-            selectedWidgetRow = indexPath.row
-            let selectedWidget: OpenHABWidget? = relevantWidget(indexPath: indexPath)
-            let selectionItemState = selectedWidget?.item?.state
-            logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
-            let hostingController = UIHostingController(rootView: SelectionView(
-                mappings: selectedWidget?.mappingsOrItemOptions ?? [],
-                selectionItemState: selectionItemState,
-                onSelection: { selectedMappingIndex in
-                    let selectedWidget: OpenHABWidget? = self.relevantPage?.widgets[self.selectedWidgetRow]
-                    let selectedMapping: OpenHABWidgetMapping? = selectedWidget?.mappingsOrItemOptions[selectedMappingIndex]
-                    self.sendCommand(selectedWidget?.item, commandToSend: selectedMapping?.command)
-                }
-            ))
-            hostingController.title = widget?.labelText
-            navigationController?.pushViewController(hostingController, animated: true)
-        }
         if let index = widgetTableView.indexPathForSelectedRow {
             widgetTableView.deselectRow(at: index, animated: false)
         }
