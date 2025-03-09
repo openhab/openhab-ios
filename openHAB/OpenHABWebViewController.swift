@@ -135,7 +135,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func modifyUrl(orig: URL?, path: String? = nil) -> URL? {
-        // better way to cone/copy ?
+        // better way to clone/copy ?
         guard let urlString = orig?.absoluteString, var url = URL(string: urlString) else { return orig }
         if url.host == "myopenhab.org" {
             url = URL(string: "https://home.myopenhab.org") ?? url

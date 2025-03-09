@@ -12,6 +12,7 @@
 import AVFoundation
 import AVKit
 import Combine
+import Foundation
 import Kingfisher
 import OpenAPIRuntime
 import OpenAPIURLSession
@@ -79,7 +80,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private let search = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
-    private var asyncOperation: Task<Int, Never>?
+    private var asyncOperation: Task<Void, Never>?
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
 
@@ -364,6 +365,11 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     // load our page and show it into UITableView
     func loadPage(_ longPolling: Bool) {
+        if asyncOperation != nil {
+            asyncOperation?.cancel()
+            asyncOperation = nil
+        }
+
         if pageUrl == "" {
             return
         }
@@ -376,18 +382,18 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
         asyncOperation = Task {
             do {
-//                if let apiactor {
-//                    await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
-//                    if let subscriptionid = try await apiactor.openHABcreateSubscription() {
-//                        logger.log("Got subscriptionid: \(subscriptionid)")
-//                        let sitemap = try await apiactor.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
-//                        currentPage = sitemap?.page
-//                        let events = try await apiactor.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
-//                        for try await event in events {
-//                            print(event)
-//                        }
-//                    }
-//                }
+                //                if let apiactor {
+                //                    await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
+                //                    if let subscriptionid = try await apiactor.openHABcreateSubscription() {
+                //                        logger.log("Got subscriptionid: \(subscriptionid)")
+                //                        let sitemap = try await apiactor.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
+                //                        currentPage = sitemap?.page
+                //                        let events = try await apiactor.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
+                //                        for try await event in events {
+                //                            print(event)
+                //                        }
+                //                    }
+                //                }
 
                 currentPage = try await openAPIService?.pollDataForPage(sitemapname: defaultSitemap, longPolling: longPolling)
 
@@ -408,32 +414,26 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                 parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
 
                 loadPage(true)
+            } catch is CancellationError {
+                logger.info("Task was cancelled")
             } catch let error as DecodingError {
                 os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            } catch let error as ClientError {
+                self.showPopupMessage(
+                    seconds: 5,
+                    title: NSLocalizedString("error", comment: ""),
+                    message: NSLocalizedString("ssl_certificate_error", comment: ""),
+                    theme: .error)
             } catch {
-                os_log("On LoadPage \"%{PUBLIC}@\" code: %d ", log: .remoteAccess, type: .error, error.localizedDescription)
-                // Error
-                DispatchQueue.main.async {
-                    if let urlError = error as? URLError, urlError.code == .clientCertificateRejected {
-                        self.showPopupMessage(
-                            seconds: 5,
-                            title: NSLocalizedString("error", comment: ""),
-                            message: NSLocalizedString("ssl_certificate_error", comment: ""),
-                            theme: .error
-                        )
-                    } else {
-                        self.showPopupMessage(
-                            seconds: 5,
-                            title: NSLocalizedString("error", comment: ""),
-                            message: error.localizedDescription,
-                            theme: .error
-                        )
-                    }
-                }
+                logger.error("On LoadPage \(error.localizedDescription)")
+                self.showPopupMessage(
+                    seconds: 5,
+                    title: NSLocalizedString("error", comment: ""),
+                    message: error.localizedDescription,
+                    theme: .error
+                )
             }
-            return 0
         }
-
         logger.info("OpenHABSitemapViewController request sent")
     }
 
@@ -640,7 +640,7 @@ extension OpenHABSitemapViewController: ColorPickerCellDelegate {
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
-extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
+extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if currentPage != nil {
             if isFiltering {
@@ -902,7 +902,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         }
     }
 
-    @available(iOS 13.0, *)
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         if let cell = tableView.cellForRow(at: indexPath) as? GenericUITableViewCell, cell.widget.type == .text, let text = cell.widget?.labelValue ?? cell.widget?.labelText, !text.isEmpty {
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
@@ -916,7 +915,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         return nil
     }
+}
 
+extension OpenHABSitemapViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let decimalSeparator = NSLocale.current.decimalSeparator ?? ""
         let oldString = (textField.text ?? "")
