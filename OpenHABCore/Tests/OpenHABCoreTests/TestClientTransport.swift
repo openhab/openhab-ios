@@ -13,7 +13,7 @@ import Foundation
 import HTTPTypes
 import OpenAPIRuntime
 
-//===----------------------------------------------------------------------===//
+// ===----------------------------------------------------------------------===//
 //
 // This source file is part of the SwiftOpenAPIGenerator open source project
 //
@@ -25,7 +25,7 @@ import OpenAPIRuntime
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-//===----------------------------------------------------------------------===//
+// ===----------------------------------------------------------------------===//
 
 /// A test implementation of the `ClientTransport` protocol.
 ///

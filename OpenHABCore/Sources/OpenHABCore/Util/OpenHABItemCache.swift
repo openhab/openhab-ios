@@ -32,7 +32,13 @@ public class OpenHABItemCache {
             priority: 1
         )
 
-        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds, ignoreSSLVerification: Preferences.ignoreSSL)
+        NetworkTracker.shared.startTracking(
+            connectionConfigurations: [connection1, connection2],
+            username: Preferences.username,
+            password: Preferences.password,
+            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
+            ignoreSSLVerification: Preferences.ignoreSSL
+        )
     }
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) -> [NSString] {

@@ -11,8 +11,9 @@
 
 import Foundation
 import HTTPTypes
+import OpenAPIRuntime
 
-//===----------------------------------------------------------------------===//
+// ===----------------------------------------------------------------------===//
 //
 // This source file is part of the SwiftOpenAPIGenerator open source project
 //
@@ -24,8 +25,7 @@ import HTTPTypes
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-//===----------------------------------------------------------------------===//
-import OpenAPIRuntime
+// ===----------------------------------------------------------------------===//
 
 public enum TestError: Swift.Error, LocalizedError, CustomStringConvertible, Sendable {
     case noHandlerFound(method: HTTPRequest.Method, path: String)
@@ -71,8 +71,6 @@ public extension HTTPResponse {
 }
 
 public extension Data {
-    var pretty: String { String(decoding: self, as: UTF8.self) }
-
     static var abcdString: String { "abcd" }
 
     static var abcd: Data { Data(abcdString.utf8) }
@@ -179,6 +177,8 @@ public extension Data {
         bytes.append(contentsOf: crlf)
         return bytes
     }
+
+    var pretty: String { String(decoding: self, as: UTF8.self) }
 }
 
 public extension HTTPRequest {

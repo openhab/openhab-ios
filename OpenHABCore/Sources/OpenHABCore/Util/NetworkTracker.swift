@@ -339,6 +339,13 @@ public extension NetworkTracker {
         return try await service.getItems()
     }
 
+    func getItemByName(id: String) async throws -> OpenHABItem? {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return nil }
+        let configuration = activeConnection.configuration
+        let service = await connectionPool.getOrCreateService(for: configuration)
+        return try await service.getItemByName(id: id)
+    }
+
     func pollDataForPage(sitemapname: String, longPolling: Bool = false) async throws -> OpenHABPage? {
         guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return nil }
         let configuration = activeConnection.configuration

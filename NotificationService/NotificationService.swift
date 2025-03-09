@@ -205,31 +205,7 @@ class NotificationService: UNNotificationServiceExtension {
 
         let itemName = String(itemURL.absoluteString.dropFirst(scheme.count + 1))
 
-        let connection1 = ConnectionConfiguration(url: Preferences.localUrl, priority: 0)
-        let connection2 = ConnectionConfiguration(url: Preferences.remoteUrl, priority: 1)
-
-        NetworkTracker.shared.startTracking(
-            connectionConfigurations: [connection1, connection2],
-            username: Preferences.username,
-            password: Preferences.password,
-            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
-            ignoreSSLVerification: Preferences.ignoreSSL
-        )
-
-        // Await the active connection
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-              let baseURL = URL(string: activeConnection.configuration.url) else {
-            throw NotificationServiceError.noActiveConnection
-        }
-
-        let client = await OpenAPIService(
-            baseURL: baseURL,
-            username: Preferences.username,
-            password: Preferences.password,
-            alwaysSendBasicAuth: Preferences.alwaysSendCreds
-        )
-
-        let item = try await client.getItemByName(id: itemName)
+        let item = try await NetworkTracker.shared.getItemByName(id: itemName)
         guard let state = item?.state else { return nil }
 
         // Extract MIME type and base64 string

@@ -772,7 +772,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                                 cell.setNeedsLayout()
                             }
                         case let .failure(error):
-                            os_log("Image loading failed: %{PUBLIC}@", log: .viewCycle, type: .error, error.localizedDescription)
+                            self.logger.error("Image loading failed for widget \(widget.label) : \(error.localizedDescription)")
                         }
                     }
                 }
