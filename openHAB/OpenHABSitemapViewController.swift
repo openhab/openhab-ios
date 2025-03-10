@@ -421,6 +421,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             } catch let error as ClientError {
                 if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
                     logger.info("Task was cancelled - URLError code: .cancelled")
+                } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
+                    logger.info("Task timed out - URLError code: .timedOut")
                 } else {
                     logger.error("\(error.localizedDescription)")
 

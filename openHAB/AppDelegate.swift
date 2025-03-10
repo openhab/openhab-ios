@@ -25,7 +25,7 @@ var player: AVAudioPlayer?
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     static var appDelegate: AppDelegate!
-    
+
     private let logger = Logger(subsystem: "org.openhab", category: "AppDelegate")
 
     var window: UIWindow?
