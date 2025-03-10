@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABCommandOptions: Decodable {
+public struct OpenHABCommandOptions: Decodable, Sendable {
     public var command = ""
     public var label: String? = ""
 
@@ -22,7 +22,7 @@ public class OpenHABCommandOptions: Decodable {
 }
 
 extension OpenHABCommandOptions {
-    convenience init?(_ options: Components.Schemas.CommandOption?) {
+    init?(_ options: Components.Schemas.CommandOption?) {
         if let options {
             self.init(command: options.command.orEmpty, label: options.label.orEmpty)
         } else {

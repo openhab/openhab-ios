@@ -106,6 +106,7 @@ struct SettingsView: View {
                             "Foo",
                             text: $settingsUsername
                         )
+                        .textContentType(.username) // Associates with AutoFill
                         .fixedSize()
                         .textInputAutocapitalization(.never)
                         .disableAutocorrection(true)
@@ -124,9 +125,9 @@ struct SettingsView: View {
                         )
                         .fixedSize()
                         .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
+                        .disableAutocorrection(true) //   or  .autocorrectionDisabled(true) ??
                         .font(.system(.caption))
-
+                        .textContentType(.password) // Associates with AutoFill
                     } label: {
                         Text("Password")
                         if settingsPassword.isEmpty {

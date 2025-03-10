@@ -139,27 +139,7 @@ public final class NetworkTracker: ObservableObject {
                 return connection
             }
         }
-
         return nil
-//        await withCheckedContinuation { continuation in
-//            let deadline = Date().addingTimeInterval(timeout)
-//
-//            func checkConnection() {
-//                Task { @MainActor in
-//                    if let activeConnection = self.activeConnection {
-//                        continuation.resume(returning: activeConnection)
-//                    } else if Date() >= deadline {
-//                        continuation.resume(returning: nil)
-//                    } else {
-//                        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
-//                            checkConnection()
-//                        }
-//                    }
-//                }
-//            }
-//
-//            checkConnection()
-//        }
     }
 
     public func restartTracking() {
@@ -288,7 +268,7 @@ public final class NetworkTracker: ObservableObject {
         guard activeConnection != connection else { return }
 
         activeConnection = connection
-        if connection != nil {
+        if activeConnection != nil {
             status = .connected
         } else {
             status = .notConnected

@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABCommandDescription {
+public struct OpenHABCommandDescription: Sendable {
     public var commandOptions: [OpenHABCommandOptions] = []
 
     public init(commandOptions: [OpenHABCommandOptions]?) {
@@ -32,7 +32,7 @@ extension OpenHABCommandDescription.CodingData {
 }
 
 extension OpenHABCommandDescription {
-    convenience init?(_ commands: Components.Schemas.CommandDescription?) {
+    init?(_ commands: Components.Schemas.CommandDescription?) {
         if let commands {
             self.init(commandOptions: commands.commandOptions?.compactMap { OpenHABCommandOptions($0) })
         } else {
