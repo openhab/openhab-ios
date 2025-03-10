@@ -288,6 +288,14 @@ struct SettingsView: View {
                 }
             }
 
+            Section(header: Text(LocalizedStringKey("debug"))) {
+                NavigationLink {
+                    LoggerView()
+                } label: {
+                    Text("Logs")
+                }
+            }
+
             Section(header: Text(LocalizedStringKey("about_settings"))) {
                 LabeledContent("App Version", value: appVersion)
 

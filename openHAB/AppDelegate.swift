@@ -25,6 +25,8 @@ var player: AVAudioPlayer?
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     static var appDelegate: AppDelegate!
+    
+    private let logger = Logger(subsystem: "org.openhab", category: "AppDelegate")
 
     var window: UIWindow?
     var appData: OpenHABDataObject
@@ -272,7 +274,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        os_log("My FCM token is: %{PUBLIC}@", log: .notifications, type: .info, fcmToken ?? "")
+        logger.info("My FCM token is: \(fcmToken ?? "", privacy: .private)")
         let dataDict = [
             "deviceToken": fcmToken ?? "",
             "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
