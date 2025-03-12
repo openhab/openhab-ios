@@ -108,7 +108,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func startTracker() {
-        if currentTarget == "" {
+        if currentTarget.isEmpty {
             showActivityIndicator(show: true)
         }
     }

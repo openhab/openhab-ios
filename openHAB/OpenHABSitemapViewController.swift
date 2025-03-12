@@ -58,6 +58,47 @@ struct OpenHABImageProcessor: ImageProcessor {
     }
 }
 
+actor PageLoader {
+    private var openAPIService: OpenAPIService
+    private var pageId: String
+    private var defaultSitemap: String
+
+    private var lastFetchedPage: OpenHABPage? // Store latest page data
+
+    private let logger = Logger(subsystem: "org.openhab.app", category: "PageLoader")
+
+    init(service: OpenAPIService, pageId: String, defaultSitemap: String) {
+        openAPIService = service
+        self.pageId = pageId
+        self.defaultSitemap = defaultSitemap
+    }
+
+    func updatePageConfig(newPageId: String, newSitemap: String) {
+        pageId = newPageId
+        defaultSitemap = newSitemap
+        // swiftformat:disable:next redundantSelf
+        logger.info("🔄 Updated config: pageId = \(self.pageId), defaultSitemap = \(self.defaultSitemap)")
+    }
+
+    func updateAPIService(newService: OpenAPIService) {
+        openAPIService = newService
+        logger.info("🔄 Updated OpenAPIService instance")
+    }
+
+    func fetchPage(longPolling: Bool) async throws -> OpenHABPage? {
+        logger.info("📡 Fetching page... (longPolling: \(longPolling))")
+        let page = try await openAPIService.pollDataForPage(
+            sitemapname: defaultSitemap,
+            pageId: pageId,
+            longPolling: longPolling
+        )
+        try Task.checkCancellation()
+
+        return page
+    }
+}
+
+// swiftlint:disable type_body_length
 class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
     var pageUrl = ""
     private var selectedWidgetRow: Int = 0
@@ -67,6 +108,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private var openHABPassword = ""
     private var openHABAlwaysSendCreds = false
     private var defaultSitemap = ""
+    private var pageId = ""
     private var idleOff = false
     private var sitemaps: [OpenHABSitemap] = []
     private var currentPage: OpenHABPage?
@@ -80,7 +122,10 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     private let search = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
-    private var asyncOperation: Task<Void, Never>?
+    // Properties in your view controller:
+    private var initialLoadTask: Task<Void, Never>?
+    private var longPollingTask: Task<Void, Never>?
+    private var pageLoader: PageLoader?
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
 
@@ -121,14 +166,20 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
-        Task {
-            await openAPIService = OpenAPIService(
-                baseURL: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank"),
-                username: openHABUsername,
-                password: openHABPassword,
-                alwaysSendBasicAuth: openHABAlwaysSendCreds
-            )
-        }
+        openAPIService = OpenAPIService(
+            baseURL: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank"),
+            username: openHABUsername,
+            password: openHABPassword,
+            alwaysSendBasicAuth: openHABAlwaysSendCreds
+        )
+
+        // ✅ Initialize PageLoader
+        guard let openAPIService else { return }
+        pageLoader = PageLoader(
+            service: openAPIService,
+            pageId: "",
+            defaultSitemap: ""
+        )
 
         registerTableViewCells()
         configureTableView()
@@ -164,7 +215,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        os_log("OpenHABSitemapViewController viewWillAppear", log: .viewCycle, type: .info)
+        logger.info("OpenHABSitemapViewController viewWillAppear")
         super.viewWillAppear(animated)
 
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -176,24 +227,21 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
             UIApplication.shared.isIdleTimerDisabled = true
         }
 
-        // if pageUrl == "" it means we are the first opened OpenHABSitemapViewController
-        if pageUrl == "" {
+        // if pageUrl is empty, it means we are the first opened OpenHABSitemapViewController
+        if pageUrl.isEmpty {
             appData?.sitemapViewController = self
             if currentPage != nil {
                 currentPage?.widgets = []
                 widgetTableView.reloadData()
             }
-            os_log("OpenHABSitemapViewController pageUrl is empty, this is first launch", log: .viewCycle, type: .info)
+            logger.info("OpenHABSitemapViewController pageUrl is empty, this is first launch")
         } else {
-            Task {
-                await openAPIService?.updateBaseURL(with: URL(string: appData!.openHABRootUrl)!)
-            }
-
-            if !pageNetworkStatusChanged() {
-                os_log("OpenHABSitemapViewController pageUrl = %{PUBLIC}@", log: .notifications, type: .info, pageUrl)
-                loadPage(false)
+            if !pageNetworkStatusChanged() || !pageId.isEmpty {
+                // swiftformat:disable:next redundantSelf
+                logger.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
+                loadInitialPage()
             } else {
-                os_log("OpenHABSitemapViewController network status changed while I was not appearing", log: .viewCycle, type: .info)
+                logger.info("OpenHABSitemapViewController network status changed while it was not appearing")
                 restart()
             }
         }
@@ -209,6 +257,13 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
         trackerCancellables.removeAll()
         stopAllTasks()
+
+        // Cancel long polling to avoid carrying over a pending request.
+        longPollingTask?.cancel()
+        longPollingTask = nil
+        // Optionally cancel the initial load task if it’s still running.
+        initialLoadTask?.cancel()
+        initialLoadTask = nil
 
         super.viewWillDisappear(animated)
 
@@ -243,7 +298,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         if isViewLoaded, view.window != nil, !pageUrl.isEmpty {
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController isViewLoaded, restarting network activity", log: .viewCycle, type: .info)
-                loadPage(false)
+                loadInitialPage()
             } else {
                 os_log("OpenHABSitemapViewController network status changed while it was inactive", log: .viewCycle, type: .info)
                 restart()
@@ -337,7 +392,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     @objc
     func handleRefresh(_ refreshControl: UIRefreshControl?) {
-        loadPage(false)
+        loadInitialPage()
         widgetTableView.reloadData()
         widgetTableView.layoutIfNeeded()
     }
@@ -363,57 +418,87 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
     }
 
-    // load our page and show it into UITableView
-    func loadPage(_ longPolling: Bool) {
-        if asyncOperation != nil {
-            asyncOperation?.cancel()
-            asyncOperation = nil
+    func updateUI(with page: OpenHABPage) {
+        currentPage = page
+
+        if isFiltering {
+            filterContentForSearchText(search.searchBar.text)
         }
 
-        if pageUrl == "" {
+        currentPage?.sendCommand = { [weak self] item, command in
+            self?.sendCommand(item, commandToSend: command)
+        }
+
+        // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
+        if !isUserInteracting {
+            widgetTableView.reloadData()
+            refreshControl?.endRefreshing()
+        } else {
+            isWaitingToReload = true
+        }
+        // on initial load ??? refreshControl?.endRefreshing()
+
+        widgetTableView.reloadData()
+        parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
+    }
+
+    func loadInitialPage() {
+        initialLoadTask?.cancel()
+
+        guard !pageUrl.isEmpty else {
+            logger.error("loadPage: Cann't run with empty pageUrl")
             return
         }
-        os_log("pageUrl = %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, pageUrl)
+
+        // swiftformat:disable:next redundantSelf
+        logger.info("loadPage for \(self.pageUrl)")
 
         // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
         // to save current reachability status.
-        if !longPolling {
-            pageNetworkStatusChanged()
+        pageNetworkStatusChanged()
+        initialLoadTask = Task {
+            await loadPage(longPolling: false).value
+            startLongPolling()
         }
-        asyncOperation = Task {
+    }
+
+    func startLongPolling() {
+        longPollingTask?.cancel() // ✅ Cancel previous long polling task
+
+        guard !pageUrl.isEmpty else {
+            logger.error("startLongPolling: Cannot run with empty pageUrl")
+            return
+        }
+
+        logger.info("🔄 Starting long polling...")
+        longPollingTask = loadPage(longPolling: true)
+    }
+
+    func loadPage(longPolling: Bool) -> Task<Void, Never> {
+        Task {
             do {
-                //                if let apiactor {
-                //                    await apiactor.updateBaseURL(with: URL(string: appData?.openHABRootUrl ?? "")!)
-                //                    if let subscriptionid = try await apiactor.openHABcreateSubscription() {
-                //                        logger.log("Got subscriptionid: \(subscriptionid)")
-                //                        let sitemap = try await apiactor.openHABpollSitemap(sitemapname: defaultSitemap, longPolling: longPolling, subscriptionId: subscriptionid)
-                //                        currentPage = sitemap?.page
-                //                        let events = try await apiactor.openHABSitemapWidgetEvents(subscriptionid: subscriptionid, sitemap: defaultSitemap)
-                //                        for try await event in events {
-                //                            print(event)
-                //                        }
-                //                    }
-                //                }
+                // ** Alternative 1
+                logger.info("Calling pollDataForPage from loadPage")
+                let page = try await openAPIService?.pollDataForPage(sitemapname: defaultSitemap, pageId: pageId, longPolling: longPolling)
+                guard let page else {
+                    logger.info("No page found ")
+                    return
+                }
+                // ** Alternative 2 too be tested.
+//                await pageLoader?.updatePageConfig(newPageId: pageId, newSitemap: defaultSitemap)
+//                guard let page = try await pageLoader?.fetchPage(longPolling: true) else { return }
+                // **
 
-                currentPage = try await openAPIService?.pollDataForPage(sitemapname: defaultSitemap, longPolling: longPolling)
-
-                if isFiltering {
-                    filterContentForSearchText(search.searchBar.text)
+                try Task.checkCancellation() // Check for cancellation before processing results
+                await MainActor.run {
+                    self.updateUI(with: page)
                 }
 
-                currentPage?.sendCommand = { [weak self] item, command in
-                    self?.sendCommand(item, commandToSend: command)
+                // Only start long polling recursively if this is not the initial load.
+                if longPolling {
+                    // Start long polling in the background.
+                    startLongPolling()
                 }
-                // isUserInteracting fixes https://github.com/openhab/openhab-ios/issues/646 where reloading while the user is interacting can have unintended consequences
-                if !isUserInteracting {
-                    widgetTableView.reloadData()
-                    refreshControl?.endRefreshing()
-                } else {
-                    isWaitingToReload = true
-                }
-                parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
-
-                loadPage(true)
             } catch is CancellationError {
                 logger.info("Task was cancelled")
             } catch let error as DecodingError {
@@ -425,7 +510,18 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     logger.info("Task timed out - URLError code: .timedOut")
                 } else {
                     logger.error("\(error.localizedDescription)")
-
+                    await MainActor.run {
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: error.localizedDescription,
+                            theme: .error
+                        )
+                    }
+                }
+            } catch {
+                logger.error("On LoadPage \(error.localizedDescription)")
+                await MainActor.run {
                     self.showPopupMessage(
                         seconds: 5,
                         title: NSLocalizedString("error", comment: ""),
@@ -433,17 +529,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                         theme: .error
                     )
                 }
-            } catch {
-                logger.error("On LoadPage \(error.localizedDescription)")
-                self.showPopupMessage(
-                    seconds: 5,
-                    title: NSLocalizedString("error", comment: ""),
-                    message: error.localizedDescription,
-                    theme: .error
-                )
             }
         }
-        logger.info("OpenHABSitemapViewController request sent")
     }
 
     // Select sitemap
@@ -451,13 +538,19 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         Task {
             do {
                 logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
-                openAPIService = await OpenAPIService(
+                openAPIService = OpenAPIService(
                     baseURL: URL(string: appData!.openHABRootUrl) ?? URL(staticString: "about:blank"),
                     username: appData!.openHABUsername,
                     password: appData!.openHABPassword,
                     alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds
                 )
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
+
+                guard let openAPIService else {
+                    logger.error("Failed to load openAPIService")
+                    return
+                }
+                await pageLoader?.updateAPIService(newService: openAPIService)
 
                 switch sitemaps.count {
                 case 2...:
@@ -467,7 +560,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                                 self.currentPage?.widgets.removeAll() // NOTE: remove all widgets to ensure cells get invalidated
                             }
                             pageUrl = sitemapToOpen.homepageLink
-                            loadPage(false)
+                            loadInitialPage()
                         } else {
                             showSideMenu()
                         }
@@ -476,7 +569,7 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
                     }
                 case 1:
                     pageUrl = sitemaps[0].homepageLink
-                    loadPage(false)
+                    loadInitialPage()
                 case ...0:
                     showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
                     showSideMenu()
@@ -828,17 +921,18 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             widgetTableView.deselectRow(at: index, animated: false)
         }
 
-        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else {
-            return
-        }
+        guard let widget: OpenHABWidget = relevantWidget(indexPath: indexPath) else { return }
 
-        if widget.linkedPage != nil {
-            if let link = widget.linkedPage?.link {
-                os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, link)
-            }
+        if let linkedPage = widget.linkedPage {
+            logger.info("Selected linked page: \(linkedPage.link)")
+            longPollingTask?.cancel()
+            longPollingTask = nil
+            initialLoadTask?.cancel()
+            initialLoadTask = nil
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
-            newViewController.title = widget.linkedPage?.title.components(separatedBy: "[")[0]
-            newViewController.pageUrl = widget.linkedPage?.link ?? ""
+            newViewController.title = linkedPage.title.components(separatedBy: "[")[0]
+            newViewController.pageId = linkedPage.pageId
+            newViewController.pageUrl = linkedPage.link
             newViewController.openHABRootUrl = openHABRootUrl
             navigationController?.pushViewController(newViewController, animated: true)
         } else if widget.type == .selection {
