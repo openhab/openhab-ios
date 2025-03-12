@@ -63,7 +63,7 @@ actor ConnectionPool {
         if let existingService = services[configuration] {
             return existingService
         }
-        let newService = await OpenAPIService(
+        let newService = OpenAPIService(
             baseURL: URL(string: configuration.url) ?? URL(staticString: "about:blank"),
             username: Preferences.username,
             password: Preferences.password,
@@ -326,11 +326,11 @@ public extension NetworkTracker {
         return try await service.getItemByName(id: id)
     }
 
-    func pollDataForPage(sitemapname: String, longPolling: Bool = false) async throws -> OpenHABPage? {
+    func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {
         guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return nil }
         let configuration = activeConnection.configuration
         let service = await connectionPool.getOrCreateService(for: configuration)
-        return try await service.pollDataForPage(sitemapname: sitemapname, longPolling: longPolling)
+        return try await service.pollDataForPage(sitemapname: sitemapname, pageId: pageId, longPolling: longPolling)
     }
 
     func runNow(ruleUID: String, payload: [String: String]) async throws {

@@ -29,7 +29,7 @@ public enum OpenAPIServiceConfiguration {
 // The generated OpenAPI client is wrapped by this curated API.
 // The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
 // It will require the migration to Swift 6.1 before this can be changed.
-public actor OpenAPIService {
+public class OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
     private var longPolling = false
@@ -46,14 +46,12 @@ public actor OpenAPIService {
         self.client = client
     }
 
-    public init(
-        baseURL url: URL = URL(staticString: "about:blank"),
-        username: String,
-        password: String,
-        alwaysSendBasicAuth: Bool = false,
-        ignoreSSL: Bool = false,
-        configuration: OpenAPIServiceConfiguration = .asDefault
-    ) async {
+    public init(baseURL url: URL = URL(staticString: "about:blank"),
+                username: String,
+                password: String,
+                alwaysSendBasicAuth: Bool = false,
+                ignoreSSL: Bool = false,
+                configuration: OpenAPIServiceConfiguration = .asDefault) {
         let config = URLSessionConfiguration.default
         switch configuration {
         case .asDefault:
@@ -223,16 +221,18 @@ public extension OpenAPIService {
     /// - Parameters:
     ///   - sitemapname: name of sitemap
     ///   - longPolling: set to true for long-polling
-    func pollDataForPage(sitemapname: String, longPolling: Bool) async throws -> OpenHABPage? {
+    func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool) async throws -> OpenHABPage? {
         var headers = Operations.pollDataForPage.Input.Headers()
         if longPolling {
-            logger.info("Long-polling, setting X-Atmosphere-Transport")
+            logger.info("Setting header X-Atmosphere-Transport to long-polling")
             headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
-        } else {
-            headers.X_hyphen_Atmosphere_hyphen_Transport = nil
         }
-        let path = Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: sitemapname)
-        await updateForLongPolling(longPolling)
+        let path = if pageId.isEmpty {
+            Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: sitemapname)
+        } else {
+            Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: pageId)
+        }
+        logger.debug("pollDataForPage: :\(String(describing: headers)), \(String(describing: path))")
         return try await pollDataForPage(path: path, headers: headers)
     }
 
