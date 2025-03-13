@@ -65,7 +65,7 @@ struct LoggerView: View {
         }
     }
 
-    init(logs: [LogEntry] = []) { // Custom initializer for prei
+    init(logs: [LogEntry] = []) { // Custom initializer for preview
         _logs = State(initialValue: logs)
         _isLoading = State(initialValue: logs.isEmpty) // Set isLoading based on logs
     }

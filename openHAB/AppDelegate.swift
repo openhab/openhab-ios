@@ -297,13 +297,26 @@ extension AppDelegate {
 }
 
 extension AppDelegate: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        logger.info("My FCM token is: \(fcmToken ?? "", privacy: .private)")
-        let dataDict = [
-            "deviceToken": fcmToken ?? "",
-            "deviceId": UIDevice.current.identifierForVendor?.uuidString ?? "",
-            "deviceName": UIDevice.current.name
-        ]
-        NotificationCenter.default.post(name: NSNotification.Name("apsRegistered"), object: self, userInfo: dataDict)
+    nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        Task { @MainActor in
+            
+            let safeToken = fcmToken ?? ""
+            let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
+            let deviceName = UIDevice.current.name
+            
+            logger.info("My FCM token is: \(safeToken, privacy: .private)")
+            
+            let dataDict: [String: Any] = [
+                "deviceToken": safeToken,
+                "deviceId": deviceID,
+                "deviceName": deviceName
+            ]
+            
+            NotificationCenter.default.post(
+                name: NSNotification.Name("apsRegistered"),
+                object: self,
+                userInfo: dataDict
+            )
+        }
     }
 }

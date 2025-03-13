@@ -609,7 +609,7 @@ class OpenHABRootViewController: UIViewController {
 // MARK: - UISideMenuNavigationControllerDelegate
 
 extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
-    func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
+    nonisolated func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
         os_log("OpenHABRootViewController sideMenuWillAppear", log: .viewCycle, type: .info)
     }
 }
@@ -617,22 +617,24 @@ extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
 // MARK: - ModalHandler
 
 extension OpenHABRootViewController: ModalHandler {
-    func modalDismissed(to: TargetController) {
-        switch to {
-        case .sitemap:
-            switchView(target: to)
-        case .settings:
-            let hostingController = UIHostingController(rootView: SettingsView())
-            navigationController?.pushViewController(hostingController, animated: true)
-        case .notifications:
-            let hostingController = UIHostingController(rootView: NotificationsView())
-            navigationController?.pushViewController(hostingController, animated: true)
-        case .webview:
-            switchView(target: to)
-        case .browser:
-            break
-        case let .tile(urlString):
-            openTileURL(urlString)
+    nonisolated func modalDismissed(to: TargetController) {
+        Task { @MainActor in
+            switch to {
+            case .sitemap:
+                switchView(target: to)
+            case .settings:
+                let hostingController = UIHostingController(rootView: SettingsView())
+                navigationController?.pushViewController(hostingController, animated: true)
+            case .notifications:
+                let hostingController = UIHostingController(rootView: NotificationsView())
+                navigationController?.pushViewController(hostingController, animated: true)
+            case .webview:
+                switchView(target: to)
+            case .browser:
+                break
+            case let .tile(urlString):
+                openTileURL(urlString)
+            }
         }
     }
 }
