@@ -91,6 +91,12 @@
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
 		DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32D1B32C8C98C40018D974 /* IconWithAction.swift */; };
 		DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4642312D7EE6CA006C3908 /* LoggerView.swift */; };
+		DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800132D836892009CF127 /* ConnectionSettingsView.swift */; };
+		DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800152D836EF0009CF127 /* MainUISettingsView.swift */; };
+		DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800172D837221009CF127 /* AboutSettingsView.swift */; };
+		DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800192D83742A009CF127 /* DebugSettingsView.swift */; };
+		DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA48001B2D837556009CF127 /* SitemapSettingsView.swift */; };
+		DA48001E2D837905009CF127 /* ApplicationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA48001D2D837905009CF127 /* ApplicationSettingsView.swift */; };
 		DA4D4DB5233F9ACB00B37E37 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DA4D4DB4233F9ACB00B37E37 /* README.md */; };
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
@@ -394,6 +400,12 @@
 		DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewRow.swift; sourceTree = "<group>"; };
 		DA32D1B32C8C98C40018D974 /* IconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconWithAction.swift; sourceTree = "<group>"; };
 		DA4642312D7EE6CA006C3908 /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
+		DA4800132D836892009CF127 /* ConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSettingsView.swift; sourceTree = "<group>"; };
+		DA4800152D836EF0009CF127 /* MainUISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainUISettingsView.swift; sourceTree = "<group>"; };
+		DA4800172D837221009CF127 /* AboutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsView.swift; sourceTree = "<group>"; };
+		DA4800192D83742A009CF127 /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
+		DA48001B2D837556009CF127 /* SitemapSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitemapSettingsView.swift; sourceTree = "<group>"; };
+		DA48001D2D837905009CF127 /* ApplicationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationSettingsView.swift; sourceTree = "<group>"; };
 		DA4D4DB4233F9ACB00B37E37 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DA4D4E0E2340A00200B37E37 /* Changes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changes.md; sourceTree = "<group>"; };
 		DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportRow.swift; sourceTree = "<group>"; };
@@ -772,6 +784,20 @@
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
 		};
+		DA48001F2D837CD8009CF127 /* SettingsView */ = {
+			isa = PBXGroup;
+			children = (
+				DA4800172D837221009CF127 /* AboutSettingsView.swift */,
+				DA48001D2D837905009CF127 /* ApplicationSettingsView.swift */,
+				DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */,
+				DA4800132D836892009CF127 /* ConnectionSettingsView.swift */,
+				DA4800152D836EF0009CF127 /* MainUISettingsView.swift */,
+				DA242C612C83588600AFB10D /* SettingsView.swift */,
+				DA48001B2D837556009CF127 /* SitemapSettingsView.swift */,
+			);
+			path = SettingsView;
+			sourceTree = "<group>";
+		};
 		DA658720236F841F007E2E7F /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -877,19 +903,20 @@
 			isa = PBXGroup;
 			children = (
 				DA4642312D7EE6CA006C3908 /* LoggerView.swift */,
+				DA48001F2D837CD8009CF127 /* SettingsView */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
 				653B54BF285C0AC700298ECD /* OpenHABRootViewController.swift */,
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABSitemapViewController.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
 				DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */,
-				DA242C612C83588600AFB10D /* SettingsView.swift */,
-				DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */,
 				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
 				DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */,
 				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
+				1224F78B228A89E300750965 /* Watch */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
+				DA4800192D83742A009CF127 /* DebugSettingsView.swift */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -993,7 +1020,6 @@
 				DFDEE3FE1883228C008B26AC /* Models */,
 				DF4B84051885AD4600F34902 /* Images */,
 				DF4B83FD18857FA100F34902 /* UI */,
-				1224F78B228A89E300750965 /* Watch */,
 				DFB2623118830A3600D3244D /* Supporting Files */,
 				938BF9C724EFCCC000E6B52F /* Resources */,
 			);
@@ -1545,6 +1571,7 @@
 				DA242C622C83588600AFB10D /* SettingsView.swift in Sources */,
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */,
+				DA48001E2D837905009CF127 /* ApplicationSettingsView.swift in Sources */,
 				DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
 				DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */,
@@ -1555,6 +1582,7 @@
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
+				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
@@ -1569,13 +1597,16 @@
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
 				DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
+				DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */,
 				938BF9D324EFD0B700E6B52F /* UIViewController+Localization.swift in Sources */,
 				DAA42BA821DC97E000244B2A /* NotificationTableViewCell.swift in Sources */,
 				DAF0A28F2C56F1EE00A14A6A /* ColorPickerCell.swift in Sources */,
 				2FEFD8F62BE7C5BE00E387B9 /* TextInputUITableViewCell.swift in Sources */,
 				938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */,
+				DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABSitemapViewController.swift in Sources */,
+				DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */,
 				653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
 				DAF0A28D2C56EF8900A14A6A /* SetpointCell.swift in Sources */,
@@ -1584,6 +1615,7 @@
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
+				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
 				938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */,
 				DA5ED9C02C8509C2004875E0 /* ClientCertificatesView.swift in Sources */,
 				653B54C0285C0AC700298ECD /* OpenHABRootViewController.swift in Sources */,
@@ -2442,7 +2474,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = PBAPXHRAM9;
-				ENABLE_DEBUG_DYLIB = NO;
+				ENABLE_DEBUG_DYLIB = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
@@ -2502,7 +2534,7 @@
 				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PBAPXHRAM9;
-				ENABLE_DEBUG_DYLIB = NO;
+				ENABLE_DEBUG_DYLIB = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "openHAB/openHAB-Prefix.pch";
 				INFOPLIST_FILE = "openHAB/openHAB-Info.plist";
