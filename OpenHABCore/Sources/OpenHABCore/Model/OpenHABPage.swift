@@ -12,7 +12,7 @@
 import Foundation
 import os.log
 
-public class OpenHABPage: NSObject {
+public class OpenHABPage: NSObject, @unchecked Sendable {
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgets: [OpenHABWidget] = []
     public var pageId = ""

@@ -27,7 +27,7 @@ public struct ValueOrFalse<T: Decodable>: Decodable {
     }
 }
 
-public final class OpenHABSitemap: NSObject {
+public final class OpenHABSitemap: NSObject, @unchecked Sendable {
     public var name = ""
     public var icon = ""
     public var label = ""
