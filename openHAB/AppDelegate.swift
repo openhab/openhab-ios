@@ -20,14 +20,38 @@ import UIKit
 import UserNotifications
 import WatchConnectivity
 
-var player: AVAudioPlayer?
+actor AudioPlayerActor {
+    private var player: AVAudioPlayer?
+
+    let logger = Logger(subsystem: "org.openhab", category: "AudioPlayerActor")
+
+    func playSound() {
+        guard let soundPath = Bundle.main.url(forResource: "ping", withExtension: "wav") else {
+            return
+        }
+
+        do {
+            let newPlayer = try AVAudioPlayer(contentsOf: soundPath)
+            newPlayer.numberOfLoops = 0
+            newPlayer.play()
+            player = newPlayer
+        } catch {
+            logger.info("Failed to play sound \(error.localizedDescription)")
+        }
+    }
+
+    func stopSound() {
+        player?.stop()
+    }
+}
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
     static var appDelegate: AppDelegate!
 
     private let logger = Logger(subsystem: "org.openhab", category: "AppDelegate")
 
+    let audioPlayer = AudioPlayerActor()
     var window: UIWindow?
     var appData: OpenHABDataObject
 
@@ -131,7 +155,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         // remove the 'openhab' from the url
         let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
-        notifyNotificationListeners(["actionIdentifier": action])
+        Task {
+            await notifyNotificationListeners(["actionIdentifier": action])
+        }
         return true
     }
 
@@ -172,46 +198,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         completionHandler(.newData)
     }
+}
 
+extension AppDelegate: UNUserNotificationCenterDelegate {
     // this is called when a notification comes in while in the foreground
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         let userInfo = notification.request.content.userInfo
-        os_log("Notification received while app is in foreground: %{PUBLIC}@", log: .notifications, type: .info, userInfo)
+        logger.info("Notification received while app is in foreground: \(userInfo)")
+
         appData.lastNotificationInfo = userInfo
-        displayNotification(userInfo: userInfo)
-        completionHandler([])
+        await displayNotification(userInfo: userInfo)
+
+        return [] // Modify this if you want to show banners, alerts, etc.
     }
 
     // this is called when clicking a notification while in the background
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
-        os_log("Notification clicked: action %{public}@ userInfo %{public}@", log: .notifications, type: .info, actionIdentifier, userInfo)
+        logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
+
         if actionIdentifier != UNNotificationDismissActionIdentifier {
             if actionIdentifier != UNNotificationDefaultActionIdentifier {
                 userInfo["actionIdentifier"] = actionIdentifier
             }
-            notifyNotificationListeners(userInfo, withCompletionHandler: completionHandler)
+            await notifyNotificationListeners(userInfo)
             appData.lastNotificationInfo = userInfo
-        } else {
-            completionHandler()
         }
     }
 
-    private func displayNotification(userInfo: [AnyHashable: Any]) {
+    private func displayNotification(userInfo: [AnyHashable: Any]) async {
         os_log("displayNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo["message"] as? String ?? "no message")
 
-        let soundPath: URL? = Bundle.main.url(forResource: "ping", withExtension: "wav")
-        if let soundPath {
-            do {
-                os_log("Sound path %{PUBLIC}@", log: .notifications, type: .info, soundPath.debugDescription)
-                player = try AVAudioPlayer(contentsOf: soundPath)
-                player?.numberOfLoops = 0
-                player?.play()
-            } catch {
-                os_log("%{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-            }
-            player = try? AVAudioPlayer(contentsOf: soundPath)
+        Task {
+            await audioPlayer.playSound()
         }
 
         let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
@@ -220,35 +240,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         config.duration = .seconds(seconds: 5)
         config.presentationStyle = .bottom
 
-        SwiftMessages.show(config: config) {
-            let view = MessageView.viewFromNib(layout: .cardView)
-            view.configureTheme(.info)
-            view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
-            view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
-            view.buttonTapHandler = { _ in SwiftMessages.hide() }
-            // Add tap gesture recognizer to the view for actions
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.messageViewTapped))
-            view.addGestureRecognizer(tapGesture)
-            return view
-        }
-    }
-
-    // Action to be performed when the notification message view is tapped
-    @objc func messageViewTapped() {
-        if let userInfo = appData.lastNotificationInfo {
-            notifyNotificationListeners(userInfo)
-            SwiftMessages.hideAll()
-        }
-    }
-
-    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any], withCompletionHandler completionHandler: (() -> Void)? = nil) {
-        if let navigationController = window?.rootViewController as? UINavigationController {
-            if let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-                rootViewController.handleNotification(userInfo, completionHandler: completionHandler)
+        await MainActor.run {
+            SwiftMessages.show(config: config) {
+                let view = MessageView.viewFromNib(layout: .cardView)
+                view.configureTheme(.info)
+                view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
+                view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
+                view.buttonTapHandler = { _ in SwiftMessages.hide() }
+                // Add tap gesture recognizer to the view for actions
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.messageViewTapped))
+                view.addGestureRecognizer(tapGesture)
+                return view
             }
         }
     }
 
+    // Action to be performed when the notification message view is tapped
+    @objc func messageViewTapped() async {
+        if let userInfo = appData.lastNotificationInfo {
+            await notifyNotificationListeners(userInfo)
+            SwiftMessages.hideAll()
+        }
+    }
+
+    // ✅ Ensure this runs on the MainActor
+    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) async {
+        if let navigationController = await MainActor.run(body: { window?.rootViewController as? UINavigationController }),
+           let rootViewController = await MainActor.run(body: { navigationController.viewControllers.first as? OpenHABRootViewController }) {
+            await rootViewController.handleNotification(userInfo)
+        }
+    }
+}
+
+extension AppDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.

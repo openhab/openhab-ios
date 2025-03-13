@@ -31,7 +31,10 @@ let package = Package(
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
                 .product(name: "HTTPTypes", package: "swift-http-types") // ✅ From `swift-http-types`
             ],
-            swiftSettings: [.enableUpcomingFeature("BareSlashRegexLiterals")]
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals")
+//                , .unsafeFlags(["-strict-concurrency=targeted"])
+            ]
         ),
         .testTarget(
             name: "OpenHABCoreTests",

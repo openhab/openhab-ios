@@ -341,6 +341,29 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
+    func handleNotification(_ userInfo: [AnyHashable: Any]) async {
+        // Extract action identifier (from button press or notification click)
+        let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
+
+        guard let action else { return }
+        let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
+
+        switch true {
+        case action.hasPrefix("ui"):
+            uiCommandAction(cmd)
+        case action.hasPrefix("command"):
+            sendCommandAction(cmd)
+        case action.hasPrefix("http"):
+            httpCommandAction(action)
+        case action.hasPrefix("app"):
+            appCommandAction(action)
+        case action.hasPrefix("rule"):
+            ruleCommandAction(action)
+        default:
+            return
+        }
+    }
+
     // Helper function to safely call the completion handler on the main thread
     private func callCompletionHandler(_ completionHandler: (() -> Void)?) {
         if let completionHandler {
