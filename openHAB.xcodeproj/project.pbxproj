@@ -791,6 +791,7 @@
 				DA48001D2D837905009CF127 /* ApplicationSettingsView.swift */,
 				DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */,
 				DA4800132D836892009CF127 /* ConnectionSettingsView.swift */,
+				DA4800192D83742A009CF127 /* DebugSettingsView.swift */,
 				DA4800152D836EF0009CF127 /* MainUISettingsView.swift */,
 				DA242C612C83588600AFB10D /* SettingsView.swift */,
 				DA48001B2D837556009CF127 /* SitemapSettingsView.swift */,
@@ -916,7 +917,6 @@
 				1224F78B228A89E300750965 /* Watch */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
-				DA4800192D83742A009CF127 /* DebugSettingsView.swift */,
 			);
 			name = UI;
 			sourceTree = "<group>";
