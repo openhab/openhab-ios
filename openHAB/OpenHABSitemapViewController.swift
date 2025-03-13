@@ -716,6 +716,8 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
     }
 }
 
+// swiftlint:enable type_body_length
+
 // MARK: - UISearchResultsUpdating
 
 extension OpenHABSitemapViewController: UISearchResultsUpdating {

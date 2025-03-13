@@ -53,6 +53,8 @@ class OpenHABWebViewController: OpenHABViewController {
 
     private lazy var webView: WKWebView = newWebView()
 
+    private var logger = Logger(subsystem: "org.openhab", category: "OpenHABWebViewController")
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
@@ -312,90 +314,77 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
 }
 
 extension OpenHABWebViewController: WKNavigationDelegate {
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        var action: WKNavigationActionPolicy?
-
-        defer {
-            decisionHandler(action ?? .allow)
-        }
-
-        guard let url = navigationAction.request.url else { return }
-        os_log("decidePolicyFor - url: %{PUBLIC}@", log: .wkwebview, type: .info, url.absoluteString)
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        guard let url = navigationAction.request.url else { return .allow }
+        logger.info("decidePolicyFor - url: \(url.absoluteString)")
 
         if navigationAction.navigationType == .linkActivated {
-            action = .cancel // Stop in WebView
-            UIApplication.shared.open(url)
+            await UIApplication.shared.open(url)
+            return .cancel // Stop in WebView
         }
+        return .allow
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
-                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
             dump(response.allHeaderFields)
-            os_log("navigationResponse: %{PUBLIC}@", log: .wkwebview, type: .info, String(response.statusCode))
+            logger.info("navigationResponse: \(response.statusCode)")
+
             if response.statusCode >= 400 {
                 pageLoadError(message: "\(response.statusCode)")
-                decisionHandler(.cancel)
-                return
+                return .cancel
             }
         }
-        decisionHandler(.allow)
+        return .allow
     }
 
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        os_log("didStartProvisionalNavigation - webView.url: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
+        logger.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
         showActivityIndicator(show: true)
     }
 
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        os_log("didFail - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: Error) {
+        logger.error("didFail - webView.url: \(String(describing: webView.url?.description))")
+
         if let urlError = error as? URLError, urlError.code == .cancelled {
             return // Ignore cancelled requests
         }
+
         pageLoadError(message: error.localizedDescription)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        os_log("didFinish - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        logger.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
         showActivityIndicator(show: false)
         hidePopupMessages()
     }
 
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
-                 completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        os_log("Challenge.protectionSpace.authtenticationMethod: %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: challenge.protectionSpace.authenticationMethod))
+    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        logger.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
 
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
-                    completionHandler(.performDefaultHandling, nil)
-                    return
+                    return (.performDefaultHandling, nil)
                 }
                 let credential = URLCredential(trust: serverTrust)
-                DispatchQueue.main.async {
-                    completionHandler(.useCredential, credential)
-                }
+                return (.useCredential, credential)
             } else {
-                var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
-                var credential: URLCredential?
                 if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-                    (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
+                    return onReceiveSessionTaskChallenge(with: challenge)
                 } else {
-                    (disposition, credential) = onReceiveSessionChallenge(with: challenge)
+                    return onReceiveSessionChallenge(with: challenge)
                 }
-                completionHandler(disposition, credential)
             }
-        } else {
-            completionHandler(.performDefaultHandling, nil)
         }
+        return (.performDefaultHandling, nil)
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        os_log("webViewWebContentProcessDidTerminate  reloading view", log: .wkwebview, type: .info)
+        logger.warning("webViewWebContentProcessDidTerminate - reloading view")
         reloadView()
     }
 
-    @available(iOS 15, *)
     func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
         decisionHandler(Preferences.alwaysAllowWebRTC ? .grant : .prompt)
     }
