@@ -48,6 +48,8 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
 }
 
 public struct Endpoint {
+    static let logger = Logger(subsystem: "org.openhab.app", category: "EndPoint")
+
     let baseURL: String
     let path: String
     var queryItems: [URLQueryItem]
@@ -58,8 +60,9 @@ public extension Endpoint {
         var components = URLComponents(string: baseURL)
         components?.path = path
         components?.queryItems = queryItems
-        os_log("URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, components?.url?.absoluteString ?? "")
-        return components?.url
+        let url = components?.url
+        Endpoint.logger.info("URL: \(url?.absoluteString ?? "", privacy: .private)")
+        return url
     }
 
     static func appleRegistration(prefsURL: String,
