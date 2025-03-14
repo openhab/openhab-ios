@@ -14,6 +14,83 @@ import os
 import SafariServices
 import SwiftUI
 
+// struct ApplicationSettingsView: View {
+//    @Binding var settingsIgnoreSSL: Bool
+//    @Binding var settingsIdleOff: Bool
+//    @Binding var settingsSendCrashReports: Bool
+//
+//    @State var showCrashReportingAlert = false
+//    @State private var hasBeenLoaded = false
+//
+//    private let logger = Logger(subsystem: "org.openhab.app", category: "ApplicationSettingsView")
+//
+//    var body: some View {
+//        Section(header: Text(LocalizedStringKey("application_settings"))) {
+//            Toggle(isOn: $settingsIgnoreSSL) {
+//                Text("Ignore SSL certificates")
+//            }
+//
+//            Toggle(isOn: $settingsIdleOff) {
+//                Text("Disable Idle Timeout")
+//            }
+//
+//            Toggle(isOn: $settingsSendCrashReports) {
+//                Text("Crash Reporting")
+//            }
+//
+//            .onAppear {
+//                // Setting .onAppear of view required here because onAppear of entire view is run after .onChange is active
+//                // when migrating to iOS17 this
+//                settingsSendCrashReports = Preferences.sendCrashReports
+//                //                    loadSitemaps()
+//                hasBeenLoaded = true
+//            }
+//            .onChange(of: settingsSendCrashReports) { newValue in
+//                if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == nil {
+//                       logger.debug("Detected change on settingsSendCrashReports")
+//                }
+//                if newValue, hasBeenLoaded {
+//                    showCrashReportingAlert = true
+//                }
+//            }
+//            .confirmationDialog(
+//                "crash_reporting",
+//                isPresented: $showCrashReportingAlert
+//            ) {
+//                Button(role: .destructive) {
+//                    settingsSendCrashReports = true
+//                } label: {
+//                    Text(LocalizedStringKey("activate"))
+//                }
+//                Button(LocalizedStringKey("privacy_policy")) {
+//                    presentPrivacyPolicy()
+//                    settingsSendCrashReports = false
+//                }
+//                Button(role: .cancel) {
+//                    settingsSendCrashReports = false
+//                } label: {
+//                    Text(LocalizedStringKey("cancel"))
+//                }
+//            } message: {
+//                Text(LocalizedStringKey("crash_reporting_info"))
+//            }
+//
+//            NavigationLink {
+//                ClientCertificatesView()
+//            } label: {
+//                Text("Client Certificates")
+//            }
+//        }
+//    }
+//
+//    func presentPrivacyPolicy() {
+//        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == nil {
+//            let vc = SFSafariViewController(url: .privacyPolicy)
+//            UIApplication.shared.firstKeyWindow?.rootViewController?.present(vc, animated: true)
+//        }
+//    }
+// }
+
 struct ApplicationSettingsView: View {
     @Binding var settingsIgnoreSSL: Bool
     @Binding var settingsIdleOff: Bool
@@ -26,57 +103,44 @@ struct ApplicationSettingsView: View {
 
     var body: some View {
         Section(header: Text(LocalizedStringKey("application_settings"))) {
-            Toggle(isOn: $settingsIgnoreSSL) {
-                Text("Ignore SSL certificates")
-            }
-
-            Toggle(isOn: $settingsIdleOff) {
-                Text("Disable Idle Timeout")
-            }
-
-            Toggle(isOn: $settingsSendCrashReports) {
-                Text("Crash Reporting")
-            }
-
-            .onAppear {
-                // Setting .onAppear of view required here because onAppear of entire view is run after .onChange is active
-                // when migrating to iOS17 this
-                settingsSendCrashReports = Preferences.sendCrashReports
-                //                    loadSitemaps()
-                hasBeenLoaded = true
-            }
-            .onChange(of: settingsSendCrashReports) { newValue in
-                logger.debug("Detected change on settingsSendCrashReports")
-                if newValue, hasBeenLoaded {
-                    showCrashReportingAlert = true
+            Toggle("Ignore SSL certificates", isOn: $settingsIgnoreSSL)
+            Toggle("Disable Idle Timeout", isOn: $settingsIdleOff)
+            Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
+                .onAppear {
+                    settingsSendCrashReports = Preferences.sendCrashReports
                 }
-            }
-            .confirmationDialog(
-                "crash_reporting",
-                isPresented: $showCrashReportingAlert
-            ) {
-                Button(role: .destructive) {
-                    settingsSendCrashReports = true
-                } label: {
-                    Text(LocalizedStringKey("activate"))
+                .onChange(of: settingsSendCrashReports) { newValue in
+                    #if !DEBUG
+                    logger.debug("Detected change on settingsSendCrashReports")
+                    #endif
+                    if newValue, hasBeenLoaded {
+                        showCrashReportingAlert = true
+                    }
                 }
-                Button(LocalizedStringKey("privacy_policy")) {
-                    presentPrivacyPolicy()
-                    settingsSendCrashReports = false
+                .confirmationDialog(
+                    "crash_reporting",
+                    isPresented: $showCrashReportingAlert
+                ) {
+                    Button(role: .destructive) {
+                        settingsSendCrashReports = true
+                    } label: {
+                        Text(LocalizedStringKey("activate"))
+                    }
+                    Button(LocalizedStringKey("privacy_policy")) {
+                        presentPrivacyPolicy()
+                        settingsSendCrashReports = false
+                    }
+                    Button(role: .cancel) {
+                        settingsSendCrashReports = false
+                    } label: {
+                        Text(LocalizedStringKey("cancel"))
+                    }
+                } message: {
+                    Text(LocalizedStringKey("crash_reporting_info"))
                 }
-                Button(role: .cancel) {
-                    settingsSendCrashReports = false
-                } label: {
-                    Text(LocalizedStringKey("cancel"))
-                }
-            } message: {
-                Text(LocalizedStringKey("crash_reporting_info"))
-            }
 
-            NavigationLink {
+            NavigationLink("Client Certificates") {
                 ClientCertificatesView()
-            } label: {
-                Text("Client Certificates")
             }
         }
     }
@@ -85,4 +149,24 @@ struct ApplicationSettingsView: View {
         let vc = SFSafariViewController(url: .privacyPolicy)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(vc, animated: true)
     }
+}
+
+#Preview {
+    struct PreviewWrapper: View {
+        @State private var ignoreSSL = true
+        @State private var idleOff = false
+        @State private var sendCrashReports = false
+
+        var body: some View {
+            Form {
+                ApplicationSettingsView(
+                    settingsIgnoreSSL: $ignoreSSL,
+                    settingsIdleOff: $idleOff,
+                    settingsSendCrashReports: $sendCrashReports
+                )
+            }
+        }
+    }
+
+    return PreviewWrapper()
 }

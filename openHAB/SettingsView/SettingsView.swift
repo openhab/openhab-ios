@@ -95,11 +95,13 @@ struct SettingsView: View {
         }
         .onAppear {
             loadSettings()
-            logger.debug("Loading Settings")
         }
     }
 
     func loadSettings() {
+        #if !DEBUG
+        logger.debug("Loading Settings")
+        #endif
         settingsLocalUrl = Preferences.localUrl
         settingsRemoteUrl = Preferences.remoteUrl
         settingsUsername = Preferences.username

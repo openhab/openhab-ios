@@ -9,13 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-//
-//  SitemapSettingsView.swift
-//  openHAB
-//
-//  Created by Tim Müller-Seydlitz on 13.03.25.
-//  Copyright © 2025 openHAB e.V. All rights reserved.
-//
 import Kingfisher
 import OpenHABCore
 import os
@@ -75,7 +68,9 @@ struct SitemapSettingsView: View {
     }
 
     func clearWebsiteCache() {
+        #if !DEBUG
         logger.debug("Clearing image cache")
+        #endif
         KingfisherManager.shared.cache.clearMemoryCache()
         KingfisherManager.shared.cache.clearDiskCache()
         KingfisherManager.shared.cache.cleanExpiredDiskCache()
@@ -85,7 +80,7 @@ struct SitemapSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State var realTimeSliders = true
-        @State var iconType: IconType = .png
+        @State var iconType: IconType = .svg
         @State var sortSitemapsBy: SortSitemapsOrder = .label
         @State var sitemapForWatch = "Home"
         @State var sitemaps: [OpenHABSitemap] = [
@@ -94,14 +89,14 @@ struct SitemapSettingsView: View {
                 icon: "",
                 label: "Home",
                 link: "http://192.168.1.100/rest/sitemaps/home",
-                page: nil // Replace with actual OpenHABPage if needed
+                page: nil
             ),
             OpenHABSitemap(
                 name: "office",
                 icon: "",
                 label: "Office",
                 link: "http://192.168.1.100/rest/sitemaps/office",
-                page: nil // Replace with actual OpenHABPage if needed
+                page: nil
             )
         ]
         var body: some View {

@@ -24,5 +24,9 @@ struct DebugSettingsView: View {
 }
 
 #Preview {
-    DebugSettingsView()
+    NavigationView {
+        Form {
+            DebugSettingsView()
+        }
+    }
 }

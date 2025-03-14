@@ -9,13 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-//
-//  AboutSettingsView.swift
-//  openHAB
-//
-//  Created by Tim Müller-Seydlitz on 13.03.25.
-//  Copyright © 2025 openHAB e.V. All rights reserved.
-//
 import SafariServices
 import SwiftUI
 
@@ -49,5 +42,13 @@ struct AboutSettingsView: View {
     func presentPrivacyPolicy() {
         let vc = SFSafariViewController(url: .privacyPolicy)
         UIApplication.shared.firstKeyWindow?.rootViewController?.present(vc, animated: true)
+    }
+}
+
+#Preview {
+    NavigationView {
+        Form {
+            AboutSettingsView()
+        }
     }
 }
