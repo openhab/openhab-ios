@@ -99,7 +99,7 @@ actor PageLoader {
 }
 
 // swiftlint:disable type_body_length
-class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCellTouchEventDelegate {
+class OpenHABSitemapViewController: OpenHABViewController {
     var pageUrl = ""
     private var selectedWidgetRow: Int = 0
     private var iconType: IconType = .png
@@ -364,12 +364,22 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         activeTasks.removeAll()
     }
 
-    /// Implementation of GenericUITableViewCellTouchEventDelegate
+    override func reloadView() {
+        defaultSitemap = Preferences.defaultSitemap
+        logger.debug("Reload view")
+        selectSitemap()
+    }
+
+    override func viewName() -> String {
+        "sitemap"
+    }
+}
+
+extension OpenHABSitemapViewController: GenericUITableViewCellTouchEventDelegate {
     func touchDown() {
         isUserInteracting = true
     }
 
-    /// Implementation of GenericUITableViewCellTouchEventDelegate
     func touchUp() {
         isUserInteracting = false
         if isWaitingToReload {
@@ -378,7 +388,9 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
         }
         isWaitingToReload = false
     }
+}
 
+extension OpenHABSitemapViewController {
     func configureTableView() {
         widgetTableView.dataSource = self
         widgetTableView.delegate = self
@@ -703,16 +715,6 @@ class OpenHABSitemapViewController: OpenHABViewController, GenericUITableViewCel
 
     func sendCommand(itemname: String, command: String) {
         Task { try await openAPIService?.sendItemCommand(itemname: itemname, command: command) }
-    }
-
-    override func reloadView() {
-        defaultSitemap = Preferences.defaultSitemap
-        logger.debug("Reload view")
-        selectSitemap()
-    }
-
-    override func viewName() -> String {
-        "sitemap"
     }
 }
 
@@ -1062,18 +1064,18 @@ extension OpenHABSitemapViewController: UITextFieldDelegate {
 
 extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
     // sessionDelegate.onReceiveSessionTaskChallenge
-    func downloader(_ downloader: ImageDownloader,
-                    task: URLSessionTask,
-                    didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    nonisolated func downloader(_ downloader: ImageDownloader,
+                                task: URLSessionTask,
+                                didReceive challenge: URLAuthenticationChallenge,
+                                completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
         completionHandler(disposition, credential)
     }
 
     // sessionDelegate.onReceiveSessionChallenge
-    func downloader(_ downloader: ImageDownloader,
-                    didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    nonisolated func downloader(_ downloader: ImageDownloader,
+                                didReceive challenge: URLAuthenticationChallenge,
+                                completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
         completionHandler(disposition, credential)
     }

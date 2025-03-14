@@ -16,7 +16,7 @@ import Foundation
 import os.log
 
 public extension OSLog {
-    private static var subsystem = Bundle.main.bundleIdentifier!
+    private static let subsystem = Bundle.main.bundleIdentifier ?? "org.openhab.app"
 
     /// Logs the view cycles like viewDidLoad.
     static let viewCycle = OSLog(subsystem: subsystem, category: "viewcycle")

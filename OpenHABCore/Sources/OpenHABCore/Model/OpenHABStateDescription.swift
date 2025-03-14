@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABStateDescription {
+public struct OpenHABStateDescription: Sendable {
     public var minimum = 0.0
     public var maximum = 100.0
     public var step = 1.0
@@ -61,7 +61,7 @@ extension OpenHABStateDescription.CodingData {
 }
 
 extension OpenHABStateDescription {
-    convenience init?(_ state: Components.Schemas.StateDescription?) {
+    init?(_ state: Components.Schemas.StateDescription?) {
         if let state {
             self.init(minimum: state.minimum, maximum: state.maximum, step: state.step, readOnly: state.readOnly, options: state.options?.compactMap { OpenHABOptions($0) }, pattern: state.pattern)
         } else {

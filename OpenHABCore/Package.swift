@@ -32,7 +32,8 @@ let package = Package(
                 .product(name: "HTTPTypes", package: "swift-http-types") // ✅ From `swift-http-types`
             ],
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals")
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+                .enableExperimentalFeature("StrictConcurrency")
 //                , .unsafeFlags(["-strict-concurrency=targeted"])
             ]
         ),

@@ -389,22 +389,3 @@ extension OpenHABWidget {
         )
     }
 }
-
-extension OpenHABWidget {
-    func update(with event: OpenHABSitemapWidgetEvent) {
-        state = event.state ?? state
-        icon = event.icon ?? icon
-        label = event.label ?? label
-        iconColor = event.iconcolor ?? ""
-        labelcolor = event.labelcolor ?? ""
-        valuecolor = event.valuecolor ?? ""
-        visibility = event.visibility ?? visibility
-
-        if let enrichedItem = event.enrichedItem {
-            if let link = item?.link {
-                enrichedItem.link = link
-            }
-            item = enrichedItem
-        }
-    }
-}

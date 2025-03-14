@@ -13,8 +13,8 @@ import CoreLocation
 import os.log
 import UIKit
 
-public class OpenHABItem: NSObject {
-    public enum ItemType: String {
+public struct OpenHABItem: Sendable {
+    public enum ItemType: String, Sendable {
         case color = "Color"
         case contact = "Contact"
         case dateTime = "DateTime"
@@ -149,7 +149,7 @@ public extension OpenHABItem.CodingData {
 }
 
 extension OpenHABItem {
-    convenience init?(_ item: Components.Schemas.EnrichedItemDTO?) {
+    init?(_ item: Components.Schemas.EnrichedItemDTO?) {
         if let item {
             // swiftlint:disable:next line_length
             self.init(name: item.name.orEmpty, type: item._type.orEmpty, state: item.state.orEmpty, link: item.link.orEmpty, label: item.label.orEmpty, groupType: nil, stateDescription: OpenHABStateDescription(item.stateDescription), commandDescription: OpenHABCommandDescription(item.commandDescription), members: [], category: item.category, options: [])

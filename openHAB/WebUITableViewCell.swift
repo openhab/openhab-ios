@@ -41,8 +41,10 @@ class WebUITableViewCell: GenericUITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        widgetWebView.navigationDelegate = self
-        widgetWebView.uiDelegate = self
+        MainActor.assumeIsolated { // See explanation https://www.massicotte.org/awakefromnib
+            widgetWebView.navigationDelegate = self
+            widgetWebView.uiDelegate = self
+        }
     }
 
     override func displayWidget() {
@@ -86,12 +88,12 @@ extension WebUITableViewCell: WKNavigationDelegate {
         os_log("webview finished load with URL: %{PUBLIC}s", log: .viewCycle, type: .info, widget.url)
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse, response.statusCode >= 400 {
             os_log("webview failed with status code: %{PUBLIC}i", log: .urlComposition, type: .debug, response.statusCode)
             url = nil
         }
-        decisionHandler(.allow)
+        return .allow
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -104,19 +106,20 @@ extension WebUITableViewCell: WKNavigationDelegate {
         url = nil
     }
 
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
-        completionHandler(disposition, credential)
+    // Signature changed on transfer from completion handler to async / from didRecieve to respondTo
+    func webView(_ webView: WKWebView,
+                 respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        onReceiveSessionChallenge(with: challenge)
     }
 }
 
 extension WebUITableViewCell: WKUIDelegate {
-    @available(iOS 15, *)
+    // Matches https://developer.apple.com/documentation/webkit/wkuidelegate/webview(_:requestdeviceorientationandmotionpermissionfor:initiatedbyframe:decisionhandler:)
     func webView(_ webView: WKWebView,
                  requestMediaCapturePermissionFor origin: WKSecurityOrigin,
                  initiatedByFrame frame: WKFrameInfo,
                  type: WKMediaCaptureType,
-                 decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+                 decisionHandler: @escaping @MainActor (WKPermissionDecision) -> Void) {
         decisionHandler(.grant)
     }
 }

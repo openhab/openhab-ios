@@ -17,6 +17,7 @@ protocol GenericCellCacheProtocol: UITableViewCell {
     func invalidateCache()
 }
 
+@MainActor
 protocol GenericUITableViewCellTouchEventDelegate: AnyObject {
     func touchDown()
     func touchUp()
