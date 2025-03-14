@@ -36,9 +36,7 @@ public enum WidgetTypeEnum {
 }
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
-    public enum WidgetType: String, Decodable, UnknownCaseRepresentable {
-        static var unknownCase: OpenHABWidget.WidgetType = .unknown
-
+    public enum WidgetType: String, Decodable {
         case chart = "Chart"
         case colorpicker = "Colorpicker"
         case defaultWidget = "Default"
@@ -57,9 +55,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case unknown = "Unknown"
     }
 
-    public enum InputHint: String, Decodable, UnknownCaseRepresentable {
-        static var unknownCase: OpenHABWidget.InputHint = .text
-        case text, number, date, time, datetime
+    public enum InputHint: String, Decodable {
+        case text, number, date, time, datetime, unknown
     }
 
     public var id: String = ""
@@ -84,7 +81,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     @Published public var state = ""
     public var text = ""
     public var legend: Bool?
-    public var inputHint = InputHint.unknownCase
+    public var inputHint = InputHint.unknown
     public var encoding = ""
     public var forceAsItem: Bool?
     @Published public var item: OpenHABItem?
@@ -361,7 +358,7 @@ extension OpenHABWidget {
             widgetId: widget.widgetId.orEmpty,
             label: widget.label.orEmpty,
             icon: widget.icon.orEmpty,
-            type: OpenHABWidget.WidgetType(rawValue: widget._type!),
+            type: OpenHABWidget.WidgetType(rawValue: widget._type ?? "Unknown") ?? .unknown,
             url: widget.url,
             period: widget.period,
             minValue: widget.minValue,
