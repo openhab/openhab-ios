@@ -978,6 +978,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     textField.keyboardType = .default
                 }
                 textExtractor = { $0.textFields?[0].text }
+            case .unknown:
+                textExtractor = nil
+                textFieldAdder = nil
             }
             guard let textExtractor, let textFieldAdder else {
                 return

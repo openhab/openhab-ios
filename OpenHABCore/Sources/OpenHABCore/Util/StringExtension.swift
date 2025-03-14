@@ -78,7 +78,7 @@ public extension String {
     }
 
     internal func toWidgetType() -> OpenHABWidget.WidgetType {
-        OpenHABWidget.WidgetType(rawValue: self)
+        OpenHABWidget.WidgetType(rawValue: self) ?? .unknown
     }
 
     func parseAsBool() -> Bool {
