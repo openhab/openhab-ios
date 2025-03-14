@@ -29,7 +29,7 @@ public enum OpenAPIServiceConfiguration {
 // The generated OpenAPI client is wrapped by this curated API.
 // The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
 // It will require the migration to Swift 6.1 before this can be changed.
-public class OpenAPIService {
+public actor OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
     private var longPolling = false
