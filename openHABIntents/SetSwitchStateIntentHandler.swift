@@ -28,17 +28,21 @@ class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.switchItem])
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.switchItem]).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.switchItem])
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.switchItem]).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func confirm(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {

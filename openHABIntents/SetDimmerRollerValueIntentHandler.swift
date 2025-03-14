@@ -16,17 +16,21 @@ import os.log
 
 class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIntentHandling {
     func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.dimmer, OpenHABItem.ItemType.rollershutter])
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.dimmer, OpenHABItem.ItemType.rollershutter]).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.dimmer, OpenHABItem.ItemType.rollershutter])
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.dimmer, OpenHABItem.ItemType.rollershutter]).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func confirm(intent: OpenHABSetDimmerRollerValueIntent, completion: @escaping (OpenHABSetDimmerRollerValueIntentResponse) -> Void) {

@@ -16,17 +16,21 @@ import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil)
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil)
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func confirm(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {

@@ -16,17 +16,21 @@ import os.log
 
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.color])
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.color]).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let items = OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.color])
-        let retItems = INObjectCollection<NSString>(items: items)
-        // Call the completion handler, passing the collection.
-        completion(retItems, nil)
+        Task {
+            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.color]).map(NSString.init)
+            let retItems = INObjectCollection<NSString>(items: items)
+            // Call the completion handler, passing the collection.
+            completion(retItems, nil)
+        }
     }
 
     func confirm(intent: OpenHABSetColorValueIntent, completion: @escaping (OpenHABSetColorValueIntentResponse) -> Void) {

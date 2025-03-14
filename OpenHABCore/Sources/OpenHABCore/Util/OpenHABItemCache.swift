@@ -13,7 +13,7 @@ import Combine
 import Foundation
 import os.log
 
-public class OpenHABItemCache {
+public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
     public var items: [OpenHABItem]?
     var cancellables = Set<AnyCancellable>()
@@ -41,7 +41,7 @@ public class OpenHABItemCache {
         )
     }
 
-    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) -> [NSString] {
+    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) -> [String] {
         guard let items else {
             return []
         }
@@ -52,7 +52,7 @@ public class OpenHABItemCache {
                     (types == nil || ($0.type != nil && types!.contains($0.type!)))
             }
             .sorted(by: \.name)
-            .map { NSString(string: $0.name) }
+            .map(\.name)
     }
 
     public func getItem(name: String) async -> OpenHABItem? {
@@ -84,7 +84,7 @@ public class OpenHABItemCache {
         }
     }
 
-    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [NSString] {
+    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
         os_log("OpenHABItemCache Loading items ")
         lastLoad = Date().timeIntervalSince1970
 

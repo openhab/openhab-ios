@@ -93,7 +93,7 @@ public struct UserDefaultURL {
 }
 
 public enum Preferences {
-    fileprivate static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
+    static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
     // MARK: - Public
 
