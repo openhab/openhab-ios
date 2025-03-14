@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import SFSafeSymbols
 import SwiftUI
 
 struct ConnectionSettingsView: View {
@@ -78,15 +79,12 @@ struct ConnectionSettingsView: View {
                 }
 
                 LabeledContent {
-                    SecureField(
-                        "1234",
-                        text: $settingsPassword
-                    )
-                    .fixedSize()
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true) //   or  .autocorrectionDisabled(true) ??
-                    .font(.system(.caption))
-                    .textContentType(.password) // Associates with AutoFill
+                    AnimatedSecureTextField(text: $settingsPassword, titleKey: "password")
+                        .fixedSize()
+                        .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true) //   or  .autocorrectionDisabled(true) ??
+                        .font(.system(.caption))
+                        .textContentType(.password) // Associates with AutoFill
                 } label: {
                     Text("Password")
                     if settingsPassword.isEmpty {

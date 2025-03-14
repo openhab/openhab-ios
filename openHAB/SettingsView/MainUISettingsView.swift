@@ -15,8 +15,8 @@ import WebKit
 struct MainUISettingsView: View {
     @Binding var settingsAlwaysAllowWebRTC: Bool
     @Binding var settingsDefaultMainUIPath: String
-    @State var showUselastPathAlert = false
 
+    @State var showUselastPathAlert = false
     @State var showingCacheAlert = false
 
     var appData: OpenHABDataObject? {
