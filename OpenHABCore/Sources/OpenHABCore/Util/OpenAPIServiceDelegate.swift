@@ -12,12 +12,25 @@
 import Foundation
 import os
 
+actor AuthAttemptTracker {
+    private var attemptCounts: [URLSessionTask: Int] = [:]
+
+    func incrementAttempt(for task: URLSessionTask) -> Int {
+        attemptCounts[task, default: 0] += 1
+        return attemptCounts[task]!
+    }
+
+    func resetAttempt(for task: URLSessionTask) {
+        attemptCounts[task] = 0
+    }
+}
+
 // MARK: - URLSessionDelegate for Client Certificates and Basic Auth
 
-class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
+final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     private let username: String
     private let password: String
-    private var authAttemptCounts = [URLSessionTask: Int]()
+    private let authTracker = AuthAttemptTracker() // ✅ Use an actor instead of a dictionary
 
     init(username: String, password: String) {
         self.username = username
@@ -37,20 +50,27 @@ class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelega
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
         switch authenticationMethod {
         case NSURLAuthenticationMethodServerTrust:
-            return await handleServerTrust(challenge: challenge)
+            let result = await handleServerTrust(challenge: challenge)
+            if let task { await authTracker.resetAttempt(for: task) } // ✅ Reset on success
+            return result
         case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
             if let task {
-                authAttemptCounts[task, default: 0] += 1
-                if authAttemptCounts[task]! > 1 {
+                let attemptCount = await authTracker.incrementAttempt(for: task) // ✅ Call actor asynchronously
+                if attemptCount > 1 {
+                    await authTracker.resetAttempt(for: task) // ✅ Reset if we cancel authentication
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
-                    return await handleBasicAuth(challenge: challenge)
+                    let result = await handleBasicAuth(challenge: challenge)
+                    await authTracker.resetAttempt(for: task) // ✅ Reset on success
+                    return result
                 }
             } else {
                 return await handleBasicAuth(challenge: challenge)
             }
         case NSURLAuthenticationMethodClientCertificate:
-            return await handleClientCertificateAuth(challenge: challenge)
+            let result = await handleClientCertificateAuth(challenge: challenge)
+            if let task { await authTracker.resetAttempt(for: task) } // ✅ Reset on success
+            return result
         default:
             return (.performDefaultHandling, nil)
         }

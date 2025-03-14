@@ -11,7 +11,7 @@
 
 import Foundation
 
-public class OpenHABServerProperties: Decodable {
+public struct OpenHABServerProperties: Decodable, Sendable {
     public let version: String?
     let links: [OpenHABLink]
 
@@ -34,7 +34,7 @@ public class OpenHABServerProperties: Decodable {
 }
 
 extension OpenHABServerProperties {
-    convenience init(_ rootBean: Components.Schemas.RootBean) {
+    init(_ rootBean: Components.Schemas.RootBean) {
         self.init(
             version: rootBean.version,
             links: rootBean.links?.compactMap { OpenHABLink($0) } ?? []

@@ -209,7 +209,7 @@ public final class NetworkTracker: ObservableObject {
         return bestConnection
     }
 
-    private func withTimeout<T>(seconds: Double, operation: @escaping () async -> T?) async -> T? {
+    private func withTimeout<T: Sendable>(seconds: Double, operation: @escaping () async -> T?) async -> T? {
         await withTaskGroup(of: T?.self) { group in
             // Start the operation
             group.addTask {
