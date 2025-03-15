@@ -319,7 +319,6 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
                     let result = await handleBasicAuth(challenge: challenge)
-                    await authAttemptTracker.resetAttempt(for: task) // ✅ Reset on success
                     return result
                 }
             } else {

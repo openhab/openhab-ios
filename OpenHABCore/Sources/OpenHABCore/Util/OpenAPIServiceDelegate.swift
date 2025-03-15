@@ -47,7 +47,6 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
                     let result = await handleBasicAuth(challenge: challenge)
-                    await authTracker.resetAttempt(for: task) // ✅ Reset on success
                     return result
                 }
             } else {
