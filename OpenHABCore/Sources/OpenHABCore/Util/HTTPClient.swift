@@ -316,7 +316,6 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
             if let task {
                 let attemptCount = await authAttemptTracker.incrementAttempt(for: task) // ✅ Call actor asynchronously
                 if attemptCount > 1 {
-                    await authAttemptTracker.resetAttempt(for: task) // ✅ Reset if we cancel authentication
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
                     let result = await handleBasicAuth(challenge: challenge)

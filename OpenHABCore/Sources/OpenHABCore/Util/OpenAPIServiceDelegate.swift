@@ -44,7 +44,6 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
             if let task {
                 let attemptCount = await authTracker.incrementAttempt(for: task) // ✅ Call actor asynchronously
                 if attemptCount > 1 {
-                    await authTracker.resetAttempt(for: task) // ✅ Reset if we cancel authentication
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
                     let result = await handleBasicAuth(challenge: challenge)
