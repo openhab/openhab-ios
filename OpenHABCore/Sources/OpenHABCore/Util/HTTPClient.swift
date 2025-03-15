@@ -70,7 +70,7 @@ public class HTTPClient: NSObject {
     private let ignoreSSL: Bool
     private var evaluateContinuation: CheckedContinuation<CertificateEvaluateResult, Never>?
     private var trustedCertificates: [String: Data] = [:]
-    private var authAttemptCounts = [URLSessionTask: Int]()
+    private let authAttemptTracker = AuthAttemptTracker()
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient")
 
@@ -309,20 +309,27 @@ extension HTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
         switch authenticationMethod {
         case NSURLAuthenticationMethodServerTrust:
-            return await handleServerTrust(challenge: challenge)
+            let result = await handleServerTrust(challenge: challenge)
+            await authAttemptTracker.resetAttempt(for: task) // ✅ Reset on success
+            return result
         case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
             if let task {
-                authAttemptCounts[task, default: 0] += 1
-                if authAttemptCounts[task]! > 1 {
+                let attemptCount = await authAttemptTracker.incrementAttempt(for: task) // ✅ Call actor asynchronously
+                if attemptCount > 1 {
+                    await authAttemptTracker.resetAttempt(for: task) // ✅ Reset if we cancel authentication
                     return (.cancelAuthenticationChallenge, nil)
                 } else {
-                    return await handleBasicAuth(challenge: challenge)
+                    let result = await handleBasicAuth(challenge: challenge)
+                    await authAttemptTracker.resetAttempt(for: task) // ✅ Reset on success
+                    return result
                 }
             } else {
                 return await handleBasicAuth(challenge: challenge)
             }
         case NSURLAuthenticationMethodClientCertificate:
-            return await handleClientCertificateAuth(challenge: challenge)
+            let result = await handleClientCertificateAuth(challenge: challenge)
+            await authAttemptTracker.resetAttempt(for: task) // ✅ Reset on success
+            return result
         default:
             return (.performDefaultHandling, nil)
         }

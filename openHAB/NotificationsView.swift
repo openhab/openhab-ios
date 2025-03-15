@@ -76,28 +76,26 @@ struct NotificationsView: View {
             NotificationRow(notification: notification)
         }
         .refreshable {
-            loadNotifications()
+            await loadNotifications()
         }
         .navigationTitle("Notifications")
-        .onAppear {
-            loadNotifications()
+        .task {
+            await loadNotifications()
         }
     }
 
-    private func loadNotifications() {
-        Task {
-            do {
-                let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
-                let data = try await client.notification(urlString: Preferences.remoteUrl)
-                try await MainActor.run {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                    let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
-                    notifications = codingDatas.map(\.openHABNotification)
-                }
-            } catch {
-                os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+    private func loadNotifications() async {
+        do {
+            let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+            let data = try await client.notification(urlString: Preferences.remoteUrl)
+            try await MainActor.run {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+                let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+                notifications = codingDatas.map(\.openHABNotification)
             }
+        } catch {
+            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
         }
     }
 }

@@ -93,7 +93,7 @@ struct SettingsView: View {
                 }
             }
         }
-        .onAppear {
+        .task {
             loadSettings()
         }
     }

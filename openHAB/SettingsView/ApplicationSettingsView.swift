@@ -106,7 +106,7 @@ struct ApplicationSettingsView: View {
             Toggle("Ignore SSL certificates", isOn: $settingsIgnoreSSL)
             Toggle("Disable Idle Timeout", isOn: $settingsIdleOff)
             Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
-                .onAppear {
+                .task {
                     settingsSendCrashReports = Preferences.sendCrashReports
                 }
                 .onChange(of: settingsSendCrashReports) { newValue in

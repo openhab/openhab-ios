@@ -12,19 +12,6 @@
 import Foundation
 import os
 
-actor AuthAttemptTracker {
-    private var attemptCounts: [URLSessionTask: Int] = [:]
-
-    func incrementAttempt(for task: URLSessionTask) -> Int {
-        attemptCounts[task, default: 0] += 1
-        return attemptCounts[task]!
-    }
-
-    func resetAttempt(for task: URLSessionTask) {
-        attemptCounts[task] = 0
-    }
-}
-
 // MARK: - URLSessionDelegate for Client Certificates and Basic Auth
 
 final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
@@ -51,7 +38,7 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
         switch authenticationMethod {
         case NSURLAuthenticationMethodServerTrust:
             let result = await handleServerTrust(challenge: challenge)
-            if let task { await authTracker.resetAttempt(for: task) } // ✅ Reset on success
+            await authTracker.resetAttempt(for: task) // ✅ Reset on success
             return result
         case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
             if let task {
@@ -69,7 +56,7 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
             }
         case NSURLAuthenticationMethodClientCertificate:
             let result = await handleClientCertificateAuth(challenge: challenge)
-            if let task { await authTracker.resetAttempt(for: task) } // ✅ Reset on success
+            await authTracker.resetAttempt(for: task) // ✅ Reset on success
             return result
         default:
             return (.performDefaultHandling, nil)

@@ -24,7 +24,7 @@ struct ClientCertificatesView: View {
             }
         }
         .navigationTitle(Text(LocalizedStringKey("client_certificates")))
-        .onAppear {
+        .task {
             viewModel.loadCertificates()
         }
     }

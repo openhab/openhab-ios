@@ -84,7 +84,7 @@ public final class NetworkTracker: ObservableObject {
 
     private var retryCount = 0
     private let maxRetries = 5
-    private let monitor: NWPathMonitor
+    private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue.global(qos: .background)
     private var connectionPool: ConnectionPool = .init()
     private var connectionConfigurations: [ConnectionConfiguration] = []
@@ -106,7 +106,6 @@ public final class NetworkTracker: ObservableObject {
 //                }
 //            }
 //        } else {
-        monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { [weak self] path in
             Task { await self?.handleNetworkChange(isConnected: path.status == .satisfied) }
         }

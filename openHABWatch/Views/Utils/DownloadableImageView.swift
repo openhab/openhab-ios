@@ -92,10 +92,9 @@ struct DownloadableImageView: View {
                     .opacity(0.3)
             }
         }
-        .onAppear {
-            fetchImage()
+        .task {
+            await fetchImage()
         }
-        .onDisappear { cancelDownload() }
         .scaledToFit()
     }
 
@@ -104,7 +103,7 @@ struct DownloadableImageView: View {
         self.url = url
     }
 
-    private func fetchImage() {
+    private func fetchImage() async {
         print("Fetching Image from \(String(describing: url))")
         guard let url else {
             print("fetchImage() skipped: URL is nil")
@@ -120,34 +119,29 @@ struct DownloadableImageView: View {
         }
 
         print("Fetching fresh image from \(url)")
-        asyncOperation = Task {
-            do {
-                guard let client = NetworkTracker.shared.httpClient else {
-                    throw DownloadableImageError.nohttpClient
-                }
-                let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, type: .data)
-                try await MainActor.run {
-                    let scaleFactor = WKInterfaceDevice.current().screenScale
-                    let options: [SDImageCoderOption: Any] = [
-                        .decodeScaleFactor: scaleFactor,
-                        .decodeThumbnailPixelSize: CGSize(width: 200, height: 200)
-                    ]
 
-                    if let image = SDImageCodersManager.shared.decodedImage(with: data, options: options) {
-                        logger.info("Downloaded and decoded image from \(url)")
-                        ImageCacheManager.shared.cacheImage(image, for: url) // Cache it
-                        imageLoader.updateImage(image)
-                    } else {
-                        throw DownloadableImageError.failedToDecode
-                    }
-                }
-            } catch {
-                logger.error("Image loading failed")
+        do {
+            guard let client = NetworkTracker.shared.httpClient else {
+                throw DownloadableImageError.nohttpClient
             }
-        }
-    }
+            let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, type: .data)
+            try await MainActor.run {
+                let scaleFactor = WKInterfaceDevice.current().screenScale
+                let options: [SDImageCoderOption: Any] = [
+                    .decodeScaleFactor: scaleFactor,
+                    .decodeThumbnailPixelSize: CGSize(width: 200, height: 200)
+                ]
 
-    private func cancelDownload() {
-        asyncOperation?.cancel()
+                if let image = SDImageCodersManager.shared.decodedImage(with: data, options: options) {
+                    logger.info("Downloaded and decoded image from \(url)")
+                    ImageCacheManager.shared.cacheImage(image, for: url) // Cache it
+                    imageLoader.updateImage(image)
+                } else {
+                    throw DownloadableImageError.failedToDecode
+                }
+            }
+        } catch {
+            logger.error("Image loading failed")
+        }
     }
 }
