@@ -76,27 +76,26 @@ struct NotificationsView: View {
             NotificationRow(notification: notification)
         }
         .refreshable {
-            await loadNotifications()
+            await notifications = loadNotifications()
         }
         .navigationTitle("Notifications")
         .task {
-            await loadNotifications()
+            await notifications = loadNotifications()
         }
     }
 
-    private func loadNotifications() async {
+    private func loadNotifications() async -> [OpenHABNotification]{
         do {
             let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
             let data = try await client.notification(urlString: Preferences.remoteUrl)
-            try await MainActor.run {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
-                notifications = codingDatas.map(\.openHABNotification)
-            }
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+            let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+            return codingDatas.map(\.openHABNotification)
         } catch {
             os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
         }
+        return []
     }
 }
 
