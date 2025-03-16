@@ -303,9 +303,9 @@ class OpenHABRootViewController: UIViewController {
                 os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
                 Task {
                     do {
-                        let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+                        let client = HTTPClient(username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
                         try await client.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
-                        os_log("my.openHAB registration sent", log: .notifications, type: .info)
+                        os_log("my.openHAB registration succeeded", log: .notifications, type: .info)
                     } catch {
                         os_log("my.openHAB registration failed %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
                     }

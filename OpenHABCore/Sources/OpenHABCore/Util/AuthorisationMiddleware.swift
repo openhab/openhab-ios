@@ -40,7 +40,7 @@ extension AuthorisationMiddleware: ClientMiddleware {
                           next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)) async throws -> (HTTPResponse, HTTPBody?) {
         // Use a mutable copy of request
         var request = request
-        if baseURL.host?.hasSuffix("myopenhab.org") == nil || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
+        if baseURL.host?.hasSuffix("myopenhab.org") == true || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
             request.headerFields[.authorization] = basicAuthHeader()
         }
         let (response, body) = try await next(request, body, baseURL)

@@ -186,7 +186,8 @@ public class HTTPClient: NSObject {
 
     private func performRequest<T>(request: URLRequest, type: SessionType = .data) async throws -> (T, URLResponse) {
         var request = request
-        if alwaysSendBasicAuth {
+
+        if request.url?.host?.hasSuffix("myopenhab.org") == true || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
             request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
         }
 
@@ -203,9 +204,8 @@ public class HTTPClient: NSObject {
     // MARK: - Basic Authentication
 
     private func basicAuthHeader() -> String {
-        let authString = "\(username):\(password)"
-        let authData = authString.data(using: .utf8)!
-        return "Basic \(authData.base64EncodedString())"
+        let credential = Data("\(username):\(password)".utf8).base64EncodedString()
+        return "Basic \(credential)"
     }
 
     // MARK: - SSL Certificate Handling
