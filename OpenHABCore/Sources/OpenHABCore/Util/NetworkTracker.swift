@@ -74,6 +74,26 @@ actor ConnectionPool {
         services[configuration] = newService
         return newService
     }
+
+    // Ensures that all URLs pointing to "myopenhab.org" are standardized to "home.myopenhab.org".
+    private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
+        configurations.map { configuration in
+            adjustMyOpenHABHost(in: configuration)
+        }
+    }
+
+    private func adjustMyOpenHABHost(in configuration: ConnectionConfiguration) -> ConnectionConfiguration {
+        var updatedURL = configuration.url
+        if let urlComponents = URLComponents(string: configuration.url),
+           let host = urlComponents.host,
+           host.contains("myopenhab.org"),
+           host != "home.myopenhab.org" {
+            var newComponents = urlComponents
+            newComponents.host = "home.myopenhab.org"
+            updatedURL = newComponents.url?.absoluteString ?? configuration.url
+        }
+        return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
+    }
 }
 
 public final class NetworkTracker: ObservableObject {
@@ -118,7 +138,8 @@ public final class NetworkTracker: ObservableObject {
                               alwaysSendBasicAuth: Bool,
                               ignoreSSLVerification: Bool) {
         logger.info("Start Network Tracking")
-        self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
+//        self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
+        self.connectionConfigurations = connectionConfigurations
         Task {
             for configuration in connectionConfigurations {
                 await connectionPool.getOrCreateService(for: configuration)
@@ -230,15 +251,17 @@ public final class NetworkTracker: ObservableObject {
         guard URL(string: configuration.url) != nil else { return nil }
 
         do {
-            let version = try await connectionPool.getOrCreateService(for: configuration).getRootVersion()
+            logger.info("testConnection for \(configuration.url)")
+            let connection = await connectionPool.getOrCreateService(for: configuration)
+            let version = try await connection.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
-            logger.info("Successfully connected to \(configuration.url)")
+            logger.info("testConnection successful for  \(configuration.url)")
             return connectionInfo
         } catch NetworkTrackerError.invalidServerVersion {
-            logger.info("Invalid server version from \(configuration.url)")
+            logger.info("testConnection error - Invalid server version from \(configuration.url)")
             return nil
         } catch {
-            logger.info("Failed to connect to \(configuration.url)")
+            logger.info("testConnection error - Failed to connect to \(configuration.url)")
             return nil
         }
     }
@@ -262,6 +285,26 @@ public final class NetworkTracker: ObservableObject {
         }
     }
 
+    // Ensures that all URLs pointing to "myopenhab.org" are standardized to "home.myopenhab.org".
+    private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
+        configurations.map { configuration in
+            adjustMyOpenHABHost(in: configuration)
+        }
+    }
+
+    private func adjustMyOpenHABHost(in configuration: ConnectionConfiguration) -> ConnectionConfiguration {
+        var updatedURL = configuration.url
+        if let urlComponents = URLComponents(string: configuration.url),
+           let host = urlComponents.host,
+           host.contains("myopenhab.org"),
+           host != "home.myopenhab.org" {
+            var newComponents = urlComponents
+            newComponents.host = "home.myopenhab.org"
+            updatedURL = newComponents.url?.absoluteString ?? configuration.url
+        }
+        return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
+    }
+
     @MainActor
     private func setActiveConnection(_ connection: ConnectionInfo?) async {
         guard activeConnection != connection else { return }
@@ -272,22 +315,6 @@ public final class NetworkTracker: ObservableObject {
         } else {
             status = .notConnected
             startRetryTask(disconnectedRetryInterval)
-        }
-    }
-
-    // Ensures that all URLs pointing to "myopenhab.org" are standardized to "home.myopenhab.org".
-    private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
-        configurations.map { configuration in
-            var updatedURL = configuration.url
-            if let urlComponents = URLComponents(string: configuration.url),
-               let host = urlComponents.host,
-               host.contains("myopenhab.org"),
-               host != "home.myopenhab.org" {
-                var newComponents = urlComponents
-                newComponents.host = "home.myopenhab.org"
-                updatedURL = newComponents.url?.absoluteString ?? configuration.url
-            }
-            return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
         }
     }
 }

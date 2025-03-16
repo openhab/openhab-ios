@@ -33,7 +33,7 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
     }
 
     private func urlSessionInternal(_ session: URLSession, task: URLSessionTask?, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        os_log("URLAuthenticationChallenge: %{public}@", log: .networking, type: .info, challenge.protectionSpace.authenticationMethod)
+        os_log("URLAuthenticationChallenge for : %{public}@", log: .networking, type: .info, challenge.protectionSpace.authenticationMethod)
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
         switch authenticationMethod {
         case NSURLAuthenticationMethodServerTrust:

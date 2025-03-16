@@ -84,7 +84,7 @@ struct NotificationsView: View {
         }
     }
 
-    private func loadNotifications() async -> [OpenHABNotification]{
+    private func loadNotifications() async -> [OpenHABNotification] {
         do {
             let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
             let data = try await client.notification(urlString: Preferences.remoteUrl)

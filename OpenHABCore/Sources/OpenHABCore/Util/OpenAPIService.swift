@@ -69,8 +69,18 @@ public actor OpenAPIService {
         self.username = username
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
-        self.url = url
         self.ignoreSSL = ignoreSSL
+
+        if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           let host = urlComponents.host,
+           host.contains("myopenhab.org"),
+           host != "home.myopenhab.org" {
+            var newComponents = urlComponents
+            newComponents.host = "home.myopenhab.org"
+            self.url = newComponents.url
+        } else {
+            self.url = url
+        }
 
         client = Client(
             serverURL: url.appending(path: "/rest"),
@@ -156,9 +166,7 @@ public extension OpenAPIService {
     }
 
     func getRootVersion() async throws -> Int {
-        let result = try await client.getRoot()
-            .ok.body.json
-        let serverProperties = OpenHABServerProperties(result)
+        let serverProperties = try await getRoot()
         guard let version = Int(serverProperties.version ?? "0"),
               version > 1 else {
             throw NetworkTrackerError.invalidServerVersion
