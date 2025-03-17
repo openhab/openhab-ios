@@ -46,6 +46,50 @@ public struct UserDefault<T> {
 }
 
 @propertyWrapper
+public struct UserDefaultObject<T: Codable> {
+    private let key: String
+    private let defaultValue: T
+    private let subject: CurrentValueSubject<T, Never>
+
+    public var wrappedValue: T {
+        get {
+            guard let data = Preferences.sharedDefaults.data(forKey: key),
+                  let object = try? JSONDecoder().decode(T.self, from: data) else {
+                return defaultValue
+            }
+            return object
+        }
+        set {
+            if let encoded = try? JSONEncoder().encode(newValue) {
+                Preferences.sharedDefaults.set(encoded, forKey: key)
+                // Relevant for Combine publication
+                let subject = subject
+                DispatchQueue.main.async {
+                    subject.send(newValue)
+                }
+            }
+        }
+    }
+
+    public var projectedValue: AnyPublisher<T, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
+    init(_ key: String, defaultValue: T) {
+        self.key = key
+        self.defaultValue = defaultValue
+
+        // Combine publication
+        if let data = Preferences.sharedDefaults.data(forKey: key),
+           let object = try? JSONDecoder().decode(T.self, from: data) {
+            subject = CurrentValueSubject(object)
+        } else {
+            subject = CurrentValueSubject(defaultValue)
+        }
+    }
+}
+
+@propertyWrapper
 public struct UserDefaultURL {
     private let key: String
     private let defaultValue: String
@@ -114,10 +158,25 @@ public enum Preferences {
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
     @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
+    @UserDefaultObject("localConnectionConfig", defaultValue: ConnectionConfiguration(
+        url: "http://localhost:8080",
+        username: "",
+        password: "",
+        alwaysSendBasicAuth: false,
+        ignoreSSL: false,
+        priority: 0)) public static var localConnectionConfig: ConnectionConfiguration
+    @UserDefaultObject("connectionConfig", defaultValue: ConnectionConfiguration(
+        url: "https://myopenhab.org",
+        username: "",
+        password: "",
+        alwaysSendBasicAuth: false,
+        ignoreSSL: false,
+        priority: 1)) public static var remoteConnectionConfig: ConnectionConfiguration
 
     // MARK: - Private
 
     @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
+    @UserDefault("didMigrateToConnectionConfig", defaultValue: false) private static var didMigrateToConnectionConfig: Bool
 }
 
 public extension Preferences {
@@ -137,5 +196,53 @@ public extension Preferences {
         Preferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? Preferences.iconType
         Preferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? Preferences.defaultSitemap
         Preferences.sendCrashReports = UserDefaults.standard.object(forKey: "sendCrashReports") as? Bool ?? Preferences.sendCrashReports
+    }
+
+    static func migrateUserDefaultsToConnectionIfRequired() {
+        guard !didMigrateToConnectionConfig else { return }
+
+        let oldLocalUrl = UserDefaults.standard.string(forKey: "localUrl") ?? Preferences.localUrl
+        let oldRemoteUrl = UserDefaults.standard.string(forKey: "remoteUrl") ?? Preferences.remoteUrl
+        let oldUsername = UserDefaults.standard.string(forKey: "username") ?? Preferences.username
+        let oldPassword = UserDefaults.standard.string(forKey: "password") ?? Preferences.password
+        let oldAlwaysSendCreds = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? Preferences.alwaysSendCreds
+        let oldIgnoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? Preferences.ignoreSSL
+
+        // Create new configuration
+        let newLocalConfiguration = ConnectionConfiguration(
+            url: oldLocalUrl,
+            username: "",
+            password: "",
+            alwaysSendBasicAuth: oldAlwaysSendCreds,
+            ignoreSSL: oldIgnoreSSL,
+            priority: 0
+        )
+
+        let newRemoteConfiguration = ConnectionConfiguration(
+            url: oldRemoteUrl,
+            username: oldUsername,
+            password: oldPassword,
+            alwaysSendBasicAuth: oldAlwaysSendCreds,
+            ignoreSSL: oldIgnoreSSL,
+            priority: 1
+        )
+
+        // Save to Preferences
+        Preferences.localConnectionConfig = newLocalConfiguration
+        Preferences.remoteConnectionConfig = newRemoteConfiguration
+        didMigrateToConnectionConfig = true
+        // Ensure UserDefaults writes to disk immediately
+        Preferences.sharedDefaults.synchronize()
+    }
+}
+
+public extension Preferences {
+    static func getLowestPriorityOpenHABConnection() -> ConnectionConfiguration? {
+        let allConnections = [localConnectionConfig, remoteConnectionConfig]
+
+        return allConnections
+            .filter { $0.url.contains("openhab.org") }
+            .sorted { $0.priority < $1.priority }
+            .first
     }
 }

@@ -12,6 +12,7 @@
 import Combine
 import Foundation
 import Network
+import OpenAPIRuntime
 import os.log
 
 // TODO: these strings should reference Localizable keys
@@ -21,16 +22,6 @@ public enum NetworkStatus: String {
     case notConnected = "Not Connected"
     case someConnected = "Some Connected"
     case allConnected = "All Connected"
-}
-
-public struct ConnectionConfiguration: Hashable, Sendable {
-    public let url: String
-    public let priority: Int // Lower is higher priority, 0 is primary
-
-    public init(url: String, priority: Int = 10) {
-        self.url = url
-        self.priority = priority
-    }
 }
 
 public struct ConnectionInfo: Equatable, Sendable {
@@ -65,10 +56,10 @@ actor ConnectionPool {
         }
         let newService = OpenAPIService(
             baseURL: URL(string: configuration.url) ?? URL(staticString: "about:blank"),
-            username: Preferences.username,
-            password: Preferences.password,
-            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
-            ignoreSSL: Preferences.ignoreSSL,
+            username: configuration.username,
+            password: configuration.password,
+            alwaysSendBasicAuth: configuration.alwaysSendBasicAuth,
+            ignoreSSL: configuration.ignoreSSL,
             configuration: .shortTerm
         )
         services[configuration] = newService
@@ -92,7 +83,7 @@ actor ConnectionPool {
             newComponents.host = "home.myopenhab.org"
             updatedURL = newComponents.url?.absoluteString ?? configuration.url
         }
-        return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
+        return ConnectionConfiguration(url: updatedURL, username: configuration.username, password: configuration.password, priority: configuration.priority)
     }
 }
 
@@ -132,11 +123,7 @@ public final class NetworkTracker: ObservableObject {
         monitor.start(queue: monitorQueue)
     }
 
-    public func startTracking(connectionConfigurations: [ConnectionConfiguration],
-                              username: String,
-                              password: String,
-                              alwaysSendBasicAuth: Bool,
-                              ignoreSSLVerification: Bool) {
+    public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {
         logger.info("Start Network Tracking")
 //        self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
         self.connectionConfigurations = connectionConfigurations
@@ -217,7 +204,7 @@ public final class NetworkTracker: ObservableObject {
 
                 if connectionInfo.configuration.priority == 0 {
                     bestConnection = connectionInfo
-                    group.cancelAll() // Stop further tasks if we found the highest-priority connection
+//                    group.cancelAll() // Stop further tasks if we found the highest-priority connection
                     break
                 }
 
@@ -260,8 +247,11 @@ public final class NetworkTracker: ObservableObject {
         } catch NetworkTrackerError.invalidServerVersion {
             logger.info("testConnection error - Invalid server version from \(configuration.url)")
             return nil
+        } catch let openAPIError as OpenAPIRuntime.ClientError {
+            logger.info("testConnection error - OpenAPIRuntime.RuntimeError encountered for \(configuration.url): \(openAPIError)")
+            return nil
         } catch {
-            logger.info("testConnection error - Failed to connect to \(configuration.url)")
+            logger.info("testConnection error - Failed to connect to \(configuration.url) \(error.localizedDescription)")
             return nil
         }
     }
@@ -302,7 +292,7 @@ public final class NetworkTracker: ObservableObject {
             newComponents.host = "home.myopenhab.org"
             updatedURL = newComponents.url?.absoluteString ?? configuration.url
         }
-        return ConnectionConfiguration(url: updatedURL, priority: configuration.priority)
+        return ConnectionConfiguration(url: updatedURL, username: configuration.username, password: configuration.password, priority: configuration.priority)
     }
 
     @MainActor

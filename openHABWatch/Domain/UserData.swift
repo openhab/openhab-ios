@@ -110,22 +110,21 @@ final class UserData: ObservableObject {
 
     func updateNetwork() async {
         if !ObservableOpenHABDataObject.shared.localUrl.isEmpty || !ObservableOpenHABDataObject.shared.remoteUrl.isEmpty {
+            // TODO:
             let connection1 = ConnectionConfiguration(
                 url: ObservableOpenHABDataObject.shared.localUrl,
+                username: "",
+                password: "",
                 priority: 0
             )
             let connection2 = ConnectionConfiguration(
                 url: ObservableOpenHABDataObject.shared.remoteUrl,
+                username: "",
+                password: "",
                 priority: 1
             )
 
-            NetworkTracker.shared.startTracking(
-                connectionConfigurations: [connection1, connection2],
-                username: ObservableOpenHABDataObject.shared.openHABUsername,
-                password: ObservableOpenHABDataObject.shared.openHABPassword,
-                alwaysSendBasicAuth: ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds,
-                ignoreSSLVerification: ObservableOpenHABDataObject.shared.ignoreSSL
-            )
+            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
         }
     }
 

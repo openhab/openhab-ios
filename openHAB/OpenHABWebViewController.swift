@@ -19,6 +19,7 @@ import WebKit
 class OpenHABWebViewController: OpenHABViewController {
     private var currentTarget = ""
     private var openHABTrackedRootUrl = ""
+    private var activeConfig: ConnectionConfiguration?
     private var hideNavBar = false
     private var activityIndicator: UIActivityIndicatorView!
     private var observation: NSKeyValueObservation?
@@ -76,8 +77,10 @@ class OpenHABWebViewController: OpenHABViewController {
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
                 if let activeConnection {
-                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeConnection.configuration.url)")
-                    self.openHABTrackedRootUrl = activeConnection.configuration.url
+                    let activeConfiguration = activeConnection.configuration
+                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeConfiguration.url)")
+                    self.openHABTrackedRootUrl = activeConfiguration.url
+                    self.activeConfig = activeConfiguration
                     self.loadWebView(force: false)
                 }
             }
@@ -116,17 +119,17 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func loadWebView(force: Bool = false, path: String? = nil) {
-        os_log("loadWebView tracked URL: %{PUBLIC}@ forced %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, openHABTrackedRootUrl, force ? "true" : "false")
-
-        let authStr = "\(Preferences.username):\(Preferences.password)"
-        let newTarget = "\(openHABTrackedRootUrl):\(authStr)"
+        logger.info("loadWebView tracked URL: \(self.activeConfig?.url ?? "") forced \(force ? "true" : "false")")
+        guard let activeConfig else { return }
+        let authStr = "\(activeConfig.username):\(activeConfig.password)"
+        let newTarget = "\(activeConfig.url):\(authStr)"
 
         if !force, currentTarget == newTarget {
             showActivityIndicator(show: false)
             return
         }
         currentTarget = newTarget
-        let url = URL(string: openHABTrackedRootUrl)
+        let url = URL(string: activeConfig.url)
 
         if let modifiedUrl = modifyUrl(orig: url, path: path) {
             let request = URLRequest(url: modifiedUrl)

@@ -81,6 +81,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.register(defaults: appDefaults)
 
         Preferences.migrateUserDefaultsIfRequired()
+        Preferences.migrateUserDefaultsToConnectionIfRequired()
 
         registerForPushNotifications()
 

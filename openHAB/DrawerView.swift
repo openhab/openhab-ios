@@ -212,7 +212,7 @@ struct DrawerView: View {
                     onDismiss(.settings)
                 }
 
-                if Preferences.remoteUrl.contains("openhab.org"), !Preferences.demomode {
+                if Preferences.getLowestPriorityOpenHABConnection() != nil, !Preferences.demomode {
                     HStack {
                         Image(systemSymbol: .bell)
                             .resizable()

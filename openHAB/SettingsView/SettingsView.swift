@@ -32,6 +32,8 @@ struct SettingsView: View {
     @State var settingsSitemapForWatch = ""
 
     @State private var sitemaps: [OpenHABSitemap] = []
+    @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
+    @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
 
     @Environment(\.dismiss) private var dismiss
 
@@ -45,11 +47,8 @@ struct SettingsView: View {
         Form {
             ConnectionSettingsView(
                 settingsDemomode: $settingsDemomode,
-                settingsLocalUrl: $settingsLocalUrl,
-                settingsRemoteUrl: $settingsRemoteUrl,
-                settingsUsername: $settingsUsername,
-                settingsPassword: $settingsPassword,
-                settingsAlwaysSendCreds: $settingsAlwaysSendCreds
+                localConnectionConfiguration: $settingsLocalConnectionConfiguration,
+                remoteConnectionConfiguration: $settingsRemoteConnectionConfiguration
             )
 
             ApplicationSettingsView(
@@ -117,6 +116,8 @@ struct SettingsView: View {
         settingsDefaultMainUIPath = Preferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.alwaysAllowWebRTC
         settingsSitemapForWatch = Preferences.sitemapForWatch
+        settingsLocalConnectionConfiguration = Preferences.localConnectionConfig
+        settingsRemoteConnectionConfiguration = Preferences.remoteConnectionConfig
     }
 
     func saveSettings() {
@@ -135,6 +136,8 @@ struct SettingsView: View {
         Preferences.defaultMainUIPath = settingsDefaultMainUIPath
         Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
         Preferences.sitemapForWatch = settingsSitemapForWatch
+        Preferences.localConnectionConfig = settingsLocalConnectionConfiguration
+        Preferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
         WatchMessageService.singleton.syncPreferencesToWatch()
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(settingsSendCrashReports)
         logger.debug("setCrashlyticsCollectionEnabled to \(settingsSendCrashReports)")
@@ -183,6 +186,16 @@ extension UIApplication {
                 page: nil // Replace with actual OpenHABPage if needed
             )
         ]
+        @State var localConnectionConfiguration = ConnectionConfiguration(
+            url: "http://192.168.2.1",
+            username: "user",
+            password: "password123"
+        )
+        @State var remoteConnectionConfiguration = ConnectionConfiguration(
+            url: "http://192.168.2.1",
+            username: "user",
+            password: "password123"
+        )
 
         var body: some View {
             NavigationView {
@@ -201,7 +214,9 @@ extension UIApplication {
                     settingsSortSitemapsBy: settingsSortSitemapsBy,
                     settingsDefaultMainUIPath: settingsDefaultMainUIPath,
                     settingsAlwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
-                    settingsSitemapForWatch: settingsSitemapForWatch
+                    settingsSitemapForWatch: settingsSitemapForWatch,
+                    settingsLocalConnectionConfiguration: localConnectionConfiguration,
+                    settingsRemoteConnectionConfiguration: remoteConnectionConfiguration
                 )
             }
         }

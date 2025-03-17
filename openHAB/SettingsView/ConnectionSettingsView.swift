@@ -9,93 +9,21 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
 
 struct ConnectionSettingsView: View {
     @Binding var settingsDemomode: Bool
-    @Binding var settingsLocalUrl: String
-    @Binding var settingsRemoteUrl: String
-    @Binding var settingsUsername: String
-    @Binding var settingsPassword: String
-    @Binding var settingsAlwaysSendCreds: Bool
+    @Binding var localConnectionConfiguration: ConnectionConfiguration
+    @Binding var remoteConnectionConfiguration: ConnectionConfiguration
 
     var body: some View {
-        Section(header: Text("OpenHAB Connection")) {
-            Toggle("Demo Mode", isOn: $settingsDemomode)
+        Toggle("Demo Mode", isOn: $settingsDemomode)
 
-            if !settingsDemomode {
-                LabeledContent {
-                    Spacer()
-                    TextField(
-                        "Local URL",
-                        text: $settingsLocalUrl
-                    )
-                    .fixedSize()
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-                    .font(.system(.caption))
-                } label: {
-                    Text("Local URL")
-                    if settingsLocalUrl.isEmpty {
-                        Text("Enter URL of local server")
-                    }
-                }
-
-                LabeledContent {
-                    Spacer()
-                    TextField(
-                        "Remote URL",
-                        text: $settingsRemoteUrl
-                    )
-                    .fixedSize()
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-                    .font(.system(.caption))
-                } label: {
-                    Text("Remote URL")
-                    if settingsRemoteUrl.isEmpty {
-                        Text("Enter URL of remote server")
-                    }
-                }
-
-                LabeledContent {
-                    TextField(
-                        "Foo",
-                        text: $settingsUsername
-                    )
-                    .textContentType(.username) // Associates with AutoFill
-                    .fixedSize()
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-                    .font(.system(.caption))
-                } label: {
-                    Text("Username")
-                    if settingsUsername.isEmpty {
-                        Text("Enter username on server, if required")
-                    }
-                }
-
-                LabeledContent {
-                    AnimatedSecureTextField(text: $settingsPassword, titleKey: "password")
-                        .fixedSize()
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true) //   or  .autocorrectionDisabled(true) ??
-                        .font(.system(.caption))
-                        .textContentType(.password) // Associates with AutoFill
-                } label: {
-                    Text("Password")
-                    if settingsPassword.isEmpty {
-                        Text("Enter password on server")
-                    }
-                }
-
-                Toggle(isOn: $settingsAlwaysSendCreds) {
-                    Text("Always send credentials")
-                }
-            }
+        if !settingsDemomode {
+            SingleConnectionSettingsView(headerText: "Configuration for local server", connectionConfig: $localConnectionConfiguration)
+            SingleConnectionSettingsView(headerText: "Configuration for remote server", connectionConfig: $remoteConnectionConfiguration)
         }
     }
 }
@@ -110,16 +38,24 @@ struct ConnectionSettingsView: View {
         @State var password = "password123"
         @State var alwaysSendCreds = true
 
+        @State var connectionConfig1 = ConnectionConfiguration(
+            url: "http://192.168.2.1",
+            username: "user",
+            password: "password123"
+        )
+        @State var connectionConfig2 = ConnectionConfiguration(
+            url: "http://192.168.2.1",
+            username: "user",
+            password: "password123"
+        )
+
         var body: some View {
             NavigationView {
                 Form {
                     ConnectionSettingsView(
                         settingsDemomode: $demoMode,
-                        settingsLocalUrl: $localUrl,
-                        settingsRemoteUrl: $remoteUrl,
-                        settingsUsername: $username,
-                        settingsPassword: $password,
-                        settingsAlwaysSendCreds: $alwaysSendCreds
+                        localConnectionConfiguration: $connectionConfig1,
+                        remoteConnectionConfiguration: $connectionConfig2
                     )
                 }
             }

@@ -44,9 +44,9 @@ extension LoggingMiddleware: ClientMiddleware {
             log(request, response, responseBodyToLog)
             return (response, responseBodyForNext)
         } catch {
-            if operationID != "getRoot", operationID != "getRootVersion" {
-                log(request, failedWith: error)
-            }
+//            if operationID != "getRoot", operationID != "getRootVersion" {
+            log(request, failedWith: error)
+//            }
             throw error
         }
     }
@@ -61,7 +61,7 @@ extension LoggingMiddleware {
 
     func log(_ request: HTTPRequest, _ response: HTTPResponse, _ responseBody: BodyLoggingPolicy.BodyLog) {
         logger.debug(
-            "Response: \(request.method, privacy: .public) \(request.path ?? "<nil>", privacy: .public) \(response.status, privacy: .public) body: \(responseBody, privacy: .auto)"
+            "Response: \(request.method, privacy: .public) \(request.path ?? "<nil>", privacy: .public) \(response.status, privacy: .public) body: \(responseBody, privacy: .public)"
         )
     }
 

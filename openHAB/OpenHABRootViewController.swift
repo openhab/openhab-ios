@@ -117,20 +117,16 @@ class OpenHABRootViewController: UIViewController {
     }
 
     fileprivate func setupTracker() {
-        let serverInfo = Publishers.CombineLatest4(
-            Preferences.$localUrl,
-            Preferences.$remoteUrl,
-            Preferences.$username,
-            Preferences.$password
+        let serverInfo = Publishers.CombineLatest(
+            Preferences.$localConnectionConfig,
+            Preferences.$remoteConnectionConfig
         )
         .eraseToAnyPublisher()
 
-        let misc = Publishers.CombineLatest3(
-            Preferences.$demomode,
-            Preferences.$alwaysSendCreds,
-            Preferences.$ignoreSSL
-        )
-        .eraseToAnyPublisher()
+//        let misc = Publishers.CombineLatest3(
+//            Preferences.$demomode,
+//        )
+//        .eraseToAnyPublisher()
 
         // Register for certificate trust notifications
         NotificationCenter.default.addObserver(
@@ -158,28 +154,22 @@ class OpenHABRootViewController: UIViewController {
             NetworkTracker.shared.restartTracking()
         }
 
-        Publishers.CombineLatest(serverInfo, misc)
+        Publishers.CombineLatest(serverInfo, Preferences.$demomode)
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
             .sink { (serverInfoTuple, miscTuple) in
-                let (localUrl, remoteUrl, username, password) = serverInfoTuple
-                let (demomode, alwaysSendCreds, ignoreSSL) = miscTuple
+                let (localConnectionConfig, remoteConnectionConfig) = serverInfoTuple
+                let (demomode) = miscTuple
                 if demomode {
                     NetworkTracker.shared.startTracking(connectionConfigurations: [
                         ConnectionConfiguration(
                             url: "https://demo.openhab.org",
+                            username: "",
+                            password: "",
                             priority: 0
                         )
-                    ], username: "", password: "", alwaysSendBasicAuth: false, ignoreSSLVerification: true)
+                    ])
                 } else {
-                    let connection1 = ConnectionConfiguration(
-                        url: localUrl,
-                        priority: 0
-                    )
-                    let connection2 = ConnectionConfiguration(
-                        url: remoteUrl,
-                        priority: 1
-                    )
-                    NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2], username: username, password: password, alwaysSendBasicAuth: alwaysSendCreds, ignoreSSLVerification: ignoreSSL)
+                    NetworkTracker.shared.startTracking(connectionConfigurations: [localConnectionConfig, remoteConnectionConfig])
                 }
             }
             .store(in: &cancellables)
@@ -294,21 +284,19 @@ class OpenHABRootViewController: UIViewController {
 
     @objc
     func handleApsRegistration(_ note: Notification?) {
-        os_log("handleApsRegistration", log: .notifications, type: .info)
+        logger.info("handleApsRegistration")
         let theData = note?.userInfo
         if theData != nil {
-            let prefsURL = Preferences.remoteUrl
-            if prefsURL.contains("openhab.org") {
-                guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
-                os_log("Registering notifications with %{PUBLIC}@", log: .notifications, type: .info, prefsURL)
-                Task {
-                    do {
-                        let client = HTTPClient(username: Preferences.username, password: Preferences.password, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
-                        try await client.register(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
-                        os_log("my.openHAB registration succeeded", log: .notifications, type: .info)
-                    } catch {
-                        os_log("my.openHAB registration failed %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
-                    }
+            guard let config = Preferences.getLowestPriorityOpenHABConnection() else { return }
+            guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
+            logger.info("Registering notifications with \(config.url)")
+            Task {
+                do {
+                    let client = HTTPClient(username: config.username, password: config.password, alwaysSendBasicAuth: config.alwaysSendBasicAuth)
+                    try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
+                    logger.info("my.openHAB registration succeeded")
+                } catch {
+                    logger.error("my.openHAB registration failed \(error.localizedDescription)")
                 }
             }
         }
@@ -426,7 +414,7 @@ class OpenHABRootViewController: UIViewController {
                 displayErrorNotification("Could not find server")
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
-                // TODOD
+                // TODO:
                 //            logger.error("Could not send data \(error.localizedDescription)")
                 //
                 //            self.displayErrorNotification("Request to \(url) failed: \(error.localizedDescription)")

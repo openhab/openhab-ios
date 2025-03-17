@@ -39,11 +39,11 @@ extension AuthorisationMiddleware: ClientMiddleware {
                           operationID: String,
                           next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)) async throws -> (HTTPResponse, HTTPBody?) {
         // Use a mutable copy of request
-        var request = request
+        var newRequest = request
         if baseURL.host?.hasSuffix("myopenhab.org") == true || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
-            request.headerFields[.authorization] = basicAuthHeader()
+            newRequest.headerFields[.authorization] = basicAuthHeader()
         }
-        let (response, body) = try await next(request, body, baseURL)
+        let (response, body) = try await next(newRequest, body, baseURL)
         return (response, body)
     }
 }

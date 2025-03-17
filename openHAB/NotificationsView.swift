@@ -86,7 +86,10 @@ struct NotificationsView: View {
 
     private func loadNotifications() async -> [OpenHABNotification] {
         do {
-            let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+            guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
+                return []
+            }
+            let client = HTTPClient(username: config.username, password: config.username, alwaysSendBasicAuth: config.alwaysSendBasicAuth)
             let data = try await client.notification(urlString: Preferences.remoteUrl)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)

@@ -23,22 +23,10 @@ public actor OpenHABItemCache {
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "OpenHABItemCache")
 
     private init() {
-        let connection1 = ConnectionConfiguration(
-            url: Preferences.localUrl,
-            priority: 0
-        )
-        let connection2 = ConnectionConfiguration(
-            url: Preferences.remoteUrl,
-            priority: 1
-        )
+        let connection1 = Preferences.localConnectionConfig
+        let connection2 = Preferences.remoteConnectionConfig
 
-        NetworkTracker.shared.startTracking(
-            connectionConfigurations: [connection1, connection2],
-            username: Preferences.username,
-            password: Preferences.password,
-            alwaysSendBasicAuth: Preferences.alwaysSendCreds,
-            ignoreSSLVerification: Preferences.ignoreSSL
-        )
+        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) -> [String] {

@@ -163,39 +163,30 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
+        NetworkTracker.shared.startTracking(connectionConfigurations: [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig])
+
+        guard let fullURL = await resolveFullURL(from: url) else { return nil }
+
+        guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return nil }
+
         let client = HTTPClient(
-            username: Preferences.username,
-            password: Preferences.password,
-            alwaysSendBasicAuth: Preferences.alwaysSendCreds
+            username: activeConfig.username,
+            password: activeConfig.password,
+            alwaysSendBasicAuth: activeConfig.alwaysSendBasicAuth
         )
 
+        let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
+        return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)
+    }
+
+    // 🔹 Extracted helper function to determine full URL
+    private func resolveFullURL(from url: String) async -> URL? {
         if url.starts(with: "/") {
-            let connection1 = ConnectionConfiguration(url: Preferences.localUrl, priority: 0)
-            let connection2 = ConnectionConfiguration(url: Preferences.remoteUrl, priority: 1)
-
-            NetworkTracker.shared.startTracking(
-                connectionConfigurations: [connection1, connection2],
-                username: Preferences.username,
-                password: Preferences.password,
-                alwaysSendBasicAuth: Preferences.alwaysSendCreds,
-                ignoreSSLVerification: Preferences.ignoreSSL
-            )
-
-            // Await the active connection
-            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection(),
-                  let fullURL = URL(string: activeConnection.configuration.url)?.appendingPathComponent(url) else {
-                return nil
-            }
-
-            let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
-            return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)
-
-        } else if let fullURL = URL(string: url) {
-            let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
-            return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)
+            guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return nil }
+            return URL(string: activeConfig.url)?.appendingPathComponent(url)
+        } else {
+            return URL(string: url)
         }
-
-        return nil
     }
 
     func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
