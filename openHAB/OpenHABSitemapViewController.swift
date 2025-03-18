@@ -87,14 +87,24 @@ actor PageLoader {
 
     func fetchPage(longPolling: Bool) async throws -> OpenHABPage? {
         logger.info("📡 Fetching page... (longPolling: \(longPolling))")
-        let page = try await openAPIService.pollDataForPage(
-            sitemapname: defaultSitemap,
-            pageId: pageId,
-            longPolling: longPolling
-        )
-        try Task.checkCancellation()
 
-        return page
+        do {
+            let page = try await openAPIService.pollDataForPage(
+                sitemapname: defaultSitemap,
+                pageId: pageId,
+                longPolling: longPolling
+            )
+            try Task.checkCancellation()
+            return page
+        } catch is CancellationError {
+            // ✅ If the task is canceled, we simply return nil without logging it as an error.
+            logger.info("🔄 Polling request was canceled (likely due to navigation)")
+            return nil
+        } catch {
+            // ❌ Handle all other unexpected errors.
+            logger.error("❌ Failed to fetch page: \(error.localizedDescription)")
+            throw error
+        }
     }
 }
 
@@ -166,11 +176,13 @@ class OpenHABSitemapViewController: OpenHABViewController {
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
-        let initialConfiguration = ConnectionConfiguration(
-            url: "",
-            username: "",
-            password: ""
-        )
+        let initialConfiguration =
+            ConnectionConfiguration(
+                url: openHABRootUrl,
+                username: openHABUsername,
+                password: openHABUsername,
+                alwaysSendBasicAuth: openHABAlwaysSendCreds
+            )
 
         openAPIService = OpenAPIService(
             connectionConfiguration: initialConfiguration,

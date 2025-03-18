@@ -238,7 +238,7 @@ public final class NetworkTracker: ObservableObject {
             let connection = await connectionPool.getOrCreateService(for: configuration)
             let version = try await connection.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
-            logger.info("testConnection successful for  \(configuration.url)")
+            logger.info("testConnection successful for \(configuration.url)")
             return connectionInfo
         } catch NetworkTrackerError.invalidServerVersion {
             logger.info("testConnection error - Invalid server version from \(configuration.url)")

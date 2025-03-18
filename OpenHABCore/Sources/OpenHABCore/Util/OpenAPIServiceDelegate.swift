@@ -66,10 +66,10 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
         var error: CFError?
         _ = SecTrustEvaluateWithError(serverTrust, &error)
         SecTrustGetTrustResult(serverTrust, &result)
-        logger.info("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
+        logger.debug("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
 
         if result.isAny(of: .unspecified, .proceed) || connectionConfiguration.ignoreSSL {
-            logger.info("Certificate is trusted or SSL verification ignored")
+            logger.debug("Certificate is trusted or SSL verification ignored")
             return (.useCredential, URLCredential(trust: serverTrust))
         }
 

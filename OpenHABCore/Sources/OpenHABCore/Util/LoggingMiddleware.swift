@@ -43,10 +43,24 @@ extension LoggingMiddleware: ClientMiddleware {
             logger.debug("Trying URL: \(baseURL) for operation ID:\(operationID)")
             log(request, response, responseBodyToLog)
             return (response, responseBodyForNext)
+        } catch is CancellationError {
+            // ✅ If the task is canceled, we simply return nil without logging it as an error.
+            logger.info("🔄 Polling request was canceled (likely due to navigation)")
+            let emptyResponse = HTTPResponse(status: .noContent, headerFields: [:])
+            return (emptyResponse, nil)
+        } catch let error as ClientError {
+            if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
+                // ✅ If the task is canceled, we simply return nil without logging it as an error.
+                logger.info("🔄 Task was cancelled - URLError code: .cancelled (likely due to navigation)")
+                let emptyResponse = HTTPResponse(status: .noContent, headerFields: [:])
+                return (emptyResponse, nil)
+            } else {
+                throw error
+            }
         } catch {
-//            if operationID != "getRoot", operationID != "getRootVersion" {
-            log(request, failedWith: error)
-//            }
+            if operationID != "getRoot", operationID != "getRootVersion" {
+                log(request, failedWith: error)
+            }
             throw error
         }
     }
@@ -61,7 +75,7 @@ extension LoggingMiddleware {
 
     func log(_ request: HTTPRequest, _ response: HTTPResponse, _ responseBody: BodyLoggingPolicy.BodyLog) {
         logger.debug(
-            "Response: \(request.method, privacy: .public) \(request.path ?? "<nil>", privacy: .public) \(response.status, privacy: .public) body: \(responseBody, privacy: .public)"
+            "Response: \(request.method, privacy: .public) \(request.path ?? "<nil>", privacy: .public) \(response.status, privacy: .public) body: \(responseBody, privacy: .auto)"
         )
     }
 
