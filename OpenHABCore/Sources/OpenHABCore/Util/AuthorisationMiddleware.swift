@@ -20,10 +20,10 @@ public struct AuthorisationMiddleware {
     private let password: String
     private let alwaysSendBasicAuth: Bool
 
-    public init(username: String, password: String, alwaysSendBasicAuth: Bool = false) {
-        self.username = username
-        self.password = password
-        self.alwaysSendBasicAuth = alwaysSendBasicAuth
+    public init(configuration: ConnectionConfiguration) {
+        username = configuration.username
+        password = configuration.password
+        alwaysSendBasicAuth = configuration.alwaysSendBasicAuth
     }
 }
 

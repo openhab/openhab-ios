@@ -166,11 +166,15 @@ class OpenHABSitemapViewController: OpenHABViewController {
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
+        let initialConfiguration = ConnectionConfiguration(
+            url: "",
+            username: "",
+            password: ""
+        )
+
         openAPIService = OpenAPIService(
-            baseURL: URL(string: openHABRootUrl) ?? URL(staticString: "about:blank"),
-            username: openHABUsername,
-            password: openHABPassword,
-            alwaysSendBasicAuth: openHABAlwaysSendCreds
+            connectionConfiguration: initialConfiguration,
+            configuration: .shortTerm
         )
 
         // ✅ Initialize PageLoader
@@ -550,12 +554,15 @@ extension OpenHABSitemapViewController {
         Task {
             do {
                 logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
-                openAPIService = OpenAPIService(
-                    baseURL: URL(string: appData!.openHABRootUrl) ?? URL(staticString: "about:blank"),
+                let initialConfiguration = ConnectionConfiguration(
+                    url: appData!.openHABRootUrl,
                     username: appData!.openHABUsername,
-                    password: appData!.openHABPassword,
+                    password: appData!.openHABUsername,
                     alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds
                 )
+                openAPIService = OpenAPIService(
+                    connectionConfiguration: initialConfiguration)
+
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
                 guard let openAPIService else {

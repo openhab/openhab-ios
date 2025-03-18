@@ -44,15 +44,15 @@ private enum HTTPClientError: Error {
     }
 }
 
+public enum CertificateEvaluateResult {
+    case undecided
+    case deny
+    case permitOnce
+    case permitAlways
+}
+
 public class HTTPClient: NSObject {
     // MARK: - Properties
-
-    public enum CertificateEvaluateResult {
-        case undecided
-        case deny
-        case permitOnce
-        case permitAlways
-    }
 
     public enum SessionType {
         case download

@@ -271,7 +271,16 @@ struct DrawerView: View {
         }
         .listStyle(.inset)
         .task {
-            let openAPIService = OpenAPIService(username: appData?.openHABUsername ?? "", password: appData?.openHABPassword ?? "", alwaysSendBasicAuth: appData?.openHABAlwaysSendCreds ?? false, ignoreSSL: false)
+            let initialConfiguration = ConnectionConfiguration(
+                url: appData!.openHABRootUrl,
+                username: appData?.openHABUsername ?? "",
+                password: appData?.openHABUsername ?? "",
+                alwaysSendBasicAuth: appData?.openHABAlwaysSendCreds ?? false,
+                ignoreSSL: false
+            )
+            let openAPIService = OpenAPIService(
+                connectionConfiguration: initialConfiguration
+            )
 
             Task {
                 do {

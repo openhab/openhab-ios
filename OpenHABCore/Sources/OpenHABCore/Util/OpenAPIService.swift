@@ -33,25 +33,20 @@ public actor OpenAPIService {
     private var client: any APIProtocol
     private var url: URL?
     private var longPolling = false
-
-    private var username: String = ""
-    private var password: String = ""
-    private var alwaysSendBasicAuth = false
-    private var ignoreSSL = false
+    private var connectionConfiguration: ConnectionConfiguration
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenAPIService")
 
     /// Creates a new client for OpenAPIService.
     public init(client: any APIProtocol) {
         self.client = client
+        connectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     }
 
-    public init(baseURL url: URL = URL(staticString: "about:blank"),
-                username: String,
-                password: String,
-                alwaysSendBasicAuth: Bool = false,
-                ignoreSSL: Bool = false,
+    public init(connectionConfiguration: ConnectionConfiguration,
                 configuration: OpenAPIServiceConfiguration = .asDefault) {
+        self.connectionConfiguration = connectionConfiguration
+        let delegate = OpenAPIServiceDelegate(with: connectionConfiguration)
         let config = URLSessionConfiguration.default
         switch configuration {
         case .asDefault:
@@ -63,33 +58,36 @@ public actor OpenAPIService {
             config.timeoutIntervalForRequest = 2.0
             config.timeoutIntervalForResource = 2.0
         }
-
-        let delegate = OpenAPIServiceDelegate(username: username, password: password)
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
-        self.username = username
-        self.password = password
-        self.alwaysSendBasicAuth = alwaysSendBasicAuth
-        self.ignoreSSL = ignoreSSL
+        let url = URL(string: connectionConfiguration.url) ?? URL(staticString: "about:blank")
+        let resolvedURL = OpenAPIService.getServerURL(for: url)
+        self.url = resolvedURL
 
+        let serverURL = resolvedURL.appending(path: "/rest")
+
+        client = Client(
+            serverURL: serverURL,
+            transport: URLSessionTransport(configuration: .init(session: session)),
+            middlewares: [
+                LoggingMiddleware(),
+                AuthorisationMiddleware(configuration: connectionConfiguration)
+            ]
+        )
+    }
+
+    private static func getServerURL(for url: URL) -> URL {
         if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
            let host = urlComponents.host,
            host.contains("myopenhab.org"),
            host != "home.myopenhab.org" {
+//            URL(string: "https://home.myopenhab.org")!
             var newComponents = urlComponents
             newComponents.host = "home.myopenhab.org"
-            self.url = newComponents.url
+//            newComponents.scheme = "https"
+            return newComponents.url!
         } else {
-            self.url = url
+            return url
         }
-
-        client = Client(
-            serverURL: url.appending(path: "/rest"),
-            transport: URLSessionTransport(configuration: .init(session: session)),
-            middlewares: [
-                AuthorisationMiddleware(username: username, password: password, alwaysSendBasicAuth: alwaysSendBasicAuth),
-                LoggingMiddleware()
-            ]
-        )
     }
 
     private func prepareURLSessionConfiguration(longPolling: Bool) -> URLSessionConfiguration {
@@ -109,8 +107,8 @@ public actor OpenAPIService {
             serverURL: newURL.appending(path: "/rest"),
             transport: URLSessionTransport(configuration: .init(session: session)),
             middlewares: [
-                AuthorisationMiddleware(username: username, password: password),
-                LoggingMiddleware()
+                LoggingMiddleware(),
+                AuthorisationMiddleware(configuration: connectionConfiguration)
             ]
         )
     }
@@ -126,8 +124,8 @@ public actor OpenAPIService {
             serverURL: url!.appending(path: "/rest"),
             transport: URLSessionTransport(configuration: .init(session: session)),
             middlewares: [
-                AuthorisationMiddleware(username: username, password: password),
-                LoggingMiddleware()
+                LoggingMiddleware(),
+                AuthorisationMiddleware(configuration: connectionConfiguration)
             ]
         )
     }

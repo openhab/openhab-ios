@@ -55,11 +55,7 @@ actor ConnectionPool {
             return existingService
         }
         let newService = OpenAPIService(
-            baseURL: URL(string: configuration.url) ?? URL(staticString: "about:blank"),
-            username: configuration.username,
-            password: configuration.password,
-            alwaysSendBasicAuth: configuration.alwaysSendBasicAuth,
-            ignoreSSL: configuration.ignoreSSL,
+            connectionConfiguration: configuration,
             configuration: .shortTerm
         )
         services[configuration] = newService

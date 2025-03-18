@@ -2054,7 +2054,7 @@ public struct Client: APIProtocol {
             forOperation: Operations.getRoot.id,
             serializer: { input in
                 let path = try converter.renderedPath(
-                    template: "//",
+                    template: "/",
                     parameters: []
                 )
                 var request: HTTPTypes.HTTPRequest = .init(

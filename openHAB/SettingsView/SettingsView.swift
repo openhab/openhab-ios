@@ -52,9 +52,7 @@ struct SettingsView: View {
             )
 
             ApplicationSettingsView(
-                settingsIgnoreSSL: $settingsIgnoreSSL,
-                settingsIdleOff: $settingsIdleOff,
-                settingsSendCrashReports: $settingsSendCrashReports
+                settingsIdleOff: $settingsIdleOff
             )
 
             MainUISettingsView(
@@ -70,7 +68,9 @@ struct SettingsView: View {
                 sitemaps: $sitemaps
             )
 
-            DebugSettingsView()
+            DebugSettingsView(
+                settingsSendCrashReports: $settingsSendCrashReports
+            )
 
             AboutSettingsView()
         }
