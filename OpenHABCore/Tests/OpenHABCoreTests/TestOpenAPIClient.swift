@@ -37,7 +37,7 @@ final class TestOpenAPIClient: XCTestCase {
             XCTAssertEqual(operationID, "getRoot")
             XCTAssertEqual(
                 request.path,
-                "//"
+                "/"
             )
             XCTAssertEqual(baseURL.absoluteString, "/rest")
             XCTAssertEqual(request.method, .get)

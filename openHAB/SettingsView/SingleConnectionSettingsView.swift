@@ -68,11 +68,14 @@ struct SingleConnectionSettingsView: View {
                 }
             }
 
-            Toggle(isOn: $connectionConfig.alwaysSendBasicAuth) {
-                Text("Always send credentials")
-            }
+            Toggle("Always send credentials",isOn: $connectionConfig.alwaysSendBasicAuth)
+                .font(.caption)
+                .opacity(0.8)
+            
 
             Toggle("Ignore SSL certificates", isOn: $connectionConfig.ignoreSSL)
+                .font(.caption)
+                .opacity(0.8)
         }
     }
 }

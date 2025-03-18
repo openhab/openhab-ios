@@ -18,11 +18,56 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
     public var priority: Int // Lower is higher priority, 0 is primary
 
     public init(url: String, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false, priority: Int = 10) {
-        self.url = url
+        self.url = ConnectionConfiguration.normalizeURL(url)
         self.username = username
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
         self.ignoreSSL = ignoreSSL
         self.priority = priority
+    }
+
+    // 🔹 Ensure normalization on decoding
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let rawURL = try container.decode(String.self, forKey: .url) // Decode raw URL
+        url = ConnectionConfiguration.normalizeURL(rawURL) // Normalize it
+        username = try container.decode(String.self, forKey: .username)
+        password = try container.decode(String.self, forKey: .password)
+        alwaysSendBasicAuth = try container.decode(Bool.self, forKey: .alwaysSendBasicAuth)
+        ignoreSSL = try container.decode(Bool.self, forKey: .ignoreSSL)
+        priority = try container.decode(Int.self, forKey: .priority)
+    }
+
+    // 🔹 Ensure normalization on encoding (optional, since we store it normalized)
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(url, forKey: .url) // Already normalized
+        try container.encode(username, forKey: .username)
+        try container.encode(password, forKey: .password)
+        try container.encode(alwaysSendBasicAuth, forKey: .alwaysSendBasicAuth)
+        try container.encode(ignoreSSL, forKey: .ignoreSSL)
+        try container.encode(priority, forKey: .priority)
+    }
+
+    // 🔹 Normalize a URL (removes trailing slashes, trims spaces, redirects openHAB cloud)
+    private static func normalizeURL(_ url: String) -> String {
+        var cleanedURL = url.trimmingCharacters(in: .whitespacesAndNewlines) // Trim whitespace
+        cleanedURL = uriWithoutTrailingSlashes(cleanedURL) // Remove trailing slashes
+
+        return cleanedURL
+    }
+
+    /// Removes trailing slashes from a URL string
+    private static func uriWithoutTrailingSlashes(_ url: String) -> String {
+        var newUrl = url
+        while newUrl.hasSuffix("/") {
+            newUrl.removeLast()
+        }
+        return newUrl
+    }
+
+    // 🔹 Coding keys for manual encoding/decoding
+    private enum CodingKeys: String, CodingKey {
+        case url, username, password, alwaysSendBasicAuth, ignoreSSL, priority
     }
 }
