@@ -207,9 +207,11 @@ class OpenHABRootViewController: UIViewController {
 
         SideMenuManager.default.rightMenuNavigationController?.settings = settings
 
+        let networkTracker = NetworkTracker.shared
         let drawerView = DrawerView { mode in
             self.handleDismiss(mode: mode)
         }
+        .environmentObject(networkTracker)
         let hostingController = UIHostingController(rootView: drawerView)
         let menu = SideMenuNavigationController(rootViewController: hostingController)
 

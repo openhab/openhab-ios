@@ -30,10 +30,7 @@ enum DrawerViewError: Error, CustomDebugStringConvertible {
 struct ImageView: View {
     let url: String
 
-    // App wide data access
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+    @EnvironmentObject var networkTracker: NetworkTracker
 
     var body: some View {
         if !url.isEmpty {
@@ -44,7 +41,10 @@ struct ImageView: View {
             case _ where url.hasPrefix("http"):
                 return KFImage(URL(string: url)).resizable()
             default:
-                let builtURL = Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: url.prepare()).url
+                let builtURL = Endpoint.resource(
+                    openHABRootUrl: networkTracker.activeConnection?.configuration.url ?? "",
+                    path: url.prepare()
+                ).url
                 return KFImage(builtURL).resizable()
             }
         } else {
@@ -56,7 +56,7 @@ struct ImageView: View {
 
 // Display the connected URL
 struct ConnectionView: View {
-    @ObservedObject private var networkTracker = NetworkTracker.shared
+    @StateObject private var networkTracker = NetworkTracker.shared
 
     var body: some View {
         HStack {
@@ -128,7 +128,6 @@ struct DrawerView: View {
     struct SitemapsSectionView: View {
         var sitemaps: [OpenHABSitemap]
         var sitemapIconwidth: CGFloat
-        var appData: OpenHABDataObject?
         @Binding var sitemapForWatch: String?
         var onDismiss: (TargetController) -> Void
         var dismiss: DismissAction
@@ -139,7 +138,6 @@ struct DrawerView: View {
                     SitemapRowView(
                         sitemap: sitemap,
                         sitemapIconwidth: sitemapIconwidth,
-                        appData: appData,
                         isWatchSitemap: sitemap.name == sitemapForWatch,
                         onDismiss: onDismiss,
                         dismiss: dismiss
@@ -159,9 +157,9 @@ struct DrawerView: View {
     }
 
     struct SitemapRowView: View {
+        @EnvironmentObject var networkTracker: NetworkTracker
         var sitemap: OpenHABSitemap
         var sitemapIconwidth: CGFloat
-        var appData: OpenHABDataObject?
         var isWatchSitemap: Bool
         var onDismiss: (TargetController) -> Void
         var dismiss: DismissAction
@@ -174,7 +172,10 @@ struct DrawerView: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: sitemapIconwidth)
                 } else {
-                    let url = Endpoint.iconForDrawer(rootUrl: appData?.openHABRootUrl ?? "", icon: sitemap.icon).url
+                    let url = Endpoint.iconForDrawer(
+                        rootUrl: networkTracker.activeConnection?.configuration.url ?? "",
+                        icon: sitemap.icon
+                    ).url
                     KFImage(url).placeholder { Image("openHABIcon").resizable() }
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -233,18 +234,11 @@ struct DrawerView: View {
     @State private var uiTiles: [OpenHABUiTile] = []
     @State private var selectedSection: Int?
     @State private var connectedUrl: String = "Not connected" // Default label text
-    @ObservedObject private var networkTracker = NetworkTracker.shared
 
-    var openHABUsername = ""
-    var openHABPassword = ""
+    @EnvironmentObject private var networkTracker: NetworkTracker
 
     var onDismiss: (TargetController) -> Void
     @Environment(\.dismiss) private var dismiss
-
-    // App wide data access
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
 
     @ScaledMetric var openHABIconwidth = 20.0
     @ScaledMetric var tilesIconwidth = 20.0
@@ -259,7 +253,7 @@ struct DrawerView: View {
 
                 TilesSectionView(uiTiles: uiTiles, tilesIconwidth: tilesIconwidth, onDismiss: onDismiss, dismiss: dismiss)
 
-                SitemapsSectionView(sitemaps: sitemaps, sitemapIconwidth: sitemapIconwidth, appData: appData, sitemapForWatch: $sitemapForWatch, onDismiss: onDismiss, dismiss: dismiss)
+                SitemapsSectionView(sitemaps: sitemaps, sitemapIconwidth: sitemapIconwidth, sitemapForWatch: $sitemapForWatch, onDismiss: onDismiss, dismiss: dismiss)
 
                 SystemSectionView(openHABIconwidth: openHABIconwidth, onDismiss: onDismiss, dismiss: dismiss)
             }
@@ -271,50 +265,43 @@ struct DrawerView: View {
         }
         .listStyle(.inset)
         .task {
-            let initialConfiguration = ConnectionConfiguration(
-                url: appData!.openHABRootUrl,
-                username: appData?.openHABUsername ?? "",
-                password: appData?.openHABUsername ?? "",
-                alwaysSendBasicAuth: appData?.openHABAlwaysSendCreds ?? false,
-                ignoreSSL: false
-            )
-            let openAPIService = OpenAPIService(
-                connectionConfiguration: initialConfiguration
-            )
-
+            let activeConnection = networkTracker.activeConnection
+            await updateSitemapsAndUITiles(activeConnection: activeConnection)
+        }
+        .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {
-                do {
-                    guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw DrawerViewError.noRootURL }
-                    await openAPIService.updateBaseURL(with: url)
+                await updateSitemapsAndUITiles(activeConnection: activeConnection)
+            }
+        }
+    }
 
-                    sitemaps = try await openAPIService.openHABSitemaps()
-                    if sitemaps.last?.name == "_default", sitemaps.count > 1 {
-                        sitemaps = Array(sitemaps.dropLast())
-                    }
-                    // Sort the sitemaps according to Settings selection.
-                    switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
-                    case .label: sitemaps.sort { $0.label < $1.label }
-                    case .name: sitemaps.sort { $0.name < $1.name }
-                    }
+    private func updateSitemapsAndUITiles(activeConnection: ConnectionInfo?) async {
+        guard let activeConnection else { return }
 
-                } catch {
-                    os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                    sitemaps = []
-                }
+        let openAPIService = OpenAPIService(connectionConfiguration: activeConnection.configuration)
+
+        do {
+            sitemaps = try await openAPIService.openHABSitemaps()
+            if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                sitemaps = Array(sitemaps.dropLast())
             }
 
-            Task {
-                do {
-                    guard let url = URL(string: appData?.openHABRootUrl ?? "") else { throw DrawerViewError.noRootURL }
-                    await openAPIService.updateBaseURL(with: url)
-
-                    uiTiles = try await openAPIService.getUITiles()
-                    os_log("ui tiles response", log: .viewCycle, type: .info)
-                } catch {
-                    os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-                    uiTiles = []
-                }
+            // Sort the sitemaps according to Settings selection.
+            switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+            case .label: sitemaps.sort { $0.label < $1.label }
+            case .name: sitemaps.sort { $0.name < $1.name }
             }
+        } catch {
+            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            sitemaps = []
+        }
+
+        do {
+            uiTiles = try await openAPIService.getUITiles()
+            os_log("ui tiles response", log: .viewCycle, type: .info)
+        } catch {
+            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            uiTiles = []
         }
     }
 }

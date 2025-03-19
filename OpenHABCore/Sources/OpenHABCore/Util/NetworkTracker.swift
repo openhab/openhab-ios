@@ -61,32 +61,14 @@ actor ConnectionPool {
         services[configuration] = newService
         return newService
     }
-
-    // Ensures that all URLs pointing to "myopenhab.org" are standardized to "home.myopenhab.org".
-    private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
-        configurations.map { configuration in
-            adjustMyOpenHABHost(in: configuration)
-        }
-    }
-
-    private func adjustMyOpenHABHost(in configuration: ConnectionConfiguration) -> ConnectionConfiguration {
-        var updatedURL = configuration.url
-        if let urlComponents = URLComponents(string: configuration.url),
-           let host = urlComponents.host,
-           host.contains("myopenhab.org"),
-           host != "home.myopenhab.org" {
-            var newComponents = urlComponents
-            newComponents.host = "home.myopenhab.org"
-            updatedURL = newComponents.url?.absoluteString ?? configuration.url
-        }
-        return ConnectionConfiguration(url: updatedURL, username: configuration.username, password: configuration.password, priority: configuration.priority)
-    }
 }
 
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
+    // @MainActor
     @Published public private(set) var activeConnection: ConnectionInfo?
+    // @MainActor
     @Published public private(set) var status: NetworkStatus = .connecting
 
     private var retryCount = 0
@@ -96,10 +78,12 @@ public final class NetworkTracker: ObservableObject {
     private var connectionPool: ConnectionPool = .init()
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
-    public private(set) var httpClient: HTTPClient?
+    private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
+
+    // TODO: remove
     public var clientCertificateManager = ClientCertificateManager()
     public var serverCertificateManager = ServerCertificateManager()
-    private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
+    public private(set) var httpClient: HTTPClient?
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
@@ -121,7 +105,6 @@ public final class NetworkTracker: ObservableObject {
 
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {
         logger.info("Start Network Tracking")
-//        self.connectionConfigurations = adjustMyOpenHABHosts(in: connectionConfigurations)
         self.connectionConfigurations = connectionConfigurations
         Task {
             for configuration in connectionConfigurations {
@@ -163,7 +146,7 @@ public final class NetworkTracker: ObservableObject {
             try await connectionPool
                 .getOrCreateService(for: activeConnection.configuration)
                 .getRoot()
-            logger.info("Active connection is reachable: \(activeConnection.configuration.url)")
+            logger.debug("Active connection is reachable: \(activeConnection.configuration.url)")
         } catch {
             logger.error("Active connection failed: \(activeConnection.configuration.url) - \(error.localizedDescription)")
             await attemptConnection()
@@ -173,20 +156,26 @@ public final class NetworkTracker: ObservableObject {
     private func attemptConnection() async {
         guard !connectionConfigurations.isEmpty else {
             logger.error("No connection configurations available.")
+            await updateStatus(.notConnected)
             await setActiveConnection(nil)
             return
         }
 
-        logger.info("Checking available connections...")
-
-        let bestConnection = await findBestConnection()
-        await setActiveConnection(bestConnection)
+        logger.debug("Checking available connections...")
+        if let bestConnection = await findBestConnection() {
+            await setActiveConnection(bestConnection)
+        } else {
+            await updateStatus(.notConnected)
+            await setActiveConnection(nil)
+        }
+//        let bestConnection = await findBestConnection()
+//        await setActiveConnection(bestConnection)
     }
 
     private func findBestConnection() async -> ConnectionInfo? {
         let sortedConfigs = connectionConfigurations.sorted { $0.priority < $1.priority }
         var bestConnection: ConnectionInfo?
-        // var connectedCounts = 0
+        var connectedCount = 0
 
         await withTaskGroup(of: ConnectionInfo?.self) { group in
             for config in sortedConfigs {
@@ -200,7 +189,7 @@ public final class NetworkTracker: ObservableObject {
 
                 if connectionInfo.configuration.priority == 0 {
                     bestConnection = connectionInfo
-//                    group.cancelAll() // Stop further tasks if we found the highest-priority connection
+                    group.cancelAll() // Stop further tasks if we found the highest-priority connection
                     break
                 }
 
@@ -208,6 +197,15 @@ public final class NetworkTracker: ObservableObject {
                     bestConnection = connectionInfo
                 }
             }
+        }
+
+        // Update status based on the number of successful connections
+        if connectedCount == 0 {
+            await updateStatus(.notConnected)
+        } else if connectedCount == 1 {
+            await updateStatus(.someConnected)
+        } else if bestConnection != nil {
+            await updateStatus(.allConnected)
         }
         return bestConnection
     }
@@ -267,28 +265,9 @@ public final class NetworkTracker: ObservableObject {
         } else {
             logger.info("Network status: Disconnected")
             await setActiveConnection(nil)
+            await updateStatus(.notConnected)
             startRetryTask(10)
         }
-    }
-
-    // Ensures that all URLs pointing to "myopenhab.org" are standardized to "home.myopenhab.org".
-    private func adjustMyOpenHABHosts(in configurations: [ConnectionConfiguration]) -> [ConnectionConfiguration] {
-        configurations.map { configuration in
-            adjustMyOpenHABHost(in: configuration)
-        }
-    }
-
-    private func adjustMyOpenHABHost(in configuration: ConnectionConfiguration) -> ConnectionConfiguration {
-        var updatedURL = configuration.url
-        if let urlComponents = URLComponents(string: configuration.url),
-           let host = urlComponents.host,
-           host.contains("myopenhab.org"),
-           host != "home.myopenhab.org" {
-            var newComponents = urlComponents
-            newComponents.host = "home.myopenhab.org"
-            updatedURL = newComponents.url?.absoluteString ?? configuration.url
-        }
-        return ConnectionConfiguration(url: updatedURL, username: configuration.username, password: configuration.password, priority: configuration.priority)
     }
 
     @MainActor
@@ -296,12 +275,17 @@ public final class NetworkTracker: ObservableObject {
         guard activeConnection != connection else { return }
 
         activeConnection = connection
-        if activeConnection != nil {
-            status = .connected
-        } else {
-            status = .notConnected
-            startRetryTask(disconnectedRetryInterval)
+        status = connection == nil ? .notConnected : .connected
+        if connection == nil {
+            startRetryTask(30)
         }
+    }
+
+    @MainActor
+    private func updateStatus(_ newStatus: NetworkStatus) async {
+        guard status != newStatus else { return } // Prevent redundant updates
+        status = newStatus
+        logger.info("Network status updated: \(newStatus.rawValue)")
     }
 }
 

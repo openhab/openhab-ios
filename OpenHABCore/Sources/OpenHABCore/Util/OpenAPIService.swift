@@ -97,22 +97,6 @@ public actor OpenAPIService {
         return config
     }
 
-    public func updateBaseURL(with newURL: URL) async {
-        guard newURL != url else { return }
-        url = newURL
-
-        let config = prepareURLSessionConfiguration(longPolling: longPolling)
-        let session = URLSession(configuration: config)
-        client = Client(
-            serverURL: newURL.appending(path: "/rest"),
-            transport: URLSessionTransport(configuration: .init(session: session)),
-            middlewares: [
-                LoggingMiddleware(),
-                AuthorisationMiddleware(configuration: connectionConfiguration)
-            ]
-        )
-    }
-
     // timeoutIntervalForRequest/timeoutIntervalForResource need to be passed through URLSessionConfiguration when URLSession is created. Therefore create a new APIClient to change values.
     public func updateForLongPolling(_ newlongPolling: Bool) async {
         guard newlongPolling != longPolling else { return }

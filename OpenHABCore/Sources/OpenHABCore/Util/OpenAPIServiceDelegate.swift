@@ -35,7 +35,7 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
     }
 
     private func urlSessionInternal(_ session: URLSession, task: URLSessionTask?, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        os_log("URLAuthenticationChallenge: %{public}@", log: .networking, type: .info, challenge.protectionSpace.authenticationMethod)
+        logger.debug("URLAuthenticationChallenge: \(challenge.protectionSpace.authenticationMethod)")
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
         switch authenticationMethod {
         case NSURLAuthenticationMethodServerTrust:
@@ -55,7 +55,7 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
 
     private func handleServerTrust(challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         let domain = challenge.protectionSpace.host
-        logger.info("Handling server trust for domain: \(domain)")
+        logger.debug("Handling server trust for domain: \(domain)")
 
         guard let serverTrust = challenge.protectionSpace.serverTrust else {
             logger.error("No server trust object available")
@@ -66,7 +66,6 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
         var error: CFError?
         _ = SecTrustEvaluateWithError(serverTrust, &error)
         SecTrustGetTrustResult(serverTrust, &result)
-        logger.debug("Trust evaluation result: \(result.rawValue), error: \(String(describing: error))")
 
         if result.isAny(of: .unspecified, .proceed) || connectionConfiguration.ignoreSSL {
             logger.debug("Certificate is trusted or SSL verification ignored")

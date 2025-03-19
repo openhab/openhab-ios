@@ -2046,8 +2046,8 @@ public struct Client: APIProtocol {
     }
     /// Gets information about the runtime, the API version and links to resources.
     ///
-    /// - Remark: HTTP `GET //`.
-    /// - Remark: Generated from `#/paths////get(getRoot)`.
+    /// - Remark: HTTP `GET /`.
+    /// - Remark: Generated from `#/paths///get(getRoot)`.
     public func getRoot(_ input: Operations.getRoot.Input) async throws -> Operations.getRoot.Output {
         try await client.send(
             input: input,

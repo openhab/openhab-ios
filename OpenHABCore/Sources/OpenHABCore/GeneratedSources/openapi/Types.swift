@@ -183,8 +183,8 @@ public protocol APIProtocol: Sendable {
     func purgeDatabase(_ input: Operations.purgeDatabase.Input) async throws -> Operations.purgeDatabase.Output
     /// Gets information about the runtime, the API version and links to resources.
     ///
-    /// - Remark: HTTP `GET //`.
-    /// - Remark: Generated from `#/paths////get(getRoot)`.
+    /// - Remark: HTTP `GET /`.
+    /// - Remark: Generated from `#/paths///get(getRoot)`.
     func getRoot(_ input: Operations.getRoot.Input) async throws -> Operations.getRoot.Output
     /// Gets information about the system.
     ///
@@ -661,8 +661,8 @@ extension APIProtocol {
     }
     /// Gets information about the runtime, the API version and links to resources.
     ///
-    /// - Remark: HTTP `GET //`.
-    /// - Remark: Generated from `#/paths////get(getRoot)`.
+    /// - Remark: HTTP `GET /`.
+    /// - Remark: Generated from `#/paths///get(getRoot)`.
     public func getRoot(headers: Operations.getRoot.Input.Headers = .init()) async throws -> Operations.getRoot.Output {
         try await getRoot(Operations.getRoot.Input(headers: headers))
     }
@@ -9468,8 +9468,8 @@ public enum Operations {
     }
     /// Gets information about the runtime, the API version and links to resources.
     ///
-    /// - Remark: HTTP `GET //`.
-    /// - Remark: Generated from `#/paths////get(getRoot)`.
+    /// - Remark: HTTP `GET /`.
+    /// - Remark: Generated from `#/paths///get(getRoot)`.
     public enum getRoot {
         public static let id: Swift.String = "getRoot"
         public struct Input: Sendable, Hashable {
@@ -9524,7 +9524,7 @@ public enum Operations {
             }
             /// OK
             ///
-            /// - Remark: Generated from `#/paths////get(getRoot)/responses/200`.
+            /// - Remark: Generated from `#/paths///get(getRoot)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.getRoot.Output.Ok)
