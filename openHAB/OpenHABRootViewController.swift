@@ -179,7 +179,11 @@ class OpenHABRootViewController: UIViewController {
             .sink { [weak self] activeConnection in
                 if let activeConnection {
                     self?.appData?.openHABRootUrl = activeConnection.configuration.url
+                    self?.appData?.openHABUsername = activeConnection.configuration.username
+                    self?.appData?.openHABPassword = activeConnection.configuration.password
+                    self?.appData?.openHABAlwaysSendCreds = activeConnection.configuration.alwaysSendBasicAuth
                     self?.appData?.openHABVersion = activeConnection.version
+                    self?.appData?.connectionInfo = activeConnection
                 }
             }
             .store(in: &cancellables)

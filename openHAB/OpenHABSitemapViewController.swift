@@ -107,6 +107,9 @@ class OpenHABSitemapViewController: OpenHABViewController {
     private var openHABUsername = ""
     private var openHABPassword = ""
     private var openHABAlwaysSendCreds = false
+
+    private var activeConnectionInfo: ConnectionInfo?
+
     private var defaultSitemap = ""
     private var pageId = ""
     private var idleOff = false
@@ -163,31 +166,23 @@ class OpenHABSitemapViewController: OpenHABViewController {
         super.viewDidLoad()
         os_log("OpenHABSitemapViewController viewDidLoad", log: .default, type: .info)
 
+        registerTableViewCells()
+
         pageNetworkStatus = nil
         sitemaps = []
         widgetTableView.tableFooterView = UIView()
-        let initialConfiguration =
-            ConnectionConfiguration(
-                url: openHABRootUrl,
-                username: openHABUsername,
-                password: openHABUsername,
-                alwaysSendBasicAuth: openHABAlwaysSendCreds
-            )
 
-        openAPIService = OpenAPIService(
-            connectionConfiguration: initialConfiguration,
-            configuration: .shortTerm
-        )
+        guard let initialConfiguration = activeConnectionInfo?.configuration else { return }
+        openAPIService = OpenAPIService(connectionConfiguration: initialConfiguration)
 
-        // ✅ Initialize PageLoader
         guard let openAPIService else { return }
+        // ✅ Initialize PageLoader
         pageLoader = PageLoader(
             service: openAPIService,
             pageId: "",
             defaultSitemap: ""
         )
 
-        registerTableViewCells()
         configureTableView()
 
         refreshControl = UIRefreshControl()
@@ -355,6 +350,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
                     if let activeConnection {
                         os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
                         self.openHABRootUrl = activeConnection.configuration.url
+                        self.activeConnectionInfo = activeConnection
                         self.selectSitemap()
                     }
                 }
@@ -497,6 +493,12 @@ extension OpenHABSitemapViewController {
             do {
                 // ** Alternative 1
                 logger.info("Calling pollDataForPage from loadPage")
+
+                if openAPIService == nil {
+                    openAPIService = OpenAPIService(
+                        connectionConfiguration: appData!.connectionInfo!.configuration)
+                }
+
                 let page = try await openAPIService?.pollDataForPage(sitemapname: defaultSitemap, pageId: pageId, longPolling: longPolling)
                 guard let page else {
                     logger.info("No page found ")
@@ -556,14 +558,9 @@ extension OpenHABSitemapViewController {
         Task {
             do {
                 logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
-                let initialConfiguration = ConnectionConfiguration(
-                    url: appData!.openHABRootUrl,
-                    username: appData!.openHABUsername,
-                    password: appData!.openHABUsername,
-                    alwaysSendBasicAuth: appData!.openHABAlwaysSendCreds
-                )
+
                 openAPIService = OpenAPIService(
-                    connectionConfiguration: initialConfiguration)
+                    connectionConfiguration: appData!.connectionInfo!.configuration)
 
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
@@ -942,6 +939,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             longPollingTask = nil
             initialLoadTask?.cancel()
             initialLoadTask = nil
+//            pageId = linkedPage.pageId
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
             newViewController.title = linkedPage.title.components(separatedBy: "[")[0]
             newViewController.pageId = linkedPage.pageId

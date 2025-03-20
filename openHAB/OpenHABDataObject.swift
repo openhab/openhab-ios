@@ -23,6 +23,7 @@ class OpenHABDataObject: NSObject, DataObject {
     var currentWebViewPath = ""
     var currentView: TargetController?
     var lastNotificationInfo: [AnyHashable: Any]?
+    var connectionInfo: ConnectionInfo?
 }
 
 extension OpenHABDataObject {
