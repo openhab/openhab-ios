@@ -539,6 +539,8 @@ extension OpenHABSitemapViewController {
                         )
                     }
                 }
+            } catch let openAPIError as OpenAPIServiceError {
+                logger.info("On LoadPage \(openAPIError)")
             } catch {
                 logger.error("On LoadPage \(error.localizedDescription)")
                 await MainActor.run {

@@ -33,11 +33,11 @@ final class ParseAsTests: XCTestCase {
     func testValidOpenHABURL() throws {
         try "http://localhost:8080".testAsValidOpenHABURL()
         try "https://localhost:8080".testAsValidOpenHABURL()
+        try "192.168.2.10".testAsValidOpenHABURL()
     }
 
     func testInvalidOpenHABURL() {
         let invalidURLs = [
-            "localhost:8080", // Missing scheme
             "ftp://localhost", // Unsupported scheme
             "http:/localhost", // Malformed
             "http://", // Missing host

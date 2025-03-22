@@ -307,5 +307,7 @@ struct DrawerView: View {
 }
 
 #Preview {
+    let networkTracker = NetworkTracker.shared
     DrawerView { _ in }
+        .environmentObject(networkTracker)
 }

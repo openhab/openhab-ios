@@ -135,13 +135,37 @@ public extension String {
         return String(dropFirst(prefix.count))
     }
 
+    func isValidURLByRegex() throws -> Bool {
+        let pattern = #"^(https?://)?(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(/[^\s]*)?$"#
+
+        let regex = try Regex(pattern).ignoresCase()
+
+        return wholeMatch(of: regex) != nil
+    }
+
     func testAsValidOpenHABURL() throws {
-        guard
-            let components = URLComponents(string: self),
-            let scheme = components.scheme?.lowercased(),
-            ["http", "https"].contains(scheme),
-            let host = components.host, !host.isEmpty
-        else {
+        var urlString = self
+
+        guard try urlString.isValidURLByRegex() else {
+            throw URLError(.badURL)
+        }
+
+        if !urlString.contains("://") {
+            urlString = "http://" + urlString
+        }
+
+        guard let components = URLComponents(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        let allowedSchemes = ["http", "https"]
+        if let scheme = components.scheme?.lowercased() {
+            if !allowedSchemes.contains(scheme) {
+                throw URLError(.unsupportedURL)
+            }
+        }
+
+        guard let host = components.host, !host.isEmpty else {
             throw URLError(.badURL)
         }
     }

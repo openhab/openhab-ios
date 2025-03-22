@@ -32,7 +32,7 @@ public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChall
 }
 
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    os_log("onReceiveSessionChallenge host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+    os_log("onReceiveSessionChallenge host:'%{PUBLIC}@'", log: .default, type: .info, challenge.protectionSpace.host)
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 

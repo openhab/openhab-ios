@@ -18,6 +18,8 @@ import os
 public enum OpenAPIServiceError: Error {
     case undocumented(statusCode: Swift.Int, undocumentedPayload: OpenAPIRuntime.UndocumentedPayload)
     case noRootURL
+    case badRequest
+    case notFound
 }
 
 public enum OpenAPIServiceConfiguration {
@@ -203,9 +205,18 @@ public extension OpenAPIService {
     internal func pollDataForPage(path: Operations.pollDataForPage.Input.Path,
                                   query: Operations.pollDataForPage.Input.Query = .init(),
                                   headers: Operations.pollDataForPage.Input.Headers) async throws -> OpenHABPage? {
-        let result = try await client.pollDataForPage(path: path, query: query, headers: headers)
-            .ok.body.json
-        return OpenHABPage(result)
+        let response = try await client.pollDataForPage(path: path, query: query, headers: headers)
+        switch response {
+        case let .ok(okresponse):
+            let result = try okresponse.body.json
+            return OpenHABPage(result)
+        case let .undocumented(statusCode, undocumentedPayload):
+            throw OpenAPIServiceError.undocumented(statusCode: statusCode, undocumentedPayload: undocumentedPayload)
+        case .badRequest:
+            throw OpenAPIServiceError.badRequest
+        case .notFound:
+            throw OpenAPIServiceError.notFound
+        }
     }
 
     /// Poll page data on sitemap

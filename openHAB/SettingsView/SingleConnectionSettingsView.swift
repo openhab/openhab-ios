@@ -23,21 +23,52 @@ struct SingleConnectionSettingsView: View {
 
     var body: some View {
         Section(header: Text(headerText)) {
-            LabeledContent {
-                Spacer()
-                TextField(
-                    "URL",
-                    text: $connectionConfig.url
-                )
-                .fixedSize()
-                .keyboardType(.URL)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-                .font(.system(.caption))
-            } label: {
-                Text("URL")
-                if connectionConfig.url.isEmpty {
-                    Text("Enter URL of remote server")
+            VStack(alignment: .leading) {
+                LabeledContent {
+                    Spacer()
+                    TextField(
+                        "URL",
+                        text: $connectionConfig.url
+                    )
+                    .fixedSize()
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .font(.system(.caption))
+                } label: {
+                    HStack {
+                        Text("URL")
+                        if isTestingConnection {
+                            ProgressView()
+                                .scaleEffect(0.5)
+                        } else {
+                            Button {
+                                Task {
+                                    await handleTestConnection()
+                                }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.accentColor)
+                            .disabled(connectionConfig.url.isEmpty)
+                            .help("Test Connection")
+                        }
+                    }
+                    if connectionConfig.url.isEmpty {
+                        Text("Enter URL of remote server")
+                    }
+                }
+
+                if let message = connectionTestMessage, let success = connectionTestSuccess {
+                    HStack(spacing: 4) {
+                        Image(systemName: success ? "checkmark.circle" : "xmark.octagon")
+                            .foregroundColor(success ? .green : .red)
+                        Text(message)
+                            .foregroundColor(success ? .green : .red)
+                            .font(.caption2)
+                    }
+                    .transition(.opacity)
                 }
             }
 
@@ -79,35 +110,6 @@ struct SingleConnectionSettingsView: View {
             Toggle("Ignore SSL certificates", isOn: $connectionConfig.ignoreSSL)
                 .font(.caption)
                 .opacity(0.8)
-
-            // 🧪 Test Connection Button
-            HStack {
-                Button {
-                    Task {
-                        await handleTestConnection()
-                    }
-                } label: {
-                    if isTestingConnection {
-                        ProgressView()
-                    } else {
-                        Label("Test Connection", systemSymbol: .arrowClockwise)
-                    }
-                }
-                .disabled(isTestingConnection || connectionConfig.url.isEmpty)
-                Spacer()
-            }
-
-            // 🟢/🔴 Feedback Message
-            if let message = connectionTestMessage, let success = connectionTestSuccess {
-                HStack {
-                    Spacer()
-                    Label(message, systemImage: success ? "checkmark.circle.fill" : "xmark.octagon.fill")
-                        .foregroundColor(success ? .green : .red)
-                        .font(.caption2)
-                    Spacer()
-                }
-                .transition(.opacity)
-            }
         }
     }
 

@@ -330,7 +330,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
-            dump(response.allHeaderFields)
+//            dump(response.allHeaderFields)
             logger.info("navigationResponse: \(response.statusCode)")
 
             if response.statusCode >= 400 {
