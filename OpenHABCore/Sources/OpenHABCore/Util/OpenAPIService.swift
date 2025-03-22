@@ -16,7 +16,7 @@ import OpenAPIURLSession
 import os
 
 public enum OpenAPIServiceError: Error {
-    case undocumented(statusCode: Swift.Int, undocumentedPayload: OpenAPIRuntime.UndocumentedPayload)
+    case undocumented(statusCode: Int, undocumentedPayload: OpenAPIRuntime.UndocumentedPayload)
     case noRootURL
     case badRequest
     case notFound
@@ -144,9 +144,14 @@ public extension OpenAPIService {
 public extension OpenAPIService {
     @discardableResult
     func getRoot() async throws -> OpenHABServerProperties {
-        let result = try await client.getRoot()
-            .ok.body.json
-        return OpenHABServerProperties(result)
+        let response = try await client.getRoot()
+        switch response {
+        case let .ok(okresponse):
+            let result = try okresponse.body.json
+            return OpenHABServerProperties(result)
+        case let .undocumented(statusCode, undocumentedPayload):
+            throw OpenAPIServiceError.undocumented(statusCode: statusCode, undocumentedPayload: undocumentedPayload)
+        }
     }
 
     @discardableResult

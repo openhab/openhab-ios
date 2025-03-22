@@ -323,7 +323,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
                         self.showPopupMessage(seconds: 1.5, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
                     case .notConnected:
                         os_log("Tracking error", log: .viewCycle, type: .info)
-                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
+//                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
                     case .connected:
                         self.hidePopupMessages()
                     default:

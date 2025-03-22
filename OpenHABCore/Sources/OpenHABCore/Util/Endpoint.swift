@@ -61,7 +61,7 @@ public extension Endpoint {
         components?.path = path
         components?.queryItems = queryItems
         let url = components?.url
-        Endpoint.logger.info("URL: \(url?.absoluteString ?? "", privacy: .private)")
+//        Endpoint.logger.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
         return url
     }
 

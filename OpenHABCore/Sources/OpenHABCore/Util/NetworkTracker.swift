@@ -241,6 +241,14 @@ public final class NetworkTracker: ObservableObject {
         } catch NetworkTrackerError.invalidServerVersion {
             logger.info("testConnection error - Invalid server version from \(configuration.url)")
             return nil
+        } catch let error as OpenAPIServiceError {
+            switch error {
+            case let .undocumented(statusCode, payload):
+                logger.info("Undocumented status code: ") // \(statusCode), ") // payload: \(String(describing: payload))")
+                return nil
+            default:
+                return nil
+            }
         } catch let openAPIError as OpenAPIRuntime.ClientError {
             logger.info("testConnection error - OpenAPIRuntime.RuntimeError encountered for \(configuration.url): \(openAPIError)")
             return nil
