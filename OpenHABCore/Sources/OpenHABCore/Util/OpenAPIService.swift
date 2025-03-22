@@ -147,6 +147,7 @@ public extension OpenAPIService {
         return OpenHABServerProperties(result)
     }
 
+    @discardableResult
     func getRootVersion() async throws -> Int {
         let serverProperties = try await getRoot()
         guard let version = Int(serverProperties.version ?? "0"),

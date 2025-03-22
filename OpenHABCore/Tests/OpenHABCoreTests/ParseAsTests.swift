@@ -29,4 +29,31 @@ final class ParseAsTests: XCTestCase {
         XCTAssertFalse("10,10,0".parseAsBool())
         XCTAssertTrue("10,10,50".parseAsBool())
     }
+
+    func testValidOpenHABURL() throws {
+        try "http://localhost:8080".testAsValidOpenHABURL()
+        try "https://localhost:8080".testAsValidOpenHABURL()
+    }
+
+    func testInvalidOpenHABURL() {
+        let invalidURLs = [
+            "localhost:8080", // Missing scheme
+            "ftp://localhost", // Unsupported scheme
+            "http:/localhost", // Malformed
+            "http://", // Missing host
+            "://localhost", // Missing scheme
+            "file:///Users/me", // Unsupported scheme
+            "https://" // No host
+        ]
+
+        for url in invalidURLs {
+            XCTAssertThrowsError(try url.testAsValidOpenHABURL(), "Expected to throw for URL: \(url)") { error in
+                if let urlError = error as? URLError {
+                    XCTAssertEqual(urlError.code, .badURL, "Expected .badURL, got \(urlError.code)")
+                } else {
+                    XCTFail("Unexpected error type: \(error)")
+                }
+            }
+        }
+    }
 }

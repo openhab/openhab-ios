@@ -17,6 +17,10 @@ struct SingleConnectionSettingsView: View {
     var headerText: String
     @Binding var connectionConfig: ConnectionConfiguration
 
+    @State private var isTestingConnection = false
+    @State private var connectionTestMessage: String?
+    @State private var connectionTestSuccess: Bool?
+
     var body: some View {
         Section(header: Text(headerText)) {
             LabeledContent {
@@ -75,6 +79,81 @@ struct SingleConnectionSettingsView: View {
             Toggle("Ignore SSL certificates", isOn: $connectionConfig.ignoreSSL)
                 .font(.caption)
                 .opacity(0.8)
+
+            // 🧪 Test Connection Button
+            HStack {
+                Button {
+                    Task {
+                        await handleTestConnection()
+                    }
+                } label: {
+                    if isTestingConnection {
+                        ProgressView()
+                    } else {
+                        Label("Test Connection", systemSymbol: .arrowClockwise)
+                    }
+                }
+                .disabled(isTestingConnection || connectionConfig.url.isEmpty)
+                Spacer()
+            }
+
+            // 🟢/🔴 Feedback Message
+            if let message = connectionTestMessage, let success = connectionTestSuccess {
+                HStack {
+                    Spacer()
+                    Label(message, systemImage: success ? "checkmark.circle.fill" : "xmark.octagon.fill")
+                        .foregroundColor(success ? .green : .red)
+                        .font(.caption2)
+                    Spacer()
+                }
+                .transition(.opacity)
+            }
+        }
+    }
+
+    private func handleTestConnection() async {
+        isTestingConnection = true
+        connectionTestMessage = nil
+        connectionTestSuccess = nil
+
+        do {
+            try await testConnection()
+            connectionTestMessage = "Connection successful"
+            connectionTestSuccess = true
+        } catch let urlError as URLError {
+            connectionTestMessage = friendlyMessage(for: urlError)
+            connectionTestSuccess = false
+        } catch {
+            connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
+            connectionTestSuccess = false
+        }
+
+        isTestingConnection = false
+    }
+
+    private func testConnection() async throws {
+        try connectionConfig.url.testAsValidOpenHABURL()
+
+        let connection = OpenAPIService(connectionConfiguration: connectionConfig)
+        try await connection.getRootVersion()
+    }
+
+    private func friendlyMessage(for error: URLError) -> String {
+        switch error.code {
+        case .badURL:
+            "The URL is invalid. Please check the format (e.g., http://192.168.2.1)."
+        case .cannotFindHost:
+            "Cannot find the server. Is the URL correct?"
+        case .cannotConnectToHost:
+            "Cannot connect to the server. Is it online?"
+        case .notConnectedToInternet:
+            "You appear to be offline. Check your internet connection."
+        case .timedOut:
+            "The connection timed out. Try again later."
+        case .secureConnectionFailed:
+            "SSL error. The connection couldn’t be established securely."
+        default:
+            error.localizedDescription
         }
     }
 }

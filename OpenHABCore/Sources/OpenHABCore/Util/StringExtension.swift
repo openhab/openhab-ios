@@ -134,6 +134,17 @@ public extension String {
         guard hasPrefix(prefix) else { return self }
         return String(dropFirst(prefix.count))
     }
+
+    func testAsValidOpenHABURL() throws {
+        guard
+            let components = URLComponents(string: self),
+            let scheme = components.scheme?.lowercased(),
+            ["http", "https"].contains(scheme),
+            let host = components.host, !host.isEmpty
+        else {
+            throw URLError(.badURL)
+        }
+    }
 }
 
 public extension String? {
