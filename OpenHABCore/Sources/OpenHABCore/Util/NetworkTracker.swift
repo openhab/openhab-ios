@@ -63,6 +63,32 @@ actor ConnectionPool {
     }
 }
 
+// Ensures a thread safe access to failureCounts dictionary
+actor ConnectionFailureTracker {
+    private var failureCounts: [ConnectionConfiguration: Int] = [:]
+    private let maxFailures = 3
+
+    func shouldAttempt(_ config: ConnectionConfiguration) -> Bool {
+        (failureCounts[config] ?? 0) < maxFailures
+    }
+
+    func recordFailure(_ config: ConnectionConfiguration) {
+        failureCounts[config, default: 0] += 1
+    }
+
+    func reset(_ config: ConnectionConfiguration) {
+        failureCounts[config] = 0
+    }
+
+    func resetAll() {
+        failureCounts.removeAll()
+    }
+
+    func maxFailureCount() -> Int {
+        failureCounts.values.max() ?? 0
+    }
+}
+
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
@@ -71,14 +97,14 @@ public final class NetworkTracker: ObservableObject {
     // @MainActor
     @Published public private(set) var status: NetworkStatus = .connecting
 
-    private var retryCount = 0
-    private let maxRetries = 5
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue.global(qos: .background)
     private var connectionPool: ConnectionPool = .init()
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
     private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
+
+    private var failureTracker = ConnectionFailureTracker()
 
     // TODO: remove
     public var clientCertificateManager = ClientCertificateManager()
@@ -231,15 +257,25 @@ public final class NetworkTracker: ObservableObject {
     private func testConnection(configuration: ConnectionConfiguration) async -> ConnectionInfo? {
         guard URL(string: configuration.url) != nil else { return nil }
 
+        let shouldTry = await failureTracker.shouldAttempt(configuration)
+        if !shouldTry {
+            logger.info("Skipping \(configuration.url) due to repeated failures.")
+            return nil
+        }
+
         do {
             logger.info("testConnection for \(configuration.url)")
             let connection = await connectionPool.getOrCreateService(for: configuration)
             let version = try await connection.getRootVersion()
             let connectionInfo = ConnectionInfo(configuration: configuration, version: version)
+
+            await failureTracker.reset(configuration) // Reset on success
             logger.info("testConnection successful for \(configuration.url)")
             return connectionInfo
         } catch NetworkTrackerError.invalidServerVersion {
             logger.info("testConnection error - Invalid server version from \(configuration.url)")
+            await failureTracker.recordFailure(configuration)
+
             return nil
         } catch let error as OpenAPIServiceError {
             switch error {
@@ -254,14 +290,19 @@ public final class NetworkTracker: ObservableObject {
             return nil
         } catch {
             logger.info("testConnection error - Failed to connect to \(configuration.url) \(error.localizedDescription)")
+            await failureTracker.recordFailure(configuration)
             return nil
         }
     }
 
-    private func startRetryTask(_ retryInterval: UInt64) {
+    private func startRetryTask(_ initialRetryInterval: UInt64) {
         retryTask?.cancel()
         retryTask = Task {
-            try? await Task.sleep(nanoseconds: UInt64(retryInterval * 1_000_000_000))
+            let backoffMultiplier = await UInt64(failureTracker.maxFailureCount())
+            let safeBackoff = min(backoffMultiplier, 10) // 2^10 = 1024
+            let delay = min(initialRetryInterval * (1 << safeBackoff), 300)
+            logger.info("Retrying in \(delay) seconds based on failure count.")
+            try? await Task.sleep(nanoseconds: delay * 1_000_000_000)
             await attemptConnection()
         }
     }
@@ -294,6 +335,12 @@ public final class NetworkTracker: ObservableObject {
         guard status != newStatus else { return } // Prevent redundant updates
         status = newStatus
         logger.info("Network status updated: \(newStatus.rawValue)")
+    }
+
+    public func resetFailures() {
+        Task {
+            await failureTracker.resetAll()
+        }
     }
 }
 

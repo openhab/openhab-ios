@@ -227,6 +227,7 @@ public extension OpenAPIService {
     /// Poll page data on sitemap
     /// - Parameters:
     ///   - sitemapname: name of sitemap
+    ///   - pageId: id of subpage
     ///   - longPolling: set to true for long-polling
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool) async throws -> OpenHABPage? {
         var headers = Operations.pollDataForPage.Input.Headers()
@@ -239,7 +240,7 @@ public extension OpenAPIService {
         } else {
             Operations.pollDataForPage.Input.Path(sitemapname: sitemapname, pageid: pageId)
         }
-        logger.debug("pollDataForPage: :\(String(describing: headers)), \(String(describing: path))")
+        //        logger.debug("pollDataForPage: :\(String(describing: headers)), \(String(describing: path))")
         return try await pollDataForPage(path: path, headers: headers)
     }
 
@@ -252,6 +253,8 @@ public extension OpenAPIService {
         return OpenHABSitemap(result)
     }
 
+    // Unused currently
+    // To be used when migrating to SSE
     func pollDataForSitemap(sitemapname: String, longPolling: Bool, subscriptionId: String? = nil) async throws -> OpenHABSitemap? {
         var headers = Operations.pollDataForSitemap.Input.Headers()
         if longPolling {

@@ -241,6 +241,20 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         config.duration = .seconds(seconds: 5)
         config.presentationStyle = .bottom
 
+        class MessageTapGestureRecognizer: UITapGestureRecognizer {
+            private let handler: () -> Void
+
+            init(handler: @escaping () -> Void) {
+                self.handler = handler
+                super.init(target: nil, action: nil)
+                addTarget(self, action: #selector(handleTap))
+            }
+
+            @objc private func handleTap() {
+                handler()
+            }
+        }
+
         await MainActor.run {
             SwiftMessages.show(config: config) {
                 let view = MessageView.viewFromNib(layout: .cardView)
@@ -248,16 +262,22 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 view.configureContent(title: NSLocalizedString("notification", comment: ""), body: message)
                 view.button?.setTitle(NSLocalizedString("dismiss", comment: ""), for: .normal)
                 view.buttonTapHandler = { _ in SwiftMessages.hide() }
-                // Add tap gesture recognizer to the view for actions
-                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.messageViewTapped))
+
+                // Use closure-based tap gesture insteae of #selector
+                let tapGesture = MessageTapGestureRecognizer {
+                    Task {
+                        await self.messageViewTapped()
+                    }
+                }
                 view.addGestureRecognizer(tapGesture)
+
                 return view
             }
         }
     }
 
     // Action to be performed when the notification message view is tapped
-    @objc func messageViewTapped() async {
+    func messageViewTapped() async {
         if let userInfo = appData.lastNotificationInfo {
             await notifyNotificationListeners(userInfo)
             SwiftMessages.hideAll()
@@ -265,9 +285,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // ✅ Ensure this runs on the MainActor
+    @MainActor
     private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) async {
-        if let navigationController = await MainActor.run(body: { window?.rootViewController as? UINavigationController }),
-           let rootViewController = await MainActor.run(body: { navigationController.viewControllers.first as? OpenHABRootViewController }) {
+        if let navigationController = window?.rootViewController as? UINavigationController,
+           let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
             await rootViewController.handleNotification(userInfo)
         }
     }
