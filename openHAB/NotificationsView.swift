@@ -86,23 +86,26 @@ struct NotificationsView: View {
         }
     }
 
+    init(notifications: [OpenHABNotification] = []) {
+        _notifications = State(initialValue: notifications)
+    }
+
     private func loadNotifications() async -> [OpenHABNotification] {
         do {
             guard let config = Preferences.getLowestPriorityOpenHABConnection() else { return [] }
             let client = HTTPClient(configuration: config)
             return try await client.notification(urlString: config.url)
-
         } catch {
-            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            logger.error("\(error.localizedDescription)")
         }
         return []
     }
 }
 
 #Preview {
-    NotificationsView(notifications: [OpenHABNotification(message: "message1", created: Date.now, id: UUID().uuidString), OpenHABNotification(message: "message2", created: Date.now, id: UUID().uuidString)])
-}
-
-#Preview {
-    NotificationRow(notification: OpenHABNotification(message: "message3", created: Date.now))
+    NotificationsView(notifications: [
+        OpenHABNotification(message: "message1", created: Date.now, id: UUID().uuidString),
+        OpenHABNotification(message: "message2", created: Date.now, id: UUID().uuidString)
+    ]
+    )
 }
