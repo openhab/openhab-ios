@@ -212,6 +212,7 @@ public final class NetworkTracker: ObservableObject {
 
             for await connectionInfo in group {
                 guard let connectionInfo else { continue }
+                connectedCount += 1
 
                 if connectionInfo.configuration.priority == 0 {
                     bestConnection = connectionInfo

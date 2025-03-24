@@ -69,6 +69,8 @@ struct NotificationRow: View {
 }
 
 struct NotificationsView: View {
+    private let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
+
     @State var notifications: [OpenHABNotification] = []
 
     var body: some View {
@@ -86,15 +88,10 @@ struct NotificationsView: View {
 
     private func loadNotifications() async -> [OpenHABNotification] {
         do {
-            guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
-                return []
-            }
-            let client = HTTPClient(username: config.username, password: config.username, alwaysSendBasicAuth: config.alwaysSendBasicAuth)
-            let data = try await client.notification(urlString: Preferences.remoteUrl)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-            let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
-            return codingDatas.map(\.openHABNotification)
+            guard let config = Preferences.getLowestPriorityOpenHABConnection() else { return [] }
+            let client = HTTPClient(configuration: config)
+            return try await client.notification(urlString: config.url)
+
         } catch {
             os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
         }

@@ -127,13 +127,19 @@ public class HTTPClient: NSObject {
         }
     }
 
-    public func notification(urlString: String) async throws -> Data {
-        if let url = Endpoint.notification(prefsURL: urlString).url {
-            let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, type: .data)
-            return data
-        } else {
-            throw HTTPClientError.couldNotLoadNotification
-        }
+    public func notification(url: URL) async throws -> Data {
+        let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, type: .data)
+        return data
+    }
+
+    public func notification(urlString: String) async throws -> [OpenHABNotification] {
+        guard let url = Endpoint.notification(prefsURL: urlString).url else { throw HTTPClientError.couldNotLoadNotification }
+        let data = try await notification(url: url)
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
+        let codingDatas = try data.decoded(as: [OpenHABNotification.CodingData].self, using: decoder)
+        return codingDatas.map(\.openHABNotification)
     }
 
     /**

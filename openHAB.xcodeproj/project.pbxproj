@@ -158,7 +158,6 @@
 		DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */; };
 		DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */; };
 		DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */; };
-		DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */; };
 		DF4B84041885A53700F34902 /* OpenHABDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84031885A53700F34902 /* OpenHABDataObject.swift */; };
 		DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */; };
 		DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4B84151886EACA00F34902 /* GenericUITableViewCell.swift */; };
@@ -474,7 +473,6 @@
 		DAF6F4112C67E83B0083883E /* openapiCorrected.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapiCorrected.json; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
-		DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABNotification.swift; sourceTree = "<group>"; };
 		DF4B84031885A53700F34902 /* OpenHABDataObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenHABDataObject.swift; sourceTree = "<group>"; };
 		DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameUITableViewCell.swift; sourceTree = "<group>"; };
 		DF4B84151886EACA00F34902 /* GenericUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericUITableViewCell.swift; sourceTree = "<group>"; };
@@ -1050,7 +1048,6 @@
 			isa = PBXGroup;
 			children = (
 				DF4B84031885A53700F34902 /* OpenHABDataObject.swift */,
-				DF1B302C1CF5C667009C921C /* OpenHABNotification.swift */,
 				DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */,
 			);
 			name = Models;
@@ -1603,7 +1600,6 @@
 				DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */,
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
-				DF1B302D1CF5C667009C921C /* OpenHABNotification.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
 				DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */,
 				938BF9D324EFD0B700E6B52F /* UIViewController+Localization.swift in Sources */,

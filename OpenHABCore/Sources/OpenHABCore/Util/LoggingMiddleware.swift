@@ -36,12 +36,12 @@ extension LoggingMiddleware: ClientMiddleware {
                            operationID: String,
                            next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)) async throws -> (HTTPResponse, HTTPBody?) {
         let (requestBodyToLog, requestBodyForNext) = try await bodyLoggingPolicy.process(body)
-//        log(request, requestBodyToLog)
+        log(request, requestBodyToLog)
         do {
             let (response, responseBody) = try await next(request, requestBodyForNext, baseURL)
             let (responseBodyToLog, responseBodyForNext) = try await bodyLoggingPolicy.process(responseBody)
             logger.debug("Trying URL: \(baseURL) for operation ID:\(operationID)")
-//            log(request, response, responseBodyToLog)
+            log(request, response, responseBodyToLog)
             return (response, responseBodyForNext)
         } catch is CancellationError {
             // ✅ If the task is canceled, we simply return nil without logging it as an error.

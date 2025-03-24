@@ -11,44 +11,27 @@
 
 import Foundation
 
-class OpenHABNotification: NSObject {
-    var message: String?
-    var created: Date?
-    var icon: String?
+public struct OpenHABNotification: Sendable {
+    public var message: String?
+    public var created: Date?
+    public var icon: String?
     var severity: String?
-    var id = ""
-    init(message: String? = nil, created: Date? = nil, icon: String? = nil, severity: String? = nil, id: String = "") {
+    public var id = ""
+
+    public init(message: String? = nil, created: Date? = nil, icon: String? = nil, severity: String? = nil, id: String = "") {
         self.message = message
         self.created = created
         self.icon = icon
         self.severity = severity
         self.id = id
     }
-
-    convenience init(dictionary: [String: Any]) {
-        let propertyNames: Set = ["message", "icon", "severity"]
-        self.init()
-        let keyArray = dictionary.keys
-        for key in keyArray {
-            if key as String == "created" {
-                let dateFormatter = DateFormatter()
-                // 2015-09-15T13:39:19.938Z
-                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
-                created = dateFormatter.date(from: dictionary[key] as? String ?? "")
-            } else {
-                if propertyNames.contains(key) {
-                    setValue(dictionary[key], forKey: key)
-                }
-            }
-        }
-    }
 }
 
 // Decode an instance of OpenHABNotification.CodingData rather than decoding a OpenHABNotificaiton value directly,
 // then convert that into a openHABNotification
 // Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
-extension OpenHABNotification {
-    public struct CodingData: Decodable {
+public extension OpenHABNotification {
+    struct CodingData: Decodable {
         let id: String
         let message: String?
         let v: Int
