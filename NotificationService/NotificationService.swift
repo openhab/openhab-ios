@@ -169,11 +169,7 @@ class NotificationService: UNNotificationServiceExtension {
 
         guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return nil }
 
-        let client = HTTPClient(
-            username: activeConfig.username,
-            password: activeConfig.password,
-            alwaysSendBasicAuth: activeConfig.alwaysSendBasicAuth
-        )
+        let client = HTTPClient(configuration: activeConfig)
 
         let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
         return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)

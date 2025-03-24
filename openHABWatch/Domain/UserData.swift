@@ -23,6 +23,7 @@
 import Foundation
 import OpenHABCore
 import os.log
+import SDWebImage
 import SwiftUI
 
 @MainActor
@@ -104,28 +105,38 @@ final class UserData: ObservableObject {
             ObservableOpenHABDataObject.shared.openHABRootUrl = activeConnection.configuration.url
             ObservableOpenHABDataObject.shared.openHABVersion = activeConnection.version
 
+            let alwaysSendBasicAuth = activeConnection.configuration.alwaysSendBasicAuth
+            let username = activeConnection.configuration.username
+            let password = activeConnection.configuration.password
+            let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
+                guard alwaysSendBasicAuth || request.url?.host?.hasSuffix("myopenhab.org") == true else {
+                    return request
+                }
+                guard !username.isEmpty, !password.isEmpty else {
+                    return request
+                }
+                var request = request
+
+                // We are handling URLRequests here, so we need to set the header fields
+                // to the request object with String and cannot use the type safe way of HTTPRequest
+                // like request.headerFields[.authorization] = basicAuthHeader()
+                // TODO: revert this
+                request.setValue(basicAuthHeader(username: username, password: password), forHTTPHeaderField: "Authorization")
+                return request
+            }
+            SDWebImageDownloader.shared.requestModifier = requestModifier
+
             await loadPage(sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch, longPolling: false, refresh: true)
         }
     }
 
     func updateNetwork() async {
-        if !ObservableOpenHABDataObject.shared.localUrl.isEmpty || !ObservableOpenHABDataObject.shared.remoteUrl.isEmpty {
-            // TODO:
-            let connection1 = ConnectionConfiguration(
-                url: ObservableOpenHABDataObject.shared.localUrl,
-                username: "",
-                password: "",
-                priority: 0
-            )
-            let connection2 = ConnectionConfiguration(
-                url: ObservableOpenHABDataObject.shared.remoteUrl,
-                username: "",
-                password: "",
-                priority: 1
-            )
-
-            NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+        guard let connection1 = ObservableOpenHABDataObject.shared.localConnectionConfig,
+              let connection2 = ObservableOpenHABDataObject.shared.remoteConnectionConfig else {
+            logger.info("No connections defined")
+            return
         }
+        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
     func loadPage(sitemapName: String, longPolling: Bool, refresh: Bool) async {

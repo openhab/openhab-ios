@@ -75,11 +75,26 @@ public class HTTPClient: NSObject {
     private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClient")
 
     public init(baseURL: URL? = nil, username: String = "", password: String = "", alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
-        self.baseURL = baseURL
         self.username = username
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
         self.ignoreSSL = ignoreSSL
+        super.init()
+
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        config.timeoutIntervalForResource = 60
+
+        session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+        initializeCertificatesStore()
+    }
+
+    public init(baseURL: URL? = nil, configuration: ConnectionConfiguration) {
+//    public init(baseURL: URL? = nil, username: String = "", password: String = "", alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false) {
+        username = configuration.username
+        password = configuration.password
+        alwaysSendBasicAuth = configuration.alwaysSendBasicAuth
+        ignoreSSL = configuration.ignoreSSL
         super.init()
 
         let config = URLSessionConfiguration.default
@@ -188,7 +203,7 @@ public class HTTPClient: NSObject {
         var request = request
 
         if request.url?.host?.hasSuffix("myopenhab.org") == true || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
-            request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
+            request.setValue(basicAuthHeader(username: username, password: password), forHTTPHeaderField: "Authorization")
         }
 
         switch type {
@@ -199,13 +214,6 @@ public class HTTPClient: NSObject {
         case .bytes:
             return try await session.bytes(for: request) as! (T, URLResponse)
         }
-    }
-
-    // MARK: - Basic Authentication
-
-    private func basicAuthHeader() -> String {
-        let credential = Data("\(username):\(password)".utf8).base64EncodedString()
-        return "Basic \(credential)"
     }
 
     // MARK: - SSL Certificate Handling

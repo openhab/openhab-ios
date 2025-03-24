@@ -26,10 +26,9 @@ struct PreferencesSwiftUIView: View {
     var body: some View {
         List {
             LabeledContent(LocalizedStringKey("active_url"), value: settings.openHABRootUrl)
-            LabeledContent(LocalizedStringKey("local_url"), value: settings.localUrl)
-            LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteUrl)
+            LabeledContent(LocalizedStringKey("local_url"), value: settings.localConnectionConfig?.url ?? "empty")
+            LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteConnectionConfig?.url ?? "empty")
             LabeledContent(LocalizedStringKey("sitemap"), value: settings.sitemapForWatch)
-            LabeledContent(LocalizedStringKey("username"), value: settings.openHABUsername)
             LabeledContent(LocalizedStringKey("version"), value: applicationVersionNumber)
         }
 

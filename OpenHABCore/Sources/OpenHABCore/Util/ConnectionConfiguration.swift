@@ -9,7 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+public struct ConnectionPayload: Codable {
+    public var local: ConnectionConfiguration
+    public var remote: ConnectionConfiguration
+}
+
 public struct ConnectionConfiguration: Hashable, Sendable, Codable {
+    // 🔹 Coding keys for manual encoding/decoding
+    private enum CodingKeys: String, CodingKey {
+        case url, username, password, alwaysSendBasicAuth, ignoreSSL, priority
+    }
+
     public var url: String
     public var username: String
     public var password: String
@@ -64,10 +74,5 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
             newUrl.removeLast()
         }
         return newUrl
-    }
-
-    // 🔹 Coding keys for manual encoding/decoding
-    private enum CodingKeys: String, CodingKey {
-        case url, username, password, alwaysSendBasicAuth, ignoreSSL, priority
     }
 }

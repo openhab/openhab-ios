@@ -13,90 +13,19 @@ import Combine
 import Foundation
 import OpenHABCore
 
-final class ObservableOpenHABDataObject: DataObject, ObservableObject {
+final class ObservableOpenHABDataObject: ObservableObject {
     static let shared = ObservableOpenHABDataObject()
 
     var openHABVersion: Int = 2
 
-    let objectWillChange = PassthroughSubject<Void, Never>()
-    let objectRefreshed = PassthroughSubject<Void, Never>()
+    @Published var localConnectionConfig: ConnectionConfiguration?
+    @Published var remoteConnectionConfig: ConnectionConfiguration?
+    @Published var haveReceivedAppContext: Bool = false
 
-    @UserDefaultsBacked(key: "rootUrl", defaultValue: "")
-    var openHABRootUrl: String {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "localUrl", defaultValue: "")
-    var localUrl: String {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "remoteUrl", defaultValue: "")
-    var remoteUrl: String {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "sitemapName", defaultValue: "")
-    var sitemapName: String {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "sitemapForWatch", defaultValue: "")
-    var sitemapForWatch: String {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "username", defaultValue: "")
-    var openHABUsername: String {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "password", defaultValue: "")
-    var openHABPassword: String {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "ignoreSSL", defaultValue: true)
-    var ignoreSSL: Bool {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "alwaysSendCreds", defaultValue: false)
-    var openHABAlwaysSendCreds: Bool {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "haveReceivedAppContext", defaultValue: false)
-    var haveReceivedAppContext: Bool {
-        didSet {
-            objectRefreshed.send()
-        }
-    }
-
-    @UserDefaultsBacked(key: "iconType", defaultValue: .svg)
-    var iconType: IconType {
-        didSet {
-            objectRefreshed.send()
-        }
-    }
+    @Published var openHABRootUrl = ""
+    @Published var sitemapName = ""
+    @Published var sitemapForWatch = ""
+    @Published var iconType: IconType = .svg
 }
 
 extension ObservableOpenHABDataObject {

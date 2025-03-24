@@ -159,13 +159,13 @@ public enum Preferences {
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
     @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
     @UserDefaultObject("localConnectionConfig", defaultValue: ConnectionConfiguration(
-        url: "http://localhost:8080",
+        url: "http://192.168.1.1:8080",
         username: "",
         password: "",
         alwaysSendBasicAuth: false,
         ignoreSSL: false,
         priority: 0)) public static var localConnectionConfig: ConnectionConfiguration
-    @UserDefaultObject("connectionConfig", defaultValue: ConnectionConfiguration(
+    @UserDefaultObject("remoteConnectionConfig", defaultValue: ConnectionConfiguration(
         url: "https://myopenhab.org",
         username: "",
         password: "",

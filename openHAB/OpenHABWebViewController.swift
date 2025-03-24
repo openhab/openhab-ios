@@ -121,6 +121,7 @@ class OpenHABWebViewController: OpenHABViewController {
     func loadWebView(force: Bool = false, path: String? = nil) {
         logger.info("loadWebView tracked URL: \(self.activeConfig?.url ?? "") forced \(force ? "true" : "false")")
         guard let activeConfig else { return }
+        // TODO: Check whether credentials are truly put into newTarget
         let authStr = "\(activeConfig.username):\(activeConfig.password)"
         let newTarget = "\(activeConfig.url):\(authStr)"
 

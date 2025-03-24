@@ -15,24 +15,26 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 import os
 
+public func basicAuthHeader(username: String, password: String) -> String {
+    let credential = Data("\(username):\(password)".utf8).base64EncodedString()
+    return "Basic \(credential)"
+}
+
 public struct AuthorisationMiddleware {
     private let username: String
     private let password: String
     private let alwaysSendBasicAuth: Bool
+    private let configuration: ConnectionConfiguration
 
     public init(configuration: ConnectionConfiguration) {
         username = configuration.username
         password = configuration.password
         alwaysSendBasicAuth = configuration.alwaysSendBasicAuth
+        self.configuration = configuration
     }
 }
 
 extension AuthorisationMiddleware: ClientMiddleware {
-    private func basicAuthHeader() -> String {
-        let credential = Data("\(username):\(password)".utf8).base64EncodedString()
-        return "Basic \(credential)"
-    }
-
     public func intercept(_ request: HTTPRequest,
                           body: HTTPBody?,
                           baseURL: URL,
@@ -41,7 +43,7 @@ extension AuthorisationMiddleware: ClientMiddleware {
         // Use a mutable copy of request
         var newRequest = request
         if baseURL.host?.hasSuffix("myopenhab.org") == true || alwaysSendBasicAuth, !username.isEmpty, !password.isEmpty {
-            newRequest.headerFields[.authorization] = basicAuthHeader()
+            newRequest.headerFields[.authorization] = basicAuthHeader(username: username, password: password)
         }
         let (response, body) = try await next(newRequest, body, baseURL)
         return (response, body)

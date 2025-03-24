@@ -22,15 +22,18 @@ class AppMessageService: NSObject, WCSessionDelegate {
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "AppMessageService")
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
-        if !applicationContext.isEmpty {
-            if let localUrl = applicationContext["localUrl"] as? String {
-                ObservableOpenHABDataObject.shared.localUrl = localUrl
+        guard !applicationContext.isEmpty else { return }
+
+        do {
+            // Decode the connection payload
+            if let connectionPayloadDict = applicationContext["connectionPayload"] as? [String: Any] {
+                let data = try JSONSerialization.data(withJSONObject: connectionPayloadDict, options: [])
+                let payload = try JSONDecoder().decode(ConnectionPayload.self, from: data)
+
+                ObservableOpenHABDataObject.shared.localConnectionConfig = payload.local
+                ObservableOpenHABDataObject.shared.remoteConnectionConfig = payload.remote
             }
 
-            if let remoteUrl = applicationContext["remoteUrl"] as? String {
-                ObservableOpenHABDataObject.shared.remoteUrl = remoteUrl
-            }
-            // !!!
             if let sitemapName = applicationContext["defaultSitemap"] as? String {
                 ObservableOpenHABDataObject.shared.sitemapName = sitemapName
             }
@@ -39,24 +42,8 @@ class AppMessageService: NSObject, WCSessionDelegate {
                 ObservableOpenHABDataObject.shared.sitemapForWatch = sitemapForWatch
             }
 
-            if let username = applicationContext["username"] as? String {
-                ObservableOpenHABDataObject.shared.openHABUsername = username
-            }
-
-            if let password = applicationContext["password"] as? String {
-                ObservableOpenHABDataObject.shared.openHABPassword = password
-            }
-
-            if let ignoreSSL = applicationContext["ignoreSSL"] as? Bool {
-                ObservableOpenHABDataObject.shared.ignoreSSL = ignoreSSL
-            }
-
             if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
                 // do we need to do anything here?  We load from the shared keychain.
-            }
-
-            if let alwaysSendCreds = applicationContext["alwaysSendCreds"] as? Bool {
-                ObservableOpenHABDataObject.shared.openHABAlwaysSendCreds = alwaysSendCreds
             }
 
             if let iconType = applicationContext["iconType"] as? IconType {
@@ -64,26 +51,26 @@ class AppMessageService: NSObject, WCSessionDelegate {
             }
 
             ObservableOpenHABDataObject.shared.haveReceivedAppContext = true
+
+        } catch {
+            logger.error("Failed to decode ConnectionPayload: \(error.localizedDescription)")
         }
     }
 
     func requestApplicationContext() {
-        WCSession
-            .default
-            .sendMessage(
-                ["request": "Preferences"],
-                replyHandler: { (response) in
-                    let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-                    self.logger.info("Received \(filteredMessages)")
+        WCSession.default.sendMessage(
+            ["request": "Preferences"],
+            replyHandler: { response in
+                let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
+                self.logger.info("Received \(filteredMessages)")
 
-                    DispatchQueue.main.async { () in
-                        self.updateValuesFromApplicationContext(response as [String: AnyObject])
-                    }
-                },
-                errorHandler: { (error) in
-                    self.logger.error("Error sending message \(error.localizedDescription)")
+                DispatchQueue.main.async { () in
+                    self.updateValuesFromApplicationContext(response as [String: AnyObject])
                 }
-            )
+            }
+        ) { error in
+            self.logger.error("Error sending message \(error.localizedDescription)")
+        }
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {

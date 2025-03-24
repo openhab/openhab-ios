@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SDWebImage
 import SDWebImageSVGCoder
 import SwiftUI
@@ -54,31 +55,6 @@ struct OpenHABWatch: App {
         let SVGCoder = SDImageSVGCoder.shared
         SDImageCodersManager.shared.addCoder(SVGCoder)
         SDWebImageDownloader.shared.config.operationClass = OpenHABImageDownloaderOperation.self
-        let alwaysSendCreds = settings.openHABAlwaysSendCreds
-        let openHABUsername = settings.openHABUsername
-        let openHABPassword = settings.openHABPassword
-        let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
-            guard alwaysSendCreds || request.url?.host?.hasSuffix("myopenhab.org") == true else {
-                return request
-            }
-            guard !openHABUsername.isEmpty, !openHABPassword.isEmpty else {
-                return request
-            }
-            var request = request
-
-            func basicAuthHeader() -> String {
-                let authString = "\(openHABUsername):\(openHABPassword)"
-                let authData = authString.data(using: .utf8)!
-                return "Basic \(authData.base64EncodedString())"
-            }
-            // We are handling URLRequests here, so we need to set the header fields
-            // to the request object with String and cannot use the type safe way of HTTPRequest
-            // like request.headerFields[.authorization] = basicAuthHeader()
-            // TODO: revert this
-            request.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
-            return request
-        }
-        SDWebImageDownloader.shared.requestModifier = requestModifier
         DispatchQueue.main.async {
             AppMessageService.singleton.requestApplicationContext()
         }

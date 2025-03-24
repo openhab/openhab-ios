@@ -34,16 +34,11 @@ public class OpenHABAccessTokenAdapter {
 
         var urlRequest = urlRequest
 
-        func basicAuthHeader() -> String {
-            let authString = "\(user):\(password)"
-            let authData = authString.data(using: .utf8)!
-            return "Basic \(authData.base64EncodedString())"
-        }
         // We are handling URLRequests here, so we need to set the header fields
         // to the request object with String and cannot use the type safe way of HTTPRequest
         // like request.headerFields[.authorization] = basicAuthHeader()
         // TODO: revert this!!
-        urlRequest.setValue(basicAuthHeader(), forHTTPHeaderField: "Authorization")
+        urlRequest.setValue(basicAuthHeader(username: user, password: password), forHTTPHeaderField: "Authorization")
         return urlRequest
     }
 }
