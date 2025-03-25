@@ -19,7 +19,7 @@ enum ImageType {
     case empty
 }
 
-class NewImageUITableViewCell: GenericUITableViewCell {
+class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     var didLoad: (() -> Void)?
 
     private var mainImageView: ScaleAspectFitImageView!

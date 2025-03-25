@@ -346,7 +346,7 @@ extension OpenHABSitemapViewController {
         relevantPage?.widgets[safe: indexPath.row]
     }
 
-    private func updateWidgetTableView() {
+    public func updateWidgetTableView() {
         UIView.performWithoutAnimation {
             widgetTableView.beginUpdates()
             widgetTableView.endUpdates()
@@ -711,72 +711,55 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             return cell
         }
 
-        let cell: UITableViewCell
+        let cell = WidgetCellFactory.provider(for: widget)
+            .dequeue(from: tableView, at: indexPath)
 
-        switch widget.type {
-        case .frame:
-            cell = tableView.dequeueReusableCell(for: indexPath) as FrameUITableViewCell
-        case .switchWidget:
-            // Reflecting the discussion held in https://github.com/openhab/openhab-core/issues/952
-            if !widget.mappings.isEmpty {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                cell = tableView.dequeueReusableCell(for: indexPath) as RollershutterCell
-            } else if !widget.mappingsOrItemOptions.isEmpty {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SwitchUITableViewCell
-            }
-        case .setpoint:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SetpointCell
-        case .slider:
-            if widget.switchSupport {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as SliderUITableViewCell
-            }
-        case .selection:
-            cell = tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
-        case .colorpicker:
-            cell = tableView.dequeueReusableCell(for: indexPath) as ColorPickerCell
-            (cell as? ColorPickerCell)?.delegate = self
-        case .image, .chart:
-            cell = tableView.dequeueReusableCell(for: indexPath) as NewImageUITableViewCell
-            (cell as? NewImageUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case .video:
-            cell = tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
-            (cell as? VideoUITableViewCell)?.didLoad = { [weak self] in
-                self?.updateWidgetTableView()
-            }
-        case .webview:
-            cell = tableView.dequeueReusableCell(for: indexPath) as WebUITableViewCell
-        case .mapview:
-            cell = tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
-        case .input:
-            if [.date, .time, .datetime].contains(widget.inputHint) {
-                let pickerCell = tableView.dequeueReusableCell(for: indexPath) as DatePickerUITableViewCell
-                pickerCell.controller = self
-                cell = pickerCell
-            } else {
-                cell = tableView.dequeueReusableCell(for: indexPath) as TextInputUITableViewCell
-            }
-        case .group, .text, .defaultWidget, .unknown:
-            cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
+        WidgetCellFactory.provider(for: widget)
+            .configure(cell: cell, for: widget, controller: self)
+
+        var iconColor = widget.iconColor
+        if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
+            iconColor = "white"
         }
-
-        WidgetIconRenderer.loadIcon(
-            for: widget,
-            into: cell.imageView,
-            in: traitCollection,
-            openHABRootUrl: openHABRootUrl,
-            openHABVersion: appData?.openHABVersion ?? 2,
-            iconType: iconType,
-            logger: logger
-        )
+        // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
+        if !(cell is NoIconDisplayableCell) {
+            if !widget.icon.isEmpty {
+                if let urlc = Endpoint.icon(
+                    rootUrl: openHABRootUrl,
+                    version: appData?.openHABVersion ?? 2,
+                    icon: widget.icon,
+                    state: widget.iconState(),
+                    iconType: iconType,
+                    iconColor: iconColor
+                ).url {
+                    var imageRequest = URLRequest(url: urlc)
+                    imageRequest.timeoutInterval = 10.0
+                    cell.imageView?.kf.setImage(
+                        with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
+                        placeholder: nil,
+                        options: [.processor(OpenHABImageProcessor())]
+                    ) { result in
+                        switch result {
+                        case .success:
+                            DispatchQueue.main.async {
+                                cell.setNeedsLayout()
+                            }
+                        case let .failure(error):
+                            self.logger.error("Image loading failed for widget \(widget.label) : \(error.localizedDescription)")
+                        }
+                    }
+                }
+            }
+            //            WidgetIconRenderer.loadIcon(
+            //                for: widget,
+            //                into: cell.imageView,
+            //                in: traitCollection,
+            //                openHABRootUrl: openHABRootUrl,
+            //                openHABVersion: appData?.openHABVersion ?? 2,
+            //                iconType: iconType,
+            //                logger: logger
+            //            )
+        }
 
         if cell is FrameUITableViewCell {
             cell.backgroundColor = .ohSystemGroupedBackground

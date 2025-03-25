@@ -13,7 +13,7 @@ import OpenHABCore
 import os.log
 import WebKit
 
-class WebUITableViewCell: GenericUITableViewCell {
+class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var url: URL?
 
     private var widgetWebView: WKWebView!

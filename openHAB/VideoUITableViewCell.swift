@@ -18,7 +18,7 @@ enum VideoEncoding: String {
     case hls, mjpeg
 }
 
-class VideoUITableViewCell: GenericUITableViewCell {
+class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
         .init(style: .medium)
     } else {

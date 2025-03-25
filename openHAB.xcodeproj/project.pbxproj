@@ -84,7 +84,7 @@
 		DA2AEB6C2D92BA3F00897D80 /* OpenHABImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6B2D92BA3F00897D80 /* OpenHABImageProcessor.swift */; };
 		DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */; };
 		DA2AEB702D92CF3E00897D80 /* WidgetIconRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6F2D92CF3E00897D80 /* WidgetIconRenderer.swift */; };
-		DA2AEB742D92D2D100897D80 /* WidgetCellProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB732D92D2D100897D80 /* WidgetCellProvider.swift */; };
+		DA2AEBA02D92FB6500897D80 /* NoIconDisplayableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB9F2D92FB6500897D80 /* NoIconDisplayableCell.swift */; };
 		DA2C4FCD2B4F55D700D1C533 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FCC2B4F55D700D1C533 /* SDWebImage */; };
 		DA2C4FCF2B4F55D700D1C533 /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FCE2B4F55D700D1C533 /* SDWebImageMapKit */; };
 		DA2C4FD22B4F56D000D1C533 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = DA2C4FD12B4F56D000D1C533 /* SDWebImageSwiftUI */; };
@@ -399,7 +399,7 @@
 		DA2AEB6B2D92BA3F00897D80 /* OpenHABImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABImageProcessor.swift; sourceTree = "<group>"; };
 		DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageLoader.swift; sourceTree = "<group>"; };
 		DA2AEB6F2D92CF3E00897D80 /* WidgetIconRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIconRenderer.swift; sourceTree = "<group>"; };
-		DA2AEB732D92D2D100897D80 /* WidgetCellProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetCellProvider.swift; sourceTree = "<group>"; };
+		DA2AEB9F2D92FB6500897D80 /* NoIconDisplayableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoIconDisplayableCell.swift; sourceTree = "<group>"; };
 		DA2DC22F21F2736C00830730 /* openHABTestsSwift.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = openHABTestsSwift.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA2DC23321F2736C00830730 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA2E0AA323DC96E9009B0A99 /* ImageWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageWithAction.swift; sourceTree = "<group>"; };
@@ -924,7 +924,6 @@
 				653B54BF285C0AC700298ECD /* OpenHABRootViewController.swift */,
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABSitemapViewController.swift */,
-				DA2AEB732D92D2D100897D80 /* WidgetCellProvider.swift */,
 				DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */,
 				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
@@ -973,6 +972,7 @@
 				DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */,
 				DA21EAE12339621C001AB415 /* Throttler.swift */,
 				DA6B2EF42C89F8F200DF77CF /* ColorPickerView.swift */,
+				DA2AEB9F2D92FB6500897D80 /* NoIconDisplayableCell.swift */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -1593,7 +1593,6 @@
 				DA48001E2D837905009CF127 /* ApplicationSettingsView.swift in Sources */,
 				DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */,
 				DF06F1FC18FEC2020011E7B9 /* ColorPickerViewController.swift in Sources */,
-				DA2AEB742D92D2D100897D80 /* WidgetCellProvider.swift in Sources */,
 				DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */,
 				1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */,
 				DAA42BAC21DC984A00244B2A /* WebUITableViewCell.swift in Sources */,
@@ -1624,6 +1623,7 @@
 				DAF0A28F2C56F1EE00A14A6A /* ColorPickerCell.swift in Sources */,
 				2FEFD8F62BE7C5BE00E387B9 /* TextInputUITableViewCell.swift in Sources */,
 				938EDCE122C4FEB800661CA1 /* ScaleAspectFitImageView.swift in Sources */,
+				DA2AEBA02D92FB6500897D80 /* NoIconDisplayableCell.swift in Sources */,
 				DA2AEB702D92CF3E00897D80 /* WidgetIconRenderer.swift in Sources */,
 				DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,

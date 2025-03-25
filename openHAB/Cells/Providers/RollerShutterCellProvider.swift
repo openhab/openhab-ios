@@ -13,7 +13,7 @@ import Foundation
 import OpenHABCore
 import UIKit
 
-struct RollerShutterCellProvider: WidgetCellProvider {
+struct RollershutterCellProvider: WidgetCellProvider {
     static var reuseIdentifier: String { "RollerShutterTableViewCell" }
 
     static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {

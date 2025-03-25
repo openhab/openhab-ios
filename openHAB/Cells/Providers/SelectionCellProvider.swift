@@ -13,15 +13,15 @@ import Foundation
 import OpenHABCore
 import UIKit
 
-struct SegmentedCellProvider: WidgetCellProvider {
-    static var reuseIdentifier: String { "SegmentedUITableViewCell" }
+struct SelectionCellProvider: WidgetCellProvider {
+    static var reuseIdentifier: String { "SelectionUITableViewCell" }
 
     static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
-        tableView.dequeueReusableCell(for: indexPath) as SegmentedUITableViewCell
+        tableView.dequeueReusableCell(for: indexPath) as SelectionUITableViewCell
     }
 
     static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
-        guard let cell = cell as? SegmentedUITableViewCell else { return }
+        guard let cell = cell as? SelectionUITableViewCell else { return }
         cell.widget = widget
         cell.displayWidget()
         cell.touchEventDelegate = controller
