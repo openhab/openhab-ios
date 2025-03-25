@@ -750,15 +750,14 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     }
                 }
             }
-            //            WidgetIconRenderer.loadIcon(
-            //                for: widget,
-            //                into: cell.imageView,
-            //                in: traitCollection,
-            //                openHABRootUrl: openHABRootUrl,
-            //                openHABVersion: appData?.openHABVersion ?? 2,
-            //                iconType: iconType,
-            //                logger: logger
-            //            )
+
+//            cell.loadWidgetIcon(
+//                widget: widget,
+//                traitCollection: traitCollection,
+//                openHABRootUrl: openHABRootUrl,
+//                openHABVersion: appData?.openHABVersion ?? 2,
+//                iconType: iconType
+//            )
         }
 
         if cell is FrameUITableViewCell {

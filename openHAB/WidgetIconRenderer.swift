@@ -15,15 +15,17 @@ import OpenHABCore
 import os.log
 import UIKit
 
-enum WidgetIconRenderer {
-    static func loadIcon(for widget: OpenHABWidget,
-                         into imageView: UIImageView?,
-                         in traitCollection: UITraitCollection,
-                         openHABRootUrl: String,
-                         openHABVersion: Int,
-                         iconType: IconType,
-                         logger: Logger) {
-        guard let imageView, !widget.icon.isEmpty else { return }
+extension UITableViewCell {
+    func loadWidgetIcon(widget: OpenHABWidget,
+                        traitCollection: UITraitCollection,
+                        openHABRootUrl: String,
+                        openHABVersion: Int,
+                        iconType: IconType) {
+        guard !(self is NewImageUITableViewCell || self is VideoUITableViewCell || self is FrameUITableViewCell || self is WebUITableViewCell),
+              let imageView,
+              !widget.icon.isEmpty else {
+            return
+        }
 
         var iconColor = widget.iconColor
         if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
@@ -37,7 +39,9 @@ enum WidgetIconRenderer {
             state: widget.iconState(),
             iconType: iconType,
             iconColor: iconColor
-        ).url else { return }
+        ).url else {
+            return
+        }
 
         var request = URLRequest(url: url)
         request.timeoutInterval = 10
@@ -53,7 +57,7 @@ enum WidgetIconRenderer {
                     imageView.setNeedsLayout()
                 }
             case let .failure(error):
-                logger.error("❌ Failed to load widget icon: \(error.localizedDescription)")
+                print("Image loading failed for widget \(widget.label): \(error.localizedDescription)")
             }
         }
     }
