@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@testable import openHAB
+@testable import OpenHABCore
 import XCTest
 
 class OpenHABJSONParserTests: XCTestCase {

@@ -23,81 +23,6 @@ import SVGKit
 import SwiftUI
 import UIKit
 
-struct OpenHABImageProcessor: ImageProcessor {
-    // `identifier` should be the same for processors with the same properties/functionality
-    // It will be used when storing and retrieving the image to/from cache.
-    let identifier = "org.openhab.svgprocessor"
-
-    // Convert input data/image to target image and return it.
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
-        switch item {
-        case let .image(image):
-            os_log("already an image", log: .default, type: .info)
-            return image
-        case let .data(data):
-            guard !data.isEmpty else { return nil }
-
-            switch data[0] {
-            case 0x3C: // svg
-                // <?xml version="1.0" encoding="UTF-8"?>
-                // <svg
-                let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
-                let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
-                if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData), image.hasSize() {
-                    if image.size.width > 1000 || image.size.height > 1000 {
-                        return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
-                    }
-                    return image.uiImage
-                } else {
-                    return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
-                }
-            default:
-                return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
-            }
-        }
-    }
-}
-
-actor PageLoader {
-    private var openAPIService: OpenAPIService
-    private var pageId: String
-    private var defaultSitemap: String
-
-    private var lastFetchedPage: OpenHABPage? // Store latest page data
-
-    private let logger = Logger(subsystem: "org.openhab.app", category: "PageLoader")
-
-    init(service: OpenAPIService, pageId: String, defaultSitemap: String) {
-        openAPIService = service
-        self.pageId = pageId
-        self.defaultSitemap = defaultSitemap
-    }
-
-    func updatePageConfig(newPageId: String, newSitemap: String) {
-        pageId = newPageId
-        defaultSitemap = newSitemap
-        // swiftformat:disable:next redundantSelf
-        logger.info("🔄 Updated config: pageId = \(self.pageId), defaultSitemap = \(self.defaultSitemap)")
-    }
-
-    func updateAPIService(newService: OpenAPIService) {
-        openAPIService = newService
-        logger.info("🔄 Updated OpenAPIService instance")
-    }
-
-    func fetchPage(longPolling: Bool) async throws -> OpenHABPage? {
-        logger.info("📡 Fetching page... (longPolling: \(longPolling))")
-        let page = try await openAPIService.pollDataForPage(
-            sitemapname: defaultSitemap,
-            pageId: pageId,
-            longPolling: longPolling
-        )
-        try Task.checkCancellation()
-
-        return page
-    }
-}
-
 // swiftlint:disable type_body_length
 class OpenHABSitemapViewController: OpenHABViewController {
     var pageUrl = ""
@@ -843,40 +768,15 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             cell = tableView.dequeueReusableCell(for: indexPath) as GenericUITableViewCell
         }
 
-        var iconColor = widget.iconColor
-        if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
-            iconColor = "white"
-        }
-        // No icon is needed for image, video, frame and web widgets
-        if !((cell is NewImageUITableViewCell) || (cell is VideoUITableViewCell) || (cell is FrameUITableViewCell) || (cell is WebUITableViewCell)) {
-            if !widget.icon.isEmpty {
-                if let urlc = Endpoint.icon(
-                    rootUrl: openHABRootUrl,
-                    version: appData?.openHABVersion ?? 2,
-                    icon: widget.icon,
-                    state: widget.iconState(),
-                    iconType: iconType,
-                    iconColor: iconColor
-                ).url {
-                    var imageRequest = URLRequest(url: urlc)
-                    imageRequest.timeoutInterval = 10.0
-                    cell.imageView?.kf.setImage(
-                        with: KF.ImageResource(downloadURL: urlc, cacheKey: urlc.path + (urlc.query ?? "")),
-                        placeholder: nil,
-                        options: [.processor(OpenHABImageProcessor())]
-                    ) { result in
-                        switch result {
-                        case .success:
-                            DispatchQueue.main.async {
-                                cell.setNeedsLayout()
-                            }
-                        case let .failure(error):
-                            self.logger.error("Image loading failed for widget \(widget.label) : \(error.localizedDescription)")
-                        }
-                    }
-                }
-            }
-        }
+        WidgetIconRenderer.loadIcon(
+            for: widget,
+            into: cell.imageView,
+            in: traitCollection,
+            openHABRootUrl: openHABRootUrl,
+            openHABVersion: appData?.openHABVersion ?? 2,
+            iconType: iconType,
+            logger: logger
+        )
 
         if cell is FrameUITableViewCell {
             cell.backgroundColor = .ohSystemGroupedBackground
