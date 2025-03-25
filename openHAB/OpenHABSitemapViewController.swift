@@ -126,8 +126,9 @@ class OpenHABSitemapViewController: OpenHABViewController {
     private var isUserInteracting = false
     private var isWaitingToReload = false
     // Properties in your view controller:
-    private var initialLoadTask: Task<Void, Never>?
-    private var longPollingTask: Task<Void, Never>?
+
+    private var pageHandlingTask: Task<Void, Never>?
+
     private var pageLoader: PageLoader?
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "OpenHABSitemapViewController")
@@ -240,7 +241,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
             if !pageNetworkStatusChanged() || !pageId.isEmpty {
                 // swiftformat:disable:next redundantSelf
                 logger.info("OpenHABSitemapViewController pageUrl \(self.pageUrl)")
-                loadInitialPage()
+                startPageHandling()
             } else {
                 logger.info("OpenHABSitemapViewController network status changed while it was not appearing")
                 restart()
@@ -258,13 +259,6 @@ class OpenHABSitemapViewController: OpenHABViewController {
 
         trackerCancellables.removeAll()
         stopAllTasks()
-
-        // Cancel long polling to avoid carrying over a pending request.
-        longPollingTask?.cancel()
-        longPollingTask = nil
-        // Optionally cancel the initial load task if it’s still running.
-        initialLoadTask?.cancel()
-        initialLoadTask = nil
 
         super.viewWillDisappear(animated)
 
@@ -299,7 +293,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
         if isViewLoaded, view.window != nil, !pageUrl.isEmpty {
             if !pageNetworkStatusChanged() {
                 os_log("OpenHABSitemapViewController isViewLoaded, restarting network activity", log: .viewCycle, type: .info)
-                loadInitialPage()
+                startPageHandling()
             } else {
                 os_log("OpenHABSitemapViewController network status changed while it was inactive", log: .viewCycle, type: .info)
                 restart()
@@ -364,6 +358,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
             task.cancel()
         }
         activeTasks.removeAll()
+        pageHandlingTask?.cancel()
+        pageHandlingTask = nil
     }
 
     override func reloadView() {
@@ -406,7 +402,7 @@ extension OpenHABSitemapViewController {
 
     @objc
     func handleRefresh(_ refreshControl: UIRefreshControl?) {
-        loadInitialPage()
+        startPageHandling()
         widgetTableView.reloadData()
         widgetTableView.layoutIfNeeded()
     }
@@ -456,105 +452,6 @@ extension OpenHABSitemapViewController {
         parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
     }
 
-    func loadInitialPage() {
-        initialLoadTask?.cancel()
-
-        guard !pageUrl.isEmpty else {
-            logger.error("loadPage: Cann't run with empty pageUrl")
-            return
-        }
-
-        // swiftformat:disable:next redundantSelf
-        logger.info("loadPage for \(self.pageUrl)")
-
-        // If this is the first request to the page make a bulk call to pageNetworkStatusChanged
-        // to save current reachability status.
-        pageNetworkStatusChanged()
-        initialLoadTask = Task {
-            await loadPage(longPolling: false).value
-            startLongPolling()
-        }
-    }
-
-    func startLongPolling() {
-        longPollingTask?.cancel() // ✅ Cancel previous long polling task
-
-        guard !pageUrl.isEmpty else {
-            logger.error("startLongPolling: Cannot run with empty pageUrl")
-            return
-        }
-
-        logger.info("🔄 Starting long polling...")
-        longPollingTask = loadPage(longPolling: true)
-    }
-
-    func loadPage(longPolling: Bool) -> Task<Void, Never> {
-        Task {
-            do {
-                // ** Alternative 1
-                logger.info("Calling pollDataForPage from loadPage")
-
-                if openAPIService == nil {
-                    openAPIService = OpenAPIService(
-                        connectionConfiguration: appData!.connectionInfo!.configuration)
-                }
-
-                let page = try await openAPIService?.pollDataForPage(sitemapname: defaultSitemap, pageId: pageId, longPolling: longPolling)
-                guard let page else {
-                    logger.info("No page found ")
-                    return
-                }
-                // ** Alternative 2 to be tested.
-//                await pageLoader?.updatePageConfig(newPageId: pageId, newSitemap: defaultSitemap)
-//                guard let page = try await pageLoader?.fetchPage(longPolling: true) else { return }
-                // **
-
-                try Task.checkCancellation() // Check for cancellation before processing results
-                await MainActor.run {
-                    self.updateUI(with: page)
-                }
-
-                // Only start long polling recursively if this is not the initial load.
-                if longPolling {
-                    // Start long polling in the background.
-                    startLongPolling()
-                }
-            } catch is CancellationError {
-                logger.info("Task was cancelled")
-            } catch let error as DecodingError {
-                os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-            } catch let error as ClientError {
-                if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
-                    logger.info("Task was cancelled - URLError code: .cancelled")
-                } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
-                    logger.info("Task timed out - URLError code: .timedOut")
-                } else {
-                    logger.error("\(error.localizedDescription)")
-                    await MainActor.run {
-                        self.showPopupMessage(
-                            seconds: 5,
-                            title: NSLocalizedString("error", comment: ""),
-                            message: error.localizedDescription,
-                            theme: .error
-                        )
-                    }
-                }
-            } catch let openAPIError as OpenAPIServiceError {
-                logger.info("On LoadPage \(openAPIError)")
-            } catch {
-                logger.error("On LoadPage \(error.localizedDescription)")
-                await MainActor.run {
-                    self.showPopupMessage(
-                        seconds: 5,
-                        title: NSLocalizedString("error", comment: ""),
-                        message: error.localizedDescription,
-                        theme: .error
-                    )
-                }
-            }
-        }
-    }
-
     // Select sitemap
     func selectSitemap() {
         Task {
@@ -580,7 +477,7 @@ extension OpenHABSitemapViewController {
                                 self.currentPage?.widgets.removeAll() // NOTE: remove all widgets to ensure cells get invalidated
                             }
                             pageUrl = sitemapToOpen.homepageLink
-                            loadInitialPage()
+                            startPageHandling()
                         } else {
                             showSideMenu()
                         }
@@ -589,7 +486,7 @@ extension OpenHABSitemapViewController {
                     }
                 case 1:
                     pageUrl = sitemaps[0].homepageLink
-                    loadInitialPage()
+                    startPageHandling()
                 case ...0:
                     showPopupMessage(seconds: 5, title: NSLocalizedString("warning", comment: ""), message: NSLocalizedString("empty_sitemap", comment: ""), theme: .warning)
                     showSideMenu()
@@ -647,6 +544,94 @@ extension OpenHABSitemapViewController {
             navigationController?.pushViewController(newViewController, animated: true)
         } catch {
             os_log("pushSitemap: Error waiting for active connection: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+        }
+    }
+
+    func startPageHandling() {
+        pageHandlingTask?.cancel()
+
+        guard !pageUrl.isEmpty else {
+            logger.error("startPageHandling: Cannot run with empty pageUrl")
+            return
+        }
+
+        logger.info("🚀 Starting page load and long polling flow...")
+
+        pageHandlingTask = Task {
+            do {
+                // Initial page load
+
+                if openAPIService == nil {
+                    openAPIService = OpenAPIService(
+                        connectionConfiguration: appData!.connectionInfo!.configuration)
+                }
+
+                let initialPage = try await openAPIService?.pollDataForPage(
+                    sitemapname: defaultSitemap,
+                    pageId: pageId,
+                    longPolling: false
+                )
+
+                // Alternative 2 to be tested.
+                //                await pageLoader?.updatePageConfig(newPageId: pageId, newSitemap: defaultSitemap)
+                //                guard let page = try await pageLoader?.fetchPage(longPolling: true) else { return }
+                //
+                try Task.checkCancellation()
+                if let page = initialPage {
+                    await MainActor.run {
+                        self.updateUI(with: page)
+                    }
+                }
+
+                // Start long polling loop
+                while !Task.isCancelled {
+                    let page = try await openAPIService?.pollDataForPage(
+                        sitemapname: defaultSitemap,
+                        pageId: pageId,
+                        longPolling: true
+                    )
+                    try Task.checkCancellation()
+
+                    if let page {
+                        await MainActor.run {
+                            self.updateUI(with: page)
+                        }
+                    }
+                }
+
+            } catch is CancellationError {
+                logger.info("🔁 pageHandlingTask was cancelled")
+            } catch let error as DecodingError {
+                os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            } catch let error as ClientError {
+                if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
+                    logger.info("Task was cancelled - URLError code: .cancelled")
+                } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
+                    logger.info("Task timed out - URLError code: .timedOut")
+                } else {
+                    logger.error("\(error.localizedDescription)")
+                    await MainActor.run {
+                        self.showPopupMessage(
+                            seconds: 5,
+                            title: NSLocalizedString("error", comment: ""),
+                            message: error.localizedDescription,
+                            theme: .error
+                        )
+                    }
+                }
+            } catch let openAPIError as OpenAPIServiceError {
+                logger.info("On pageHandling \(openAPIError)")
+            } catch {
+                logger.error("❌ pageHandlingTask error: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.showPopupMessage(
+                        seconds: 5,
+                        title: NSLocalizedString("error", comment: ""),
+                        message: error.localizedDescription,
+                        theme: .error
+                    )
+                }
+            }
         }
     }
 
@@ -937,10 +922,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
 
         if let linkedPage = widget.linkedPage {
             logger.info("Selected linked page: \(linkedPage.link)")
-            longPollingTask?.cancel()
-            longPollingTask = nil
-            initialLoadTask?.cancel()
-            initialLoadTask = nil
+            stopAllTasks()
 //            pageId = linkedPage.pageId
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
             newViewController.title = linkedPage.title.components(separatedBy: "[")[0]

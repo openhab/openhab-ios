@@ -54,7 +54,7 @@ class OpenHABWebViewController: OpenHABViewController {
 
     private lazy var webView: WKWebView = newWebView()
 
-    private var logger = Logger(subsystem: "org.openhab", category: "OpenHABWebViewController")
+    private var logger = Logger(subsystem: "org.openhab.app", category: "OpenHABWebViewController")
 
     override func viewDidLoad() {
         super.viewDidLoad()
