@@ -273,7 +273,7 @@ class OpenHABWebViewController: OpenHABViewController {
                 if let path = url?.path {
                     os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
                     // append trailing slash as WebUI/Vue/F7 will try and issue a 302 if the url is navigated to directly, this can be problamatic on myopenHAB
-                    self.appData?.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+                    Preferences.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
                 }
             }
         }

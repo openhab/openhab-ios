@@ -177,6 +177,7 @@ public enum Preferences {
 
     @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
     @UserDefault("didMigrateToConnectionConfig", defaultValue: false) private static var didMigrateToConnectionConfig: Bool
+    @UserDefault("currentWebViewPath", defaultValue: "") public static var currentWebViewPath: String
 }
 
 public extension Preferences {

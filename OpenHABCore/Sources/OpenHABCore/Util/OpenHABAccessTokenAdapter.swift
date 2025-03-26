@@ -13,20 +13,21 @@ import Foundation
 import Kingfisher
 
 public class OpenHABAccessTokenAdapter {
-    var appData: DataObject
+    var connectionConfiguration: ConnectionConfiguration?
 
-    public init(appData data: DataObject) {
-        appData = data
+    public init(connectionConfiguration: ConnectionConfiguration) {
+        self.connectionConfiguration = connectionConfiguration
     }
 
     public func adapt(_ urlRequest: URLRequest) throws -> URLRequest {
-        guard appData.openHABAlwaysSendCreds || urlRequest.url?.host?.hasSuffix("myopenhab.org") == true else {
+        guard let connectionConfiguration else { return urlRequest }
+        guard connectionConfiguration.alwaysSendBasicAuth || urlRequest.url?.host?.hasSuffix("myopenhab.org") == true else {
             // The user did not choose for the credentials to be sent with every request.
             return urlRequest
         }
 
-        let user = appData.openHABUsername
-        let password = appData.openHABPassword
+        let user = connectionConfiguration.username
+        let password = connectionConfiguration.password
         guard !user.isEmpty, !password.isEmpty else {
             // In order to set the credentials on the `URLRequestt`, both username and password must be set up.
             return urlRequest

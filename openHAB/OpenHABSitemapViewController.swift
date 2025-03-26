@@ -26,7 +26,6 @@ import UIKit
 // swiftlint:disable type_body_length
 class OpenHABSitemapViewController: OpenHABViewController {
     var pageUrl = ""
-    private var selectedWidgetRow: Int = 0
     private var iconType: IconType = .png
     private var openHABRootUrl = ""
     private var openHABUsername = ""
@@ -40,13 +39,10 @@ class OpenHABSitemapViewController: OpenHABViewController {
     private var idleOff = false
     private var sitemaps: [OpenHABSitemap] = []
     private var currentPage: OpenHABPage?
-    private var selectionPicker: UIPickerView?
     private var pageNetworkStatus: NetworkStatus?
     private var pageNetworkStatusAvailable = false
-    private var toggle: Int = 0
     private var refreshControl: UIRefreshControl?
     private var filteredPage: OpenHABPage?
-    private var serverProperties: OpenHABServerProperties?
     private let search = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
@@ -157,6 +153,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
         // if pageUrl is empty, it means we are the first opened OpenHABSitemapViewController
         if pageUrl.isEmpty {
             appData?.sitemapViewController = self
+//        if navigationController?.viewControllers.first == self {
+            // This is the first sitemap opened
             if currentPage != nil {
                 currentPage?.widgets = []
                 widgetTableView.reloadData()
@@ -381,10 +379,10 @@ extension OpenHABSitemapViewController {
     func selectSitemap() {
         Task {
             do {
-                logger.debug("Running selectSitemap for URL: \(self.appData?.openHABRootUrl ?? "")")
+                logger.debug("Running selectSitemap for URL: \(NetworkTracker.shared.activeConnection?.configuration.url ?? "")")
 
                 openAPIService = OpenAPIService(
-                    connectionConfiguration: appData!.connectionInfo!.configuration)
+                    connectionConfiguration: NetworkTracker.shared.activeConnection!.configuration)
 
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
@@ -488,7 +486,7 @@ extension OpenHABSitemapViewController {
 
                 if openAPIService == nil {
                     openAPIService = OpenAPIService(
-                        connectionConfiguration: appData!.connectionInfo!.configuration)
+                        connectionConfiguration: NetworkTracker.shared.activeConnection!.configuration)
                 }
 
                 let initialPage = try await openAPIService?.pollDataForPage(
@@ -560,7 +558,7 @@ extension OpenHABSitemapViewController {
         }
     }
 
-    // load app settings
+    // load settings into local properties
     func loadSettings() {
         openHABUsername = Preferences.username
         openHABPassword = Preferences.password
@@ -568,11 +566,6 @@ extension OpenHABSitemapViewController {
         defaultSitemap = Preferences.defaultSitemap
         idleOff = Preferences.idleOff
         iconType = IconType(rawValue: Preferences.iconType) ?? .png
-
-        appData?.openHABUsername = openHABUsername
-        appData?.openHABPassword = openHABPassword
-        appData?.openHABAlwaysSendCreds = openHABAlwaysSendCreds
-
         #if DEBUG
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
@@ -726,7 +719,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             if !widget.icon.isEmpty {
                 if let urlc = Endpoint.icon(
                     rootUrl: openHABRootUrl,
-                    version: appData?.openHABVersion ?? 2,
+                    version: NetworkTracker.shared.activeConnection?.version ?? 2,
                     icon: widget.icon,
                     state: widget.iconState(),
                     iconType: iconType,

@@ -9,19 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SwiftUI
 import WebKit
 
 struct MainUISettingsView: View {
     @Binding var settingsAlwaysAllowWebRTC: Bool
     @Binding var settingsDefaultMainUIPath: String
+//    @Binding var currentWebViewPath: String
 
     @State var showUselastPathAlert = false
     @State var showingCacheAlert = false
-
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
 
     var body: some View {
         Section(header: Text(LocalizedStringKey("mainui_settings"))) {
@@ -45,9 +43,7 @@ struct MainUISettingsView: View {
                     isPresented: $showUselastPathAlert
                 ) {
                     Button("Ok") {
-                        if let path = appData?.currentWebViewPath {
-                            settingsDefaultMainUIPath = path
-                        }
+                        settingsDefaultMainUIPath = Preferences.currentWebViewPath
                     }
                     Button(role: .cancel) {} label: {
                         Text(LocalizedStringKey("cancel"))

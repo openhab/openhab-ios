@@ -37,10 +37,6 @@ struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
-
     private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
 
     var body: some View {
@@ -81,7 +77,6 @@ struct SettingsView: View {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Save") {
                     saveSettings()
-                    appData?.sitemapViewController?.pageUrl = ""
                     NotificationCenter.default.post(name: NSNotification.Name("org.openhab.preferences.saved"), object: nil)
                     dismiss()
                 }

@@ -99,8 +99,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         activateWatchConnectivity()
 
-        KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(appData: AppDelegate.appDelegate.appData))]
-
         return true
     }
 

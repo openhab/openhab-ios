@@ -11,6 +11,7 @@
 
 import Combine
 import Foundation
+import Kingfisher
 import Network
 import OpenAPIRuntime
 import os.log
@@ -326,7 +327,9 @@ public final class NetworkTracker: ObservableObject {
 
         activeConnection = connection
         status = connection == nil ? .notConnected : .connected
-        if connection == nil {
+        if let connection {
+            KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: connection.configuration))]
+        } else {
             startRetryTask(30)
         }
     }
