@@ -158,20 +158,8 @@ public enum Preferences {
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
     @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
-    @UserDefaultObject("localConnectionConfig", defaultValue: ConnectionConfiguration(
-        url: "http://192.168.1.1:8080",
-        username: "",
-        password: "",
-        alwaysSendBasicAuth: false,
-        ignoreSSL: false,
-        priority: 0)) public static var localConnectionConfig: ConnectionConfiguration
-    @UserDefaultObject("remoteConnectionConfig", defaultValue: ConnectionConfiguration(
-        url: "https://myopenhab.org",
-        username: "",
-        password: "",
-        alwaysSendBasicAuth: false,
-        ignoreSSL: false,
-        priority: 1)) public static var remoteConnectionConfig: ConnectionConfiguration
+    @UserDefaultObject("localConnectionConfig", defaultValue: ConnectionConfiguration.localDefault) public static var localConnectionConfig: ConnectionConfiguration
+    @UserDefaultObject("remoteConnectionConfig", defaultValue: ConnectionConfiguration.remoteDefault) public static var remoteConnectionConfig: ConnectionConfiguration
 
     // MARK: - Private
 
@@ -246,4 +234,26 @@ public extension Preferences {
             .sorted { $0.priority < $1.priority }
             .first
     }
+}
+
+// MARK: - Sample Codable Model
+
+public extension ConnectionConfiguration {
+    static let localDefault = ConnectionConfiguration(
+        url: "http://192.168.1.1:8080",
+        username: "",
+        password: "",
+        alwaysSendBasicAuth: false,
+        ignoreSSL: false,
+        priority: 0
+    )
+
+    static let remoteDefault = ConnectionConfiguration(
+        url: "https://myopenhab.org",
+        username: "",
+        password: "",
+        alwaysSendBasicAuth: false,
+        ignoreSSL: false,
+        priority: 1
+    )
 }
