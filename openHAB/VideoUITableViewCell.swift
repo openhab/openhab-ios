@@ -40,9 +40,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var aspectRatioConstraint: NSLayoutConstraint?
     private var activeTask: Task<Void, Never>?
     private var session: URLSession!
-    private var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)

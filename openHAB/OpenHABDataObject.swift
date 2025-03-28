@@ -22,7 +22,6 @@ class OpenHABDataObject: NSObject, DataObject {
     var openHABVersion: Int = 0
     var currentWebViewPath = ""
     var currentView: TargetController?
-    var lastNotificationInfo: [AnyHashable: Any]?
     var connectionInfo: ConnectionInfo?
 }
 
