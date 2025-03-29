@@ -39,19 +39,21 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
     public var ignoreSSL = false
     public var trustedCertificates: [String: Data] = [:]
 
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "ServerCertificateManager", category: "ServerCert")
+
     // Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool = false) {
         self.ignoreSSL = ignoreSSL
 
-        os_log("Initializing cert store", log: .remoteAccess, type: .info)
+        logger.info("Initializing cert store")
         loadTrustedCertificates()
         if trustedCertificates.isEmpty {
-            os_log("No cert store, creating", log: .remoteAccess, type: .info)
+            logger.info("No cert store, creating")
             trustedCertificates = [:]
             //        [trustedCertificates setObject:@"Bulk" forKey:@"Bulk id to make it non-empty"];
             saveTrustedCertificates()
         } else {
-            os_log("Loaded existing cert store", log: .remoteAccess, type: .info)
+            logger.info("Loaded existing cert store")
         }
     }
 
@@ -69,7 +71,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             let data = try PropertyListEncoder().encode(trustedCertificates)
             try data.write(to: getPersistensePath())
         } catch {
-            os_log("Could not save trusted certificates", log: .default)
+            logger.info("Could not save trusted certificates")
         }
     }
 
@@ -102,9 +104,9 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
                     return
                 }
             } catch {
-                os_log("Could not load trusted unarchived certificates", log: .default)
+                logger.info("Could not load trusted unarchived certificates")
             }
-            os_log("Could not load trusted codable certificates", log: .default)
+            logger.info("Could not load trusted codable certificates")
         }
     }
 
@@ -149,7 +151,9 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
 
         // If we have a certificate for this domain
         // Obtain certificate we have and compare it with the certificate presented by the server
-        if let previousData = self.certificateData(forDomain: domain), CFEqual(previousData, certificateData) {
+        let previousData = self.certificateData(forDomain: domain)
+
+        if let previousData, CFEqual(previousData, certificateData) {
             // If certificate matched one in our store - permit this connection
             return // trusted
         }
@@ -158,7 +162,8 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             throw ServerCertificateManagerError.serverTrustEvaluationFailed
         }
 
-        let decision: EvaluateResult = if self.certificateData(forDomain: domain) != nil {
+        logger.info("Server trust not valid for \(domain), asking delegate...")
+        let decision: EvaluateResult = if previousData != nil {
             // mismatch, we have a certificate for this domain in our memory of decisions, but the certificate we've got now
             // differs. We need to warn user about possible MiM attack and wait for users decision.
             await delegate.evaluateCertificateMismatch(summary: certificateSummary as String?, forDomain: domain)
@@ -179,7 +184,10 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             // Add certificate to storage
             storeCertificateData(certificateData, forDomain: domain)
             delegate.acceptedServerCertificatesChanged()
+            logger.info("User chose to trust cert for \(domain) permanently")
             return
+        @unknown default:
+            throw ServerCertificateManagerError.serverTrustEvaluationFailed
         }
     }
 
