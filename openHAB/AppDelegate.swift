@@ -154,9 +154,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // remove the 'openhab' from the url
         let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
-        Task {
-            await notifyNotificationListeners(["actionIdentifier": action])
-        }
+        notifyNotificationListeners(action: action)
         return true
     }
 
@@ -168,55 +166,62 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
+    
+    @MainActor
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) async -> UIBackgroundFetchResult {
 
-    // this is called for "content-available" silent notifications (background notifications)
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        os_log("didReceiveRemoteNotification %{PUBLIC}@", log: .default, type: .info, userInfo)
-        // Hide notification logic
-        if let type = userInfo["type"] as? String, type == "hideNotification" {
-            if let refid = userInfo["reference-id"] as? String {
-                os_log("didReceiveRemoteNotification remove id %{PUBLIC}@", log: .default, type: .info, refid)
-                UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [refid])
-            }
-            if let tag = userInfo["tag"] as? String {
-                UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
-                    let notificationsWithSeverity = notifications.filter { notification in
-                        notification.request.content.userInfo["tag"] as? String == tag
-                    }
+        logger.info("didReceiveRemoteNotification \(String(describing: userInfo), privacy: .public)")
 
-                    // Get the identifiers of these notifications
-                    let identifiers = notificationsWithSeverity.map(\.request.identifier)
+        guard let type = userInfo["type"] as? String, type == "hideNotification" else {
+            return .noData
+        }
 
-                    if !identifiers.isEmpty {
-                        os_log("didReceiveRemoteNotification remove tag %{PUBLIC}@ %{PUBLIC}@", log: .default, type: .info, tag, identifiers)
-                        // Remove the filtered notifications
-                        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
-                    }
-                }
+        if let refid = userInfo["reference-id"] as? String {
+            logger.info("Removing notification with id \(refid, privacy: .public)")
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [refid])
+        }
+
+        if let tag = userInfo["tag"] as? String {
+            // Hop off the MainActor to avoid Sendable warning
+            let identifiers: [String] = await Task.detached(priority: .userInitiated) {
+                let notifications = await UNUserNotificationCenter.current().deliveredNotifications()
+                return notifications
+                    .filter { $0.request.content.userInfo["tag"] as? String == tag }
+                    .map(\.request.identifier)
+            }.value
+            
+            
+            if !identifiers.isEmpty {
+                logger.info("Removing notifications with tag \(tag, privacy: .public), identifiers: \(String(describing: identifiers), privacy: .public)")
+                UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
             }
         }
-        completionHandler(.newData)
+
+        return .newData
     }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
     // this is called when a notification comes in while in the foreground
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+     nonisolated func userNotificationCenter(_ center:  UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         let userInfo = notification.request.content.userInfo
         logger.info("Notification received while app is in foreground: \(userInfo)")
 
-        NotificationCenter.default.post(
+         NotificationCenter.default.post(
             name: .openHABDidReceiveNotification,
             object: nil,
             userInfo: userInfo
-        )
-        await displayNotification(userInfo: userInfo)
-
-        return [] // Modify this if you want to show banners, alerts, etc.
-    }
-
+         )
+         
+         let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
+         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
+         await displayNotification(message: message, action: action)
+         
+         return [] // Modify this if you want to show banners, alerts, etc.
+     }
+    
     // this is called when clicking a notification while in the background
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
         logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
@@ -230,18 +235,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 object: nil,
                 userInfo: userInfo
             )
-            await notifyNotificationListeners(userInfo)
+            let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
+            await notifyNotificationListeners(action: action)
         }
     }
 
-    private func displayNotification(userInfo: [AnyHashable: Any]) async {
-        os_log("displayNotification %{PUBLIC}@", log: .notifications, type: .info, userInfo["message"] as? String ?? "no message")
+    private func displayNotification(message: String, action: String?) async {
+        logger.info("displayNotification \(message)")
 
         Task {
             await audioPlayer.playSound()
         }
-
-        let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
 
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: 5)
@@ -272,7 +276,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 // Use closure-based tap gesture insteae of #selector
                 let tapGesture = MessageTapGestureRecognizer {
                     Task {
-                        self.messageViewTapped(userInfo: userInfo)
+                        self.messageViewTapped(action: action)
                     }
                 }
                 view.addGestureRecognizer(tapGesture)
@@ -283,17 +287,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // Action to be performed when the notification message view is tapped
-    func messageViewTapped(userInfo: [AnyHashable: Any]) {
-        notifyNotificationListeners(userInfo)
+    func messageViewTapped(action: String?) {
+        notifyNotificationListeners(action: action)
         SwiftMessages.hideAll()
     }
 
     // ✅ Ensure this runs on the MainActor
     @MainActor
-    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) {
+    private func notifyNotificationListeners(action: String?) {
         if let navigationController = window?.rootViewController as? UINavigationController,
            let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
             rootViewController.handleNotification(action: action)
         }
     }
