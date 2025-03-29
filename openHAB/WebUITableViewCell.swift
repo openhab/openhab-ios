@@ -109,7 +109,7 @@ extension WebUITableViewCell: WKNavigationDelegate {
     // Signature changed on transfer from completion handler to async / from didRecieve to respondTo
     func webView(_ webView: WKWebView,
                  respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        onReceiveSessionChallenge(with: challenge)
+        await onReceiveSessionChallenge(with: challenge)
     }
 }
 

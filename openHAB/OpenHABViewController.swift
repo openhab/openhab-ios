@@ -78,32 +78,51 @@ class OpenHABViewController: UIViewController {
 
 extension OpenHABViewController: ServerCertificateManagerDelegate {
     // delegate should ask user for a decision on what to do with invalid certificate
-    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async {
+    @MainActor
+    func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult {
+        await withCheckedContinuation { continuation in
             let title = NSLocalizedString("ssl_certificate_warning", comment: "")
             let message = String(format: NSLocalizedString("ssl_certificate_invalid", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
+
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .deny)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitOnce)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitAlways)
+            })
+
+            self.present(alertView, animated: true, completion: nil)
         }
     }
 
     // certificate received from openHAB doesn't match our record, ask user for a decision
-    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?) {
-        DispatchQueue.main.async {
+    @MainActor
+    func evaluateCertificateMismatch(summary certificateSummary: String?, forDomain domain: String?) async -> OpenHABCore.ServerCertificateManager.EvaluateResult {
+        await withCheckedContinuation { continuation in
             let title = NSLocalizedString("ssl_certificate_warning", comment: "")
             let message = String(format: NSLocalizedString("ssl_certificate_no_match", comment: ""), certificateSummary ?? "", domain ?? "")
             let alertView = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in policy?.evaluateResult = .deny })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitOnce })
-            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in policy?.evaluateResult = .permitAlways })
-            self.present(alertView, animated: true) {}
+
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("abort", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .deny)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("once", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitOnce)
+            })
+            alertView.addAction(UIAlertAction(title: NSLocalizedString("always", comment: ""), style: .default) { _ in
+                continuation.resume(returning: .permitAlways)
+            })
+
+            self.present(alertView, animated: true, completion: nil)
         }
     }
 
-    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?) {
+    @MainActor
+    func acceptedServerCertificatesChanged() {
         // User's decision about trusting server certificates has changed.  Send updates to the paired watch.
         WatchMessageService.singleton.syncPreferencesToWatch()
     }

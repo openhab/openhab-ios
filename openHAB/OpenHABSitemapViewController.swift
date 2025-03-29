@@ -932,7 +932,7 @@ extension OpenHABSitemapViewController: UITextFieldDelegate {
 extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
     func downloader(_ downloader: ImageDownloader,
                     didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        onReceiveSessionChallenge(with: challenge)
+        await onReceiveSessionChallenge(with: challenge)
     }
 
     func downloader(_ downloader: ImageDownloader,

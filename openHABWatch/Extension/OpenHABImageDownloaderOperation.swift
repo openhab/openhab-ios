@@ -15,8 +15,10 @@ import SDWebImage
 
 class OpenHABImageDownloaderOperation: SDWebImageDownloaderOperation, @unchecked Sendable {
     override func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
-        completionHandler(disposition, credential)
+        Task {
+            let (disposition, credential) = await onReceiveSessionChallenge(with: challenge)
+            completionHandler(disposition, credential)
+        }
     }
 
     override func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
