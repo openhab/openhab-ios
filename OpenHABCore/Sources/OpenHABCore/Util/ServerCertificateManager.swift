@@ -12,15 +12,6 @@
 import Foundation
 import os.log
 
-// public protocol ServerCertificateManagerDelegate: NSObjectProtocol {
-//    // delegate should ask user for a decision on what to do with invalid certificate
-//    func evaluateServerTrust(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
-//    // certificate received from openHAB doesn't match our record, ask user for a decision
-//    func evaluateCertificateMismatch(_ policy: ServerCertificateManager?, summary certificateSummary: String?, forDomain domain: String?)
-//    // notify delegate that the certificagtes that a user is willing to trust has changed
-//    func acceptedServerCertificatesChanged(_ policy: ServerCertificateManager?)
-// }
-
 public protocol ServerCertificateManagerDelegate: AnyObject {
     // delegate should ask user for a decision on what to do with invalid certificate
     func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
@@ -43,14 +34,6 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
         case permitAlways
     }
 
-//    public var evaluateResult: EvaluateResult = .undecided {
-//        didSet {
-//            if evaluateResult != .undecided {
-//                evaluateResultSemaphore.signal()
-//            }
-//        }
-//    }
-
     weak var delegate: ServerCertificateManagerDelegate?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL = false
@@ -58,7 +41,6 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
 
     // Init a ServerCertificateManager and set ignore certificates setting
     public init(ignoreSSL: Bool = false) {
-//        super.init(evaluators: [:])
         self.ignoreSSL = ignoreSSL
 
         os_log("Initializing cert store", log: .remoteAccess, type: .info)

@@ -64,11 +64,15 @@ extension OpenHABWatchAppDelegate: WKApplicationDelegate {
 
 extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) {}
+    func askForClientCertificateImport() async -> Bool {
+        true
+    }
 
     // delegate should ask user for the export password used to decode the PKCS#12
-    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) {}
+    func askForCertificatePassword() async -> String? {
+        nil
+    }
 
-    // delegate should alert the user that an error occured importing the certificate
-    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
+    // delegate should ask user for the export password used to decode the PKCS#12
+    func alertClientCertificateError(errMsg: String) {}
 }
