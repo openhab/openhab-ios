@@ -704,11 +704,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             return cell
         }
 
-        let cell = WidgetCellFactory.provider(for: widget)
-            .dequeue(from: tableView, at: indexPath)
-
-        WidgetCellFactory.provider(for: widget)
-            .configure(cell: cell, for: widget, controller: self)
+        let provider = WidgetCellFactory.provider(for: widget)
+        let cell = provider.dequeue(from: tableView, at: indexPath)
+        provider.configure(cell: cell, for: widget, controller: self)
 
         var iconColor = widget.iconColor
         if iconColor.isEmpty, traitCollection.userInterfaceStyle == .dark {
@@ -932,20 +930,14 @@ extension OpenHABSitemapViewController: UITextFieldDelegate {
 // MARK: Kingfisher authentication with NSURLCredential
 
 extension OpenHABSitemapViewController: AuthenticationChallengeResponsible {
-    // sessionDelegate.onReceiveSessionTaskChallenge
-    nonisolated func downloader(_ downloader: ImageDownloader,
-                                task: URLSessionTask,
-                                didReceive challenge: URLAuthenticationChallenge,
-                                completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionTaskChallenge(with: challenge)
-        completionHandler(disposition, credential)
+    func downloader(_ downloader: ImageDownloader,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        onReceiveSessionChallenge(with: challenge)
     }
 
-    // sessionDelegate.onReceiveSessionChallenge
-    nonisolated func downloader(_ downloader: ImageDownloader,
-                                didReceive challenge: URLAuthenticationChallenge,
-                                completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        let (disposition, credential) = onReceiveSessionChallenge(with: challenge)
-        completionHandler(disposition, credential)
+    func downloader(_ downloader: ImageDownloader,
+                    task: URLSessionTask,
+                    didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        onReceiveSessionTaskChallenge(with: challenge)
     }
 }

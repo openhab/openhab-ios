@@ -14,13 +14,14 @@ import OpenHABCore
 import UIKit
 
 struct ColorPickerCellProvider: WidgetCellProvider {
-    static var reuseIdentifier: String { "ColorPickerCell" }
+    var reuseIdentifier: String { "ColorPickerCell" }
 
-    static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         tableView.dequeueReusableCell(for: indexPath) as ColorPickerCell
     }
 
-    static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
+    @MainActor
+    func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
         guard let cell = cell as? ColorPickerCell else { return }
         cell.delegate = controller
         cell.widget = widget

@@ -14,13 +14,13 @@ import OpenHABCore
 import UIKit
 
 struct VideoCellProvider: WidgetCellProvider {
-    static var reuseIdentifier: String { "VideoUITableViewCell" }
+    var reuseIdentifier: String { "VideoUITableViewCell" }
 
-    static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         tableView.dequeueReusableCell(for: indexPath) as VideoUITableViewCell
     }
 
-    static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
+    func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
         guard let cell = cell as? VideoUITableViewCell else { return }
         cell.widget = widget
         cell.displayWidget()

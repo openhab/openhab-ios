@@ -125,7 +125,9 @@ public final class NetworkTracker: ObservableObject {
 //            }
 //        } else {
         monitor.pathUpdateHandler = { [weak self] path in
-            Task { await self?.handleNetworkChange(isConnected: path.status == .satisfied) }
+            Task.detached(priority: .utility) {
+                await self?.handleNetworkChange(isConnected: path.status == .satisfied)
+            }
         }
         monitor.start(queue: monitorQueue)
     }

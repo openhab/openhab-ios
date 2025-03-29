@@ -13,45 +13,49 @@ import Foundation
 import OpenHABCore
 import UIKit
 
-protocol WidgetCellProvider {
-    static var reuseIdentifier: String { get }
-    static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell
-    static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController)
-}
-
 enum WidgetCellFactory {
-    static func provider(for widget: OpenHABWidget) -> WidgetCellProvider.Type {
+    static func provider(for widget: OpenHABWidget) -> WidgetCellProvider {
         switch widget.type {
         case .switchWidget:
             if !widget.mappings.isEmpty {
-                SegmentedCellProvider.self // 🔥 Done
+                SegmentedCellProvider()
             } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                SwitchCellProvider.self // 🔥 Done
+                SwitchCellProvider()
             } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                RollershutterCellProvider.self // 🔥 Done
+                RollershutterCellProvider()
             } else if !widget.mappingsOrItemOptions.isEmpty {
-                SegmentedCellProvider.self
+                SegmentedCellProvider()
             } else {
-                SwitchCellProvider.self
+                SwitchCellProvider()
             }
         case .slider:
-            widget.switchSupport ? SliderWithSwitchProvider.self : SliderProvider.self // 🔥 Done
+            if widget.switchSupport {
+                SliderWithSwitchProvider()
+            } else {
+                SliderProvider()
+            }
         case .input:
             if [.date, .time, .datetime].contains(widget.inputHint) {
-                DatePickerInputProvider.self // 🔥 Done
+                DatePickerInputProvider()
             } else {
-                TextInputProvider.self // 🔥 Done
+                TextInputProvider()
             }
-        case .frame: FrameCellProvider.self // 🔥 Done
-        case .setpoint: SetpointCellProvider.self // 🔥 Done
-        case .selection: SelectionCellProvider.self // 🔥 Done
-        case .colorpicker: ColorPickerCellProvider.self // 🔥 Done
-        case .image, .chart: ImageCellProvider.self // 🔥 Done
-        case .video: VideoCellProvider.self // 🔥 Done
-        case .webview: WebViewCellProvider.self // 🔥 Done
-        case .mapview: MapViewCellProvider.self // 🔥 Done
+        case .frame: FrameCellProvider()
+        case .setpoint: SetpointCellProvider()
+        case .selection: SelectionCellProvider()
+        case .colorpicker: ColorPickerCellProvider()
+        case .image, .chart: ImageCellProvider()
+        case .video: VideoCellProvider()
+        case .webview: WebViewCellProvider()
+        case .mapview: MapViewCellProvider()
         case .group, .text, .defaultWidget, .unknown:
-            GenericCellProvider.self // 🔥 Done
+            GenericCellProvider()
         }
     }
+}
+
+protocol WidgetCellProvider {
+    var reuseIdentifier: String { get }
+    @MainActor func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell
+    @MainActor func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController)
 }

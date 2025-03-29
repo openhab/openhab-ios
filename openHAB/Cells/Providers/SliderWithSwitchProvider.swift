@@ -14,13 +14,13 @@ import OpenHABCore
 import UIKit
 
 struct SliderWithSwitchProvider: WidgetCellProvider {
-    static var reuseIdentifier: String { "SliderWithSwitchSupportUITableViewCell" }
+    var reuseIdentifier: String { "SliderWithSwitchSupportUITableViewCell" }
 
-    static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         tableView.dequeueReusableCell(for: indexPath) as SliderWithSwitchSupportUITableViewCell
     }
 
-    static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
+    func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
         guard let cell = cell as? SliderWithSwitchSupportUITableViewCell else { return }
         cell.widget = widget
         cell.displayWidget()

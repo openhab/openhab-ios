@@ -14,13 +14,13 @@ import OpenHABCore
 import UIKit
 
 struct RollershutterCellProvider: WidgetCellProvider {
-    static var reuseIdentifier: String { "RollerShutterTableViewCell" }
+    var reuseIdentifier: String { "RollerShutterTableViewCell" }
 
-    static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         tableView.dequeueReusableCell(for: indexPath) as RollershutterCell
     }
 
-    static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
+    func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
         guard let cell = cell as? RollershutterCell else { return }
         cell.widget = widget
         cell.displayWidget()

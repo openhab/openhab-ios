@@ -14,13 +14,13 @@ import OpenHABCore
 import UIKit
 
 struct TextInputProvider: WidgetCellProvider {
-    static var reuseIdentifier: String { "TextInputUITableViewCell" }
+    var reuseIdentifier: String { "TextInputUITableViewCell" }
 
-    static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         tableView.dequeueReusableCell(for: indexPath) as TextInputUITableViewCell
     }
 
-    static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
+    func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
         guard let cell = cell as? TextInputUITableViewCell else { return }
         cell.widget = widget
         cell.displayWidget()

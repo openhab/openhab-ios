@@ -166,10 +166,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
     }
-    
-    @MainActor
-    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) async -> UIBackgroundFetchResult {
 
+    @MainActor
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
         logger.info("didReceiveRemoteNotification \(String(describing: userInfo), privacy: .public)")
 
         guard let type = userInfo["type"] as? String, type == "hideNotification" else {
@@ -189,8 +188,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     .filter { $0.request.content.userInfo["tag"] as? String == tag }
                     .map(\.request.identifier)
             }.value
-            
-            
+
             if !identifiers.isEmpty {
                 logger.info("Removing notifications with tag \(tag, privacy: .public), identifiers: \(String(describing: identifiers), privacy: .public)")
                 UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: identifiers)
@@ -203,23 +201,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
     // this is called when a notification comes in while in the foreground
-     nonisolated func userNotificationCenter(_ center:  UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         let userInfo = notification.request.content.userInfo
         logger.info("Notification received while app is in foreground: \(userInfo)")
 
-         NotificationCenter.default.post(
+        NotificationCenter.default.post(
             name: .openHABDidReceiveNotification,
             object: nil,
             userInfo: userInfo
-         )
-         
-         let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
-         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-         await displayNotification(message: message, action: action)
-         
-         return [] // Modify this if you want to show banners, alerts, etc.
-     }
-    
+        )
+
+        let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
+        let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
+        await displayNotification(message: message, action: action)
+
+        return [] // Modify this if you want to show banners, alerts, etc.
+    }
+
     // this is called when clicking a notification while in the background
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo

@@ -14,13 +14,13 @@ import OpenHABCore
 import UIKit
 
 struct MapViewCellProvider: WidgetCellProvider {
-    static var reuseIdentifier: String { "MapViewTableViewCell" }
+    var reuseIdentifier: String { "MapViewTableViewCell" }
 
-    static func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
+    func dequeue(from tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         tableView.dequeueReusableCell(for: indexPath) as MapViewTableViewCell
     }
 
-    static func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
+    func configure(cell: UITableViewCell, for widget: OpenHABWidget, controller: OpenHABSitemapViewController) {
         guard let cell = cell as? MapViewTableViewCell else { return }
         cell.widget = widget
         cell.displayWidget()
