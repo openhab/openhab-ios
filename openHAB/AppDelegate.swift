@@ -205,7 +205,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         let userInfo = notification.request.content.userInfo
         logger.info("Notification received while app is in foreground: \(userInfo)")
 
-        appData.lastNotificationInfo = userInfo
+        NotificationCenter.default.post(
+            name: .openHABDidReceiveNotification,
+            object: nil,
+            userInfo: userInfo
+        )
         await displayNotification(userInfo: userInfo)
 
         return [] // Modify this if you want to show banners, alerts, etc.
@@ -221,8 +225,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             if actionIdentifier != UNNotificationDefaultActionIdentifier {
                 userInfo["actionIdentifier"] = actionIdentifier
             }
+            NotificationCenter.default.post(
+                name: .openHABDidReceiveNotification,
+                object: nil,
+                userInfo: userInfo
+            )
             await notifyNotificationListeners(userInfo)
-            appData.lastNotificationInfo = userInfo
         }
     }
 
@@ -264,7 +272,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 // Use closure-based tap gesture insteae of #selector
                 let tapGesture = MessageTapGestureRecognizer {
                     Task {
-                        await self.messageViewTapped()
+                        self.messageViewTapped(userInfo: userInfo)
                     }
                 }
                 view.addGestureRecognizer(tapGesture)
@@ -275,21 +283,24 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // Action to be performed when the notification message view is tapped
-    func messageViewTapped() async {
-        if let userInfo = appData.lastNotificationInfo {
-            await notifyNotificationListeners(userInfo)
-            SwiftMessages.hideAll()
-        }
+    func messageViewTapped(userInfo: [AnyHashable: Any]) {
+        notifyNotificationListeners(userInfo)
+        SwiftMessages.hideAll()
     }
 
     // ✅ Ensure this runs on the MainActor
     @MainActor
-    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) async {
+    private func notifyNotificationListeners(_ userInfo: [AnyHashable: Any]) {
         if let navigationController = window?.rootViewController as? UINavigationController,
            let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            await rootViewController.handleNotification(userInfo)
+            let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
+            rootViewController.handleNotification(action: action)
         }
     }
+}
+
+extension Notification.Name {
+    static let openHABDidReceiveNotification = Notification.Name("openHABDidReceiveNotification")
 }
 
 extension AppDelegate {

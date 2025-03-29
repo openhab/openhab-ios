@@ -100,8 +100,20 @@ class OpenHABRootViewController: UIViewController {
         switchToSavedView()
         setupTracker()
         // check if we were launched with a notification
-        if let userInfo = appData?.lastNotificationInfo {
-            handleNotification(userInfo)
+        // ✅ Observe notifications (in-app or from AppDelegate)
+        NotificationCenter.default.addObserver(
+            forName: .openHABDidReceiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let userInfo = notification.userInfo else { return }
+
+            // ✅ Extract action identifier (from button press or notification click) *before* entering the Task
+            let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
+
+            Task { @MainActor in
+                self?.handleNotification(action: action)
+            }
         }
     }
 
@@ -308,38 +320,9 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
-    func handleNotification(_ userInfo: [AnyHashable: Any], completionHandler: (() -> Void)? = nil) {
-        // actionIdentifier is the result of a action button being pressed
-        // if not actionIdentifier, then the notification was clicked, so use "on-click" if there
-        if let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String {
-            let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
-            switch true {
-            case action.hasPrefix("ui"):
-                uiCommandAction(cmd)
-                callCompletionHandler(completionHandler)
-            case action.hasPrefix("command"):
-                sendCommandAction(cmd)
-                callCompletionHandler(completionHandler)
-            case action.hasPrefix("http"):
-                httpCommandAction(action)
-                callCompletionHandler(completionHandler)
-            case action.hasPrefix("app"):
-                appCommandAction(action)
-                callCompletionHandler(completionHandler)
-            case action.hasPrefix("rule"):
-                ruleCommandAction(action)
-                callCompletionHandler(completionHandler)
-            default:
-                callCompletionHandler(completionHandler)
-            }
-        }
-    }
-
-    func handleNotification(_ userInfo: [AnyHashable: Any]) async {
-        // Extract action identifier (from button press or notification click)
-        let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-
+    func handleNotification(action: String?) {
         guard let action else { return }
+
         let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
 
         switch true {
