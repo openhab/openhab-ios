@@ -19,7 +19,6 @@ import OpenAPIURLSession
 import OpenHABCore
 import os.log
 import SafariServices
-import SVGKit
 import SwiftUI
 import UIKit
 

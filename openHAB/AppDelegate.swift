@@ -15,6 +15,7 @@ import FirebaseMessaging
 import Kingfisher
 import OpenHABCore
 import os.log
+import SDWebImageSVGCoder
 import SwiftMessages
 import UIKit
 import UserNotifications
@@ -98,6 +99,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
 
         activateWatchConnectivity()
+
+        let SVGCoder = SDImageSVGCoder.shared
+        SDImageCodersManager.shared.addCoder(SVGCoder)
 
         return true
     }

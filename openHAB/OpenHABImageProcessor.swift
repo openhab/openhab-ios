@@ -12,7 +12,8 @@
 import Foundation
 import Kingfisher
 import os.log
-import SVGKit
+import SDWebImage
+import SDWebImageSVGCoder
 
 struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
@@ -32,15 +33,14 @@ struct OpenHABImageProcessor: ImageProcessor {
             case 0x3C: // svg
                 // <?xml version="1.0" encoding="UTF-8"?>
                 // <svg
-                let svgkSourceNSData = SVGKSourceNSData.source(from: data, urlForRelativeLinks: nil)
-                let parseResults = SVGKParser.parseSource(usingDefaultSVGKParser: svgkSourceNSData)
-                if parseResults?.parsedDocument != nil, let image = SVGKImage(parsedSVG: parseResults, from: svgkSourceNSData), image.hasSize() {
-                    if image.size.width > 1000 || image.size.height > 1000 {
-                        return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
+                if let image = SDImageSVGCoder.shared.decodedImage(with: data, options: nil) {
+                    let size = image.size
+                    if size.width > 1000 || size.height > 1000 {
+                        return UIImage(systemName: "exclamationmark.triangle")?.withTintColor(.orange, renderingMode: .alwaysOriginal)
                     }
-                    return image.uiImage
+                    return image
                 } else {
-                    return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange)
+                    return UIImage(systemName: "exclamationmark.triangle")?.withTintColor(.orange, renderingMode: .alwaysOriginal)
                 }
             default:
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))

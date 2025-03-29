@@ -18,6 +18,7 @@ final class MockClientCertDelegate: ClientCertificateManagerDelegate {
     var shouldImport = true
     var password: String? = "test1234"
     var receivedErrorMessage: String?
+    var receivedErrorCode: OSStatus?
 
     func askForClientCertificateImport() async -> Bool {
         shouldImport
@@ -27,7 +28,6 @@ final class MockClientCertDelegate: ClientCertificateManagerDelegate {
         password
     }
 
-    var receivedErrorCode: OSStatus?
     func alertClientCertificateError(errMsg: String) async {
         receivedErrorMessage = errMsg
         if let code = Int(errMsg.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
