@@ -28,6 +28,17 @@ public enum OpenAPIServiceConfiguration {
     case longTerm
 }
 
+protocol OpenAPIServiceProtocol: AnyObject, Sendable {
+    func getRootVersion() async throws -> Int
+    func getRoot() async throws -> OpenHABServerProperties
+    func sendItemCommand(itemname: String, command: String) async throws
+    func updateItemState(itemname: String, with: String) async throws
+    func getItems() async throws -> [OpenHABItem]
+    func getItemByName(id: String) async throws -> OpenHABItem?
+    func pollDataForPage(sitemapname: String, pageId: String, longPolling: Bool) async throws -> OpenHABPage?
+    func runNow(ruleUID: String, payload: [String: any Sendable]) async throws
+}
+
 // The generated OpenAPI client is wrapped by this curated API.
 // The library leaks the fact that it uses Swift OpenAPI Generator under the hood in 'openHABSitemapWidgetEvents'.
 // It will require the migration to Swift 6.1 before this can be changed.
@@ -296,3 +307,5 @@ public extension OpenAPIService {
         _ = try response.ok
     }
 }
+
+extension OpenAPIService: OpenAPIServiceProtocol {}

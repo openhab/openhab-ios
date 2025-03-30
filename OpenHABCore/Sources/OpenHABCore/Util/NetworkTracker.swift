@@ -47,25 +47,30 @@ public enum NetworkTrackerError: Error, CustomDebugStringConvertible {
 // Prevent race conditions.
 // Ensure thread-safe dictionary access.
 // Avoid memory corruption errors like unrecognized selector.
-actor ConnectionPool {
-    private var services: [ConnectionConfiguration: OpenAPIService] = [:]
+public actor ConnectionPool {
+    private var services: [ConnectionConfiguration: OpenAPIServiceProtocol] = [:]
+    private let serviceFactory: (ConnectionConfiguration) -> OpenAPIServiceProtocol
+
+    // Initializer allowing the injection of mocked OpenAPIServiceProtocol
+    init(serviceFactory: @escaping (ConnectionConfiguration) -> OpenAPIServiceProtocol = {
+        OpenAPIService(connectionConfiguration: $0, configuration: .shortTerm)
+    }) {
+        self.serviceFactory = serviceFactory
+    }
 
     @discardableResult
-    func getOrCreateService(for configuration: ConnectionConfiguration) async -> OpenAPIService {
-        if let existingService = services[configuration] {
-            return existingService
+    func getOrCreateService(for configuration: ConnectionConfiguration) async -> OpenAPIServiceProtocol {
+        if let existing = services[configuration] {
+            return existing
         }
-        let newService = OpenAPIService(
-            connectionConfiguration: configuration,
-            configuration: .shortTerm
-        )
+        let newService = serviceFactory(configuration)
         services[configuration] = newService
         return newService
     }
 }
 
 // Ensures a thread safe access to failureCounts dictionary
-actor ConnectionFailureTracker {
+public actor ConnectionFailureTracker {
     private var failureCounts: [ConnectionConfiguration: Int] = [:]
     private let maxFailures = 3
 
@@ -98,14 +103,14 @@ public final class NetworkTracker: ObservableObject {
     // @MainActor
     @Published public private(set) var status: NetworkStatus = .connecting
 
-    private let monitor = NWPathMonitor()
-    private let monitorQueue = DispatchQueue.global(qos: .background)
-    private var connectionPool: ConnectionPool = .init()
+    private var pathMonitor: NWPathMonitoring
+    private var monitorQueue: DispatchQueue
+    private var connectionPool: ConnectionPool
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
     private let disconnectedRetryInterval: UInt64 = 30 // / amount of time we scan when not connected
 
-    private var failureTracker = ConnectionFailureTracker()
+    private var failureTracker: ConnectionFailureTracker
 
     // TODO: remove
     public var clientCertificateManager = ClientCertificateManager()
@@ -115,21 +120,36 @@ public final class NetworkTracker: ObservableObject {
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
     private init() {
-//        if #available(iOS 17, watchOS 10, *) {
-//            // The `for await` loop automatically handles updates from NWPathMonitor, so there’s no need for a callback.
-//            Task {
-//                let monitor = NWPathMonitor()
-//                for await path in monitor {
-//                    await handleNetworkChange(isConnected: path.status == .satisfied)
-//                }
-//            }
-//        } else {
-        monitor.pathUpdateHandler = { [weak self] path in
+        monitorQueue = DispatchQueue.global(qos: .background)
+        pathMonitor = RealPathMonitor()
+        connectionPool = ConnectionPool()
+        failureTracker = ConnectionFailureTracker()
+
+        pathMonitor.setUpdateHandler { [weak self] isConnected in
             Task.detached(priority: .utility) {
-                await self?.handleNetworkChange(isConnected: path.status == .satisfied)
+                await self?.handleNetworkChange(isConnected: isConnected)
             }
         }
-        monitor.start(queue: monitorQueue)
+        pathMonitor.start(queue: monitorQueue)
+    }
+
+    // MARK: - Injectable initializer for testing
+
+    init(monitor: NWPathMonitoring,
+         monitorQueue: DispatchQueue,
+         connectionPool: ConnectionPool,
+         failureTracker: ConnectionFailureTracker) {
+        pathMonitor = monitor
+        self.monitorQueue = monitorQueue
+        self.connectionPool = connectionPool
+        self.failureTracker = failureTracker
+
+        pathMonitor.setUpdateHandler { [weak self] isConnected in
+            Task.detached(priority: .utility) {
+                await self?.handleNetworkChange(isConnected: isConnected)
+            }
+        }
+        pathMonitor.start(queue: monitorQueue)
     }
 
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {
@@ -283,7 +303,7 @@ public final class NetworkTracker: ObservableObject {
             return nil
         } catch let error as OpenAPIServiceError {
             switch error {
-            case let .undocumented(statusCode, payload):
+            case let .undocumented(statusCode, _):
                 logger.info("Undocumented status code: ") // \(statusCode), ") // payload: \(String(describing: payload))")
                 return nil
             default:
