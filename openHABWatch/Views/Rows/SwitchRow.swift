@@ -15,7 +15,7 @@ import SwiftUI
 
 struct SwitchRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
 
     // https://stackoverflow.com/questions/59395501/do-something-when-toggle-state-changes
     var stateBinding: Binding<Bool> {
@@ -53,5 +53,5 @@ struct SwitchRow: View {
 #Preview {
     let widget = UserData().widgets[2]
     SwitchRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }

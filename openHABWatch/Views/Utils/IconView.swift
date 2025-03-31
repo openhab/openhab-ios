@@ -16,7 +16,7 @@ import SwiftUI
 
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @ObservedObject var settings = AppSettings.shared
 
     var iconURL: URL? {
         var iconColor = widget.iconColor
@@ -42,6 +42,43 @@ struct IconView: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[3]
-    IconView(widget: widget, settings: ObservableOpenHABDataObject(openHABRootUrl: PreviewConstants.remoteURLString))
+    
+    let item = OpenHABItem(name: "PreviewItem", type: "Preview Light", state: "Switch", link: "ON", label: nil, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
+    let widget = OpenHABWidget(widgetId: "00",
+                               label: "Lights",
+                               icon: "lightbulb",
+                               type: .slider,
+                               url: nil,
+                               period: nil,
+                               minValue: nil,
+                               maxValue: nil,
+                               step: nil,
+                               refresh: nil,
+                               height: nil,
+                               isLeaf: nil,
+                               iconColor: nil,
+                               labelColor: nil,
+                               valueColor: nil,
+                               service: nil,
+                               state: nil,
+                               text: nil,
+                               legend: true,
+                               inputHint: nil,
+                               encoding: nil,
+                               item: item,
+                               linkedPage: nil,
+                               mappings: [],
+                               widgets: [],
+                               visibility: nil,
+                               switchSupport: nil,
+                               forceAsItem: nil)
+    
+    
+    let mockSettings = {
+        let obj = AppSettings()
+        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        return obj
+    }()
+    
+    IconView(widget: widget, settings: mockSettings)
 }

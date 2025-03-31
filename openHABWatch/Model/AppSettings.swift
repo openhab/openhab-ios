@@ -13,8 +13,8 @@ import Combine
 import Foundation
 import OpenHABCore
 
-final class ObservableOpenHABDataObject: ObservableObject {
-    static let shared = ObservableOpenHABDataObject()
+final class AppSettings: ObservableObject {
+    static let shared = AppSettings()
 
     var openHABVersion: Int = 2
 
@@ -26,11 +26,4 @@ final class ObservableOpenHABDataObject: ObservableObject {
     @Published var sitemapName = ""
     @Published var sitemapForWatch = ""
     @Published var iconType: IconType = .svg
-}
-
-extension ObservableOpenHABDataObject {
-    convenience init(openHABRootUrl: String) {
-        self.init()
-        self.openHABRootUrl = openHABRootUrl
-    }
 }

@@ -15,7 +15,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: UserData
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
     @State var title = "openHAB"
 
     var body: some View {
@@ -118,5 +118,5 @@ struct ContentView: View {
 
         ContentView(viewModel: UserData())
     }
-    .environmentObject(ObservableOpenHABDataObject())
+    .environmentObject(AppSettings())
 }

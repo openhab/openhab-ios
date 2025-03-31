@@ -14,7 +14,7 @@ import SwiftUI
 
 struct FrameRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
         HStack {
@@ -29,5 +29,5 @@ struct FrameRow: View {
 #Preview {
     let widget = UserData().widgets[6]
     FrameRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }

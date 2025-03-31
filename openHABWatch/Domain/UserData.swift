@@ -9,17 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-//// Copyright (c) 2010-2025 Contributors to the openHAB project
-////
-//// See the NOTICE file(s) distributed with this work for additional
-//// information.
-////
-//// This program and the accompanying materials are made available under the
-//// terms of the Eclipse Public License 2.0 which is available at
-//// http://www.eclipse.org/legal/epl-2.0
-////
-//// SPDX-License-Identifier: EPL-2.0
-
+import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -40,8 +30,10 @@ final class UserData: ObservableObject {
     var currentClient: HTTPClient?
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
+    
+    private var cancellables = Set<AnyCancellable>()
 
-    init(sitemapName: String = "watch") {
+    init() {
         NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,
             object: nil,
@@ -82,10 +74,19 @@ final class UserData: ObservableObject {
             NetworkTracker.shared.restartTracking()
         }
 
-        Task {
-            await updateNetwork()
-            await observeNetworkChanges()
-        }
+        AppSettings.shared.$haveReceivedAppContext
+               .removeDuplicates()
+               .filter { $0 == true }
+               .sink { [weak self] _ in
+                   Task {
+                       await self?.updateNetwork()
+                   }
+               }
+               .store(in: &cancellables)
+
+           Task {
+               await observeNetworkChanges()
+           }
     }
 
     /// Observes network connection changes and updates state
@@ -95,15 +96,15 @@ final class UserData: ObservableObject {
 
             logger.info("openHABTracked: \(activeConnection.configuration.url)")
 
-            if !ObservableOpenHABDataObject.shared.haveReceivedAppContext {
+            if !AppSettings.shared.haveReceivedAppContext {
                 AppMessageService.singleton.requestApplicationContext()
                 errorDescription = NSLocalizedString("settings_not_received", comment: "")
                 showAlert = true
                 continue
             }
 
-            ObservableOpenHABDataObject.shared.openHABRootUrl = activeConnection.configuration.url
-            ObservableOpenHABDataObject.shared.openHABVersion = activeConnection.version
+            AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
+            AppSettings.shared.openHABVersion = activeConnection.version
 
             let alwaysSendBasicAuth = activeConnection.configuration.alwaysSendBasicAuth
             let username = activeConnection.configuration.username
@@ -126,13 +127,13 @@ final class UserData: ObservableObject {
             }
             SDWebImageDownloader.shared.requestModifier = requestModifier
 
-            await loadPage(sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch, longPolling: false, refresh: true)
+            await loadPage(sitemapName: AppSettings.shared.sitemapForWatch, longPolling: false, refresh: true)
         }
     }
 
     func updateNetwork() async {
-        guard let connection1 = ObservableOpenHABDataObject.shared.localConnectionConfig,
-              let connection2 = ObservableOpenHABDataObject.shared.remoteConnectionConfig else {
+        guard let connection1 = AppSettings.shared.localConnectionConfig,
+              let connection2 = AppSettings.shared.remoteConnectionConfig else {
             logger.info("No connections defined")
             return
         }
@@ -172,10 +173,10 @@ final class UserData: ObservableObject {
     }
 
     func refreshUrl() async {
-        guard ObservableOpenHABDataObject.shared.haveReceivedAppContext,
-              !ObservableOpenHABDataObject.shared.openHABRootUrl.isEmpty else { return }
+        guard AppSettings.shared.haveReceivedAppContext,
+              !AppSettings.shared.openHABRootUrl.isEmpty else { return }
 
         showAlert = false
-        await loadPage(sitemapName: ObservableOpenHABDataObject.shared.sitemapForWatch, longPolling: false, refresh: true)
+        await loadPage(sitemapName: AppSettings.shared.sitemapForWatch, longPolling: false, refresh: true)
     }
 }

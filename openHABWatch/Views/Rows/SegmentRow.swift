@@ -15,7 +15,7 @@ import SwiftUI
 
 struct SegmentRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
     @State private var pendingValue: String?
 
     var valueBinding: Binding<Int> {
@@ -67,5 +67,5 @@ struct SegmentRow: View {
         SegmentRow(widget: widget)
         SegmentRow(widget: widget)
     }
-    .environmentObject(ObservableOpenHABDataObject())
+    .environmentObject(AppSettings())
 }

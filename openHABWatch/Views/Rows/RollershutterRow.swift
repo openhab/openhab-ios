@@ -14,7 +14,7 @@ import SwiftUI
 
 struct RollershutterRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
         VStack(spacing: -5) {
@@ -47,5 +47,5 @@ struct RollershutterRow: View {
 #Preview {
     let widget = UserData().widgets[5]
     RollershutterRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }

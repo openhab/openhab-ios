@@ -15,7 +15,7 @@ import SwiftUI
 import WatchConnectivity
 
 struct PreferencesSwiftUIView: View {
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
 
     var applicationVersionNumber: String = {
         let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
@@ -41,5 +41,5 @@ struct PreferencesSwiftUIView: View {
 
 #Preview {
     PreferencesSwiftUIView()
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }

@@ -30,16 +30,16 @@ class AppMessageService: NSObject, WCSessionDelegate {
         do {
             // Decode the connection payload
             let prefs = try JSONDecoder().decode(WatchPreferences.self, from: data)
-            ObservableOpenHABDataObject.shared.localConnectionConfig = prefs.localConnectionConfiguration ?? .localDefault
-            ObservableOpenHABDataObject.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
-            ObservableOpenHABDataObject.shared.sitemapName = prefs.defaultSitemap
-            ObservableOpenHABDataObject.shared.sitemapForWatch = prefs.sitemapForWatch
-            ObservableOpenHABDataObject.shared.iconType = IconType(rawValue: prefs.iconType) ?? .svg
-            ObservableOpenHABDataObject.shared.haveReceivedAppContext = true
+            AppSettings.shared.localConnectionConfig = prefs.localConnectionConfiguration ?? .localDefault
+            AppSettings.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
+            AppSettings.shared.sitemapName = prefs.defaultSitemap
+            AppSettings.shared.sitemapForWatch = prefs.sitemapForWatch
+            AppSettings.shared.iconType = IconType(rawValue: prefs.iconType) ?? .svg
+            AppSettings.shared.haveReceivedAppContext = true
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
             //                   }
-            ObservableOpenHABDataObject.shared.haveReceivedAppContext = true
+            AppSettings.shared.haveReceivedAppContext = true
             logger.info("✅ Applied WatchPreferences to ObservableOpenHABDataObject")
         } catch {
             logger.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")

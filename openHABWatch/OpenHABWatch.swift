@@ -17,10 +17,10 @@ import UserNotifications
 
 @main
 struct OpenHABWatch: App {
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @ObservedObject var settings = AppSettings.shared
     // https://developer.apple.com/documentation/watchkit/wkapplicationdelegate
     @WKApplicationDelegateAdaptor(OpenHABWatchAppDelegate.self) var appDelegate
-    @ObservedObject var userData = ObservableOpenHABDataObject(sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
+    @ObservedObject var userData = UserData.shared //(sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
 
     var body: some Scene {
         WindowGroup {
@@ -55,6 +55,7 @@ struct OpenHABWatch: App {
         let SVGCoder = SDImageSVGCoder.shared
         SDImageCodersManager.shared.addCoder(SVGCoder)
         SDWebImageDownloader.shared.config.operationClass = OpenHABImageDownloaderOperation.self
+        
         DispatchQueue.main.async {
             AppMessageService.singleton.requestApplicationContext()
         }

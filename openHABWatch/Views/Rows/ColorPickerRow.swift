@@ -15,7 +15,7 @@ import SwiftUI
 
 struct ColorPickerRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @ObservedObject var settings = AppSettings.shared
     var body: some View {
         let uiColor = widget.item?.stateAsUIColor()
 
@@ -67,5 +67,5 @@ struct ColorPickerRow: View {
 #Preview {
     let widget = UserData().widgets[10]
     ColorPickerRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }

@@ -14,7 +14,7 @@ import SwiftUI
 
 struct MapViewRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
 
     var body: some View {
         VStack {
@@ -29,5 +29,5 @@ struct MapViewRow: View {
 #Preview {
     let widget = UserData().widgets[9]
     MapViewRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }

@@ -15,7 +15,7 @@ import SwiftUI
 
 struct SliderRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @EnvironmentObject var settings: ObservableOpenHABDataObject
+    @EnvironmentObject var settings: AppSettings
     @State private var pendingValue: Double?
     var valueBinding: Binding<Double> {
         .init(
@@ -65,5 +65,5 @@ struct SliderRow: View {
         SliderRow(widget: widget)
         SliderRow(widget: widget)
     }
-    .environmentObject(ObservableOpenHABDataObject())
+    .environmentObject(AppSettings())
 }

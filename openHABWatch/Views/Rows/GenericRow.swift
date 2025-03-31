@@ -15,7 +15,7 @@ import SwiftUI
 
 struct GenericRow: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject var settings = ObservableOpenHABDataObject.shared
+    @ObservedObject var settings = AppSettings.shared
 
     var body: some View {
         HStack {
@@ -31,5 +31,5 @@ struct GenericRow: View {
 #Preview {
     let widget = UserData().widgets[6]
     GenericRow(widget: widget)
-        .environmentObject(ObservableOpenHABDataObject())
+        .environmentObject(AppSettings())
 }
