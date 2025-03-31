@@ -20,7 +20,7 @@ struct OpenHABWatch: App {
     @ObservedObject var settings = ObservableOpenHABDataObject.shared
     // https://developer.apple.com/documentation/watchkit/wkapplicationdelegate
     @WKApplicationDelegateAdaptor(OpenHABWatchAppDelegate.self) var appDelegate
-    @ObservedObject var userData = UserData(sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
+    @ObservedObject var userData = ObservableOpenHABDataObject(sitemapName: ObservableOpenHABDataObject.shared.sitemapName)
 
     var body: some Scene {
         WindowGroup {

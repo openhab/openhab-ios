@@ -19,54 +19,73 @@ import WatchConnectivity
 class WatchMessageService: NSObject, WCSessionDelegate {
     static let singleton = WatchMessageService()
 
+    private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
+
     // This method gets called when the watch requests the data
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        os_log("didReceiveMessage %{PUBLIC}@", log: .watch, type: .info, "\(message)")
+        logger.info("Received message with reply handler: \(message, privacy: .public)")
 
-        if message["request"] != nil {
-            let applicationDict = buildApplicationDict()
-            replyHandler(applicationDict)
+        guard message["request"] != nil else {
+            logger.warning("Invalid message: no 'request' key.")
+            return
         }
+
+        let prefs = WatchPreferences(fromPreferences: Preferences.self)
+        replyHandler(prefs.encodedWatchPreferences())
+        logger.debug("Sent WatchPreferences in replyHandler.")
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        os_log("Received message: %{PUBLIC}@", log: .watch, type: .info, message)
+        logger.info("Received message (no reply): \(message, privacy: .public)")
     }
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        os_log("activationDidCompleteWith activationState %{PUBLIC}@ error: %{PUBLIC}@", log: .watch, type: .info, "\(activationState)", "\(String(describing: error))")
+        logger.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {
-        os_log("sessionDidBecomeInactive", log: .watch, type: .info)
+        logger.info("WCSession became inactive.")
     }
 
     func sessionDidDeactivate(_ session: WCSession) {
-        os_log("sessionDidDeactivate", log: .watch, type: .info)
+        logger.info("WCSession deactivated.")
     }
 
-    func buildApplicationDict() -> [String: Any] {
-        let applicationDict: [String: Any] =
-            [
-                "localUrl": Preferences.localUrl,
-                "remoteUrl": Preferences.remoteUrl,
-                "username": Preferences.username,
-                "password": Preferences.password,
-                "alwaysSendCreds": Preferences.alwaysSendCreds,
-                "defaultSitemap": Preferences.defaultSitemap,
-                "ignoreSSL": Preferences.ignoreSSL,
-                // "trustedCertificates": NetworkConnection.shared.serverCertificateManager.trustedCertificates,
-                "sitemapForWatch": Preferences.sitemapForWatch,
-                "iconType": Preferences.iconType
-            ]
-
-        return applicationDict
-    }
+    // MARK: - Sync Preferences
 
     public func syncPreferencesToWatch() {
-        if WCSession.default.activationState == .activated {
-            let applicationDict = buildApplicationDict()
-            try? WCSession.default.updateApplicationContext(applicationDict)
+        guard WCSession.default.activationState == .activated else {
+            logger.warning("WCSession not activated; skipping sync.")
+            return
         }
+
+        let prefs = WatchPreferences(fromPreferences: Preferences.self)
+        let context = prefs.encodedWatchPreferences()
+
+        do {
+            try WCSession.default.updateApplicationContext(context)
+            logger.debug("Successfully updated application context with WatchPreferences.")
+        } catch {
+            logger.error("Failed to encode or update watch context: \(error.localizedDescription)")
+        }
+    }
+}
+
+public extension WatchPreferences {
+    init(fromPreferences preferences: Preferences.Type) {
+        self.init(
+            localUrl: preferences.localUrl,
+            remoteUrl: preferences.remoteUrl,
+            username: preferences.username,
+            password: preferences.password,
+            alwaysSendCreds: preferences.alwaysSendCreds,
+            defaultSitemap: preferences.defaultSitemap,
+            ignoreSSL: preferences.ignoreSSL,
+            sitemapForWatch: preferences.sitemapForWatch,
+            iconType: preferences.iconType,
+            demoMode: preferences.demomode,
+            localConnectionConfiguration: preferences.localConnectionConfig,
+            remoteConnectionConfiguration: preferences.remoteConnectionConfig
+        )
     }
 }

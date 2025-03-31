@@ -22,38 +22,27 @@ class AppMessageService: NSObject, WCSessionDelegate {
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "AppMessageService")
 
     func updateValuesFromApplicationContext(_ applicationContext: [String: AnyObject]) {
-        guard !applicationContext.isEmpty else { return }
+        guard let data = applicationContext["watchPreferences"] as? Data else {
+            logger.warning("⚠️ No 'watchPreferences' data found in applicationContext.")
+            return
+        }
 
         do {
             // Decode the connection payload
-            if let connectionPayloadDict = applicationContext["connectionPayload"] as? [String: Any] {
-                let data = try JSONSerialization.data(withJSONObject: connectionPayloadDict, options: [])
-                let payload = try JSONDecoder().decode(ConnectionPayload.self, from: data)
-
-                ObservableOpenHABDataObject.shared.localConnectionConfig = payload.local
-                ObservableOpenHABDataObject.shared.remoteConnectionConfig = payload.remote
-            }
-
-            if let sitemapName = applicationContext["defaultSitemap"] as? String {
-                ObservableOpenHABDataObject.shared.sitemapName = sitemapName
-            }
-
-            if let sitemapForWatch = applicationContext["sitemapForWatch"] as? String {
-                ObservableOpenHABDataObject.shared.sitemapForWatch = sitemapForWatch
-            }
-
-            if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
-                // do we need to do anything here?  We load from the shared keychain.
-            }
-
-            if let iconType = applicationContext["iconType"] as? IconType {
-                ObservableOpenHABDataObject.shared.iconType = iconType
-            }
-
+            let prefs = try JSONDecoder().decode(WatchPreferences.self, from: data)
+            ObservableOpenHABDataObject.shared.localConnectionConfig = prefs.localConnectionConfiguration ?? .localDefault
+            ObservableOpenHABDataObject.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
+            ObservableOpenHABDataObject.shared.sitemapName = prefs.defaultSitemap
+            ObservableOpenHABDataObject.shared.sitemapForWatch = prefs.sitemapForWatch
+            ObservableOpenHABDataObject.shared.iconType = IconType(rawValue: prefs.iconType) ?? .svg
             ObservableOpenHABDataObject.shared.haveReceivedAppContext = true
-
+            //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
+            //                       // do we need to do anything here?  We load from the shared keychain.
+            //                   }
+            ObservableOpenHABDataObject.shared.haveReceivedAppContext = true
+            logger.info("✅ Applied WatchPreferences to ObservableOpenHABDataObject")
         } catch {
-            logger.error("Failed to decode ConnectionPayload: \(error.localizedDescription)")
+            logger.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")
         }
     }
 
@@ -61,8 +50,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
         WCSession.default.sendMessage(
             ["request": "Preferences"],
             replyHandler: { response in
-                let filteredMessages = response.filter { ["remoteUrl", "localUrl", "username"].contains($0.key) }
-                self.logger.info("Received \(filteredMessages)")
 
                 DispatchQueue.main.async { () in
                     self.updateValuesFromApplicationContext(response as [String: AnyObject])
