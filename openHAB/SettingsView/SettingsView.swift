@@ -31,7 +31,7 @@ struct SettingsView: View {
     @State var settingsAlwaysAllowWebRTC = true
     @State var settingsSitemapForWatch = ""
 
-    @State private var sitemaps: [OpenHABSitemap] = []
+    @State var sitemaps: [OpenHABSitemap] = []
     @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
 
@@ -89,10 +89,32 @@ struct SettingsView: View {
         }
         .task {
             loadSettings()
+            let activeConfiguration = settingsLocalConnectionConfiguration
+            await updateSitemaps(activeConfiguration: activeConfiguration)
         }
     }
 
-    func loadSettings() {
+    private func updateSitemaps(activeConfiguration: ConnectionConfiguration) async {
+        let openAPIService = OpenAPIService(connectionConfiguration: activeConfiguration)
+
+        do {
+            sitemaps = try await openAPIService.openHABSitemaps()
+            if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                sitemaps = Array(sitemaps.dropLast())
+            }
+
+            // Sort the sitemaps according to Settings selection.
+            switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+            case .label: sitemaps.sort { $0.label < $1.label }
+            case .name: sitemaps.sort { $0.name < $1.name }
+            }
+        } catch {
+            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            sitemaps = []
+        }
+    }
+
+    private func loadSettings() {
         #if !DEBUG
         logger.debug("Loading Settings")
         #endif
@@ -171,14 +193,14 @@ extension UIApplication {
                 icon: "",
                 label: "Home",
                 link: "http://192.168.1.100/rest/sitemaps/home",
-                page: nil // Replace with actual OpenHABPage if needed
+                page: nil
             ),
             OpenHABSitemap(
                 name: "office",
                 icon: "",
                 label: "Office",
                 link: "http://192.168.1.100/rest/sitemaps/office",
-                page: nil // Replace with actual OpenHABPage if needed
+                page: nil
             )
         ]
         @State var localConnectionConfiguration = ConnectionConfiguration(
@@ -210,9 +232,16 @@ extension UIApplication {
                     settingsDefaultMainUIPath: settingsDefaultMainUIPath,
                     settingsAlwaysAllowWebRTC: settingsAlwaysAllowWebRTC,
                     settingsSitemapForWatch: settingsSitemapForWatch,
+                    sitemaps: sitemaps,
                     settingsLocalConnectionConfiguration: localConnectionConfiguration,
                     settingsRemoteConnectionConfiguration: remoteConnectionConfiguration
                 )
+            }
+            .onAppear {
+                // Mock behavior of updateSitemaps
+                if settingsSitemapForWatch.isEmpty, let first = sitemaps.first {
+                    settingsSitemapForWatch = first.name
+                }
             }
         }
     }

@@ -267,6 +267,7 @@ struct DrawerView: View {
         .task {
             let activeConnection = networkTracker.activeConnection
             await updateSitemapsAndUITiles(activeConnection: activeConnection)
+            sitemapForWatch = Preferences.sitemapForWatch
         }
         .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {

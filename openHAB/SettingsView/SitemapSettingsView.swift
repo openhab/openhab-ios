@@ -57,13 +57,16 @@ struct SitemapSettingsView: View {
                 Text("Sort sitemaps by")
             }
 
-            Picker(selection: $settingsSitemapForWatch) {
-                ForEach(sitemaps, id: \.name) { sitemap in
-                    Text(sitemap.label)
+            Picker("Sitemap For Apple Watch", selection: $settingsSitemapForWatch) {
+                if sitemaps.isEmpty {
+                    Text("No sitemaps available").tag("").foregroundColor(.secondary)
+                } else {
+                    ForEach(sitemaps, id: \.name) { sitemap in
+                        Text(sitemap.label).tag(sitemap.name)
+                    }
                 }
-            } label: {
-                Text("Sitemap For Apple Watch")
             }
+            .disabled(sitemaps.isEmpty)
         }
     }
 
