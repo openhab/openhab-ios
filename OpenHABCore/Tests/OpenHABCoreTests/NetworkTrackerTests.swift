@@ -82,7 +82,7 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
     }
 }
 
-final class MockPathMonitor: PathMonitoring {
+final class MockPathMonitor: NWPathMonitoring {
     private var handler: ((Bool) -> Void)?
 
     init() {}
