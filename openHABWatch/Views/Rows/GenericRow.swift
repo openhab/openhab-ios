@@ -30,6 +30,11 @@ struct GenericRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[6]
+    let mockSettings = {
+        let obj = AppSettings()
+        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        return obj
+    }()
     GenericRow(widget: widget)
-        .environmentObject(AppSettings())
+        .environmentObject(mockSettings)
 }

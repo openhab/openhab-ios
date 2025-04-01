@@ -32,6 +32,11 @@ struct ImageRawRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[4]
+    let mockSettings = {
+        let obj = AppSettings()
+        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        return obj
+    }()
     ImageRawRow(widget: widget)
-        .environmentObject(AppSettings())
+        .environmentObject(mockSettings)
 }

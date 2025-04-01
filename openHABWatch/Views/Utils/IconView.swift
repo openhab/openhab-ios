@@ -51,51 +51,15 @@ struct IconView: View {
             .aspectRatio(contentMode: .fit)
             .frame(width: 20, height: 20)
             .id(iconURL?.absoluteString ?? "")
-//        DownloadableImageView(url: iconURL)
-//            .transition(.fade(duration: 0.3))
-//            .frame(width: 20.0, height: 20.0)
-//            .id(iconURL?.absoluteString ?? "")
     }
 }
 
 #Preview {
-    let item = OpenHABItem(name: "PreviewItem", type: "Preview Light", state: "Switch", link: "ON", label: nil, groupType: nil, stateDescription: nil, commandDescription: nil, members: [], category: nil, options: nil)
-    let widget = OpenHABWidget(
-        widgetId: "00",
-        label: "Lights",
-        icon: "lightbulb",
-        type: .slider,
-        url: nil,
-        period: nil,
-        minValue: nil,
-        maxValue: nil,
-        step: nil,
-        refresh: nil,
-        height: nil,
-        isLeaf: nil,
-        iconColor: nil,
-        labelColor: nil,
-        valueColor: nil,
-        service: nil,
-        state: nil,
-        text: nil,
-        legend: true,
-        inputHint: nil,
-        encoding: nil,
-        item: item,
-        linkedPage: nil,
-        mappings: [],
-        widgets: [],
-        visibility: nil,
-        switchSupport: nil,
-        forceAsItem: nil
-    )
-
     let mockSettings = {
         let obj = AppSettings()
         obj.openHABRootUrl = PreviewConstants.remoteURLString
         return obj
     }()
-
-    IconView(widget: widget, settings: mockSettings)
+    let widget2 = UserData(preview: true).widgets[3]
+    IconView(widget: widget2, settings: mockSettings)
 }

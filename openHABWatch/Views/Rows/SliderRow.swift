@@ -61,9 +61,14 @@ struct SliderRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[3]
+    let mockSettings = {
+        let obj = AppSettings()
+        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        return obj
+    }()
     Group {
         SliderRow(widget: widget)
         SliderRow(widget: widget)
     }
-    .environmentObject(AppSettings())
+    .environmentObject(mockSettings)
 }
