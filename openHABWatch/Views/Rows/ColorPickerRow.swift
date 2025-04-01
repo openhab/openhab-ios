@@ -65,7 +65,7 @@ struct ColorPickerRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[10]
+    let widget = UserData(preview: true).widgets[10]
     ColorPickerRow(widget: widget)
         .environmentObject(AppSettings())
 }

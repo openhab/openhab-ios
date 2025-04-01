@@ -26,6 +26,6 @@ struct DetailTextLabelView: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[2]
+    let widget = UserData(preview: true).widgets[2]
     DetailTextLabelView(widget: widget)
 }

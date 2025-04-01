@@ -82,7 +82,7 @@ struct SetpointRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[3]
+    let widget = UserData(preview: true).widgets[3]
     SetpointRow(widget: widget)
         .environmentObject(AppSettings())
 }

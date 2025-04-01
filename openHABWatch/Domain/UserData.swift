@@ -37,6 +37,22 @@ final class UserData: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    #if DEBUG
+    init(preview: Bool = false) {
+        let data = PreviewConstants.sitemapJson
+        do {
+            let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
+            openHABSitemapPage = OpenHABPage(sitemapPage)
+            widgets = openHABSitemapPage?.widgets ?? []
+            //            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+            //                self?.sendCommand(item, command: command)
+            //            }
+        } catch {
+            logger.error("Should not throw \(error.localizedDescription)")
+        }
+    }
+    #endif
+
     init() {
         NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,

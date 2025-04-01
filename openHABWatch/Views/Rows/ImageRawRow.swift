@@ -31,7 +31,7 @@ struct ImageRawRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[4]
+    let widget = UserData(preview: true).widgets[4]
     ImageRawRow(widget: widget)
         .environmentObject(AppSettings())
 }

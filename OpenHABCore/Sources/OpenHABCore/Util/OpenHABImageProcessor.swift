@@ -12,8 +12,6 @@
 import Foundation
 import Kingfisher
 import os.log
-
-// import SDWebImage
 import SDWebImageSVGCoder
 
 public struct OpenHABImageProcessor: ImageProcessor {

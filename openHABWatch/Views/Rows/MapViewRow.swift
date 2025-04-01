@@ -27,7 +27,7 @@ struct MapViewRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[9]
+    let widget = UserData(preview: true).widgets[9]
     MapViewRow(widget: widget)
         .environmentObject(AppSettings())
 }

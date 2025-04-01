@@ -10,8 +10,6 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
-import SDWebImage
-import SDWebImageSVGCoder
 import SwiftUI
 import UserNotifications
 
@@ -51,11 +49,6 @@ struct OpenHABWatch: App {
     }
 
     init() {
-        // Initialize SVGCoder
-//        let SVGCoder = SDImageSVGCoder.shared
-//        SDImageCodersManager.shared.addCoder(SVGCoder)
-//        SDWebImageDownloader.shared.config.operationClass = OpenHABImageDownloaderOperation.self
-
         DispatchQueue.main.async {
             AppMessageService.singleton.requestApplicationContext()
         }

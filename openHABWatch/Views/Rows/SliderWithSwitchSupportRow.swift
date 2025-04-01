@@ -85,7 +85,7 @@ struct SliderWithSwitchSupportRow: View {
 }
 
 #Preview {
-    let widget = UserData().widgets[3]
+    let widget = UserData(preview: true).widgets[3]
     Group {
         SliderRow(widget: widget)
         SliderRow(widget: widget)

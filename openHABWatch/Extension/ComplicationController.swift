@@ -17,7 +17,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Complication Configuration
 
     func getComplicationDescriptors(handler: @escaping ([CLKComplicationDescriptor]) -> Void) {
-        // watchOS7: replacing depreciated CLKComplicationSupportedFamilies
+        // watchOS7: replacing deprecated CLKComplicationSupportedFamilies
         let descriptors = [
             CLKComplicationDescriptor(identifier: "complication", displayName: Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as! String, supportedFamilies: CLKComplicationFamily.allCases)
             // Multiple complication support can be added here with more descriptors
