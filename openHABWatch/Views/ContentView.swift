@@ -20,42 +20,45 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            ScrollView {
-                HStack {
-                    Text(viewModel.openHABSitemapPage?.title ?? "Waiting...")
-                        .font(.body)
-                        .lineLimit(1)
-                    Spacer()
+            if viewModel.isLoadingSitemap {
+                ProgressView("Loading sitemap...")
+                    .progressViewStyle(CircularProgressViewStyle())
+            } else if viewModel.widgets.isEmpty {
+                VStack {
+                    Text("No widgets available.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
-                ForEach(viewModel.widgets) { widget in
-                    rowWidget(widget: widget)
+            } else {
+                ScrollView {
+                    HStack {
+                        Text(viewModel.openHABSitemapPage?.title ?? "Waiting...")
+                            .font(.body)
+                            .lineLimit(1)
+                        Spacer()
+                    }
+                    ForEach(viewModel.widgets) { widget in
+                        rowWidget(widget: widget)
+                    }
                 }
+                .navigationBarTitle(Text(title))
             }
-            .navigationBarTitle(Text(title))
-            .alert(isPresented: $viewModel.showCertificateAlert) {
-                Alert(
-                    title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
-                    message: Text(viewModel.certificateErrorDescription),
-                    primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
-                        if let client = viewModel.currentClient {
-                            client.completeEvaluation(.permitAlways)
-                        }
-                    },
-                    secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
-                        if let client = viewModel.currentClient {
-                            client.completeEvaluation(.deny)
-                        }
+        }
+        .alert(isPresented: $viewModel.showCertificateAlert) {
+            Alert(
+                title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),
+                message: Text(viewModel.certificateErrorDescription),
+                primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
+                    if let client = viewModel.currentClient {
+                        client.completeEvaluation(.permitAlways)
                     }
-                )
-            }
-            if viewModel.showAlert {
-                Text("Refreshing...")
-                    .task {
-                        await viewModel.refreshUrl()
-                        os_log("reload after alert", log: .default, type: .info)
-                        viewModel.showAlert = false
+                },
+                secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
+                    if let client = viewModel.currentClient {
+                        client.completeEvaluation(.deny)
                     }
-            }
+                }
+            )
         }
     }
 

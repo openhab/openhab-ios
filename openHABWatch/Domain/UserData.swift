@@ -25,12 +25,16 @@ final class UserData: ObservableObject {
     @Published var errorDescription = ""
     @Published var showCertificateAlert = false
     @Published var certificateErrorDescription = ""
+    @Published var isLoadingSitemap = false
+
+    private var pageHandlingTask: Task<Void, Never>?
+    @Published var isPolling = false
 
     var openHABSitemapPage: OpenHABPage?
     var currentClient: HTTPClient?
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "UserData")
-    
+
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -75,18 +79,18 @@ final class UserData: ObservableObject {
         }
 
         AppSettings.shared.$haveReceivedAppContext
-               .removeDuplicates()
-               .filter { $0 == true }
-               .sink { [weak self] _ in
-                   Task {
-                       await self?.updateNetwork()
-                   }
-               }
-               .store(in: &cancellables)
+            .removeDuplicates()
+            .filter { $0 == true }
+            .sink { [weak self] _ in
+                Task {
+                    await self?.updateNetwork()
+                }
+            }
+            .store(in: &cancellables)
 
-           Task {
-               await observeNetworkChanges()
-           }
+        Task {
+            await observeNetworkChanges()
+        }
     }
 
     /// Observes network connection changes and updates state
@@ -127,7 +131,7 @@ final class UserData: ObservableObject {
             }
             SDWebImageDownloader.shared.requestModifier = requestModifier
 
-            await loadPage(sitemapName: AppSettings.shared.sitemapForWatch, longPolling: false, refresh: true)
+            startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
         }
     }
 
@@ -142,6 +146,9 @@ final class UserData: ObservableObject {
 
     func loadPage(sitemapName: String, longPolling: Bool, refresh: Bool) async {
         logger.info("Loading page: \(sitemapName) longPolling: \(longPolling) refresh: \(refresh)")
+
+        isLoadingSitemap = true
+        defer { isLoadingSitemap = false }
 
         do {
             openHABSitemapPage = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, longPolling: longPolling)
@@ -160,7 +167,59 @@ final class UserData: ObservableObject {
             logger.error("Polling failed with error \(error.localizedDescription)")
             widgets = []
             showAlert = true
+            errorDescription = error.localizedDescription
         }
+    }
+
+    func startPageHandling(sitemapName: String, pageId: String = "") {
+        pageHandlingTask?.cancel()
+
+        pageHandlingTask = Task {
+            do {
+                isLoadingSitemap = true
+                let service = OpenAPIService(connectionConfiguration: NetworkTracker.shared.activeConnection?.configuration ?? ConnectionConfiguration.remoteDefault)
+
+                let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
+                try Task.checkCancellation()
+
+                await MainActor.run {
+                    self.openHABSitemapPage = initialPage
+                    self.widgets = initialPage?.widgets ?? []
+                    openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                        Task { await self?.sendCommand(item, command: command) }
+                    }
+                    self.isLoadingSitemap = false
+                }
+
+                // Long polling loop
+                while !Task.isCancelled {
+                    let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
+                    try Task.checkCancellation()
+
+                    await MainActor.run {
+                        self.openHABSitemapPage = page
+                        openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                            Task { await self?.sendCommand(item, command: command) }
+                        }
+                        self.widgets = page?.widgets ?? []
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.widgets = []
+                    self.errorDescription = error.localizedDescription
+                    self.showAlert = true
+                    self.isLoadingSitemap = false
+                }
+            }
+        }
+    }
+
+    func stopLongPolling() {
+        pageHandlingTask?.cancel()
+        pageHandlingTask = nil
+        isPolling = false
+        isLoadingSitemap = false
     }
 
     func sendCommand(_ item: OpenHABItem?, command: String?) async {
@@ -177,6 +236,7 @@ final class UserData: ObservableObject {
               !AppSettings.shared.openHABRootUrl.isEmpty else { return }
 
         showAlert = false
-        await loadPage(sitemapName: AppSettings.shared.sitemapForWatch, longPolling: false, refresh: true)
+//        await loadPage(sitemapName: AppSettings.shared.sitemapForWatch, longPolling: false, refresh: true)
+        startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
     }
 }

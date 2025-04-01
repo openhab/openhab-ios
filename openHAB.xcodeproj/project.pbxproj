@@ -80,7 +80,6 @@
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
 		DA242C622C83588600AFB10D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA242C612C83588600AFB10D /* SettingsView.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		DA2AEB6C2D92BA3F00897D80 /* OpenHABImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6B2D92BA3F00897D80 /* OpenHABImageProcessor.swift */; };
 		DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */; };
 		DA2AEB702D92CF3E00897D80 /* WidgetIconRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6F2D92CF3E00897D80 /* WidgetIconRenderer.swift */; };
 		DA2AEBA02D92FB6500897D80 /* NoIconDisplayableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB9F2D92FB6500897D80 /* NoIconDisplayableCell.swift */; };
@@ -397,7 +396,6 @@
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
 		DA242C612C83588600AFB10D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		DA2AEB6B2D92BA3F00897D80 /* OpenHABImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABImageProcessor.swift; sourceTree = "<group>"; };
 		DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageLoader.swift; sourceTree = "<group>"; };
 		DA2AEB6F2D92CF3E00897D80 /* WidgetIconRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIconRenderer.swift; sourceTree = "<group>"; };
 		DA2AEB9F2D92FB6500897D80 /* NoIconDisplayableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoIconDisplayableCell.swift; sourceTree = "<group>"; };
@@ -934,7 +932,6 @@
 				1224F78B228A89E300750965 /* Watch */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
-				DA2AEB6B2D92BA3F00897D80 /* OpenHABImageProcessor.swift */,
 				DA2AEB6F2D92CF3E00897D80 /* WidgetIconRenderer.swift */,
 			);
 			name = UI;
@@ -1634,7 +1631,6 @@
 				653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */,
 				DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,
-				DA2AEB6C2D92BA3F00897D80 /* OpenHABImageProcessor.swift in Sources */,
 				DAF0A28D2C56EF8900A14A6A /* SetpointCell.swift in Sources */,
 				DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */,
 				DF05FF231896BD2D00FF2F9B /* SelectionUITableViewCell.swift in Sources */,

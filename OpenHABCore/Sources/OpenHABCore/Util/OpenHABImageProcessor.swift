@@ -12,16 +12,19 @@
 import Foundation
 import Kingfisher
 import os.log
-import SDWebImage
+
+// import SDWebImage
 import SDWebImageSVGCoder
 
-struct OpenHABImageProcessor: ImageProcessor {
+public struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
-    let identifier = "org.openhab.svgprocessor"
+    public let identifier = "org.openhab.svgprocessor"
+
+    public init() {}
 
     // Convert input data/image to target image and return it.
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
+    public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
             os_log("already an image", log: .default, type: .info)
