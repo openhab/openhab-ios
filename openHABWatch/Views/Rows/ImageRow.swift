@@ -28,8 +28,6 @@ struct ImageRow: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .id(url?.absoluteString ?? "")
-//        DownloadableImageView(url: url)
-//            .transition(.fade(duration: 0.3)).id(url?.absoluteString ?? "")
     }
 }
 

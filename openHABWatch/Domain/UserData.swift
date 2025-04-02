@@ -13,7 +13,6 @@ import Combine
 import Foundation
 import OpenHABCore
 import os.log
-import SDWebImage
 import SwiftUI
 
 @MainActor
@@ -44,9 +43,9 @@ final class UserData: ObservableObject {
             let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
             openHABSitemapPage = OpenHABPage(sitemapPage)
             widgets = openHABSitemapPage?.widgets ?? []
-            //            openHABSitemapPage?.sendCommand = { [weak self] item, command in
-            //                self?.sendCommand(item, command: command)
-            //            }
+            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                Task { await self?.sendCommand(item, command: command) }
+            }
         } catch {
             logger.error("Should not throw \(error.localizedDescription)")
         }
@@ -125,27 +124,8 @@ final class UserData: ObservableObject {
 
             AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
             AppSettings.shared.openHABVersion = activeConnection.version
-
-            let alwaysSendBasicAuth = activeConnection.configuration.alwaysSendBasicAuth
-            let username = activeConnection.configuration.username
-            let password = activeConnection.configuration.password
-            let requestModifier = SDWebImageDownloaderRequestModifier { (request) -> URLRequest? in
-                guard alwaysSendBasicAuth || request.url?.host?.hasSuffix("myopenhab.org") == true else {
-                    return request
-                }
-                guard !username.isEmpty, !password.isEmpty else {
-                    return request
-                }
-                var request = request
-
-                // We are handling URLRequests here, so we need to set the header fields
-                // to the request object with String and cannot use the type safe way of HTTPRequest
-                // like request.headerFields[.authorization] = basicAuthHeader()
-                // TODO: revert this
-                request.setValue(basicAuthHeader(username: username, password: password), forHTTPHeaderField: "Authorization")
-                return request
-            }
-            SDWebImageDownloader.shared.requestModifier = requestModifier
+            
+            // TODO: Check whether there is need to setup requestModifier for Kingfisher
 
             startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
         }
@@ -158,33 +138,6 @@ final class UserData: ObservableObject {
             return
         }
         NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
-    }
-
-    func loadPage(sitemapName: String, longPolling: Bool, refresh: Bool) async {
-        logger.info("Loading page: \(sitemapName) longPolling: \(longPolling) refresh: \(refresh)")
-
-        isLoadingSitemap = true
-        defer { isLoadingSitemap = false }
-
-        do {
-            openHABSitemapPage = try await NetworkTracker.shared.pollDataForPage(sitemapname: sitemapName, longPolling: longPolling)
-
-            openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                Task { await self?.sendCommand(item, command: command) }
-            }
-
-            widgets = openHABSitemapPage?.widgets ?? []
-            showAlert = widgets.isEmpty
-
-            if refresh {
-                await loadPage(sitemapName: sitemapName, longPolling: true, refresh: true)
-            }
-        } catch {
-            logger.error("Polling failed with error \(error.localizedDescription)")
-            widgets = []
-            showAlert = true
-            errorDescription = error.localizedDescription
-        }
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "") {
@@ -222,6 +175,7 @@ final class UserData: ObservableObject {
                 }
             } catch {
                 await MainActor.run {
+                    logger.error("Page handling failed with error \(error.localizedDescription)")
                     self.widgets = []
                     self.errorDescription = error.localizedDescription
                     self.showAlert = true
@@ -252,7 +206,6 @@ final class UserData: ObservableObject {
               !AppSettings.shared.openHABRootUrl.isEmpty else { return }
 
         showAlert = false
-//        await loadPage(sitemapName: AppSettings.shared.sitemapForWatch, longPolling: false, refresh: true)
         startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
     }
 }
