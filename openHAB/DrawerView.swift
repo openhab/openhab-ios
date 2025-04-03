@@ -150,6 +150,7 @@ struct DrawerView: View {
                             sitemapForWatch = sitemap.name
                             Preferences.sitemapForWatch = sitemap.name
                         }
+                        WatchMessageService.singleton.syncPreferencesToWatch()
                     }
                 }
             }

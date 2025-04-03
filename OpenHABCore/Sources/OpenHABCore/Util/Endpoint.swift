@@ -17,7 +17,7 @@ public enum ChartStyle {
     case light
 }
 
-public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible {
+public enum IconType: Int, CaseIterable, Identifiable, CustomStringConvertible, Codable {
     case png
     case svg
 

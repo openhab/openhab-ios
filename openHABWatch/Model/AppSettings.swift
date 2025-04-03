@@ -12,18 +12,92 @@
 import Combine
 import Foundation
 import OpenHABCore
+import SwiftUI
 
 final class AppSettings: ObservableObject {
     static let shared = AppSettings()
-
     var openHABVersion: Int = 2
+    var cancellables = Set<AnyCancellable>()
 
     @Published var localConnectionConfig: ConnectionConfiguration?
     @Published var remoteConnectionConfig: ConnectionConfiguration?
-    @Published var haveReceivedAppContext: Bool = false
+    @Published var openHABRootUrl: String
+    @Published var sitemapName: String
+    @Published var sitemapForWatch: String
+    @Published var iconType: IconType
+    @Published var haveReceivedAppContext = false
 
-    @Published var openHABRootUrl = ""
-    @Published var sitemapName = ""
-    @Published var sitemapForWatch = ""
-    @Published var iconType: IconType = .svg
+    init() {
+        let store = UserDefaults(suiteName: "group.openhab.shared")!
+
+        if let data = store.data(forKey: "localConnectionConfig"),
+           let decoded = try? JSONDecoder().decode(ConnectionConfiguration.self, from: data) {
+            localConnectionConfig = decoded
+        } else {
+            localConnectionConfig = nil
+        }
+
+        if let data = store.data(forKey: "remoteConnectionConfig"),
+           let decoded = try? JSONDecoder().decode(ConnectionConfiguration.self, from: data) {
+            remoteConnectionConfig = decoded
+        } else {
+            remoteConnectionConfig = nil
+        }
+
+        openHABRootUrl = store.string(forKey: "openHABRootUrl") ?? ""
+        sitemapName = store.string(forKey: "sitemapName") ?? ""
+        sitemapForWatch = store.string(forKey: "sitemapForWatch") ?? ""
+        iconType = IconType(rawValue: store.integer(forKey: "iconType")) ?? .svg
+
+        // Observe changes and write back to UserDefaults
+        $localConnectionConfig
+            .sink { newValue in
+                if let newValue,
+                   let data = try? JSONEncoder().encode(newValue) {
+                    store.set(data, forKey: "localConnectionConfig")
+                } else {
+                    store.removeObject(forKey: "localConnectionConfig")
+                }
+            }
+            .store(in: &cancellables)
+
+        $remoteConnectionConfig
+            .sink { newValue in
+                if let newValue,
+                   let data = try? JSONEncoder().encode(newValue) {
+                    store.set(data, forKey: "remoteConnectionConfig")
+                } else {
+                    store.removeObject(forKey: "remoteConnectionConfig")
+                }
+            }
+            .store(in: &cancellables)
+
+        $openHABRootUrl
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue, forKey: "openHABRootUrl")
+            }
+            .store(in: &cancellables)
+
+        $sitemapName
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue, forKey: "sitemapName")
+            }
+            .store(in: &cancellables)
+
+        $sitemapForWatch
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue, forKey: "sitemapForWatch")
+            }
+            .store(in: &cancellables)
+
+        $iconType
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue.rawValue, forKey: "iconType")
+            }
+            .store(in: &cancellables)
+    }
 }

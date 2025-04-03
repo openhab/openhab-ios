@@ -103,6 +103,14 @@ final class UserData: ObservableObject {
             }
             .store(in: &cancellables)
 
+        AppSettings.shared.$sitemapForWatch
+            .removeDuplicates()
+            .sink { [weak self] newValue in
+                guard !newValue.isEmpty else { return }
+                self?.startPageHandling(sitemapName: newValue)
+            }
+            .store(in: &cancellables)
+
         Task {
             await observeNetworkChanges()
         }
@@ -124,7 +132,7 @@ final class UserData: ObservableObject {
 
             AppSettings.shared.openHABRootUrl = activeConnection.configuration.url
             AppSettings.shared.openHABVersion = activeConnection.version
-            
+
             // TODO: Check whether there is need to setup requestModifier for Kingfisher
 
             startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)
@@ -160,17 +168,35 @@ final class UserData: ObservableObject {
                     self.isLoadingSitemap = false
                 }
 
-                // Long polling loop
-                while !Task.isCancelled {
-                    let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
-                    try Task.checkCancellation()
+                // Long polling loop with backoff
+                var backoffAttempt = 0
+                let maxBackoffDelay: UInt64 = 30_000_000_000 // 30 seconds
 
-                    await MainActor.run {
-                        self.openHABSitemapPage = page
-                        openHABSitemapPage?.sendCommand = { [weak self] item, command in
-                            Task { await self?.sendCommand(item, command: command) }
+                while !Task.isCancelled {
+                    do {
+                        let page = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: true)
+                        try Task.checkCancellation()
+
+                        await MainActor.run {
+                            self.openHABSitemapPage = page
+                            openHABSitemapPage?.sendCommand = { [weak self] item, command in
+                                Task { await self?.sendCommand(item, command: command) }
+                            }
+                            self.widgets = page?.widgets ?? []
                         }
-                        self.widgets = page?.widgets ?? []
+
+                        // Reset backoff after success
+                        backoffAttempt = 0
+
+                    } catch {
+                        backoffAttempt += 1
+                        let baseDelay = min(UInt64(pow(2.0, Double(backoffAttempt))) * 1_000_000_000, maxBackoffDelay)
+                        let jitter = UInt64.random(in: 0 ..< (baseDelay / 2))
+                        let totalDelay = baseDelay + jitter
+
+                        logger.warning("Polling failed: \(error.localizedDescription). Retrying in \(Double(totalDelay) / 1_000_000_000.0) seconds.")
+
+                        try await Task.sleep(nanoseconds: totalDelay)
                     }
                 }
             } catch {

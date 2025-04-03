@@ -39,7 +39,6 @@ class AppMessageService: NSObject, WCSessionDelegate {
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {
             //                       // do we need to do anything here?  We load from the shared keychain.
             //                   }
-            AppSettings.shared.haveReceivedAppContext = true
             logger.info("✅ Applied WatchPreferences to ObservableOpenHABDataObject")
         } catch {
             logger.error("❌ Failed to decode WatchPreferences: \(error.localizedDescription)")

@@ -15,6 +15,7 @@ import os.log
 
 public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
+
     public var items: [OpenHABItem]?
     var cancellables = Set<AnyCancellable>()
     var timeout: Double = 20
@@ -27,6 +28,10 @@ public actor OpenHABItemCache {
         let connection2 = Preferences.remoteConnectionConfig
 
         NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+    }
+
+    private init(connections: [ConnectionConfiguration]) {
+        NetworkTracker.shared.startTracking(connectionConfigurations: connections)
     }
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) -> [String] {

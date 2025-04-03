@@ -87,8 +87,8 @@ public extension OpenHABPage.CodingData {
     }
 }
 
-extension OpenHABPage {
-   public convenience init?(_ page: Components.Schemas.PageDTO?) {
+public extension OpenHABPage {
+    convenience init?(_ page: Components.Schemas.PageDTO?) {
         if let page {
             self.init(
                 pageId: page.id.orEmpty,
