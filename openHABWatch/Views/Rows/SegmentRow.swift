@@ -63,14 +63,9 @@ struct SegmentRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[4]
-    let mockSettings = {
-        let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
-        return obj
-    }()
     Group {
         SegmentRow(widget: widget)
         SegmentRow(widget: widget)
     }
-    .environmentObject(mockSettings)
+    .environmentObject(AppSettings())
 }

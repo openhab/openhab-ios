@@ -40,11 +40,6 @@ struct ImageRow: View {
         iconType: .svg,
         iconColor: ""
     ).url
-    let mockSettings = {
-        let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
-        return obj
-    }()
     return ImageRow(url: iconUrl)
-        .environmentObject(mockSettings)
+        .environmentObject(AppSettings())
 }

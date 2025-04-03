@@ -13,7 +13,7 @@ import Foundation
 import os.log
 
 public struct WatchPreferences: Codable {
-    public init(localUrl: String, remoteUrl: String, username: String, password: String, alwaysSendCreds: Bool, defaultSitemap: String, ignoreSSL: Bool, sitemapForWatch: String, iconType: Int, demoMode: Bool, localConnectionConfiguration: ConnectionConfiguration? = nil, remoteConnectionConfiguration: ConnectionConfiguration? = nil) {
+    public init(localUrl: String, remoteUrl: String, username: String, password: String, alwaysSendCreds: Bool, defaultSitemap: String, ignoreSSL: Bool, sitemapForWatch: String, sitemapForWatchLabel: String, iconType: Int, demoMode: Bool, localConnectionConfiguration: ConnectionConfiguration? = nil, remoteConnectionConfiguration: ConnectionConfiguration? = nil) {
         self.localUrl = localUrl
         self.remoteUrl = remoteUrl
         self.username = username
@@ -22,6 +22,7 @@ public struct WatchPreferences: Codable {
         self.defaultSitemap = defaultSitemap
         self.ignoreSSL = ignoreSSL
         self.sitemapForWatch = sitemapForWatch
+        self.sitemapForWatchLabel = sitemapForWatchLabel
         self.iconType = iconType
         self.demoMode = demoMode
         self.localConnectionConfiguration = localConnectionConfiguration
@@ -36,6 +37,7 @@ public struct WatchPreferences: Codable {
     public var defaultSitemap: String
     public var ignoreSSL: Bool
     public var sitemapForWatch: String
+    public var sitemapForWatchLabel: String
     public var iconType: Int
     public var demoMode: Bool
     public var localConnectionConfiguration: ConnectionConfiguration?

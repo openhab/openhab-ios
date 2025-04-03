@@ -19,31 +19,41 @@ struct ContentView: View {
     @State var title = "openHAB"
 
     var body: some View {
-        ZStack {
+        Group {
             if viewModel.isLoadingSitemap {
-                ProgressView("Loading sitemap...")
-                    .progressViewStyle(CircularProgressViewStyle())
-            } else if viewModel.widgets.isEmpty {
                 VStack {
-                    Text("No widgets available.")
+                    Spacer()
+                    ProgressView("Loading sitemap...")
+                        .progressViewStyle(CircularProgressViewStyle())
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                    Spacer()
                 }
-            } else {
+            } else if !viewModel.widgets.isEmpty {
                 ScrollView {
                     HStack {
-                        Text(viewModel.openHABSitemapPage?.title ?? "Waiting...")
-                            .font(.body)
+                        Text(viewModel.openHABSitemapPage?.title ?? "Sitemap")
+                            .font(.headline)
                             .lineLimit(1)
                         Spacer()
                     }
+                    .padding(.horizontal)
+
                     ForEach(viewModel.widgets) { widget in
                         rowWidget(widget: widget)
                     }
                 }
                 .navigationBarTitle(Text(title))
+            } else {
+                VStack {
+                    Spacer()
+                    Text("No widgets available.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isLoadingSitemap)
         .alert(isPresented: $viewModel.showCertificateAlert) {
             Alert(
                 title: Text(NSLocalizedString("ssl_certificate_warning", comment: "")),

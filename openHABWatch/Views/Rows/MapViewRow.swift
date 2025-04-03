@@ -28,11 +28,6 @@ struct MapViewRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[9]
-    let mockSettings = {
-        let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
-        return obj
-    }()
     MapViewRow(widget: widget)
-        .environmentObject(mockSettings)
+        .environmentObject(AppSettings())
 }

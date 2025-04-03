@@ -66,11 +66,6 @@ struct ColorPickerRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[10]
-    let mockSettings = {
-        let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
-        return obj
-    }()
     ColorPickerRow(widget: widget)
-        .environmentObject(mockSettings)
+        .environmentObject(AppSettings())
 }

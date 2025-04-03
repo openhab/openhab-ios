@@ -82,6 +82,7 @@ public extension WatchPreferences {
             defaultSitemap: preferences.defaultSitemap,
             ignoreSSL: preferences.ignoreSSL,
             sitemapForWatch: preferences.sitemapForWatch,
+            sitemapForWatchLabel: preferences.sitemapForWatchLabel,
             iconType: preferences.iconType,
             demoMode: preferences.demomode,
             localConnectionConfiguration: preferences.localConnectionConfig,

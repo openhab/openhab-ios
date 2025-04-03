@@ -24,6 +24,7 @@ final class AppSettings: ObservableObject {
     @Published var openHABRootUrl: String
     @Published var sitemapName: String
     @Published var sitemapForWatch: String
+    @Published var sitemapForWatchLabel: String
     @Published var iconType: IconType
     @Published var haveReceivedAppContext = false
 
@@ -47,6 +48,7 @@ final class AppSettings: ObservableObject {
         openHABRootUrl = store.string(forKey: "openHABRootUrl") ?? ""
         sitemapName = store.string(forKey: "sitemapName") ?? ""
         sitemapForWatch = store.string(forKey: "sitemapForWatch") ?? ""
+        sitemapForWatchLabel = store.string(forKey: "sitemapForWatchLabel") ?? ""
         iconType = IconType(rawValue: store.integer(forKey: "iconType")) ?? .svg
 
         // Observe changes and write back to UserDefaults
@@ -90,6 +92,13 @@ final class AppSettings: ObservableObject {
             .removeDuplicates()
             .sink { newValue in
                 store.set(newValue, forKey: "sitemapForWatch")
+            }
+            .store(in: &cancellables)
+
+        $sitemapForWatchLabel
+            .removeDuplicates()
+            .sink { newValue in
+                store.set(newValue, forKey: "sitemapForWatchLabel")
             }
             .store(in: &cancellables)
 

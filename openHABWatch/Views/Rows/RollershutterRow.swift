@@ -46,11 +46,6 @@ struct RollershutterRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[5]
-    let mockSettings = {
-        let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
-        return obj
-    }()
     RollershutterRow(widget: widget)
-        .environmentObject(mockSettings)
+        .environmentObject(AppSettings())
 }

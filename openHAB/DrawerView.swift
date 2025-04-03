@@ -146,9 +146,11 @@ struct DrawerView: View {
                         if sitemap.name == sitemapForWatch {
                             sitemapForWatch = nil
                             Preferences.sitemapForWatch = ""
+                            Preferences.sitemapForWatchLabel = ""
                         } else {
                             sitemapForWatch = sitemap.name
                             Preferences.sitemapForWatch = sitemap.name
+                            Preferences.sitemapForWatchLabel = sitemap.label
                         }
                         WatchMessageService.singleton.syncPreferencesToWatch()
                     }

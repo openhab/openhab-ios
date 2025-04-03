@@ -160,6 +160,7 @@ public enum Preferences {
     @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
     @UserDefaultObject("localConnectionConfig", defaultValue: ConnectionConfiguration.localDefault) public static var localConnectionConfig: ConnectionConfiguration
     @UserDefaultObject("remoteConnectionConfig", defaultValue: ConnectionConfiguration.remoteDefault) public static var remoteConnectionConfig: ConnectionConfiguration
+    @UserDefault("sitemapForWatchLabel", defaultValue: "watch") public static var sitemapForWatchLabel: String
 
     // MARK: - Private
 

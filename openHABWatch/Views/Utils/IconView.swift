@@ -55,11 +55,6 @@ struct IconView: View {
 }
 
 #Preview {
-    let mockSettings = {
-        let obj = AppSettings()
-        obj.openHABRootUrl = PreviewConstants.remoteURLString
-        return obj
-    }()
     let widget2 = UserData(preview: true).widgets[3]
-    IconView(widget: widget2, settings: mockSettings)
+    IconView(widget: widget2, settings: AppSettings())
 }

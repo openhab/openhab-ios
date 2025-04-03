@@ -25,17 +25,59 @@ struct PreferencesSwiftUIView: View {
 
     var body: some View {
         List {
-            LabeledContent(LocalizedStringKey("active_url"), value: settings.openHABRootUrl)
             LabeledContent(LocalizedStringKey("local_url"), value: settings.localConnectionConfig?.url ?? "empty")
+                .highlightDotRow(if: settings.localConnectionConfig?.url == settings.openHABRootUrl)
             LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteConnectionConfig?.url ?? "empty")
-            LabeledContent(LocalizedStringKey("sitemap"), value: settings.sitemapForWatch)
+                .highlightDotRow(if: settings.remoteConnectionConfig?.url == settings.openHABRootUrl)
+            LabeledContent(LocalizedStringKey("sitemap"), value: settings.sitemapForWatchLabel)
+                .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
             LabeledContent(LocalizedStringKey("version"), value: applicationVersionNumber)
+                .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
         }
+        .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
+        .listStyle(.plain)
+        .environment(\.defaultMinListRowHeight, 10)
+        .labeledContentStyle(CompactLabeledContentStyle()) // 👈 Apply custom style
+        .refreshable {
+            AppMessageService.singleton.requestApplicationContext()
+        }
+    }
+}
 
-        Button { AppMessageService.singleton.requestApplicationContext()
-        } label: { Label("sync_prefs", systemSymbol: .arrowTriangle2Circlepath)
+struct HighlightDotRowModifier: ViewModifier {
+    let showDot: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
+            .overlay(alignment: .topTrailing) {
+                if showDot {
+                    Circle()
+                        .fill(Color.red.opacity(0.7))
+                        .frame(width: 6, height: 6)
+                        .offset(x: 0, y: 0)
+                }
+            }
+    }
+}
+
+extension View {
+    func highlightDotRow(if condition: Bool) -> some View {
+        modifier(HighlightDotRowModifier(showDot: condition))
+    }
+}
+
+struct CompactLabeledContentStyle: LabeledContentStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.label
+                .font(.footnote)
+            Spacer()
+            configuration.content
+                .font(.footnote)
+                .foregroundColor(.secondary)
         }
-        .buttonStyle(.borderedProminent)
+//        .padding(.vertical, 4) // Reduces vertical space
     }
 }
 

@@ -34,6 +34,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
             AppSettings.shared.remoteConnectionConfig = prefs.remoteConnectionConfiguration ?? .remoteDefault
             AppSettings.shared.sitemapName = prefs.defaultSitemap
             AppSettings.shared.sitemapForWatch = prefs.sitemapForWatch
+            AppSettings.shared.sitemapForWatchLabel = prefs.sitemapForWatchLabel
             AppSettings.shared.iconType = IconType(rawValue: prefs.iconType) ?? .svg
             AppSettings.shared.haveReceivedAppContext = true
             //                   if let trustedCertificates = applicationContext["trustedCertificates"] as? [String: Data] {

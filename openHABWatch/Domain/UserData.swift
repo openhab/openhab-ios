@@ -228,8 +228,7 @@ final class UserData: ObservableObject {
     }
 
     func refreshUrl() async {
-        guard AppSettings.shared.haveReceivedAppContext,
-              !AppSettings.shared.openHABRootUrl.isEmpty else { return }
+        guard AppSettings.shared.haveReceivedAppContext, !AppSettings.shared.openHABRootUrl.isEmpty else { return }
 
         showAlert = false
         startPageHandling(sitemapName: AppSettings.shared.sitemapForWatch)

@@ -153,6 +153,7 @@ struct SettingsView: View {
         Preferences.defaultMainUIPath = settingsDefaultMainUIPath
         Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
         Preferences.sitemapForWatch = settingsSitemapForWatch
+        Preferences.sitemapForWatchLabel = sitemaps.first(where: { $0.name == settingsSitemapForWatch })?.label ?? "unknown"
         Preferences.localConnectionConfig = settingsLocalConnectionConfiguration
         Preferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
         WatchMessageService.singleton.syncPreferencesToWatch()
