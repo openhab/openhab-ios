@@ -36,18 +36,12 @@ struct IconView: View {
     var body: some View {
         KFImage(iconURL)
             .placeholder {
-                ProgressView()
+                Image(systemSymbol: .circle)
                     .frame(width: 20, height: 20)
             }
             .setProcessor(OpenHABImageProcessor())
             .fade(duration: 0.25)
             .resizable()
-            .onSuccess { result in
-                print("Image loaded from cache: \(result.cacheType)")
-            }
-            .onFailure { error in
-                print("Error: \(error)")
-            }
             .aspectRatio(contentMode: .fit)
             .frame(width: 20, height: 20)
             .id(iconURL?.absoluteString ?? "")
@@ -55,6 +49,9 @@ struct IconView: View {
 }
 
 #Preview {
-    let widget2 = UserData(preview: true).widgets[3]
-    IconView(widget: widget2, settings: AppSettings())
+    let widget2 = UserData(preview: true).widgets[4]
+    IconView(
+        widget: widget2,
+        settings: AppSettings()
+    )
 }

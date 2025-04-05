@@ -55,3 +55,14 @@ struct SwitchRow: View {
     SwitchRow(widget: widget)
         .environmentObject(AppSettings())
 }
+
+#Preview {
+    let widget = UserData(preview: true).widgets[2]
+    let mockSettings = {
+        let obj = AppSettings()
+        obj.openHABRootUrl = PreviewConstants.remoteURLString
+        return obj
+    }()
+    SwitchRow(widget: widget)
+        .environmentObject(mockSettings)
+}

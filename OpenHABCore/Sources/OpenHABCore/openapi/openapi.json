@@ -5431,6 +5431,9 @@
                 }
               }
             }
+          },
+          "401": {
+              "description": "User is not authenticated"
           }
         }
       }

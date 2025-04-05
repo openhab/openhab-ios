@@ -53,7 +53,7 @@ public actor ConnectionPool {
 
     // Initializer allowing the injection of mocked OpenAPIServiceProtocol
     init(serviceFactory: @escaping (ConnectionConfiguration) -> OpenAPIServiceProtocol = {
-        OpenAPIService(connectionConfiguration: $0, configuration: .shortTerm)
+        OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .shortTerm)
     }) {
         self.serviceFactory = serviceFactory
     }

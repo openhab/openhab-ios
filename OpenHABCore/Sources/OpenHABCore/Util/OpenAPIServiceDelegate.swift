@@ -16,7 +16,6 @@ import os
 
 final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     private let connectionConfiguration: ConnectionConfiguration
-    private let authTracker = AuthAttemptTracker() // ✅ Use an actor instead of a dictionary
     private var trustedCertificates: [String: Data] = [:]
     private var evaluateContinuation: CheckedContinuation<CertificateEvaluateResult, Never>?
 
@@ -35,21 +34,25 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
     }
 
     private func urlSessionInternal(_ session: URLSession, task: URLSessionTask?, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        logger.debug("URLAuthenticationChallenge: \(challenge.protectionSpace.authenticationMethod)")
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
-        switch authenticationMethod {
-        case NSURLAuthenticationMethodServerTrust:
-            let result = await handleServerTrust(challenge: challenge)
-            return result
-        case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
+        logger.debug("URLAuthenticationChallenge: \(authenticationMethod)")
 
-            let result = handleBasicAuth(challenge: challenge)
-            return result
-        case NSURLAuthenticationMethodClientCertificate:
-            let result = handleClientCertificateAuth(challenge: challenge)
-            return result
-        default:
-            return (.performDefaultHandling, nil)
+        if challenge.previousFailureCount > 0 {
+            return (.cancelAuthenticationChallenge, nil)
+        } else {
+            switch authenticationMethod {
+            case NSURLAuthenticationMethodServerTrust:
+                let result = await handleServerTrust(challenge: challenge)
+                return result
+            case NSURLAuthenticationMethodDefault, NSURLAuthenticationMethodHTTPBasic:
+                let result = handleBasicAuth(challenge: challenge)
+                return result
+            case NSURLAuthenticationMethodClientCertificate:
+                let result = handleClientCertificateAuth(challenge: challenge)
+                return result
+            default:
+                return (.performDefaultHandling, nil)
+            }
         }
     }
 

@@ -20,6 +20,7 @@ public enum OpenAPIServiceError: Error {
     case noRootURL
     case badRequest
     case notFound
+    case unAuthorized
 }
 
 public enum OpenAPIServiceConfiguration {
@@ -57,11 +58,11 @@ public actor OpenAPIService {
     }
 
     public init(connectionConfiguration: ConnectionConfiguration,
-                configuration: OpenAPIServiceConfiguration = .asDefault) {
+                serviceConfiguration: OpenAPIServiceConfiguration = .asDefault) {
         self.connectionConfiguration = connectionConfiguration
         let delegate = OpenAPIServiceDelegate(with: connectionConfiguration)
         let config = URLSessionConfiguration.default
-        switch configuration {
+        switch serviceConfiguration {
         case .asDefault:
             break
         case .longTerm:
@@ -160,6 +161,8 @@ public extension OpenAPIService {
         case let .ok(okresponse):
             let result = try okresponse.body.json
             return OpenHABServerProperties(result)
+        case .unauthorized:
+            throw OpenAPIServiceError.unAuthorized
         case let .undocumented(statusCode, undocumentedPayload):
             throw OpenAPIServiceError.undocumented(statusCode: statusCode, undocumentedPayload: undocumentedPayload)
         }

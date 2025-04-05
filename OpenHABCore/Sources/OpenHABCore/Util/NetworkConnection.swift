@@ -10,29 +10,31 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import os.log
+
+private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SessionChallenge")
 
 public func onReceiveSessionTaskChallenge(with challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    os_log("onReceiveSessionTaskChallenge host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+    logger.info("onReceiveSessionTaskChallenge host: \(String(describing: challenge.protectionSpace.host))")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 
     if challenge.previousFailureCount > 0 {
         return (.cancelAuthenticationChallenge, credential)
     } else if challenge.protectionSpace.authenticationMethod.isAny(of: NSURLAuthenticationMethodHTTPBasic, NSURLAuthenticationMethodDefault) {
-        let localUrl = URL(string: Preferences.localUrl)
-        let remoteUrl = URL(string: Preferences.remoteUrl)
-        if challenge.protectionSpace.host == localUrl?.host || challenge.protectionSpace.host == remoteUrl?.host || challenge.protectionSpace.host == "home.myopenhab.org" {
-            credential = URLCredential(user: Preferences.username, password: Preferences.password, persistence: .forSession)
+        guard let configuration = NetworkTracker.shared.activeConnection?.configuration else { return (.cancelAuthenticationChallenge, credential) }
+        if challenge.protectionSpace.host == URL(string: configuration.url)?.host || challenge.protectionSpace.host == "home.myopenhab.org" {
+            credential = URLCredential(user: configuration.username, password: configuration.password, persistence: .forSession)
             disposition = .useCredential
-            os_log("HTTP BasicAuth host:'%{PUBLIC}@'", log: .default, type: .error, challenge.protectionSpace.host)
+            logger.info(".useCredential")
+        } else {
+            logger.error("No match \(challenge.protectionSpace.host) <> \(configuration.url)")
         }
     }
     return (disposition, credential)
 }
 
 public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-    os_log("onReceiveSessionChallenge host:'%{PUBLIC}@'", log: .default, type: .info, challenge.protectionSpace.host)
+    logger.info("onReceiveSessionChallenge host: \(String(describing: challenge.protectionSpace.host))")
     var disposition: URLSession.AuthChallengeDisposition = .performDefaultHandling
     var credential: URLCredential?
 
