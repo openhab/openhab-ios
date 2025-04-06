@@ -165,10 +165,10 @@ final class OpenAPIServiceDelegate: NSObject, URLSessionDelegate, URLSessionTask
 
     private func getPersistencePath() -> URL {
         #if os(watchOS)
-        let documentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: documentsDirectory).appendingPathComponent("trustedCertificates")
+        return URL.documentsDirectory.appendingPathComponent("trustedCertificates")
         #else
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!.appendingPathComponent("trustedCertificates")
+        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.org.openhab.app")!
+        return appGroupURL.appendingPathComponent("trustedCertificates")
         #endif
     }
 
