@@ -240,10 +240,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
                     case .notConnected:
                         os_log("Tracking error", log: .viewCycle, type: .info)
 //                        self.showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: NSLocalizedString("network_not_available", comment: ""), theme: .error)
-                    case .connected:
+                    case .connected, .allConnected, .someConnected:
                         self.hidePopupMessages()
-                    default:
-                        break
                     }
                 }
             }
@@ -253,22 +251,15 @@ class OpenHABSitemapViewController: OpenHABViewController {
 
     func startWatchingActiveServer() {
         let task = Task {
-            var isFirst = true // Track first value
-
             for await activeConnection in NetworkTracker.shared.$activeConnection.values {
-                // we only want our watcher to notify us about changes, and not the inital value
-                if isFirst {
-                    isFirst = false
-                    continue
-                }
-
-                await MainActor.run {
-                    if let activeConnection {
+                if let activeConnection {
+                    await MainActor.run {
                         os_log("OpenHABSitemapViewController tracker URL %{PUBLIC}@", log: .viewCycle, type: .info, activeConnection.configuration.url)
                         self.openHABRootUrl = activeConnection.configuration.url
                         self.activeConnectionInfo = activeConnection
                         self.selectSitemap()
                     }
+                    break
                 }
             }
         }
