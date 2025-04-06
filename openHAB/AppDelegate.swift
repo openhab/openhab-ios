@@ -223,23 +223,25 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // this is called when clicking a notification while in the background
-    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        var userInfo = response.notification.request.content.userInfo
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
         let actionIdentifier = response.actionIdentifier
-        logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
-
-        if actionIdentifier != UNNotificationDismissActionIdentifier {
-            if actionIdentifier != UNNotificationDefaultActionIdentifier {
-                userInfo["actionIdentifier"] = actionIdentifier
-            }
-            NotificationCenter.default.post(
-                name: .openHABDidReceiveNotification,
-                object: nil,
-                userInfo: userInfo
-            )
-            let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-            await notifyNotificationListeners(action: action)
+        var userInfo = response.notification.request.content.userInfo
+        print("Notification clicked: \(actionIdentifier)")
+        for (key, value) in userInfo {
+            print("userInfo: \(key) = \(value)")
         }
+        Task { @MainActor in
+            if actionIdentifier != UNNotificationDismissActionIdentifier {
+                if actionIdentifier != UNNotificationDefaultActionIdentifier {
+                    userInfo["actionIdentifier"] = actionIdentifier
+                }
+                let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
+                notifyNotificationListeners(action: action)
+            }
+        }
+        completionHandler()
     }
 
     private func displayNotification(message: String, action: String?) async {
