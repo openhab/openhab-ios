@@ -46,17 +46,24 @@ struct NotificationRow: View {
     }
 
     private var iconUrl: URL? {
-        if let appData {
-            return Endpoint.icon(
-                rootUrl: appData.openHABRootUrl,
-                version: appData.openHABVersion,
-                icon: notification.icon,
-                state: "",
-                iconType: .png,
-                iconColor: ""
-            ).url
+        guard let appData else { return nil }
+
+        let endpoint = Endpoint.icon(
+            rootUrl: appData.openHABRootUrl,
+            version: appData.openHABVersion,
+            icon: notification.icon,
+            state: "",
+            iconType: .png,
+            iconColor: ""
+        )
+
+        guard let url = endpoint.url, url.scheme != nil else {
+            Logger(subsystem: "org.openhab.app", category: "NotificationRow")
+                .warning("Invalid icon URL for icon: \(notification.icon ?? "nil", privacy: .public)")
+            return nil
         }
-        return nil
+
+        return url
     }
 
     private func dateString(from date: Date) -> String {
@@ -92,13 +99,21 @@ struct NotificationsView: View {
 
     private func loadNotifications() async -> [OpenHABNotification] {
         do {
-            guard let config = Preferences.getLowestPriorityOpenHABConnection() else { return [] }
+            guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
+                logger.warning("No openHAB configuration found.")
+                return []
+            }
+
+            guard let url = URL(string: config.url), url.scheme != nil else {
+                logger.error("Invalid URL: \(config.url, privacy: .public)")
+                return []
+            }
             let client = HTTPClient(configuration: config)
             return try await client.notification(urlString: config.url)
         } catch {
-            logger.error("\(error.localizedDescription)")
+            logger.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")
+            return []
         }
-        return []
     }
 }
 
