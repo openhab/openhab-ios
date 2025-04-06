@@ -13,6 +13,12 @@ import Combine
 import Foundation
 import os.log
 
+public protocol ItemCacheProtocol {
+    func getItem(name: String) async -> OpenHABItem?
+    func sendCommand(_ item: OpenHABItem, commandToSend: String) async
+    func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String]
+}
+
 public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
@@ -34,7 +40,7 @@ public actor OpenHABItemCache {
         NetworkTracker.shared.startTracking(connectionConfigurations: connections)
     }
 
-    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) -> [String] {
+    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
         guard let items else {
             return []
         }
@@ -84,7 +90,7 @@ public actor OpenHABItemCache {
         do {
             items = try await NetworkTracker.shared.getItems()
             os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
-            return getItemNames(searchTerm: searchTerm, types: types)
+            return await getItemNames(searchTerm: searchTerm, types: types)
         } catch {
             os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
             return []
@@ -102,3 +108,5 @@ public actor OpenHABItemCache {
         }
     }
 }
+
+extension OpenHABItemCache: ItemCacheProtocol {}

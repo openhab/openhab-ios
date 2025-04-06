@@ -12,70 +12,77 @@
 import Foundation
 import Intents
 import OpenHABCore
-import os.log
+import os
 
-class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling {
-    static let ON = NSLocalizedString("on", comment: "").capitalized // User language
-    static let OFF = NSLocalizedString("off", comment: "").capitalized // User language
-    static let ACTION_NAMES = [ON, OFF]
-    static let ACTION_MAP = [ON: "ON", OFF: "OFF"] // these are the sent items - do not translate this text
+final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling {
+    private static let onLabel = NSLocalizedString("on", comment: "").capitalized
+    private static let offLabel = NSLocalizedString("off", comment: "").capitalized
+
+    private static let localizedActions = [onLabel, offLabel]
+    private static let actionMap: [String: String] = [
+        onLabel: "ON",
+        offLabel: "OFF"
+    ]
+
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SetSwitchStateIntent")
+
+    private let itemCache: ItemCacheProtocol
+
+    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+        self.itemCache = itemCache
+    }
 
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let actions = INObjectCollection<NSString>(items: SetSwitchStateIntentHandler.ACTION_NAMES as [NSString])
-
-        // Call the completion handler, passing the collection.
-        completion(actions, nil)
+        let collection = INObjectCollection(items: Self.localizedActions as [NSString])
+        completion(collection, nil)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
         Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.switchItem]).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
+            let itemNames = await self.itemCache.getItemNames(
+                searchTerm: searchTerm,
+                types: [.switchItem]
+            ).map(NSString.init)
+
+            completion(INObjectCollection(items: itemNames), nil)
         }
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.switchItem]).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+        provideItemOptionsCollection(for: intent, searchTerm: nil, with: completion)
     }
 
     func confirm(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
-        completion(OpenHABSetSwitchStateIntentResponse(code: .ready, userActivity: nil))
+        completion(.init(code: .ready, userActivity: nil))
     }
 
     func handle(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
-        os_log("SetSwitchStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+        let itemName = intent.item ?? ""
+        logger.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
 
-        guard let itemName = intent.item else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
+        guard !itemName.isEmpty else {
+            completion(.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
             return
         }
 
         guard let action = intent.action else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction(NSLocalizedString("empty", comment: "empty action"), item: itemName))
+            completion(.failureInvalidAction(NSLocalizedString("empty", comment: "empty action"), item: itemName))
             return
         }
 
-        // Map user language to real action
-        guard let realAction = SetSwitchStateIntentHandler.ACTION_MAP[action] else {
-            completion(OpenHABSetSwitchStateIntentResponse.failureInvalidAction(action, item: itemName))
+        guard let command = Self.actionMap[action] else {
+            completion(.failureInvalidAction(action, item: itemName))
             return
         }
+
         Task {
-            let item = await OpenHABItemCache.instance.getItem(name: itemName)
-            guard let item else {
-                completion(OpenHABSetSwitchStateIntentResponse.failureInvalidItem(itemName))
+            guard let item = await itemCache.getItem(name: itemName) else {
+                completion(.failureInvalidItem(itemName))
                 return
             }
-            await OpenHABItemCache.instance.sendCommand(item, commandToSend: realAction)
 
-            completion(OpenHABSetSwitchStateIntentResponse.success(action: action, item: itemName))
+            await itemCache.sendCommand(item, commandToSend: command)
+            completion(.success(action: action, item: itemName))
         }
     }
 }
