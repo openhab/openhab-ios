@@ -99,22 +99,6 @@ class OpenHABRootViewController: UIViewController {
         isDemoMode = Preferences.demomode
         switchToSavedView()
         setupTracker()
-        // check if we were launched with a notification
-        // ✅ Observe notifications (in-app or from AppDelegate)
-        NotificationCenter.default.addObserver(
-            forName: .openHABDidReceiveNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let userInfo = notification.userInfo else { return }
-
-            // ✅ Extract action identifier (from button press or notification click) *before* entering the Task
-            let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-
-            Task { @MainActor in
-                self?.handleNotification(action: action)
-            }
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
