@@ -32,63 +32,57 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
         self.itemCache = itemCache
     }
 
-    func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
+    func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
         logger.info("SetSwitchStateIntentHandler provideActionOptionsCollection")
 
         let collection = INObjectCollection(items: Self.localizedActions as [NSString])
-        completion(collection, nil)
+        return collection
     }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
+    func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
         logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection with searchTerm: \(searchTerm ?? "<none>", privacy: .public)")
 
-        Task {
-            let itemNames = await self.itemCache.getItemNames(
+        let itemNames = await itemCache
+            .getItemNames(
                 searchTerm: searchTerm,
                 types: [.switchItem]
-            ).map(NSString.init)
+            )
+            .map(NSString.init)
 
-            completion(INObjectCollection(items: itemNames), nil)
-        }
+        return INObjectCollection(items: itemNames)
     }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
+    func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
         logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection")
 
-        provideItemOptionsCollection(for: intent, searchTerm: nil, with: completion)
+        return try await provideItemOptionsCollection(for: intent, searchTerm: nil)
     }
 
-    func confirm(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
-        completion(.init(code: .ready, userActivity: nil))
+    func confirm(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
+        .init(code: .ready, userActivity: nil)
     }
 
-    func handle(intent: OpenHABSetSwitchStateIntent, completion: @escaping (OpenHABSetSwitchStateIntentResponse) -> Void) {
+    func handle(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
         let itemName = intent.item ?? ""
         logger.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
 
         guard !itemName.isEmpty else {
-            completion(.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
         }
 
         guard let action = intent.action else {
-            completion(.failureInvalidAction(NSLocalizedString("empty", comment: "empty action"), item: itemName))
-            return
+            return .failureInvalidAction(NSLocalizedString("empty", comment: "empty action"), item: itemName)
         }
 
         guard let command = Self.actionMap[action] else {
-            completion(.failureInvalidAction(action, item: itemName))
-            return
+            return .failureInvalidAction(action, item: itemName)
         }
 
-        Task {
-            guard let item = await itemCache.getItem(name: itemName) else {
-                completion(.failureInvalidItem(itemName))
-                return
-            }
-
-            await itemCache.sendCommand(item, commandToSend: command)
-            completion(.success(action: action, item: itemName))
+        guard let item = await itemCache.getItem(name: itemName) else {
+            return .failureInvalidItem(itemName)
         }
+
+        await itemCache.sendCommand(item, commandToSend: command)
+        return .success(action: action, item: itemName)
     }
 }
