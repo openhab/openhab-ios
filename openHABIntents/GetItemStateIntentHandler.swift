@@ -15,43 +15,40 @@ import OpenHABCore
 import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
-    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
+
+    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil).map(NSString.init)
+        return INObjectCollection(items: items)
     }
 
-    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
+        let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil).map(NSString.init)
+        return INObjectCollection(items: items)
     }
 
-    func confirm(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
-        completion(OpenHABGetItemStateIntentResponse(code: .ready, userActivity: nil))
+    func confirm(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
+        OpenHABGetItemStateIntentResponse(code: .ready, userActivity: nil)
     }
 
-    func handle(intent: OpenHABGetItemStateIntent, completion: @escaping (OpenHABGetItemStateIntentResponse) -> Void) {
-        os_log("GetItemStateIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+    func handle(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
+        logger.info("GetItemStateIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item else {
-            completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item name")
+            )
         }
 
-        Task {
-            let item = await OpenHABItemCache.instance.getItem(name: itemName)
-            guard let item else {
-                completion(OpenHABGetItemStateIntentResponse.failureInvalidItem(itemName))
-                return
-            }
-            completion(OpenHABGetItemStateIntentResponse.success(item: itemName, state: item.state ?? NSLocalizedString("unknown", comment: "unknown item")))
+        let item = await OpenHABItemCache.instance.getItem(name: itemName)
+
+        guard let item else {
+            return .failureInvalidItem(itemName)
         }
+
+        return .success(
+            item: itemName,
+            state: item.state ?? NSLocalizedString("unknown", comment: "unknown item")
+        )
     }
 }

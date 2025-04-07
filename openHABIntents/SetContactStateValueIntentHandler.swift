@@ -20,62 +20,54 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     static let ACTION_NAMES = [OPEN, CLOSED]
     static let ACTION_MAP = [OPEN: "OPEN", CLOSED: "CLOSED"] // these are the sent items - do not translate this text
 
-    func provideStateOptionsCollection(for intent: OpenHABSetContactStateValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        let actions = INObjectCollection<NSString>(items: SetContactStateValueIntentHandler.ACTION_NAMES as [NSString])
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
 
-        // Call the completion handler, passing the collection.
-        completion(actions, nil)
+    func provideStateOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
+        INObjectCollection(items: Self.ACTION_NAMES.map(NSString.init))
     }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.contact]).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        let items = await OpenHABItemCache.instance
+            .getItemNames(searchTerm: searchTerm, types: [.contact])
+            .map(NSString.init)
+        return INObjectCollection(items: items)
     }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.contact]).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
+        let items = await OpenHABItemCache.instance
+            .getItemNames(searchTerm: nil, types: [.contact])
+            .map(NSString.init)
+        return INObjectCollection(items: items)
     }
 
-    func confirm(intent: OpenHABSetContactStateValueIntent, completion: @escaping (OpenHABSetContactStateValueIntentResponse) -> Void) {
-        completion(OpenHABSetContactStateValueIntentResponse(code: .ready, userActivity: nil))
+    func confirm(intent: OpenHABSetContactStateValueIntent) async -> OpenHABSetContactStateValueIntentResponse {
+        OpenHABSetContactStateValueIntentResponse(code: .ready, userActivity: nil)
     }
 
-    func handle(intent: OpenHABSetContactStateValueIntent, completion: @escaping (OpenHABSetContactStateValueIntentResponse) -> Void) {
-        os_log("SetContactStateValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+    func handle(intent: OpenHABSetContactStateValueIntent) async -> OpenHABSetContactStateValueIntentResponse {
+        logger.info("SetContactStateValueIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
         }
 
         guard let state = intent.state else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: NSLocalizedString("empty", comment: "empty value"), item: itemName))
-            return
+            return .failureInvalidAction(
+                state: NSLocalizedString("empty", comment: "empty value"),
+                item: itemName
+            )
         }
 
-        // Map user language to real action
-        guard let realState = SetContactStateValueIntentHandler.ACTION_MAP[state] else {
-            completion(OpenHABSetContactStateValueIntentResponse.failureInvalidAction(state: state, item: itemName))
-            return
+        guard let realState = Self.ACTION_MAP[state] else {
+            return .failureInvalidAction(state: state, item: itemName)
         }
-        Task {
-            let item = await OpenHABItemCache.instance.getItem(name: itemName)
-            guard let item else {
-                completion(OpenHABSetContactStateValueIntentResponse.failureInvalidItem(itemName))
-                return
-            }
-            await OpenHABItemCache.instance.sendState(item, stateToSend: realState)
 
-            completion(OpenHABSetContactStateValueIntentResponse.success(item: itemName, state: state))
+        guard let item = await OpenHABItemCache.instance.getItem(name: itemName) else {
+            return .failureInvalidItem(itemName)
         }
+
+        await OpenHABItemCache.instance.sendState(item, stateToSend: realState)
+
+        return .success(item: itemName, state: state)
     }
 }

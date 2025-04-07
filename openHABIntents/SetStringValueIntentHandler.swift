@@ -15,50 +15,45 @@ import OpenHABCore
 import os.log
 
 class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling {
-    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: [OpenHABItem.ItemType.stringItem]).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SetStringValueIntent")
+
+    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        let items = await OpenHABItemCache.instance
+            .getItemNames(searchTerm: searchTerm, types: [.stringItem])
+            .map(NSString.init)
+        return INObjectCollection(items: items)
     }
 
-    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
-        Task {
-            let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: [OpenHABItem.ItemType.stringItem]).map(NSString.init)
-            let retItems = INObjectCollection<NSString>(items: items)
-            // Call the completion handler, passing the collection.
-            completion(retItems, nil)
-        }
+    func provideItemOptionsCollection(for intent: OpenHABSetStringValueIntent) async throws -> INObjectCollection<NSString> {
+        let items = await OpenHABItemCache.instance
+            .getItemNames(searchTerm: nil, types: [.stringItem])
+            .map(NSString.init)
+        return INObjectCollection(items: items)
     }
 
-    func confirm(intent: OpenHABSetStringValueIntent, completion: @escaping (OpenHABSetStringValueIntentResponse) -> Void) {
-        completion(OpenHABSetStringValueIntentResponse(code: .ready, userActivity: nil))
+    func confirm(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
+        OpenHABSetStringValueIntentResponse(code: .ready, userActivity: nil)
     }
 
-    func handle(intent: OpenHABSetStringValueIntent, completion: @escaping (OpenHABSetStringValueIntentResponse) -> Void) {
-        os_log("SetStringValueIntent for %{PUBLIC}@", log: .default, type: .info, intent.item ?? "")
+    func handle(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
+        logger.info("SetStringValueIntent for \(intent.item ?? "")")
 
         guard let itemName = intent.item else {
-            completion(OpenHABSetStringValueIntentResponse.failureInvalidItem(NSLocalizedString("empty", comment: "empty item name")))
-            return
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item name")
+            )
         }
 
         guard let value = intent.value else {
-            completion(OpenHABSetStringValueIntentResponse.failureEmptyValue(item: itemName))
-            return
+            return .failureEmptyValue(item: itemName)
         }
 
-        Task {
-            let item = await OpenHABItemCache.instance.getItem(name: itemName)
-            guard let item else {
-                completion(OpenHABSetStringValueIntentResponse.failureInvalidItem(itemName))
-                return
-            }
-            await OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
-
-            completion(OpenHABSetStringValueIntentResponse.success(value: value, item: itemName))
+        guard let item = await OpenHABItemCache.instance.getItem(name: itemName) else {
+            return .failureInvalidItem(itemName)
         }
+
+        await OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
+
+        return .success(value: value, item: itemName)
     }
 }
