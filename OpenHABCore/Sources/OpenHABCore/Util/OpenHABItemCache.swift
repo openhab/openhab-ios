@@ -41,20 +41,18 @@ public actor OpenHABItemCache {
     }
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
+        logger.info("getItemNames")
         guard let items else {
-            return []
+            return await reload(searchTerm: searchTerm, types: types)
         }
 
-        return items
-            .filter {
-                (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
-                    (types == nil || ($0.type != nil && types!.contains($0.type!)))
-            }
+        return items.filtered(by: searchTerm, for: types)
             .sorted(by: \.name)
             .map(\.name)
     }
 
     public func getItem(name: String) async -> OpenHABItem? {
+        logger.info("getItem")
         let now = Date().timeIntervalSince1970
 
         if items == nil || (now - lastLoad) > 10 {
@@ -84,29 +82,40 @@ public actor OpenHABItemCache {
     }
 
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
-        os_log("OpenHABItemCache Loading items ")
+        logger.info("OpenHABItemCache Loading items ")
         lastLoad = Date().timeIntervalSince1970
 
         do {
-            items = try await NetworkTracker.shared.getItems()
-            os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
-            return await getItemNames(searchTerm: searchTerm, types: types)
+            items = try await NetworkTracker.shared.getItems().filter{ $0.type != .group}
+            logger.info("Loaded \(self.items?.count ?? 0) items to cache")
+            return items?.filtered(by: searchTerm, for: types).sorted(by: \.name).map(\.name) ?? []
         } catch {
-            os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+            logger.error("Could not reload \(error.localizedDescription)")
             return []
         }
     }
 
     public func reload(name: String) async -> OpenHABItem? {
         do {
-            items = try await NetworkTracker.shared.getItems()
-            os_log("Loaded items to cache: %{PUBLIC}d", log: .default, type: .info, self.items?.count ?? 0)
+            items = try await NetworkTracker.shared.getItems().filter{ $0.type != .group}
             return items?.first { $0.name == name }
         } catch {
-            os_log("OpenHABItemCache %{PUBLIC}@ ", log: .default, type: .error, error.localizedDescription)
+            logger.error("Could not reload \(error.localizedDescription)")
             return nil
+        }
+    }
+
+}
+
+extension OpenHABItemCache: ItemCacheProtocol {}
+
+private extension Array where Element == OpenHABItem {
+    func filtered(by searchTerm: String?, for types: [OpenHABItem.ItemType]?) -> [OpenHABItem] {
+        self.filter {
+            (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
+            (types == nil || ($0.type != nil && types!.contains($0.type!)))
         }
     }
 }
 
-extension OpenHABItemCache: ItemCacheProtocol {}
+

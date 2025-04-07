@@ -33,11 +33,15 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
+        logger.info("SetSwitchStateIntentHandler provideActionOptionsCollection")
+
         let collection = INObjectCollection(items: Self.localizedActions as [NSString])
         completion(collection, nil)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
+        logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection with searchTerm: \(searchTerm ?? "<none>", privacy: .public)")
+
         Task {
             let itemNames = await self.itemCache.getItemNames(
                 searchTerm: searchTerm,
@@ -49,6 +53,8 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, with completion: @escaping (INObjectCollection<NSString>?, Error?) -> Void) {
+        logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection")
+
         provideItemOptionsCollection(for: intent, searchTerm: nil, with: completion)
     }
 
