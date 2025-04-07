@@ -86,8 +86,8 @@ public actor OpenHABItemCache {
         lastLoad = Date().timeIntervalSince1970
 
         do {
-            items = try await NetworkTracker.shared.getItems().filter{ $0.type != .group}
-            logger.info("Loaded \(self.items?.count ?? 0) items to cache")
+            items = try await NetworkTracker.shared.getItems().filter { $0.type != .group }
+            logger.info("Loaded \(items?.count ?? 0) items to cache")
             return items?.filtered(by: searchTerm, for: types).sorted(by: \.name).map(\.name) ?? []
         } catch {
             logger.error("Could not reload \(error.localizedDescription)")
@@ -97,25 +97,22 @@ public actor OpenHABItemCache {
 
     public func reload(name: String) async -> OpenHABItem? {
         do {
-            items = try await NetworkTracker.shared.getItems().filter{ $0.type != .group}
+            items = try await NetworkTracker.shared.getItems().filter { $0.type != .group }
             return items?.first { $0.name == name }
         } catch {
             logger.error("Could not reload \(error.localizedDescription)")
             return nil
         }
     }
-
 }
 
 extension OpenHABItemCache: ItemCacheProtocol {}
 
-private extension Array where Element == OpenHABItem {
+private extension [OpenHABItem] {
     func filtered(by searchTerm: String?, for types: [OpenHABItem.ItemType]?) -> [OpenHABItem] {
-        self.filter {
+        filter {
             (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&
-            (types == nil || ($0.type != nil && types!.contains($0.type!)))
+                (types == nil || ($0.type != nil && types!.contains($0.type!)))
         }
     }
 }
-
-
