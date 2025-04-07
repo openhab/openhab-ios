@@ -87,6 +87,7 @@ public actor OpenHABItemCache {
 
         do {
             items = try await NetworkTracker.shared.getItems().filter { $0.type != .group }
+            // swiftformat:disable next redundantSelf
             logger.info("Loaded \(self.items?.count ?? 0) items to cache")
             return items?.filtered(by: searchTerm, for: types).sorted(by: \.name).map(\.name) ?? []
         } catch {
