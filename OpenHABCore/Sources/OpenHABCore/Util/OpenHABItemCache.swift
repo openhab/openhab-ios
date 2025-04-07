@@ -87,7 +87,7 @@ public actor OpenHABItemCache {
 
         do {
             items = try await NetworkTracker.shared.getItems().filter { $0.type != .group }
-            logger.info("Loaded \(items?.count ?? 0) items to cache")
+            logger.info("Loaded \(self.items?.count ?? 0) items to cache")
             return items?.filtered(by: searchTerm, for: types).sorted(by: \.name).map(\.name) ?? []
         } catch {
             logger.error("Could not reload \(error.localizedDescription)")
