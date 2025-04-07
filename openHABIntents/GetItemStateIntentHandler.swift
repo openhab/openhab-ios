@@ -16,14 +16,19 @@ import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
+    private let itemCache: ItemCacheProtocol
+
+    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+        self.itemCache = itemCache
+    }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance.getItemNames(searchTerm: searchTerm, types: nil).map(NSString.init)
+        let items = await itemCache.getItemNames(searchTerm: searchTerm, types: nil).map(NSString.init)
         return INObjectCollection(items: items)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance.getItemNames(searchTerm: nil, types: nil).map(NSString.init)
+        let items = await itemCache.getItemNames(searchTerm: nil, types: nil).map(NSString.init)
         return INObjectCollection(items: items)
     }
 
@@ -40,7 +45,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
             )
         }
 
-        let item = await OpenHABItemCache.instance.getItem(name: itemName)
+        let item = await itemCache.getItem(name: itemName)
 
         guard let item else {
             return .failureInvalidItem(itemName)

@@ -16,9 +16,14 @@ import os.log
 
 class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetDimmerRollerValueIntent")
+    private let itemCache: ItemCacheProtocol
+
+    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+        self.itemCache = itemCache
+    }
 
     func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance.getItemNames(
+        let items = await itemCache.getItemNames(
             searchTerm: searchTerm,
             types: [.dimmer, .rollershutter]
         ).map(NSString.init)
@@ -26,7 +31,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance.getItemNames(
+        let items = await itemCache.getItemNames(
             searchTerm: nil,
             types: [.dimmer, .rollershutter]
         ).map(NSString.init)
@@ -56,11 +61,11 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
             return .failureInvalidValue(value, item: itemName)
         }
 
-        guard let item = await OpenHABItemCache.instance.getItem(name: itemName) else {
+        guard let item = await itemCache.getItem(name: itemName) else {
             return .failureInvalidItem(itemName)
         }
 
-        await OpenHABItemCache.instance.sendCommand(item, commandToSend: "\(number)")
+        await itemCache.sendCommand(item, commandToSend: "\(number)")
 
         return .success(value: NSNumber(value: number), item: itemName)
     }

@@ -15,26 +15,35 @@ import OpenHABCore
 import os.log
 
 class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIntentHandling {
-    static let OPEN = NSLocalizedString("open", comment: "").capitalized // User language
-    static let CLOSED = NSLocalizedString("closed", comment: "").capitalized // User language
-    static let ACTION_NAMES = [OPEN, CLOSED]
-    static let ACTION_MAP = [OPEN: "OPEN", CLOSED: "CLOSED"] // these are the sent items - do not translate this text
+    private static let onLabel = NSLocalizedString("on", comment: "").capitalized
+    private static let offLabel = NSLocalizedString("off", comment: "").capitalized
+
+    private static let localizedActions = [onLabel, offLabel]
+    private static let actionMap: [String: String] = [
+        onLabel: "ON",
+        offLabel: "OFF"
+    ]
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
+    private let itemCache: ItemCacheProtocol
+
+    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+        self.itemCache = itemCache
+    }
 
     func provideStateOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
-        INObjectCollection(items: Self.ACTION_NAMES.map(NSString.init))
+        INObjectCollection(items: Self.localizedActions as [NSString])
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance
+        let items = await itemCache
             .getItemNames(searchTerm: searchTerm, types: [.contact])
             .map(NSString.init)
         return INObjectCollection(items: items)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance
+        let items = await itemCache
             .getItemNames(searchTerm: nil, types: [.contact])
             .map(NSString.init)
         return INObjectCollection(items: items)
@@ -58,15 +67,15 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
             )
         }
 
-        guard let realState = Self.ACTION_MAP[state] else {
+        guard let realState = Self.actionMap[state] else {
             return .failureInvalidAction(state: state, item: itemName)
         }
 
-        guard let item = await OpenHABItemCache.instance.getItem(name: itemName) else {
+        guard let item = await itemCache.getItem(name: itemName) else {
             return .failureInvalidItem(itemName)
         }
 
-        await OpenHABItemCache.instance.sendState(item, stateToSend: realState)
+        await itemCache.sendState(item, stateToSend: realState)
 
         return .success(item: itemName, state: state)
     }

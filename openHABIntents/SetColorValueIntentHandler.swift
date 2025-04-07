@@ -16,16 +16,21 @@ import os.log
 
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
+    private let itemCache: ItemCacheProtocol
+
+    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+        self.itemCache = itemCache
+    }
 
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance
+        let items = await itemCache
             .getItemNames(searchTerm: searchTerm, types: [.color])
             .map(NSString.init)
         return INObjectCollection(items: items)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance
+        let items = await itemCache
             .getItemNames(searchTerm: nil, types: [.color])
             .map(NSString.init)
         return INObjectCollection(items: items)
@@ -59,11 +64,11 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
 
         value = "\(hue),\(sat),\(val)"
 
-        guard let item = await OpenHABItemCache.instance.getItem(name: itemName) else {
+        guard let item = await itemCache.getItem(name: itemName) else {
             return .failureInvalidItem(itemName)
         }
 
-        await OpenHABItemCache.instance.sendCommand(item, commandToSend: value)
+        await itemCache.sendCommand(item, commandToSend: value)
 
         return .success(value: value, item: itemName)
     }

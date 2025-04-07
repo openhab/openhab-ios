@@ -16,16 +16,21 @@ import os.log
 
 class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetNumberValueIntent")
+    private let itemCache: ItemCacheProtocol
+
+    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+        self.itemCache = itemCache
+    }
 
     func provideItemOptionsCollection(for intent: OpenHABSetNumberValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance
+        let items = await itemCache
             .getItemNames(searchTerm: searchTerm, types: [.number])
             .map(NSString.init)
         return INObjectCollection(items: items)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetNumberValueIntent) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABItemCache.instance
+        let items = await itemCache
             .getItemNames(searchTerm: nil, types: [.number])
             .map(NSString.init)
         return INObjectCollection(items: items)
@@ -48,11 +53,11 @@ class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling
             return .failureEmptyValue(item: itemName)
         }
 
-        guard let item = await OpenHABItemCache.instance.getItem(name: itemName) else {
+        guard let item = await itemCache.getItem(name: itemName) else {
             return .failureInvalidItem(itemName)
         }
 
-        await OpenHABItemCache.instance.sendCommand(item, commandToSend: value.stringValue)
+        await itemCache.sendCommand(item, commandToSend: value.stringValue)
 
         return .success(value: value, item: itemName)
     }

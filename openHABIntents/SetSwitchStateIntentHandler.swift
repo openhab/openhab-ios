@@ -34,9 +34,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
 
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
         logger.info("SetSwitchStateIntentHandler provideActionOptionsCollection")
-
-        let collection = INObjectCollection(items: Self.localizedActions as [NSString])
-        return collection
+        return INObjectCollection(items: Self.localizedActions as [NSString])
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {

@@ -17,6 +17,7 @@ public protocol ItemCacheProtocol {
     func getItem(name: String) async -> OpenHABItem?
     func sendCommand(_ item: OpenHABItem, commandToSend: String) async
     func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String]
+    func sendState(_ item: OpenHABItem, stateToSend: String) async
 }
 
 public actor OpenHABItemCache {
