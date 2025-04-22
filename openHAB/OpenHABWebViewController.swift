@@ -44,10 +44,6 @@ class OpenHABWebViewController: OpenHABViewController {
     }
     """
 
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
-
     override open var shouldAutorotate: Bool {
         true
     }

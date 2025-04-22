@@ -28,6 +28,12 @@ public enum NetworkStatus: String {
 public struct ConnectionInfo: Equatable, Sendable {
     public let configuration: ConnectionConfiguration
     public let version: Int
+
+    // Explicit public memberwise initializer
+    public init(configuration: ConnectionConfiguration, version: Int) {
+        self.configuration = configuration
+        self.version = version
+    }
 }
 
 public enum NetworkTrackerError: Error, CustomDebugStringConvertible {
@@ -370,6 +376,12 @@ public final class NetworkTracker: ObservableObject {
     }
 }
 
+public protocol NetworkTracking: ObservableObject {
+    var activeConnection: ConnectionInfo? { get }
+}
+
+extension NetworkTracker: NetworkTracking {}
+
 public extension NetworkTracker {
     func send(to item: OpenHABItem, command: String) async throws {
         try await send(to: item.name, command: command)
@@ -428,3 +440,11 @@ public extension NetworkTracker {
         }
     }
 }
+
+#if DEBUG
+public extension NetworkTracker {
+    func setMockConnection(_ connection: ConnectionInfo) {
+        activeConnection = connection
+    }
+}
+#endif

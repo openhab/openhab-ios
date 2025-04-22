@@ -25,7 +25,7 @@ struct SettingsView: View {
     @State var settingsIgnoreSSL = true
     @State var settingsRealTimeSliders = true
     @State var settingsSendCrashReports = false
-    @State var settingsIconType: IconType = .png
+    @State var settingsIconType: IconType = .svg
     @State var settingsSortSitemapsBy: SortSitemapsOrder = .label
     @State var settingsDefaultMainUIPath = ""
     @State var settingsAlwaysAllowWebRTC = true

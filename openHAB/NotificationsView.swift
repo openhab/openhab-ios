@@ -16,11 +16,7 @@ import SwiftUI
 
 struct NotificationRow: View {
     var notification: OpenHABNotification
-
-    // App wide data access
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+    var connection: ConnectionInfo
 
     var body: some View {
         HStack {
@@ -46,11 +42,9 @@ struct NotificationRow: View {
     }
 
     private var iconUrl: URL? {
-        guard let appData else { return nil }
-
         let endpoint = Endpoint.icon(
-            rootUrl: appData.openHABRootUrl,
-            version: appData.openHABVersion,
+            rootUrl: connection.configuration.url,
+            version: connection.version,
             icon: notification.icon,
             state: "",
             iconType: .png,
@@ -75,14 +69,20 @@ struct NotificationRow: View {
     }
 }
 
-struct NotificationsView: View {
-    private let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
+typealias NotificationLoader = () async -> [OpenHABNotification]
 
+struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
+    @ObservedObject var networkTracker: Tracker
     @State var notifications: [OpenHABNotification] = []
+    let loadNotifications: NotificationLoader
+
+    private let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
 
     var body: some View {
         List(notifications, id: \.id) { notification in
-            NotificationRow(notification: notification)
+            if let connection = networkTracker.activeConnection {
+                NotificationRow(notification: notification, connection: connection)
+            }
         }
         .refreshable {
             await notifications = loadNotifications()
@@ -92,35 +92,86 @@ struct NotificationsView: View {
             await notifications = loadNotifications()
         }
     }
+}
 
+extension NotificationsView where Tracker == NetworkTracker {
     init(notifications: [OpenHABNotification] = []) {
+        networkTracker = NetworkTracker.shared
         _notifications = State(initialValue: notifications)
-    }
+        loadNotifications = {
+            let logger = Logger(subsystem: "org.openhab.app", category: "NotificationView")
 
-    private func loadNotifications() async -> [OpenHABNotification] {
-        do {
-            guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
-                logger.warning("No openHAB configuration found.")
+            do {
+                guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
+                    logger.warning("No openHAB configuration found.")
+                    return []
+                }
+
+                guard let url = URL(string: config.url), url.scheme != nil else {
+                    logger.error("Invalid URL: \(config.url, privacy: .public)")
+                    return []
+                }
+
+                let client = HTTPClient(configuration: config)
+                return try await client.notification(urlString: config.url)
+            } catch {
+                logger.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")
                 return []
             }
-
-            guard let url = URL(string: config.url), url.scheme != nil else {
-                logger.error("Invalid URL: \(config.url, privacy: .public)")
-                return []
-            }
-            let client = HTTPClient(configuration: config)
-            return try await client.notification(urlString: config.url)
-        } catch {
-            logger.error("Failed to load notifications: \(error.localizedDescription, privacy: .public)")
-            return []
         }
     }
 }
 
-#Preview {
-    NotificationsView(notifications: [
-        OpenHABNotification(message: "message1", created: Date.now, id: UUID().uuidString),
-        OpenHABNotification(message: "message2", created: Date.now, id: UUID().uuidString)
-    ]
-    )
+#if DEBUG
+public extension ConnectionInfo {
+    static var mock: ConnectionInfo {
+        ConnectionInfo(
+            configuration: ConnectionConfiguration(
+                url: "http://mock.local:8080",
+                username: "demo",
+                password: "demo",
+                alwaysSendBasicAuth: true
+            ),
+            version: 3
+        )
+    }
 }
+
+final class MockNetworkTracker: NetworkTracking, ObservableObject {
+    @Published var activeConnection: ConnectionInfo?
+
+    init(connection: ConnectionInfo?) {
+        activeConnection = connection
+    }
+}
+
+struct NotificationsViewPreview: View {
+    var body: some View {
+        let mockTracker = MockNetworkTracker(connection: .mock)
+        return NotificationsView(
+            networkTracker: mockTracker,
+            notifications: [],
+            loadNotifications: {
+                [
+                    OpenHABNotification(
+                        message: "Preview Notification 1",
+                        created: .now,
+                        icon: "sun",
+                        id: UUID().uuidString
+                    ),
+                    OpenHABNotification(
+                        message: "Preview Notification 2",
+                        created: .now.addingTimeInterval(-3600),
+                        icon: "moon",
+                        id: UUID().uuidString
+                    )
+                ]
+            }
+        )
+    }
+}
+
+#Preview {
+    NotificationsViewPreview()
+}
+#endif
