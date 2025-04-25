@@ -52,9 +52,7 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+    private var activeConnection: ConnectionInfo?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -174,12 +172,7 @@ class OpenHABRootViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] activeConnection in
                 if let activeConnection {
-                    self?.appData?.openHABRootUrl = activeConnection.configuration.url
-                    self?.appData?.openHABUsername = activeConnection.configuration.username
-                    self?.appData?.openHABPassword = activeConnection.configuration.password
-                    self?.appData?.openHABAlwaysSendCreds = activeConnection.configuration.alwaysSendBasicAuth
-                    self?.appData?.openHABVersion = activeConnection.version
-                    self?.appData?.connectionInfo = activeConnection
+                    self?.activeConnection = activeConnection
                 }
             }
             .store(in: &cancellables)
@@ -227,14 +220,19 @@ class OpenHABRootViewController: UIViewController {
         // Use SFSafariViewController in SwiftUI with UIViewControllerRepresentable
         // Dependent on $OPENHAB_CONF/services/runtime.cfg
         // Can either be an absolute URL, a path (sometimes malformed)
-        if !urlString.isEmpty {
-            let url: URL? = if urlString.hasPrefix("http") {
-                URL(string: urlString)
-            } else {
-                Endpoint.resource(openHABRootUrl: appData?.openHABRootUrl ?? "", path: urlString.prepare()).url
+        guard !urlString.isEmpty else { return }
+
+        let url: URL?
+        if urlString.hasPrefix("http") || urlString.hasPrefix("https") {
+            url = URL(string: urlString)
+        } else {
+            guard let rootUrl = activeConnection?.configuration.url else {
+                os_log("openTileURL failed: no active connection URL", log: .default, type: .error)
+                return
             }
-            openURL(url: url)
+            url = Endpoint.resource(openHABRootUrl: rootUrl, path: urlString.prepare()).url
         }
+        openURL(url: url)
     }
 
     private func openURL(url: URL?) {
@@ -260,7 +258,6 @@ class OpenHABRootViewController: UIViewController {
             }
         case let .sitemap(sitemap):
             Preferences.defaultSitemap = sitemap
-            appData?.sitemapViewController?.pageUrl = ""
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .sitemap(sitemap))
             }
@@ -512,7 +509,6 @@ class OpenHABRootViewController: UIViewController {
             }
             addView(viewController: targetView)
             currentView = targetView
-            appData?.currentView = target
             // Don't save our view in demo mode
             if !Preferences.demomode {
                 Preferences.defaultView = currentView.viewName()

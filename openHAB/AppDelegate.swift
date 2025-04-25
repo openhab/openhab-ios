@@ -54,7 +54,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let audioPlayer = AudioPlayerActor()
     var window: UIWindow?
-    var appData: OpenHABDataObject
 
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
@@ -68,7 +67,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     override init() {
-        appData = OpenHABDataObject()
         super.init()
         AppDelegate.appDelegate = self
     }

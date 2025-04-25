@@ -27,9 +27,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var chartStyle: ChartStyle = .light
     private var activeTask: Task<Void, Never>?
 
-    private var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+    var openHABRootUrl: String?
 
     private var shouldCache: Bool {
         widget?.refresh == 0
@@ -40,8 +38,12 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         switch widget.type {
         case .chart:
+            guard let openHABRootUrl else {
+                os_log("Missing openHABRootUrl in NewImageUITableViewCell", log: .urlComposition, type: .error)
+                return .empty
+            }
             return .link(url: Endpoint.chart(
-                rootUrl: appData!.openHABRootUrl,
+                rootUrl: openHABRootUrl,
                 period: widget.period,
                 type: widget.item?.type,
                 service: widget.service,

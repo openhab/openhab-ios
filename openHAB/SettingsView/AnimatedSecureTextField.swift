@@ -29,11 +29,12 @@ struct AnimatedSecureTextField: View {
                     SecureField(titleKey, text: $text)
                         .textContentType(.password)
                         .multilineTextAlignment(.trailing) // Ensures text aligns to the right
-
+                        .disableAutocorrection(true)
                 } else {
                     TextField(titleKey, text: $text)
                         .textContentType(.password)
                         .multilineTextAlignment(.trailing) // Ensures text aligns to the right
+                        .disableAutocorrection(true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .trailing) // Push to the right

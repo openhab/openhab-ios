@@ -63,9 +63,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
 
     // App wide data access
     // https://stackoverflow.com/questions/45832155/how-do-i-refactor-my-code-to-call-appdelegate-on-the-main-thread
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
+
+    var sitemapViewController: OpenHABSitemapViewController?
 
     // MARK: - Private instance methods
 
@@ -151,7 +150,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
 
         // if pageUrl is empty, it means we are the first opened OpenHABSitemapViewController
         if pageUrl.isEmpty {
-            appData?.sitemapViewController = self
+            sitemapViewController = self
 //        if navigationController?.viewControllers.first == self {
             // This is the first sitemap opened
             if currentPage != nil {
@@ -321,11 +320,11 @@ extension OpenHABSitemapViewController {
     }
 
     func restart() {
-        if appData?.sitemapViewController == self {
+        if sitemapViewController == self {
             os_log("I am a rootViewController!", log: .viewCycle, type: .info)
 
         } else {
-            appData?.sitemapViewController?.pageUrl = ""
+            sitemapViewController?.pageUrl = ""
             navigationController?.popToRootViewController(animated: true)
         }
     }
@@ -731,14 +730,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     }
                 }
             }
-
-//            cell.loadWidgetIcon(
-//                widget: widget,
-//                traitCollection: traitCollection,
-//                openHABRootUrl: openHABRootUrl,
-//                openHABVersion: appData?.openHABVersion ?? 2,
-//                iconType: iconType
-//            )
         }
 
         if cell is FrameUITableViewCell {

@@ -16,7 +16,6 @@ import WebKit
 struct MainUISettingsView: View {
     @Binding var settingsAlwaysAllowWebRTC: Bool
     @Binding var settingsDefaultMainUIPath: String
-//    @Binding var currentWebViewPath: String
 
     @State var showUselastPathAlert = false
     @State var showingCacheAlert = false
