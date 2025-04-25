@@ -22,6 +22,17 @@ import SafariServices
 import SwiftUI
 import UIKit
 
+enum OpenHABSitemapError: LocalizedError {
+    case noActiveConnection
+
+    var errorDescription: String? {
+        switch self {
+        case .noActiveConnection:
+            return NSLocalizedString("no_active_connection", comment: "No active connection available.")
+        }
+    }
+}
+
 // swiftlint:disable type_body_length
 class OpenHABSitemapViewController: OpenHABViewController {
     var pageUrl = ""
@@ -368,11 +379,12 @@ extension OpenHABSitemapViewController {
     func selectSitemap() {
         Task {
             do {
-                logger.debug("Running selectSitemap for URL: \(NetworkTracker.shared.activeConnection?.configuration.url ?? "")")
+                guard let activeConnection = NetworkTracker.shared.activeConnection else {
+                    throw OpenHABSitemapError.noActiveConnection
+                }
+                logger.debug("Running selectSitemap for URL: \(activeConnection.configuration.url)")
 
-                openAPIService = OpenAPIService(
-                    connectionConfiguration: NetworkTracker.shared.activeConnection!.configuration)
-
+                openAPIService = OpenAPIService(connectionConfiguration: activeConnection.configuration)
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
                 guard let openAPIService else {
@@ -407,6 +419,16 @@ extension OpenHABSitemapViewController {
                 widgetTableView.reloadData()
             } catch _ as OpenAPIServiceError {
                 logger.debug("OpenAPIService Error on OpenHABSitemapViewController")
+            } catch let error as OpenHABSitemapError {
+                logger.error("OpenHABSitemap Error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.showPopupMessage(
+                        seconds: 5,
+                        title: NSLocalizedString("error", comment: ""),
+                        message: error.localizedDescription,
+                        theme: .error
+                    )
+                }
             } catch {
                 os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
                 DispatchQueue.main.async {

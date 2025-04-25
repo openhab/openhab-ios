@@ -922,11 +922,11 @@
 				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
 				DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */,
+				DA2AEB6F2D92CF3E00897D80 /* WidgetIconRenderer.swift */,
 				DA48001F2D837CD8009CF127 /* SettingsView */,
 				1224F78B228A89E300750965 /* Watch */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
-				DA2AEB6F2D92CF3E00897D80 /* WidgetIconRenderer.swift */,
 			);
 			name = UI;
 			sourceTree = "<group>";
