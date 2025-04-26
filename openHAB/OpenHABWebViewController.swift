@@ -327,7 +327,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse {
-//            dump(response.allHeaderFields)
             logger.info("navigationResponse: \(response.statusCode)")
 
             if response.statusCode >= 400 {
@@ -384,10 +383,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         logger.warning("webViewWebContentProcessDidTerminate - reloading view")
         reloadView()
     }
-
-    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
-        decisionHandler(Preferences.alwaysAllowWebRTC ? .grant : .prompt)
-    }
 }
 
 extension OpenHABWebViewController: WKUIDelegate {
@@ -405,5 +400,9 @@ extension OpenHABWebViewController: WKUIDelegate {
         }
 
         return nil
+    }
+
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping @MainActor @Sendable (WKPermissionDecision) -> Void) {
+        decisionHandler(Preferences.alwaysAllowWebRTC ? .grant : .prompt)
     }
 }
