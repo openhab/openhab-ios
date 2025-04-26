@@ -22,19 +22,8 @@ import SafariServices
 import SwiftUI
 import UIKit
 
-enum OpenHABSitemapError: LocalizedError {
-    case noActiveConnection
-
-    var errorDescription: String? {
-        switch self {
-        case .noActiveConnection:
-            return NSLocalizedString("no_active_connection", comment: "No active connection available.")
-        }
-    }
-}
-
 // swiftlint:disable type_body_length
-class OpenHABSitemapViewController: OpenHABViewController {
+class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDelegate {
     var pageUrl = ""
     private var iconType: IconType = .png
     private var openHABRootUrl = ""
@@ -53,7 +42,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
     private var pageNetworkStatusAvailable = false
     private var refreshControl: UIRefreshControl?
     private var filteredPage: OpenHABPage?
-    private let search = UISearchController(searchResultsController: nil)
+    private let searchController = UISearchController(searchResultsController: nil)
     private var isUserInteracting = false
     private var isWaitingToReload = false
     // Properties in your view controller:
@@ -81,11 +70,11 @@ class OpenHABSitemapViewController: OpenHABViewController {
 
     var searchBarIsEmpty: Bool {
         // Returns true if the text is empty or nil
-        search.searchBar.text?.isEmpty ?? true
+        searchController.searchBar.text?.isEmpty ?? true
     }
 
     var isFiltering: Bool {
-        search.isActive && !searchBarIsEmpty
+        searchController.isActive && !searchBarIsEmpty
     }
 
     private var openAPIService: OpenAPIService?
@@ -104,7 +93,11 @@ class OpenHABSitemapViewController: OpenHABViewController {
         widgetTableView.tableFooterView = UIView()
 
         guard let initialConfiguration = activeConnectionInfo?.configuration else { return }
-        openAPIService = OpenAPIService(connectionConfiguration: initialConfiguration)
+        do {
+            openAPIService = try OpenAPIService(connectionConfiguration: initialConfiguration)
+        } catch {
+            logger.error("Could not create OpenAPIService: \(error)")
+        }
 
         guard let openAPIService else { return }
         // ✅ Initialize PageLoader
@@ -123,9 +116,12 @@ class OpenHABSitemapViewController: OpenHABViewController {
             widgetTableView.refreshControl = refreshControl
         }
 
-        search.searchResultsUpdater = self
-        search.obscuresBackgroundDuringPresentation = false
-        search.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
+        searchController.delegate = self
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.delegate = self // Monitor when the search button is tapped.
+        searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
         definesPresentationContext = true
 
         #if DEBUG
@@ -141,7 +137,7 @@ class OpenHABSitemapViewController: OpenHABViewController {
         // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
         if parent?.navigationItem.searchController == nil {
             DispatchQueue.main.async {
-                self.parent?.navigationItem.searchController = self.search
+                self.parent?.navigationItem.searchController = self.searchController
             }
         }
     }
@@ -195,8 +191,8 @@ class OpenHABSitemapViewController: OpenHABViewController {
         super.viewWillDisappear(animated)
 
         if #unavailable(iOS 13.0) {
-            if animated, !search.isActive, !search.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
-               let searchBarSuperview = search.searchBar.superview,
+            if animated, !searchController.isActive, !searchController.isEditing, navigationController.map({ $0.viewControllers.last != self }) ?? false,
+               let searchBarSuperview = searchController.searchBar.superview,
                let searchBarHeightConstraint = searchBarSuperview.constraints.first(where: {
                    $0.firstAttribute == .height
                        && $0.secondItem == nil
@@ -355,7 +351,7 @@ extension OpenHABSitemapViewController {
         currentPage = page
 
         if isFiltering {
-            filterContentForSearchText(search.searchBar.text)
+            filterContentForSearchText(searchController.searchBar.text)
         }
 
         currentPage?.sendCommand = { [weak self] item, command in
@@ -384,7 +380,7 @@ extension OpenHABSitemapViewController {
                 }
                 logger.debug("Running selectSitemap for URL: \(activeConnection.configuration.url)")
 
-                openAPIService = OpenAPIService(connectionConfiguration: activeConnection.configuration)
+                openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
                 sitemaps = try await openAPIService?.openHABSitemaps() ?? []
 
                 guard let openAPIService else {
@@ -496,7 +492,7 @@ extension OpenHABSitemapViewController {
                 // Initial page load
 
                 if openAPIService == nil {
-                    openAPIService = OpenAPIService(
+                    openAPIService = try OpenAPIService(
                         connectionConfiguration: NetworkTracker.shared.activeConnection!.configuration)
                 }
 
@@ -650,6 +646,18 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
     }
 }
 
+// MARK: - UISearchBarDelegate
+
+extension OpenHABSitemapViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+
+//    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+//        updateSearchResults(for: searchController)
+//    }
+}
+
 // MARK: - ColorPickerCellDelegate
 
 extension OpenHABSitemapViewController: ColorPickerCellDelegate {
@@ -675,6 +683,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 return filteredPage?.widgets.count ?? 0
             }
             return currentPage?.widgets.count ?? 0
+//            relevantPage?.widgets.count ?? 0
         } else {
             return 0
         }
@@ -799,7 +808,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         if let linkedPage = widget.linkedPage {
             logger.info("Selected linked page: \(linkedPage.link)")
             stopAllTasks()
-//            pageId = linkedPage.pageId
             let newViewController = (storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController)!
             newViewController.title = linkedPage.title.components(separatedBy: "[")[0]
             newViewController.pageId = linkedPage.pageId

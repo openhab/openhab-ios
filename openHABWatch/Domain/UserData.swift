@@ -154,7 +154,7 @@ final class UserData: ObservableObject {
         pageHandlingTask = Task {
             do {
                 isLoadingSitemap = true
-                let service = OpenAPIService(connectionConfiguration: NetworkTracker.shared.activeConnection?.configuration ?? ConnectionConfiguration.remoteDefault)
+                let service = try OpenAPIService(connectionConfiguration: NetworkTracker.shared.activeConnection?.configuration ?? ConnectionConfiguration.remoteDefault)
 
                 let initialPage = try await service.pollDataForPage(sitemapname: sitemapName, pageId: pageId, longPolling: false)
                 try Task.checkCancellation()

@@ -58,7 +58,10 @@ public actor OpenAPIService {
     }
 
     public init(connectionConfiguration: ConnectionConfiguration,
-                serviceConfiguration: OpenAPIServiceConfiguration = .asDefault) {
+                serviceConfiguration: OpenAPIServiceConfiguration = .asDefault) throws {
+        guard !connectionConfiguration.url.isEmpty else {
+            throw OpenHABSitemapError.invalidConnectionConfiguration
+        }
         self.connectionConfiguration = connectionConfiguration
         let delegate = OpenAPIServiceDelegate(with: connectionConfiguration)
         let config = URLSessionConfiguration.default

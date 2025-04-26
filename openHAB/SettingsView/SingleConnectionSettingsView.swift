@@ -136,7 +136,7 @@ struct SingleConnectionSettingsView: View {
     private func testConnection() async throws {
         try connectionConfig.url.testAsValidOpenHABURL()
 
-        let connection = OpenAPIService(connectionConfiguration: connectionConfig, serviceConfiguration: .shortTerm)
+        let connection = try OpenAPIService(connectionConfiguration: connectionConfig, serviceConfiguration: .shortTerm)
         try await connection.getRootVersion()
     }
 

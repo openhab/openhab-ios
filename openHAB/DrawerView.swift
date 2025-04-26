@@ -16,6 +16,8 @@ import SafariServices
 import SFSafeSymbols
 import SwiftUI
 
+private let logger = Logger(subsystem: "org.openhab.app", category: "DrawerView")
+
 enum DrawerViewError: Error, CustomDebugStringConvertible {
     case noRootURL
 
@@ -282,29 +284,38 @@ struct DrawerView: View {
     private func updateSitemapsAndUITiles(activeConnection: ConnectionInfo?) async {
         guard let activeConnection else { return }
 
-        let openAPIService = OpenAPIService(connectionConfiguration: activeConnection.configuration)
-
         do {
-            sitemaps = try await openAPIService.openHABSitemaps()
-            if sitemaps.last?.name == "_default", sitemaps.count > 1 {
-                sitemaps = Array(sitemaps.dropLast())
+            let openAPIService = try OpenAPIService(connectionConfiguration: activeConnection.configuration)
+
+            do {
+                sitemaps = try await openAPIService.openHABSitemaps()
+                if sitemaps.last?.name == "_default", sitemaps.count > 1 {
+                    sitemaps = Array(sitemaps.dropLast())
+                }
+
+                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+                case .label:
+                    sitemaps.sort { $0.label < $1.label }
+                case .name:
+                    sitemaps.sort { $0.name < $1.name }
+                }
+
+            } catch {
+                logger.error("Failed to fetch sitemaps: \(error.localizedDescription)")
+                sitemaps = []
             }
 
-            // Sort the sitemaps according to Settings selection.
-            switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
-            case .label: sitemaps.sort { $0.label < $1.label }
-            case .name: sitemaps.sort { $0.name < $1.name }
+            do {
+                uiTiles = try await openAPIService.getUITiles()
+                logger.info("Fetched UI tiles successfully")
+            } catch {
+                logger.error("Failed to fetch UI tiles: \(error.localizedDescription)")
+                uiTiles = []
             }
+
         } catch {
-            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            logger.error("Failed to initialize OpenAPIService: \(error.localizedDescription)")
             sitemaps = []
-        }
-
-        do {
-            uiTiles = try await openAPIService.getUITiles()
-            os_log("ui tiles response", log: .viewCycle, type: .info)
-        } catch {
-            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
             uiTiles = []
         }
     }

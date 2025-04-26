@@ -95,9 +95,9 @@ struct SettingsView: View {
     }
 
     private func updateSitemaps(activeConfiguration: ConnectionConfiguration) async {
-        let openAPIService = OpenAPIService(connectionConfiguration: activeConfiguration)
-
         do {
+            let openAPIService = try OpenAPIService(connectionConfiguration: activeConfiguration)
+
             sitemaps = try await openAPIService.openHABSitemaps()
             if sitemaps.last?.name == "_default", sitemaps.count > 1 {
                 sitemaps = Array(sitemaps.dropLast())
