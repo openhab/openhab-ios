@@ -401,8 +401,13 @@ extension OpenHABWebViewController: WKUIDelegate {
 
         return nil
     }
-
-    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping @MainActor @Sendable (WKPermissionDecision) -> Void) {
-        decisionHandler(Preferences.alwaysAllowWebRTC ? .grant : .prompt)
+    
+    func webView(
+        _ webView: WKWebView,
+        decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
+        initiatedBy frame: WKFrameInfo,
+        type: WKMediaCaptureType
+    ) async -> WKPermissionDecision {
+        Preferences.alwaysAllowWebRTC ? .grant : .prompt
     }
 }
