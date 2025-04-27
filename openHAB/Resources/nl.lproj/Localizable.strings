@@ -78,3 +78,4 @@
 "about_settings" = "Over";
 "uselastpath_settings" = "Laatst bezochte pad gebruiken?";
 "always_allow_webrtc" = "WebRTC altijd toestaan";
+"no_active_connection" = "No active connection available. Please check your settings.";
