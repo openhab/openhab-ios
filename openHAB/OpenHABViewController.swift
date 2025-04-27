@@ -15,7 +15,13 @@ import SideMenu
 import SwiftMessages
 import UIKit
 
-class OpenHABViewController: UIViewController {
+protocol OpenHABViewable: AnyObject {
+    func reloadView()
+    func viewName() -> String
+    func pushSitemap(name: String, path: String?) async
+}
+
+class OpenHABViewController: UIViewController, OpenHABViewable {
     var trackerCancellables = Set<AnyCancellable>()
 
     var activeTasks = Set<Task<Void, Never>>()
@@ -71,6 +77,10 @@ class OpenHABViewController: UIViewController {
 
     func viewName() -> String {
         "default"
+    }
+
+    func pushSitemap(name: String, path: String?) async {
+        // No-op for non-sitemap view controllers
     }
 }
 

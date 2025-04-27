@@ -135,7 +135,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         super.viewDidAppear(animated)
 
         // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
-        if parent?.navigationItem.searchController == nil {
+        if navigationItem.searchController == nil {
             DispatchQueue.main.async {
                 self.parent?.navigationItem.searchController = self.searchController
             }
@@ -289,6 +289,33 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
 
     override func viewName() -> String {
         "sitemap"
+    }
+
+    // This is mainly used for navigting to a specific sitemap and path from notifications
+    override func pushSitemap(name: String, path: String?) async {
+        do {
+            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+                logger.error("pushSiteMap: No active connection available")
+                return
+            }
+
+            logger.info("pushSitemap: pushing page")
+
+            guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
+                os_log("pushSitemap: Failed to instantiate OpenHABSitemapViewController", log: .default, type: .error)
+                return
+            }
+            let openHABUrl = activeConnection.configuration.url
+
+            newViewController.pageUrl = path != nil
+                ? "\(openHABUrl)/rest/sitemaps/\(name)/\(path!)"
+                : "\(openHABUrl)/rest/sitemaps/\(name)"
+            newViewController.openHABRootUrl = openHABUrl
+
+            navigationController?.pushViewController(newViewController, animated: true)
+        } catch {
+            os_log("pushSitemap: Error waiting for active connection: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+        }
     }
 }
 
@@ -448,35 +475,6 @@ extension OpenHABSitemapViewController {
         }
     }
 
-    // This is mainly used for navigting to a specific sitemap and path from notifications
-
-    // This is mainly used for navigating to a specific sitemap and path from notifications
-    func pushSitemap(name: String, path: String?) async {
-        do {
-            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-                logger.error("pushSiteMap: No active connection available")
-                return
-            }
-
-            logger.info("pushSitemap: pushing page")
-
-            guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
-                os_log("pushSitemap: Failed to instantiate OpenHABSitemapViewController", log: .default, type: .error)
-                return
-            }
-            let openHABUrl = activeConnection.configuration.url
-
-            newViewController.pageUrl = path != nil
-                ? "\(openHABUrl)/rest/sitemaps/\(name)/\(path!)"
-                : "\(openHABUrl)/rest/sitemaps/\(name)"
-            newViewController.openHABRootUrl = openHABUrl
-
-            navigationController?.pushViewController(newViewController, animated: true)
-        } catch {
-            os_log("pushSitemap: Error waiting for active connection: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
-        }
-    }
-
     func startPageHandling() {
         pageHandlingTask?.cancel()
 
@@ -619,10 +617,14 @@ extension OpenHABSitemapViewController {
         filteredPage = currentPage?.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
         }
+
         filteredPage?.sendCommand = { [weak self] item, command in
             self?.sendCommand(item, commandToSend: command)
         }
-        widgetTableView.reloadData()
+
+        UIView.performWithoutAnimation {
+            widgetTableView.reloadData()
+        }
     }
 
     func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
@@ -650,6 +652,7 @@ extension OpenHABSitemapViewController: UISearchResultsUpdating {
 
 extension OpenHABSitemapViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        filterContentForSearchText(searchBar.text)
         searchBar.resignFirstResponder()
     }
 

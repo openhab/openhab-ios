@@ -34,9 +34,38 @@ protocol ModalHandler: AnyObject {
 
 private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
 
+class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHABViewable {
+    private let viewModel: SitemapPageViewModel
+
+    init() {
+        let viewModel = SitemapPageViewModel()
+        self.viewModel = viewModel
+        super.init(rootView: SitemapPageView(viewModel: viewModel))
+    }
+
+    @available(*, unavailable)
+    @objc dynamic required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func viewName() -> String { "sitemap" }
+
+    func reloadView() {
+        // Maybe call viewModel.reload() if you wire a viewModel refresh
+        Task {
+            await rootView.viewModel.reload()
+        }
+    }
+
+    func pushSitemap(name: String, path: String?) async {
+        // Implement pushing logic into SitemapPageViewModel
+        await viewModel.pushSitemap(name: name, path: path)
+    }
+}
+
 // swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
-    var currentView: OpenHABViewController!
+    var currentView: (UIViewController & OpenHABViewable)!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
 
@@ -46,11 +75,7 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
-    private lazy var sitemapViewController: OpenHABSitemapViewController = {
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABPageViewController") as! OpenHABSitemapViewController
-        return viewController
-    }()
+    private lazy var sitemapViewController: (UIViewController & OpenHABViewable) = HostingSitemapViewController()
 
     private var activeConnection: ConnectionInfo?
 
@@ -338,7 +363,7 @@ class OpenHABRootViewController: UIViewController {
             let path = String(firstMatch.1)
             os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
             if path.starts(with: "/basicui/app?") {
-                if currentView != sitemapViewController {
+                if currentView !== sitemapViewController {
                     switchView(target: .sitemap(""))
                 }
                 if let urlComponents = URLComponents(string: path) {
@@ -503,7 +528,7 @@ class OpenHABRootViewController: UIViewController {
                 webViewController
             }
 
-        if currentView != targetView {
+        if currentView !== targetView {
             if currentView != nil {
                 removeView(viewController: currentView)
             }
