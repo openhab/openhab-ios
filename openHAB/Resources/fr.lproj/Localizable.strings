@@ -78,3 +78,4 @@
 "about_settings" = "A propos";
 "uselastpath_settings" = "Utiliser le chemin de la dernière visite?";
 "always_allow_webrtc" = "Toujours autoriser WebRTC";
+"no_active_connection" = "No active connection available. Please check your settings.";
