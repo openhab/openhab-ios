@@ -13,6 +13,20 @@ import Foundation
 import os.log
 
 public struct WatchPreferences: Codable {
+    public var localUrl: String
+    public var remoteUrl: String
+    public var username: String
+    public var password: String
+    public var alwaysSendCreds: Bool
+    public var defaultSitemap: String
+    public var ignoreSSL: Bool
+    public var sitemapForWatch: String
+    public var sitemapForWatchLabel: String
+    public var iconType: Int
+    public var demoMode: Bool
+    public var localConnectionConfiguration: ConnectionConfiguration?
+    public var remoteConnectionConfiguration: ConnectionConfiguration?
+
     public init(localUrl: String, remoteUrl: String, username: String, password: String, alwaysSendCreds: Bool, defaultSitemap: String, ignoreSSL: Bool, sitemapForWatch: String, sitemapForWatchLabel: String, iconType: Int, demoMode: Bool, localConnectionConfiguration: ConnectionConfiguration? = nil, remoteConnectionConfiguration: ConnectionConfiguration? = nil) {
         self.localUrl = localUrl
         self.remoteUrl = remoteUrl
@@ -28,20 +42,6 @@ public struct WatchPreferences: Codable {
         self.localConnectionConfiguration = localConnectionConfiguration
         self.remoteConnectionConfiguration = remoteConnectionConfiguration
     }
-
-    public var localUrl: String
-    public var remoteUrl: String
-    public var username: String
-    public var password: String
-    public var alwaysSendCreds: Bool
-    public var defaultSitemap: String
-    public var ignoreSSL: Bool
-    public var sitemapForWatch: String
-    public var sitemapForWatchLabel: String
-    public var iconType: Int
-    public var demoMode: Bool
-    public var localConnectionConfiguration: ConnectionConfiguration?
-    public var remoteConnectionConfiguration: ConnectionConfiguration?
 
     public func encodedWatchPreferences() -> [String: Data] {
         do {

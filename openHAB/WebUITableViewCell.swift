@@ -114,12 +114,10 @@ extension WebUITableViewCell: WKNavigationDelegate {
 }
 
 extension WebUITableViewCell: WKUIDelegate {
-    func webView(
-        _ webView: WKWebView,
-        decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
-        initiatedBy frame: WKFrameInfo,
-        type: WKMediaCaptureType
-    ) async -> WKPermissionDecision {
+    func webView(_ webView: WKWebView,
+                 decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
+                 initiatedBy frame: WKFrameInfo,
+                 type: WKMediaCaptureType) async -> WKPermissionDecision {
         .grant
     }
 }

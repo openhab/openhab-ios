@@ -31,7 +31,7 @@ public enum OpenAPIServiceConfiguration {
 
 protocol OpenAPIServiceProtocol: AnyObject, Sendable {
     func getRootVersion() async throws -> Int
-    func getRoot() async throws -> OpenHABServerProperties
+    @discardableResult func getRoot() async throws -> OpenHABServerProperties
     func sendItemCommand(itemname: String, command: String) async throws
     func updateItemState(itemname: String, with: String) async throws
     func getItems() async throws -> [OpenHABItem]

@@ -12,15 +12,6 @@
 import Foundation
 import Network
 
-// MARK: - Protocol
-
-public protocol NWPathMonitoring: AnyObject {
-    /// Called with `true` when connected, `false` otherwise.
-    func setUpdateHandler(_ handler: @escaping (Bool) -> Void)
-    func start(queue: DispatchQueue)
-    func cancel()
-}
-
 // Wrap real NWPathMonitor
 final class RealPathMonitor: NWPathMonitoring {
     private let monitor: NWPathMonitor
@@ -52,4 +43,13 @@ final class RealPathMonitor: NWPathMonitoring {
         monitor.cancel()
         task?.cancel()
     }
+}
+
+// MARK: - Protocol
+
+public protocol NWPathMonitoring: AnyObject {
+    /// Called with `true` when connected, `false` otherwise.
+    func setUpdateHandler(_ handler: @escaping (Bool) -> Void)
+    func start(queue: DispatchQueue)
+    func cancel()
 }
