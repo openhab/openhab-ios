@@ -28,7 +28,7 @@ public struct OpenHABItem: Sendable {
         case rollershutter = "Rollershutter"
         case stringItem = "String"
         case switchItem = "Switch"
-        case undetermind = "" // Relevant only for SitemapWidgetEvent
+        case undetermined = "" // Relevant only for SitemapWidgetEvent
     }
 
     public var type: ItemType?
