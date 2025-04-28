@@ -30,9 +30,11 @@ class WatchMessageService: NSObject, WCSessionDelegate {
             return
         }
 
-        let prefs = WatchPreferences(fromPreferences: Preferences.self)
-        replyHandler(prefs.encodedWatchPreferences())
-        logger.debug("Sent WatchPreferences in replyHandler.")
+        Task { @MainActor in
+            let prefs = WatchPreferences(fromPreferences: Preferences.self)
+            replyHandler(prefs.encodedWatchPreferences())
+            logger.debug("Sent WatchPreferences in replyHandler.")
+        }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
@@ -53,6 +55,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     // MARK: - Sync Preferences
 
+    @MainActor
     public func syncPreferencesToWatch() {
         guard WCSession.default.activationState == .activated else {
             logger.warning("WCSession not activated; skipping sync.")
@@ -71,6 +74,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 }
 
+@MainActor
 public extension WatchPreferences {
     init(fromPreferences preferences: Preferences.Type) {
         self.init(

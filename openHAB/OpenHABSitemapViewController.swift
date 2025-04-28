@@ -27,9 +27,6 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     var pageUrl = ""
     private var iconType: IconType = .png
     private var openHABRootUrl = ""
-    private var openHABUsername = ""
-    private var openHABPassword = ""
-    private var openHABAlwaysSendCreds = false
 
     private var activeConnectionInfo: ConnectionInfo?
 
@@ -567,9 +564,6 @@ extension OpenHABSitemapViewController {
 
     // load settings into local properties
     func loadSettings() {
-        openHABUsername = Preferences.username
-        openHABPassword = Preferences.password
-        openHABAlwaysSendCreds = Preferences.alwaysSendCreds
         defaultSitemap = Preferences.defaultSitemap
         idleOff = Preferences.idleOff
         iconType = IconType(rawValue: Preferences.iconType) ?? .png

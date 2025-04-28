@@ -163,7 +163,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
-        NetworkTracker.shared.startTracking(connectionConfigurations: [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig])
+        await NetworkTracker.shared.startTracking(connectionConfigurations: [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig])
 
         guard let fullURL = await resolveFullURL(from: url) else { return nil }
 
