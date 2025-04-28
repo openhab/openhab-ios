@@ -445,33 +445,27 @@ extension OpenHABSitemapViewController {
         }
     }
 
-    // This is mainly used for navigting to a specific sitemap and path from notifications
-
     // This is mainly used for navigating to a specific sitemap and path from notifications
     func pushSitemap(name: String, path: String?) async {
-        do {
-            guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-                logger.error("pushSiteMap: No active connection available")
-                return
-            }
-
-            logger.info("pushSitemap: pushing page")
-
-            guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
-                os_log("pushSitemap: Failed to instantiate OpenHABSitemapViewController", log: .default, type: .error)
-                return
-            }
-            let openHABUrl = activeConnection.configuration.url
-
-            newViewController.pageUrl = path != nil
-                ? "\(openHABUrl)/rest/sitemaps/\(name)/\(path!)"
-                : "\(openHABUrl)/rest/sitemaps/\(name)"
-            newViewController.openHABRootUrl = openHABUrl
-
-            navigationController?.pushViewController(newViewController, animated: true)
-        } catch {
-            os_log("pushSitemap: Error waiting for active connection: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+            logger.error("pushSiteMap: No active connection available")
+            return
         }
+
+        logger.info("pushSitemap: pushing page")
+
+        guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
+            os_log("pushSitemap: Failed to instantiate OpenHABSitemapViewController", log: .default, type: .error)
+            return
+        }
+        let openHABUrl = activeConnection.configuration.url
+
+        newViewController.pageUrl = path != nil
+            ? "\(openHABUrl)/rest/sitemaps/\(name)/\(path!)"
+            : "\(openHABUrl)/rest/sitemaps/\(name)"
+        newViewController.openHABRootUrl = openHABUrl
+
+        navigationController?.pushViewController(newViewController, animated: true)
     }
 
     func startPageHandling() {
@@ -646,10 +640,6 @@ extension OpenHABSitemapViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
     }
-
-//    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-//        updateSearchResults(for: searchController)
-//    }
 }
 
 // MARK: - ColorPickerCellDelegate

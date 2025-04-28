@@ -31,9 +31,7 @@ struct ApplicationSettingsView: View {
 
 #Preview {
     struct PreviewWrapper: View {
-        @State private var ignoreSSL = true
         @State private var idleOff = false
-        @State private var sendCrashReports = false
 
         var body: some View {
             Form {
