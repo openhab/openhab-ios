@@ -17,7 +17,7 @@ struct SitemapPageView: View {
     var body: some View {
         NavigationStack {
             List(viewModel.relevantWidgets) { widget in
-                WidgetRow(widget: widget)
+                WidgetViewFactory.view(for: widget)
                     .onTapGesture {
                         viewModel.widgetTapped(widget)
                     }
@@ -28,7 +28,7 @@ struct SitemapPageView: View {
                 await viewModel.reload()
             }
             .task {
-                await viewModel.startPolling()
+                viewModel.startPageHandling()
             }
             .alert("Error", isPresented: .constant(viewModel.error != nil), actions: {
                 Button("OK", role: .cancel) {}

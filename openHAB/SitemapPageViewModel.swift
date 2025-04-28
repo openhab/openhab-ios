@@ -12,25 +12,40 @@
 import Combine
 import OpenAPIRuntime
 import OpenHABCore
+import os.log
 import SwiftUI
+
+private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SitemapPageViewModel")
+
+enum SitemapPageError: LocalizedError {
+    case noActiveConnection
+    case serviceUnavailable
+
+    var errorDescription: String? {
+        switch self {
+        case .noActiveConnection:
+            "No active connection available."
+        case .serviceUnavailable:
+            "Service unavailable."
+        }
+    }
+}
 
 @MainActor
 class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
     @Published var filteredWidgets: [OpenHABWidget] = []
-    @Published var searchText: String = ""
+    @Published var searchText = ""
     @Published var error: LocalizedError?
-    @Published var isLoading: Bool = false
+    @Published var isLoading = false
+    @Published var openHABRootUrl: String?
 
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
-    private var defaultSitemap: String = ""
-    private var pageId: String = ""
-
-    init() {
-        loadSettings()
-    }
+    private var defaultSitemap = ""
+    private var pageId = ""
+    private var trackerTask: Task<Void, Never>?
 
     var relevantWidgets: [OpenHABWidget] {
         if searchText.isEmpty {
@@ -44,25 +59,103 @@ class SitemapPageViewModel: ObservableObject {
         currentPage?.title.components(separatedBy: "[")[0] ?? "Sitemap"
     }
 
+    init() {
+        loadSettings()
+        startWatchingActiveServer()
+    }
+
     func loadSettings() {
         defaultSitemap = Preferences.defaultSitemap
     }
 
-    func startPolling() async {
-        guard pageHandlingTask == nil else { return }
+    func startPageHandling() {
+        pageHandlingTask?.cancel()
+
+        guard !defaultSitemap.isEmpty else {
+            logger.error("startPageHandling: Cannot run with empty sitemap")
+            return
+        }
+
+        logger.info("🚀 Starting page load and long polling flow...")
 
         pageHandlingTask = Task {
-            await reload()
+            do {
+                // Setup service if needed
+//                if openAPIService == nil {
+//                    guard let activeConnection = NetworkTracker.shared.activeConnection else {
+//                        throw SitemapPageError.noActiveConnection
+//                    }
+//                    openAPIService = try OpenAPIService(
+//                        connectionConfiguration: activeConnection.configuration
+//                    )
+//                }
 
-            while !Task.isCancelled {
-                do {
-                    try await Task.sleep(nanoseconds: 20 * 1_000_000_000) // 20s polling
-                    try await loadCurrentPage()
-                } catch {
-                    self.error = error as? LocalizedError
+                if openAPIService == nil {
+                    openAPIService = try OpenAPIService(
+                        connectionConfiguration: NetworkTracker.shared.activeConnection!.configuration)
+                }
+
+                // 1. Initial page load (longPolling: false)
+                let initialPage = try await openAPIService?.pollDataForPage(
+                    sitemapname: defaultSitemap,
+                    pageId: pageId,
+                    longPolling: false
+                )
+
+                try Task.checkCancellation()
+
+                if let page = initialPage {
+                    updateUI(with: page)
+                }
+
+                // 2. Start long polling loop
+                while !Task.isCancelled {
+                    let page = try await openAPIService?.pollDataForPage(
+                        sitemapname: defaultSitemap,
+                        pageId: pageId,
+                        longPolling: true
+                    )
+                    try Task.checkCancellation()
+
+                    if let page {
+                        updateUI(with: page)
+                    }
+                }
+
+            } catch is CancellationError {
+                logger.info("🔁 pageHandlingTask was cancelled")
+            } catch let error as DecodingError {
+                logger.error("Decoding error: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.error = SitemapPageError.serviceUnavailable
+                }
+            } catch let error as ClientError {
+                if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
+                    logger.info("Task cancelled (URLError: cancelled)")
+                } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
+                    logger.info("Task timed out (URLError: timedOut)")
+                } else {
+                    logger.error("ClientError: \(error.localizedDescription)")
+                    await MainActor.run {
+                        self.error = SitemapPageError.serviceUnavailable
+                    }
+                }
+            } catch let openAPIError as OpenAPIServiceError {
+                logger.error("OpenAPIServiceError: \(openAPIError.localizedDescription)")
+            } catch {
+                logger.error("❌ Unhandled pageHandlingTask error: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.error = SitemapPageError.serviceUnavailable
                 }
             }
         }
+    }
+
+    @MainActor
+    private func updateUI(with page: OpenHABPage) {
+        injectSendCommand(for: page.widgets)
+        currentPage = page
+        filterWidgets()
     }
 
     func reload() async {
@@ -94,8 +187,20 @@ class SitemapPageViewModel: ObservableObject {
             longPolling: false
         )
 
+        injectSendCommand(for: page!.widgets)
         currentPage = page
         filterWidgets()
+    }
+
+    private func injectSendCommand(for widgets: [OpenHABWidget]) {
+        for widget in widgets {
+            widget.sendCommand = { [weak self] item, command in
+                self?.sendCommand(item, commandToSend: command)
+            }
+
+            // If widget has nested children (e.g., frames/groups), inject recursively
+            injectSendCommand(for: widget.widgets)
+        }
     }
 
     func filterWidgets() {
@@ -119,20 +224,73 @@ class SitemapPageViewModel: ObservableObject {
     func pushSitemap(name: String, path: String?) async {
         defaultSitemap = name
         pageId = path ?? ""
+        await startPageHandling()
+    }
+
+    deinit {
+        trackerTask?.cancel()
+    }
+
+    func startWatchingActiveServer() {
+        trackerTask = Task {
+            for await activeConnection in NetworkTracker.shared.$activeConnection.stream() {
+                if let activeConnection {
+                    logger.info("Tracker URL \(activeConnection.configuration.url)")
+                    await handleActiveConnection(activeConnection)
+                    break
+                }
+            }
+        }
+    }
+
+    private func handleActiveConnection(_ connection: ConnectionInfo) async {
+        // Save the active connection information
+        activeConnectionInfo = connection
+        openHABRootUrl = connection.configuration.url
+
+        do {
+            // Setup the OpenAPI service based on the new connection
+            openAPIService = try OpenAPIService(connectionConfiguration: connection.configuration)
+            // Reload the sitemap data
+            await selectSitemap()
+        } catch {
+            self.error = error as? LocalizedError
+        }
+    }
+
+    func selectSitemap() async {
         await reload()
+    }
+
+    // MARK: - Command Sending
+
+    func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
+        if let item, let command {
+            sendCommand(itemname: item.name, command: command)
+        }
+    }
+
+    func sendCommand(itemname: String, command: String) {
+        Task {
+            do {
+                try await openAPIService?.sendItemCommand(itemname: itemname, command: command)
+                os_log("SitemapPageViewModel: Successfully sent command %{PUBLIC}@ to %{PUBLIC}@", log: .default, type: .info, command, itemname)
+            } catch {
+                os_log("SitemapPageViewModel: Failed to send command %{PUBLIC}@ to %{PUBLIC}@ — %{PUBLIC}@", log: .default, type: .error, command, itemname, error.localizedDescription)
+            }
+        }
     }
 }
 
-enum SitemapPageError: LocalizedError {
-    case noActiveConnection
-    case serviceUnavailable
-
-    var errorDescription: String? {
-        switch self {
-        case .noActiveConnection:
-            "No active connection available."
-        case .serviceUnavailable:
-            "Service unavailable."
+extension Published.Publisher {
+    func stream() -> AsyncStream<Output> {
+        AsyncStream { continuation in
+            let cancellable = self.sink { value in
+                continuation.yield(value)
+            }
+            continuation.onTermination = { _ in
+                cancellable.cancel()
+            }
         }
     }
 }

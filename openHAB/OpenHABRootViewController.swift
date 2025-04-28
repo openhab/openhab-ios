@@ -521,29 +521,37 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchView(target: TargetController) {
-        let targetView =
-            if case .sitemap = target {
-                sitemapViewController
-            } else {
-                webViewController
-            }
+        let targetView: (UIViewController & OpenHABViewable)
 
-        if currentView !== targetView {
-            if currentView != nil {
-                removeView(viewController: currentView)
-            }
-            addView(viewController: targetView)
-            currentView = targetView
-            // Don't save our view in demo mode
-            if !Preferences.demomode {
-                Preferences.defaultView = currentView.viewName()
-            }
-        } else {
-            // if we hit the menu item again while on the view, trigger a reload
-            currentView.reloadView()
+        switch target {
+        case .sitemap:
+            targetView = sitemapViewController
+        case .webview:
+            targetView = webViewController
+        default:
+            // For nowfatalError because we are handling only sitemap+webview
+            fatalError("Unhandled target: \(target)")
         }
-        // make sure we reset any views that may be pushed
-        currentView.navigationController?.popToRootViewController(animated: true)
+
+        guard currentView !== targetView else {
+            // Same view tapped again -> reload it
+            currentView.reloadView()
+            currentView.navigationController?.popToRootViewController(animated: true)
+            return
+        }
+
+        if let currentView {
+            removeView(viewController: currentView)
+        }
+
+        addView(viewController: targetView)
+        currentView = targetView
+
+        if !Preferences.demomode {
+            Preferences.defaultView = targetView.viewName()
+        }
+
+        targetView.navigationController?.popToRootViewController(animated: true)
     }
 
     private func switchToSavedView() {
