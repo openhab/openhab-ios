@@ -496,19 +496,24 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchView(target: TargetController) {
-        let targetView =
-            if case .sitemap = target {
-                sitemapViewController
-            } else {
-                webViewController
-            }
+        let targetView: OpenHABViewController
+
+        switch target {
+        case .sitemap:
+            targetView = sitemapViewController
+        case .webview:
+            targetView = webViewController
+        default:
+            return
+        }
 
         if currentView != targetView {
-            if currentView != nil {
+            if let currentView {
                 removeView(viewController: currentView)
             }
             addView(viewController: targetView)
             currentView = targetView
+
             // Don't save our view in demo mode
             if !Preferences.demomode {
                 Preferences.defaultView = currentView.viewName()
@@ -517,8 +522,9 @@ class OpenHABRootViewController: UIViewController {
             // if we hit the menu item again while on the view, trigger a reload
             currentView.reloadView()
         }
-        // make sure we reset any views that may be pushed
-        currentView.navigationController?.popToRootViewController(animated: true)
+
+        // Make sure we reset any views that may be pushed
+        navigationController?.popToRootViewController(animated: true)
     }
 
     private func switchToSavedView() {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ni3-JL-qg0">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ni3-JL-qg0">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -57,12 +57,12 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="749" verticalCompressionResistancePriority="749" text="Temp blabla ballall llalla" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2sF-SD-siy">
-                                                    <rect key="frame" x="62.000000000000007" y="12" width="71.666666666666686" height="20"/>
+                                                    <rect key="frame" x="62.000000000000007" y="12" width="72.666666666666686" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <datePicker contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" style="compact" translatesAutoresizingMaskIntoConstraints="NO" id="z76-h7-KYr">
-                                                    <rect key="frame" x="142" y="4" width="199" height="36"/>
+                                                    <rect key="frame" x="142.66666666666666" y="4" width="197.99999999999997" height="36"/>
                                                 </datePicker>
                                             </subviews>
                                             <constraints>
@@ -113,7 +113,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="GenericUITableViewCell" id="fYY-WZ-Zms" customClass="GenericUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="129" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="173" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="fYY-WZ-Zms" id="GBq-BC-eoa">
                                             <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="44"/>
@@ -147,7 +147,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SetpointCell" rowHeight="44" id="5zt-3o-mk1" userLabel="SetpointCell" customClass="SetpointCell" customModule="openHAB" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="129" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="217" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="5zt-3o-mk1" id="ycb-72-B9b">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -209,7 +209,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ColorPickerCell" rowHeight="44" id="DBU-O1-1Vg" userLabel="ColorPickerCell" customClass="ColorPickerCell" customModule="openHAB" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="173" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="261" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="DBU-O1-1Vg" id="b1h-IT-JfS">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -274,7 +274,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SwitchUITableViewCell" rowHeight="44" id="Exy-oD-ZAr" customClass="SwitchUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="217" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="305" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Exy-oD-ZAr" id="rgR-nn-rTm">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -313,7 +313,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SliderUITableViewCell" rowHeight="44" id="S22-0C-9Sl" customClass="SliderUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="261" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="349" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="S22-0C-9Sl" id="n9y-r4-Qcp">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -367,7 +367,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="TopLeft" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SelectionUITableViewCell" rowHeight="44" id="OGD-zU-l0C" customClass="SelectionUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="305" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="393" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" tableViewCell="OGD-zU-l0C" id="cLy-KN-ufh">
                                             <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="44"/>
@@ -403,7 +403,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SegmentedUITableViewCell" rowHeight="44" id="IBt-aJ-0VH" customClass="SegmentedUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="349" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="437" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="IBt-aJ-0VH" id="bbE-Hw-4gl">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -452,7 +452,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ChartUITableViewCell" rowHeight="44" id="o5c-ql-8Ao" customClass="NewImageTableViewCell" customModule="openHAB" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="393" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="481" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="o5c-ql-8Ao" id="P0d-ou-gEj">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -474,7 +474,7 @@
                                         </accessibility>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ImageUITableViewCell" rowHeight="76" id="qAL-2k-0Oq" customClass="ImageUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="437" width="375" height="76"/>
+                                        <rect key="frame" x="0.0" y="525" width="375" height="76"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" tableViewCell="qAL-2k-0Oq" id="TQB-dV-Dmo">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="76"/>
@@ -499,7 +499,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="RollershutterCell" rowHeight="44" id="CuM-7E-qv9" customClass="RollershutterCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="513" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="601" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="CuM-7E-qv9" id="jrw-5H-cZS">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -573,7 +573,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="VideoUITableViewCell" rowHeight="44" id="s2s-Aw-LZh" customClass="VideoUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="557" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="645" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="s2s-Aw-LZh" id="BRq-hd-ujz">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -584,7 +584,7 @@
                                         </accessibility>
                                     </tableViewCell>
                                     <tableViewCell autoresizesSubviews="NO" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="WebUITableViewCell" rowHeight="44" id="cNS-Yn-KPo" customClass="WebUITableViewCell" customModule="openHAB">
-                                        <rect key="frame" x="0.0" y="601" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="689" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cNS-Yn-KPo" id="Tr2-YU-Z8o">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -595,13 +595,13 @@
                                         </accessibility>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SliderWithSwitchSupportUITableViewCell" rowHeight="44" id="hdi-dL-Cmb" userLabel="SliderWithSwitchSupportUITableViewCell" customClass="SliderWithSwitchSupportUITableViewCell" customModule="openHAB" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="645" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="733" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="hdi-dL-Cmb" id="fHE-DY-dah">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <slider opaque="NO" tag="400" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="7Yg-5Y-d79">
+                                                <slider opaque="NO" tag="400" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="7Yg-5Y-d79">
                                                     <rect key="frame" x="144" y="7" width="154" height="31"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="150" id="Kwe-zd-0GA">
@@ -616,19 +616,19 @@
                                                         <action selector="sliderValueChanged:" destination="hdi-dL-Cmb" eventType="valueChanged" id="zyb-2D-0Q0"/>
                                                     </connections>
                                                 </slider>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Dimmer" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kir-ML-7Yp">
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" ambiguous="YES" text="Dimmer" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kir-ML-7Yp">
                                                     <rect key="frame" x="62" y="11.999999999999998" width="42.666666666666657" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="msG-1F-fVE">
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="100" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" ambiguous="YES" text="191" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="msG-1F-fVE">
                                                     <rect key="frame" x="112.66666666666667" y="11.999999999999998" width="25.333333333333329" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fOS-5q-DJq">
+                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fOS-5q-DJq">
                                                     <rect key="frame" x="306" y="6.6666666666666679" width="51" height="31.000000000000004"/>
                                                 </switch>
                                             </subviews>
@@ -669,7 +669,6 @@
                             <constraint firstAttribute="trailing" secondItem="S7g-eE-wf7" secondAttribute="trailing" id="yz9-6F-Iw8"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="N7h-KT-EtL"/>
                     <connections>
                         <outlet property="widgetTableView" destination="S7g-eE-wf7" id="KbB-WO-sKI"/>
                     </connections>
@@ -701,7 +700,7 @@
             <objects>
                 <navigationController storyboardIdentifier="RightMenuNavigationController" id="TS8-mI-318" customClass="SideMenuNavigationController" customModule="SideMenu" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="1Cd-5P-USA">
-                        <rect key="frame" x="0.0" y="50" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <userDefinedRuntimeAttributes>
@@ -739,7 +738,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="ni3-JL-qg0" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="1IA-wu-eGo">
-                        <rect key="frame" x="0.0" y="50" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -776,7 +775,7 @@
         <image name="chevron.up" catalog="system" width="128" height="70"/>
         <image name="stop" catalog="system" width="128" height="113"/>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
