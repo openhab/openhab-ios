@@ -448,23 +448,32 @@ extension OpenHABSitemapViewController {
     // This is mainly used for navigating to a specific sitemap and path from notifications
     func pushSitemap(name: String, path: String?) async {
         guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
-            logger.error("pushSiteMap: No active connection available")
+            logger.error("pushSitemap: No active connection available")
             return
         }
 
         logger.info("pushSitemap: pushing page")
 
-        guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
-            os_log("pushSitemap: Failed to instantiate OpenHABSitemapViewController", log: .default, type: .error)
+        guard let baseUrl = URL(string: activeConnection.configuration.url) else {
+            logger.error("pushSitemap: Invalid base URL")
             return
         }
-        let openHABUrl = activeConnection.configuration.url
 
-        newViewController.pageUrl = path != nil
-            ? "\(openHABUrl)/rest/sitemaps/\(name)/\(path!)"
-            : "\(openHABUrl)/rest/sitemaps/\(name)"
-        newViewController.openHABRootUrl = openHABUrl
+        var url = baseUrl.appendingPathComponent("rest")
+            .appendingPathComponent("sitemaps")
+            .appendingPathComponent(name)
 
+        if let subpath = path {
+            url.appendPathComponent(subpath)
+        }
+
+        guard let newViewController = storyboard?.instantiateViewController(withIdentifier: "OpenHABPageViewController") as? OpenHABSitemapViewController else {
+            logger.error("pushSitemap: Failed to instantiate OpenHABSitemapViewController")
+            return
+        }
+
+        newViewController.pageUrl = url.absoluteString
+        newViewController.openHABRootUrl = activeConnection.configuration.url
         navigationController?.pushViewController(newViewController, animated: true)
     }
 

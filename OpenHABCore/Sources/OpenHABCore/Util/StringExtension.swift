@@ -169,6 +169,10 @@ public extension String {
             throw URLError(.badURL)
         }
     }
+
+    func uriWithoutTrailingSlashes() -> String {
+        replacing(/\/+$/, with: "")
+    }
 }
 
 public extension String? {
