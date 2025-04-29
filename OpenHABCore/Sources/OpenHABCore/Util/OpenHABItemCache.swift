@@ -30,10 +30,11 @@ public actor OpenHABItemCache {
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "OpenHABItemCache")
 
-    private init() {
-        let connection1 = Preferences.localConnectionConfig
-        let connection2 = Preferences.remoteConnectionConfig
+    private init() {}
 
+    public func setup() async {
+        let connection1 = await Preferences.localConnectionConfig
+        let connection2 = await Preferences.remoteConnectionConfig
         NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 

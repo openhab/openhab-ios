@@ -145,7 +145,7 @@ final class NetworkTrackerTests: XCTestCase {
         // Simulate the network becoming available
         mockMonitor.simulateConnection(isConnected: true)
 
-        wait(for: [expectation], timeout: 2.0)
+        await fulfillment(of: [expectation], timeout: 2.0)
     }
 
     func testTrackerGoesOfflineOnNetworkLoss() async {
@@ -155,7 +155,7 @@ final class NetworkTrackerTests: XCTestCase {
         let tracker = NetworkTracker(
             monitor: mockMonitor,
             monitorQueue: .main,
-            connectionPool: ConnectionPool(serviceFactory: { _ in MockOpenAPIService() }),
+            connectionPool: ConnectionPool { _ in MockOpenAPIService() },
             failureTracker: ConnectionFailureTracker()
         )
 
@@ -178,6 +178,6 @@ final class NetworkTrackerTests: XCTestCase {
         // Simulate loss of network
         mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
 
-        wait(for: [expectation], timeout: 2.0)
+        await fulfillment(of: [expectation], timeout: 2.0)
     }
 }

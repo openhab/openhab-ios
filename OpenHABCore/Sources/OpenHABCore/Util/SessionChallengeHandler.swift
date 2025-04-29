@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import os
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "org.openhab.app", category: "SessionChallenge")
 
@@ -57,9 +58,6 @@ public func onReceiveSessionChallenge(with challenge: URLAuthenticationChallenge
         return (disposition, credential)
     }
 }
-
-import Foundation
-import os
 
 final class SessionChallengeHandler {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "SessionChallengeHandler", category: "Auth")

@@ -27,9 +27,6 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     var pageUrl = ""
     private var iconType: IconType = .png
     private var openHABRootUrl = ""
-    private var openHABUsername = ""
-    private var openHABPassword = ""
-    private var openHABAlwaysSendCreds = false
 
     private var activeConnectionInfo: ConnectionInfo?
 
@@ -61,9 +58,6 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         }
     }
 
-    // App wide data access
-    // https://stackoverflow.com/questions/45832155/how-do-i-refactor-my-code-to-call-appdelegate-on-the-main-thread
-
     var sitemapViewController: OpenHABSitemapViewController?
 
     // MARK: - Private instance methods
@@ -81,51 +75,44 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
 
     @IBOutlet private var widgetTableView: UITableView!
 
-    // Here goes everything about view loading, appearing, disappearing, entering background and becoming active
     override func viewDidLoad() {
         super.viewDidLoad()
         os_log("OpenHABSitemapViewController viewDidLoad", log: .default, type: .info)
 
         registerTableViewCells()
-
-        pageNetworkStatus = nil
-        sitemaps = []
+        configureTableView()
         widgetTableView.tableFooterView = UIView()
 
-        guard let initialConfiguration = activeConnectionInfo?.configuration else { return }
-        do {
-            openAPIService = try OpenAPIService(connectionConfiguration: initialConfiguration)
-        } catch {
-            logger.error("Could not create OpenAPIService: \(error)")
-        }
-
-        guard let openAPIService else { return }
-        // ✅ Initialize PageLoader
-        pageLoader = PageLoader(
-            service: openAPIService,
-            pageId: "",
-            defaultSitemap: ""
-        )
-
-        configureTableView()
-
         refreshControl = UIRefreshControl()
+        refreshControl?.addTarget(self, action: #selector(handleRefresh(_:)), for: .valueChanged)
+        widgetTableView.refreshControl = refreshControl
 
-        refreshControl?.addTarget(self, action: #selector(OpenHABSitemapViewController.handleRefresh(_:)), for: .valueChanged)
-        if let refreshControl {
-            widgetTableView.refreshControl = refreshControl
-        }
-
-        searchController.delegate = self
+        // Setup search controller
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.autocapitalizationType = .none
-        searchController.searchBar.delegate = self // Monitor when the search button is tapped.
+        searchController.searchBar.delegate = self
+        searchController.delegate = self
         searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
         definesPresentationContext = true
 
+        // Assign to navigation item (must be in navigation stack)
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+
+        // Setup active connection
+        guard let config = activeConnectionInfo?.configuration else { return }
+        do {
+            openAPIService = try OpenAPIService(connectionConfiguration: config)
+        } catch {
+            logger.error("Failed to create OpenAPIService: \(error.localizedDescription)")
+        }
+
+        if let service = openAPIService {
+            pageLoader = PageLoader(service: service, pageId: "", defaultSitemap: "")
+        }
+
         #if DEBUG
-        // setup accessibilityIdentifiers for UITest
         widgetTableView.accessibilityIdentifier = "OpenHABSitemapViewControllerWidgetTableView"
         #endif
     }
@@ -134,11 +121,9 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         os_log("OpenHABSitemapViewController viewDidAppear", log: .viewCycle, type: .info)
         super.viewDidAppear(animated)
 
-        // NOTE: workaround for https://github.com/openhab/openhab-ios/issues/420
-        if navigationItem.searchController == nil {
-            DispatchQueue.main.async {
-                self.parent?.navigationItem.searchController = self.searchController
-            }
+        if parent?.navigationItem.searchController !== searchController {
+            parent?.navigationItem.searchController = searchController
+            parent?.navigationItem.hidesSearchBarWhenScrolling = true
         }
     }
 
@@ -570,9 +555,6 @@ extension OpenHABSitemapViewController {
 
     // load settings into local properties
     func loadSettings() {
-        openHABUsername = Preferences.username
-        openHABPassword = Preferences.password
-        openHABAlwaysSendCreds = Preferences.alwaysSendCreds
         defaultSitemap = Preferences.defaultSitemap
         idleOff = Preferences.idleOff
         iconType = IconType(rawValue: Preferences.iconType) ?? .png
@@ -649,6 +631,7 @@ extension OpenHABSitemapViewController {
 
 extension OpenHABSitemapViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
+        logger.info("Search updated: \(searchController.searchBar.text ?? "")")
         filterContentForSearchText(searchController.searchBar.text)
     }
 }
@@ -660,10 +643,6 @@ extension OpenHABSitemapViewController: UISearchBarDelegate {
         filterContentForSearchText(searchBar.text)
         searchBar.resignFirstResponder()
     }
-
-//    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-//        updateSearchResults(for: searchController)
-//    }
 }
 
 // MARK: - ColorPickerCellDelegate
@@ -686,15 +665,7 @@ extension OpenHABSitemapViewController: ColorPickerCellDelegate {
 
 extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if currentPage != nil {
-            if isFiltering {
-                return filteredPage?.widgets.count ?? 0
-            }
-            return currentPage?.widgets.count ?? 0
-//            relevantPage?.widgets.count ?? 0
-        } else {
-            return 0
-        }
+        relevantPage?.widgets.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {

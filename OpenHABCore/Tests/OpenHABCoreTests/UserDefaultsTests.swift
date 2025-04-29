@@ -13,6 +13,7 @@
 
 import XCTest
 
+@MainActor
 final class UserDefaultsTests: XCTestCase {
     let data = UserDefaults(suiteName: "group.org.openhab.app")!
 

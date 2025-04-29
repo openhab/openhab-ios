@@ -32,7 +32,7 @@ final class TestOpenAPIClient: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testgetRoot() async throws {
+    func testGetRoot() async throws {
         transport = .init { (request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) in
             XCTAssertEqual(operationID, "getRoot")
             XCTAssertEqual(

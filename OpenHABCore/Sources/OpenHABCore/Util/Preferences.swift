@@ -21,13 +21,11 @@ public struct UserDefault<T> {
 
     public var wrappedValue: T {
         get {
-            let value = Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
-            return value
+            Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
         }
         set {
             Preferences.sharedDefaults.set(newValue, forKey: key)
-            let subject = subject
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [subject] in
                 subject.send(newValue)
             }
         }
@@ -63,8 +61,7 @@ public struct UserDefaultObject<T: Codable> {
             if let encoded = try? JSONEncoder().encode(newValue) {
                 Preferences.sharedDefaults.set(encoded, forKey: key)
                 // Relevant for Combine publication
-                let subject = subject
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [subject] in
                     subject.send(newValue)
                 }
             }
@@ -98,16 +95,15 @@ public struct UserDefaultURL {
     public var wrappedValue: String {
         get {
             let storedValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
-            let trimmedUri = uriWithoutTrailingSlashes(storedValue).trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedUri = storedValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
             return trimmedUri.isValidURL ? trimmedUri : defaultValue
         }
         set {
             Preferences.sharedDefaults.set(newValue, forKey: key)
-            let subject = subject
             let defaultValue = defaultValue
             // Trim and validate the new URL
-            let trimmedUri = uriWithoutTrailingSlashes(newValue).trimmingCharacters(in: .whitespacesAndNewlines)
-            DispatchQueue.main.async {
+            let trimmedUri = newValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
+            DispatchQueue.main.async { [subject] in
                 if trimmedUri.isValidURL {
                     subject.send(trimmedUri)
                 } else {
@@ -127,15 +123,9 @@ public struct UserDefaultURL {
         let currentValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
         subject = CurrentValueSubject<String, Never>(currentValue)
     }
-
-    private func uriWithoutTrailingSlashes(_ hostUri: String) -> String {
-        if hostUri.hasSuffix("/") {
-            return String(hostUri[..<hostUri.index(before: hostUri.endIndex)])
-        }
-        return hostUri
-    }
 }
 
+@MainActor
 public enum Preferences {
     static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
@@ -221,8 +211,6 @@ public extension Preferences {
         Preferences.localConnectionConfig = newLocalConfiguration
         Preferences.remoteConnectionConfig = newRemoteConfiguration
         didMigrateToConnectionConfig = true
-        // Ensure UserDefaults writes to disk immediately
-        Preferences.sharedDefaults.synchronize()
     }
 }
 

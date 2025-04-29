@@ -13,6 +13,14 @@ import Intents
 import OpenHABCore
 
 class IntentHandler: INExtension {
+    override init() {
+        super.init()
+
+        Task {
+            await OpenHABItemCache.instance.setup()
+        }
+    }
+
     override func handler(for intent: INIntent) -> Any {
         switch intent {
         case is OpenHABGetItemStateIntent: GetItemStateIntentHandler()

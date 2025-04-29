@@ -48,17 +48,6 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
         priority = try container.decode(Int.self, forKey: .priority)
     }
 
-    // 🔹 Ensure normalization on encoding (optional, since we store it normalized)
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(url, forKey: .url) // Already normalized
-        try container.encode(username, forKey: .username)
-        try container.encode(password, forKey: .password)
-        try container.encode(alwaysSendBasicAuth, forKey: .alwaysSendBasicAuth)
-        try container.encode(ignoreSSL, forKey: .ignoreSSL)
-        try container.encode(priority, forKey: .priority)
-    }
-
     // 🔹 Normalize a URL (removes trailing slashes, trims spaces, redirects openHAB cloud)
     private static func normalizeURL(_ url: String) -> String {
         var cleanedURL = url.trimmingCharacters(in: .whitespacesAndNewlines) // Trim whitespace
@@ -74,5 +63,16 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
             newUrl.removeLast()
         }
         return newUrl
+    }
+
+    // 🔹 Ensure normalization on encoding (optional, since we store it normalized)
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(url, forKey: .url) // Already normalized
+        try container.encode(username, forKey: .username)
+        try container.encode(password, forKey: .password)
+        try container.encode(alwaysSendBasicAuth, forKey: .alwaysSendBasicAuth)
+        try container.encode(ignoreSSL, forKey: .ignoreSSL)
+        try container.encode(priority, forKey: .priority)
     }
 }
