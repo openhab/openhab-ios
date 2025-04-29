@@ -170,7 +170,7 @@ public extension String {
         }
     }
 
-    func uriWithoutTrailingSlashes() -> String {
+    func removeTrailingSlashes() -> String {
         replacing(/\/+$/, with: "")
     }
 }

@@ -95,14 +95,14 @@ public struct UserDefaultURL {
     public var wrappedValue: String {
         get {
             let storedValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
-            let trimmedUri = storedValue.uriWithoutTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedUri = storedValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
             return trimmedUri.isValidURL ? trimmedUri : defaultValue
         }
         set {
             Preferences.sharedDefaults.set(newValue, forKey: key)
             let defaultValue = defaultValue
             // Trim and validate the new URL
-            let trimmedUri = newValue.uriWithoutTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedUri = newValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
             DispatchQueue.main.async { [subject] in
                 if trimmedUri.isValidURL {
                     subject.send(trimmedUri)
