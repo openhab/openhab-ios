@@ -354,6 +354,11 @@ extension [OpenHABWidget] {
 
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {
+//        widget.unit
+//        widget.staticIcon
+//        widget.visibility
+//        widget.labelSource
+//        widget.pattern
         self.init(
             widgetId: widget.widgetId.orEmpty,
             label: widget.label.orEmpty,
