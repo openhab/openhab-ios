@@ -15,29 +15,27 @@ struct SitemapPageView: View {
     @StateObject public var viewModel = SitemapPageViewModel()
 
     var body: some View {
-        NavigationStack {
-            List(viewModel.relevantWidgets) { widget in
-                WidgetViewFactory.view(for: widget)
-                    .onTapGesture {
-                        viewModel.widgetTapped(widget)
-                    }
-            }
-            .navigationTitle(viewModel.pageTitle)
-            .searchable(text: $viewModel.searchText)
-            .refreshable {
-                await viewModel.reload()
-            }
-            .task {
-                viewModel.startPageHandling()
-            }
-            .alert("Error", isPresented: .constant(viewModel.error != nil), actions: {
-                Button("OK", role: .cancel) {}
-            }, message: {
-                if let error = viewModel.error {
-                    Text(error.localizedDescription)
+        List(viewModel.relevantWidgets) { widget in
+            WidgetViewFactory.view(for: widget)
+                .onTapGesture {
+                    viewModel.widgetTapped(widget)
                 }
-            })
         }
+        .navigationTitle(viewModel.pageTitle)
+        .searchable(text: $viewModel.searchText)
+        .refreshable {
+            await viewModel.reload()
+        }
+        .task {
+            viewModel.startPageHandling()
+        }
+        .alert("Error", isPresented: .constant(viewModel.error != nil), actions: {
+            Button("OK", role: .cancel) {}
+        }, message: {
+            if let error = viewModel.error {
+                Text(error.localizedDescription)
+            }
+        })
     }
 
     init(viewModel: SitemapPageViewModel) {

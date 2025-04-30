@@ -41,6 +41,7 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
         let viewModel = SitemapPageViewModel()
         self.viewModel = viewModel
         super.init(rootView: SitemapPageView(viewModel: viewModel))
+        navigationItem.title = "Test" // viewModel.currentPage?.title.components(separatedBy: "[")[0]
     }
 
     @available(*, unavailable)

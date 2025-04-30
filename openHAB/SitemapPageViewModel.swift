@@ -90,9 +90,12 @@ class SitemapPageViewModel: ObservableObject {
 //                    )
 //                }
 
+                guard let configuration = NetworkTracker.shared.activeConnection?.configuration else {
+                    throw NetworkTrackerError.noActiveConnection
+                }
+
                 if openAPIService == nil {
-                    openAPIService = try OpenAPIService(
-                        connectionConfiguration: NetworkTracker.shared.activeConnection!.configuration)
+                    openAPIService = try OpenAPIService(connectionConfiguration: configuration)
                 }
 
                 // 1. Initial page load (longPolling: false)
