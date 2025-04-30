@@ -479,9 +479,12 @@ extension OpenHABSitemapViewController {
             do {
                 // Initial page load
 
+                guard let configuration = NetworkTracker.shared.activeConnection?.configuration else {
+                    throw NetworkTrackerError.noActiveConnection
+                }
+
                 if openAPIService == nil {
-                    openAPIService = try OpenAPIService(
-                        connectionConfiguration: NetworkTracker.shared.activeConnection!.configuration)
+                    openAPIService = try OpenAPIService(connectionConfiguration: configuration)
                 }
 
                 let initialPage = try await openAPIService?.pollDataForPage(
