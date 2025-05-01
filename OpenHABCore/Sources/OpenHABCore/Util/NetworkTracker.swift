@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
+@preconcurrency import Combine
 import Foundation
 import Kingfisher
 import Network

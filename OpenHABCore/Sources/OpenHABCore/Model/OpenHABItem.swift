@@ -153,7 +153,6 @@ extension OpenHABItem {
         // unitSymbol
         // tags
         if let item {
-            // swiftlint:disable:next line_length
             self.init(
                 name: item.name.orEmpty,
                 type: item._type.orEmpty,

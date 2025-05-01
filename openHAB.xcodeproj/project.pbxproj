@@ -107,6 +107,7 @@
 		DA7224D223828D3400712D20 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA72E1B8236DEA0900B8EF3A /* AppMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA72E1B5236DEA0900B8EF3A /* AppMessageService.swift */; };
 		DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA77E19A2D886D9B007CFF0F /* SingleConnectionSettingsView.swift */; };
+		DA7ACD5F2DC3DB130055CFC7 /* SFSafeSymbols in Frameworks */ = {isa = PBXBuildFile; productRef = DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E1E47222EB00B002AEFD8 /* PlayerView.swift */; };
 		DA817E7A234BF39B00C91824 /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = DA817E79234BF39B00C91824 /* CHANGELOG.md */; };
 		DA88F8C622EC377200B408E5 /* ReleaseNotes.md in Resources */ = {isa = PBXBuildFile; fileRef = DA88F8C522EC377100B408E5 /* ReleaseNotes.md */; };
@@ -515,6 +516,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA7ACD5F2DC3DB130055CFC7 /* SFSafeSymbols in Frameworks */,
 				937E4492270B37FE00A98C26 /* Kingfisher in Frameworks */,
 				937E44E2270B393C00A98C26 /* OpenHABCore in Frameworks */,
 			);
@@ -1091,6 +1093,7 @@
 			packageProductDependencies = (
 				937E4491270B37FE00A98C26 /* Kingfisher */,
 				937E44E1270B393C00A98C26 /* OpenHABCore */,
+				DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */,
 			);
 			productName = openHABIntents;
 			productReference = 4D6470D32561F935007B03FC /* openHABIntents.appex */;
@@ -2849,6 +2852,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DA2C4FD32B4F573300D1C533 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */;
 			productName = SDWebImageSVGCoder;
+		};
+		DA7ACD5E2DC3DB130055CFC7 /* SFSafeSymbols */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA3B75AC2C59729200E219AB /* XCRemoteSwiftPackageReference "SFSafeSymbols" */;
+			productName = SFSafeSymbols;
 		};
 		DA9A7EFC2D668D5900824156 /* SFSafeSymbols */ = {
 			isa = XCSwiftPackageProductDependency;

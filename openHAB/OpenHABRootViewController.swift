@@ -34,7 +34,6 @@ protocol ModalHandler: AnyObject {
 
 private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
 
-// swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false

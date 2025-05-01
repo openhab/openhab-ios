@@ -22,7 +22,6 @@ import SafariServices
 import SwiftUI
 import UIKit
 
-// swiftlint:disable type_body_length
 class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDelegate {
     var pageUrl = ""
     private var iconType: IconType = .png
