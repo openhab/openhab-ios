@@ -110,7 +110,6 @@ public final class NetworkTracker: ObservableObject {
     @Published public private(set) var status: NetworkStatus = .connecting
 
     private var pathMonitor: NWPathMonitoring
-    private var monitorQueue: DispatchQueue
     private var connectionPool: ConnectionPool
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
@@ -126,36 +125,31 @@ public final class NetworkTracker: ObservableObject {
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
     private init() {
-        monitorQueue = DispatchQueue.global(qos: .background)
         pathMonitor = RealPathMonitor()
         connectionPool = ConnectionPool()
         failureTracker = ConnectionFailureTracker()
 
-        pathMonitor.setUpdateHandler { [weak self] isConnected in
-            Task.detached(priority: .utility) {
+        Task.detached(priority: .utility) { [weak self] in
+            await self?.pathMonitor.startMonitoring { isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
         }
-        pathMonitor.start(queue: monitorQueue)
     }
 
     // MARK: - Injectable initializer for testing
 
     init(monitor: NWPathMonitoring,
-         monitorQueue: DispatchQueue,
          connectionPool: ConnectionPool,
          failureTracker: ConnectionFailureTracker) {
         pathMonitor = monitor
-        self.monitorQueue = monitorQueue
         self.connectionPool = connectionPool
         self.failureTracker = failureTracker
 
-        pathMonitor.setUpdateHandler { [weak self] isConnected in
-            Task.detached(priority: .utility) {
+        Task.detached(priority: .utility) { [weak self] in
+            await self?.pathMonitor.startMonitoring { isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
         }
-        pathMonitor.start(queue: monitorQueue)
     }
 
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {

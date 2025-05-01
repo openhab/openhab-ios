@@ -15,41 +15,49 @@ import Network
 // Wrap real NWPathMonitor
 final class RealPathMonitor: NWPathMonitoring {
     private let monitor: NWPathMonitor
-    private var task: Task<Void, Never>?
 
     init() {
         monitor = NWPathMonitor()
     }
 
-    func setUpdateHandler(_ handler: @escaping (Bool) -> Void) {
+    func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         if #available(iOS 17, watchOS 10, *) {
-            task = Task {
-                for await path in monitor {
-                    handler(path.status == .satisfied)
-                }
+            for await path in monitor {
+                await handler(path.status == .satisfied)
             }
         } else {
-            monitor.pathUpdateHandler = { path in
-                handler(path.status == .satisfied)
+            for await path in monitor.paths() {
+                await handler(path.status == .satisfied)
             }
         }
     }
 
-    func start(queue: DispatchQueue) {
-        monitor.start(queue: queue)
-    }
-
     func cancel() {
         monitor.cancel()
-        task?.cancel()
     }
 }
 
 // MARK: - Protocol
 
 public protocol NWPathMonitoring: AnyObject {
-    /// Called with `true` when connected, `false` otherwise.
-    func setUpdateHandler(_ handler: @escaping (Bool) -> Void)
-    func start(queue: DispatchQueue)
+    /// Continuously monitors network connectivity status.
+    /// Calls the handler with `true` when connected, `false` otherwise.
+    func startMonitoring(handler: @escaping (Bool) async -> Void) async
     func cancel()
+}
+
+// MARK: Extension for version iOS <17
+
+extension NWPathMonitor {
+    func paths() -> AsyncStream<NWPath> {
+        AsyncStream { continuation in
+            pathUpdateHandler = { path in
+                continuation.yield(path)
+            }
+            continuation.onTermination = { [weak self] _ in
+                self?.cancel()
+            }
+            start(queue: DispatchQueue(label: "NSPathMonitor.paths"))
+        }
+    }
 }

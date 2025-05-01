@@ -83,16 +83,12 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
 }
 
 final class MockPathMonitor: NWPathMonitoring {
-    private var handler: ((Bool) -> Void)?
+    private var handler: ((Bool) async -> Void)?
 
     init() {}
 
-    func setUpdateHandler(_ handler: @escaping (Bool) -> Void) {
+    func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         self.handler = handler
-    }
-
-    func start(queue: DispatchQueue) {
-        // no-op
     }
 
     func cancel() {
@@ -101,7 +97,10 @@ final class MockPathMonitor: NWPathMonitoring {
 
     /// Call this in your tests to simulate a connection status change
     func simulateConnection(isConnected: Bool) {
-        handler?(isConnected)
+        guard let handler else { return }
+        Task {
+            await handler(isConnected)
+        }
     }
 }
 
@@ -123,7 +122,6 @@ final class NetworkTrackerTests: XCTestCase {
 
         let tracker = NetworkTracker(
             monitor: mockMonitor,
-            monitorQueue: .main,
             connectionPool: mockPool,
             failureTracker: ConnectionFailureTracker()
         )
@@ -154,7 +152,6 @@ final class NetworkTrackerTests: XCTestCase {
         let mockMonitor = MockPathMonitor() // ⬅️ Hold on to this
         let tracker = NetworkTracker(
             monitor: mockMonitor,
-            monitorQueue: .main,
             connectionPool: ConnectionPool { _ in MockOpenAPIService() },
             failureTracker: ConnectionFailureTracker()
         )
