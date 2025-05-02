@@ -124,49 +124,37 @@ public final class NetworkTracker: ObservableObject {
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
-    private init() {
-        pathMonitor = RealPathMonitor()
-        connectionPool = ConnectionPool()
-        failureTracker = ConnectionFailureTracker()
-
-        Task.detached(priority: .utility) { [weak self] in
-            await self?.pathMonitor.startMonitoring { isConnected in
-                await self?.handleNetworkChange(isConnected: isConnected)
-            }
-        }
-    }
-
     // MARK: - Injectable initializer for testing
 
-    init(monitor: NWPathMonitoring,
-         connectionPool: ConnectionPool,
-         failureTracker: ConnectionFailureTracker) {
+    init(monitor: NWPathMonitoring = RealPathMonitor(),
+         connectionPool: ConnectionPool = ConnectionPool(),
+         failureTracker: ConnectionFailureTracker = ConnectionFailureTracker()) {
         pathMonitor = monitor
         self.connectionPool = connectionPool
         self.failureTracker = failureTracker
+    }
+
+    public func startTracking(connectionConfigurations: [ConnectionConfiguration]) async {
+        logger.info("Start Network Tracking")
+        self.connectionConfigurations = connectionConfigurations
 
         Task.detached(priority: .utility) { [weak self] in
             await self?.pathMonitor.startMonitoring { isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
         }
-    }
 
-    public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {
-        logger.info("Start Network Tracking")
-        self.connectionConfigurations = connectionConfigurations
-        Task {
-            for configuration in connectionConfigurations {
-                do {
-                    _ = try await connectionPool.getOrCreateService(for: configuration)
-                } catch {
-                    logger.error("Failed to create service for config: \(configuration.url, privacy: .public) — \(error.localizedDescription)")
-                    // Optionally: show a UI popup or skip to next config
-                }
+        for configuration in connectionConfigurations {
+            do {
+                _ = try await connectionPool.getOrCreateService(for: configuration)
+            } catch {
+                logger.error("Failed to create service for config: \(configuration.url, privacy: .public) — \(error.localizedDescription)")
+                // Optionally: show a UI popup or skip to next config
             }
-            await setActiveConnection(nil)
-            await attemptConnection()
         }
+
+        await setActiveConnection(nil)
+        await attemptConnection()
     }
 
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {

@@ -138,7 +138,7 @@ final class NetworkTrackerTests: XCTestCase {
             .store(in: &cancellables)
 
         // Start tracking with your mock config
-        tracker.startTracking(connectionConfigurations: [config])
+        await tracker.startTracking(connectionConfigurations: [config])
 
         // Simulate the network becoming available
         mockMonitor.simulateConnection(isConnected: true)

@@ -152,17 +152,23 @@ class OpenHABRootViewController: UIViewController {
             .sink { (serverInfoTuple, miscTuple) in
                 let (localConnectionConfig, remoteConnectionConfig) = serverInfoTuple
                 let (demomode) = miscTuple
-                if demomode {
-                    NetworkTracker.shared.startTracking(connectionConfigurations: [
-                        ConnectionConfiguration(
-                            url: "https://demo.openhab.org",
-                            username: "",
-                            password: "",
-                            priority: 0
-                        )
-                    ])
-                } else {
-                    NetworkTracker.shared.startTracking(connectionConfigurations: [localConnectionConfig, remoteConnectionConfig])
+
+                Task {
+                    if demomode {
+                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                            ConnectionConfiguration(
+                                url: "https://demo.openhab.org",
+                                username: "",
+                                password: "",
+                                priority: 0
+                            )
+                        ])
+                    } else {
+                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                            localConnectionConfig,
+                            remoteConnectionConfig
+                        ])
+                    }
                 }
             }
             .store(in: &cancellables)
