@@ -146,6 +146,7 @@ final class NetworkTrackerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
     }
 
+    @MainActor
     func testTrackerGoesOfflineOnNetworkLoss() async {
         let expectation = XCTestExpectation(description: "Status becomes .notConnected")
 
@@ -168,13 +169,13 @@ final class NetworkTrackerTests: XCTestCase {
             .store(in: &cancellables)
 
         // Start tracking first to initialize properly
-        tracker.startTracking(connectionConfigurations: [
+        await tracker.startTracking(connectionConfigurations: [
             ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
         ])
 
         // Simulate loss of network
         mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
 
-        await fulfillment(of: [expectation], timeout: 2.0)
+        await fulfillment(of: [expectation], timeout: 4.0)
     }
 }

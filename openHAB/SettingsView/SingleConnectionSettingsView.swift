@@ -66,7 +66,6 @@ struct SingleConnectionSettingsView: View {
                                 }
                             } label: {
                                 Image(systemSymbol: .wifiCircle)
-                                
                             }
                             .buttonStyle(.plain)
                             .foregroundColor(.accentColor)
