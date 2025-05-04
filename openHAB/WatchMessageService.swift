@@ -75,7 +75,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 }
 
 @MainActor
-public extension WatchPreferences {
+extension WatchPreferences {
     init(fromPreferences preferences: Preferences.Type) {
         self.init(
             localUrl: preferences.localUrl,

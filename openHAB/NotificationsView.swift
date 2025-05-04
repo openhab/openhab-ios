@@ -154,7 +154,7 @@ extension NotificationsView where Tracker == NetworkTracker {
 }
 
 #if DEBUG
-public extension ConnectionInfo {
+extension ConnectionInfo {
     static var mock: ConnectionInfo {
         ConnectionInfo(
             configuration: ConnectionConfiguration(

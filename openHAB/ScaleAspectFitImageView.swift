@@ -11,7 +11,7 @@
 
 import UIKit
 
-public class ScaleAspectFitImageView: UIImageView {
+class ScaleAspectFitImageView: UIImageView {
     private var aspectRatioConstraint: NSLayoutConstraint?
     override public var image: UIImage? {
         didSet {
