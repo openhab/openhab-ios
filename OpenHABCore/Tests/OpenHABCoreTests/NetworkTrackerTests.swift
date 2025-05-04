@@ -173,6 +173,9 @@ final class NetworkTrackerTests: XCTestCase {
             ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
         ])
 
+        // Add small delay to let Combine attach the sink before simulating
+        try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+
         // Simulate loss of network
         mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
 

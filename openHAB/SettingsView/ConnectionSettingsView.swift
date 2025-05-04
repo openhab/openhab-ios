@@ -22,8 +22,8 @@ struct ConnectionSettingsView: View {
         Toggle("Demo Mode", isOn: $settingsDemomode)
 
         if !settingsDemomode {
-            SingleConnectionSettingsView(headerText: "Configuration for local server", connectionConfig: $localConnectionConfiguration)
-            SingleConnectionSettingsView(headerText: "Configuration for remote server", connectionConfig: $remoteConnectionConfiguration)
+            SingleConnectionSettingsView(headerText: "Local server", connectionConfig: $localConnectionConfiguration)
+            SingleConnectionSettingsView(headerText: "Remote server", connectionConfig: $remoteConnectionConfiguration)
         }
     }
 }

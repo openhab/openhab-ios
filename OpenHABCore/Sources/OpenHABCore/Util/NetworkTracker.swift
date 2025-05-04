@@ -36,7 +36,7 @@ public struct ConnectionInfo: Equatable, Sendable {
     }
 }
 
-public enum NetworkTrackerError: Error, CustomDebugStringConvertible {
+public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
     case invalidServerVersion
     case failedConnection(String)
     case noActiveConnection
@@ -314,7 +314,8 @@ public final class NetworkTracker: ObservableObject {
 
     private func startRetryTask(_ initialRetryInterval: UInt64) {
         retryTask?.cancel()
-        retryTask = Task {
+        retryTask = Task { [weak self] in
+            guard let self else { return }
             let backoffMultiplier = await UInt64(failureTracker.maxFailureCount())
             let safeBackoff = min(backoffMultiplier, 10) // 2^10 = 1024
             let delay = min(initialRetryInterval * (1 << safeBackoff), 300)
@@ -363,7 +364,7 @@ public final class NetworkTracker: ObservableObject {
     }
 }
 
-public protocol NetworkTracking: ObservableObject {
+public protocol NetworkTracking: ObservableObject, Sendable {
     var activeConnection: ConnectionInfo? { get }
 }
 
@@ -423,7 +424,7 @@ public extension NetworkTracker {
             let cancellable = self.$activeConnection
                 .sink { continuation.yield($0) }
 
-            continuation.onTermination = { _ in cancellable.cancel() }
+            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
         }
     }
 }
