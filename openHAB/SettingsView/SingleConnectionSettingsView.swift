@@ -18,7 +18,7 @@ struct SpinningSymbol: View {
     @State private var isAnimating = false
 
     var body: some View {
-        Image(systemName: "arrow.triangle.2.circlepath")
+        Image(systemSymbol: .arrowTriangle2Circlepath)
             .rotationEffect(.degrees(isAnimating ? 360 : 0))
             .animation(
                 Animation.linear(duration: 1.0)

@@ -87,7 +87,6 @@ public extension OpenHABSitemapWidgetEvent {
 
 extension OpenHABSitemapWidgetEvent.CodingData {
     var openHABSitemapWidgetEvent: OpenHABSitemapWidgetEvent {
-        // swiftlint:disable:next line_length
         OpenHABSitemapWidgetEvent(
             sitemapName: sitemapName,
             pageId: pageId,

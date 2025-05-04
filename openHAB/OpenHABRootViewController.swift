@@ -15,6 +15,7 @@ import Foundation
 import OpenHABCore
 import os.log
 import SafariServices
+import SFSafeSymbols
 import SideMenu
 import SwiftUI
 import UIKit
@@ -571,8 +572,6 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 }
-
-// swiftlint:enable type_body_length
 
 // MARK: - UISideMenuNavigationControllerDelegate
 

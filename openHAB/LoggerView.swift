@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OSLog
+import SFSafeSymbols
 import SwiftUI
 
 struct LogEntry: Identifiable, Hashable {
@@ -58,7 +59,7 @@ struct LoggerView: View {
                     item: shareLogs(),
                     preview: SharePreview("Share Log Data")
                 ) {
-                    Label("Share", systemImage: "square.and.arrow.up")
+                    Label("Share", systemSymbol: .squareAndArrowUp)
                 }
                 .disabled(logs.isEmpty)
             }

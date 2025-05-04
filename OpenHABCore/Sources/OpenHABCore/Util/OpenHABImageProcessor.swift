@@ -13,6 +13,7 @@ import Foundation
 import Kingfisher
 import os.log
 import SDWebImageSVGCoder
+import SFSafeSymbols
 
 public struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
@@ -37,11 +38,11 @@ public struct OpenHABImageProcessor: ImageProcessor {
                 if let image = SDImageSVGCoder.shared.decodedImage(with: data, options: nil) {
                     let size = image.size
                     if size.width > 1000 || size.height > 1000 {
-                        return UIImage(systemName: "exclamationmark.triangle")?.withTintColor(.orange, renderingMode: .alwaysOriginal)
+                        return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange, renderingMode: .alwaysOriginal)
                     }
                     return image
                 } else {
-                    return UIImage(systemName: "exclamationmark.triangle")?.withTintColor(.orange, renderingMode: .alwaysOriginal)
+                    return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange, renderingMode: .alwaysOriginal)
                 }
             default:
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))

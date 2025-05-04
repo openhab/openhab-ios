@@ -41,7 +41,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         logger.info("Received message (no reply): \(message, privacy: .public)")
     }
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         logger.info("WCSession activation completed. State: \(String(describing: activationState)), Error: \(String(describing: error))")
     }
 

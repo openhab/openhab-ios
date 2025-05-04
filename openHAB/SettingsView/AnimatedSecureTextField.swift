@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import SFSafeSymbols
 import SwiftUI
 
 struct AnimatedSecureTextField: View {

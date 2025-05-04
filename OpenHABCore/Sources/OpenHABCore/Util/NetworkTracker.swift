@@ -101,6 +101,10 @@ public actor ConnectionFailureTracker {
     }
 }
 
+public protocol NetworkTracking: ObservableObject, Sendable {
+    var activeConnection: ConnectionInfo? { get }
+}
+
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
@@ -296,8 +300,8 @@ public final class NetworkTracker: ObservableObject {
             return nil
         } catch let error as OpenAPIServiceError {
             switch error {
-            case let .undocumented(statusCode, _):
-                logger.info("Undocumented status code: ") // \(statusCode), ") // payload: \(String(describing: payload))")
+            case let .undocumented(statusCode, payload):
+                logger.info("Undocumented status code: \(statusCode), payload: \(String(describing: payload))")
                 return nil
             default:
                 return nil
@@ -362,10 +366,6 @@ public final class NetworkTracker: ObservableObject {
             await failureTracker.resetAll()
         }
     }
-}
-
-public protocol NetworkTracking: ObservableObject, Sendable {
-    var activeConnection: ConnectionInfo? { get }
 }
 
 extension NetworkTracker: NetworkTracking {}

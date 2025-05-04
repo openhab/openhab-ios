@@ -93,6 +93,11 @@ custom_rules:
      regex: '((?:\s*\n){3,})'
      message: "There are too many line breaks"
      severity: error
+  sf_safe_symbol:
+    name: "Safe SFSymbol"
+    message: "Use `SFSafeSymbols` via `systemSymbol` parameters for type safety."
+    regex: "(Image\\(systemName:)|(NSImage\\(symbolName:)|(Label[^,]+?,\\s*systemImage:)|(UIApplicationShortcutIcon\\(systemImageName:)"
+    severity: warning
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"

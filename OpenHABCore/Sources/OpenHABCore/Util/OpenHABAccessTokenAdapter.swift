@@ -12,8 +12,8 @@
 import Foundation
 import Kingfisher
 
-public class OpenHABAccessTokenAdapter {
-    var connectionConfiguration: ConnectionConfiguration?
+public final class OpenHABAccessTokenAdapter {
+    let connectionConfiguration: ConnectionConfiguration?
 
     public init(connectionConfiguration: ConnectionConfiguration) {
         self.connectionConfiguration = connectionConfiguration

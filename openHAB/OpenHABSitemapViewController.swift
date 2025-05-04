@@ -19,6 +19,8 @@ import OpenAPIURLSession
 import OpenHABCore
 import os.log
 import SafariServices
+import SFSafeSymbols
+import SwiftMessages
 import SwiftUI
 import UIKit
 
@@ -623,8 +625,6 @@ extension OpenHABSitemapViewController {
     }
 }
 
-// swiftlint:enable type_body_length
-
 // MARK: - UISearchResultsUpdating
 
 extension OpenHABSitemapViewController: UISearchResultsUpdating {
@@ -709,7 +709,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             iconColor = "white"
         }
         // No icon will be displazed for cells that conform to NoIconDisplayableCell protocol
-        if !(cell is NoIconDisplayableCell) {
+        if !(cell is any NoIconDisplayableCell) {
             if !widget.icon.isEmpty {
                 if let urlc = Endpoint.icon(
                     rootUrl: openHABRootUrl,
@@ -855,7 +855,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if let cell = cell as? GenericCellCacheProtocol {
+        if let cell = cell as? any GenericCellCacheProtocol {
             // invalidate cache only if the cell is not visible or the datasource is empty (eg. sitemap change)
             if tableView.indexPathsForVisibleRows == nil || !tableView.indexPathsForVisibleRows!.contains(indexPath) || currentPage == nil || currentPage!.widgets.isEmpty {
                 cell.invalidateCache()

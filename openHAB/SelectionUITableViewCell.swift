@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
+import UIKit
 
 class SelectionUITableViewCell: GenericUITableViewCell {
     override var widget: OpenHABWidget! {

@@ -9,10 +9,12 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import OpenHABCore
 import os.log
 import SafariServices
 import SideMenu
+import SwiftMessages
 import UIKit
 import WebKit
 
@@ -342,7 +344,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         showActivityIndicator(show: true)
     }
 
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: Error) {
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
         logger.error("didFail - webView.url: \(String(describing: webView.url?.description))")
 
         if let urlError = error as? URLError, urlError.code == .cancelled {

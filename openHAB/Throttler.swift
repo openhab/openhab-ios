@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 
 // Inspired by http://danielemargutti.com/2017/10/19/throttle-in-swift/

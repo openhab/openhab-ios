@@ -364,7 +364,6 @@ public extension OpenHABWidget {
 public extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
-        // swiftlint:disable:next line_length
         return OpenHABWidget(
             widgetId: widgetId,
             label: label,
