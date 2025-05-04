@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
+@preconcurrency import Combine
 import Foundation
 import Kingfisher
 import Network
@@ -36,7 +36,7 @@ public struct ConnectionInfo: Equatable, Sendable {
     }
 }
 
-public enum NetworkTrackerError: Error, CustomDebugStringConvertible {
+public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
     case invalidServerVersion
     case failedConnection(String)
     case noActiveConnection
@@ -101,6 +101,10 @@ public actor ConnectionFailureTracker {
     }
 }
 
+public protocol NetworkTracking: ObservableObject, Sendable {
+    var activeConnection: ConnectionInfo? { get }
+}
+
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
@@ -110,7 +114,6 @@ public final class NetworkTracker: ObservableObject {
     @Published public private(set) var status: NetworkStatus = .connecting
 
     private var pathMonitor: NWPathMonitoring
-    private var monitorQueue: DispatchQueue
     private var connectionPool: ConnectionPool
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
@@ -125,54 +128,37 @@ public final class NetworkTracker: ObservableObject {
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkTracker")
 
-    private init() {
-        monitorQueue = DispatchQueue.global(qos: .background)
-        pathMonitor = RealPathMonitor()
-        connectionPool = ConnectionPool()
-        failureTracker = ConnectionFailureTracker()
-
-        pathMonitor.setUpdateHandler { [weak self] isConnected in
-            Task.detached(priority: .utility) {
-                await self?.handleNetworkChange(isConnected: isConnected)
-            }
-        }
-        pathMonitor.start(queue: monitorQueue)
-    }
-
     // MARK: - Injectable initializer for testing
 
-    init(monitor: NWPathMonitoring,
-         monitorQueue: DispatchQueue,
-         connectionPool: ConnectionPool,
-         failureTracker: ConnectionFailureTracker) {
+    init(monitor: NWPathMonitoring = RealPathMonitor(),
+         connectionPool: ConnectionPool = ConnectionPool(),
+         failureTracker: ConnectionFailureTracker = ConnectionFailureTracker()) {
         pathMonitor = monitor
-        self.monitorQueue = monitorQueue
         self.connectionPool = connectionPool
         self.failureTracker = failureTracker
+    }
 
-        pathMonitor.setUpdateHandler { [weak self] isConnected in
-            Task.detached(priority: .utility) {
+    public func startTracking(connectionConfigurations: [ConnectionConfiguration]) async {
+        logger.info("Start Network Tracking")
+        self.connectionConfigurations = connectionConfigurations
+
+        Task.detached(priority: .utility) { [weak self] in
+            await self?.pathMonitor.startMonitoring { isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
         }
-        pathMonitor.start(queue: monitorQueue)
-    }
 
-    public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {
-        logger.info("Start Network Tracking")
-        self.connectionConfigurations = connectionConfigurations
-        Task {
-            for configuration in connectionConfigurations {
-                do {
-                    _ = try await connectionPool.getOrCreateService(for: configuration)
-                } catch {
-                    logger.error("Failed to create service for config: \(configuration.url, privacy: .public) — \(error.localizedDescription)")
-                    // Optionally: show a UI popup or skip to next config
-                }
+        for configuration in connectionConfigurations {
+            do {
+                _ = try await connectionPool.getOrCreateService(for: configuration)
+            } catch {
+                logger.error("Failed to create service for config: \(configuration.url, privacy: .public) — \(error.localizedDescription)")
+                // Optionally: show a UI popup or skip to next config
             }
-            await setActiveConnection(nil)
-            await attemptConnection()
         }
+
+        await setActiveConnection(nil)
+        await attemptConnection()
     }
 
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
@@ -314,8 +300,8 @@ public final class NetworkTracker: ObservableObject {
             return nil
         } catch let error as OpenAPIServiceError {
             switch error {
-            case let .undocumented(statusCode, _):
-                logger.info("Undocumented status code: ") // \(statusCode), ") // payload: \(String(describing: payload))")
+            case let .undocumented(statusCode, payload):
+                logger.info("Undocumented status code: \(statusCode), payload: \(String(describing: payload))")
                 return nil
             default:
                 return nil
@@ -332,7 +318,8 @@ public final class NetworkTracker: ObservableObject {
 
     private func startRetryTask(_ initialRetryInterval: UInt64) {
         retryTask?.cancel()
-        retryTask = Task {
+        retryTask = Task { [weak self] in
+            guard let self else { return }
             let backoffMultiplier = await UInt64(failureTracker.maxFailureCount())
             let safeBackoff = min(backoffMultiplier, 10) // 2^10 = 1024
             let delay = min(initialRetryInterval * (1 << safeBackoff), 300)
@@ -379,10 +366,6 @@ public final class NetworkTracker: ObservableObject {
             await failureTracker.resetAll()
         }
     }
-}
-
-public protocol NetworkTracking: ObservableObject {
-    var activeConnection: ConnectionInfo? { get }
 }
 
 extension NetworkTracker: NetworkTracking {}
@@ -441,7 +424,7 @@ public extension NetworkTracker {
             let cancellable = self.$activeConnection
                 .sink { continuation.yield($0) }
 
-            continuation.onTermination = { _ in cancellable.cancel() }
+            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
         }
     }
 }

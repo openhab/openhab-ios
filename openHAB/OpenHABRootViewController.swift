@@ -15,6 +15,7 @@ import Foundation
 import OpenHABCore
 import os.log
 import SafariServices
+import SFSafeSymbols
 import SideMenu
 import SwiftUI
 import UIKit
@@ -64,7 +65,6 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
     }
 }
 
-// swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: (UIViewController & OpenHABViewable)!
     var isDemoMode = false
@@ -179,17 +179,23 @@ class OpenHABRootViewController: UIViewController {
             .sink { (serverInfoTuple, miscTuple) in
                 let (localConnectionConfig, remoteConnectionConfig) = serverInfoTuple
                 let (demomode) = miscTuple
-                if demomode {
-                    NetworkTracker.shared.startTracking(connectionConfigurations: [
-                        ConnectionConfiguration(
-                            url: "https://demo.openhab.org",
-                            username: "",
-                            password: "",
-                            priority: 0
-                        )
-                    ])
-                } else {
-                    NetworkTracker.shared.startTracking(connectionConfigurations: [localConnectionConfig, remoteConnectionConfig])
+
+                Task {
+                    if demomode {
+                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                            ConnectionConfiguration(
+                                url: "https://demo.openhab.org",
+                                username: "",
+                                password: "",
+                                priority: 0
+                            )
+                        ])
+                    } else {
+                        await NetworkTracker.shared.startTracking(connectionConfigurations: [
+                            localConnectionConfig,
+                            remoteConnectionConfig
+                        ])
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -591,8 +597,6 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 }
-
-// swiftlint:enable type_body_length
 
 // MARK: - UISideMenuNavigationControllerDelegate
 

@@ -14,36 +14,6 @@ import os.log
 import SwiftUI
 import WatchConnectivity
 
-struct PreferencesSwiftUIView: View {
-    @EnvironmentObject var settings: AppSettings
-
-    var applicationVersionNumber: String = {
-        let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
-        let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        return "\(appVersionString ?? "") (\(appBuildString ?? ""))"
-    }()
-
-    var body: some View {
-        List {
-            LabeledContent(LocalizedStringKey("local_url"), value: settings.localConnectionConfig?.url ?? "empty")
-                .highlightDotRow(if: settings.localConnectionConfig?.url == settings.openHABRootUrl)
-            LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteConnectionConfig?.url ?? "empty")
-                .highlightDotRow(if: settings.remoteConnectionConfig?.url == settings.openHABRootUrl)
-            LabeledContent(LocalizedStringKey("sitemap"), value: settings.sitemapForWatchLabel)
-                .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
-            LabeledContent(LocalizedStringKey("version"), value: applicationVersionNumber)
-                .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
-        }
-        .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
-        .listStyle(.plain)
-        .environment(\.defaultMinListRowHeight, 10)
-        .labeledContentStyle(CompactLabeledContentStyle()) // 👈 Apply custom style
-        .refreshable {
-            AppMessageService.singleton.requestApplicationContext()
-        }
-    }
-}
-
 struct HighlightDotRowModifier: ViewModifier {
     let showDot: Bool
 
@@ -78,6 +48,36 @@ struct CompactLabeledContentStyle: LabeledContentStyle {
                 .foregroundColor(.secondary)
         }
 //        .padding(.vertical, 4) // Reduces vertical space
+    }
+}
+
+struct PreferencesSwiftUIView: View {
+    @EnvironmentObject var settings: AppSettings
+
+    var applicationVersionNumber: String = {
+        let appBuildString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+        let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return "\(appVersionString ?? "") (\(appBuildString ?? ""))"
+    }()
+
+    var body: some View {
+        List {
+            LabeledContent(LocalizedStringKey("local_url"), value: settings.localConnectionConfig?.url ?? "empty")
+                .highlightDotRow(if: settings.localConnectionConfig?.url == settings.openHABRootUrl)
+            LabeledContent(LocalizedStringKey("remote_url"), value: settings.remoteConnectionConfig?.url ?? "empty")
+                .highlightDotRow(if: settings.remoteConnectionConfig?.url == settings.openHABRootUrl)
+            LabeledContent(LocalizedStringKey("sitemap"), value: settings.sitemapForWatchLabel)
+                .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
+            LabeledContent(LocalizedStringKey("version"), value: applicationVersionNumber)
+                .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
+        }
+        .listRowInsets(EdgeInsets(top: 0, leading: 5, bottom: 0, trailing: 5))
+        .listStyle(.plain)
+        .environment(\.defaultMinListRowHeight, 10)
+        .labeledContentStyle(CompactLabeledContentStyle()) // 👈 Apply custom style
+        .refreshable {
+            AppMessageService.singleton.requestApplicationContext()
+        }
     }
 }
 

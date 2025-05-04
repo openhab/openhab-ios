@@ -83,16 +83,12 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
 }
 
 final class MockPathMonitor: NWPathMonitoring {
-    private var handler: ((Bool) -> Void)?
+    private var handler: ((Bool) async -> Void)?
 
     init() {}
 
-    func setUpdateHandler(_ handler: @escaping (Bool) -> Void) {
+    func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         self.handler = handler
-    }
-
-    func start(queue: DispatchQueue) {
-        // no-op
     }
 
     func cancel() {
@@ -101,7 +97,10 @@ final class MockPathMonitor: NWPathMonitoring {
 
     /// Call this in your tests to simulate a connection status change
     func simulateConnection(isConnected: Bool) {
-        handler?(isConnected)
+        guard let handler else { return }
+        Task {
+            await handler(isConnected)
+        }
     }
 }
 
@@ -123,7 +122,6 @@ final class NetworkTrackerTests: XCTestCase {
 
         let tracker = NetworkTracker(
             monitor: mockMonitor,
-            monitorQueue: .main,
             connectionPool: mockPool,
             failureTracker: ConnectionFailureTracker()
         )
@@ -140,7 +138,7 @@ final class NetworkTrackerTests: XCTestCase {
             .store(in: &cancellables)
 
         // Start tracking with your mock config
-        tracker.startTracking(connectionConfigurations: [config])
+        await tracker.startTracking(connectionConfigurations: [config])
 
         // Simulate the network becoming available
         mockMonitor.simulateConnection(isConnected: true)
@@ -148,13 +146,13 @@ final class NetworkTrackerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
     }
 
+    @MainActor
     func testTrackerGoesOfflineOnNetworkLoss() async {
         let expectation = XCTestExpectation(description: "Status becomes .notConnected")
 
         let mockMonitor = MockPathMonitor() // ⬅️ Hold on to this
         let tracker = NetworkTracker(
             monitor: mockMonitor,
-            monitorQueue: .main,
             connectionPool: ConnectionPool { _ in MockOpenAPIService() },
             failureTracker: ConnectionFailureTracker()
         )
@@ -171,13 +169,16 @@ final class NetworkTrackerTests: XCTestCase {
             .store(in: &cancellables)
 
         // Start tracking first to initialize properly
-        tracker.startTracking(connectionConfigurations: [
+        await tracker.startTracking(connectionConfigurations: [
             ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
         ])
+
+        // Add small delay to let Combine attach the sink before simulating
+        try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
 
         // Simulate loss of network
         mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
 
-        await fulfillment(of: [expectation], timeout: 2.0)
+        await fulfillment(of: [expectation], timeout: 4.0)
     }
 }

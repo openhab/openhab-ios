@@ -9,9 +9,27 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenAPIRuntime
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
+
+struct SpinningSymbol: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        Image(systemSymbol: .arrowTriangle2Circlepath)
+            .rotationEffect(.degrees(isAnimating ? 360 : 0))
+            .animation(
+                Animation.linear(duration: 1.0)
+                    .repeatForever(autoreverses: false),
+                value: isAnimating
+            )
+            .onAppear {
+                isAnimating = true
+            }
+    }
+}
 
 struct SingleConnectionSettingsView: View {
     var headerText: String
@@ -39,15 +57,15 @@ struct SingleConnectionSettingsView: View {
                     HStack {
                         Text("URL")
                         if isTestingConnection {
-                            ProgressView()
-                                .scaleEffect(0.5)
+                            SpinningSymbol()
+                                .scaleEffect(0.8)
                         } else {
                             Button {
                                 Task {
                                     await handleTestConnection()
                                 }
                             } label: {
-                                Image(systemName: "arrow.clockwise")
+                                Image(systemSymbol: .wifiCircle)
                             }
                             .buttonStyle(.plain)
                             .foregroundColor(.accentColor)
@@ -62,7 +80,7 @@ struct SingleConnectionSettingsView: View {
 
                 if let message = connectionTestMessage, let success = connectionTestSuccess {
                     HStack(spacing: 4) {
-                        Image(systemName: success ? "checkmark.circle" : "xmark.octagon")
+                        Image(systemSymbol: success ? .checkmarkCircle : .xmarkOctagon)
                             .foregroundColor(success ? .green : .red)
                         Text(message)
                             .foregroundColor(success ? .green : .red)
@@ -122,6 +140,24 @@ struct SingleConnectionSettingsView: View {
             try await testConnection()
             connectionTestMessage = "Connection successful"
             connectionTestSuccess = true
+        } catch is CancellationError {
+            connectionTestMessage = "Cancellation occurred"
+            connectionTestSuccess = false
+        } catch let error as DecodingError {
+            connectionTestMessage = "Unexpected error: \(error.localizedDescription)"
+            connectionTestSuccess = false
+        } catch let error as ClientError {
+            if let urlError = error.underlyingError as? URLError {
+                connectionTestMessage = friendlyMessage(for: urlError)
+            } else {
+                connectionTestMessage = """
+                \(String(describing: error.underlyingError))
+                """
+            }
+            connectionTestSuccess = false
+        } catch let openAPIError as OpenAPIServiceError {
+            connectionTestMessage = "\(openAPIError.localizedDescription)"
+            connectionTestSuccess = false
         } catch let urlError as URLError {
             connectionTestMessage = friendlyMessage(for: urlError)
             connectionTestSuccess = false

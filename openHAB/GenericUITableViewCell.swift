@@ -27,7 +27,7 @@ class GenericUITableViewCell: UITableViewCell {
     private var _widget: OpenHABWidget!
 
     // optional event callback if table cells neeed to notify on touch up or down events
-    weak var touchEventDelegate: GenericUITableViewCellTouchEventDelegate?
+    weak var touchEventDelegate: (any GenericUITableViewCellTouchEventDelegate)?
 
     var widget: OpenHABWidget! {
         get {

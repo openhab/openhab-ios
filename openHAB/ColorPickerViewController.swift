@@ -73,7 +73,7 @@ class ColorPickerViewController: DefaultColorPickerViewController {
 }
 
 extension ColorPickerViewController: ColorPickerDelegate {
-    func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: ColorControl) {
+    func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: any ColorControl) {
         if let throttler {
             throttler.throttle { DispatchQueue.main.async { self.sendColorUpdate(color: selectedColor) } }
         } else {
@@ -81,7 +81,7 @@ extension ColorPickerViewController: ColorPickerDelegate {
         }
     }
 
-    func colorPicker(_ colorPicker: ColorPickerController, confirmedColor: UIColor, usingControl: ColorControl) {
+    func colorPicker(_ colorPicker: ColorPickerController, confirmedColor: UIColor, usingControl: any ColorControl) {
         sendColorUpdate(color: confirmedColor)
     }
 }

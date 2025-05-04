@@ -14,7 +14,7 @@ import OpenHABCore
 import UIKit
 
 enum WidgetCellFactory {
-    static func provider(for widget: OpenHABWidget) -> WidgetCellProvider {
+    static func provider(for widget: OpenHABWidget) -> any WidgetCellProvider {
         switch widget.type {
         case .switchWidget:
             if !widget.mappings.isEmpty {

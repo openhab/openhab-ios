@@ -9,10 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
 import SwiftUI
+
+typealias NotificationLoader = () async -> [OpenHABNotification]
 
 struct NotificationRow: View {
     var notification: OpenHABNotification
@@ -69,7 +72,35 @@ struct NotificationRow: View {
     }
 }
 
-typealias NotificationLoader = () async -> [OpenHABNotification]
+final class MockNetworkTracker: NetworkTracking, ObservableObject {
+    @Published var activeConnection: ConnectionInfo?
+
+    init(connection: ConnectionInfo?) {
+        activeConnection = connection
+    }
+}
+
+struct NotificationsViewPreview: View {
+    var body: some View {
+        let mockTracker = MockNetworkTracker(connection: .mock)
+        return NotificationsView(networkTracker: mockTracker, notifications: []) {
+            [
+                OpenHABNotification(
+                    message: "Preview Notification 1",
+                    created: .now,
+                    icon: "sun",
+                    id: UUID().uuidString
+                ),
+                OpenHABNotification(
+                    message: "Preview Notification 2",
+                    created: .now.addingTimeInterval(-3600),
+                    icon: "moon",
+                    id: UUID().uuidString
+                )
+            ]
+        }
+    }
+}
 
 struct NotificationsView<Tracker: NetworkTracking>: View where Tracker: ObservableObject {
     @ObservedObject var networkTracker: Tracker
@@ -133,40 +164,6 @@ public extension ConnectionInfo {
                 alwaysSendBasicAuth: true
             ),
             version: 3
-        )
-    }
-}
-
-final class MockNetworkTracker: NetworkTracking, ObservableObject {
-    @Published var activeConnection: ConnectionInfo?
-
-    init(connection: ConnectionInfo?) {
-        activeConnection = connection
-    }
-}
-
-struct NotificationsViewPreview: View {
-    var body: some View {
-        let mockTracker = MockNetworkTracker(connection: .mock)
-        return NotificationsView(
-            networkTracker: mockTracker,
-            notifications: [],
-            loadNotifications: {
-                [
-                    OpenHABNotification(
-                        message: "Preview Notification 1",
-                        created: .now,
-                        icon: "sun",
-                        id: UUID().uuidString
-                    ),
-                    OpenHABNotification(
-                        message: "Preview Notification 2",
-                        created: .now.addingTimeInterval(-3600),
-                        icon: "moon",
-                        id: UUID().uuidString
-                    )
-                ]
-            }
         )
     }
 }

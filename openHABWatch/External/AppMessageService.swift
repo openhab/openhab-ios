@@ -47,15 +47,11 @@ class AppMessageService: NSObject, WCSessionDelegate {
     }
 
     func requestApplicationContext() {
-        WCSession.default.sendMessage(
-            ["request": "Preferences"],
-            replyHandler: { response in
-
-                DispatchQueue.main.async { () in
-                    self.updateValuesFromApplicationContext(response as [String: AnyObject])
-                }
+        WCSession.default.sendMessage(["request": "Preferences"]) { response in
+            DispatchQueue.main.async { () in
+                self.updateValuesFromApplicationContext(response as [String: AnyObject])
             }
-        ) { error in
+        } errorHandler: { error in
             self.logger.error("Error sending message \(error.localizedDescription)")
         }
     }

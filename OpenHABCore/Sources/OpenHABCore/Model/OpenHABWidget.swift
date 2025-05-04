@@ -255,7 +255,34 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
 public extension OpenHABWidget {
     // This is an ugly initializer
-    convenience init(widgetId: String, label: String, icon: String, type: WidgetType, url: String?, period: String?, minValue: Double?, maxValue: Double?, step: Double?, refresh: Int?, height: Double?, isLeaf: Bool?, iconColor: String?, labelColor: String?, valueColor: String?, service: String?, state: String?, text: String?, legend: Bool?, inputHint: InputHint?, encoding: String?, item: OpenHABItem?, linkedPage: OpenHABPage?, mappings: [OpenHABWidgetMapping], widgets: [OpenHABWidget], visibility: Bool?, switchSupport: Bool?, forceAsItem: Bool?) {
+    convenience init(widgetId: String,
+                     label: String,
+                     icon: String,
+                     type: WidgetType,
+                     url: String?,
+                     period: String?,
+                     minValue: Double?,
+                     maxValue: Double?,
+                     step: Double?,
+                     refresh: Int?,
+                     height: Double?,
+                     isLeaf: Bool?,
+                     iconColor: String?,
+                     labelColor: String?,
+                     valueColor: String?,
+                     service: String?,
+                     state: String?,
+                     text: String?,
+                     legend: Bool?,
+                     inputHint: InputHint?,
+                     encoding: String?,
+                     item: OpenHABItem?,
+                     linkedPage: OpenHABPage?,
+                     mappings: [OpenHABWidgetMapping],
+                     widgets: [OpenHABWidget],
+                     visibility: Bool?,
+                     switchSupport: Bool?,
+                     forceAsItem: Bool?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -337,8 +364,36 @@ public extension OpenHABWidget {
 public extension OpenHABWidget.CodingData {
     var openHABWidget: OpenHABWidget {
         let mappedWidgets = widgets.map(\.openHABWidget)
-        // swiftlint:disable:next line_length
-        return OpenHABWidget(widgetId: widgetId, label: label, icon: icon, type: type, url: url, period: period, minValue: minValue, maxValue: maxValue, step: step, refresh: refresh, height: height, isLeaf: isLeaf, iconColor: iconcolor, labelColor: labelcolor, valueColor: valuecolor, service: service, state: state, text: text, legend: legend, inputHint: inputHint, encoding: encoding, item: item?.openHABItem, linkedPage: linkedPage?.openHABSitemapPage, mappings: mappings, widgets: mappedWidgets, visibility: visibility, switchSupport: switchSupport, forceAsItem: forceAsItem)
+        return OpenHABWidget(
+            widgetId: widgetId,
+            label: label,
+            icon: icon,
+            type: type,
+            url: url,
+            period: period,
+            minValue: minValue,
+            maxValue: maxValue,
+            step: step,
+            refresh: refresh,
+            height: height,
+            isLeaf: isLeaf,
+            iconColor: iconcolor,
+            labelColor: labelcolor,
+            valueColor: valuecolor,
+            service: service,
+            state: state,
+            text: text,
+            legend: legend,
+            inputHint: inputHint,
+            encoding: encoding,
+            item: item?.openHABItem,
+            linkedPage: linkedPage?.openHABSitemapPage,
+            mappings: mappings,
+            widgets: mappedWidgets,
+            visibility: visibility,
+            switchSupport: switchSupport,
+            forceAsItem: forceAsItem
+        )
     }
 }
 

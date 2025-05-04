@@ -35,11 +35,7 @@ public actor OpenHABItemCache {
     public func setup() async {
         let connection1 = await Preferences.localConnectionConfig
         let connection2 = await Preferences.remoteConnectionConfig
-        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
-    }
-
-    private init(connections: [ConnectionConfiguration]) {
-        NetworkTracker.shared.startTracking(connectionConfigurations: connections)
+        await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
     public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {

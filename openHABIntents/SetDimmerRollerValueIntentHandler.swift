@@ -26,7 +26,8 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
         let items = await itemCache.getItemNames(
             searchTerm: searchTerm,
             types: [.dimmer, .rollershutter]
-        ).map(NSString.init)
+        )
+        .map(NSString.init)
         return INObjectCollection(items: items)
     }
 
@@ -34,7 +35,8 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
         let items = await itemCache.getItemNames(
             searchTerm: nil,
             types: [.dimmer, .rollershutter]
-        ).map(NSString.init)
+        )
+        .map(NSString.init)
         return INObjectCollection(items: items)
     }
 

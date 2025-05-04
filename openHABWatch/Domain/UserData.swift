@@ -145,7 +145,7 @@ final class UserData: ObservableObject {
             logger.info("No connections defined")
             return
         }
-        NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
+        await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
     func startPageHandling(sitemapName: String, pageId: String = "") {

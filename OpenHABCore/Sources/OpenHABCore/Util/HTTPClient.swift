@@ -51,7 +51,7 @@ public enum CertificateEvaluateResult {
     case permitAlways
 }
 
-public class HTTPClient: NSObject {
+public final class HTTPClient: NSObject {
     // MARK: - Properties
 
     public enum SessionType {

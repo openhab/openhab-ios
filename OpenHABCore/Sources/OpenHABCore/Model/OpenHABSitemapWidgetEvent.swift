@@ -87,7 +87,20 @@ public extension OpenHABSitemapWidgetEvent {
 
 extension OpenHABSitemapWidgetEvent.CodingData {
     var openHABSitemapWidgetEvent: OpenHABSitemapWidgetEvent {
-        // swiftlint:disable:next line_length
-        OpenHABSitemapWidgetEvent(sitemapName: sitemapName, pageId: pageId, widgetId: widgetId, label: label, labelSource: labelSource, icon: icon, reloadIcon: reloadIcon, labelcolor: labelcolor, valuecolor: valuecolor, iconcolor: iconcolor, visibility: visibility, enrichedItem: item?.openHABItem, descriptionChanged: descriptionChanged)
+        OpenHABSitemapWidgetEvent(
+            sitemapName: sitemapName,
+            pageId: pageId,
+            widgetId: widgetId,
+            label: label,
+            labelSource: labelSource,
+            icon: icon,
+            reloadIcon: reloadIcon,
+            labelcolor: labelcolor,
+            valuecolor: valuecolor,
+            iconcolor: iconcolor,
+            visibility: visibility,
+            enrichedItem: item?.openHABItem,
+            descriptionChanged: descriptionChanged
+        )
     }
 }

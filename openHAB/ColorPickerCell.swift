@@ -18,7 +18,7 @@ protocol ColorPickerCellDelegate: NSObjectProtocol {
 }
 
 class ColorPickerCell: GenericUITableViewCell {
-    weak var delegate: ColorPickerCellDelegate?
+    weak var delegate: (any ColorPickerCellDelegate)?
 
     @IBOutlet private var downButton: UIButton!
     @IBOutlet private var upButton: UIButton!
