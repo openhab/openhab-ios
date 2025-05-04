@@ -520,26 +520,22 @@ extension OpenHABSitemapViewController {
                         }
                     }
                 }
-
             } catch is CancellationError {
                 logger.info("🔁 pageHandlingTask was cancelled")
             } catch let error as DecodingError {
-                os_log("DecodingError %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                logger.error("DecodingError \(error.localizedDescription)")
             } catch let error as ClientError {
-                if let urlError = error.underlyingError as? URLError, urlError.code == .cancelled {
-                    logger.info("Task was cancelled - URLError code: .cancelled")
-                } else if let urlError = error.underlyingError as? URLError, urlError.code == .timedOut {
-                    logger.info("Task timed out - URLError code: .timedOut")
+                if let urlError = error.underlyingError as? URLError {
+                    switch urlError.code {
+                    case .cancelled:
+                        logger.info("Task was cancelled - URLError code: .cancelled")
+                    case .timedOut:
+                        logger.info("Task timed out - URLError code: .timedOut")
+                    default:
+                        logger.info("URLError: \(urlError.localizedDescription)")
+                    }
                 } else {
                     logger.error("\(error.localizedDescription)")
-                    await MainActor.run {
-                        self.showPopupMessage(
-                            seconds: 5,
-                            title: NSLocalizedString("error", comment: ""),
-                            message: error.localizedDescription,
-                            theme: .error
-                        )
-                    }
                 }
             } catch let openAPIError as OpenAPIServiceError {
                 logger.info("On pageHandling \(openAPIError)")
