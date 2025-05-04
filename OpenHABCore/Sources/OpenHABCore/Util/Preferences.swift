@@ -14,7 +14,7 @@ import os.log
 import UIKit
 
 @propertyWrapper
-public struct UserDefault<T> {
+public struct UserDefault<T: Sendable> {
     private let key: String
     private let defaultValue: T
     private let subject: CurrentValueSubject<T, Never>
@@ -28,6 +28,12 @@ public struct UserDefault<T> {
             DispatchQueue.main.async { [subject] in
                 subject.send(newValue)
             }
+//            Preferences.sharedDefaults.set(newValue, forKey: key)
+//            let valueToSend = newValue
+//            let subjectCopy = subject
+//            Task.detached { @MainActor in
+//                subjectCopy.send(valueToSend)
+//            }
         }
     }
 
@@ -44,7 +50,7 @@ public struct UserDefault<T> {
 }
 
 @propertyWrapper
-public struct UserDefaultObject<T: Codable> {
+public struct UserDefaultObject<T: Codable & Sendable> {
     private let key: String
     private let defaultValue: T
     private let subject: CurrentValueSubject<T, Never>
