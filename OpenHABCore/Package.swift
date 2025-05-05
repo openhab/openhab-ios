@@ -31,7 +31,7 @@ let package = Package(
                 .product(name: "Kingfisher", package: "Kingfisher", condition: .when(platforms: [.iOS, .watchOS])),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
-                .product(name: "HTTPTypes", package: "swift-http-types"), // ✅ From `swift-http-types`
+                .product(name: "HTTPTypes", package: "swift-http-types"),
                 .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder"),
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
             ],
@@ -47,7 +47,7 @@ let package = Package(
             dependencies: [
                 "OpenHABCore",
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "HTTPTypes", package: "swift-http-types"), // ✅ From `swift-http-types`
+                .product(name: "HTTPTypes", package: "swift-http-types"),
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
             ],
             resources: [
