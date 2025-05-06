@@ -13,15 +13,7 @@ import Foundation
 import os.log
 import Security
 
-// public protocol ClientCertificateManagerDelegate: AnyObject {
-//    // delegate should ask user for a decision on whether to import the client certificate into the keychain
-//    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?)
-//    // delegate should ask user for a decision on whether to import the client certificate into the keychain
-//    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?)
-//    // delegate should alert the user that an error occured importing the certificate
-//    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String)
-// }
-
+@MainActor
 public protocol ClientCertificateManagerDelegate: AnyObject {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
     func askForClientCertificateImport() async -> Bool

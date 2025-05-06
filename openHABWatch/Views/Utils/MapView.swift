@@ -15,26 +15,23 @@ import SwiftUI
 
 struct MapView: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(
-            latitude: 40,
-            longitude: -5
-        ),
-        span: MKCoordinateSpan(
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02
-        )
-    )
+
+    @State private var cameraPosition: MapCameraPosition
 
     var body: some View {
-        Map(coordinateRegion: .constant(
-            MKCoordinateRegion(
-                center: widget.coordinate,
-                latitudinalMeters: 1000.0,
-                longitudinalMeters: 1000.0
-            )
+        Map(position: $cameraPosition) {
+            Marker("Location", coordinate: widget.coordinate)
+        }
+    }
+
+    init(widget: OpenHABWidget) {
+        self.widget = widget
+        let region = MKCoordinateRegion(
+            center: widget.coordinate,
+            latitudinalMeters: 1000.0,
+            longitudinalMeters: 1000.0
         )
-        )
+        _cameraPosition = State(initialValue: .region(region))
     }
 }
 

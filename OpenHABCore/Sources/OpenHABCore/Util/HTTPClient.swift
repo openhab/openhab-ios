@@ -44,7 +44,7 @@ private enum HTTPClientError: Error {
     }
 }
 
-public enum CertificateEvaluateResult {
+public enum CertificateEvaluateResult: Sendable {
     case undecided
     case deny
     case permitOnce
