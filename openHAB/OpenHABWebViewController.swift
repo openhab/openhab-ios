@@ -24,7 +24,6 @@ class OpenHABWebViewController: OpenHABViewController {
     private var activeConfig: ConnectionConfiguration?
     private var hideNavBar = false
     private var activityIndicator: UIActivityIndicatorView!
-    private var observation: NSKeyValueObservation?
     private var sseTimer: Timer?
     private var commandQueue: [String] = []
     private var acceptsCommands = false
@@ -264,22 +263,8 @@ class OpenHABWebViewController: OpenHABViewController {
         if #available(iOS 16.4, *) {
             webView.isInspectable = true
         }
-        // watch for URL changes so we can store the last visited path
-        observation = webView.observe(\.url, options: [.new]) { _, _ in
-            if let webviewURL = webView.url {
-                let url = URL(string: webviewURL.path, relativeTo: URL(string: self.openHABTrackedRootUrl))
-                if let path = url?.path {
-                    os_log("navigation change base: %{PUBLIC}@ path: %{PUBLIC}@", log: OSLog.default, type: .info, self.openHABTrackedRootUrl, path)
-                    // append trailing slash as WebUI/Vue/F7 will try and issue a 302 if the url is navigated to directly, this can be problamatic on myopenHAB
-                    Preferences.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
-                }
-            }
-        }
-        return webView
-    }
 
-    deinit {
-        observation = nil
+        return webView
     }
 }
 
@@ -358,6 +343,16 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         logger.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
         showActivityIndicator(show: false)
         hidePopupMessages()
+
+        // watch for URL changes so we can store the last visited path
+        if let webviewURL = webView.url {
+            let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))
+            if let path = url?.path {
+                let string = openHABTrackedRootUrl
+                logger.info("navigation change base: \(string) path: \(path)")
+                Preferences.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+            }
+        }
     }
 
     func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
