@@ -57,8 +57,12 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "0"
+         BundleIdentifier = "com.apple.shortcuts"
+         RemotePath = "/var/containers/Bundle/Application/56144A40-4A6B-4F65-AC0E-EFCF4607C06F/Shortcuts.app">
+      </RemoteRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DFB2622618830A3600D3244D"
@@ -66,7 +70,7 @@
             BlueprintName = "openHAB"
             ReferencedContainer = "container:openHAB.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
