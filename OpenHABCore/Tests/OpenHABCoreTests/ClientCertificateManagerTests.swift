@@ -91,10 +91,19 @@ final class ClientCertificateManagerTests: XCTestCase {
         XCTAssertNotNil(manager.importingIdentity)
     }
 
+//    func testClientCertificateAcceptedFailsAndAlerts() async {
+//        manager.importingRawCert = Data([0x00, 0x01, 0x02]) // invalid cert
+//        await manager.clientCertificateAccepted(password: "badpassword")
+//        XCTAssertNotNil(delegate.receivedErrorMessage)
+//    }
+
+    @MainActor
     func testClientCertificateAcceptedFailsAndAlerts() async {
         manager.importingRawCert = Data([0x00, 0x01, 0x02]) // invalid cert
         await manager.clientCertificateAccepted(password: "badpassword")
-        XCTAssertNotNil(delegate.receivedErrorMessage)
+
+        let errorMessage = await MainActor.run { delegate.receivedErrorMessage }
+        XCTAssertNotNil(errorMessage)
     }
 
     // Helper to load valid PKCS#12 mock
