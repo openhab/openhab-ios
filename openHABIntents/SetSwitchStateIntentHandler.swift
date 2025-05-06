@@ -64,6 +64,8 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
         let itemName = intent.item ?? ""
         logger.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
 
+        await OpenHABItemCache.instance.waitUntilReady()
+
         guard !itemName.isEmpty else {
             return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
         }

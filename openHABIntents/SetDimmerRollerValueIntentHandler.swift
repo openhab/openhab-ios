@@ -47,6 +47,8 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
     func handle(intent: OpenHABSetDimmerRollerValueIntent) async -> OpenHABSetDimmerRollerValueIntentResponse {
         logger.info("SetDimmerRollerValueIntent for \(intent.item ?? "")")
 
+        await OpenHABItemCache.instance.waitUntilReady()
+
         guard let itemName = intent.item else {
             return .failureInvalidItem(
                 NSLocalizedString("empty", comment: "empty item name")

@@ -38,6 +38,8 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
 
     func handle(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
         logger.info("GetItemStateIntent for \(intent.item ?? "")")
+        await OpenHABItemCache.instance.waitUntilReady()
+        // Proceed to fetch item and complete
 
         guard let itemName = intent.item else {
             return .failureInvalidItem(

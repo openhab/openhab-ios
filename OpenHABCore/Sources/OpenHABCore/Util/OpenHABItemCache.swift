@@ -23,6 +23,10 @@ public protocol ItemCacheProtocol {
 public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
+    private lazy var setupTask: Task<Void, Never> = Task { [weak self] in
+        await self?.setup()
+    }
+
     public var items: [OpenHABItem]?
     var cancellables = Set<AnyCancellable>()
     var timeout: Double = 20
@@ -32,9 +36,14 @@ public actor OpenHABItemCache {
 
     private init() {}
 
+    public func waitUntilReady() async {
+        await setupTask.value
+    }
+
     public func setup() async {
-        let connection1 = await Preferences.localConnectionConfig
-        let connection2 = await Preferences.remoteConnectionConfig
+        let connection1: ConnectionConfiguration = await Preferences.localConnectionConfig
+        let connection2: ConnectionConfiguration = await Preferences.remoteConnectionConfig
+        logger.info("Local: \(connection1.url), Remote: \(connection2.url)")
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 

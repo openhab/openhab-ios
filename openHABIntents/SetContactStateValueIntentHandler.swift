@@ -56,6 +56,8 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     func handle(intent: OpenHABSetContactStateValueIntent) async -> OpenHABSetContactStateValueIntentResponse {
         logger.info("SetContactStateValueIntent for \(intent.item ?? "")")
 
+        await OpenHABItemCache.instance.waitUntilReady()
+
         guard let itemName = intent.item else {
             return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
         }

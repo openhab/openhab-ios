@@ -43,6 +43,8 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
     func handle(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
         logger.info("SetStringValueIntent for \(intent.item ?? "")")
 
+        await OpenHABItemCache.instance.waitUntilReady()
+
         guard let itemName = intent.item else {
             return .failureInvalidItem(
                 NSLocalizedString("empty", comment: "empty item name")
