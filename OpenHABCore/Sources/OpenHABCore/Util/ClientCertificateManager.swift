@@ -151,12 +151,14 @@ public class ClientCertificateManager {
         return refCounts
     }
 
+    @MainActor
     public func startImportClientCertificate(url: URL) async -> Bool {
         do {
             // Import PKCS12 client cert
             importingRawCert = try Data(contentsOf: url)
 
             guard let delegate else { return false }
+
             let shouldImport = await delegate.askForClientCertificateImport()
             return shouldImport
         } catch {
@@ -193,6 +195,7 @@ public class ClientCertificateManager {
         importingPassword = nil
     }
 
+    @MainActor
     func addClientCertificateToKeychain() async {
         guard let identity = importingIdentity else {
             logger.error("No identity available to import")
