@@ -63,7 +63,7 @@ public actor OpenAPIService {
             throw OpenHABSitemapError.invalidConnectionConfiguration
         }
         self.connectionConfiguration = connectionConfiguration
-        let delegate = OpenAPIServiceDelegate(with: connectionConfiguration)
+        let delegate = HTTPClientDelegate(with: connectionConfiguration)
         let config = URLSessionConfiguration.default
         switch serviceConfiguration {
         case .asDefault:

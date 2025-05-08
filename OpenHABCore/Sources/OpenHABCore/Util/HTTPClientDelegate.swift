@@ -12,11 +12,24 @@
 import Foundation
 import os
 
+actor CertificateEvaluationState {
+    private var continuation: CheckedContinuation<CertificateEvaluateResult, Never>?
+
+    func store(_ continuation: CheckedContinuation<CertificateEvaluateResult, Never>) {
+        self.continuation = continuation
+    }
+
+    func complete(_ result: CertificateEvaluateResult) {
+        continuation?.resume(returning: result)
+        continuation = nil
+    }
+}
+
 // MARK: - URLSessionDelegate for Client Certificates and Basic Auth
 
 public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     private let connectionConfiguration: ConnectionConfiguration
-    private var evaluateContinuation: CheckedContinuation<CertificateEvaluateResult, Never>?
+    private let evaluationState = CertificateEvaluationState()
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "HTTPClientDelegate")
 
@@ -163,13 +176,15 @@ public final class HTTPClientDelegate: NSObject, URLSessionDelegate, URLSessionT
 
     public func waitForEvaluation() async -> CertificateEvaluateResult {
         await withCheckedContinuation { continuation in
-            evaluateContinuation = continuation
+            Task {
+                await evaluationState.store(continuation)
+            }
         }
     }
 
     public func completeEvaluation(_ result: CertificateEvaluateResult) {
-        logger.info("Completing evaluation with result: \(String(describing: result))")
-        evaluateContinuation?.resume(returning: result)
-        evaluateContinuation = nil
+        Task {
+            await evaluationState.complete(result)
+        }
     }
 }
