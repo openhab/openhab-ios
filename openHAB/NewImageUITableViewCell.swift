@@ -30,6 +30,8 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
     var openHABRootUrl: String?
 
+    private let logger = Logger(subsystem: "org.openhab.app", category: "NewImageUITableViewCell")
+
     private var shouldCache: Bool {
         widget?.refresh == 0
     }
@@ -151,7 +153,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     private func loadRemoteImage(withURL url: URL) {
-        os_log("Image URL: %{PUBLIC}@", log: OSLog.urlComposition, type: .debug, url.absoluteString)
+        logger.debug("Image URL: \(url.absoluteString)")
 
         if activeTask != nil {
             activeTask?.cancel()
@@ -160,7 +162,11 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         activeTask = Task {
             do {
-                let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+                guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
+                    logger.warning("No openHAB configuration found.")
+                    throw HTTPClientError.noConfiguration
+                }
+                let client = HTTPClient(configuration: config)
                 let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
                 await MainActor.run {
                     self.mainImageView?.image = UIImage(data: data)
@@ -168,7 +174,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     self.didLoad?()
                 }
             } catch {
-                os_log("Download failed: %{PUBLIC}@", log: .urlComposition, type: .debug, error.localizedDescription)
+                logger.info("Downloading image failed: \(error.localizedDescription)")
             }
         }
     }

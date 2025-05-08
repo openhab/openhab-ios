@@ -34,6 +34,8 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
         }
     }
 
+    private let logger = Logger(subsystem: "org.openhab.app", category: "VideoUITableViewCell")
+
     private var playerView: PlayerView!
     private var mainImageView: UIImageView!
     private var playerObserver: NSKeyValueObservation?
@@ -163,7 +165,11 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         activeTask = Task {
             do {
-                let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+                guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
+                    logger.warning("No openHAB configuration found.")
+                    throw HTTPClientError.noConfiguration
+                }
+                let client = HTTPClient(configuration: config)
                 let (byteStream, _) = try await client.processStream(url: url)
                 await handleMJPEGStream(byteStream)
             } catch {

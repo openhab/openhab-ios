@@ -60,12 +60,12 @@ struct ContentView: View {
                 message: Text(viewModel.certificateErrorDescription),
                 primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
                     if let client = viewModel.currentClient {
-                        client.completeEvaluation(.permitAlways)
+                        client.delegate.completeEvaluation(.permitAlways)
                     }
                 },
                 secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
                     if let client = viewModel.currentClient {
-                        client.completeEvaluation(.deny)
+                        client.delegate.completeEvaluation(.deny)
                     }
                 }
             )

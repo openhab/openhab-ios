@@ -37,9 +37,11 @@ let package = Package(
             ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableExperimentalFeature("StrictConcurrency")
-//                , .unsafeFlags(["-strict-concurrency=targeted"])
-//                .enableUpcomingFeature("all")
+                .enableExperimentalFeature("StrictConcurrency"),
+                .unsafeFlags([
+                    "-Xfrontend", "-enable-actor-data-race-checks",
+                    "-Xfrontend", "-strict-concurrency=complete"
+                ])
             ]
         ),
         .testTarget(

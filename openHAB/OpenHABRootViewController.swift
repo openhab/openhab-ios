@@ -557,15 +557,15 @@ class OpenHABRootViewController: UIViewController {
             )
 
             alert.addAction(UIAlertAction(title: "Always", style: .default) { _ in
-                client.completeEvaluation(.permitAlways)
+                client.delegate.completeEvaluation(.permitAlways)
             })
 
             alert.addAction(UIAlertAction(title: "Once", style: .default) { _ in
-                client.completeEvaluation(.permitOnce)
+                client.delegate.completeEvaluation(.permitOnce)
             })
 
             alert.addAction(UIAlertAction(title: "Deny", style: .cancel) { _ in
-                client.completeEvaluation(.deny)
+                client.delegate.completeEvaluation(.deny)
             })
 
             self.present(alert, animated: true)

@@ -101,7 +101,7 @@ public actor ConnectionFailureTracker {
     }
 }
 
-public protocol NetworkTracking: ObservableObject, Sendable {
+public protocol NetworkTracking: ObservableObject {
     var activeConnection: ConnectionInfo? { get }
 }
 
