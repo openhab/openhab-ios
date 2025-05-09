@@ -130,8 +130,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         #endif
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
-            guard let self else { return }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
             guard granted else { return }
             UNUserNotificationCenter.current().getNotificationSettings { settings in

@@ -19,30 +19,37 @@ final class UserDefaultsTests: XCTestCase {
 
     override func setUpWithError() throws {
         super.setUp()
-        let defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
-        data.removePersistentDomain(forName: defaultsName)
+        // Set Preferences from MainActor
+        let expectation = expectation(description: "MainActor setup")
 
-        Preferences.username = Preferences.username
-        Preferences.localUrl = Preferences.localUrl
-        Preferences.remoteUrl = Preferences.remoteUrl
-        Preferences.password = Preferences.password
-        Preferences.ignoreSSL = Preferences.ignoreSSL
-        Preferences.demomode = Preferences.demomode
-        Preferences.idleOff = Preferences.idleOff
-        Preferences.iconType = Preferences.iconType
-        Preferences.defaultSitemap = Preferences.defaultSitemap
-        Preferences.sitemapForWatch = Preferences.sitemapForWatch
+        Task { @MainActor in
+            // Reset UserDefaults
+            let defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
+            data.removePersistentDomain(forName: defaultsName)
+
+            Preferences.username = "testuser"
+            Preferences.localUrl = "http://local.test"
+            Preferences.remoteUrl = "http://remote.test"
+            Preferences.password = "secret"
+            Preferences.ignoreSSL = true
+            Preferences.demomode = true
+            Preferences.idleOff = false
+            Preferences.iconType = 2
+            Preferences.defaultSitemap = "default"
+            Preferences.sitemapForWatch = "watchmap"
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1.0)
     }
 
-    // Testing the consistency between properties of Preferences and the corresponding entry in UserDefaults
+    // Testing the consistency between Preferences and UserDefaults
     func testConsistency() {
         XCTAssertEqual(Preferences.username, data.string(forKey: "username"))
-        XCTAssertNotEqual(Preferences.username, data.string(forKey: "usern"))
         XCTAssertEqual(Preferences.localUrl, data.string(forKey: "localUrl"))
         XCTAssertEqual(Preferences.remoteUrl, data.string(forKey: "remoteUrl"))
         XCTAssertEqual(Preferences.password, data.string(forKey: "password"))
         XCTAssertEqual(Preferences.ignoreSSL, data.bool(forKey: "ignoreSSL"))
-        //  XCTAssertEqual(Preferences.sitemapName, data.string(forKey: "sitemapName"))
         XCTAssertEqual(Preferences.demomode, data.bool(forKey: "demomode"))
         XCTAssertEqual(Preferences.idleOff, data.bool(forKey: "idleOff"))
         XCTAssertEqual(Preferences.iconType, data.integer(forKey: "iconType"))
