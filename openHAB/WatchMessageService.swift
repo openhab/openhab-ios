@@ -17,24 +17,24 @@ import WatchConnectivity
 // This class receives Watch Request for the configuration data like localUrl.
 // The functionality is activated in the AppDelegate.
 class WatchMessageService: NSObject, WCSessionDelegate {
+    @MainActor
     static let singleton = WatchMessageService()
 
     private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
 
+    private var cachedWatchPreferences: [String: Any] = [:]
+    private let lock = NSLock()
+
     // This method gets called when the watch requests the data
+    // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        logger.info("Received message with reply handler: \(message, privacy: .public)")
+        guard message["request"] != nil else { return }
 
-        guard message["request"] != nil else {
-            logger.warning("Invalid message: no 'request' key.")
-            return
-        }
+        lock.lock()
+        let reply = cachedWatchPreferences
+        lock.unlock()
 
-        Task { @MainActor in
-            let prefs = WatchPreferences(fromPreferences: Preferences.self)
-            replyHandler(prefs.encodedWatchPreferences())
-            logger.debug("Sent WatchPreferences in replyHandler.")
-        }
+        replyHandler(reply) // ✅ Used synchronously — no concurrency violation
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
@@ -64,6 +64,10 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         let prefs = WatchPreferences(fromPreferences: Preferences.self)
         let context = prefs.encodedWatchPreferences()
+
+        lock.lock()
+        cachedWatchPreferences = context
+        lock.unlock()
 
         do {
             try WCSession.default.updateApplicationContext(context)

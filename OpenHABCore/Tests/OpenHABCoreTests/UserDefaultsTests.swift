@@ -15,36 +15,30 @@ import XCTest
 
 @MainActor
 final class UserDefaultsTests: XCTestCase {
-    let data = UserDefaults(suiteName: "group.org.openhab.app")!
-
-    override func setUpWithError() throws {
-        super.setUp()
-        // Set Preferences from MainActor
-        let expectation = expectation(description: "MainActor setup")
-
-        Task { @MainActor in
-            // Reset UserDefaults
-            let defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
-            data.removePersistentDomain(forName: defaultsName)
-
-            Preferences.username = "testuser"
-            Preferences.localUrl = "http://local.test"
-            Preferences.remoteUrl = "http://remote.test"
-            Preferences.password = "secret"
-            Preferences.ignoreSSL = true
-            Preferences.demomode = true
-            Preferences.idleOff = false
-            Preferences.iconType = 2
-            Preferences.defaultSitemap = "default"
-            Preferences.sitemapForWatch = "watchmap"
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1.0)
-    }
-
     // Testing the consistency between Preferences and UserDefaults
     func testConsistency() {
+        // Set Preferences from MainActor
+        let defaultsName: String
+        // Reset UserDefaults
+        let data = UserDefaults(suiteName: "group.org.openhab.app")!
+        do {
+            defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
+        } catch {
+            fatalError()
+        }
+        data.removePersistentDomain(forName: defaultsName)
+
+        Preferences.username = "testuser"
+        Preferences.localUrl = "http://local.test"
+        Preferences.remoteUrl = "http://remote.test"
+        Preferences.password = "secret"
+        Preferences.ignoreSSL = true
+        Preferences.demomode = true
+        Preferences.idleOff = false
+        Preferences.iconType = 2
+        Preferences.defaultSitemap = "default"
+        Preferences.sitemapForWatch = "watchmap"
+
         XCTAssertEqual(Preferences.username, data.string(forKey: "username"))
         XCTAssertEqual(Preferences.localUrl, data.string(forKey: "localUrl"))
         XCTAssertEqual(Preferences.remoteUrl, data.string(forKey: "remoteUrl"))

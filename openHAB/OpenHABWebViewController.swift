@@ -269,6 +269,7 @@ class OpenHABWebViewController: OpenHABViewController {
 }
 
 extension OpenHABWebViewController: WKScriptMessageHandler {
+    @MainActor
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
         if let callbackName = message.body as? String {
@@ -288,11 +289,14 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                 acceptsCommands = true
                 executeQueuedCommands()
             case "sseConnected-false":
-                os_log("WKScriptMessage sseConnected is false", log: OSLog.remoteAccess, type: .info)
+                logger.info("WKScriptMessage sseConnected is false")
                 sseTimer?.invalidate()
-                sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                    self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
-                    self.acceptsCommands = false
+                sseTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+                    guard let self else { return }
+                    Task { @MainActor in
+                        self.showPopupMessage(seconds: 20, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
+                        self.acceptsCommands = false
+                    }
                 }
             default: break
             }

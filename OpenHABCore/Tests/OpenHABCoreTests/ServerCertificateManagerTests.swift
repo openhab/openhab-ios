@@ -92,6 +92,7 @@ final class ServerCertificateManagerTests: XCTestCase {
         }
     }
 
+    @MainActor
     func testTriggersMismatchDelegateWhenCertsDiffer() async throws {
         let trust = try dummyTrust()
         let domain = "test.openhab.org"
@@ -103,6 +104,7 @@ final class ServerCertificateManagerTests: XCTestCase {
         XCTAssertEqual(delegate.lastCall, "evaluateCertificateMismatch")
     }
 
+    @MainActor
     func testTriggersServerTrustDelegateForNewCert() async throws {
         let trust = try dummyTrust()
         let domain = "unknown.openhab.org"
@@ -113,6 +115,7 @@ final class ServerCertificateManagerTests: XCTestCase {
         XCTAssertEqual(delegate.lastCall, "evaluateServerTrust")
     }
 
+    @MainActor
     func testThrowsWhenUserDeniesTrust() async throws {
         let trust = try dummyTrust()
         let domain = "deny.openhab.org"
@@ -127,6 +130,7 @@ final class ServerCertificateManagerTests: XCTestCase {
         }
     }
 
+    @MainActor
     func testStoresCertWhenUserAcceptsAlways() async throws {
         let trust = try dummyTrust()
         let domain = "persist.openhab.org"

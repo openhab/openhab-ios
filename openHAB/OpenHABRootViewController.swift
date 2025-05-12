@@ -117,18 +117,29 @@ class OpenHABRootViewController: UIViewController {
         )
         .eraseToAnyPublisher()
 
-//        let misc = Publishers.CombineLatest3(
-//            Preferences.$demomode,
-//        )
-//        .eraseToAnyPublisher()
-
         // Register for certificate trust notifications
         NotificationCenter.default.addObserver(
             forName: .evaluateServerTrust,
             object: nil,
             queue: nil
         ) { [weak self] notification in
-            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_invalid", comment: ""))
+
+            guard
+                let summary = notification.userInfo?["summary"] as? String,
+                let domain = notification.userInfo?["domain"] as? String,
+                let client = notification.object as? HTTPClient
+            else {
+                return
+            }
+
+            Task { @MainActor in
+                self?.handleCertificateTrust(
+                    summary: summary,
+                    domain: domain,
+                    client: client,
+                    messageTemplateKey: "ssl_certificate_invalid"
+                )
+            }
         }
 
         NotificationCenter.default.addObserver(
@@ -136,7 +147,23 @@ class OpenHABRootViewController: UIViewController {
             object: nil,
             queue: nil
         ) { [weak self] notification in
-            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_no_match", comment: ""))
+
+            guard
+                let summary = notification.userInfo?["summary"] as? String,
+                let domain = notification.userInfo?["domain"] as? String,
+                let client = notification.object as? HTTPClient
+            else {
+                return
+            }
+
+            Task { @MainActor in
+                self?.handleCertificateTrust(
+                    summary: summary,
+                    domain: domain,
+                    client: client,
+                    messageTemplateKey: "ssl_certificate_no_match"
+                )
+            }
         }
 
         NotificationCenter.default.addObserver(
@@ -144,8 +171,10 @@ class OpenHABRootViewController: UIViewController {
             object: nil,
             queue: nil
         ) { _ in
-            WatchMessageService.singleton.syncPreferencesToWatch()
-            NetworkTracker.shared.restartTracking()
+            Task { @MainActor in
+                WatchMessageService.singleton.syncPreferencesToWatch()
+                NetworkTracker.shared.restartTracking()
+            }
         }
 
         Publishers.CombineLatest(serverInfo, Preferences.$demomode)
@@ -542,6 +571,7 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
+    @MainActor
     @objc func handleCertificateTrust(_ notification: Notification, message: String) {
         guard let summary = notification.userInfo?["summary"] as? String,
               let domain = notification.userInfo?["domain"] as? String,
@@ -570,6 +600,33 @@ class OpenHABRootViewController: UIViewController {
 
             self.present(alert, animated: true)
         }
+    }
+
+    @MainActor
+    @objc
+    func handleCertificateTrust(summary: String, domain: String, client: HTTPClient, messageTemplateKey: String) {
+        let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+        let message = String(format: NSLocalizedString(messageTemplateKey, comment: ""), summary, domain)
+
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Always", style: .default) { _ in
+            client.delegate.completeEvaluation(.permitAlways)
+        })
+
+        alert.addAction(UIAlertAction(title: "Once", style: .default) { _ in
+            client.delegate.completeEvaluation(.permitOnce)
+        })
+
+        alert.addAction(UIAlertAction(title: "Deny", style: .cancel) { _ in
+            client.delegate.completeEvaluation(.deny)
+        })
+
+        present(alert, animated: true)
     }
 }
 

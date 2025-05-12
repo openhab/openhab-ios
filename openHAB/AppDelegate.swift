@@ -220,7 +220,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // this is called when clicking a notification while in the background
-    @MainActor
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier

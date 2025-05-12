@@ -126,20 +126,25 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
             playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in
+                guard let self else { return }
+
                 switch playerItem.status {
                 case .failed:
                     os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
-                    self?.url = nil
+                    Task { @MainActor in
+                        self.url = nil
+                    }
                 case .readyToPlay:
                     os_log("Loaded video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
                 default: return
                 }
-
-                self?.activityIndicator.isHidden = true
-                if playerItem.status == .readyToPlay, playerItem.presentationSize != .zero {
-                    let aspectRatio = playerItem.presentationSize.width / playerItem.presentationSize.height
-                    self?.updateAspectRatio(forView: self?.playerView, aspectRatio: aspectRatio)
-                    self?.didLoad?()
+                Task { @MainActor in
+                    self.activityIndicator.isHidden = true
+                    if playerItem.status == .readyToPlay, playerItem.presentationSize != .zero {
+                        let aspectRatio = playerItem.presentationSize.width / playerItem.presentationSize.height
+                        self.updateAspectRatio(forView: self.playerView, aspectRatio: aspectRatio)
+                        self.didLoad?()
+                    }
                 }
             }
             playerView?.playerLayer.player = AVPlayer(playerItem: playerItem)

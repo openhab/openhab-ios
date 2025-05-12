@@ -12,7 +12,8 @@
 import Foundation
 import os.log
 
-public protocol ServerCertificateManagerDelegate: AnyObject {
+@MainActor
+public protocol ServerCertificateManagerDelegate: AnyObject, Sendable {
     // delegate should ask user for a decision on what to do with invalid certificate
     func evaluateServerTrust(summary certificateSummary: String?, forDomain domain: String?) async -> ServerCertificateManager.EvaluateResult
     // certificate received from openHAB doesn't match our record, ask user for a decision
@@ -183,7 +184,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
             // User decided to accept invalid certificate and remember decision
             // Add certificate to storage
             storeCertificateData(certificateData, forDomain: domain)
-            delegate.acceptedServerCertificatesChanged()
+            await delegate.acceptedServerCertificatesChanged()
             logger.info("User chose to trust cert for \(domain) permanently")
             return
         @unknown default:

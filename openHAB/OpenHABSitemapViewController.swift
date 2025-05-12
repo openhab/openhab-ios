@@ -640,7 +640,7 @@ extension OpenHABSitemapViewController: UISearchBarDelegate {
 
 // MARK: - ColorPickerCellDelegate
 
-extension OpenHABSitemapViewController: ColorPickerCellDelegate {
+extension OpenHABSitemapViewController: @preconcurrency ColorPickerCellDelegate {
     func didPressColorButton(_ cell: ColorPickerCell?) {
         let colorPickerViewController = storyboard?.instantiateViewController(withIdentifier: "ColorPickerViewController") as? ColorPickerViewController
         if let cell {
