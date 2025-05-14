@@ -129,6 +129,22 @@ public final class NetworkTrackerViewModel: ObservableObject {
         try await observer.updateState(for: item.name, state: state)
     }
 
+    public func getItems() async throws -> [OpenHABItem] {
+        try await observer.getItems()
+    }
+
+    public func getItemByName(id: String) async throws -> OpenHABItem? {
+        try await observer.getItemByName(id: id)
+    }
+
+    public func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {
+        try await observer.pollDataForPage(sitemapname: sitemapname, pageId: pageId, longPolling: longPolling)
+    }
+
+    public func runNow(ruleUID: String, payload: [String: String]) async throws {
+        try await observer.runNow(ruleUID: ruleUID, payload: payload)
+    }
+
     public func resetFailures() async {
         await observer.resetFailures()
     }
@@ -303,8 +319,40 @@ public actor NetworkObserver {
         let service = try await connectionPool.getOrCreateService(for: connection.configuration)
         try await service.updateItemState(itemname: item, with: state)
     }
+
+    public func updateState(for item: OpenHABItem, state: String) async throws {
+        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return }
+        let configuration = activeConnection.configuration
+        let service = try await connectionPool.getOrCreateService(for: configuration)
+        try await service.updateItemState(itemname: item.name, with: state)
+    }
+
+    public func getItems() async throws -> [OpenHABItem] {
+        guard let connection = await viewModel?.activeConnection else { return [] }
+        let service = try await connectionPool.getOrCreateService(for: connection.configuration)
+        return try await service.getItems()
+    }
+
+    public func getItemByName(id: String) async throws -> OpenHABItem? {
+        guard let connection = await viewModel?.activeConnection else { return nil }
+        let service = try await connectionPool.getOrCreateService(for: connection.configuration)
+        return try await service.getItemByName(id: id)
+    }
+
+    public func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {
+        guard let connection = await viewModel?.activeConnection else { return nil }
+        let service = try await connectionPool.getOrCreateService(for: connection.configuration)
+        return try await service.pollDataForPage(sitemapname: sitemapname, pageId: pageId, longPolling: longPolling)
+    }
+
+    public func runNow(ruleUID: String, payload: [String: String]) async throws {
+        guard let connection = await viewModel?.activeConnection else { throw NetworkTrackerError.noActiveConnection }
+        let service = try await connectionPool.getOrCreateService(for: connection.configuration)
+        try await service.runNow(ruleUID: ruleUID, payload: payload)
+    }
 }
 
+// @available(*, deprecated)
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 

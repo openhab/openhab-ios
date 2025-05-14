@@ -14,7 +14,7 @@ import Foundation
 import OpenHABCore
 import os.log
 import UniformTypeIdentifiers
-import UserNotifications
+@preconcurrency import UserNotifications
 
 enum NotificationServiceError: Error {
     case unknown
@@ -57,7 +57,7 @@ class NotificationService: UNNotificationServiceExtension {
         var notificationActions: [UNNotificationAction] = []
         let userInfo = bestAttemptContent.userInfo
 
-        os_log("didReceive userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
+        logger.info("didReceive userInfo \(userInfo)")
 
         if let title = userInfo["title"] as? String {
             bestAttemptContent.title = title
@@ -162,17 +162,40 @@ class NotificationService: UNNotificationServiceExtension {
         return nil
     }
 
+    private func downloadForAttachment(attachmentURLString: String) -> (URL?, String?) {
+        var returnValues: (URL?, String?)
+        Task {
+            do {
+                returnValues = if attachmentURLString.starts(with: "item:") {
+                    try await downloadItemImage(itemURI: attachmentURLString)
+                } else {
+                    try await downloadMedia(url: attachmentURLString)
+                }
+
+            } catch {
+                os_log("Error fetching data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            }
+        }
+        return returnValues
+    }
+
     private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
+        let (localURL, mimeType) = try await downloadMedia(url: url)
+        guard let localURL else { return nil }
+        return await attachFile(localURL: localURL, mimeType: mimeType)
+    }
+
+    private func downloadMedia(url: String) async throws -> (URL?, String?) {
         await NetworkTracker.shared.startTracking(connectionConfigurations: [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig])
 
-        guard let fullURL = await resolveFullURL(from: url) else { return nil }
+        guard let fullURL = await resolveFullURL(from: url) else { return (nil, nil) }
 
-        guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return nil }
+        guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return (nil, nil) }
 
         let client = HTTPClient(configuration: activeConfig)
 
         let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
-        return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)
+        return (localURL, urlResponse.mimeType)
     }
 
     // 🔹 Extracted helper function to determine full URL
@@ -186,6 +209,12 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
+        let (tempFileURL, mimeType) = try await downloadItemImage(itemURI: itemURI)
+        guard let tempFileURL else { return nil }
+        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
+    }
+
+    func downloadItemImage(itemURI: String) async throws -> (URL?, String?) {
         guard let itemURL = URL(string: itemURI), let scheme = itemURL.scheme else {
             throw NotificationServiceError.noScheme(itemURI)
         }
@@ -193,7 +222,7 @@ class NotificationService: UNNotificationServiceExtension {
         let itemName = String(itemURL.absoluteString.dropFirst(scheme.count + 1))
 
         let item = try await NetworkTracker.shared.getItemByName(id: itemName)
-        guard let state = item?.state else { return nil }
+        guard let state = item?.state else { return (nil, nil) }
 
         // Extract MIME type and base64 string
         let pattern = /^data:(.*?);base64,(.*)$/
@@ -213,7 +242,7 @@ class NotificationService: UNNotificationServiceExtension {
         try imageData.write(to: tempFileURL)
 
         os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
-        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
+        return (tempFileURL, mimeType)
     }
 
     func attachFile(localURL: URL, mimeType: String?) async -> UNNotificationAttachment? {

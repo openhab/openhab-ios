@@ -16,7 +16,7 @@ import SwiftUI
 
 extension OpenHABWidget {
     @ViewBuilder func makeView(settings: AppSettings) -> some View {
-        if let linkedPage {
+        if linkedPage != nil {
             // os_log("Selected %{PUBLIC}@", log: .viewCycle, type: .info, pageUrl)
             NavigationLink(destination:
                 LazyView(

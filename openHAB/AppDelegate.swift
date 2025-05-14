@@ -18,7 +18,7 @@ import os.log
 import SDWebImageSVGCoder
 import SwiftMessages
 import UIKit
-import UserNotifications
+@preconcurrency import UserNotifications
 import WatchConnectivity
 
 actor AudioPlayerActor {

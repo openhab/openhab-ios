@@ -35,6 +35,7 @@ protocol ModalHandler: AnyObject {
 
 private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
 
+// swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
@@ -629,6 +630,8 @@ class OpenHABRootViewController: UIViewController {
         present(alert, animated: true)
     }
 }
+
+// swiftlint:enable type_body_length
 
 // MARK: - UISideMenuNavigationControllerDelegate
 
