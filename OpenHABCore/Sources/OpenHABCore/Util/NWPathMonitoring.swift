@@ -13,7 +13,7 @@ import Foundation
 import Network
 
 // Wrap real NWPathMonitor
-final class RealPathMonitor: NWPathMonitoring {
+final class RealPathMonitor: NWPathMonitoring, Sendable {
     private let monitor: NWPathMonitor
 
     init() {
@@ -39,7 +39,7 @@ final class RealPathMonitor: NWPathMonitoring {
 
 // MARK: - Protocol
 
-public protocol NWPathMonitoring: AnyObject {
+public protocol NWPathMonitoring: AnyObject, Sendable {
     /// Continuously monitors network connectivity status.
     /// Calls the handler with `true` when connected, `false` otherwise.
     func startMonitoring(handler: @escaping (Bool) async -> Void) async

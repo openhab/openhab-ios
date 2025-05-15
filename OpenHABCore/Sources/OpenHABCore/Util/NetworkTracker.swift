@@ -156,9 +156,18 @@ public final class NetworkTrackerViewModel: ObservableObject {
             self.activeConnection = connection
         }
     }
+
+    func activeConnectionStream() -> AsyncStream<ConnectionInfo?> {
+        AsyncStream { continuation in
+            let cancellable = self.$activeConnection
+                .sink { continuation.yield($0) }
+
+            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
+        }
+    }
 }
 
-public actor NetworkObserver {
+public actor NetworkObserver: Sendable {
     public static let shared = NetworkObserver()
 
     private var viewModel: NetworkTrackerViewModel?
@@ -173,8 +182,8 @@ public actor NetworkObserver {
 
     private static func makeNetworkHandler(for observer: NetworkObserver?) -> @Sendable (Bool) -> Void {
         { isConnected in
-            guard let observer else { return }
-            Task {
+            Task.detached(priority: .utility) {
+                guard let observer else { return }
                 await observer.handleNetworkChange(isConnected: isConnected)
             }
         }
@@ -187,10 +196,12 @@ public actor NetworkObserver {
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {
         self.connectionConfigurations = connectionConfigurations
 
-        let pathMonitor = pathMonitor
-        let handler = Self.makeNetworkHandler(for: self)
+//        let pathMonitor = pathMonitor
+//        let handler = Self.makeNetworkHandler(for: self)
 
-        Task.detached(priority: .utility) {
+        Task { [weak self] in
+            guard let self else { return }
+            let handler = Self.makeNetworkHandler(for: self)
             await pathMonitor.startMonitoring(handler: handler)
         }
 
@@ -318,13 +329,6 @@ public actor NetworkObserver {
         guard let connection = await viewModel?.activeConnection else { return }
         let service = try await connectionPool.getOrCreateService(for: connection.configuration)
         try await service.updateItemState(itemname: item, with: state)
-    }
-
-    public func updateState(for item: OpenHABItem, state: String) async throws {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return }
-        let configuration = activeConnection.configuration
-        let service = try await connectionPool.getOrCreateService(for: configuration)
-        try await service.updateItemState(itemname: item.name, with: state)
     }
 
     public func getItems() async throws -> [OpenHABItem] {
