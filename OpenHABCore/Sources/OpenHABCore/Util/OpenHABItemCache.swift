@@ -28,9 +28,8 @@ public actor OpenHABItemCache {
     }
 
     public var items: [OpenHABItem]?
-    var cancellables = Set<AnyCancellable>()
-    var timeout: Double = 20
-    var lastLoad = Date().timeIntervalSince1970
+    private let ttl: TimeInterval = 20
+    var lastLoad = Date()
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "OpenHABItemCache")
 
@@ -60,9 +59,9 @@ public actor OpenHABItemCache {
 
     public func getItem(name: String) async -> OpenHABItem? {
         logger.info("getItem")
-        let now = Date().timeIntervalSince1970
+        let now = Date()
 
-        if items == nil || (now - lastLoad) > 10 {
+        if items == nil || now.timeIntervalSince(lastLoad) > ttl {
             return await reload(name: name)
         }
         return getItem(name)
@@ -90,11 +89,11 @@ public actor OpenHABItemCache {
 
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
         logger.info("OpenHABItemCache Loading items ")
-        lastLoad = Date().timeIntervalSince1970
 
         do {
             items = try await NetworkTracker.shared.getItems().filter { $0.type != .group }
             // swiftformat:disable next redundantSelf
+            lastLoad = Date()
             logger.info("Loaded \(self.items?.count ?? 0) items to cache")
             return items?.filtered(by: searchTerm, for: types).sorted(by: \.name).map(\.name) ?? []
         } catch {

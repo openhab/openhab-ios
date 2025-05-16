@@ -180,6 +180,12 @@ public actor NetworkObserver: Sendable {
 
     private let logger = Logger(subsystem: "org.openhab.core", category: "NetworkObserver")
 
+    private let allowUIEffects: Bool
+
+    init(allowUIEffects: Bool = true) {
+        self.allowUIEffects = allowUIEffects
+    }
+
     private static func makeNetworkHandler(for observer: NetworkObserver?) -> @Sendable (Bool) -> Void {
         { isConnected in
             Task.detached(priority: .utility) {
@@ -195,9 +201,6 @@ public actor NetworkObserver: Sendable {
 
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) {
         self.connectionConfigurations = connectionConfigurations
-
-//        let pathMonitor = pathMonitor
-//        let handler = Self.makeNetworkHandler(for: self)
 
         Task { [weak self] in
             guard let self else { return }
@@ -253,7 +256,7 @@ public actor NetworkObserver: Sendable {
 
         await updateUI(status: newStatus, connection: bestConnection)
 
-        if let best = bestConnection {
+        if allowUIEffects, let best = bestConnection {
             KingfisherManager.shared.defaultOptions = [
                 .requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: best.configuration))
             ]
