@@ -37,7 +37,20 @@ let package = Package(
             ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableExperimentalFeature("StrictConcurrency"),
+                .enableUpcomingFeature("StrictConcurrency"),
+                .enableUpcomingFeature("ConciseMagicFile"),
+                .enableUpcomingFeature("DisableOutwardActorInference"),
+                .enableUpcomingFeature("DynamicActorIsolation"),
+                .enableUpcomingFeature("ExistentialAny"),
+                .enableUpcomingFeature("ForwardTrailingClosures"),
+                .enableUpcomingFeature("GlobalActorIsolatedTypesUsability"),
+                .enableUpcomingFeature("GlobalConcurrency"),
+                .enableUpcomingFeature("ImplicitOpenExistentials"),
+                .enableUpcomingFeature("InferSendableFromCaptures"),
+                .enableUpcomingFeature("IsolatedDefaultValues"),
+                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableUpcomingFeature("RegionBasedIsolation"),
+//                .enableUpcomingFeature("InternalImportsByDefault"),
                 .unsafeFlags([
                     "-Xfrontend", "-enable-actor-data-race-checks",
                     "-Xfrontend", "-strict-concurrency=complete"

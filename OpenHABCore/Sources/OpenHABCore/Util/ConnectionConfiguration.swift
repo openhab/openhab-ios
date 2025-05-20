@@ -9,6 +9,8 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Foundation
+
 public struct ConnectionPayload: Codable {
     public var local: ConnectionConfiguration
     public var remote: ConnectionConfiguration
@@ -37,7 +39,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
     }
 
     // 🔹 Ensure normalization on decoding
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let rawURL = try container.decode(String.self, forKey: .url) // Decode raw URL
         url = ConnectionConfiguration.normalizeURL(rawURL) // Normalize it
@@ -66,7 +68,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
     }
 
     // 🔹 Ensure normalization on encoding (optional, since we store it normalized)
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(url, forKey: .url) // Already normalized
         try container.encode(username, forKey: .username)

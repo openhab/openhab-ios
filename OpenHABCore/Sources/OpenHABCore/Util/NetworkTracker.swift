@@ -54,18 +54,18 @@ public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
 // Ensure thread-safe dictionary access.
 // Avoid memory corruption errors like unrecognized selector.
 public actor ConnectionPool {
-    private var services: [ConnectionConfiguration: OpenAPIServiceProtocol] = [:]
-    private let serviceFactory: @Sendable (ConnectionConfiguration) throws -> OpenAPIServiceProtocol
+    private var services: [ConnectionConfiguration: any OpenAPIServiceProtocol] = [:]
+    private let serviceFactory: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
     // Initializer allowing the injection of mocked OpenAPIServiceProtocol
-    init(serviceFactory: @escaping @Sendable (ConnectionConfiguration) throws -> OpenAPIServiceProtocol = {
+    init(serviceFactory: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
         try OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .shortTerm)
     }) {
         self.serviceFactory = serviceFactory
     }
 
     @discardableResult
-    func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> OpenAPIServiceProtocol {
+    func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> any OpenAPIServiceProtocol {
         if let existing = services[configuration] {
             return existing
         }
@@ -172,7 +172,7 @@ public actor NetworkObserver: Sendable {
 
     private var viewModel: NetworkTrackerViewModel?
 
-    private var pathMonitor: NWPathMonitoring = RealPathMonitor()
+    private var pathMonitor: any NWPathMonitoring = RealPathMonitor()
     private var connectionPool = ConnectionPool()
     private var failureTracker = ConnectionFailureTracker()
     private var connectionConfigurations: [ConnectionConfiguration] = []
@@ -368,7 +368,7 @@ public final class NetworkTracker: ObservableObject {
     // @MainActor
     @Published public private(set) var status: NetworkStatus = .connecting
 
-    private var pathMonitor: NWPathMonitoring
+    private var pathMonitor: any NWPathMonitoring
     private var connectionPool: ConnectionPool
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
@@ -385,7 +385,7 @@ public final class NetworkTracker: ObservableObject {
 
     // MARK: - Injectable initializer for testing
 
-    init(monitor: NWPathMonitoring = RealPathMonitor(),
+    init(monitor: any NWPathMonitoring = RealPathMonitor(),
          connectionPool: ConnectionPool = ConnectionPool(),
          failureTracker: ConnectionFailureTracker = ConnectionFailureTracker()) {
         pathMonitor = monitor

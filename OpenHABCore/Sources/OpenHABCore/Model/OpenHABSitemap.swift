@@ -16,7 +16,7 @@ import Foundation
 public struct ValueOrFalse<T: Decodable>: Decodable {
     let value: T?
 
-    public init(from decoder: Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
         let falseValue = try? container.decode(Bool.self)
         if falseValue == nil {

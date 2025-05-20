@@ -29,7 +29,7 @@ public class ClientCertificateManager {
     private var importingCertChain: [SecCertificate]?
     public var importingPassword: String?
 
-    weak var delegate: ClientCertificateManagerDelegate?
+    weak var delegate: (any ClientCertificateManagerDelegate)?
 
     public var clientIdentities: [SecIdentity] = []
 
