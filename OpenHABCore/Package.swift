@@ -37,7 +37,6 @@ let package = Package(
             ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableUpcomingFeature("StrictConcurrency"),
                 .enableUpcomingFeature("ConciseMagicFile"),
                 .enableUpcomingFeature("DisableOutwardActorInference"),
                 .enableUpcomingFeature("DynamicActorIsolation"),
@@ -46,11 +45,14 @@ let package = Package(
                 .enableUpcomingFeature("GlobalActorIsolatedTypesUsability"),
                 .enableUpcomingFeature("GlobalConcurrency"),
                 .enableUpcomingFeature("ImplicitOpenExistentials"),
+                .enableUpcomingFeature("ImportObjcForwardDeclarations"),
                 .enableUpcomingFeature("InferSendableFromCaptures"),
+                .enableUpcomingFeature("InternalImportsByDefault"),
                 .enableUpcomingFeature("IsolatedDefaultValues"),
                 .enableUpcomingFeature("MemberImportVisibility"),
+                .enableUpcomingFeature("NonfrozenEnumExhaustivity"),
                 .enableUpcomingFeature("RegionBasedIsolation"),
-//                .enableUpcomingFeature("InternalImportsByDefault"),
+                .enableUpcomingFeature("StrictConcurrency"),
                 .unsafeFlags([
                     "-Xfrontend", "-enable-actor-data-race-checks",
                     "-Xfrontend", "-strict-concurrency=complete"

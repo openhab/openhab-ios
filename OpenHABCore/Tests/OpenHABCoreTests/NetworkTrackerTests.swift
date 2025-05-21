@@ -148,6 +148,9 @@ final class NetworkTrackerTests: XCTestCase {
 
     @MainActor
     func testTrackerGoesOfflineOnNetworkLoss() async {
+        let statusSinkAttached = XCTestExpectation(description: "Combine sink attached")
+        let becameNotConnected = XCTestExpectation(description: "Status becomes .notConnected")
+
         let expectation = XCTestExpectation(description: "Status becomes .notConnected")
 
         let mockMonitor = MockPathMonitor() // ⬅️ Hold on to this
@@ -159,13 +162,17 @@ final class NetworkTrackerTests: XCTestCase {
 
         var cancellables = Set<AnyCancellable>()
 
+        // swiftlint:disable:next trailing_closure
         tracker.$status
+            .handleEvents(receiveSubscription: { _ in
+                statusSinkAttached.fulfill()
+            })
             .dropFirst()
-            .sink { status in
+            .sink(receiveValue: { status in
                 if status == .notConnected {
-                    expectation.fulfill()
+                    becameNotConnected.fulfill()
                 }
-            }
+            })
             .store(in: &cancellables)
 
         // Start tracking first to initialize properly
@@ -173,12 +180,12 @@ final class NetworkTrackerTests: XCTestCase {
             ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
         ])
 
-        // Add small delay to let Combine attach the sink before simulating
-        try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        // 🚦 Wait until Combine is ready before triggering anything
+        await fulfillment(of: [statusSinkAttached], timeout: 2.0)
 
         // Simulate loss of network
         mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
 
-        await fulfillment(of: [expectation], timeout: 4.0)
+        await fulfillment(of: [becameNotConnected], timeout: 4.0)
     }
 }

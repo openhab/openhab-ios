@@ -16,9 +16,9 @@ import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 

@@ -16,9 +16,9 @@ import os.log
 
 class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetNumberValueIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 

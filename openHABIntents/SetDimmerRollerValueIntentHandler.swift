@@ -16,9 +16,9 @@ import os.log
 
 class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetDimmerRollerValueIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 

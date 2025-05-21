@@ -17,7 +17,7 @@ import WatchKit
 
 class OpenHABWatchAppDelegate: NSObject {
     var session: WCSession
-    let delegate: WCSessionDelegate
+    let delegate: any WCSessionDelegate
 
     override init() {
         delegate = AppMessageService.singleton

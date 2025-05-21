@@ -425,10 +425,7 @@ class OpenHABRootViewController: UIViewController {
                 displayErrorNotification("Could not find server")
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
-                // TODO:
-                //            logger.error("Could not send data \(error.localizedDescription)")
-                //
-                //            self.displayErrorNotification("Request to \(url) failed: \(error.localizedDescription)")
+                logger.error("Could not send data \(error.localizedDescription)")
             }
         }
     }

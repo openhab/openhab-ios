@@ -56,7 +56,7 @@ class AppMessageService: NSObject, WCSessionDelegate {
         }
     }
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         logger.info("activationDidCompleteWith activationState \(activationState.rawValue) error: \(String(describing: error))")
         DispatchQueue.main.async { () in
             self.updateValuesFromApplicationContext(session.receivedApplicationContext as [String: AnyObject])

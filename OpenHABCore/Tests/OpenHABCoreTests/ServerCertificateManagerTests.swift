@@ -12,6 +12,7 @@
 @testable import OpenHABCore
 import XCTest
 
+@MainActor
 func XCTAssertThrowsErrorAsync(
     _ expression: @escaping () async throws -> some Any,
     _ message: @autoclosure () -> String = "Expected async error but got success",
