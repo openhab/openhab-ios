@@ -59,14 +59,6 @@ extension OpenHABSitemapWidgetEvent: CustomStringConvertible {
 
 public extension OpenHABSitemapWidgetEvent {
     struct CodingData: Decodable, Hashable, Equatable {
-        public static func == (lhs: OpenHABSitemapWidgetEvent.CodingData, rhs: OpenHABSitemapWidgetEvent.CodingData) -> Bool {
-            lhs.widgetId == rhs.widgetId
-        }
-
-        public func hash(into hasher: inout Hasher) {
-            hasher.combine(widgetId)
-        }
-
         var sitemapName: String?
         var pageId: String?
         var widgetId: String?
@@ -82,6 +74,14 @@ public extension OpenHABSitemapWidgetEvent {
         var item: OpenHABItem.CodingData?
         var descriptionChanged: Bool?
         var link: String?
+
+        public static func == (lhs: OpenHABSitemapWidgetEvent.CodingData, rhs: OpenHABSitemapWidgetEvent.CodingData) -> Bool {
+            lhs.widgetId == rhs.widgetId
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(widgetId)
+        }
     }
 }
 

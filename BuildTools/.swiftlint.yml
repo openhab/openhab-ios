@@ -33,6 +33,9 @@ excluded:
   - ../OpenHABCore/Sources/OpenHABCore/GeneratedSources/*
   - ../OpenHABCore/swift-openapi-generator
   - ../vendor
+  - ../DerivedData
+  - ../openHAB/Intents/Generated
+  - ../openHABWatch/Intents/Generated
 
 nesting:
     type_level: 2

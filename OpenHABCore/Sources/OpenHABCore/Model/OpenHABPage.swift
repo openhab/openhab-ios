@@ -62,13 +62,6 @@ public extension OpenHABPage {
 
 public extension OpenHABPage {
     struct CodingData: Decodable {
-        let pageId: String?
-        let title: String?
-        let link: String?
-        let leaf: Bool?
-        let widgets: [OpenHABWidget.CodingData]?
-        let icon: String?
-
         private enum CodingKeys: String, CodingKey {
             case pageId = "id"
             case title
@@ -77,6 +70,13 @@ public extension OpenHABPage {
             case widgets
             case icon
         }
+
+        let pageId: String?
+        let title: String?
+        let link: String?
+        let leaf: Bool?
+        let widgets: [OpenHABWidget.CodingData]?
+        let icon: String?
     }
 }
 

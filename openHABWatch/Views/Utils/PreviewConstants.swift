@@ -14,7 +14,7 @@ import Foundation
 enum PreviewConstants {
     static let remoteURLString = "http://192.168.2.10:8080"
 
-    static let sitemapJson = """
+    static let sitemapJson = Data("""
     {
         "id": "watch",
         "title": "watch",
@@ -287,5 +287,5 @@ enum PreviewConstants {
             }
         ]
     }
-    """.data(using: .utf8)!
+    """.utf8)
 }
