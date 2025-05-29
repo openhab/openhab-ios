@@ -789,14 +789,15 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
         } else if widget.type == .selection {
             let selectionItemState = widget.item?.state
             logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
-            let hostingController = UIHostingController(rootView: SelectionView(
-                mappings: widget.mappingsOrItemOptions,
-                selectionItemState: selectionItemState,
-                onSelection: { selectedMappingIndex in
+            let hostingController = UIHostingController(
+                rootView: SelectionView(
+                    mappings: widget.mappingsOrItemOptions,
+                    selectionItemState: selectionItemState
+                ) { selectedMappingIndex in
                     let selectedMapping: OpenHABWidgetMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
                     self.sendCommand(widget.item, commandToSend: selectedMapping.command)
                 }
-            ))
+            )
             hostingController.title = widget.labelText
             navigationController?.pushViewController(hostingController, animated: true)
         } else if widget.type == .input {
@@ -840,9 +841,9 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                 preferredStyle: .alert
             )
             alert.addTextField(configurationHandler: textFieldAdder)
-            let sendAction = UIAlertAction(title: "Set value", style: .destructive, handler: { [weak self] _ in
+            let sendAction = UIAlertAction(title: "Set value", style: .destructive) { [weak self] _ in
                 self?.sendCommand(widget.item, commandToSend: textExtractor(alert))
-            })
+            }
             alert.addAction(sendAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.preferredAction = sendAction

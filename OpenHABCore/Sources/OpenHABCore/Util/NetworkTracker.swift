@@ -167,7 +167,7 @@ public final class NetworkTrackerViewModel: ObservableObject {
     }
 }
 
-public actor NetworkObserver: Sendable {
+public actor NetworkObserver {
     public static let shared = NetworkObserver()
 
     private var viewModel: NetworkTrackerViewModel?
