@@ -196,9 +196,13 @@ platform :ios do
             sh 'git commit --amend --no-edit --signoff'
         end
 
+        sh("echo '📋 Git status before ensure_git_status_clean:'")
+        sh("git status --untracked-files=all --short", log: true)
+
         # push bump commit
         ensure_git_status_clean(
-            ignore_files: ["openHAB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"]
+            show_diff: true,
+            ignore_files: ["openHAB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved", "vendor/"]
         )
         push_to_git_remote
 
