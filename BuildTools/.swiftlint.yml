@@ -32,6 +32,7 @@ excluded:
   - .build
   - ../OpenHABCore/Sources/OpenHABCore/GeneratedSources/*
   - ../OpenHABCore/swift-openapi-generator
+  - ../vendor
 
 nesting:
     type_level: 2
@@ -103,4 +104,4 @@ file_name:
   suffix_pattern: "Extension?|\\+.*"
 
 opening_brace:
-  allow_multiline_func: true
+  ignore_multiline_function_signatures: true

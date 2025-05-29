@@ -124,7 +124,6 @@ class OpenHABRootViewController: UIViewController {
             object: nil,
             queue: nil
         ) { [weak self] notification in
-
             guard
                 let summary = notification.userInfo?["summary"] as? String,
                 let domain = notification.userInfo?["domain"] as? String,
@@ -150,7 +149,6 @@ class OpenHABRootViewController: UIViewController {
             object: nil,
             queue: nil
         ) { [weak self] notification in
-
             guard
                 let summary = notification.userInfo?["summary"] as? String,
                 let domain = notification.userInfo?["domain"] as? String,

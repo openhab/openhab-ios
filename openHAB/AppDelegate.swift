@@ -327,7 +327,6 @@ extension AppDelegate {
 extension AppDelegate: MessagingDelegate {
     nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         Task { @MainActor in
-
             let safeToken = fcmToken ?? ""
             let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
             let deviceName = UIDevice.current.name
