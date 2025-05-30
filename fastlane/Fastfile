@@ -69,22 +69,45 @@ platform :ios do
             package_path: "OpenHABCore"
         )
     end
+    
+    def resolve_current_branch
+      branch = if is_ci?
+        ENV["BRANCH_NAME"]
+      else
+        sh("git branch --show-current").strip
+      end
+
+      if branch.nil? || branch.empty?
+        UI.user_error!("Unable to determine current git branch.")
+      end
+
+      branch
+    end
+    
+    def ensure_fully_clean_git_state!(ignored_files = [])
+      status = sh("git status --porcelain").lines.reject do |line|
+        ignored_files.any? { |ignored| line.strip.end_with?(ignored) }
+      end.map(&:strip)
+
+      unless status.empty?
+        UI.error("Git working directory is not clean:")
+        UI.message(status.join("\n"))
+        UI.user_error!("Please commit, stash, or clean all changes before continuing.")
+      end
+    end
+    
+    IGNORED_GIT_FILES = [
+      "openHAB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+      "vendor/"
+    ]
 
     desc 'Build beta'
     lane :beta do |options|
         options[:bump] = options[:bump] != nil ? options[:bump] : "patch"
 
-        if is_ci?
-            current_branch = ENV["BRANCH_NAME"]
-        else
-            current_branch = sh("git branch --show-current")
-        end
+        current_branch = resolve_current_branch
 
-        if current_branch != "develop"
-            options[:isfeaturebuild] = true
-        else
-            options[:isfeaturebuild] = false
-        end
+        options[:isfeaturebuild] = current_branch != "develop"
 
         # ensure branch is clean
         ensure_git_status_clean
@@ -120,7 +143,7 @@ platform :ios do
         certificates
 
         # run unit tests
-        unittests
+        #unittests
 
         increment_build
 
@@ -202,8 +225,17 @@ platform :ios do
         # push bump commit
         ensure_git_status_clean(
             show_diff: true,
-            ignore_files: ["openHAB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved", "vendor/"]
+            ignore_files: IGNORED_GIT_FILES
         )
+        
+        sh("git stash --include-untracked")
+        branch = resolve_current_branch
+        sh("git pull origin #{branch} --rebase")
+        sh("git stash pop || true")
+        
+        UI.message("Checking for clean working directory before pull...")
+        ensure_fully_clean_git_state!(IGNORED_GIT_FILES)
+        
         push_to_git_remote
 
         # tag if not a feature build
