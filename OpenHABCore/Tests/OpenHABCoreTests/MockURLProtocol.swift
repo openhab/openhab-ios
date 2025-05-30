@@ -35,15 +35,15 @@ final class MockURLProtocol: URLProtocol {
         return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }()
 
-    override class func canInit(with request: URLRequest) -> Bool {
+    override static func canInit(with request: URLRequest) -> Bool {
         true
     }
 
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+    override static func canonicalRequest(for request: URLRequest) -> URLRequest {
         request
     }
 
-    override class func requestIsCacheEquivalent(_ a: URLRequest, to b: URLRequest) -> Bool {
+    override static func requestIsCacheEquivalent(_ a: URLRequest, to b: URLRequest) -> Bool {
         false
     }
 
