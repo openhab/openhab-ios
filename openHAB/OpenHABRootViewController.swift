@@ -314,8 +314,9 @@ class OpenHABRootViewController: UIViewController {
                 self.modalDismissed(to: .tile(urlString))
             }
         case .homeSelection:
+            print("Dismissed to Home Selection")
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
-                self.modalDismissed(to: .settings)
+                self.modalDismissed(to: .homeSelection)
             }
         }
     }
@@ -667,7 +668,7 @@ extension OpenHABRootViewController: ModalHandler {
             case let .tile(urlString):
                 openTileURL(urlString)
         	case .homeSelection:
-            	let hostingController = UIHostingController(rootView: SettingsView())
+            	let hostingController = UIHostingController(rootView: HomeSelectionView())
             	navigationController?.pushViewController(hostingController, animated: true)
             }
         }
