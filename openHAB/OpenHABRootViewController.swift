@@ -27,6 +27,7 @@ enum TargetController {
     case notifications
     case browser(String)
     case tile(String)
+    case homeSelection
 }
 
 protocol ModalHandler: AnyObject {
@@ -311,6 +312,10 @@ class OpenHABRootViewController: UIViewController {
         case let .tile(urlString):
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .tile(urlString))
+            }
+        case .homeSelection:
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .settings)
             }
         }
     }
@@ -661,6 +666,9 @@ extension OpenHABRootViewController: ModalHandler {
                 break
             case let .tile(urlString):
                 openTileURL(urlString)
+        	case .homeSelection:
+            	let hostingController = UIHostingController(rootView: SettingsView())
+            	navigationController?.pushViewController(hostingController, animated: true)
             }
         }
     }
