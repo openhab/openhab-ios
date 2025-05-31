@@ -61,6 +61,7 @@
 "oh_secret" = "openHAB-Secret";
 "notifications" = "Benachrichtigungen";
 "settings" = "Einstellungen";
+"homeSelection" = "Auswahl des Zuhauses";
 "privacy_policy" = "Datenschutzerklärung";
 "crash_reporting_info" = "Durch die Aktivierung der Absturzberichterstattung stimmen Sie zu, dass Informationen zu Ihrem Gerät und der Nutzung der App erfasst und mit Crashlytics (einem Unternehmen von Google) geteilt werden. Weitere Informationen finden Sie in unserer Datenschutzerklärung.";
 "activate" = "Aktivieren";
