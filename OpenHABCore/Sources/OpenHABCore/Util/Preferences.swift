@@ -29,7 +29,7 @@ public struct UserDefault<T: Sendable> {
                 Preferences.change(storedPreference: key, to: newValue)
             }
             if store {
-                Preferences.change(storedPreference: key, to: newValue)
+                Preferences.storeCurrentPreferences()
             }
             DispatchQueue.main.async { [subject] in
                 subject.send(newValue)
@@ -107,7 +107,7 @@ public struct UserDefaultURL {
         }
         set {
             Preferences.sharedDefaults.set(newValue, forKey: key)
-            Preferences.change(storedPreference: key, to: newValue)
+            Preferences.storeCurrentPreferences()
             let defaultValue = defaultValue
             // Trim and validate the new URL
             let trimmedUri = newValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -159,14 +159,15 @@ public enum Preferences {
     @UserDefaultObject("localConnectionConfig", defaultValue: ConnectionConfiguration.localDefault) public static var localConnectionConfig: ConnectionConfiguration
     @UserDefaultObject("remoteConnectionConfig", defaultValue: ConnectionConfiguration.remoteDefault) public static var remoteConnectionConfig: ConnectionConfiguration
     @UserDefault("sitemapForWatchLabel", defaultValue: "watch") public static var sitemapForWatchLabel: String
+    @UserDefault("homeName", defaultValue: "Home") public static var homeName: String
 
     /// settings for different homes TODO come up with better name
-    @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: [String: Any]]
+    @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: NSDictionary]
 
     // MARK: - Private
 
     /// the currently applied settings set from storedPreferences
-    @UserDefault("currentlyUsedSettings", defaultValue: "", store: false) private static var currentlyUsedSettings: String
+    @UserDefault("currentlyUsedSettings", defaultValue: UUID().uuidString, store: false) private static var currentlyUsedSettings: String
 
     @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
     @UserDefault("didMigrateToConnectionConfig", defaultValue: false) private static var didMigrateToConnectionConfig: Bool
@@ -174,44 +175,59 @@ public enum Preferences {
 }
 
 public extension Preferences {
-    static func switchCurrentlyUsedSettings(to name: String) {
-        guard !storedPreferences.isEmpty, let stored = storedPreferences[name] else {
+    static func listStoredPreferences() -> [UUID] {
+        initializeStoredPreferences()
+        let preferenceIds = storedPreferences
+            .sorted { e1, e2 in
+                (e1.value["homeName"] as? String ?? "") <= (e2.value["homeName"] as? String ?? "")
+            }
+            .map(\.key)
+        return preferenceIds.compactMap { UUID(uuidString: $0) }
+    }
+
+    static func switchCurrentlyUsedSettings(to settingsId: UUID) {
+        initializeStoredPreferences()
+
+        let settingsIdString = settingsId.uuidString
+
+        guard let stored = storedPreferences[settingsIdString] else {
             // we have not stored our settings in that list yet
             return
         }
 
-        Preferences.currentlyUsedSettings = name
+        Preferences.currentlyUsedSettings = settingsIdString
 
         // TODO: not pretty to repeat everything here
-        Preferences.defaultView = stored["defaultView"] as! String
-        Preferences.localUrl = stored["localUrl"] as! String
-        Preferences.remoteUrl = stored["remoteUrl"] as! String
-        Preferences.username = stored["username"] as! String
-        Preferences.password = stored["password"] as! String
-        Preferences.alwaysSendCreds = stored["alwaysSendCreds"] as! Bool
-        Preferences.ignoreSSL = stored["ignoreSSL"] as! Bool
-        Preferences.demomode = stored["demomode"] as! Bool
-        Preferences.idleOff = stored["idleOff"] as! Bool
-        Preferences.realTimeSliders = stored["realTimeSliders"] as! Bool
-        Preferences.iconType = stored["iconType"] as! Int
-        Preferences.defaultSitemap = stored["defaultSitemap"] as! String
-        Preferences.sendCrashReports = stored["sendCrashReports"] as! Bool
-        Preferences.sortSitemapsby = stored["sortSitemapsby"] as! Int
-        Preferences.defaultMainUIPath = stored["defaultMainUIPath"] as! String
-        Preferences.alwaysAllowWebRTC = stored["alwaysAllowWebRTC"] as! Bool
-        Preferences.sitemapForWatch = stored["sitemapForWatch"] as! String
+        Preferences.defaultView = stored["defaultView"] as? String ?? "web"
+        Preferences.localUrl = stored["localUrl"] as? String ?? ""
+        Preferences.remoteUrl = stored["remoteUrl"] as? String ?? "https://myopenhab.org"
+        Preferences.username = stored["username"] as? String ?? "test"
+        Preferences.password = stored["password"] as? String ?? "test"
+        Preferences.alwaysSendCreds = stored["alwaysSendCreds"] as? Bool ?? false
+        Preferences.ignoreSSL = stored["ignoreSSL"] as? Bool ?? false
+        Preferences.demomode = stored["demomode"] as? Bool ?? true
+        Preferences.idleOff = stored["idleOff"] as? Bool ?? false
+        Preferences.realTimeSliders = stored["realTimeSliders"] as? Bool ?? false
+        Preferences.iconType = stored["iconType"] as? Int ?? 0
+        Preferences.defaultSitemap = stored["defaultSitemap"] as? String ?? "demo"
+        Preferences.sendCrashReports = stored["sendCrashReports"] as? Bool ?? false
+        Preferences.sortSitemapsby = stored["sortSitemapsby"] as? Int ?? 0
+        Preferences.defaultMainUIPath = stored["defaultMainUIPath"] as? String ?? ""
+        Preferences.alwaysAllowWebRTC = stored["alwaysAllowWebRTC"] as? Bool ?? false
+        Preferences.sitemapForWatch = stored["sitemapForWatch"] as? String ?? "watch"
+        Preferences.homeName = stored["homeName"] as? String ?? "Home"
     }
 
-    fileprivate static func change(storedPreference: String, to newValue: Any) {
-        guard var stored = storedPreferences[currentlyUsedSettings] else {
+    private static func initializeStoredPreferences() {
+        if storedPreferences.isEmpty {
             storeCurrentPreferences()
-            return
         }
-        stored[storedPreference] = newValue
     }
 
-    private static func storeCurrentPreferences() {
-        storedPreferences[currentlyUsedSettings] = [
+    static func storeCurrentPreferences() {
+        // TODO: not pretty to repeat everything here
+        var stored = storedPreferences
+        stored[currentlyUsedSettings] = [
             "defaultView": Preferences.defaultView,
             "localUrl": Preferences.localUrl,
             "remoteUrl": Preferences.remoteUrl,
@@ -228,8 +244,10 @@ public extension Preferences {
             "sortSitemapsby": Preferences.sortSitemapsby,
             "defaultMainUIPath": Preferences.defaultMainUIPath,
             "alwaysAllowWebRTC": Preferences.alwaysAllowWebRTC,
-            "sitemapForWatch": Preferences.sitemapForWatch
+            "sitemapForWatch": Preferences.sitemapForWatch,
+            "homeName": Preferences.homeName
         ]
+        storedPreferences = stored
     }
 }
 
