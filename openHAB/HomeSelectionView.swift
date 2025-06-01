@@ -27,6 +27,9 @@ struct HomeSelectionView: View {
 
     @State private var homes: [UUID] = []
 
+    @State private var showingNewHomeAlert = false
+    @State private var newHomeName = ""
+
     @Environment(\.dismiss) private var dismiss
 
     var appData: OpenHABDataObject? {
@@ -36,31 +39,45 @@ struct HomeSelectionView: View {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
 
     var body: some View {
-        Form {
-            List(homes, id: \.self) {
-                Text(Preferences.storedPreferences[$0.uuidString]?["homeName"] as? String ?? "")
+        List(homes, id: \.self) { home in
+            HStack {
+                Text(Preferences.storedPreferences[home.uuidString]?["homeName"] as? String ?? "")
                 // TODO: selection of name in list changes settings
                 // TODO: options like remove, rename (or should we rename in settings?)
+                Spacer()
+                if Preferences.currentlyUsedSettings == home.uuidString {
+                    Image(systemSymbol: .checkmark)
+                        .foregroundColor(.blue)
+                }
+            }
+            .contentShape(.interaction, Rectangle()) // Ensures entire row is tappable
+            .onTapGesture {
+                Preferences.switchCurrentlyUsedSettings(to: home)
+                dismiss()
             }
         }
         .onAppear {
             homes = Preferences.listStoredPreferences()
         }
-        .formStyle(.grouped)
         .navigationBarTitle("homeSelection")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button(action: {
-                    addHome()
+                    showingNewHomeAlert.toggle()
                 }, label: {
                     Image(systemSymbol: .plus)
                 })
+                .alert("Enter name for new home", isPresented: $showingNewHomeAlert) {
+                    TextField("Name for new home", text: $newHomeName)
+                    Button("OK", action: addHome)
+                }
             }
         }
     }
 
     private func addHome() {
-        // TODO: alert to insert name for home, store and dismiss
+        Preferences.createAndLoadNewStoredSettings(homeName: newHomeName)
+        dismiss()
     }
 }
 
