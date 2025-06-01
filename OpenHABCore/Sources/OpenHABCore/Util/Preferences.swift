@@ -22,14 +22,46 @@ public struct UserDefault<T: Sendable> {
 
     public var wrappedValue: T {
         get {
-            Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
+            let preferenceValue = Preferences.sharedDefaults.object(forKey: key)
+            if let preferenceAsT = preferenceValue as? T {
+                os_log(
+                    "Preference value %{PUBLIC}@ is %{PUBLIC}@",
+                    log: .default,
+                    type: .debug,
+                    key,
+                    "\(preferenceAsT)"
+                )
+                return preferenceAsT
+            } else {
+                if let preferenceValue {
+                    os_log(
+                        "Preference value %{PUBLIC}@ was %{PUBLIC}@ but did not conform to %{PUBLIC}@. Replace with default value.",
+                        log: .default,
+                        type: .fault,
+                        key,
+                        "\(preferenceValue)",
+                        "\(T.self)"
+                    )
+                } else {
+                    os_log(
+                        "Preference value %{PUBLIC}@ was set for the first time. Using default value.",
+                        log: .default,
+                        type: .info,
+                        key
+                    )
+                }
+                let fallback = defaultValue
+                Preferences.sharedDefaults.set(fallback, forKey: key)
+                return fallback
+            }
         }
         set {
+            os_log("Preference %{PUBLIC}@ will be changed to value %{PUBLIC}@", log: .default, type: .debug, key, "\(newValue)")
             Preferences.sharedDefaults.set(newValue, forKey: key)
                 Preferences.change(storedPreference: key, to: newValue)
             }
             if store {
-                Preferences.storeCurrentPreferences()
+                Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: newValue)
             }
             DispatchQueue.main.async { [subject] in
                 subject.send(newValue)
@@ -107,7 +139,7 @@ public struct UserDefaultURL {
         }
         set {
             Preferences.sharedDefaults.set(newValue, forKey: key)
-            Preferences.storeCurrentPreferences()
+            Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: newValue)
             let defaultValue = defaultValue
             // Trim and validate the new URL
             let trimmedUri = newValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -162,7 +194,7 @@ public enum Preferences {
     @UserDefault("homeName", defaultValue: "Home") public static var homeName: String
 
     /// settings for different homes TODO come up with better name
-    @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: NSDictionary]
+    @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: [String: Any]]
 
     // MARK: - Private
 
@@ -176,7 +208,10 @@ public enum Preferences {
 
 public extension Preferences {
     static func listStoredPreferences() -> [UUID] {
-        initializeStoredPreferences()
+        if storedPreferences.isEmpty {
+            //first time the multi-home view is entered, there might be no stored preferences, if no preference was changed since the update
+            storeCurrentPreferences()
+        }
         let preferenceIds = storedPreferences
             .sorted { e1, e2 in
                 (e1.value["homeName"] as? String ?? "") <= (e2.value["homeName"] as? String ?? "")
@@ -186,8 +221,6 @@ public extension Preferences {
     }
 
     static func switchCurrentlyUsedSettings(to settingsId: UUID) {
-        initializeStoredPreferences()
-
         let settingsIdString = settingsId.uuidString
 
         guard let stored = storedPreferences[settingsIdString] else {
@@ -218,34 +251,28 @@ public extension Preferences {
         Preferences.homeName = stored["homeName"] as? String ?? "Home"
     }
 
-    private static func initializeStoredPreferences() {
-        if storedPreferences.isEmpty {
-            storeCurrentPreferences()
-        }
-    }
-
-    static func storeCurrentPreferences() {
+    static func storeCurrentPreferences(updatedKey: String = "", updatedValue: Any = "") {
         // TODO: not pretty to repeat everything here
         var stored = storedPreferences
         stored[currentlyUsedSettings] = [
-            "defaultView": Preferences.defaultView,
-            "localUrl": Preferences.localUrl,
-            "remoteUrl": Preferences.remoteUrl,
-            "username": Preferences.username,
-            "password": Preferences.password,
-            "alwaysSendCreds": Preferences.alwaysSendCreds,
-            "ignoreSSL": Preferences.ignoreSSL,
-            "demomode": Preferences.demomode,
-            "idleOff": Preferences.idleOff,
-            "realTimeSliders": Preferences.realTimeSliders,
-            "iconType": Preferences.iconType,
-            "defaultSitemap": Preferences.defaultSitemap,
-            "sendCrashReports": Preferences.sendCrashReports,
-            "sortSitemapsby": Preferences.sortSitemapsby,
-            "defaultMainUIPath": Preferences.defaultMainUIPath,
-            "alwaysAllowWebRTC": Preferences.alwaysAllowWebRTC,
-            "sitemapForWatch": Preferences.sitemapForWatch,
-            "homeName": Preferences.homeName
+            "defaultView": updatedKey == "defaultView" ? updatedValue : Preferences.defaultView,
+            "localUrl": updatedKey == "localUrl" ? updatedValue : Preferences.localUrl,
+            "remoteUrl": updatedKey == "remoteUrl" ? updatedValue : Preferences.remoteUrl,
+            "username": updatedKey == "username" ? updatedValue : Preferences.username,
+            "password": updatedKey == "password" ? updatedValue : Preferences.password,
+            "alwaysSendCreds": updatedKey == "alwaysSendCreds" ? updatedValue : Preferences.alwaysSendCreds,
+            "ignoreSSL": updatedKey == "ignoreSSL" ? updatedValue : Preferences.ignoreSSL,
+            "demomode": updatedKey == "demomode" ? updatedValue : Preferences.demomode,
+            "idleOff": updatedKey == "idleOff" ? updatedValue : Preferences.idleOff,
+            "realTimeSliders": updatedKey == "realTimeSliders" ? updatedValue : Preferences.realTimeSliders,
+            "iconType": updatedKey == "iconType" ? updatedValue : Preferences.iconType,
+            "defaultSitemap": updatedKey == "defaultSitemap" ? updatedValue : Preferences.defaultSitemap,
+            "sendCrashReports": updatedKey == "sendCrashReports" ? updatedValue : Preferences.sendCrashReports,
+            "sortSitemapsby": updatedKey == "sortSitemapsby" ? updatedValue : Preferences.sortSitemapsby,
+            "defaultMainUIPath": updatedKey == "defaultMainUIPath" ? updatedValue : Preferences.defaultMainUIPath,
+            "alwaysAllowWebRTC": updatedKey == "alwaysAllowWebRTC" ? updatedValue : Preferences.alwaysAllowWebRTC,
+            "sitemapForWatch": updatedKey == "sitemapForWatch" ? updatedValue : Preferences.sitemapForWatch,
+            "homeName": updatedKey == "homeName" ? updatedValue : Preferences.homeName
         ]
         storedPreferences = stored
     }
