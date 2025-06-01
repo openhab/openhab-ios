@@ -168,10 +168,7 @@ public enum Preferences {
 
 public extension Preferences {
     static func listStoredPreferences() -> [UUID] {
-        if storedPreferences.isEmpty {
-            // first time the multi-home view is entered, there might be no stored preferences, if no preference was changed since the update
-            storeCurrentPreferences()
-        }
+        initializeStoredPreferences()
         let preferenceIds = storedPreferences
             .sorted { e1, e2 in
                 (e1.value["homeName"] as? String ?? "") <= (e2.value["homeName"] as? String ?? "")
@@ -180,9 +177,40 @@ public extension Preferences {
         return preferenceIds.compactMap { UUID(uuidString: $0) }
     }
 
+    static func getCurrentlyUsedSettings() -> UUID {
+        initializeStoredPreferences()
+        guard let currentPreferenceUUID = UUID(uuidString: currentlyUsedSettings) else {
+            fatalError("currentlyUsedSettings must be a UUID, but was \(currentlyUsedSettings)")
+        }
+        return currentPreferenceUUID
+    }
+
+    private static func initializeStoredPreferences() {
+        if storedPreferences.isEmpty {
+            // first there might be no stored preferences, if no preference was changed since the update
+            storeCurrentPreferences()
+        }
+    }
+
     static func createAndLoadNewStoredSettings(homeName: String) {
         currentlyUsedSettings = UUID().uuidString
         loadSettings(stored: ["homeName": homeName])
+    }
+
+    static func renameHome(_ settingsId: UUID, newHomeName: String) {
+        var stored = storedPreferences
+        stored[settingsId.uuidString]?["homeName"] = newHomeName
+        storedPreferences = stored
+    }
+
+    static func deleteStoredSettings(_ settingsId: UUID) {
+        guard settingsId != getCurrentlyUsedSettings() else {
+            // cannot remove current home
+            return
+        }
+        var stored = storedPreferences
+        stored.removeValue(forKey: settingsId.uuidString)
+        storedPreferences = stored
     }
 
     static func switchCurrentlyUsedSettings(to settingsId: UUID) {
