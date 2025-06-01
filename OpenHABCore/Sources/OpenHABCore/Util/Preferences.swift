@@ -184,7 +184,7 @@ public enum Preferences {
     @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
-    @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
+    @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsBy: Int
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
     @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
@@ -199,17 +199,19 @@ public enum Preferences {
     // MARK: - Private
 
     /// the currently applied settings set from storedPreferences
-    @UserDefault("currentlyUsedSettings", defaultValue: UUID().uuidString, store: false) private static var currentlyUsedSettings: String
+    @UserDefault("currentlyUsedSettings", defaultValue: UUID().uuidString, store: false) public private(set) static var currentlyUsedSettings: String
 
     @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
     @UserDefault("didMigrateToConnectionConfig", defaultValue: false) private static var didMigrateToConnectionConfig: Bool
     @UserDefault("currentWebViewPath", defaultValue: "") public static var currentWebViewPath: String
+
+    private static var loadingStoredPreferences = false
 }
 
 public extension Preferences {
     static func listStoredPreferences() -> [UUID] {
         if storedPreferences.isEmpty {
-            //first time the multi-home view is entered, there might be no stored preferences, if no preference was changed since the update
+            // first time the multi-home view is entered, there might be no stored preferences, if no preference was changed since the update
             storeCurrentPreferences()
         }
         let preferenceIds = storedPreferences
@@ -218,6 +220,11 @@ public extension Preferences {
             }
             .map(\.key)
         return preferenceIds.compactMap { UUID(uuidString: $0) }
+    }
+
+    static func createAndLoadNewStoredSettings(homeName: String) {
+        currentlyUsedSettings = UUID().uuidString
+        loadSettings(stored: ["homeName": homeName])
     }
 
     static func switchCurrentlyUsedSettings(to settingsId: UUID) {
@@ -230,6 +237,11 @@ public extension Preferences {
 
         Preferences.currentlyUsedSettings = settingsIdString
 
+        loadSettings(stored: stored)
+    }
+
+    private static func loadSettings(stored: [String: Any]) {
+        loadingStoredPreferences = true
         // TODO: not pretty to repeat everything here
         Preferences.defaultView = stored["defaultView"] as? String ?? "web"
         Preferences.localUrl = stored["localUrl"] as? String ?? ""
@@ -244,14 +256,20 @@ public extension Preferences {
         Preferences.iconType = stored["iconType"] as? Int ?? 0
         Preferences.defaultSitemap = stored["defaultSitemap"] as? String ?? "demo"
         Preferences.sendCrashReports = stored["sendCrashReports"] as? Bool ?? false
-        Preferences.sortSitemapsby = stored["sortSitemapsby"] as? Int ?? 0
+        Preferences.sortSitemapsBy = stored["sortSitemapsBy"] as? Int ?? 0
         Preferences.defaultMainUIPath = stored["defaultMainUIPath"] as? String ?? ""
         Preferences.alwaysAllowWebRTC = stored["alwaysAllowWebRTC"] as? Bool ?? false
         Preferences.sitemapForWatch = stored["sitemapForWatch"] as? String ?? "watch"
         Preferences.homeName = stored["homeName"] as? String ?? "Home"
+        loadingStoredPreferences = false
+        storeCurrentPreferences()
     }
 
     static func storeCurrentPreferences(updatedKey: String = "", updatedValue: Any = "") {
+        guard !loadingStoredPreferences else {
+            // concurrent access for writing and reading is prohibited
+            return
+        }
         // TODO: not pretty to repeat everything here
         var stored = storedPreferences
         stored[currentlyUsedSettings] = [
@@ -268,7 +286,7 @@ public extension Preferences {
             "iconType": updatedKey == "iconType" ? updatedValue : Preferences.iconType,
             "defaultSitemap": updatedKey == "defaultSitemap" ? updatedValue : Preferences.defaultSitemap,
             "sendCrashReports": updatedKey == "sendCrashReports" ? updatedValue : Preferences.sendCrashReports,
-            "sortSitemapsby": updatedKey == "sortSitemapsby" ? updatedValue : Preferences.sortSitemapsby,
+            "sortSitemapsBy": updatedKey == "sortSitemapsBy" ? updatedValue : Preferences.sortSitemapsBy,
             "defaultMainUIPath": updatedKey == "defaultMainUIPath" ? updatedValue : Preferences.defaultMainUIPath,
             "alwaysAllowWebRTC": updatedKey == "alwaysAllowWebRTC" ? updatedValue : Preferences.alwaysAllowWebRTC,
             "sitemapForWatch": updatedKey == "sitemapForWatch" ? updatedValue : Preferences.sitemapForWatch,
