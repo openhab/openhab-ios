@@ -57,6 +57,8 @@ struct HomeSelectionView: View {
                         Spacer()
                         Image(systemSymbol: .checkmark)
                             .foregroundColor(.blue)
+                    } else if !showEditOptions {
+                        Spacer() // make more of the cell clickable
                     }
                 }
                 .contentShape(.interaction, Rectangle())
