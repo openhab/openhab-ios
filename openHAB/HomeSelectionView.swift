@@ -26,6 +26,9 @@ struct HomeSelectionView: View {
 
     @State private var showEditOptions = false
 
+    @State private var homeForAlert: UUID
+    @State private var homeNameForAlert: String
+
     @State private var showingRenameHomeAlert = false
 
     @State private var showingDeleteHomeAlert = false
@@ -45,6 +48,7 @@ struct HomeSelectionView: View {
                 HStack {
                     if showEditOptions {
                         Image(systemSymbol: .pencil)
+                            .foregroundStyle(.blue)
                     }
                     Text(homeName)
                     // TODO: selection of name in list changes settings
@@ -61,20 +65,10 @@ struct HomeSelectionView: View {
                         Preferences.switchCurrentlyUsedSettings(to: home)
                         dismiss()
                     } else {
+                        homeNameForAlert = homeName
+                        homeForAlert = home
                         newHomeName = homeName
                         showingRenameHomeAlert.toggle()
-                    }
-                }
-                .alert("Enter new name", isPresented: $showingRenameHomeAlert) {
-                    TextField("New name for home", text: $newHomeName)
-                    HStack {
-                        Button("Abort") {
-                            showingRenameHomeAlert.toggle()
-                        }
-                        Button("OK") {
-                            rename(home: home)
-                            showingRenameHomeAlert.toggle()
-                        }
                     }
                 }
                 if showEditOptions {
@@ -82,26 +76,58 @@ struct HomeSelectionView: View {
                         Spacer()
                         if Preferences.currentlyUsedSettings != home.uuidString {
                             Button(action: {
+                                homeNameForAlert = homeName
+                                homeForAlert = home
                                 showingDeleteHomeAlert.toggle()
                             }, label: {
                                 Image(systemSymbol: .trash)
                             })
-                            .alert("Delete home \(homeName)?", isPresented: $showingDeleteHomeAlert) {
-                                HStack {
-                                    Button("Abort") {
-                                        showingDeleteHomeAlert.toggle()
-                                    }
-                                    Button("OK") {
-                                        delete(home: home)
-                                        showingDeleteHomeAlert.toggle()
-                                    }
-                                }
-                            }
                         } else {
                             Image(systemSymbol: .checkmark)
-                                .foregroundColor(.blue)
+                                .foregroundStyle(.white)
                         }
                     }
+                }
+            }
+            .alert("Enter new name", isPresented: $showingRenameHomeAlert) {
+                TextField("New name for home \(homeNameForAlert)", text: $newHomeName)
+                HStack {
+                    Button("Abort", role: .cancel) {
+                        showingRenameHomeAlert.toggle()
+                    }
+                    Button("OK") {
+                        rename(home: homeForAlert)
+                        showingRenameHomeAlert.toggle()
+                    }
+                }
+            }
+            .alert("Delete home \(homeNameForAlert)?", isPresented: $showingDeleteHomeAlert) {
+                HStack {
+                    Button("Abort", role: .cancel) {
+                        showingDeleteHomeAlert.toggle()
+                    }
+                    Button("Delete", role: .destructive) {
+                        delete(home: homeForAlert)
+                        showingDeleteHomeAlert.toggle()
+                    }
+                }
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    delete(home: home)
+                } label: {
+                    HStack {
+                        Text("Delete")
+                        Image(systemSymbol: .trashFill)
+                    }
+                }
+                .tint(.red)
+            }
+            .swipeActions(edge: .leading) {
+                Button {
+                    homeNameForAlert = homeName
+                    homeForAlert = home
+                    showingRenameHomeAlert.toggle()
                 }
             }
         }
@@ -111,11 +137,6 @@ struct HomeSelectionView: View {
             if showEditOptions {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button(action: {
-                        showEditOptions.toggle()
-                    }, label: {
-                        Image(systemSymbol: .checkmark)
-                    })
-                    Button(action: {
                         newHomeName = ""
                         showingNewHomeAlert.toggle()
                     }, label: {
@@ -124,7 +145,7 @@ struct HomeSelectionView: View {
                     .alert("Enter name for new home", isPresented: $showingNewHomeAlert) {
                         TextField("Name for new home", text: $newHomeName)
                         HStack {
-                            Button("Abort") {
+                            Button("Abort", role: .cancel) {
                                 showingNewHomeAlert.toggle()
                             }
                             Button("OK") {
@@ -133,6 +154,11 @@ struct HomeSelectionView: View {
                             }
                         }
                     }
+                    Button(action: {
+                        showEditOptions.toggle()
+                    }, label: {
+                        Image(systemSymbol: .checkmark)
+                    })
                 }
             } else {
                 ToolbarItemGroup(placement: .primaryAction) {
