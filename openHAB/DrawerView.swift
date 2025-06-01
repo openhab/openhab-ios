@@ -285,7 +285,7 @@ struct DrawerView: View {
                     sitemaps = Array(sitemaps.dropLast())
                 }
 
-                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsBy) ?? .label {
                 case .label: sitemaps.sort { $0.label < $1.label }
                 case .name: sitemaps.sort { $0.name < $1.name }
                 }
