@@ -26,8 +26,8 @@ struct HomeSelectionView: View {
 
     @State private var showEditOptions = false
 
-    @State private var homeForAlert: UUID
-    @State private var homeNameForAlert: String
+    @State private var homeForAlert = UUID() // just a random uuid to init
+    @State private var homeNameForAlert = ""
 
     @State private var showingRenameHomeAlert = false
 
@@ -89,8 +89,8 @@ struct HomeSelectionView: View {
                     }
                 }
             }
-            .alert("Enter new name", isPresented: $showingRenameHomeAlert) {
-                TextField("New name for home \(homeNameForAlert)", text: $newHomeName)
+            .alert("Enter new name for home \(homeNameForAlert)", isPresented: $showingRenameHomeAlert) {
+                TextField("New name", text: $newHomeName)
                 HStack {
                     Button("Abort", role: .cancel) {
                         showingRenameHomeAlert.toggle()
@@ -113,22 +113,28 @@ struct HomeSelectionView: View {
                 }
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                Button(role: .destructive) {
+                Button(role: .destructive, action: {
                     delete(home: home)
-                } label: {
+                }, label: {
                     HStack {
                         Text("Delete")
                         Image(systemSymbol: .trashFill)
                     }
-                }
+                })
                 .tint(.red)
             }
             .swipeActions(edge: .leading) {
-                Button {
+                Button(action: {
                     homeNameForAlert = homeName
                     homeForAlert = home
                     showingRenameHomeAlert.toggle()
-                }
+                }, label: {
+                    HStack {
+                        Image(systemSymbol: .pencil)
+                        Text("Rename")
+                    }
+                })
+                .tint(.blue)
             }
         }
         .onAppear(perform: loadHomesList)
@@ -176,13 +182,19 @@ struct HomeSelectionView: View {
         homes = Preferences.listStoredPreferences()
     }
 
-    private func delete(home toDelete: UUID) {
+    private func delete(home toDelete: UUID?) {
+        guard let toDelete else {
+            return
+        }
         os_log("delete home settings for %@", toDelete.uuidString)
         Preferences.deleteStoredSettings(toDelete)
         loadHomesList()
     }
 
-    private func rename(home toRename: UUID) {
+    private func rename(home toRename: UUID?) {
+        guard let toRename else {
+            return
+        }
         let newName = newHomeName
         os_log("rename home %@ to %@", toRename.uuidString, newName)
         if toRename == Preferences.getCurrentlyUsedSettings() {
