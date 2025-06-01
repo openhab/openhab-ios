@@ -19,10 +19,6 @@ import SwiftUI
 import WebKit
 
 struct HomeSelectionView: View {
-    @State private var showingCacheAlert = false
-    @State private var showCrashReportingAlert = false
-    @State private var showUselastPathAlert = false
-
     @State private var homes: [UUID] = []
 
     @State private var showingNewHomeAlert = false
@@ -31,6 +27,8 @@ struct HomeSelectionView: View {
     @State private var showEditOptions = false
 
     @State private var showingRenameHomeAlert = false
+
+    @State private var showingDeleteHomeAlert = false
 
     @Environment(\.dismiss) private var dismiss
 
@@ -42,52 +40,72 @@ struct HomeSelectionView: View {
 
     var body: some View {
         List(homes, id: \.self) { home in
+            let homeName = Preferences.storedPreferences[home.uuidString]?["homeName"] as? String ?? ""
             HStack {
                 HStack {
-                    Text(Preferences.storedPreferences[home.uuidString]?["homeName"] as? String ?? "")
+                    if showEditOptions {
+                        Image(systemSymbol: .pencil)
+                    }
+                    Text(homeName)
                     // TODO: selection of name in list changes settings
                     // TODO: options like remove, rename (or should we rename in settings?)
-                    Spacer()
-                    if Preferences.currentlyUsedSettings == home.uuidString {
+                    if Preferences.currentlyUsedSettings == home.uuidString, !showEditOptions {
+                        Spacer()
                         Image(systemSymbol: .checkmark)
                             .foregroundColor(.blue)
                     }
                 }
-                .contentShape(.interaction, Rectangle()) // Ensures entire row is tappable
+                .contentShape(.interaction, Rectangle())
                 .onTapGesture {
                     if !showEditOptions {
                         Preferences.switchCurrentlyUsedSettings(to: home)
                         dismiss()
+                    } else {
+                        newHomeName = homeName
+                        showingRenameHomeAlert.toggle()
                     }
                 }
-                HStack {
-                    if showEditOptions {
+                .alert("Enter new name", isPresented: $showingRenameHomeAlert) {
+                    TextField("New name for home", text: $newHomeName)
+                    HStack {
+                        Button("Abort") {
+                            showingRenameHomeAlert.toggle()
+                        }
+                        Button("OK") {
+                            rename(home: home)
+                            showingRenameHomeAlert.toggle()
+                        }
+                    }
+                }
+                if showEditOptions {
+                    HStack {
+                        Spacer()
                         if Preferences.currentlyUsedSettings != home.uuidString {
                             Button(action: {
-                                delete(home: home)
+                                showingDeleteHomeAlert.toggle()
                             }, label: {
                                 Image(systemSymbol: .trash)
                             })
-                        }
-                        Button(action: {
-                            showingRenameHomeAlert.toggle()
-                        }, label: {
-                            Image(systemSymbol: .pencil)
-                        })
-                        .alert("Enter new name", isPresented: $showingRenameHomeAlert) {
-                            TextField("Name for new home", text: $newHomeName)
-                            Button("OK") {
-                                rename(home: home)
-                                showingRenameHomeAlert.toggle()
+                            .alert("Delete home \(homeName)?", isPresented: $showingDeleteHomeAlert) {
+                                HStack {
+                                    Button("Abort") {
+                                        showingDeleteHomeAlert.toggle()
+                                    }
+                                    Button("OK") {
+                                        delete(home: home)
+                                        showingDeleteHomeAlert.toggle()
+                                    }
+                                }
                             }
+                        } else {
+                            Image(systemSymbol: .checkmark)
+                                .foregroundColor(.blue)
                         }
                     }
                 }
             }
         }
-        .onAppear {
-            homes = Preferences.listStoredPreferences()
-        }
+        .onAppear(perform: loadHomesList)
         .navigationBarTitle("homeSelection")
         .toolbar {
             if showEditOptions {
@@ -98,13 +116,22 @@ struct HomeSelectionView: View {
                         Image(systemSymbol: .checkmark)
                     })
                     Button(action: {
+                        newHomeName = ""
                         showingNewHomeAlert.toggle()
                     }, label: {
                         Image(systemSymbol: .plus)
                     })
                     .alert("Enter name for new home", isPresented: $showingNewHomeAlert) {
                         TextField("Name for new home", text: $newHomeName)
-                        Button("OK", action: addHome)
+                        HStack {
+                            Button("Abort") {
+                                showingNewHomeAlert.toggle()
+                            }
+                            Button("OK") {
+                                addHome()
+                                showingNewHomeAlert.toggle()
+                            }
+                        }
                     }
                 }
             } else {
@@ -119,20 +146,30 @@ struct HomeSelectionView: View {
         }
     }
 
+    private func loadHomesList() {
+        homes = Preferences.listStoredPreferences()
+    }
+
     private func delete(home toDelete: UUID) {
         os_log("delete home settings for %@", toDelete.uuidString)
-        // TODO: preferences remove stored home settings, reload view
+        Preferences.deleteStoredSettings(toDelete)
+        loadHomesList()
     }
 
     private func rename(home toRename: UUID) {
-        // TODO: rename home in settings, reload view
         let newName = newHomeName
         os_log("rename home %@ to %@", toRename.uuidString, newName)
+        if toRename == Preferences.getCurrentlyUsedSettings() {
+            Preferences.homeName = newName
+        } else {
+            Preferences.renameHome(toRename, newHomeName: newName)
+        }
+        loadHomesList()
     }
 
     private func addHome() {
         Preferences.createAndLoadNewStoredSettings(homeName: newHomeName)
-        dismiss()
+        loadHomesList()
     }
 }
 
