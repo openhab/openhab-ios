@@ -58,8 +58,6 @@ public struct UserDefault<T: Sendable> {
         set {
             os_log("Preference %{PUBLIC}@ will be changed to value %{PUBLIC}@", log: .default, type: .debug, key, "\(newValue)")
             Preferences.sharedDefaults.set(newValue, forKey: key)
-                Preferences.change(storedPreference: key, to: newValue)
-            }
             if store {
                 Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: newValue)
             }
@@ -194,7 +192,7 @@ public enum Preferences {
     @UserDefault("homeName", defaultValue: "Home") public static var homeName: String
 
     /// settings for different homes TODO come up with better name
-    @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: [String: Any]]
+    @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: [String: any Sendable]]
 
     // MARK: - Private
 
@@ -293,7 +291,7 @@ public extension Preferences {
         storeCurrentPreferences()
     }
 
-    static func storeCurrentPreferences(updatedKey: String = "", updatedValue: Any = "") {
+    static func storeCurrentPreferences(updatedKey: String = "", updatedValue: any Sendable = "") {
         guard !loadingStoredPreferences else {
             // concurrent access for writing and reading is prohibited
             return

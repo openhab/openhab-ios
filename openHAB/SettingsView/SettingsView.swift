@@ -104,7 +104,7 @@ struct SettingsView: View {
             }
 
             // Sort the sitemaps according to Settings selection.
-            switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+            switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsBy) ?? .label {
             case .label: sitemaps.sort { $0.label < $1.label }
             case .name: sitemaps.sort { $0.name < $1.name }
             }
@@ -129,7 +129,7 @@ struct SettingsView: View {
         settingsRealTimeSliders = Preferences.realTimeSliders
         settingsSendCrashReports = Preferences.sendCrashReports
         settingsIconType = IconType(rawValue: Preferences.iconType) ?? .png
-        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsBy) ?? .label
         settingsDefaultMainUIPath = Preferences.defaultMainUIPath
         settingsAlwaysAllowWebRTC = Preferences.alwaysAllowWebRTC
         settingsSitemapForWatch = Preferences.sitemapForWatch
@@ -149,7 +149,7 @@ struct SettingsView: View {
         Preferences.realTimeSliders = settingsRealTimeSliders
         Preferences.iconType = settingsIconType.rawValue
         Preferences.sendCrashReports = settingsSendCrashReports
-        Preferences.sortSitemapsby = settingsSortSitemapsBy.rawValue
+        Preferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
         Preferences.defaultMainUIPath = settingsDefaultMainUIPath
         Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
         Preferences.sitemapForWatch = settingsSitemapForWatch
