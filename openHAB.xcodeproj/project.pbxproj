@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1224F78F228A89FD00750965 /* WatchMessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1224F78D228A89FC00750965 /* WatchMessageService.swift */; };
+		2F55E7BB2DEE447700EC8350 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F55E7BA2DEE447700EC8350 /* SettingsView.swift */; };
+		2F55E7BD2DEE44A800EC8350 /* ClientCertificatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F55E7BC2DEE44A800EC8350 /* ClientCertificatesView.swift */; };
 		2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F6412ED2CE494A80039FB28 /* DatePickerUITableViewCell.swift */; };
 		2FBCF58C2DEB0B7700CD5D83 /* HomeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */; };
 		2FEFD8F62BE7C5BE00E387B9 /* TextInputUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEFD8F52BE7C5BE00E387B9 /* TextInputUITableViewCell.swift */; };
@@ -78,7 +80,6 @@
 		DA162BEC2CD3B53E0040DAE5 /* LogsViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA162BEB2CD3B53E0040DAE5 /* LogsViewer.swift */; };
 		DA19E25B22FD801D002F8F2F /* OpenHABGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA19E25A22FD801D002F8F2F /* OpenHABGeneralTests.swift */; };
 		DA21EAE22339621C001AB415 /* Throttler.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA21EAE12339621C001AB415 /* Throttler.swift */; };
-		DA242C622C83588600AFB10D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA242C612C83588600AFB10D /* SettingsView.swift */; };
 		DA28C362225241DE00AB409C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA28C361225241DE00AB409C /* WebKit.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */; };
 		DA2AEB702D92CF3E00897D80 /* UITableViewCellExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2AEB6F2D92CF3E00897D80 /* UITableViewCellExtension.swift */; };
@@ -100,7 +101,6 @@
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
 		DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */; };
-		DA5ED9C02C8509C2004875E0 /* ClientCertificatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */; };
 		DA65871F236F83CE007E2E7F /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */; };
 		DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */; };
 		DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */; };
@@ -276,6 +276,8 @@
 
 /* Begin PBXFileReference section */
 		1224F78D228A89FC00750965 /* WatchMessageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchMessageService.swift; sourceTree = "<group>"; };
+		2F55E7BA2DEE447700EC8350 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2F55E7BC2DEE44A800EC8350 /* ClientCertificatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesView.swift; sourceTree = "<group>"; };
 		2F6412ED2CE494A80039FB28 /* DatePickerUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerUITableViewCell.swift; sourceTree = "<group>"; };
 		2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSelectionView.swift; sourceTree = "<group>"; };
 		2FEFD8F52BE7C5BE00E387B9 /* TextInputUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputUITableViewCell.swift; sourceTree = "<group>"; };
@@ -391,7 +393,6 @@
 		DA1C2E6D230DC28F00FACFB0 /* primary_category.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
 		DA1C2E6E230DC28F00FACFB0 /* Snapfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Snapfile; sourceTree = "<group>"; };
 		DA21EAE12339621C001AB415 /* Throttler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Throttler.swift; sourceTree = "<group>"; };
-		DA242C612C83588600AFB10D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DA28C361225241DE00AB409C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageLoader.swift; sourceTree = "<group>"; };
 		DA2AEB6F2D92CF3E00897D80 /* UITableViewCellExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableViewCellExtension.swift; sourceTree = "<group>"; };
@@ -415,7 +416,6 @@
 		DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportRow.swift; sourceTree = "<group>"; };
 		DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchSupportUITableViewCell.swift; sourceTree = "<group>"; };
 		DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesViewModel.swift; sourceTree = "<group>"; };
-		DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientCertificatesView.swift; sourceTree = "<group>"; };
 		DA65871E236F83CD007E2E7F /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerView.swift; sourceTree = "<group>"; };
 		DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
@@ -793,14 +793,14 @@
 			children = (
 				DA4800172D837221009CF127 /* AboutSettingsView.swift */,
 				DA48001D2D837905009CF127 /* ApplicationSettingsView.swift */,
-				DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */,
+				2F55E7BC2DEE44A800EC8350 /* ClientCertificatesView.swift */,
 				DA4800132D836892009CF127 /* ConnectionSettingsView.swift */,
 				DA77E19A2D886D9B007CFF0F /* SingleConnectionSettingsView.swift */,
 				DA4800202D839D39009CF127 /* AnimatedSecureTextField.swift */,
 				DA4800192D83742A009CF127 /* DebugSettingsView.swift */,
 				DA4800152D836EF0009CF127 /* MainUISettingsView.swift */,
-				DA242C612C83588600AFB10D /* SettingsView.swift */,
 				DA48001B2D837556009CF127 /* SitemapSettingsView.swift */,
+				2F55E7BA2DEE447700EC8350 /* SettingsView.swift */,
 			);
 			path = SettingsView;
 			sourceTree = "<group>";
@@ -917,23 +917,18 @@
 			isa = PBXGroup;
 			children = (
 				DA2AEB752D92D32000897D80 /* Cells */,
-				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
 				DA4642312D7EE6CA006C3908 /* LoggerView.swift */,
-				DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
 				653B54BF285C0AC700298ECD /* OpenHABRootViewController.swift */,
 				65570A7C2476D16A00D524EA /* OpenHABWebViewController.swift */,
 				DFB2624318830A3600D3244D /* OpenHABSitemapViewController.swift */,
 				DA2AEB6D2D92BAD800897D80 /* PageLoader.swift */,
-				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
 				DAC65FC6236EDF3900F4501E /* SpinnerViewController.swift */,
 				DA6B2EF62C8B92E800DF77CF /* SelectionView.swift */,
 				DA2AEB6F2D92CF3E00897D80 /* UITableViewCellExtension.swift */,
 				DA48001F2D837CD8009CF127 /* SettingsView */,
 				1224F78B228A89E300750965 /* Watch */,
 				2FBCF58B2DEB0B7700CD5D83 /* HomeSelectionView.swift */,
-				DA242C612C83588600AFB10D /* SettingsView.swift */,
-				DA5ED9BF2C8509C2004875E0 /* ClientCertificatesView.swift */,
 				DA9F81862C85020F00B47B72 /* RTFTextView.swift */,
 				DA6B2EF02C87B59000DF77CF /* NotificationsView.swift */,
 				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
@@ -1586,7 +1581,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA242C622C83588600AFB10D /* SettingsView.swift in Sources */,
 				DA7E1E4B2233986E002AEFD8 /* PlayerView.swift in Sources */,
 				65570A7D2476D16A00D524EA /* OpenHABWebViewController.swift in Sources */,
 				DA48001E2D837905009CF127 /* ApplicationSettingsView.swift in Sources */,
@@ -1606,6 +1600,7 @@
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,
 				DAA42BAA21DC983B00244B2A /* VideoUITableViewCell.swift in Sources */,
 				DFB2623B18830A3600D3244D /* AppDelegate.swift in Sources */,
+				2F55E7BD2DEE44A800EC8350 /* ClientCertificatesView.swift in Sources */,
 				DA6B2EF72C8B92E800DF77CF /* SelectionView.swift in Sources */,
 				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
 				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
@@ -1627,6 +1622,7 @@
 				DA2AEB702D92CF3E00897D80 /* UITableViewCellExtension.swift in Sources */,
 				DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
+				2F55E7BB2DEE447700EC8350 /* SettingsView.swift in Sources */,
 				DFB2624418830A3600D3244D /* OpenHABSitemapViewController.swift in Sources */,
 				DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */,
 				653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */,
@@ -1640,7 +1636,6 @@
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
 				938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */,
-				DA5ED9C02C8509C2004875E0 /* ClientCertificatesView.swift in Sources */,
 				653B54C0285C0AC700298ECD /* OpenHABRootViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

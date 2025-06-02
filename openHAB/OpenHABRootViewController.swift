@@ -667,9 +667,9 @@ extension OpenHABRootViewController: ModalHandler {
                 break
             case let .tile(urlString):
                 openTileURL(urlString)
-        	case .homeSelection:
-            	let hostingController = UIHostingController(rootView: HomeSelectionView())
-            	navigationController?.pushViewController(hostingController, animated: true)
+            case .homeSelection:
+                let hostingController = UIHostingController(rootView: HomeSelectionView())
+                navigationController?.pushViewController(hostingController, animated: true)
             }
         }
     }
