@@ -35,10 +35,6 @@ struct HomeSelectionView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    var appData: OpenHABDataObject? {
-        AppDelegate.appDelegate.appData
-    }
-
     private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
 
     var body: some View {
