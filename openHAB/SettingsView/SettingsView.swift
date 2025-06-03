@@ -35,6 +35,8 @@ struct SettingsView: View {
     @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
 
+    @State var viewAppearedOnce: Bool = false
+
     @Environment(\.dismiss) private var dismiss
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SettingsView")
@@ -88,9 +90,12 @@ struct SettingsView: View {
             }
         }
         .task {
-            loadSettings()
-            let activeConfiguration = settingsLocalConnectionConfiguration
-            await updateSitemaps(activeConfiguration: activeConfiguration)
+            if !viewAppearedOnce {
+                viewAppearedOnce = true
+                loadSettings()
+                let activeConfiguration = settingsLocalConnectionConfiguration
+                await updateSitemaps(activeConfiguration: activeConfiguration)
+            }
         }
     }
 
