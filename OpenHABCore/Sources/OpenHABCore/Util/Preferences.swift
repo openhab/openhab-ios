@@ -84,6 +84,7 @@ public struct UserDefault<T: Sendable> {
 public struct UserDefaultObject<T: Codable & Sendable> {
     private let key: String
     private let defaultValue: T
+    private let store: Bool
     private let subject: CurrentValueSubject<T, Never>
 
     public var wrappedValue: T {
@@ -97,6 +98,9 @@ public struct UserDefaultObject<T: Codable & Sendable> {
         set {
             if let encoded = try? JSONEncoder().encode(newValue) {
                 Preferences.sharedDefaults.set(encoded, forKey: key)
+                if store {
+                    Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: encoded)
+                }
                 // Relevant for Combine publication
                 DispatchQueue.main.async { [subject] in
                     subject.send(newValue)
@@ -109,9 +113,10 @@ public struct UserDefaultObject<T: Codable & Sendable> {
         subject.eraseToAnyPublisher()
     }
 
-    init(_ key: String, defaultValue: T) {
+    init(_ key: String, defaultValue: T, store: Bool = true) {
         self.key = key
         self.defaultValue = defaultValue
+        self.store = store
 
         // Combine publication
         if let data = Preferences.sharedDefaults.data(forKey: key),
@@ -127,6 +132,7 @@ public struct UserDefaultObject<T: Codable & Sendable> {
 public struct UserDefaultURL {
     private let key: String
     private let defaultValue: String
+    private let store: Bool
     private let subject: CurrentValueSubject<String, Never>
 
     public var wrappedValue: String {
@@ -137,7 +143,9 @@ public struct UserDefaultURL {
         }
         set {
             Preferences.sharedDefaults.set(newValue, forKey: key)
-            Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: newValue)
+            if store {
+                Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: newValue)
+            }
             let defaultValue = defaultValue
             // Trim and validate the new URL
             let trimmedUri = newValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -155,9 +163,10 @@ public struct UserDefaultURL {
         subject.eraseToAnyPublisher()
     }
 
-    public init(_ key: String, defaultValue: String) {
+    public init(_ key: String, defaultValue: String, store: Bool = true) {
         self.key = key
         self.defaultValue = defaultValue
+        self.store = store
         let currentValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
         subject = CurrentValueSubject<String, Never>(currentValue)
     }
@@ -167,21 +176,22 @@ public struct UserDefaultURL {
 public enum Preferences {
     static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
-    // MARK: - Public
+    // MARK: - Public Deprecated
+
+    @UserDefaultURL("localUrl", defaultValue: "", store: false) public static var localUrl: String
+    @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org", store: false) public static var remoteUrl: String
+    @UserDefault("username", defaultValue: "test", store: false) public static var username: String
+    @UserDefault("password", defaultValue: "test", store: false) public static var password: String
+    @UserDefault("alwaysSendCreds", defaultValue: false, store: false) public static var alwaysSendCreds: Bool
+    @UserDefault("ignoreSSL", defaultValue: false, store: false) public static var ignoreSSL: Bool
+
+    // MARK: - Public Home related
 
     @UserDefaultURL("defaultView", defaultValue: "web") public static var defaultView: String
-    @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
-    @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org") public static var remoteUrl: String
-    @UserDefault("username", defaultValue: "test") public static var username: String
-    @UserDefault("password", defaultValue: "test") public static var password: String
-    @UserDefault("alwaysSendCreds", defaultValue: false) public static var alwaysSendCreds: Bool
-    @UserDefault("ignoreSSL", defaultValue: false) public static var ignoreSSL: Bool
     @UserDefault("demomode", defaultValue: true) public static var demomode: Bool
-    @UserDefault("idleOff", defaultValue: false) public static var idleOff: Bool
     @UserDefault("realTimeSliders", defaultValue: false) public static var realTimeSliders: Bool
     @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
     @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
-    @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
     @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsBy: Int
     @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
     @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
@@ -191,6 +201,11 @@ public enum Preferences {
     @UserDefault("sitemapForWatchLabel", defaultValue: "watch") public static var sitemapForWatchLabel: String
     @UserDefault("homeName", defaultValue: "Home") public static var homeName: String
 
+    // MARK: - Public App related
+
+    @UserDefault("sendCrashReports", defaultValue: false, store: false) public static var sendCrashReports: Bool
+    @UserDefault("idleOff", defaultValue: false, store: false) public static var idleOff: Bool
+
     /// settings for different homes TODO come up with better name
     @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: [String: any Sendable]]
 
@@ -199,16 +214,15 @@ public enum Preferences {
     /// the currently applied settings set from storedPreferences
     @UserDefault("currentlyUsedSettings", defaultValue: UUID().uuidString, store: false) public private(set) static var currentlyUsedSettings: String
 
-    @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
-    @UserDefault("didMigrateToConnectionConfig", defaultValue: false) private static var didMigrateToConnectionConfig: Bool
-    @UserDefault("currentWebViewPath", defaultValue: "") public static var currentWebViewPath: String
+    @UserDefault("didMigrateToSharedDefaults", defaultValue: false, store: false) private static var didMigrateToSharedDefaults: Bool
+    @UserDefault("didMigrateToConnectionConfig", defaultValue: false, store: false) private static var didMigrateToConnectionConfig: Bool
+    @UserDefault("currentWebViewPath", defaultValue: "", store: false) public static var currentWebViewPath: String
 
     private static var loadingStoredPreferences = false
 }
 
 public extension Preferences {
     static func listStoredPreferences() -> [UUID] {
-        initializeStoredPreferences()
         let preferenceIds = storedPreferences
             .sorted { e1, e2 in
                 (e1.value["homeName"] as? String ?? "") <= (e2.value["homeName"] as? String ?? "")
@@ -218,14 +232,13 @@ public extension Preferences {
     }
 
     static func getCurrentlyUsedSettings() -> UUID {
-        initializeStoredPreferences()
         guard let currentPreferenceUUID = UUID(uuidString: currentlyUsedSettings) else {
             fatalError("currentlyUsedSettings must be a UUID, but was \(currentlyUsedSettings)")
         }
         return currentPreferenceUUID
     }
 
-    private static func initializeStoredPreferences() {
+    static func initializeStoredPreferences() {
         if storedPreferences.isEmpty {
             // first there might be no stored preferences, if no preference was changed since the update
             storeCurrentPreferences()
@@ -270,22 +283,17 @@ public extension Preferences {
         loadingStoredPreferences = true
         // TODO: not pretty to repeat everything here
         Preferences.defaultView = stored["defaultView"] as? String ?? "web"
-        Preferences.localUrl = stored["localUrl"] as? String ?? ""
-        Preferences.remoteUrl = stored["remoteUrl"] as? String ?? "https://myopenhab.org"
-        Preferences.username = stored["username"] as? String ?? "test"
-        Preferences.password = stored["password"] as? String ?? "test"
-        Preferences.alwaysSendCreds = stored["alwaysSendCreds"] as? Bool ?? false
-        Preferences.ignoreSSL = stored["ignoreSSL"] as? Bool ?? false
         Preferences.demomode = stored["demomode"] as? Bool ?? true
-        Preferences.idleOff = stored["idleOff"] as? Bool ?? false
         Preferences.realTimeSliders = stored["realTimeSliders"] as? Bool ?? false
         Preferences.iconType = stored["iconType"] as? Int ?? 0
         Preferences.defaultSitemap = stored["defaultSitemap"] as? String ?? "demo"
-        Preferences.sendCrashReports = stored["sendCrashReports"] as? Bool ?? false
         Preferences.sortSitemapsBy = stored["sortSitemapsBy"] as? Int ?? 0
         Preferences.defaultMainUIPath = stored["defaultMainUIPath"] as? String ?? ""
         Preferences.alwaysAllowWebRTC = stored["alwaysAllowWebRTC"] as? Bool ?? false
         Preferences.sitemapForWatch = stored["sitemapForWatch"] as? String ?? "watch"
+        Preferences.localConnectionConfig = stored["localConnectionConfig"] as? ConnectionConfiguration ?? ConnectionConfiguration.localDefault
+        Preferences.remoteConnectionConfig = stored["remoteConnectionConfig"] as? ConnectionConfiguration ?? ConnectionConfiguration.remoteDefault
+        Preferences.sitemapForWatchLabel = stored["sitemapForWatchLabel"] as? String ?? "watch"
         Preferences.homeName = stored["homeName"] as? String ?? "Home"
         loadingStoredPreferences = false
         storeCurrentPreferences()
@@ -300,22 +308,17 @@ public extension Preferences {
         var stored = storedPreferences
         stored[currentlyUsedSettings] = [
             "defaultView": updatedKey == "defaultView" ? updatedValue : Preferences.defaultView,
-            "localUrl": updatedKey == "localUrl" ? updatedValue : Preferences.localUrl,
-            "remoteUrl": updatedKey == "remoteUrl" ? updatedValue : Preferences.remoteUrl,
-            "username": updatedKey == "username" ? updatedValue : Preferences.username,
-            "password": updatedKey == "password" ? updatedValue : Preferences.password,
-            "alwaysSendCreds": updatedKey == "alwaysSendCreds" ? updatedValue : Preferences.alwaysSendCreds,
-            "ignoreSSL": updatedKey == "ignoreSSL" ? updatedValue : Preferences.ignoreSSL,
             "demomode": updatedKey == "demomode" ? updatedValue : Preferences.demomode,
-            "idleOff": updatedKey == "idleOff" ? updatedValue : Preferences.idleOff,
             "realTimeSliders": updatedKey == "realTimeSliders" ? updatedValue : Preferences.realTimeSliders,
             "iconType": updatedKey == "iconType" ? updatedValue : Preferences.iconType,
             "defaultSitemap": updatedKey == "defaultSitemap" ? updatedValue : Preferences.defaultSitemap,
-            "sendCrashReports": updatedKey == "sendCrashReports" ? updatedValue : Preferences.sendCrashReports,
             "sortSitemapsBy": updatedKey == "sortSitemapsBy" ? updatedValue : Preferences.sortSitemapsBy,
             "defaultMainUIPath": updatedKey == "defaultMainUIPath" ? updatedValue : Preferences.defaultMainUIPath,
             "alwaysAllowWebRTC": updatedKey == "alwaysAllowWebRTC" ? updatedValue : Preferences.alwaysAllowWebRTC,
             "sitemapForWatch": updatedKey == "sitemapForWatch" ? updatedValue : Preferences.sitemapForWatch,
+            "localConnectionConfig": updatedKey == "localConnectionConfig" ? updatedValue : Preferences.localConnectionConfig,
+            "remoteConnectionConfig": updatedKey == "remoteConnectionConfig" ? updatedValue : Preferences.remoteConnectionConfig,
+            "sitemapForWatchLabel": updatedKey == "sitemapForWatchLabel" ? updatedValue : Preferences.sitemapForWatchLabel,
             "homeName": updatedKey == "homeName" ? updatedValue : Preferences.homeName
         ]
         storedPreferences = stored
