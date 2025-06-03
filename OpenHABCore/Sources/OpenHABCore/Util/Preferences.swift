@@ -316,8 +316,8 @@ public extension Preferences {
             "defaultMainUIPath": updatedKey == "defaultMainUIPath" ? updatedValue : Preferences.defaultMainUIPath,
             "alwaysAllowWebRTC": updatedKey == "alwaysAllowWebRTC" ? updatedValue : Preferences.alwaysAllowWebRTC,
             "sitemapForWatch": updatedKey == "sitemapForWatch" ? updatedValue : Preferences.sitemapForWatch,
-            "localConnectionConfig": updatedKey == "localConnectionConfig" ? updatedValue : Preferences.localConnectionConfig,
-            "remoteConnectionConfig": updatedKey == "remoteConnectionConfig" ? updatedValue : Preferences.remoteConnectionConfig,
+            "localConnectionConfig": updatedKey == "localConnectionConfig" ? updatedValue : try? JSONEncoder().encode(Preferences.localConnectionConfig),
+            "remoteConnectionConfig": updatedKey == "remoteConnectionConfig" ? updatedValue : try? JSONEncoder().encode(Preferences.remoteConnectionConfig),
             "sitemapForWatchLabel": updatedKey == "sitemapForWatchLabel" ? updatedValue : Preferences.sitemapForWatchLabel,
             "homeName": updatedKey == "homeName" ? updatedValue : Preferences.homeName
         ]
