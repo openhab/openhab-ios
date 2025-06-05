@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 
 struct RollershutterRow: View {
