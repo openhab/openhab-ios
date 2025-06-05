@@ -63,7 +63,7 @@ struct SegmentRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[4]
-    Group {
+    return Group {
         SegmentRow(widget: widget)
         SegmentRow(widget: widget)
     }

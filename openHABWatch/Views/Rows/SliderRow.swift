@@ -61,7 +61,7 @@ struct SliderRow: View {
 
 #Preview {
     let widget = UserData(preview: true).widgets[3]
-    Group {
+    return Group {
         SliderRow(widget: widget)
         SliderRow(widget: widget)
     }

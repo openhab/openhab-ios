@@ -121,15 +121,14 @@ struct ContentView: View {
 }
 
 #Preview {
-    Group {
-        ContentView(viewModel: UserData())
+    let userData = UserData()
+    let appSettings = AppSettings()
 
-            .environmentObject({ () -> UserData in
-                let envObj = UserData()
-                return envObj
-            }())
+    return Group {
+        ContentView(viewModel: userData)
+            .environmentObject(userData)
 
-        ContentView(viewModel: UserData())
+        ContentView(viewModel: userData)
     }
-    .environmentObject(AppSettings())
+    .environmentObject(appSettings)
 }
