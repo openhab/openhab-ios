@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import openHAB
+import OpenHABCore
 import XCTest
 
 class OpenHABGeneralTests: XCTestCase {
