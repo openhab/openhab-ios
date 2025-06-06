@@ -211,14 +211,13 @@ public extension OpenAPIService {
         return URL(string: urlString)?.lastPathComponent
     }
 
-    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> some AsyncSequence {
+    // Will need swift 6.0 SE-0421 to return an opaque sequence
+    func openHABSitemapWidgetEvents(subscriptionid: String, sitemap: String) async throws -> AsyncCompactMapSequence<AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<Components.Schemas.SitemapWidgetEvent>>, OpenHABSitemapWidgetEvent> {
         let path = Operations.getSitemapEvents_1.Input.Path(subscriptionid: subscriptionid)
         let query = Operations.getSitemapEvents_1.Input.Query(sitemap: sitemap, pageid: sitemap)
-
         let decodedSequence = try await client.getSitemapEvents_1(path: path, query: query)
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
-
         return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
     }
 }

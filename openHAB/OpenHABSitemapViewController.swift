@@ -15,6 +15,7 @@ import Combine
 import Foundation
 import Kingfisher
 import OpenAPIRuntime
+import OpenAPIURLSession
 import OpenHABCore
 import os.log
 import SafariServices
