@@ -47,8 +47,6 @@ struct HomeSelectionView: View {
                             .foregroundStyle(.blue)
                     }
                     Text(homeName)
-                    // TODO: selection of name in list changes settings
-                    // TODO: options like remove, rename (or should we rename in settings?)
                     if Preferences.currentlyUsedSettings == home.uuidString, !showEditOptions {
                         Spacer()
                         Image(systemSymbol: .checkmark)
@@ -59,13 +57,12 @@ struct HomeSelectionView: View {
                 }
                 .contentShape(.interaction, Rectangle())
                 .onTapGesture {
+                    homeNameForAlert = homeName
+                    homeForAlert = home
+                    newHomeName = homeName
                     if !showEditOptions {
-                        Preferences.switchCurrentlyUsedSettings(to: home)
-                        dismiss()
+                        select(home: home)
                     } else {
-                        homeNameForAlert = homeName
-                        homeForAlert = home
-                        newHomeName = homeName
                         showingRenameHomeAlert.toggle()
                     }
                 }
@@ -176,6 +173,10 @@ struct HomeSelectionView: View {
         }
     }
 
+    private func select(home: UUID) {
+        Preferences.switchCurrentlyUsedSettings(to: home)
+    }
+
     private func loadHomesList() {
         homes = Preferences.listStoredPreferences()
     }
@@ -200,7 +201,6 @@ struct HomeSelectionView: View {
         } else {
             Preferences.renameHome(toRename, newHomeName: newName)
         }
-        loadHomesList()
     }
 
     private func addHome() {
