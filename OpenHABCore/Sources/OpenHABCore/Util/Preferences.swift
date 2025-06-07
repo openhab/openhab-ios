@@ -291,8 +291,8 @@ public extension Preferences {
         Preferences.defaultMainUIPath = stored["defaultMainUIPath"] as? String ?? ""
         Preferences.alwaysAllowWebRTC = stored["alwaysAllowWebRTC"] as? Bool ?? false
         Preferences.sitemapForWatch = stored["sitemapForWatch"] as? String ?? "watch"
-        Preferences.localConnectionConfig = stored["localConnectionConfig"] as? ConnectionConfiguration ?? ConnectionConfiguration.localDefault
-        Preferences.remoteConnectionConfig = stored["remoteConnectionConfig"] as? ConnectionConfiguration ?? ConnectionConfiguration.remoteDefault
+        Preferences.localConnectionConfig = (try? JSONDecoder().decode(ConnectionConfiguration.self, from: stored["localConnectionConfig"] as? Data ?? Data())) ?? ConnectionConfiguration.localDefault
+        Preferences.remoteConnectionConfig = (try? JSONDecoder().decode(ConnectionConfiguration.self, from: stored["remoteConnectionConfig"] as? Data ?? Data())) ?? ConnectionConfiguration.remoteDefault
         Preferences.sitemapForWatchLabel = stored["sitemapForWatchLabel"] as? String ?? "watch"
         Preferences.homeName = stored["homeName"] as? String ?? "Home"
         loadingStoredPreferences = false
