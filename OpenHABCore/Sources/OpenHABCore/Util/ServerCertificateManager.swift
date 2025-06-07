@@ -35,7 +35,7 @@ public class ServerCertificateManager { // ServerTrustManager, ServerTrustEvalua
         case permitAlways
     }
 
-    weak var delegate: (any ServerCertificateManagerDelegate)?
+    public weak var delegate: (any ServerCertificateManagerDelegate)?
     // ignoreSSL is a synonym for allowInvalidCertificates, ignoreCertificates
     public var ignoreSSL = false
     public var trustedCertificates: [String: Data] = [:]
