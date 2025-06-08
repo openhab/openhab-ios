@@ -27,6 +27,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private var refreshTimer: Timer?
     private var chartStyle: ChartStyle = .light
     private var activeTask: Task<Void, Never>?
+    private var cachedImage: UIImage?
 
     var openHABRootUrl: String?
 
@@ -100,10 +101,10 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     override func displayWidget() {
-        if widget?.image == nil {
+        if cachedImage == nil {
             loadImage()
         } else {
-            mainImageView.image = widget?.image
+            mainImageView.image = cachedImage
         }
         // If widget have a refresh rate configured, i.e. different from zero, schedule an image update timer
         if widget.refresh != 0 {
@@ -126,7 +127,7 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     func loadImage() {
         switch widgetPayload {
         case let .embedded(image):
-            widget?.image = image
+            cachedImage = image
             mainImageView.image = image
             didLoad?()
         case let .link(url):
@@ -169,8 +170,8 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 let client = HTTPClient(configuration: config)
                 let (data, _): (Data, URLResponse) = try await client.doRequest(baseURL: url, timeout: 10.0, type: .data, cacheingPolicy: !shouldCache ? .reloadIgnoringCacheData : .useProtocolCachePolicy)
                 await MainActor.run {
-                    self.mainImageView?.image = UIImage(data: data)
-                    self.widget?.image = UIImage(data: data)
+                    self.cachedImage = UIImage(data: data)
+                    self.mainImageView?.image = self.cachedImage
                     self.didLoad?()
                 }
             } catch {
@@ -198,5 +199,6 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 extension NewImageUITableViewCell: GenericCellCacheProtocol {
     func invalidateCache() {
         refreshTimer?.invalidate()
+        cachedImage = nil
     }
 }
