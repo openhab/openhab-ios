@@ -16,11 +16,11 @@ import Security
 @MainActor
 public protocol ClientCertificateManagerDelegate: AnyObject {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForClientCertificateImport() async -> Bool
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForCertificatePassword() async -> String?
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String?
     // delegate should alert the user that an error occured importing the certificate
-    func alertClientCertificateError(errMsg: String) async
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async
 }
 
 public class ClientCertificateManager {
@@ -29,7 +29,7 @@ public class ClientCertificateManager {
     private var importingCertChain: [SecCertificate]?
     public var importingPassword: String?
 
-    weak var delegate: (any ClientCertificateManagerDelegate)?
+    public weak var delegate: (any ClientCertificateManagerDelegate)?
 
     public var clientIdentities: [SecIdentity] = []
 
@@ -159,7 +159,7 @@ public class ClientCertificateManager {
 
             guard let delegate else { return false }
 
-            let shouldImport = await delegate.askForClientCertificateImport()
+            let shouldImport = await delegate.askForClientCertificateImport(self)
             return shouldImport
         } catch {
             logger.error("Failed to read certificate from URL: \(error.localizedDescription)")
@@ -168,7 +168,7 @@ public class ClientCertificateManager {
     }
 
     @MainActor
-    public func clientCertificateAccepted(password: String) async {
+    public func clientCertificateAccepted(password: String?) async {
         importingPassword = password
         let status = decodePKCS12()
 
@@ -177,7 +177,7 @@ public class ClientCertificateManager {
             await addClientCertificateToKeychain()
 
         case errSecAuthFailed:
-            guard let retryPassword = await delegate?.askForCertificatePassword() else {
+            guard let retryPassword = await delegate?.askForCertificatePassword(self) else {
                 logger.warning("Password prompt cancelled after auth failure")
                 return
             }
@@ -185,7 +185,7 @@ public class ClientCertificateManager {
 
         default:
             let errMsg = String(format: NSLocalizedString("unable_to_decode_certificate", comment: ""), "\(status)")
-            await delegate?.alertClientCertificateError(errMsg: errMsg)
+            await delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
 
@@ -267,7 +267,7 @@ public class ClientCertificateManager {
                 errorMessage = NSLocalizedString("certficate_exists", comment: "")
             }
 
-            await delegate?.alertClientCertificateError(errMsg: errorMessage)
+            await delegate?.alertClientCertificateError(self, errMsg: errorMessage)
         }
     }
 

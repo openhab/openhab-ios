@@ -151,8 +151,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Probably need to do this in a way compatible to Android app's URL
 
         os_log("Calling Application Bundle ID: %{PUBLIC}@", log: .notifications, type: .info, options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")
+        os_log("URL: %{PUBLIC}@", log: .notifications, type: .info, url.absoluteString)
         os_log("URL scheme: %{PUBLIC}@", log: .notifications, type: .info, url.scheme ?? "")
         os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
+
+        if url.isFileURL {
+            os_log("Loading Certificate", log: .notifications, type: .info)
+            let clientCertificateManager = NetworkTracker.shared.clientCertificateManager
+            Task { @MainActor in
+                await clientCertificateManager.startImportClientCertificate(url: url)
+            }
+            return true
+        }
 
         // remove the 'openhab' from the url
         let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
