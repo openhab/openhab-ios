@@ -22,7 +22,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
 
-    private var cachedWatchPreferences: [String: Any] = [:]
+    private var cachedWatchPreferences: [String: Data] = [:]
     private let lock = NSLock()
 
     // This method gets called when the watch requests the data
@@ -64,6 +64,11 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         let prefs = WatchPreferences(fromPreferences: Preferences.self)
         let context = prefs.encodedWatchPreferences()
+
+        guard cachedWatchPreferences != context else {
+            // avoid update of update unchanged preferences
+            return
+        }
 
         lock.lock()
         cachedWatchPreferences = context
