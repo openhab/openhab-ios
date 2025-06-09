@@ -161,8 +161,6 @@ struct SettingsView: View {
         Preferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
         Preferences.localConnectionConfig = settingsLocalConnectionConfiguration
         Preferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
-        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(settingsSendCrashReports)
-        logger.debug("setCrashlyticsCollectionEnabled to \(settingsSendCrashReports)")
     }
 }
 

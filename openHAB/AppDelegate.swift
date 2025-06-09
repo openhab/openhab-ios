@@ -56,6 +56,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let audioPlayer = AudioPlayerActor()
     var window: UIWindow?
 
+    private var crashlyticsSubscriber: AnyCancellable?
+
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
         didSet {
@@ -112,7 +114,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
+        crashlyticsSubscriber = Preferences.$sendCrashReports.sink { [weak self] in
+            // TODO: is this called once we setup this subscriber? Otherwise we need to manually invoke it for setting up
+            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
+            self?.logger.debug("setCrashlyticsCollectionEnabled to \($0)")
+        }
         Messaging.messaging().delegate = self
     }
 

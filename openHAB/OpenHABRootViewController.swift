@@ -68,7 +68,6 @@ class OpenHABRootViewController: UIViewController {
             alertController.addAction(
                 UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
                     Preferences.sendCrashReports = true
-                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
                     Crashlytics.crashlytics().sendUnsentReports()
                 }
             )
