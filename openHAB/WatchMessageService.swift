@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -24,6 +25,8 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     private var cachedWatchPreferences: [String: Data] = [:]
     private let lock = NSLock()
+
+    private var preferencesSubscription: AnyCancellable?
 
     // This method gets called when the watch requests the data
     // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
@@ -54,6 +57,43 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     }
 
     // MARK: - Sync Preferences
+
+    @MainActor
+    public func subscribeToPreferences() {
+        let currentlyUsedSettings: AnyPublisher<any Sendable, Never> = Preferences.$currentlyUsedSettings
+            .map { $0 as any Sendable }
+            .eraseToAnyPublisher()
+        let watchRelatedSettingsPart1: AnyPublisher<any Sendable, Never> =
+            currentlyUsedSettings
+                .merge(
+                    with:
+                    Preferences.$localUrl.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                    Preferences.$remoteUrl.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                    Preferences.$username.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                    Preferences.$password.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                    Preferences.$alwaysSendCreds.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                    Preferences.$defaultSitemap.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                    Preferences.$ignoreSSL.map { $0 as any Sendable }.eraseToAnyPublisher()
+                )
+                .eraseToAnyPublisher()
+        let watchRelatedSettingsPart2: AnyPublisher<any Sendable, Never> = watchRelatedSettingsPart1
+            .merge(
+                with:
+                Preferences.$sitemapForWatch.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$sitemapForWatchLabel.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$iconType.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$demomode.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$localConnectionConfig.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$localConnectionConfig.map { $0 as any Sendable }.eraseToAnyPublisher()
+            )
+            .eraseToAnyPublisher()
+
+        preferencesSubscription = watchRelatedSettingsPart2
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { _ in } receiveValue: { _ in
+                self.syncPreferencesToWatch()
+            }
+    }
 
     @MainActor
     public func syncPreferencesToWatch() {

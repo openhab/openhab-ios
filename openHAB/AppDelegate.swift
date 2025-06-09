@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
+import Combine
 import Firebase
 import FirebaseMessaging
 import Kingfisher
@@ -59,9 +60,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var session: WCSession? {
         didSet {
             if let session {
-                session.delegate = WatchMessageService.singleton
+                let watchMessageService = WatchMessageService.singleton
+                session.delegate = watchMessageService
                 session.activate()
                 os_log("Paired watch %{PUBLIC}@, watch app installed %{PUBLIC}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
+                watchMessageService.subscribeToPreferences()
             }
         }
     }

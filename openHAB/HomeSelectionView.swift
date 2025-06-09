@@ -175,7 +175,6 @@ struct HomeSelectionView: View {
 
     private func select(home: UUID) {
         Preferences.switchCurrentlyUsedSettings(to: home)
-        WatchMessageService.singleton.syncPreferencesToWatch()
     }
 
     private func loadHomesList() {
@@ -206,7 +205,6 @@ struct HomeSelectionView: View {
 
     private func addHome() {
         Preferences.createAndLoadNewStoredSettings(homeName: newHomeName)
-        WatchMessageService.singleton.syncPreferencesToWatch()
         loadHomesList()
     }
 }
