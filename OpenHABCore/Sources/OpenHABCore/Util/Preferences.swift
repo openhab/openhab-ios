@@ -22,48 +22,10 @@ public struct UserDefault<T: Sendable> {
 
     public var wrappedValue: T {
         get {
-            let preferenceValue = Preferences.sharedDefaults.object(forKey: key)
-            if let preferenceAsT = preferenceValue as? T {
-                os_log(
-                    "Preference value %{PUBLIC}@ is %{PUBLIC}@",
-                    log: .default,
-                    type: .debug,
-                    key,
-                    "\(preferenceAsT)"
-                )
-                return preferenceAsT
-            } else {
-                if let preferenceValue {
-                    os_log(
-                        "Preference value %{PUBLIC}@ was %{PUBLIC}@ but did not conform to %{PUBLIC}@. Replace with default value.",
-                        log: .default,
-                        type: .fault,
-                        key,
-                        "\(preferenceValue)",
-                        "\(T.self)"
-                    )
-                } else {
-                    os_log(
-                        "Preference value %{PUBLIC}@ was set for the first time. Using default value.",
-                        log: .default,
-                        type: .info,
-                        key
-                    )
-                }
-                let fallback = defaultValue
-                Preferences.sharedDefaults.set(fallback, forKey: key)
-                return fallback
-            }
+            Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         }
         set {
-            os_log("Preference %{PUBLIC}@ will be changed to value %{PUBLIC}@", log: .default, type: .debug, key, "\(newValue)")
-            Preferences.sharedDefaults.set(newValue, forKey: key)
-            if store {
-                Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: newValue)
-            }
-            DispatchQueue.main.async { [subject] in
-                subject.send(newValue)
-            }
+            Preferences.preferenceChanged(newValue: newValue, key: key, store: store, subject: subject) { $0 }
         }
     }
 
@@ -75,7 +37,7 @@ public struct UserDefault<T: Sendable> {
         self.key = key
         self.defaultValue = defaultValue
         self.store = store
-        let currentValue = Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
+        let currentValue = Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         subject = CurrentValueSubject<T, Never>(currentValue)
     }
 }
@@ -87,25 +49,21 @@ public struct UserDefaultObject<T: Codable & Sendable> {
     private let store: Bool
     private let subject: CurrentValueSubject<T, Never>
 
+    private let objectDecoder: (Any) -> (T?) = {
+        guard let data = $0 as? Data else {
+            return nil
+        }
+        return try? JSONDecoder().decode(T.self, from: data)
+    }
+
+    private let objectEncoder: (T) -> (any Sendable)? = { try? JSONEncoder().encode($0) }
+
     public var wrappedValue: T {
         get {
-            guard let data = Preferences.sharedDefaults.data(forKey: key),
-                  let object = try? JSONDecoder().decode(T.self, from: data) else {
-                return defaultValue
-            }
-            return object
+            Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
         }
         set {
-            if let encoded = try? JSONEncoder().encode(newValue) {
-                Preferences.sharedDefaults.set(encoded, forKey: key)
-                if store {
-                    Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: encoded)
-                }
-                // Relevant for Combine publication
-                DispatchQueue.main.async { [subject] in
-                    subject.send(newValue)
-                }
-            }
+            Preferences.preferenceChanged(newValue: newValue, key: key, store: store, subject: subject, converter: objectEncoder)
         }
     }
 
@@ -119,17 +77,29 @@ public struct UserDefaultObject<T: Codable & Sendable> {
         self.store = store
 
         // Combine publication
-        if let data = Preferences.sharedDefaults.data(forKey: key),
-           let object = try? JSONDecoder().decode(T.self, from: data) {
-            subject = CurrentValueSubject(object)
-        } else {
-            subject = CurrentValueSubject(defaultValue)
-        }
+        let currentValue = Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
+        subject = CurrentValueSubject(currentValue)
     }
 }
 
 @propertyWrapper @MainActor
 public struct UserDefaultURL {
+    private static let urlSanitizer: (String) -> (String?) = {
+        // Trim and validate the new URL
+        let trimmedUri = $0.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedUri.isValidURL || trimmedUri.isEmpty else { // empty is the default for localUrl
+            return nil
+        }
+        return trimmedUri
+    }
+
+    private static let urlConverter: (Any) -> (String?) = {
+        guard let preferenceString = $0 as? String else {
+            return nil
+        }
+        return urlSanitizer(preferenceString)
+    }
+
     private let key: String
     private let defaultValue: String
     private let store: Bool
@@ -137,25 +107,10 @@ public struct UserDefaultURL {
 
     public var wrappedValue: String {
         get {
-            let storedValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
-            let trimmedUri = storedValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
-            return trimmedUri.isValidURL ? trimmedUri : defaultValue
+            Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: UserDefaultURL.urlSanitizer, decoder: UserDefaultURL.urlConverter)
         }
         set {
-            Preferences.sharedDefaults.set(newValue, forKey: key)
-            if store {
-                Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: newValue)
-            }
-            let defaultValue = defaultValue
-            // Trim and validate the new URL
-            let trimmedUri = newValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
-            DispatchQueue.main.async { [subject] in
-                if trimmedUri.isValidURL {
-                    subject.send(trimmedUri)
-                } else {
-                    subject.send(defaultValue)
-                }
-            }
+            Preferences.preferenceChanged(newValue: newValue, key: key, store: true, subject: subject, sanitize: UserDefaultURL.urlSanitizer) { $0 }
         }
     }
 
@@ -167,7 +122,7 @@ public struct UserDefaultURL {
         self.key = key
         self.defaultValue = defaultValue
         self.store = store
-        let currentValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
+        let currentValue = Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: UserDefaultURL.urlConverter)
         subject = CurrentValueSubject<String, Never>(currentValue)
     }
 }
@@ -176,7 +131,7 @@ public struct UserDefaultURL {
 public enum Preferences {
     static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
-    // MARK: - Public Deprecated
+    // MARK: - Public Deprecated preferences
 
     @UserDefaultURL("localUrl", defaultValue: "", store: false) public static var localUrl: String
     @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org", store: false) public static var remoteUrl: String
@@ -185,7 +140,7 @@ public enum Preferences {
     @UserDefault("alwaysSendCreds", defaultValue: false, store: false) public static var alwaysSendCreds: Bool
     @UserDefault("ignoreSSL", defaultValue: false, store: false) public static var ignoreSSL: Bool
 
-    // MARK: - Public Home related
+    // MARK: - Public Home related preferences
 
     @UserDefaultURL("defaultView", defaultValue: "web") public static var defaultView: String
     @UserDefault("demomode", defaultValue: true) public static var demomode: Bool
@@ -201,15 +156,16 @@ public enum Preferences {
     @UserDefault("sitemapForWatchLabel", defaultValue: "watch") public static var sitemapForWatchLabel: String
     @UserDefault("homeName", defaultValue: "Home") public static var homeName: String
 
-    // MARK: - Public App related
+    // MARK: - Public App related preferences
 
     @UserDefault("sendCrashReports", defaultValue: false, store: false) public static var sendCrashReports: Bool
+
     @UserDefault("idleOff", defaultValue: false, store: false) public static var idleOff: Bool
 
     /// settings for different homes TODO come up with better name
     @UserDefault("storedPreferences", defaultValue: [:], store: false) public static var storedPreferences: [String: [String: any Sendable]]
 
-    // MARK: - Private
+    // MARK: - Private preferences
 
     /// the currently applied settings set from storedPreferences
     @UserDefault("currentlyUsedSettings", defaultValue: UUID().uuidString, store: false) public private(set) static var currentlyUsedSettings: String
@@ -220,6 +176,67 @@ public enum Preferences {
 
     private static var loadingStoredPreferences = false
 }
+
+// MARK: Retrieving preference from user defaults, reacting to preference change
+
+private extension Preferences {
+    static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
+        let preferenceValue = Preferences.sharedDefaults.object(forKey: key)
+        if let preferenceConverted = decoder(preferenceValue) {
+            os_log(
+                "Preference value %{PUBLIC}@ is %{PUBLIC}@",
+                log: .default,
+                type: .debug,
+                key,
+                "\(preferenceConverted)"
+            )
+            return preferenceConverted
+        } else {
+            if let preferenceValue {
+                os_log(
+                    "Preference value %{PUBLIC}@ was \"%{PUBLIC}@\" but did not conform to %{PUBLIC}@. Replace with default value.",
+                    log: .default,
+                    type: .fault,
+                    key,
+                    "\(preferenceValue)",
+                    "\(T.self)"
+                )
+            } else {
+                os_log(
+                    "Preference value %{PUBLIC}@ was set for the first time. Using default value.",
+                    log: .default,
+                    type: .info,
+                    key
+                )
+            }
+            let fallback = defaultValue
+            Preferences.sharedDefaults.set(encoder(fallback), forKey: key)
+            return fallback
+        }
+    }
+
+    static func preferenceChanged<T>(newValue: T, key: String, store: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
+        guard let sanitized = sanitize(newValue) else {
+            os_log("Preference %{PUBLIC}@ new value \"%{PUBLIC}@\" could not be sanitized, will be ignored", log: .default, type: .debug, key, "\(newValue)")
+            return
+        }
+        let convertedValue = converter(sanitized)
+        guard convertedValue != nil else {
+            os_log("Preference %{PUBLIC}@ conversion of new value %{PUBLIC}@ failed, do not store.", log: .default, type: .debug, key, "\(sanitized)")
+            return
+        }
+        os_log("Preference %{PUBLIC}@ will be changed to value %{PUBLIC}@", log: .default, type: .debug, key, "\(newValue)")
+        Preferences.sharedDefaults.set(convertedValue, forKey: key)
+        if store {
+            Preferences.storeCurrentPreferences(updatedKey: key, updatedValue: convertedValue)
+        }
+        DispatchQueue.main.async { [subject] in
+            subject.send(sanitized)
+        }
+    }
+}
+
+// MARK: Multiple homes
 
 public extension Preferences {
     static func listStoredPreferences() -> [UUID] {
@@ -325,6 +342,8 @@ public extension Preferences {
     }
 }
 
+// MARK: Migration
+
 public extension Preferences {
     static func migrateUserDefaultsIfRequired() {
         guard !didMigrateToSharedDefaults else { return }
@@ -379,6 +398,8 @@ public extension Preferences {
         didMigrateToConnectionConfig = true
     }
 }
+
+// MARK: All connections
 
 public extension Preferences {
     static func getLowestPriorityOpenHABConnection() -> ConnectionConfiguration? {

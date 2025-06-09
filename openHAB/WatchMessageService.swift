@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -22,8 +23,10 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
 
-    private var cachedWatchPreferences: [String: Any] = [:]
+    private var cachedWatchPreferences: [String: Data] = [:]
     private let lock = NSLock()
+
+    private var preferencesSubscription: AnyCancellable?
 
     // This method gets called when the watch requests the data
     // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
@@ -56,6 +59,31 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
+    public func subscribeToPreferences() {
+        let currentlyUsedSettings: AnyPublisher<any Sendable, Never> = Preferences.$currentlyUsedSettings
+            .map { $0 as any Sendable }
+            .eraseToAnyPublisher()
+        let watchRelatedSettings: AnyPublisher<any Sendable, Never> = currentlyUsedSettings
+            .merge(
+                with:
+                Preferences.$defaultSitemap.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$sitemapForWatch.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$sitemapForWatchLabel.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$iconType.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$demomode.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$localConnectionConfig.map { $0 as any Sendable }.eraseToAnyPublisher(),
+                Preferences.$localConnectionConfig.map { $0 as any Sendable }.eraseToAnyPublisher()
+            )
+            .eraseToAnyPublisher()
+
+        preferencesSubscription = watchRelatedSettings
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { _ in } receiveValue: { _ in
+                self.syncPreferencesToWatch()
+            }
+    }
+
+    @MainActor
     public func syncPreferencesToWatch() {
         guard WCSession.default.activationState == .activated else {
             logger.warning("WCSession not activated; skipping sync.")
@@ -64,6 +92,11 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
         let prefs = WatchPreferences(fromPreferences: Preferences.self)
         let context = prefs.encodedWatchPreferences()
+
+        guard cachedWatchPreferences != context else {
+            // avoid update of update unchanged preferences
+            return
+        }
 
         lock.lock()
         cachedWatchPreferences = context
@@ -82,13 +115,13 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 extension WatchPreferences {
     init(fromPreferences preferences: Preferences.Type) {
         self.init(
-            localUrl: preferences.localUrl,
-            remoteUrl: preferences.remoteUrl,
-            username: preferences.username,
-            password: preferences.password,
-            alwaysSendCreds: preferences.alwaysSendCreds,
+            localUrl: preferences.localConnectionConfig.url,
+            remoteUrl: preferences.remoteConnectionConfig.url,
+            username: preferences.remoteConnectionConfig.username,
+            password: preferences.remoteConnectionConfig.password,
+            alwaysSendCreds: preferences.remoteConnectionConfig.alwaysSendBasicAuth,
             defaultSitemap: preferences.defaultSitemap,
-            ignoreSSL: preferences.ignoreSSL,
+            ignoreSSL: preferences.remoteConnectionConfig.ignoreSSL,
             sitemapForWatch: preferences.sitemapForWatch,
             sitemapForWatchLabel: preferences.sitemapForWatchLabel,
             iconType: preferences.iconType,
