@@ -402,13 +402,24 @@ public extension Preferences {
 // MARK: All connections
 
 public extension Preferences {
-    static func getLowestPriorityOpenHABConnection() -> ConnectionConfiguration? {
-        let allConnections = [localConnectionConfig, remoteConnectionConfig]
+    static func getLowestPriorityOpenHABConnection(of stored: [String: Any]) -> ConnectionConfiguration? {
+        let localConfig = stored["localConnectionConfig"] as? Data ?? Data()
+        let localConnection = try? JSONDecoder().decode(ConnectionConfiguration.self, from: localConfig)
+        let remoteConfig = stored["remoteConnectionConfig"] as? Data ?? Data()
+        let remoteConnection = try? JSONDecoder().decode(ConnectionConfiguration.self, from: remoteConfig)
+        return Preferences.getLowestPriorityOpenHABConnection(of: [localConnection, remoteConnection])
+    }
 
-        return allConnections
+    static func getLowestPriorityOpenHABConnection(of connections: [ConnectionConfiguration?]) -> ConnectionConfiguration? {
+        connections
+            .compactMap { $0 }
             .filter { $0.url.contains("openhab.org") }
             .sorted { $0.priority < $1.priority }
             .first
+    }
+
+    static func getLowestPriorityOpenHABConnection() -> ConnectionConfiguration? {
+        getLowestPriorityOpenHABConnection(of: [localConnectionConfig, remoteConnectionConfig])
     }
 }
 

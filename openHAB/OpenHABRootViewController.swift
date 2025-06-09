@@ -42,6 +42,8 @@ class OpenHABRootViewController: UIViewController {
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
 
+    private var apsRegistrationData: [AnyHashable: Any]?
+
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         var viewController = storyboard.instantiateViewController(withIdentifier: "OpenHABWebViewController") as! OpenHABWebViewController
@@ -328,19 +330,71 @@ class OpenHABRootViewController: UIViewController {
     @objc
     func handleApsRegistration(_ note: Notification?) {
         logger.info("handleApsRegistration")
-        let theData = note?.userInfo
-        if theData != nil {
-            guard let config = Preferences.getLowestPriorityOpenHABConnection() else { return }
-            guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
-            logger.info("Registering notifications with \(config.url)")
-            Task {
-                do {
-                    let client = HTTPClient(configuration: config)
-                    try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
-                    logger.info("my.openHAB registration succeeded")
-                } catch {
-                    logger.error("my.openHAB registration failed \(error.localizedDescription)")
-                }
+        apsRegistrationData = note?.userInfo
+        subscribeToOpenhabConnectionChanges()
+    }
+
+    private func subscribeToOpenhabConnectionChanges() {
+        struct UuidWithConnection: Hashable, Equatable {
+            let uuid: String
+            let connection: ConnectionConfiguration // not only URL, because auth and certs might be relevant for establishing the connection
+        }
+
+        let storedOpenHabConnections = Preferences.$storedPreferences
+            .debounce(for: .seconds(1), scheduler: RunLoop.main) // avoid overexcited registrations / deregistrations in batch updates
+            .map { storedPrefsUpdate in // we want to recognize changes in the OpenHab URLs for any of the homes
+                Set<UuidWithConnection>(storedPrefsUpdate.compactMap { storedWithUuid in
+                    let (uuid, homeConfig) = storedWithUuid
+                    guard let connection = Preferences.getLowestPriorityOpenHABConnection(of: homeConfig) else { return nil }
+                    return UuidWithConnection(uuid: uuid, connection: connection)
+                })
+            }
+
+        // create a tuple that lets us inspect the previous value
+        let connectionsWithPreviousValues = storedOpenHabConnections
+            .scan((previous: Set<UuidWithConnection>(), current: Set<UuidWithConnection>())) { previous, current in
+                (previous: previous.current, current: current)
+            }
+
+        let differences = connectionsWithPreviousValues.map { (previous, current) in // diff set of previous and current OpenHab URLs
+            (newValues: current.subtracting(previous), deletedValues: previous.subtracting(current))
+        }
+
+        let openhabConnectionSubscription = differences.sink { [weak self] diff in
+            for newHome in diff.newValues {
+                self?.registerHome(uuid: newHome.uuid, connection: newHome.connection)
+            }
+            for deletedHome in diff.deletedValues {
+                // TODO: implement deregistration
+                logger.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
+            }
+        }
+
+        cancellables.insert(openhabConnectionSubscription)
+    }
+
+    private func registerHome(uuid: String, connection: ConnectionConfiguration) {
+        guard let apsRegistrationData else {
+            logger.fault("Cannot register homes for push notifications, no notification registration data available")
+            return
+        }
+        guard let deviceId = apsRegistrationData["deviceId"] as? String,
+              let deviceToken = apsRegistrationData["deviceToken"] as? String,
+              let deviceName = apsRegistrationData["deviceName"] as? String else {
+            return
+        }
+        logger.info("Registering notifications with \(connection.url)")
+        _ = registerHome(connection, deviceToken, deviceId, deviceName)
+    }
+
+    private func registerHome(_ config: ConnectionConfiguration, _ deviceToken: String, _ deviceId: String, _ deviceName: String) -> Task<Void, Never> {
+        Task {
+            do {
+                let client = HTTPClient(configuration: config)
+                try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
+                logger.info("my.openHAB registration succeeded")
+            } catch {
+                logger.error("my.openHAB registration failed \(error.localizedDescription)")
             }
         }
     }
