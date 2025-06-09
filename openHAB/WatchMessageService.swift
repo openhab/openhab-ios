@@ -63,22 +63,10 @@ class WatchMessageService: NSObject, WCSessionDelegate {
         let currentlyUsedSettings: AnyPublisher<any Sendable, Never> = Preferences.$currentlyUsedSettings
             .map { $0 as any Sendable }
             .eraseToAnyPublisher()
-        let watchRelatedSettingsPart1: AnyPublisher<any Sendable, Never> =
-            currentlyUsedSettings
-                .merge(
-                    with:
-                    Preferences.$localUrl.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                    Preferences.$remoteUrl.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                    Preferences.$username.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                    Preferences.$password.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                    Preferences.$alwaysSendCreds.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                    Preferences.$defaultSitemap.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                    Preferences.$ignoreSSL.map { $0 as any Sendable }.eraseToAnyPublisher()
-                )
-                .eraseToAnyPublisher()
-        let watchRelatedSettingsPart2: AnyPublisher<any Sendable, Never> = watchRelatedSettingsPart1
+        let watchRelatedSettings: AnyPublisher<any Sendable, Never> = currentlyUsedSettings
             .merge(
                 with:
+                Preferences.$defaultSitemap.map { $0 as any Sendable }.eraseToAnyPublisher(),
                 Preferences.$sitemapForWatch.map { $0 as any Sendable }.eraseToAnyPublisher(),
                 Preferences.$sitemapForWatchLabel.map { $0 as any Sendable }.eraseToAnyPublisher(),
                 Preferences.$iconType.map { $0 as any Sendable }.eraseToAnyPublisher(),
@@ -88,7 +76,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
             )
             .eraseToAnyPublisher()
 
-        preferencesSubscription = watchRelatedSettingsPart2
+        preferencesSubscription = watchRelatedSettings
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { _ in } receiveValue: { _ in
                 self.syncPreferencesToWatch()
@@ -127,13 +115,13 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 extension WatchPreferences {
     init(fromPreferences preferences: Preferences.Type) {
         self.init(
-            localUrl: preferences.localUrl,
-            remoteUrl: preferences.remoteUrl,
-            username: preferences.username,
-            password: preferences.password,
-            alwaysSendCreds: preferences.alwaysSendCreds,
+            localUrl: preferences.localConnectionConfig.url,
+            remoteUrl: preferences.remoteConnectionConfig.url,
+            username: preferences.remoteConnectionConfig.username,
+            password: preferences.remoteConnectionConfig.password,
+            alwaysSendCreds: preferences.remoteConnectionConfig.alwaysSendBasicAuth,
             defaultSitemap: preferences.defaultSitemap,
-            ignoreSSL: preferences.ignoreSSL,
+            ignoreSSL: preferences.remoteConnectionConfig.ignoreSSL,
             sitemapForWatch: preferences.sitemapForWatch,
             sitemapForWatchLabel: preferences.sitemapForWatchLabel,
             iconType: preferences.iconType,

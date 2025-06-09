@@ -87,7 +87,7 @@ public struct UserDefaultURL {
     private static let urlSanitizer: (String) -> (String?) = {
         // Trim and validate the new URL
         let trimmedUri = $0.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmedUri.isValidURL else {
+        guard trimmedUri.isValidURL || trimmedUri.isEmpty else { // empty is the default for localUrl
             return nil
         }
         return trimmedUri
@@ -194,7 +194,7 @@ private extension Preferences {
         } else {
             if let preferenceValue {
                 os_log(
-                    "Preference value %{PUBLIC}@ was %{PUBLIC}@ but did not conform to %{PUBLIC}@. Replace with default value.",
+                    "Preference value %{PUBLIC}@ was \"%{PUBLIC}@\" but did not conform to %{PUBLIC}@. Replace with default value.",
                     log: .default,
                     type: .fault,
                     key,
@@ -217,7 +217,7 @@ private extension Preferences {
 
     static func preferenceChanged<T>(newValue: T, key: String, store: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
-            os_log("Preference %{PUBLIC}@ new value %{PUBLIC}@ could not be sanitized, will be ignored", log: .default, type: .debug, key, "\(newValue)")
+            os_log("Preference %{PUBLIC}@ new value \"%{PUBLIC}@\" could not be sanitized, will be ignored", log: .default, type: .debug, key, "\(newValue)")
             return
         }
         let convertedValue = converter(sanitized)
