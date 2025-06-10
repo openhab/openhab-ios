@@ -84,11 +84,15 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
 
 final class MockPathMonitor: NWPathMonitoring {
     private var handler: ((Bool) async -> Void)?
+    var onStartMonitoring: (() -> Void)?
 
-    init() {}
+    init(onStartMonitoring: (() -> Void)? = nil) {
+        self.onStartMonitoring = onStartMonitoring
+    }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         self.handler = handler
+        onStartMonitoring?()
     }
 
     func cancel() {
@@ -150,10 +154,9 @@ final class NetworkTrackerTests: XCTestCase {
     func testTrackerGoesOfflineOnNetworkLoss() async {
         let statusSinkAttached = XCTestExpectation(description: "Combine sink attached")
         let becameNotConnected = XCTestExpectation(description: "Status becomes .notConnected")
+        let monitorStarted = XCTestExpectation(description: "Path monitor started")
 
-        let expectation = XCTestExpectation(description: "Status becomes .notConnected")
-
-        let mockMonitor = MockPathMonitor() // ⬅️ Hold on to this
+        let mockMonitor = MockPathMonitor { monitorStarted.fulfill() } // ⬅️ Hold on to this
         let tracker = NetworkTracker(
             monitor: mockMonitor,
             connectionPool: ConnectionPool { _ in MockOpenAPIService() },
@@ -187,8 +190,8 @@ final class NetworkTrackerTests: XCTestCase {
             ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
         ])
 
-        // 🚦 Wait until Combine is ready before triggering anything
-        await fulfillment(of: [statusSinkAttached], timeout: 2.0)
+        // 🚦 Wait until Combine and monitoring are ready before triggering anything
+        await fulfillment(of: [statusSinkAttached, monitorStarted], timeout: 2.0)
 
         // Simulate loss of network
         mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
