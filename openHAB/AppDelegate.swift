@@ -115,7 +115,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
         crashlyticsSubscriber = Preferences.$sendCrashReports.sink { [weak self] in
-            // TODO: is this called once we setup this subscriber? Otherwise we need to manually invoke it for setting up
             Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
             self?.logger.debug("setCrashlyticsCollectionEnabled to \($0)")
         }
