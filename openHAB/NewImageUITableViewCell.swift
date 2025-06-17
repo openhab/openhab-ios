@@ -162,8 +162,8 @@ class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         activeTask = Task {
             do {
-                guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
-                    logger.warning("No openHAB configuration found.")
+                guard let config = NetworkTracker.shared.activeConnection?.configuration else {
+                    logger.warning("No openHAB connection found.")
                     throw HTTPClientError.noConfiguration
                 }
                 let client = HTTPClient(configuration: config)

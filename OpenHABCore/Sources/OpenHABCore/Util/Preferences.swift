@@ -127,6 +127,49 @@ public struct UserDefaultURL {
     }
 }
 
+// TODO: We should refactor this class to use an instance of this struct rather then setting preferences values directly on ourself
+// so instead of Preferences.demomode it could be Preferences.active.demomode or something. Requires a heafty refactor.
+public struct PreferenceInstance: Sendable {
+    public let id: UUID
+    public let defaultView: String
+    public let demomode: Bool
+    public let realTimeSliders: Bool
+    public let iconType: Int
+    public let defaultSitemap: String
+    public let sortSitemapsBy: Int
+    public let defaultMainUIPath: String
+    public let alwaysAllowWebRTC: Bool
+    public let sitemapForWatch: String
+    public let localConnectionConfig: ConnectionConfiguration
+    public let remoteConnectionConfig: ConnectionConfiguration
+    public let sitemapForWatchLabel: String
+    public let homeName: String
+
+    fileprivate init?(id: UUID, dict: [String: any Sendable]) {
+        guard
+            let localData = dict["localConnectionConfig"] as? Data,
+            let remoteData = dict["remoteConnectionConfig"] as? Data,
+            let localCfg = try? JSONDecoder().decode(ConnectionConfiguration.self, from: localData),
+            let remoteCfg = try? JSONDecoder().decode(ConnectionConfiguration.self, from: remoteData)
+        else { return nil }
+
+        self.id = id
+        defaultView = dict["defaultView"] as? String ?? "web"
+        demomode = dict["demomode"] as? Bool ?? true
+        realTimeSliders = dict["realTimeSliders"] as? Bool ?? false
+        iconType = dict["iconType"] as? Int ?? 0
+        defaultSitemap = dict["defaultSitemap"] as? String ?? "demo"
+        sortSitemapsBy = dict["sortSitemapsBy"] as? Int ?? 0
+        defaultMainUIPath = dict["defaultMainUIPath"] as? String ?? ""
+        alwaysAllowWebRTC = dict["alwaysAllowWebRTC"] as? Bool ?? false
+        sitemapForWatch = dict["sitemapForWatch"] as? String ?? "watch"
+        localConnectionConfig = localCfg
+        remoteConnectionConfig = remoteCfg
+        sitemapForWatchLabel = dict["sitemapForWatchLabel"] as? String ?? "watch"
+        homeName = dict["homeName"] as? String ?? "Home"
+    }
+}
+
 @MainActor
 public enum Preferences {
     static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
@@ -238,6 +281,7 @@ private extension Preferences {
 
 // MARK: Multiple homes
 
+@MainActor
 public extension Preferences {
     static func listStoredPreferences() -> [UUID] {
         let preferenceIds = storedPreferences
@@ -315,30 +359,89 @@ public extension Preferences {
         loadingStoredPreferences = false
         storeCurrentPreferences()
     }
+}
 
-    static func storeCurrentPreferences(updatedKey: String = "", updatedValue: any Sendable = "") {
-        guard !loadingStoredPreferences else {
-            // concurrent access for writing and reading is prohibited
-            return
-        }
-        // TODO: not pretty to repeat everything here
-        var stored = storedPreferences
-        stored[currentlyUsedSettings] = [
-            "defaultView": updatedKey == "defaultView" ? updatedValue : Preferences.defaultView,
-            "demomode": updatedKey == "demomode" ? updatedValue : Preferences.demomode,
-            "realTimeSliders": updatedKey == "realTimeSliders" ? updatedValue : Preferences.realTimeSliders,
-            "iconType": updatedKey == "iconType" ? updatedValue : Preferences.iconType,
-            "defaultSitemap": updatedKey == "defaultSitemap" ? updatedValue : Preferences.defaultSitemap,
-            "sortSitemapsBy": updatedKey == "sortSitemapsBy" ? updatedValue : Preferences.sortSitemapsBy,
-            "defaultMainUIPath": updatedKey == "defaultMainUIPath" ? updatedValue : Preferences.defaultMainUIPath,
-            "alwaysAllowWebRTC": updatedKey == "alwaysAllowWebRTC" ? updatedValue : Preferences.alwaysAllowWebRTC,
-            "sitemapForWatch": updatedKey == "sitemapForWatch" ? updatedValue : Preferences.sitemapForWatch,
-            "localConnectionConfig": updatedKey == "localConnectionConfig" ? updatedValue : try? JSONEncoder().encode(Preferences.localConnectionConfig),
-            "remoteConnectionConfig": updatedKey == "remoteConnectionConfig" ? updatedValue : try? JSONEncoder().encode(Preferences.remoteConnectionConfig),
-            "sitemapForWatchLabel": updatedKey == "sitemapForWatchLabel" ? updatedValue : Preferences.sitemapForWatchLabel,
-            "homeName": updatedKey == "homeName" ? updatedValue : Preferences.homeName
+@MainActor
+public extension Preferences {
+    private static func currentPreferencesDict(updatedKey: String = "", updatedValue: any Sendable = "") -> [String: any Sendable] {
+        [
+            "defaultView": updatedKey == "defaultView" ? updatedValue : defaultView,
+            "demomode": updatedKey == "demomode" ? updatedValue : demomode,
+            "realTimeSliders": updatedKey == "realTimeSliders" ? updatedValue : realTimeSliders,
+            "iconType": updatedKey == "iconType" ? updatedValue : iconType,
+            "defaultSitemap": updatedKey == "defaultSitemap" ? updatedValue : defaultSitemap,
+            "sortSitemapsBy": updatedKey == "sortSitemapsBy" ? updatedValue : sortSitemapsBy,
+            "defaultMainUIPath": updatedKey == "defaultMainUIPath" ? updatedValue : defaultMainUIPath,
+            "alwaysAllowWebRTC": updatedKey == "alwaysAllowWebRTC" ? updatedValue : alwaysAllowWebRTC,
+            "sitemapForWatch": updatedKey == "sitemapForWatch" ? updatedValue : sitemapForWatch,
+            "localConnectionConfig": updatedKey == "localConnectionConfig" ? updatedValue : try? JSONEncoder().encode(localConnectionConfig),
+            "remoteConnectionConfig": updatedKey == "remoteConnectionConfig" ? updatedValue : try? JSONEncoder().encode(remoteConnectionConfig),
+            "sitemapForWatchLabel": updatedKey == "sitemapForWatchLabel" ? updatedValue : sitemapForWatchLabel,
+            "homeName": updatedKey == "homeName" ? updatedValue : homeName
         ]
-        storedPreferences = stored
+    }
+
+    static func storePreferences(for settingsId: String, updatedKey: String = "", updatedValue: any Sendable = "") {
+        guard !loadingStoredPreferences else { return }
+        var all = storedPreferences
+        if updatedKey.isEmpty {
+            // store the current set preferences for the settingsId
+            all[settingsId] = currentPreferencesDict()
+        } else {
+            // assign the current settings for this home
+            var record = all[settingsId] ?? [:]
+            // update just the single value
+            record[updatedKey] = updatedValue
+            // set the updated record back
+            all[settingsId] = record
+        }
+        storedPreferences = all
+        os_log("Stored preferences for home %{public}@", log: .default, type: .debug, settingsId)
+    }
+
+    // omitting the updatedKey will result in all settings being saved
+    static func storeCurrentPreferences(updatedKey: String = "", updatedValue: any Sendable = "") {
+        storePreferences(for: currentlyUsedSettings, updatedKey: updatedKey, updatedValue: updatedValue)
+    }
+
+    // helper function for when we update the remote connection cloudUserId for notifications
+    static func setRemoteConnection(_ connection: ConnectionConfiguration, for settingsId: String) {
+        guard let encoded = try? JSONEncoder().encode(connection) else { return }
+        // Update local instance if this is the active home
+        if settingsId == currentlyUsedSettings {
+            remoteConnectionConfig = connection
+        }
+        storePreferences(for: settingsId, updatedKey: "remoteConnectionConfig", updatedValue: encoded)
+    }
+}
+
+@MainActor
+public extension Preferences {
+    static func firstStoredSettings(where key: String, matches predicate: (Any) -> Bool) -> (id: UUID, record: [String: any Sendable])? {
+        for (uuidString, record) in storedPreferences {
+            guard let raw = record[key], predicate(raw),
+                  let uuid = UUID(uuidString: uuidString) else { continue }
+            return (uuid, record)
+        }
+        return nil
+    }
+
+    static func storedSettingsId(forCloudUserId id: String) -> UUID? {
+        firstStoredSettings(where: "remoteConnectionConfig") { raw in
+            guard
+                let data = raw as? Data,
+                let cfg = try? JSONDecoder().decode(ConnectionConfiguration.self, from: data)
+            else { return false }
+            return cfg.cloudUserId == id
+        }?.id
+    }
+}
+
+@MainActor
+public extension Preferences {
+    static func preferenceInstance(for settingsId: String) -> PreferenceInstance? {
+        guard let dict = storedPreferences[settingsId], let uuid = UUID(uuidString: settingsId) else { return nil }
+        return PreferenceInstance(id: uuid, dict: dict)
     }
 }
 
@@ -380,6 +483,7 @@ public extension Preferences {
             password: "",
             alwaysSendBasicAuth: oldAlwaysSendCreds,
             ignoreSSL: oldIgnoreSSL,
+            supportsNotifications: false,
             priority: 0
         )
 
@@ -389,6 +493,7 @@ public extension Preferences {
             password: oldPassword,
             alwaysSendBasicAuth: oldAlwaysSendCreds,
             ignoreSSL: oldIgnoreSSL,
+            supportsNotifications: true,
             priority: 1
         )
 
@@ -402,24 +507,23 @@ public extension Preferences {
 // MARK: All connections
 
 public extension Preferences {
-    static func getLowestPriorityOpenHABConnection(of stored: [String: Any]) -> ConnectionConfiguration? {
-        let localConfig = stored["localConnectionConfig"] as? Data ?? Data()
-        let localConnection = try? JSONDecoder().decode(ConnectionConfiguration.self, from: localConfig)
+    static func getNotificationConnection(of stored: [String: Any]) -> ConnectionConfiguration? {
         let remoteConfig = stored["remoteConnectionConfig"] as? Data ?? Data()
         let remoteConnection = try? JSONDecoder().decode(ConnectionConfiguration.self, from: remoteConfig)
-        return Preferences.getLowestPriorityOpenHABConnection(of: [localConnection, remoteConnection])
+        return Preferences.getNotificationConnection(of: [remoteConnection])
     }
 
-    static func getLowestPriorityOpenHABConnection(of connections: [ConnectionConfiguration?]) -> ConnectionConfiguration? {
+    // this will support mutliple connection configs, right now we just pass in the remote config
+    static func getNotificationConnection(of connections: [ConnectionConfiguration?]) -> ConnectionConfiguration? {
         connections
             .compactMap { $0 }
-            .filter { $0.url.contains("openhab.org") }
-            .sorted { $0.priority < $1.priority }
+            .filter { $0.suportsNotifications == true }
+            .sorted { $0.priority > $1.priority }
             .first
     }
 
-    static func getLowestPriorityOpenHABConnection() -> ConnectionConfiguration? {
-        getLowestPriorityOpenHABConnection(of: [localConnectionConfig, remoteConnectionConfig])
+    static func getNotificationConnection() -> ConnectionConfiguration? {
+        getNotificationConnection(of: [remoteConnectionConfig])
     }
 }
 
@@ -427,11 +531,12 @@ public extension Preferences {
 
 public extension ConnectionConfiguration {
     static let localDefault = ConnectionConfiguration(
-        url: "http://192.168.1.1:8080",
+        url: "https://openhab.local:8443",
         username: "",
         password: "",
         alwaysSendBasicAuth: false,
         ignoreSSL: false,
+        supportsNotifications: false,
         priority: 0
     )
 
@@ -441,6 +546,7 @@ public extension ConnectionConfiguration {
         password: "",
         alwaysSendBasicAuth: false,
         ignoreSSL: false,
+        supportsNotifications: true,
         priority: 1
     )
 }

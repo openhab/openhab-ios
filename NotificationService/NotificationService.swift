@@ -46,7 +46,8 @@ class NotificationService: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
-
+    var networkTracker: NetworkTracker?
+    var cloudUserId: String?
     let logger = Logger(subsystem: "org.openhab.network", category: "NotificationService")
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
@@ -65,6 +66,8 @@ class NotificationService: UNNotificationServiceExtension {
         if let message = userInfo["message"] as? String {
             bestAttemptContent.body = message
         }
+
+        cloudUserId = userInfo["userId"] as? String
 
         // Check if the user has defined custom actions in the payload
         if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
@@ -186,11 +189,9 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     private func downloadMedia(url: String) async throws -> (URL?, String?) {
-        await NetworkTracker.shared.startTracking(connectionConfigurations: [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig])
-
         guard let fullURL = await resolveFullURL(from: url) else { return (nil, nil) }
 
-        guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return (nil, nil) }
+        guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return (nil, nil) }
 
         let client = HTTPClient(configuration: activeConfig)
 
@@ -201,7 +202,7 @@ class NotificationService: UNNotificationServiceExtension {
     // 🔹 Extracted helper function to determine full URL
     private func resolveFullURL(from url: String) async -> URL? {
         if url.starts(with: "/") {
-            guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return nil }
+            guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return nil }
             return URL(string: activeConfig.url)?.appendingPathComponent(url)
         } else {
             return URL(string: url)
@@ -221,7 +222,7 @@ class NotificationService: UNNotificationServiceExtension {
 
         let itemName = String(itemURL.absoluteString.dropFirst(scheme.count + 1))
 
-        let item = try await NetworkTracker.shared.getItemByName(id: itemName)
+        let item = try await networkTracker().getItemByName(id: itemName)
         guard let state = item?.state else { return (nil, nil) }
 
         // Extract MIME type and base64 string
@@ -269,5 +270,21 @@ class NotificationService: UNNotificationServiceExtension {
             os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
         }
         return nil
+    }
+
+    func networkTracker() async -> NetworkTracker {
+        if networkTracker == nil {
+            networkTracker = NetworkTracker.shared
+            let connections: [ConnectionConfiguration]
+            if let cloudUserId, let uuid = await Preferences.storedSettingsId(forCloudUserId: cloudUserId), let instance = await Preferences.preferenceInstance(for: uuid.uuidString) {
+                logger.info("setting up network tracking for \(cloudUserId)")
+                connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
+            } else {
+                logger.info("Using default connection configurations")
+                connections = await [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig]
+            }
+            await networkTracker!.startTracking(connectionConfigurations: connections)
+        }
+        return networkTracker!
     }
 }

@@ -198,11 +198,11 @@ struct DrawerView: View {
             Section(header: Text("System")) {
                 settingsMenuEntry(image: .gear, text: "settings", goTo: .settings)
 
-                if Preferences.getLowestPriorityOpenHABConnection() != nil, !Preferences.demomode {
+                if Preferences.getNotificationConnection() != nil, !Preferences.demomode {
                     settingsMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
                 }
 
-                settingsMenuEntry(image: .house, text: "homeSelection", goTo: .homeSelection)
+                settingsMenuEntry(image: .house, text: "Manage Homes", goTo: .homeSelection)
             }
         }
 

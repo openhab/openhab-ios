@@ -345,7 +345,7 @@ class OpenHABRootViewController: UIViewController {
             .map { storedPrefsUpdate in // we want to recognize changes in the OpenHab URLs for any of the homes
                 Set<UuidWithConnection>(storedPrefsUpdate.compactMap { storedWithUuid in
                     let (uuid, homeConfig) = storedWithUuid
-                    guard let connection = Preferences.getLowestPriorityOpenHABConnection(of: homeConfig) else { return nil }
+                    guard let connection = Preferences.getNotificationConnection(of: homeConfig) else { return nil }
                     return UuidWithConnection(uuid: uuid, connection: connection)
                 })
             }
@@ -361,7 +361,9 @@ class OpenHABRootViewController: UIViewController {
         }
 
         let openhabConnectionSubscription = differences.sink { [weak self] diff in
+            logger.info("openhabConnectionSubscription updated")
             for newHome in diff.newValues {
+                logger.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications ")
                 self?.registerHome(uuid: newHome.uuid, connection: newHome.connection)
             }
             for deletedHome in diff.deletedValues {
@@ -384,22 +386,49 @@ class OpenHABRootViewController: UIViewController {
             return
         }
         logger.info("Registering notifications with \(connection.url)")
-        _ = registerHome(connection, deviceToken, deviceId, deviceName)
+        _ = registerHome(uuid, connection, deviceToken, deviceId, deviceName)
     }
 
-    private func registerHome(_ config: ConnectionConfiguration, _ deviceToken: String, _ deviceId: String, _ deviceName: String) -> Task<Void, Never> {
+    private func registerHome(_ uuid: String, _ config: ConnectionConfiguration, _ deviceToken: String, _ deviceId: String, _ deviceName: String) -> Task<Void, Never> {
         Task {
             do {
                 let client = HTTPClient(configuration: config)
-                try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
-                logger.info("my.openHAB registration succeeded")
+                if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
+                    var cc = config
+                    cc.cloudUserId = cloudUserId
+                    Preferences.setRemoteConnection(cc, for: uuid)
+                    logger.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
+                }
+                logger.info("my.openHAB registration succeeded without cloudUserId")
             } catch {
                 logger.error("my.openHAB registration failed \(error.localizedDescription)")
             }
         }
     }
 
-    func handleNotification(action: String?) {
+    func handleNotification(action: String?, cloudUserId: String?) {
+        guard let action else { return }
+
+        logger.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
+        if let cloudUserId, let targetHome = Preferences.storedSettingsId(forCloudUserId: cloudUserId) {
+            if Preferences.remoteConnectionConfig.cloudUserId != cloudUserId {
+                // if we need to switch homes, disconnnect the tracking fist,and wait for the tracker to start again with the updated preferences
+                Task {
+                    await NetworkTracker.shared.stopTracking()
+                    logger.info("Switching to home \(targetHome)")
+                    Preferences.switchCurrentlyUsedSettings(to: targetHome)
+                    await NetworkTracker.shared.waitForActiveConnection()
+                    handleNotificationInternal(action)
+                }
+                return
+            }
+        }
+        handleNotificationInternal(action)
+    }
+
+    private func handleNotificationInternal(_ action: String?) {
+        logger.info("handleNotificationInternal: \(action ?? "<none>")")
+
         guard let action else { return }
 
         let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
