@@ -273,18 +273,22 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     func networkTracker() async -> NetworkTracker {
-        if networkTracker == nil {
-            networkTracker = NetworkTracker.shared
-            let connections: [ConnectionConfiguration]
-            if let cloudUserId, let uuid = await Preferences.storedSettingsId(forCloudUserId: cloudUserId), let instance = await Preferences.preferenceInstance(for: uuid.uuidString) {
-                logger.info("setting up network tracking for \(cloudUserId)")
-                connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
-            } else {
-                logger.info("Using default connection configurations")
-                connections = await [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig]
-            }
-            await networkTracker!.startTracking(connectionConfigurations: connections)
+        if let cached = networkTracker {
+            return cached
         }
-        return networkTracker!
+        let tracker = NetworkTracker.shared
+        let connections: [ConnectionConfiguration]
+        if let cloudUserId,
+           let uuid = await Preferences.storedSettingsId(forCloudUserId: cloudUserId),
+           let instance = await Preferences.preferenceInstance(for: uuid.uuidString) {
+            logger.info("setting up network tracking for \(cloudUserId)")
+            connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
+        } else {
+            logger.info("Using default connection configurations")
+            connections = await [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig]
+        }
+        await tracker.startTracking(connectionConfigurations: connections)
+        networkTracker = tracker
+        return tracker
     }
 }

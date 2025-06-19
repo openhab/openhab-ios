@@ -396,7 +396,7 @@ class OpenHABRootViewController: UIViewController {
                 if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
                     var cc = config
                     cc.cloudUserId = cloudUserId
-                    Preferences.setRemoteConnection(cc, for: uuid)
+                    Preferences.updateRemoteConnectionConfig(cc, for: uuid)
                     logger.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
                 }
                 logger.info("my.openHAB registration succeeded without cloudUserId")
