@@ -28,7 +28,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
     public var alwaysSendBasicAuth: Bool
     public var ignoreSSL: Bool
     public var priority: Int // Lower is higher priority, 0 is primary
-    public var suportsNotifications: Bool = false
+    public var supportsNotifications = false
     public var cloudUserId: String?
 
     public init(url: String, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false, supportsNotifications: Bool = false, priority: Int = 10) {
@@ -38,7 +38,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
         self.ignoreSSL = ignoreSSL
         self.priority = priority
-        suportsNotifications = supportsNotifications
+        self.supportsNotifications = supportsNotifications
     }
 
     // 🔹 Ensure normalization on decoding
@@ -50,7 +50,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
         password = try container.decode(String.self, forKey: .password)
         alwaysSendBasicAuth = try container.decode(Bool.self, forKey: .alwaysSendBasicAuth)
         ignoreSSL = try container.decode(Bool.self, forKey: .ignoreSSL)
-        suportsNotifications = try container.decode(Bool.self, forKey: .supportsNotifications)
+        supportsNotifications = try container.decode(Bool.self, forKey: .supportsNotifications)
         priority = try container.decode(Int.self, forKey: .priority)
         cloudUserId = try container.decodeIfPresent(String.self, forKey: .cloudUserId)
     }
@@ -80,7 +80,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
         try container.encode(password, forKey: .password)
         try container.encode(alwaysSendBasicAuth, forKey: .alwaysSendBasicAuth)
         try container.encode(ignoreSSL, forKey: .ignoreSSL)
-        try container.encode(suportsNotifications, forKey: .supportsNotifications)
+        try container.encode(supportsNotifications, forKey: .supportsNotifications)
         try container.encode(priority, forKey: .priority)
         if let cloudUserId {
             try container.encode(cloudUserId, forKey: .cloudUserId)

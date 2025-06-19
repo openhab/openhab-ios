@@ -517,7 +517,7 @@ public extension Preferences {
     static func getNotificationConnection(of connections: [ConnectionConfiguration?]) -> ConnectionConfiguration? {
         connections
             .compactMap { $0 }
-            .filter { $0.suportsNotifications == true }
+            .filter { $0.supportsNotifications == true }
             .sorted { $0.priority > $1.priority }
             .first
     }
