@@ -162,6 +162,10 @@ public final class NetworkTracker: ObservableObject {
         await attemptConnection()
     }
 
+    public func stopTracking() async {
+        await setActiveConnection(nil)
+    }
+
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
         logger.info("NetworkConnection: waitForActiveConnection")
         // Utilize for await to listen for changes in $activeConnection

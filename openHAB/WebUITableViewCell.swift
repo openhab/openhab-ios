@@ -50,7 +50,7 @@ class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     override func displayWidget() {
         os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
 
-        let urlString = widget.url.lowercased().hasPrefix("http") ? widget.url : Preferences.localUrl + widget.url
+        let urlString = widget.url.lowercased().hasPrefix("http") ? widget.url : Preferences.currentHomePreferences.localConnectionConfig.url + widget.url
         guard url?.absoluteString != urlString else {
             os_log("webview URL has not changed, abort loading", log: .viewCycle, type: .info)
             return

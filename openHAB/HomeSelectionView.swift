@@ -39,7 +39,7 @@ struct HomeSelectionView: View {
 
     var body: some View {
         List(homes, id: \.self) { home in
-            let homeName = Preferences.storedPreferences[home.uuidString]?["homeName"] as? String ?? ""
+            let homeName = Preferences.storedHomes[home]?.homeName ?? ""
             HStack {
                 HStack {
                     if showEditOptions {
@@ -47,7 +47,7 @@ struct HomeSelectionView: View {
                             .foregroundStyle(.blue)
                     }
                     Text(homeName)
-                    if Preferences.currentlyUsedSettings == home.uuidString, !showEditOptions {
+                    if Preferences.currentHomePreferences.id == home, !showEditOptions {
                         Spacer()
                         Image(systemSymbol: .checkmark)
                             .foregroundColor(.blue)
@@ -69,7 +69,7 @@ struct HomeSelectionView: View {
                 if showEditOptions {
                     HStack {
                         Spacer()
-                        if Preferences.currentlyUsedSettings != home.uuidString {
+                        if Preferences.currentHomePreferences.id != home {
                             Button(action: {
                                 homeNameForAlert = homeName
                                 homeForAlert = home
@@ -133,7 +133,7 @@ struct HomeSelectionView: View {
             }
         }
         .onAppear(perform: loadHomesList)
-        .navigationBarTitle("homeSelection")
+        .navigationBarTitle("Manage Homes")
         .toolbar {
             if showEditOptions {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -174,11 +174,11 @@ struct HomeSelectionView: View {
     }
 
     private func select(home: UUID) {
-        Preferences.switchCurrentlyUsedSettings(to: home)
+        Preferences.switchActiveHome(to: home)
     }
 
     private func loadHomesList() {
-        homes = Preferences.listStoredPreferences()
+        homes = Preferences.listStoredHomes()
     }
 
     private func delete(home toDelete: UUID?) {
@@ -186,7 +186,7 @@ struct HomeSelectionView: View {
             return
         }
         os_log("delete home settings for %@", toDelete.uuidString)
-        Preferences.deleteStoredSettings(toDelete)
+        Preferences.deleteStoredHome(toDelete)
         loadHomesList()
     }
 
@@ -196,11 +196,7 @@ struct HomeSelectionView: View {
         }
         let newName = newHomeName
         os_log("rename home %@ to %@", toRename.uuidString, newName)
-        if toRename == Preferences.getCurrentlyUsedSettings() {
-            Preferences.homeName = newName
-        } else {
-            Preferences.renameHome(toRename, newHomeName: newName)
-        }
+        Preferences.renameHome(toRename, newHomeName: newName)
     }
 
     private func addHome() {

@@ -84,9 +84,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
-        Preferences.initializeStoredPreferences()
-        Preferences.migrateUserDefaultsIfRequired()
-        Preferences.migrateUserDefaultsToConnectionIfRequired()
+        Preferences.migratePreferences()
 
         registerForPushNotifications()
 
@@ -233,7 +231,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
         let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-        await displayNotification(message: message, action: action)
+        let cloudUserId = userInfo["userId"] as? String
+        await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
 
         return [] // Modify this if you want to show banners, alerts, etc.
     }
@@ -242,6 +241,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
+
         logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
 
         if actionIdentifier != UNNotificationDismissActionIdentifier {
@@ -249,11 +249,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 userInfo["actionIdentifier"] = actionIdentifier
             }
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-            notifyNotificationListeners(action: action)
+            let cloudUserId = userInfo["userId"] as? String
+
+            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         }
     }
 
-    private func displayNotification(message: String, action: String?) async {
+    private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
         logger.info("displayNotification \(message)")
 
         Task {
@@ -289,7 +291,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 // Use closure-based tap gesture insteae of #selector
                 let tapGesture = MessageTapGestureRecognizer {
                     Task {
-                        self.messageViewTapped(action: action)
+                        self.messageViewTapped(action: action, cloudUserId: cloudUserId)
                     }
                 }
                 view.addGestureRecognizer(tapGesture)
@@ -300,17 +302,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // Action to be performed when the notification message view is tapped
-    func messageViewTapped(action: String?) {
-        notifyNotificationListeners(action: action)
+    func messageViewTapped(action: String?, cloudUserId: String? = nil) {
+        notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         SwiftMessages.hideAll()
     }
 
     // ✅ Ensure this runs on the MainActor
     @MainActor
-    private func notifyNotificationListeners(action: String?) {
+    private func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
         if let navigationController = window?.rootViewController as? UINavigationController,
            let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            rootViewController.handleNotification(action: action)
+            rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
         }
     }
 }

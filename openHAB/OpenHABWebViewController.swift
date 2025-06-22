@@ -146,8 +146,8 @@ class OpenHABWebViewController: OpenHABViewController {
 
         if let path {
             url = appendPathToURL(baseURL: url, path: path) ?? url
-        } else if !Preferences.defaultMainUIPath.isEmpty {
-            url = appendPathToURL(baseURL: url, path: Preferences.defaultMainUIPath) ?? url
+        } else if !Preferences.currentHomePreferences.defaultMainUIPath.isEmpty {
+            url = appendPathToURL(baseURL: url, path: Preferences.currentHomePreferences.defaultMainUIPath) ?? url
         }
         return url
     }
@@ -407,6 +407,6 @@ extension OpenHABWebViewController: WKUIDelegate {
                  decideMediaCapturePermissionsFor origin: WKSecurityOrigin,
                  initiatedBy frame: WKFrameInfo,
                  type: WKMediaCaptureType) async -> WKPermissionDecision {
-        Preferences.alwaysAllowWebRTC ? .grant : .prompt
+        Preferences.currentHomePreferences.alwaysAllowWebRTC ? .grant : .prompt
     }
 }

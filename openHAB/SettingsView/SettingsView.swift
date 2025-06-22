@@ -16,13 +16,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @State var settingsDemomode = false
-    @State var settingsLocalUrl = ""
-    @State var settingsRemoteUrl = ""
-    @State var settingsUsername = ""
-    @State var settingsPassword = ""
-    @State var settingsAlwaysSendCreds = true
     @State var settingsIdleOff = true
-    @State var settingsIgnoreSSL = true
     @State var settingsRealTimeSliders = true
     @State var settingsSendCrashReports = false
     @State var settingsIconType: IconType = .svg
@@ -34,7 +28,7 @@ struct SettingsView: View {
     @State var sitemaps: [OpenHABSitemap] = []
     @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
-
+    @State var settingsHomeName = ""
     @State var viewAppearedOnce: Bool = false
 
     @Environment(\.dismiss) private var dismiss
@@ -74,7 +68,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationBarBackButtonHidden(true)
-        .navigationBarTitle("Settings")
+        .navigationBarTitle("\(settingsHomeName) Settings")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Save") {
@@ -109,7 +103,7 @@ struct SettingsView: View {
             }
 
             // Sort the sitemaps according to Settings selection.
-            switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsBy) ?? .label {
+            switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
             case .label: sitemaps.sort { $0.label < $1.label }
             case .name: sitemaps.sort { $0.name < $1.name }
             }
@@ -123,44 +117,34 @@ struct SettingsView: View {
         #if !DEBUG
         logger.debug("Loading Settings")
         #endif
-        settingsLocalUrl = Preferences.localUrl
-        settingsRemoteUrl = Preferences.remoteUrl
-        settingsUsername = Preferences.username
-        settingsPassword = Preferences.password
-        settingsAlwaysSendCreds = Preferences.alwaysSendCreds
-        settingsIgnoreSSL = Preferences.ignoreSSL
-        settingsDemomode = Preferences.demomode
+        settingsDemomode = Preferences.currentHomePreferences.demomode
         settingsIdleOff = Preferences.idleOff
-        settingsRealTimeSliders = Preferences.realTimeSliders
+        settingsRealTimeSliders = Preferences.currentHomePreferences.realTimeSliders
         settingsSendCrashReports = Preferences.sendCrashReports
-        settingsIconType = IconType(rawValue: Preferences.iconType) ?? .png
-        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.sortSitemapsBy) ?? .label
-        settingsDefaultMainUIPath = Preferences.defaultMainUIPath
-        settingsAlwaysAllowWebRTC = Preferences.alwaysAllowWebRTC
-        settingsSitemapForWatch = Preferences.sitemapForWatch
-        settingsLocalConnectionConfiguration = Preferences.localConnectionConfig
-        settingsRemoteConnectionConfiguration = Preferences.remoteConnectionConfig
+        settingsIconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .png
+        settingsSortSitemapsBy = SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label
+        settingsDefaultMainUIPath = Preferences.currentHomePreferences.defaultMainUIPath
+        settingsAlwaysAllowWebRTC = Preferences.currentHomePreferences.alwaysAllowWebRTC
+        settingsSitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
+        settingsLocalConnectionConfiguration = Preferences.currentHomePreferences.localConnectionConfig
+        settingsRemoteConnectionConfiguration = Preferences.currentHomePreferences.remoteConnectionConfig
+        settingsHomeName = Preferences.currentHomePreferences.homeName
     }
 
     func saveSettings() {
-        Preferences.localUrl = settingsLocalUrl
-        Preferences.remoteUrl = settingsRemoteUrl
-        Preferences.username = settingsUsername
-        Preferences.password = settingsPassword
-        Preferences.alwaysSendCreds = settingsAlwaysSendCreds
-        Preferences.ignoreSSL = settingsIgnoreSSL
-        Preferences.demomode = settingsDemomode
+        Preferences.modifyActiveHome { homePreferences in
+            homePreferences.demomode = settingsDemomode
+            homePreferences.realTimeSliders = settingsRealTimeSliders
+            homePreferences.iconType = settingsIconType.rawValue
+            homePreferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
+            homePreferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
+            homePreferences.sitemapForWatch = settingsSitemapForWatch
+            homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
+            homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
+            homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
+        }
         Preferences.idleOff = settingsIdleOff
-        Preferences.realTimeSliders = settingsRealTimeSliders
-        Preferences.iconType = settingsIconType.rawValue
         Preferences.sendCrashReports = settingsSendCrashReports
-        Preferences.sortSitemapsBy = settingsSortSitemapsBy.rawValue
-        Preferences.defaultMainUIPath = settingsDefaultMainUIPath
-        Preferences.alwaysAllowWebRTC = settingsAlwaysAllowWebRTC
-        Preferences.sitemapForWatch = settingsSitemapForWatch
-        Preferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
-        Preferences.localConnectionConfig = settingsLocalConnectionConfiguration
-        Preferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
     }
 }
 
@@ -176,13 +160,7 @@ extension UIApplication {
 #Preview {
     struct PreviewWrapper: View {
         @State var settingsDemomode = false
-        @State var settingsLocalUrl = "http://192.168.1.100"
-        @State var settingsRemoteUrl = "https://myopenhab.org"
-        @State var settingsUsername = "user"
-        @State var settingsPassword = "password123"
-        @State var settingsAlwaysSendCreds = true
         @State var settingsIdleOff = true
-        @State var settingsIgnoreSSL = true
         @State var settingsRealTimeSliders = true
         @State var settingsSendCrashReports = false
         @State var settingsIconType: IconType = .png
@@ -221,13 +199,7 @@ extension UIApplication {
             NavigationView {
                 SettingsView(
                     settingsDemomode: settingsDemomode,
-                    settingsLocalUrl: settingsLocalUrl,
-                    settingsRemoteUrl: settingsRemoteUrl,
-                    settingsUsername: settingsUsername,
-                    settingsPassword: settingsPassword,
-                    settingsAlwaysSendCreds: settingsAlwaysSendCreds,
                     settingsIdleOff: settingsIdleOff,
-                    settingsIgnoreSSL: settingsIgnoreSSL,
                     settingsRealTimeSliders: settingsRealTimeSliders,
                     settingsSendCrashReports: settingsSendCrashReports,
                     settingsIconType: settingsIconType,

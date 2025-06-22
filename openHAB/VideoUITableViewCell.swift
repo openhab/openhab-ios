@@ -170,7 +170,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         activeTask = Task {
             do {
-                guard let config = Preferences.getLowestPriorityOpenHABConnection() else {
+                guard let config = NetworkTracker.shared.activeConnection?.configuration else {
                     logger.warning("No openHAB configuration found.")
                     throw HTTPClientError.noConfiguration
                 }
