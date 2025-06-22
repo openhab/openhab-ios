@@ -60,37 +60,21 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
     @MainActor
     public func subscribeToPreferences() {
-        let currentlyUsedSettings: AnyPublisher<any Sendable, Never> = Preferences.$currentlyUsedSettings
-            .map { $0 as any Sendable }
-            .eraseToAnyPublisher()
-        let watchRelatedSettings: AnyPublisher<any Sendable, Never> = currentlyUsedSettings
-            .merge(
-                with:
-                Preferences.$defaultSitemap.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                Preferences.$sitemapForWatch.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                Preferences.$sitemapForWatchLabel.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                Preferences.$iconType.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                Preferences.$demomode.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                Preferences.$localConnectionConfig.map { $0 as any Sendable }.eraseToAnyPublisher(),
-                Preferences.$localConnectionConfig.map { $0 as any Sendable }.eraseToAnyPublisher()
-            )
-            .eraseToAnyPublisher()
-
-        preferencesSubscription = watchRelatedSettings
+        preferencesSubscription = Preferences.$currentHomePreferences
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .sink { _ in } receiveValue: { _ in
-                self.syncPreferencesToWatch()
+            .sink { _ in } receiveValue: { homeSettings in
+                self.syncPreferencesToWatch(homeSettings)
             }
     }
 
     @MainActor
-    public func syncPreferencesToWatch() {
+    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.currentHomePreferences) {
         guard WCSession.default.activationState == .activated else {
             logger.warning("WCSession not activated; skipping sync.")
             return
         }
 
-        let prefs = WatchPreferences(fromPreferences: Preferences.self)
+        let prefs = WatchPreferences(fromPreferences: homeSettings)
         let context = prefs.encodedWatchPreferences()
 
         guard cachedWatchPreferences != context else {
@@ -113,7 +97,7 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 
 @MainActor
 extension WatchPreferences {
-    init(fromPreferences preferences: Preferences.Type) {
+    init(fromPreferences preferences: HomePreferences) {
         self.init(
             localUrl: preferences.localConnectionConfig.url,
             remoteUrl: preferences.remoteConnectionConfig.url,

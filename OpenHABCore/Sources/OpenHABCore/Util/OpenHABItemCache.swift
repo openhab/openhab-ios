@@ -40,8 +40,8 @@ public actor OpenHABItemCache {
     }
 
     public func setup() async {
-        let connection1: ConnectionConfiguration = await Preferences.localConnectionConfig
-        let connection2: ConnectionConfiguration = await Preferences.remoteConnectionConfig
+        let connection1: ConnectionConfiguration = await Preferences.currentHomePreferences.localConnectionConfig
+        let connection2: ConnectionConfiguration = await Preferences.currentHomePreferences.remoteConnectionConfig
         logger.info("Local: \(connection1.url), Remote: \(connection2.url)")
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }

@@ -282,14 +282,14 @@ class NotificationService: UNNotificationServiceExtension {
 
         if let cloudUserId,
            let uuid = await Preferences.storedSettingsId(forCloudUserId: cloudUserId),
-           let instance = await Preferences.preferenceInstance(for: uuid.uuidString) {
+           let instance = await Preferences.storedPreferences[uuid] {
             logger.info("Setting up network tracking for \(cloudUserId)")
-            connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
+            connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
             logger.info("Using default connection configurations")
             connections = await [
-                Preferences.localConnectionConfig,
-                Preferences.remoteConnectionConfig
+                Preferences.currentHomePreferences.localConnectionConfig,
+                Preferences.currentHomePreferences.remoteConnectionConfig
             ]
         }
 

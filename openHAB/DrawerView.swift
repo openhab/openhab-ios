@@ -138,14 +138,16 @@ struct DrawerView: View {
                         dismiss: dismiss
                     )
                     .onTapGesture(count: 2) {
-                        if sitemap.name == sitemapForWatch {
-                            sitemapForWatch = nil
-                            Preferences.sitemapForWatch = ""
-                            Preferences.sitemapForWatchLabel = ""
-                        } else {
-                            sitemapForWatch = sitemap.name
-                            Preferences.sitemapForWatch = sitemap.name
-                            Preferences.sitemapForWatchLabel = sitemap.label
+                        Preferences.changeCurrentHomePreferences { homePreferences in
+                            if sitemap.name == sitemapForWatch {
+                                sitemapForWatch = nil
+                                homePreferences.sitemapForWatch = ""
+                                homePreferences.sitemapForWatchLabel = ""
+                            } else {
+                                sitemapForWatch = sitemap.name
+                                homePreferences.sitemapForWatch = sitemap.name
+                                homePreferences.sitemapForWatchLabel = sitemap.label
+                            }
                         }
                     }
                 }
@@ -198,7 +200,7 @@ struct DrawerView: View {
             Section(header: Text("System")) {
                 settingsMenuEntry(image: .gear, text: "settings", goTo: .settings)
 
-                if Preferences.getNotificationConnection() != nil, !Preferences.demomode {
+                if Preferences.getNotificationConnection() != nil, !Preferences.currentHomePreferences.demomode {
                     settingsMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
                 }
 
@@ -252,7 +254,7 @@ struct DrawerView: View {
         .task {
             let activeConnection = networkTracker.activeConnection
             await updateSitemapsAndUITiles(activeConnection: activeConnection)
-            sitemapForWatch = Preferences.sitemapForWatch
+            sitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
         }
         .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {
@@ -287,7 +289,7 @@ struct DrawerView: View {
                     sitemaps = Array(sitemaps.dropLast())
                 }
 
-                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsBy) ?? .label {
+                switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
                 case .label:
                     sitemaps.sort { $0.label < $1.label }
                 case .name:

@@ -84,9 +84,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
-        Preferences.initializeStoredPreferences()
-        Preferences.migrateUserDefaultsIfRequired()
-        Preferences.migrateUserDefaultsToConnectionIfRequired()
+        Preferences.migratePreferences()
 
         registerForPushNotifications()
 

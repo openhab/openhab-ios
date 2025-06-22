@@ -39,7 +39,7 @@ struct HomeSelectionView: View {
 
     var body: some View {
         List(homes, id: \.self) { home in
-            let homeName = Preferences.storedPreferences[home.uuidString]?["homeName"] as? String ?? ""
+            let homeName = Preferences.storedPreferences[home]?.homeName ?? ""
             HStack {
                 HStack {
                     if showEditOptions {
@@ -47,7 +47,7 @@ struct HomeSelectionView: View {
                             .foregroundStyle(.blue)
                     }
                     Text(homeName)
-                    if Preferences.currentlyUsedSettings == home.uuidString, !showEditOptions {
+                    if Preferences.currentHomePreferences.id == home, !showEditOptions {
                         Spacer()
                         Image(systemSymbol: .checkmark)
                             .foregroundColor(.blue)
@@ -69,7 +69,7 @@ struct HomeSelectionView: View {
                 if showEditOptions {
                     HStack {
                         Spacer()
-                        if Preferences.currentlyUsedSettings != home.uuidString {
+                        if Preferences.currentHomePreferences.id != home {
                             Button(action: {
                                 homeNameForAlert = homeName
                                 homeForAlert = home
@@ -197,7 +197,9 @@ struct HomeSelectionView: View {
         let newName = newHomeName
         os_log("rename home %@ to %@", toRename.uuidString, newName)
         if toRename == Preferences.getCurrentlyUsedSettings() {
-            Preferences.homeName = newName
+            Preferences.changeCurrentHomePreferences {
+                $0.homeName = newName
+            }
         } else {
             Preferences.renameHome(toRename, newHomeName: newName)
         }

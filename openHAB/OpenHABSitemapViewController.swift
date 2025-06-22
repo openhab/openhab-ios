@@ -268,7 +268,7 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
     }
 
     override func reloadView() {
-        defaultSitemap = Preferences.defaultSitemap
+        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
         logger.debug("Reload view")
         selectSitemap()
     }
@@ -555,9 +555,9 @@ extension OpenHABSitemapViewController {
 
     // load settings into local properties
     func loadSettings() {
-        defaultSitemap = Preferences.defaultSitemap
+        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
         idleOff = Preferences.idleOff
-        iconType = IconType(rawValue: Preferences.iconType) ?? .png
+        iconType = IconType(rawValue: Preferences.currentHomePreferences.iconType) ?? .png
         #if DEBUG
         // always use demo sitemap for UITest
         if ProcessInfo.processInfo.environment["UITest"] != nil {
