@@ -34,10 +34,11 @@ struct SpinningSymbol: View {
 struct SingleConnectionSettingsView: View {
     var headerText: String
     @Binding var connectionConfig: ConnectionConfiguration
-
+    var showNotificationToggle: Bool
     @State private var isTestingConnection = false
     @State private var connectionTestMessage: String?
     @State private var connectionTestSuccess: Bool?
+    @State private var showAdvanced = false
 
     var body: some View {
         Section(header: Text(headerText)) {
@@ -120,14 +121,23 @@ struct SingleConnectionSettingsView: View {
                     Text("Enter password on server")
                 }
             }
+            DisclosureGroup("Advanced", isExpanded: $showAdvanced) {
+                Toggle("Always send credentials", isOn: $connectionConfig.alwaysSendBasicAuth)
+                    .font(.caption)
+                    .opacity(0.8)
 
-            Toggle("Always send credentials", isOn: $connectionConfig.alwaysSendBasicAuth)
-                .font(.caption)
-                .opacity(0.8)
+                Toggle("Ignore SSL certificates", isOn: $connectionConfig.ignoreSSL)
+                    .font(.caption)
+                    .opacity(0.8)
 
-            Toggle("Ignore SSL certificates", isOn: $connectionConfig.ignoreSSL)
-                .font(.caption)
-                .opacity(0.8)
+                if showNotificationToggle {
+                    Toggle("openHAB Cloud Service", isOn: $connectionConfig.supportsNotifications)
+                        .font(.caption)
+                        .opacity(0.8)
+                }
+            }
+            .font(.subheadline)
+            .animation(.default, value: showAdvanced)
         }
     }
 
@@ -199,16 +209,15 @@ struct SingleConnectionSettingsView: View {
 // **TODO Migrate to @Previewable on iOS 17
 #Preview {
     struct PreviewWrapper: View {
-        @State var connectionConfig = ConnectionConfiguration(
-            url: "http://192.168.2.1:8080",
-            username: "user",
-            password: "password123"
-        )
+        @State var connectionConfig = ConnectionConfiguration.makeDefaultRemote { cfg in
+            cfg.username = "user"
+            cfg.password = "password123"
+        }
 
         var body: some View {
             NavigationView {
                 Form {
-                    SingleConnectionSettingsView(headerText: "Connection Settings for local server", connectionConfig: $connectionConfig)
+                    SingleConnectionSettingsView(headerText: "Connection Settings for local server", connectionConfig: $connectionConfig, showNotificationToggle: false)
                 }
             }
         }

@@ -34,7 +34,7 @@ struct SettingsView: View {
     @State var sitemaps: [OpenHABSitemap] = []
     @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
-
+    @State var settingsHomeName = ""
     @State var viewAppearedOnce: Bool = false
 
     @Environment(\.dismiss) private var dismiss
@@ -74,7 +74,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationBarBackButtonHidden(true)
-        .navigationBarTitle("Settings")
+        .navigationBarTitle("\(settingsHomeName) Settings")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Save") {
@@ -140,6 +140,7 @@ struct SettingsView: View {
         settingsSitemapForWatch = Preferences.sitemapForWatch
         settingsLocalConnectionConfiguration = Preferences.localConnectionConfig
         settingsRemoteConnectionConfiguration = Preferences.remoteConnectionConfig
+        settingsHomeName = Preferences.homeName
     }
 
     func saveSettings() {
