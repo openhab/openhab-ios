@@ -82,51 +82,6 @@ public struct UserDefaultObject<T: Codable & Sendable> {
     }
 }
 
-@propertyWrapper @MainActor
-public struct UserDefaultURL {
-    private static let urlSanitizer: (String) -> (String?) = {
-        // Trim and validate the new URL
-        let trimmedUri = $0.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmedUri.isValidURL || trimmedUri.isEmpty else { // empty is the default for localUrl
-            return nil
-        }
-        return trimmedUri
-    }
-
-    private static let urlConverter: (Any) -> (String?) = {
-        guard let preferenceString = $0 as? String else {
-            return nil
-        }
-        return urlSanitizer(preferenceString)
-    }
-
-    private let key: String
-    private let defaultValue: String
-    private let isHomeProperty: Bool
-    private let subject: CurrentValueSubject<String, Never>
-
-    public var wrappedValue: String {
-        get {
-            Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: UserDefaultURL.urlSanitizer, decoder: UserDefaultURL.urlConverter)
-        }
-        set {
-            Preferences.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject, sanitize: UserDefaultURL.urlSanitizer) { $0 }
-        }
-    }
-
-    public var projectedValue: AnyPublisher<String, Never> {
-        subject.eraseToAnyPublisher()
-    }
-
-    public init(_ key: String, defaultValue: String, isHomeProperty: Bool = false) {
-        self.key = key
-        self.defaultValue = defaultValue
-        self.isHomeProperty = isHomeProperty
-        let currentValue = Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: UserDefaultURL.urlConverter)
-        subject = CurrentValueSubject<String, Never>(currentValue)
-    }
-}
-
 public struct HomePreferences: Codable, Sendable {
     public let id: UUID
     public var defaultView: String = "web"
@@ -174,8 +129,8 @@ public enum Preferences {
     @UserDefault("didMigrateToSharedDefaults", defaultValue: false)
     private static var didMigrateToSharedDefaults: Bool
 
-    @UserDefault("didMigrateToConnectionConfig", defaultValue: false)
-    private static var didMigrateToConnectionConfig: Bool
+    @UserDefault("didMigrateToMultipleHomes", defaultValue: false)
+    private static var didMigrateToMultipleHomes: Bool
 
     private static var loadingStoredHome = false
 }
@@ -358,36 +313,37 @@ public extension Preferences {
     static func migratePreferences() {
         initializeStoredHomes()
         migrateToSharedDefaultsIfRequired()
-        migrateToConnectionConfigIfRequired()
+        migrateToMultipleHomesIfRequired()
     }
 
     private static func migrateToSharedDefaultsIfRequired() {
         guard !didMigrateToSharedDefaults else { return }
 
-        var currentHomePreferences = Preferences.currentHomePreferences
+        modifyActiveHome { currentHomePreferences in
+            currentHomePreferences.localConnectionConfig.url = UserDefaults.standard.string(forKey: "localUrl") ?? currentHomePreferences.localConnectionConfig.url
+            currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth
+            currentHomePreferences.localConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.localConnectionConfig.ignoreSSL
+            currentHomePreferences.remoteConnectionConfig.url = UserDefaults.standard.string(forKey: "remoteUrl") ?? currentHomePreferences.remoteConnectionConfig.url
+            currentHomePreferences.remoteConnectionConfig.username = UserDefaults.standard.string(forKey: "username") ?? currentHomePreferences.remoteConnectionConfig.username
+            currentHomePreferences.remoteConnectionConfig.password = UserDefaults.standard.string(forKey: "password") ?? currentHomePreferences.remoteConnectionConfig.password
+            currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth
+            currentHomePreferences.remoteConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.remoteConnectionConfig.ignoreSSL
+            currentHomePreferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
+            currentHomePreferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
+            currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
+        }
 
-        currentHomePreferences.localConnectionConfig.url = UserDefaults.standard.string(forKey: "localUrl") ?? currentHomePreferences.localConnectionConfig.url
-        currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth
-        currentHomePreferences.localConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.localConnectionConfig.ignoreSSL
-        currentHomePreferences.remoteConnectionConfig.url = UserDefaults.standard.string(forKey: "remoteUrl") ?? currentHomePreferences.remoteConnectionConfig.url
-        currentHomePreferences.remoteConnectionConfig.username = UserDefaults.standard.string(forKey: "username") ?? currentHomePreferences.remoteConnectionConfig.username
-        currentHomePreferences.remoteConnectionConfig.password = UserDefaults.standard.string(forKey: "password") ?? currentHomePreferences.remoteConnectionConfig.password
-        currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth
-        currentHomePreferences.remoteConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.remoteConnectionConfig.ignoreSSL
-        currentHomePreferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
-        currentHomePreferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
-        currentHomePreferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
-        currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
-
-        Preferences.currentHomePreferences = currentHomePreferences
         Preferences.idleOff = UserDefaults.standard.object(forKey: "idleOff") as? Bool ?? Preferences.idleOff
         Preferences.sendCrashReports = UserDefaults.standard.object(forKey: "sendCrashReports") as? Bool ?? Preferences.sendCrashReports
 
         didMigrateToSharedDefaults = true
+        // this was done implicitly
+        didMigrateToMultipleHomes = true
     }
 
-    private static func migrateToConnectionConfigIfRequired() {
-        guard !didMigrateToConnectionConfig else { return }
+    private static func migrateToMultipleHomesIfRequired() {
+        guard !didMigrateToMultipleHomes else { return }
 
         migrateToSharedDefaultsIfRequired()
 
@@ -412,13 +368,22 @@ public extension Preferences {
         newRemoteConfiguration.ignoreSSL = oldIgnoreSSL ?? newRemoteConfiguration.ignoreSSL
 
         // Save to Preferences
-        var currentHomePreferences = Preferences.currentHomePreferences
-        currentHomePreferences.localConnectionConfig = newLocalConfiguration
-        currentHomePreferences.remoteConnectionConfig = newRemoteConfiguration
+        modifyActiveHome { currentHomePreferences in
+            currentHomePreferences.defaultView = Preferences.sharedDefaults.string(forKey: "defaultView") ?? currentHomePreferences.defaultView
+            currentHomePreferences.demomode = Preferences.sharedDefaults.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
+            currentHomePreferences.realTimeSliders = Preferences.sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.iconType = Preferences.sharedDefaults.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
+            currentHomePreferences.defaultSitemap = Preferences.sharedDefaults.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
+            currentHomePreferences.sortSitemapsBy = Preferences.sharedDefaults.object(forKey: "sortSitemapsBy") as? Int ?? currentHomePreferences.sortSitemapsBy
+            currentHomePreferences.defaultMainUIPath = Preferences.sharedDefaults.string(forKey: "defaultMainUIPath") ?? currentHomePreferences.defaultMainUIPath
+            currentHomePreferences.alwaysAllowWebRTC = Preferences.sharedDefaults.object(forKey: "alwaysAllowWebRTC") as? Bool ?? currentHomePreferences.alwaysAllowWebRTC
+            currentHomePreferences.sitemapForWatch = Preferences.sharedDefaults.string(forKey: "sitemapForWatch") ?? currentHomePreferences.sitemapForWatch
+            currentHomePreferences.localConnectionConfig = newLocalConfiguration
+            currentHomePreferences.remoteConnectionConfig = newRemoteConfiguration
+            currentHomePreferences.sitemapForWatchLabel = Preferences.sharedDefaults.string(forKey: "sitemapForWatchLabel") ?? currentHomePreferences.sitemapForWatchLabel
+        }
 
-        Preferences.currentHomePreferences = currentHomePreferences
-
-        didMigrateToConnectionConfig = true
+        didMigrateToMultipleHomes = true
     }
 }
 
