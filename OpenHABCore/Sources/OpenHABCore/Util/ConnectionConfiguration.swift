@@ -16,7 +16,7 @@ public struct ConnectionPayload: Codable {
     public var remote: ConnectionConfiguration
 }
 
-public struct ConnectionConfiguration: Hashable, Sendable, Codable {
+public struct ConnectionConfiguration: Hashable, Sendable, Codable, Equatable {
     // 🔹 Coding keys for manual encoding/decoding
     private enum CodingKeys: String, CodingKey {
         case url, username, password, alwaysSendBasicAuth, ignoreSSL, supportsNotifications, priority, cloudUserId

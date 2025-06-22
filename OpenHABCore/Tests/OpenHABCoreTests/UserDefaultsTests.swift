@@ -28,26 +28,43 @@ final class UserDefaultsTests: XCTestCase {
         }
         data.removePersistentDomain(forName: defaultsName)
 
-        Preferences.username = "testuser"
-        Preferences.localUrl = "http://local.test"
-        Preferences.remoteUrl = "http://remote.test"
-        Preferences.password = "secret"
-        Preferences.ignoreSSL = true
-        Preferences.demomode = true
-        Preferences.idleOff = false
-        Preferences.iconType = 2
-        Preferences.defaultSitemap = "default"
-        Preferences.sitemapForWatch = "watchmap"
+        let random: String = UUID().uuidString
 
-        XCTAssertEqual(Preferences.username, data.string(forKey: "username"))
-        XCTAssertEqual(Preferences.localUrl, data.string(forKey: "localUrl"))
-        XCTAssertEqual(Preferences.remoteUrl, data.string(forKey: "remoteUrl"))
-        XCTAssertEqual(Preferences.password, data.string(forKey: "password"))
-        XCTAssertEqual(Preferences.ignoreSSL, data.bool(forKey: "ignoreSSL"))
-        XCTAssertEqual(Preferences.demomode, data.bool(forKey: "demomode"))
+        var home = Preferences.currentHomePreferences
+        home.remoteConnectionConfig.username = "testuser\(random)"
+        home.localConnectionConfig.url = "http://local\(random).test"
+        home.remoteConnectionConfig.url = "http://remote\(random).test"
+        home.remoteConnectionConfig.password = "secret\(random)"
+        home.remoteConnectionConfig.ignoreSSL = true
+        home.demomode = true
+        home.iconType = 2
+        home.defaultSitemap = "default\(random)"
+        home.sitemapForWatch = "watchmap\(random)"
+
+        Preferences.modifyActiveHome { preferences in
+            preferences.remoteConnectionConfig.username = "testuser\(random)"
+            preferences.localConnectionConfig.url = "http://local\(random).test"
+            preferences.remoteConnectionConfig.url = "http://remote\(random).test"
+            preferences.remoteConnectionConfig.password = "secret\(random)"
+            preferences.remoteConnectionConfig.ignoreSSL = true
+            preferences.demomode = true
+            preferences.iconType = 2
+            preferences.defaultSitemap = "default\(random)"
+            preferences.sitemapForWatch = "watchmap\(random)"
+        }
+
+        Preferences.idleOff = false
+
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.username, home.remoteConnectionConfig.username)
+        XCTAssertEqual(Preferences.currentHomePreferences.localConnectionConfig.url, home.localConnectionConfig.url)
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.url, home.remoteConnectionConfig.url)
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.password, home.remoteConnectionConfig.password)
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.ignoreSSL, home.remoteConnectionConfig.ignoreSSL)
+        XCTAssertEqual(Preferences.currentHomePreferences.demomode, home.demomode)
         XCTAssertEqual(Preferences.idleOff, data.bool(forKey: "idleOff"))
-        XCTAssertEqual(Preferences.iconType, data.integer(forKey: "iconType"))
-        XCTAssertEqual(Preferences.defaultSitemap, data.string(forKey: "defaultSitemap"))
-        XCTAssertEqual(Preferences.sitemapForWatch, data.string(forKey: "sitemapForWatch"))
+        XCTAssertEqual(Preferences.currentHomePreferences.iconType, home.iconType)
+        XCTAssertEqual(Preferences.currentHomePreferences.defaultSitemap, home.defaultSitemap)
+        XCTAssertEqual(Preferences.currentHomePreferences.sitemapForWatch, home.sitemapForWatch)
+        XCTAssertEqual(home, try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!))
     }
 }

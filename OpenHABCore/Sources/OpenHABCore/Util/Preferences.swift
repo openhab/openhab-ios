@@ -82,7 +82,7 @@ public struct UserDefaultObject<T: Codable & Sendable> {
     }
 }
 
-public struct HomePreferences: Codable, Sendable {
+public struct HomePreferences: Codable, Sendable, Equatable {
     public let id: UUID
     public var defaultView: String = "web"
     public var demomode: Bool = true
