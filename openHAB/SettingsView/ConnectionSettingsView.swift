@@ -22,8 +22,8 @@ struct ConnectionSettingsView: View {
         Toggle("Demo Mode", isOn: $settingsDemomode)
 
         if !settingsDemomode {
-            SingleConnectionSettingsView(headerText: "Local server", connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
-            SingleConnectionSettingsView(headerText: "Remote server", connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
+            SingleConnectionSettingsView(headerText: "Local server", connectionConfig: $localConnectionConfiguration)
+            SingleConnectionSettingsView(headerText: "Remote server", connectionConfig: $remoteConnectionConfiguration)
         }
     }
 }
@@ -32,14 +32,14 @@ struct ConnectionSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State var demoMode = false
-        @State var localUrl = "https://openhab.local:8443"
+        @State var localUrl = "http://192.168.1.100"
         @State var remoteUrl = "https://myopenhab.org"
         @State var username = "user"
         @State var password = "password123"
         @State var alwaysSendCreds = true
 
         @State var connectionConfig1 = ConnectionConfiguration(
-            url: "https://openhab.local:8443",
+            url: "http://192.168.2.1",
             username: "user",
             password: "password123"
         )

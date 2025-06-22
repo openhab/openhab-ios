@@ -17,8 +17,10 @@ public struct ConnectionPayload: Codable {
 }
 
 public struct ConnectionConfiguration: Hashable, Sendable, Codable {
-    public static let defaultLocalURL = "https://openhab.local:8443"
-    public static let defaultRemoteURL = "https://myopenhab.org"
+    // 🔹 Coding keys for manual encoding/decoding
+    private enum CodingKeys: String, CodingKey {
+        case url, username, password, alwaysSendBasicAuth, ignoreSSL, priority
+    }
 
     public var url: String
     public var username: String
@@ -26,17 +28,14 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
     public var alwaysSendBasicAuth: Bool
     public var ignoreSSL: Bool
     public var priority: Int // Lower is higher priority, 0 is primary
-    public var supportsNotifications: Bool = false
-    public var cloudUserId: String?
 
-    public init(url: String, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false, supportsNotifications: Bool = false, priority: Int = 10) {
+    public init(url: String, username: String, password: String, alwaysSendBasicAuth: Bool = false, ignoreSSL: Bool = false, priority: Int = 10) {
         self.url = ConnectionConfiguration.normalizeURL(url)
         self.username = username
         self.password = password
         self.alwaysSendBasicAuth = alwaysSendBasicAuth
         self.ignoreSSL = ignoreSSL
         self.priority = priority
-        self.supportsNotifications = supportsNotifications
     }
 
     // 🔹 Ensure normalization on decoding
@@ -48,39 +47,7 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
         password = try container.decode(String.self, forKey: .password)
         alwaysSendBasicAuth = try container.decode(Bool.self, forKey: .alwaysSendBasicAuth)
         ignoreSSL = try container.decode(Bool.self, forKey: .ignoreSSL)
-        supportsNotifications = try container.decode(Bool.self, forKey: .supportsNotifications)
         priority = try container.decode(Int.self, forKey: .priority)
-        cloudUserId = try container.decodeIfPresent(String.self, forKey: .cloudUserId)
-    }
-
-    // MARK: - Static helpers with default values that can be overidden if needed
-
-    public static func makeDefaultLocal(customize: ((inout ConnectionConfiguration) -> Void)? = nil) -> ConnectionConfiguration {
-        var cfg = ConnectionConfiguration(
-            url: defaultLocalURL,
-            username: "",
-            password: "",
-            alwaysSendBasicAuth: false,
-            ignoreSSL: false,
-            supportsNotifications: false,
-            priority: 0
-        )
-        customize?(&cfg)
-        return cfg
-    }
-
-    public static func makeDefaultRemote(customize: ((inout ConnectionConfiguration) -> Void)? = nil) -> ConnectionConfiguration {
-        var cfg = ConnectionConfiguration(
-            url: defaultRemoteURL,
-            username: "",
-            password: "",
-            alwaysSendBasicAuth: false,
-            ignoreSSL: false,
-            supportsNotifications: true,
-            priority: 1
-        )
-        customize?(&cfg)
-        return cfg
     }
 
     // 🔹 Normalize a URL (removes trailing slashes, trims spaces, redirects openHAB cloud)
@@ -108,16 +75,6 @@ public struct ConnectionConfiguration: Hashable, Sendable, Codable {
         try container.encode(password, forKey: .password)
         try container.encode(alwaysSendBasicAuth, forKey: .alwaysSendBasicAuth)
         try container.encode(ignoreSSL, forKey: .ignoreSSL)
-        try container.encode(supportsNotifications, forKey: .supportsNotifications)
         try container.encode(priority, forKey: .priority)
-        if let cloudUserId {
-            try container.encode(cloudUserId, forKey: .cloudUserId)
-        }
-    }
-}
-
-extension ConnectionConfiguration {
-    private enum CodingKeys: String, CodingKey {
-        case url, username, password, alwaysSendBasicAuth, ignoreSSL, supportsNotifications, priority, cloudUserId
     }
 }
