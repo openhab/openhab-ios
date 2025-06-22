@@ -132,7 +132,7 @@ struct SettingsView: View {
     }
 
     func saveSettings() {
-        Preferences.changeCurrentHomePreferences { homePreferences in
+        Preferences.modifyActiveHome { homePreferences in
             homePreferences.demomode = settingsDemomode
             homePreferences.realTimeSliders = settingsRealTimeSliders
             homePreferences.iconType = settingsIconType.rawValue

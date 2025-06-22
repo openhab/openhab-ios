@@ -127,8 +127,7 @@ public struct UserDefaultURL {
     }
 }
 
-@MainActor
-public struct HomePreferences: Codable {
+public struct HomePreferences: Codable, Sendable {
     public let id: UUID
     public var defaultView: String = "web"
     public var demomode: Bool = true
@@ -151,22 +150,34 @@ public struct HomePreferences: Codable {
 
 @MainActor
 public enum Preferences {
-    /// the currently applied settings set from storedPreferences
-    @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: UUID(uuidString: Preferences.currentlyUsedSettings)!))
+    /// the currently applied settings set from storedHomes
+    @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: Preferences.activeHomeId))
     public private(set) static var currentHomePreferences: HomePreferences
 
-    @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
+    @UserDefault("sendCrashReports", defaultValue: false)
+    public static var sendCrashReports: Bool
 
-    @UserDefault("idleOff", defaultValue: false) public static var idleOff: Bool
+    @UserDefault("idleOff", defaultValue: false)
+    public static var idleOff: Bool
 
-    @UserDefault("currentWebViewPath", defaultValue: "") public static var currentWebViewPath: String
-    /// settings for different homes TODO come up with better name
-    @UserDefaultObject("storedPreferences", defaultValue: [:]) public private(set) static var storedPreferences: [UUID: HomePreferences]
-    /// the currently applied settings set from storedPreferences
-    @UserDefault("currentlyUsedSettings", defaultValue: UUID().uuidString) private static var currentlyUsedSettings: String
-    @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
-    @UserDefault("didMigrateToConnectionConfig", defaultValue: false) private static var didMigrateToConnectionConfig: Bool
-    private static var loadingStoredPreferences = false
+    @UserDefault("currentWebViewPath", defaultValue: "")
+    public static var currentWebViewPath: String
+
+    /// settings for different homes
+    @UserDefaultObject("storedHomes", defaultValue: [:])
+    public private(set) static var storedHomes: [UUID: HomePreferences]
+
+    /// the currently applied settings set from storedHomes
+    @UserDefaultObject("activeHomeId", defaultValue: UUID())
+    private static var activeHomeId: UUID
+
+    @UserDefault("didMigrateToSharedDefaults", defaultValue: false)
+    private static var didMigrateToSharedDefaults: Bool
+
+    @UserDefault("didMigrateToConnectionConfig", defaultValue: false)
+    private static var didMigrateToConnectionConfig: Bool
+
+    private static var loadingStoredHome = false
 }
 
 // MARK: Retrieving preference from user defaults, reacting to preference change
@@ -230,10 +241,9 @@ extension Preferences {
 
 // MARK: Multiple homes
 
-@MainActor
 public extension Preferences {
-    static func listStoredPreferences() -> [UUID] {
-        let preferenceIds = storedPreferences
+    static func listStoredHomes() -> [UUID] {
+        let preferenceIds = storedHomes
             .sorted { e1, e2 in
                 e1.value.homeName <= e2.value.homeName
             }
@@ -241,106 +251,104 @@ public extension Preferences {
         return preferenceIds
     }
 
-    static func getCurrentlyUsedSettings() -> UUID {
-        guard let currentPreferenceUUID = UUID(uuidString: currentlyUsedSettings) else {
-            fatalError("currentlyUsedSettings must be a UUID, but was \(currentlyUsedSettings)")
-        }
-        return currentPreferenceUUID
-    }
-
     static func createAndLoadNewStoredSettings(homeName: String) {
-        currentlyUsedSettings = UUID().uuidString
-        var newHomePreferences = HomePreferences(id: getCurrentlyUsedSettings())
-        newHomePreferences.homeName = homeName
-        loadSettings(stored: newHomePreferences)
+        activeHomeId = UUID()
+        var newHome = HomePreferences(id: activeHomeId)
+        newHome.homeName = homeName
+        loadHomePreferences(newHome)
     }
 
-    static func renameHome(_ settingsId: UUID, newHomeName: String) {
-        var stored = storedPreferences
-        stored[settingsId]?.homeName = newHomeName
-        storedPreferences = stored
+    static func renameHome(_ homeId: UUID, newHomeName: String) {
+        if homeId == activeHomeId {
+            modifyActiveHome {
+                $0.homeName = newHomeName
+            }
+        } else {
+            var stored = storedHomes
+            stored[homeId]?.homeName = newHomeName
+            storedHomes = stored
+        }
     }
 
-    static func deleteStoredSettings(_ settingsId: UUID) {
-        guard settingsId != getCurrentlyUsedSettings() else {
+    /// helper function for when we update the remote connection cloudUserId for notifications
+    static func setCloudUserId(_ cloudUserId: String?, for homeId: UUID) {
+        if homeId == activeHomeId {
+            modifyActiveHome { homePreferences in
+                homePreferences.remoteConnectionConfig.cloudUserId = cloudUserId
+            }
+        } else {
+            var stored = storedHomes
+            var home = stored[homeId]
+            home?.remoteConnectionConfig.cloudUserId = cloudUserId
+            stored[homeId] = home
+            storedHomes = stored
+        }
+    }
+
+    static func deleteStoredHome(_ homeId: UUID) {
+        guard homeId != activeHomeId else {
             // cannot remove current home
             return
         }
-        var stored = storedPreferences
-        stored.removeValue(forKey: settingsId)
-        storedPreferences = stored
+        var stored = storedHomes
+        stored.removeValue(forKey: homeId)
+        storedHomes = stored
     }
 
-    static func switchCurrentlyUsedSettings(to settingsId: UUID) {
-        guard let stored = storedPreferences[settingsId] else {
+    static func switchActiveHome(to homeId: UUID) {
+        guard let storedHome = storedHomes[homeId] else {
             // we have not stored our settings in that list yet
             return
         }
 
-        currentlyUsedSettings = settingsId.uuidString
+        activeHomeId = homeId
 
-        loadSettings(stored: stored)
+        loadHomePreferences(storedHome)
     }
 
-    private static func initializeStoredPreferences() {
-        if storedPreferences.isEmpty {
+    private static func initializeStoredHomes() {
+        if storedHomes.isEmpty {
             // first there might be no stored preferences, if no preference was changed since the update
-            storeCurrentHomePreferences()
+            storeActiveHome()
         }
     }
 
-    private static func loadSettings(stored: HomePreferences) {
-        loadingStoredPreferences = true
-        Preferences.currentHomePreferences = stored
-        loadingStoredPreferences = false
-        storeCurrentHomePreferences() // store home settings in case they were not yet there
+    private static func loadHomePreferences(_ preferences: HomePreferences) {
+        loadingStoredHome = true
+        Preferences.currentHomePreferences = preferences
+        loadingStoredHome = false
+        storeActiveHome() // store home settings in case they were not yet there
     }
 
-    private static func storeCurrentHomePreferences() {
-        var all = storedPreferences
-        let homeId = Preferences.getCurrentlyUsedSettings()
+    private static func storeActiveHome() {
+        var all = storedHomes
+        let homeId = Preferences.activeHomeId
         all[homeId] = Preferences.currentHomePreferences
-        storedPreferences = all
+        storedHomes = all
         os_log("Stored preferences for current home %{public}@", log: .default, type: .debug, homeId.uuidString)
     }
 
-    static func changeCurrentHomePreferences(modificationFunction: (inout HomePreferences) -> Void) {
+    static func modifyActiveHome(modificationFunction: (inout HomePreferences) -> Void) {
         var homePreferences = currentHomePreferences
         modificationFunction(&homePreferences)
         currentHomePreferences = homePreferences
-        storeCurrentHomePreferences()
-    }
-
-    // helper function for when we update the remote connection cloudUserId for notifications
-    static func setCloudUserId(_ cloudUserId: String?, for homeId: UUID) {
-        if homeId == getCurrentlyUsedSettings() {
-            changeCurrentHomePreferences { homePreferences in
-                homePreferences.remoteConnectionConfig.cloudUserId = cloudUserId
-            }
-        } else {
-            var storedHomes = storedPreferences
-            var home = storedHomes[homeId]
-            home?.remoteConnectionConfig.cloudUserId = cloudUserId
-            storedHomes[homeId] = home
-            storedPreferences = storedHomes
-        }
+        storeActiveHome()
     }
 }
 
-@MainActor
 public extension Preferences {
-    static func firstStoredSettings(where predicate: (HomePreferences) -> Bool) -> (id: UUID, record: HomePreferences)? {
-        for (uuid, record) in storedPreferences {
+    static func firstStoredHome(where predicate: (HomePreferences) -> Bool) -> (id: UUID, record: HomePreferences)? {
+        for (uuid, record) in storedHomes {
             guard predicate(record) else { continue }
             return (uuid, record)
         }
         return nil
     }
 
-    static func storedSettingsId(forCloudUserId id: String) -> UUID? {
-        firstStoredSettings { homePreferences in
+    static func storedHome(forCloudUserId id: String) -> HomePreferences? {
+        firstStoredHome { homePreferences in
             homePreferences.remoteConnectionConfig.cloudUserId == id
-        }?.id
+        }?.record
     }
 }
 
@@ -348,7 +356,7 @@ public extension Preferences {
 
 public extension Preferences {
     static func migratePreferences() {
-        initializeStoredPreferences()
+        initializeStoredHomes()
         migrateToSharedDefaultsIfRequired()
         migrateToConnectionConfigIfRequired()
     }

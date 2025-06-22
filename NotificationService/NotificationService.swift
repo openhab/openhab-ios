@@ -281,10 +281,9 @@ class NotificationService: UNNotificationServiceExtension {
         let connections: [ConnectionConfiguration]
 
         if let cloudUserId,
-           let uuid = await Preferences.storedSettingsId(forCloudUserId: cloudUserId),
-           let instance = await Preferences.storedPreferences[uuid] {
+           let instance = await Preferences.storedHome(forCloudUserId: cloudUserId) {
             logger.info("Setting up network tracking for \(cloudUserId)")
-            connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
+            connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
             logger.info("Using default connection configurations")
             connections = await [

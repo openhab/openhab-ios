@@ -91,7 +91,7 @@ class OpenHABRootViewController: UIViewController {
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
-            Preferences.changeCurrentHomePreferences(modificationFunction: { homePreferences in
+            Preferences.modifyActiveHome(modificationFunction: { homePreferences in
                 homePreferences.demomode = true
             })
         }
@@ -296,7 +296,7 @@ class OpenHABRootViewController: UIViewController {
                 self.modalDismissed(to: .settings)
             }
         case let .sitemap(sitemap):
-            Preferences.changeCurrentHomePreferences { homePreferences in
+            Preferences.modifyActiveHome { homePreferences in
                 homePreferences.defaultSitemap = sitemap
             }
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
@@ -340,10 +340,10 @@ class OpenHABRootViewController: UIViewController {
             let connection: ConnectionConfiguration // not only URL, because auth and certs might be relevant for establishing the connection
         }
 
-        let storedOpenHabConnections = Preferences.$storedPreferences
+        let storedOpenHabConnections = Preferences.$storedHomes
             .debounce(for: .seconds(1), scheduler: RunLoop.main) // avoid overexcited registrations / deregistrations in batch updates
-            .map { storedPrefsUpdate in // we want to recognize changes in the OpenHab URLs for any of the homes
-                Set<UuidWithConnection>(storedPrefsUpdate.compactMap { storedWithUuid in
+            .map { updatedPreferences in // we want to recognize changes in the OpenHab URLs for any of the homes
+                Set<UuidWithConnection>(updatedPreferences.compactMap { storedWithUuid in
                     let (uuid, homeConfig) = storedWithUuid
                     guard let connection = Preferences.getNotificationConnection(of: homeConfig) else { return nil }
                     return UuidWithConnection(uuid: uuid, connection: connection)
@@ -408,12 +408,12 @@ class OpenHABRootViewController: UIViewController {
         guard let action else { return }
 
         logger.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
-        if let cloudUserId, let targetHome = Preferences.storedSettingsId(forCloudUserId: cloudUserId), Preferences.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
+        if let cloudUserId, let targetHome = Preferences.storedHome(forCloudUserId: cloudUserId), Preferences.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
             // if we need to switch homes, disconnnect the tracking fist,and wait for the tracker to start again with the updated preferences
             Task {
                 await NetworkTracker.shared.stopTracking()
-                logger.info("Switching to home \(targetHome)")
-                Preferences.switchCurrentlyUsedSettings(to: targetHome)
+                logger.info("Switching to home \(targetHome.id)")
+                Preferences.switchActiveHome(to: targetHome.id)
                 await NetworkTracker.shared.waitForActiveConnection()
                 handleNotificationInternal(action)
             }
@@ -636,7 +636,7 @@ class OpenHABRootViewController: UIViewController {
 
             // Don't save our view in demo mode
             if !Preferences.currentHomePreferences.demomode {
-                Preferences.changeCurrentHomePreferences {
+                Preferences.modifyActiveHome {
                     $0.defaultView = currentView.viewName()
                 }
             }

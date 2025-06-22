@@ -138,7 +138,7 @@ struct DrawerView: View {
                         dismiss: dismiss
                     )
                     .onTapGesture(count: 2) {
-                        Preferences.changeCurrentHomePreferences { homePreferences in
+                        Preferences.modifyActiveHome { homePreferences in
                             if sitemap.name == sitemapForWatch {
                                 sitemapForWatch = nil
                                 homePreferences.sitemapForWatch = ""
