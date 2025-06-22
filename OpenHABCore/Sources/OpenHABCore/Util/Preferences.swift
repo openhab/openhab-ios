@@ -152,7 +152,8 @@ public struct HomePreferences: Codable {
 @MainActor
 public enum Preferences {
     /// the currently applied settings set from storedPreferences
-    @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: UUID())) public private(set) static var currentHomePreferences: HomePreferences
+    @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: UUID(uuidString: Preferences.currentlyUsedSettings)!))
+    public private(set) static var currentHomePreferences: HomePreferences
 
     @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
 
