@@ -233,8 +233,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
         let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-        let cloudUserId = userInfo["userId"] as? String
-        await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
+        await displayNotification(message: message, action: action)
 
         return [] // Modify this if you want to show banners, alerts, etc.
     }
@@ -243,7 +242,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
-
         logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
 
         if actionIdentifier != UNNotificationDismissActionIdentifier {
@@ -251,13 +249,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 userInfo["actionIdentifier"] = actionIdentifier
             }
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-            let cloudUserId = userInfo["userId"] as? String
-
-            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+            notifyNotificationListeners(action: action)
         }
     }
 
-    private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
+    private func displayNotification(message: String, action: String?) async {
         logger.info("displayNotification \(message)")
 
         Task {
@@ -293,7 +289,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 // Use closure-based tap gesture insteae of #selector
                 let tapGesture = MessageTapGestureRecognizer {
                     Task {
-                        self.messageViewTapped(action: action, cloudUserId: cloudUserId)
+                        self.messageViewTapped(action: action)
                     }
                 }
                 view.addGestureRecognizer(tapGesture)
@@ -304,17 +300,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // Action to be performed when the notification message view is tapped
-    func messageViewTapped(action: String?, cloudUserId: String? = nil) {
-        notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
+    func messageViewTapped(action: String?) {
+        notifyNotificationListeners(action: action)
         SwiftMessages.hideAll()
     }
 
     // ✅ Ensure this runs on the MainActor
     @MainActor
-    private func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
+    private func notifyNotificationListeners(action: String?) {
         if let navigationController = window?.rootViewController as? UINavigationController,
            let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
+            rootViewController.handleNotification(action: action)
         }
     }
 }

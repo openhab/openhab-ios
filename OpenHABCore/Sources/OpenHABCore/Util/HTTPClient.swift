@@ -159,11 +159,10 @@ public final class HTTPClient: NSObject {
     public func register(prefsURL: String,
                          deviceToken: String,
                          deviceId: String,
-                         deviceName: String) async throws -> String? {
+                         deviceName: String) async throws -> Data? {
         if let url = Endpoint.appleRegistration(prefsURL: prefsURL, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName).url {
             let (data, _): (Data, URLResponse) = try await doRequest(baseURL: url, type: .data)
-            struct CloudUserResponse: Decodable { let userId: String }
-            return try? JSONDecoder().decode(CloudUserResponse.self, from: data).userId
+            return data
         } else {
             throw HTTPClientError.couldNotRegister
         }

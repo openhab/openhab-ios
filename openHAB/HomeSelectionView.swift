@@ -133,7 +133,7 @@ struct HomeSelectionView: View {
             }
         }
         .onAppear(perform: loadHomesList)
-        .navigationBarTitle("Manage Homes")
+        .navigationBarTitle("homeSelection")
         .toolbar {
             if showEditOptions {
                 ToolbarItemGroup(placement: .primaryAction) {
