@@ -176,7 +176,7 @@ struct SingleConnectionSettingsView: View {
         isTestingConnection = false
     }
 
-    private func testConnection() async throws {
+    func testConnection() async throws {
         try connectionConfig.url.testAsValidOpenHABURL()
 
         let connection = try OpenAPIService(connectionConfiguration: connectionConfig, serviceConfiguration: .shortTerm)

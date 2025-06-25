@@ -173,9 +173,8 @@ final class NetworkTrackerTests: XCTestCase {
                 },
                 receiveOutput: nil,
                 receiveCompletion: nil,
-                receiveCancel: nil,
-                receiveRequest: { _ in }
-            )
+                receiveCancel: nil
+            ) { _ in }
             // swiftlint:enable trailing_closure
             .dropFirst()
             .sink { status in

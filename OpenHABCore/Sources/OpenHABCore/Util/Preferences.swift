@@ -84,19 +84,19 @@ public struct UserDefaultObject<T: Codable & Sendable> {
 
 public struct HomePreferences: Codable, Sendable, Equatable {
     public let id: UUID
-    public var defaultView: String = "web"
-    public var demomode: Bool = true
-    public var realTimeSliders: Bool = false
-    public var iconType: Int = 0
-    public var defaultSitemap: String = "demo"
-    public var sortSitemapsBy: Int = 0
-    public var defaultMainUIPath: String = ""
-    public var alwaysAllowWebRTC: Bool = false
-    public var sitemapForWatch: String = "watch"
+    public var defaultView = "web"
+    public var demomode = true
+    public var realTimeSliders = false
+    public var iconType = 0
+    public var defaultSitemap = "demo"
+    public var sortSitemapsBy = 0
+    public var defaultMainUIPath = ""
+    public var alwaysAllowWebRTC = false
+    public var sitemapForWatch = "watch"
     public var localConnectionConfig: ConnectionConfiguration = .localDefault
     public var remoteConnectionConfig: ConnectionConfiguration = .remoteDefault
-    public var sitemapForWatchLabel: String = "watch"
-    public var homeName: String = "Home"
+    public var sitemapForWatchLabel = "watch"
+    public var homeName = "Home"
 
     fileprivate init(id: UUID) {
         self.id = id

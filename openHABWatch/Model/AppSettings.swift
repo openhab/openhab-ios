@@ -16,7 +16,7 @@ import SwiftUI
 
 final class AppSettings: ObservableObject {
     static let shared = AppSettings()
-    var openHABVersion: Int = 2
+    var openHABVersion = 2
     var cancellables = Set<AnyCancellable>()
 
     @Published var localConnectionConfig: ConnectionConfiguration?

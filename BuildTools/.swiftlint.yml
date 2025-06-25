@@ -108,3 +108,6 @@ file_name:
 
 opening_brace:
   ignore_multiline_function_signatures: true
+
+redundant_type_annotation:
+  consider_default_literal_types_redundant: true

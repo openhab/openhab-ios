@@ -28,7 +28,7 @@ func XCTAssertThrowsErrorAsync(
 }
 
 final class MockServerCertificateDelegate: ServerCertificateManagerDelegate {
-    var lastCall: String = ""
+    var lastCall = ""
     var expectedResult: ServerCertificateManager.EvaluateResult = .permitOnce
     var acceptedChangedCalled = false
 

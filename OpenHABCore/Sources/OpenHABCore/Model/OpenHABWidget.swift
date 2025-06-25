@@ -60,7 +60,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case text, number, date, time, datetime, unknown
     }
 
-    public var id: String = ""
+    public var id = ""
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
