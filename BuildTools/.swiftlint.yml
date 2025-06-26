@@ -36,6 +36,7 @@ excluded:
   - ../DerivedData
   - ../openHAB/Intents/Generated
   - ../openHABWatch/Intents/Generated
+  - ../OsLogRewriter/.build
 
 nesting:
     type_level: 2

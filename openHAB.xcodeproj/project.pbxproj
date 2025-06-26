@@ -474,6 +474,7 @@
 		DAF4581D23DC60020018B495 /* ImageRawRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRawRow.swift; sourceTree = "<group>"; };
 		DAF4F6BF222734D200C24876 /* NewImageUITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageUITableViewCell.swift; sourceTree = "<group>"; };
 		DAF6F4112C67E83B0083883E /* openapiCorrected.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = openapiCorrected.json; sourceTree = "<group>"; };
+		DAFD2FE62E0D96700059A1EB /* OsLogRewriter */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = OsLogRewriter; sourceTree = "<group>"; };
 		DF05FF221896BD2D00FF2F9B /* SelectionUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectionUITableViewCell.swift; sourceTree = "<group>"; };
 		DF06F1FB18FEC2020011E7B9 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
 		DF4B84121886DAC400F34902 /* FrameUITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameUITableViewCell.swift; sourceTree = "<group>"; };
@@ -1006,6 +1007,7 @@
 				DFB2622818830A3600D3244D /* Products */,
 				DFB2622918830A3600D3244D /* Frameworks */,
 				DA1C2E4A230DC28F00FACFB0 /* fastlane */,
+				DAFD2FE62E0D96700059A1EB /* OsLogRewriter */,
 				DA0DA9E12E0C9B74000C5D0A /* BuildTools */,
 				DAE238252806E5C800196467 /* Recovered References */,
 			);

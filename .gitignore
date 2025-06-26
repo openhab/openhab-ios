@@ -22,3 +22,5 @@ OpenHABCore/Package.resolved
 swift-openapi-generator/
 OpenHABCore/swift-openapi-generator/
 vendor/
+
+OsLogRewriter/.build

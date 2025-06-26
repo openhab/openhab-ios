@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "OsLogRewriter",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v15)],
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0")
     ],
@@ -11,14 +11,14 @@ let package = Package(
         .executableTarget(
             name: "OsLogRewriter",
             dependencies: [
-                "OsLogRewriterLib",
+                "OsLogRewriterLib"
             ]
         ),
         .target(
             name: "OsLogRewriterLib",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntax", package: "swift-syntax")
             ]
         ),
         .testTarget(
@@ -26,7 +26,7 @@ let package = Package(
             dependencies: [
                 "OsLogRewriterLib",
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax")
             ]
         )
     ]

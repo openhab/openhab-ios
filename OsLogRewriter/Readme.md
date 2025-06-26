@@ -2,7 +2,9 @@
 
 ## 📋 Build and run the executable 
 
-swift run OsLogRewriter <inputFile.swift> > <outputFile.swift>
+'swift run OsLogRewriter <inputFile.swift> > <outputFile.swift>'
+
+'find ./Sources -name "*.swift" -exec swift run OsLogRewriter {} \; > temp.swift && mv temp.swift {}'
 
 ## 📋 How to Run Tests:
 
