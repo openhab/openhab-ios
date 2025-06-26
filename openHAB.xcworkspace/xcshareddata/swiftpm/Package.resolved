@@ -1,5 +1,4 @@
 {
-  "originHash" : "8bdfc8eeb7fcbc48ed390776694834a01e4fcdb093404ab31c58f64918915df4",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -218,6 +217,24 @@
       }
     },
     {
+      "identity" : "swiftformatplugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/weakfl/SwiftFormatPlugin",
+      "state" : {
+        "revision" : "daf7c48b2264b11cc8535aa3649b2d8486bb3b08",
+        "version" : "0.56.1"
+      }
+    },
+    {
+      "identity" : "swiftlintplugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
+      "state" : {
+        "revision" : "3e10a982ff8f62ba6a19401380280a26e4c56bef",
+        "version" : "0.59.1"
+      }
+    },
+    {
       "identity" : "swiftmessages",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftKickMobile/SwiftMessages.git",
@@ -227,5 +244,5 @@
       }
     }
   ],
-  "version" : 3
+  "version" : 2
 }
