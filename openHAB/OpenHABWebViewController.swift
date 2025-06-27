@@ -75,7 +75,7 @@ class OpenHABWebViewController: OpenHABViewController {
             .sink { activeConnection in
                 if let activeConnection {
                     let activeConfiguration = activeConnection.configuration
-                    os_log("OpenHABWebViewController openHAB URL = %{PUBLIC}@", log: .remoteAccess, type: .info, "\(activeConfiguration.url)")
+                    self.logger.info("OpenHABWebViewController openHAB URL = \(activeConfiguration.url)")
                     self.openHABTrackedRootUrl = activeConfiguration.url
                     self.activeConfig = activeConfiguration
                     self.loadWebView(force: false)
@@ -86,7 +86,7 @@ class OpenHABWebViewController: OpenHABViewController {
         NetworkTracker.shared.$status
             .receive(on: DispatchQueue.main)
             .sink { status in
-                os_log("OpenHABWebViewController tracker status %{PUBLIC}@", log: .viewCycle, type: .info, status.rawValue)
+                self.logger.info("OpenHABWebViewController tracker status \(status.rawValue)")
                 switch status {
                 case .connecting:
                     self.showPopupMessage(seconds: 60, title: NSLocalizedString("connecting", comment: ""), message: "", theme: .info)
@@ -187,8 +187,10 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: true)
     }
 
+    // swiftformat:disable redundantSelf
     func clearExistingPage() {
-        os_log("clearExistingPage - webView.url %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description))
+        logger.info("clearExistingPage - webView.url \(String(describing: self.webView.url?.description))")
+
         setHideNavBar(shouldHide: false)
         // clear out existing page while we load.
         webView.stopLoading()
@@ -196,10 +198,12 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func pageLoadError(message: String) {
-        os_log("pageLoadError - webView.url %{PUBLIC}@ %{PUBLIC}@", log: .wkwebview, type: .info, String(describing: webView.url?.description), message)
+        logger.info("pageLoadError - webView.url \(String(describing: self.webView.url?.description)) \(message)")
         showActivityIndicator(show: false)
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
     }
+
+    // swiftformat:enable redundantSelf
 
     override func reloadView() {
         currentTarget = ""
@@ -225,9 +229,9 @@ class OpenHABWebViewController: OpenHABViewController {
         let jsCode = "window.MainUI.handleCommand('\(command)')"
         webView.evaluateJavaScript(jsCode) { (_, error) in
             if let error {
-                os_log("navigateCommandInternal failed %{PUBLIC}@", log: .wkwebview, type: .error, error.localizedDescription)
+                self.logger.error("navigateCommandInternal failed \(error.localizedDescription)")
             } else {
-                os_log("navigateCommandInternal Success", log: .wkwebview, type: .info)
+                self.logger.info("navigateCommandInternal Success")
             }
         }
     }
@@ -271,9 +275,9 @@ class OpenHABWebViewController: OpenHABViewController {
 extension OpenHABWebViewController: WKScriptMessageHandler {
     @MainActor
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, message.name)
+        logger.info("WKScriptMessage \(message.name)")
         if let callbackName = message.body as? String {
-            os_log("WKScriptMessage %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, callbackName)
+            logger.info("WKScriptMessage \(callbackName)")
             switch callbackName {
             case "exitToApp":
                 showSideMenu()
@@ -283,7 +287,7 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
                     setHideNavBar(shouldHide: true)
                 }
             case "sseConnected-true":
-                os_log("WKScriptMessage sseConnected is true", log: OSLog.remoteAccess, type: .info)
+                logger.info("WKScriptMessage sseConnected is true")
                 hidePopupMessages()
                 sseTimer?.invalidate()
                 acceptsCommands = true

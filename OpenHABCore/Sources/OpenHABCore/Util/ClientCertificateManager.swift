@@ -101,14 +101,14 @@ public class ClientCertificateManager {
             kSecValueRef as String: cert!
         ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
-        os_log("SecItemDelete(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
+        logger.info("SecItemDelete(cert) result=%{PUBLIC}d")
         if status == noErr {
             let deleteKeyQuery: [String: Any] = [
                 kSecClass as String: kSecClassKey,
                 kSecValueRef as String: key!
             ]
             status = SecItemDelete(deleteKeyQuery as NSDictionary)
-            os_log("SecItemDelete(key) result=%{PUBLIC}d", log: .default, type: .info, status)
+            logger.info("SecItemDelete(key) result=%{PUBLIC}d")
         }
 
         // Figure out which certs in the certificate chain also need to be removed.
@@ -127,7 +127,7 @@ public class ClientCertificateManager {
                     ]
                     let status = SecItemDelete(deleteCertQuery as NSDictionary)
                     let summary = SecCertificateCopySubjectSummary(ct) as String? ?? ""
-                    os_log("SecItemDelete(certChain) %s result=%{PUBLIC}d", log: .default, type: .info, summary, status)
+                    logger.info("SecItemDelete(certChain) \(summary) result=%{PUBLIC}d")
                 }
             }
         }
@@ -286,7 +286,7 @@ public class ClientCertificateManager {
             importingIdentity = identityDictionaries[0][kSecImportItemIdentity as String] as! SecIdentity?
             importingCertChain = identityDictionaries[0][kSecImportItemCertChain as String] as! [SecCertificate]?
         } else {
-            os_log("SecPKCS12Import failed; result=%{PUBLIC}d", log: .default, type: .info, status)
+            logger.info("SecPKCS12Import failed; result=%{PUBLIC}d")
         }
         return status
     }
@@ -333,12 +333,12 @@ public class ClientCertificateManager {
            let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate] {
             let rootCA = certificates[chainSize - 1]
             let anchors = [rootCA]
-            os_log("Setting anchor for trust evaluation to %s", log: .default, type: .info, SecCertificateCopySubjectSummary(rootCA)! as String)
+            logger.info("Setting anchor for trust evaluation to \(SecCertificateCopySubjectSummary(rootCA)! as String)")
             SecTrustSetAnchorCertificates(trust, anchors as CFArray)
             trustResult = SecTrustResultType.proceed
             var trustError: CFError?
             if SecTrustEvaluateWithError(trust, &trustError) != true {
-                os_log("Trust evaluation failed building client certificate chain after anchor has been set: %s", log: .default, type: .info, trustError.debugDescription)
+                logger.info("Trust evaluation failed building client certificate chain after anchor has been set: \(trustError.debugDescription)")
                 SecTrustGetTrustResult(trust, &trustResult)
             }
         }

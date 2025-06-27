@@ -15,6 +15,7 @@ import SFSafeSymbols
 import SwiftUI
 
 struct ColorPickerRow: View {
+    let logger = Logger(subsystem: "org.openhab", category: "ColorPickerRow")
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject var settings = AppSettings.shared
     var body: some View {
@@ -55,12 +56,12 @@ struct ColorPickerRow: View {
     }
 
     func upButtonPressed() {
-        os_log("ON button pressed", log: .command, type: .info)
+        logger.info("ON button pressed")
         widget.sendCommand("ON")
     }
 
     func downButtonPressed() {
-        os_log("OFF button pressed", log: .command, type: .info)
+        logger.info("OFF button pressed")
         widget.sendCommand("OFF")
     }
 }

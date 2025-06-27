@@ -14,6 +14,8 @@ import os.log
 import WebKit
 
 class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
+    private let logger = Logger(subsystem: "org.openhab.core", category: "WebUITableViewCell")
+
     private var url: URL?
 
     private var widgetWebView: WKWebView!
@@ -48,11 +50,13 @@ class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     override func displayWidget() {
-        os_log("webview loading url %{PUBLIC}@", log: .default, type: .info, widget.url)
+        // swiftformat:disable redundantSelf
+        logger.info("webview loading url \(self.widget.url)")
+        // swiftformat:enable redundantSelf
 
         let urlString = widget.url.lowercased().hasPrefix("http") ? widget.url : Preferences.currentHomePreferences.localConnectionConfig.url + widget.url
         guard url?.absoluteString != urlString else {
-            os_log("webview URL has not changed, abort loading", log: .viewCycle, type: .info)
+            logger.info("webview URL has not changed, abort loading")
             return
         }
 
@@ -66,7 +70,7 @@ class WebUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     }
 
     func setFrame(_ frame: CGRect) {
-        os_log("setFrame", log: .viewCycle, type: .info)
+        logger.info("setFrame")
         super.frame = frame
         widgetWebView?.reload()
     }
@@ -81,28 +85,28 @@ extension WebUITableViewCell: GenericCellCacheProtocol {
 
 extension WebUITableViewCell: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        os_log("webview started loading with URL: %{PUBLIC}s", log: .viewCycle, type: .info, widget.url)
+        logger.info("webview started loading with URL: %{PUBLIC}s")
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        os_log("webview finished load with URL: %{PUBLIC}s", log: .viewCycle, type: .info, widget.url)
+        logger.info("webview finished load with URL: %{PUBLIC}s")
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse, response.statusCode >= 400 {
-            os_log("webview failed with status code: %{PUBLIC}i", log: .urlComposition, type: .debug, response.statusCode)
+            logger.debug("webview failed with status code: %{PUBLIC}i")
             url = nil
         }
         return .allow
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
-        os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
+        logger.debug("webview failed with error: %{PUBLIC}s")
         url = nil
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-        os_log("webview failed with error: %{PUBLIC}s", log: .urlComposition, type: .debug, error.localizedDescription)
+        logger.debug("webview failed with error: %{PUBLIC}s")
         url = nil
     }
 

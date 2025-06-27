@@ -12,8 +12,6 @@
 @preconcurrency import Foundation
 import os
 
-private let logger = Logger(subsystem: "org.openhab", category: "HTTPClient")
-
 public enum HTTPClientError: Error {
     case serverTrustEvaluationFailed(reason: String)
     case noDataforItem

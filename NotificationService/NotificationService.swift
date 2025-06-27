@@ -88,7 +88,7 @@ class NotificationService: UNNotificationServiceExtension {
                 }
             }
             if !notificationActions.isEmpty {
-                os_log("didReceive registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
+                logger.info("didReceive registering \(notificationActions) for category \(category)")
                 let notificationCategory =
                     UNNotificationCategory(
                         identifier: category,
@@ -98,7 +98,7 @@ class NotificationService: UNNotificationServiceExtension {
                     )
                 UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
                     var updatedCategories = existingCategories
-                    os_log("handleNotification adding category %{PUBLIC}@", log: .default, type: .info, category)
+                    self.logger.info("handleNotification adding category \(category)")
                     updatedCategories.insert(notificationCategory)
                     UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
                 }
@@ -123,7 +123,7 @@ class NotificationService: UNNotificationServiceExtension {
                         throw NotificationServiceError.handleNotificationCouldNotAttach
                     }
                 } catch {
-                    os_log("Error fetching data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                    logger.error("Error fetching data: \(error.localizedDescription)")
                 }
                 contentHandler(bestAttemptContent)
             }
@@ -134,9 +134,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     override func serviceExtensionTimeWillExpire() {
-        // Called just before the extension will be terminated by the system.
-        // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
-        os_log("serviceExtensionTimeWillExpire", log: .default, type: .info)
+        logger.info("serviceExtensionTimeWillExpire")
         if let contentHandler, let bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
@@ -150,7 +148,7 @@ class NotificationService: UNNotificationServiceExtension {
                     return actionsArray
                 }
             } catch {
-                os_log("Error parsing actions: %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                logger.info("Error parsing actions: \(error.localizedDescription)")
             }
         }
         return nil
@@ -176,7 +174,7 @@ class NotificationService: UNNotificationServiceExtension {
                 }
 
             } catch {
-                os_log("Error fetching data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                logger.error("Error fetching data: \(error.localizedDescription)")
             }
         }
         return returnValues
@@ -241,8 +239,7 @@ class NotificationService: UNNotificationServiceExtension {
         let tempDirectory = FileManager.default.temporaryDirectory
         let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
         try imageData.write(to: tempFileURL)
-
-        os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
+        logger.info("Image saved to temporary file: \(tempFileURL.absoluteString)")
         return (tempFileURL, mimeType)
     }
 
@@ -262,12 +259,12 @@ class NotificationService: UNNotificationServiceExtension {
                 try fileManager.moveItem(at: tempFile, to: newTempFile)
                 attachment = try UNNotificationAttachment(identifier: UUID().uuidString, url: newTempFile, options: nil)
             } else {
-                os_log("Unrecognized MIME type or file extension", log: .default, type: .error)
+                logger.error("Unrecognized MIME type or file extension")
                 attachment = nil
             }
             return attachment
         } catch {
-            os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            logger.error("Failed to create UNNotificationAttachment: \(error.localizedDescription)")
         }
         return nil
     }

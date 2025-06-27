@@ -19,6 +19,8 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
+    private let logger = Logger(subsystem: "org.openhab", category: "VideoUITableViewCell")
+
     private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
         .init(style: .medium)
     } else {
@@ -33,8 +35,6 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             prepareToPlay()
         }
     }
-
-    private let logger = Logger(subsystem: "org.openhab.app", category: "VideoUITableViewCell")
 
     private var playerView: PlayerView!
     private var mainImageView: UIImageView!
@@ -130,12 +130,12 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
                 switch playerItem.status {
                 case .failed:
-                    os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
+                    logger.debug("Failed to load video with URL: \(url.absoluteString)")
                     Task { @MainActor in
                         self.url = nil
                     }
                 case .readyToPlay:
-                    os_log("Loaded video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
+                    logger.debug("Loaded video with URL: \(url.absoluteString)")
                 default: return
                 }
                 Task { @MainActor in
@@ -178,7 +178,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                 let (byteStream, _) = try await client.processStream(url: url)
                 await handleMJPEGStream(byteStream)
             } catch {
-                os_log("Failed to start MJPEG stream: %@", log: .decoding, type: .error, error.localizedDescription)
+                logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
             }
         }
 
@@ -206,7 +206,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     }
                 }
             } catch {
-                os_log("Failed to process MJPEG stream: %@", log: .decoding, type: .error, error.localizedDescription)
+                logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
             }
         }
     }

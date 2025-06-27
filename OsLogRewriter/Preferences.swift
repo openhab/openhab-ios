@@ -13,8 +13,6 @@
 import os.log
 import UIKit
 
-private let logger = Logger(subsystem: "org.openhab", category: "Preferences")
-
 @propertyWrapper @MainActor
 public struct UserDefault<T: Sendable> {
     private let key: String
@@ -145,11 +143,11 @@ extension Preferences {
     fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
         let preferenceValue = sharedDefaults.object(forKey: key)
         if let preferenceConverted = decoder(preferenceValue) {
-            logger.debug("Preference value \(key) is \(String(describing: preferenceConverted))")
+            logger.debug("Preference value \(key) is \(preferenceConverted)")
             return preferenceConverted
         } else {
             if let preferenceValue {
-                logger.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
+                logger.error("Preference value \(key) was \"\(preferenceValue)\" but did not conform to \(T.self). Replace with default value.")
             } else {
                 logger.info("Preference value \(key) was set for the first time. Using default value.")
             }
@@ -161,15 +159,15 @@ extension Preferences {
 
     fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
         guard let sanitized = sanitize(newValue) else {
-            logger.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
+            logger.debug("Preference \(key) new value \"\(newValue)\" could not be sanitized, will be ignored")
             return
         }
         let convertedValue = converter(sanitized)
         guard convertedValue != nil else {
-            logger.debug("Preference \(key) conversion of new value \(String(describing: sanitized)) failed, do not store.")
+            logger.debug("Preference \(key) conversion of new value \(sanitized) failed, do not store.")
             return
         }
-        logger.debug("Preference \(key) will be changed to value \(String(describing: newValue))")
+        logger.debug("Preference \(key) will be changed to value \(newValue)")
         sharedDefaults.set(convertedValue, forKey: key)
 
         DispatchQueue.main.async { [subject] in

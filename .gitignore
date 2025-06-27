@@ -24,3 +24,4 @@ OpenHABCore/swift-openapi-generator/
 vendor/
 
 OsLogRewriter/.build
+OsLogRewriter/.swiftpm

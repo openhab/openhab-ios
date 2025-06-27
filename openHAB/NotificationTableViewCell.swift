@@ -14,11 +14,13 @@ import os.log
 import UIKit
 
 class NotificationTableViewCell: UITableViewCell {
+    private let logger = Logger(subsystem: "org.openhab", category: "NotificationTableViewCell")
+
     @IBOutlet private(set) var customTextLabel: UILabel!
     @IBOutlet private(set) var customDetailTextLabel: UILabel!
 
     required init?(coder: NSCoder) {
-        os_log("DrawerUITableViewCell initWithCoder", log: .viewCycle, type: .info)
+        logger.info("DrawerUITableViewCell initWithCoder")
         super.init(coder: coder)
         separatorInset = .zero
     }

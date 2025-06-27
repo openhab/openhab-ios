@@ -19,6 +19,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
     public let identifier = "org.openhab.svgprocessor"
+    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABImageProcessor")
 
     public init() {}
 
@@ -26,7 +27,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         switch item {
         case let .image(image):
-            os_log("already an image", log: .default, type: .info)
+            logger.info("already an image")
             return image
         case let .data(data):
             guard !data.isEmpty else { return nil }
