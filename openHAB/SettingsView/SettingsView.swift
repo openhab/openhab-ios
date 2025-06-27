@@ -29,7 +29,7 @@ struct SettingsView: View {
     @State var settingsLocalConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     @State var settingsHomeName = ""
-    @State var viewAppearedOnce: Bool = false
+    @State var viewAppearedOnce = false
 
     @Environment(\.dismiss) private var dismiss
 

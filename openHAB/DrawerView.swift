@@ -220,7 +220,7 @@ struct DrawerView: View {
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
     @State private var selectedSection: Int?
-    @State private var connectedUrl: String = "Not connected" // Default label text
+    @State private var connectedUrl = "Not connected" // Default label text
 
     @EnvironmentObject private var networkTracker: NetworkTracker
 

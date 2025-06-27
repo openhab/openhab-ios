@@ -52,7 +52,7 @@ enum DragState {
 struct ColorSelection: View {
     @GestureState var thumb: DragState = .inactive
 
-    @State var hue: Double = 0.5
+    @State var hue = 0.5
     @State var xpos: Double = 100
     @State var ypos: Double = 100
 

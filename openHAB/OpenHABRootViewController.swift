@@ -91,9 +91,9 @@ class OpenHABRootViewController: UIViewController {
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
-            Preferences.modifyActiveHome(modificationFunction: { homePreferences in
+            Preferences.modifyActiveHome { homePreferences in
                 homePreferences.demomode = true
-            })
+            }
         }
         // setup accessibilityIdentifiers for UITest
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
