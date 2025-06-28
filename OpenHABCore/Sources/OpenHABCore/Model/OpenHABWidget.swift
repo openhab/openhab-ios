@@ -37,7 +37,7 @@ public enum WidgetTypeEnum {
 }
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABWidget")
+    private static let logger = Logger(subsystem: "org.openhab", category: "OpenHABWidget")
 
     public enum WidgetType: String, Decodable {
         case chart = "Chart"
