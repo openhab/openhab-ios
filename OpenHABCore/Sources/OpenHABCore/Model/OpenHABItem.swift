@@ -14,8 +14,6 @@ import os.log
 import UIKit
 
 public struct OpenHABItem: Sendable {
-    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
-
     public enum ItemType: String, Sendable {
         case color = "Color"
         case contact = "Contact"
@@ -32,6 +30,8 @@ public struct OpenHABItem: Sendable {
         case switchItem = "Switch"
         case undetermined = "" // Relevant only for SitemapWidgetEvent
     }
+    
+    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
 
     public var type: ItemType?
     public var groupType: ItemType?

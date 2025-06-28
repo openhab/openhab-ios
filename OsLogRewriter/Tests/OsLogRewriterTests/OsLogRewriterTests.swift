@@ -198,7 +198,7 @@ final class OsLogRewriterTests: XCTestCase {
         import os.log
 
         func test() {
-            os_log("Preference value %{PUBLIC}@ was \\"%{PUBLIC}@\\" but did not conform to %{PUBLIC}@. Replace with default value.", 
+            os_log("Preference value %{PUBLIC}@ was \\"%{PUBLIC}@\\" but did not conform to %{PUBLIC}@. Replace with default value.",
                    log: .default, type: .fault, key, "\\(preferenceValue)", "\\(T.self)")
         }
         """
