@@ -85,28 +85,30 @@ extension WebUITableViewCell: GenericCellCacheProtocol {
 
 extension WebUITableViewCell: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        logger.info("webview started loading with URL: %{PUBLIC}s")
+        // swiftformat:disable:next redundantSelf
+        logger.info("webview started loading with URL: \(self.widget.url)")
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        logger.info("webview finished load with URL: %{PUBLIC}s")
+        // swiftformat:disable:next redundantSelf
+        logger.info("webview finished load with URL: \(self.widget.url)")
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
         if let response = navigationResponse.response as? HTTPURLResponse, response.statusCode >= 400 {
-            logger.debug("webview failed with status code: %{PUBLIC}i")
+            logger.debug("webview failed with status code: \(response.statusCode)")
             url = nil
         }
         return .allow
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
-        logger.debug("webview failed with error: %{PUBLIC}s")
+        logger.debug("webview failed with error: \(error.localizedDescription)")
         url = nil
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
-        logger.debug("webview failed with error: %{PUBLIC}s")
+        logger.debug("webview failed with error: \(error.localizedDescription)")
         url = nil
     }
 

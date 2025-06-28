@@ -101,14 +101,14 @@ public class ClientCertificateManager {
             kSecValueRef as String: cert!
         ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
-        logger.info("SecItemDelete(cert) result=%{PUBLIC}d")
+        logger.info("SecItemDelete(cert) result = \(status) ")
         if status == noErr {
             let deleteKeyQuery: [String: Any] = [
                 kSecClass as String: kSecClassKey,
                 kSecValueRef as String: key!
             ]
             status = SecItemDelete(deleteKeyQuery as NSDictionary)
-            logger.info("SecItemDelete(key) result=%{PUBLIC}d")
+            logger.info("SecItemDelete(key) result= \(status)")
         }
 
         // Figure out which certs in the certificate chain also need to be removed.
@@ -127,7 +127,7 @@ public class ClientCertificateManager {
                     ]
                     let status = SecItemDelete(deleteCertQuery as NSDictionary)
                     let summary = SecCertificateCopySubjectSummary(ct) as String? ?? ""
-                    logger.info("SecItemDelete(certChain) \(summary) result=%{PUBLIC}d")
+                    logger.info("SecItemDelete(certChain) \(summary) result = \(status)")
                 }
             }
         }
@@ -286,7 +286,7 @@ public class ClientCertificateManager {
             importingIdentity = identityDictionaries[0][kSecImportItemIdentity as String] as! SecIdentity?
             importingCertChain = identityDictionaries[0][kSecImportItemCertChain as String] as! [SecCertificate]?
         } else {
-            logger.info("SecPKCS12Import failed; result=%{PUBLIC}d")
+            logger.info("SecPKCS12Import failed; result = \(status)")
         }
         return status
     }

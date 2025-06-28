@@ -87,8 +87,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Preferences.migratePreferences()
 
         registerForPushNotifications()
-        logger.info("uniq id: %{PUBLIC}s")
-        logger.info("device name: %{PUBLIC}s")
+        logger.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
+        logger.info("device name: \(UIDevice.current.name)")
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
