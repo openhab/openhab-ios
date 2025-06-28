@@ -444,60 +444,29 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONLargeSitemapParseSwift() throws {
-        let log = OSLog(
-            subsystem: "org.openhab.app",
-            category: "RecordDecoding"
-        )
+        let logger = Logger(subsystem: "org.openhab.app", category: "RecordDecoding")
 
-        if #available(iOS 12, *) {
-            let signpostID = OSSignpostID(log: log)
+        let jsonFile = "LargeSitemap"
+        let testBundle = Bundle.module
+        let url = try XCTUnwrap(testBundle.url(forResource: jsonFile, withExtension: "json"))
 
-            let jsonFile = "LargeSitemap"
-            os_signpost(
-                .begin,
-                log: log,
-                name: "Read File",
-                signpostID: signpostID,
-                "%{public}s",
-                jsonFile
-            )
+        let signposter = OSSignposter(subsystem: "org.openhab.app", category: "RecordDecoding")
 
-            let testBundle = Bundle.module
-            let url = testBundle.url(forResource: jsonFile, withExtension: "json")
-            let contents = try Data(contentsOf: url!)
-            os_signpost(
-                .end,
-                log: log,
-                name: "Read File",
-                signpostID: signpostID,
-                "%{public}s",
-                jsonFile
-            )
+        let state = signposter.beginInterval("Read File")
+        let contents = try Data(contentsOf: url)
+        signposter.endInterval("Read File", state)
 
-            os_signpost(
-                .begin,
-                log: log,
-                name: "Decode JSON",
-                signpostID: signpostID,
-                "Begin"
-            )
-            let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: contents)
-            os_signpost(
-                .end,
-                log: log,
-                name: "Decode JSON",
-                signpostID: signpostID,
-                "End"
-            )
+        let state2 = signposter.beginInterval("Decode JSON")
+        let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: contents)
+        signposter.endInterval("Decode JSON", state2)
 
-            let widgets = try XCTUnwrap(codingData.homepage?.widgets)
-            let widget = widgets[0]
-            XCTAssertEqual(widget.label, "Flat Scenes")
-            XCTAssertEqual(widget.widgets?[0].label, "Scenes")
-            XCTAssertEqual(codingData.homepage?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
-            let widget2 = widgets[10]
-            XCTAssertEqual(widget2.widgets?[0].label, "Admin Items")
-        }
+        let widgets = try XCTUnwrap(codingData.homepage?.widgets)
+        let widget = widgets[0]
+        XCTAssertEqual(widget.label, "Flat Scenes")
+        XCTAssertEqual(widget.widgets?[0].label, "Scenes")
+        XCTAssertEqual(codingData.homepage?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
+        let widget2 = widgets[10]
+        XCTAssertEqual(widget2.widgets?[0].label, "Admin Items")
     }
 
     func testItemWithDescription() {

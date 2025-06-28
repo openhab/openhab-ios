@@ -65,7 +65,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let watchMessageService = WatchMessageService.singleton
                 session.delegate = watchMessageService
                 session.activate()
-                os_log("Paired watch %{PUBLIC}@, watch app installed %{PUBLIC}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
+                logger.info("Paired watch \(session.isPaired), watch app installed \(session.isWatchAppInstalled)")
                 watchMessageService.subscribeToPreferences()
             }
         }
@@ -77,7 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
+        logger.info("didFinishLaunchingWithOptions started")
 
         setupFirebase()
 
@@ -87,18 +87,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Preferences.migratePreferences()
 
         registerForPushNotifications()
-
-        os_log("uniq id: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.identifierForVendor?.uuidString ?? "")
-        os_log("device name: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.name)
+        logger.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
+        logger.info("device name: \(UIDevice.current.name)")
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.playback, mode: .default, options: [])
         } catch {
-            os_log("Setting category to AVAudioSessionCategoryPlayback failed.", log: .default, type: .info)
+            logger.info("Setting category to AVAudioSessionCategoryPlayback failed.")
         }
-
-        os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
+        logger.info("didFinishLaunchingWithOptions ended")
 
         activateWatchConnectivity()
 
@@ -123,7 +121,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if WCSession.isSupported() {
             session = WCSession.default
         } else {
-            os_log("WCSession is not supported - For instance on iPad", log: .watch, type: .debug)
+            logger.debug("WCSession is not supported - For instance on iPad")
         }
     }
 
@@ -138,10 +136,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
 
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
+            self.logger.info("Permission granted: \(granted ? "YES" : "NO")")
             guard granted else { return }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
-                os_log("Notification settings: %{PUBLIC}@", log: .notifications, type: .info, settings)
+                self.logger.info("Notification settings: \(settings)")
 
                 guard settings.authorizationStatus == .authorized else { return }
                 DispatchQueue.main.async {
@@ -155,14 +153,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
-
-        os_log("Calling Application Bundle ID: %{PUBLIC}@", log: .notifications, type: .info, options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")
-        os_log("URL: %{PUBLIC}@", log: .notifications, type: .info, url.absoluteString)
-        os_log("URL scheme: %{PUBLIC}@", log: .notifications, type: .info, url.scheme ?? "")
-        os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
+        logger.info("Calling Application Bundle ID: \(options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")")
+        logger.info("URL: \(url.absoluteString)")
+        logger.info("URL scheme: \(url.scheme ?? "")")
+        logger.info("URL query: \(url.query ?? "")")
 
         if url.isFileURL {
-            os_log("Loading Certificate", log: .notifications, type: .info)
+            logger.info("Loading Certificate")
             let clientCertificateManager = NetworkTracker.shared.clientCertificateManager
             Task { @MainActor in
                 await clientCertificateManager.startImportClientCertificate(url: url)
@@ -182,7 +179,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
-        os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+        logger.error("Failed to get token for notifications: \(error.localizedDescription)")
     }
 
     @MainActor

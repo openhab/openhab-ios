@@ -653,7 +653,7 @@ class OpenHABRootViewController: UIViewController {
         if Preferences.currentHomePreferences.demomode {
             switchView(target: .sitemap(""))
         } else {
-            logger.info("OpenHABRootViewController switchToSavedView \(Preferences.currentHomePreferences.defaultView == "sitemap" ? "sitemap" : "web")")
+            logger.info("OpenHABRootViewController switchToSavedView \(Preferences.currentHomePreferences.defaultView == "sitemap"?"sitemap": "web")")
             switchView(target: Preferences.currentHomePreferences.defaultView == "sitemap" ? .sitemap("") : .webview)
         }
     }

@@ -108,7 +108,7 @@ struct SettingsView: View {
             case .name: sitemaps.sort { $0.name < $1.name }
             }
         } catch {
-            os_log("%{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            logger.error("\(error.localizedDescription)")
             sitemaps = []
         }
     }

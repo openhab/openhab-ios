@@ -14,6 +14,8 @@ import os.log
 import UIKit
 
 class SwitchUITableViewCell: GenericUITableViewCell {
+    let logger = Logger(subsystem: "org.openhab", category: "SwitchUITableViewCell")
+
     @IBOutlet private var widgetSwitch: UISwitch!
 
     required init?(coder: NSCoder) {
@@ -47,10 +49,10 @@ class SwitchUITableViewCell: GenericUITableViewCell {
     @objc
     func switchChange() {
         if (widgetSwitch?.isOn)! {
-            os_log("Switch to ON", log: .viewCycle, type: .info)
+            logger.info("Switch to ON")
             widget.sendCommand("ON")
         } else {
-            os_log("Switch to OFF", log: .viewCycle, type: .info)
+            logger.info("Switch to OFF")
             widget.sendCommand("OFF")
         }
     }

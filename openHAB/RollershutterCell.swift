@@ -15,6 +15,7 @@ import UIKit
 
 class RollershutterCell: GenericUITableViewCell {
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+    private let logger = Logger(subsystem: "org.openhab", category: "RollershutterCell")
 
     @IBOutlet private var upButton: UIButton!
     @IBOutlet private var stopButton: UIButton!
@@ -22,13 +23,13 @@ class RollershutterCell: GenericUITableViewCell {
     @IBOutlet private var customDetailText: UILabel!
 
     required init?(coder: NSCoder) {
-        os_log("RollershutterCell initWithCoder", log: .viewCycle, type: .info)
+        logger.info("RollershutterCell initWithCoder")
         super.init(coder: coder)
         initialize()
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        os_log("RollershutterCell initWithStyle", log: .viewCycle, type: .info)
+        logger.info("RollershutterCell initWithStyle")
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         initialize()
     }
@@ -48,21 +49,21 @@ class RollershutterCell: GenericUITableViewCell {
 
     @objc
     func upButtonPressed() {
-        os_log("up button pressed", log: .viewCycle, type: .info)
+        logger.info("up button pressed")
         widget.sendCommand("UP")
         feedbackGenerator.impactOccurred()
     }
 
     @objc
     func stopButtonPressed() {
-        os_log("stop button pressed", log: .viewCycle, type: .info)
+        logger.info("stop button pressed")
         widget.sendCommand("STOP")
         feedbackGenerator.impactOccurred()
     }
 
     @objc
     func downButtonPressed() {
-        os_log("down button pressed", log: .viewCycle, type: .info)
+        logger.info("down button pressed")
         widget.sendCommand("DOWN")
         feedbackGenerator.impactOccurred()
     }

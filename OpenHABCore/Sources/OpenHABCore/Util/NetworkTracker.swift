@@ -187,7 +187,7 @@ public final class NetworkTracker: ObservableObject {
     private func checkActiveConnection() async {
         guard let activeConnection else {
             // No active connection, proceed with the normal connection attempt
-            os_log("No active connection, attempting to reconnect...", log: OSLog.default, type: .info)
+            logger.info("No active connection, attempting to reconnect...")
             await attemptConnection()
             return
         }
