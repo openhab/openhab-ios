@@ -449,7 +449,6 @@ final class JSONParserTests: XCTestCase {
             category: "RecordDecoding"
         )
 
-        if #available(iOS 12, *) {
             let signpostID = OSSignpostID(log: log)
 
             let jsonFile = "LargeSitemap"
@@ -497,7 +496,7 @@ final class JSONParserTests: XCTestCase {
             XCTAssertEqual(codingData.homepage?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
             let widget2 = widgets[10]
             XCTAssertEqual(widget2.widgets?[0].label, "Admin Items")
-        }
+        
     }
 
     func testItemWithDescription() {

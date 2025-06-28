@@ -239,10 +239,10 @@ public final class HTTPClient: NSObject {
         let (result, response): (T, URLResponse) = try await performRequest(request: request, type: type)
         if let response = response as? HTTPURLResponse {
             if (400 ... 599).contains(response.statusCode) {
-                logger.error("HTTP error from URL \(url.absoluteString) : %{public}d")
+                logger.error("HTTP error from URL \(url.absoluteString) : \(response.statusCode)")
                 throw HTTPClientError.httpError(response.statusCode)
             } else {
-                logger.info("Response from URL \(url.absoluteString) : %{public}d")
+                logger.info("Response from URL \(url.absoluteString) : \(response.statusCode)")
                 return (result, response)
             }
         }
