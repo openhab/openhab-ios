@@ -676,7 +676,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             if let height = widget?.height {
                 // calculate webview/mapview height and return it. Limited to UIScreen.main.bounds.height
                 let heightValue = height * 44
-                logger.info("Webview/Mapview height would be %g")
+                logger.info("Webview/Mapview height would be \(heightValue)")
                 return min(UIScreen.main.bounds.height, CGFloat(heightValue))
             } else {
                 // return default height for webview/mapview as 8 rows
