@@ -14,7 +14,7 @@ import os.log
 import SwiftUI
 
 struct SliderWithSwitchSupportRow: View {
-    let logger = Logger(subsystem: "org.openhab", category: "SliderWithSwitchSupportRow")
+    private let logger = Logger(subsystem: "org.openhab", category: "SliderWithSwitchSupportRow")
 
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var settings: AppSettings
