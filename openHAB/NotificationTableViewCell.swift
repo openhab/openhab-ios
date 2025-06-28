@@ -20,7 +20,7 @@ class NotificationTableViewCell: UITableViewCell {
     @IBOutlet private(set) var customDetailTextLabel: UILabel!
 
     required init?(coder: NSCoder) {
-        logger.info("DrawerUITableViewCell initWithCoder")
+        logger.info("NotificationTableViewCell initWithCoder")
         super.init(coder: coder)
         separatorInset = .zero
     }
