@@ -90,7 +90,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     @Published public var item: OpenHABItem?
     public var linkedPage: OpenHABPage?
     public var mappings: [OpenHABWidgetMapping] = []
-    public var image: UIImage?
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
     public var switchSupport = false
