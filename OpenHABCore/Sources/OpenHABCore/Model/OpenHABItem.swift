@@ -30,7 +30,7 @@ public struct OpenHABItem: Sendable {
         case switchItem = "Switch"
         case undetermined = "" // Relevant only for SitemapWidgetEvent
     }
-    
+
     private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
 
     public var type: ItemType?
