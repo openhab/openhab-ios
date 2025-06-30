@@ -46,7 +46,7 @@ enum InputHint: String, Decodable, CaseIterable {
 
 @available(iOS 13.0, OSX 10.15, tvOS 13.0, watchOS 6.0, *)
 class ObservableOpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
-    var id: String = ""
+    var id = ""
 
     var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     var widgetId = ""

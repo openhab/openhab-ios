@@ -17,7 +17,7 @@ import OpenAPIRuntime
 import os.log
 
 // TODO: these strings should reference Localizable keys
-public enum NetworkStatus: String {
+public enum NetworkStatus: String, Sendable {
     case connecting = "Connecting"
     case connected = "Connected"
     case notConnected = "Not Connected"
@@ -54,18 +54,18 @@ public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
 // Ensure thread-safe dictionary access.
 // Avoid memory corruption errors like unrecognized selector.
 public actor ConnectionPool {
-    private var services: [ConnectionConfiguration: OpenAPIServiceProtocol] = [:]
-    private let serviceFactory: (ConnectionConfiguration) throws -> OpenAPIServiceProtocol
+    private var services: [ConnectionConfiguration: any OpenAPIServiceProtocol] = [:]
+    private let serviceFactory: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
     // Initializer allowing the injection of mocked OpenAPIServiceProtocol
-    init(serviceFactory: @escaping (ConnectionConfiguration) throws -> OpenAPIServiceProtocol = {
+    init(serviceFactory: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
         try OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .shortTerm)
     }) {
         self.serviceFactory = serviceFactory
     }
 
     @discardableResult
-    func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> OpenAPIServiceProtocol {
+    func getOrCreateService(for configuration: ConnectionConfiguration) async throws -> any OpenAPIServiceProtocol {
         if let existing = services[configuration] {
             return existing
         }
@@ -101,10 +101,11 @@ public actor ConnectionFailureTracker {
     }
 }
 
-public protocol NetworkTracking: ObservableObject, Sendable {
+public protocol NetworkTracking: ObservableObject {
     var activeConnection: ConnectionInfo? { get }
 }
 
+@available(*, deprecated)
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 
@@ -113,7 +114,7 @@ public final class NetworkTracker: ObservableObject {
     // @MainActor
     @Published public private(set) var status: NetworkStatus = .connecting
 
-    private var pathMonitor: NWPathMonitoring
+    private var pathMonitor: any NWPathMonitoring
     private var connectionPool: ConnectionPool
     private var connectionConfigurations: [ConnectionConfiguration] = []
     private var retryTask: Task<Void, Never>?
@@ -130,7 +131,7 @@ public final class NetworkTracker: ObservableObject {
 
     // MARK: - Injectable initializer for testing
 
-    init(monitor: NWPathMonitoring = RealPathMonitor(),
+    init(monitor: any NWPathMonitoring = RealPathMonitor(),
          connectionPool: ConnectionPool = ConnectionPool(),
          failureTracker: ConnectionFailureTracker = ConnectionFailureTracker()) {
         pathMonitor = monitor
@@ -161,6 +162,10 @@ public final class NetworkTracker: ObservableObject {
         await attemptConnection()
     }
 
+    public func stopTracking() async {
+        await setActiveConnection(nil)
+    }
+
     public func waitForActiveConnection(timeout: TimeInterval = 10) async -> ConnectionInfo? {
         logger.info("NetworkConnection: waitForActiveConnection")
         // Utilize for await to listen for changes in $activeConnection
@@ -182,7 +187,7 @@ public final class NetworkTracker: ObservableObject {
     private func checkActiveConnection() async {
         guard let activeConnection else {
             // No active connection, proceed with the normal connection attempt
-            os_log("No active connection, attempting to reconnect...", log: OSLog.default, type: .info)
+            logger.info("No active connection, attempting to reconnect...")
             await attemptConnection()
             return
         }

@@ -12,9 +12,6 @@
 import os.log
 import UIKit
 
-var normalBackgroundColor: UIColor?
-var normalTextColor: UIColor?
-
 class UICircleButton: UIButton {
     required init?(coder: NSCoder) {
         super.init(coder: coder)

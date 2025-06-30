@@ -30,6 +30,8 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
         super.viewDidLoad()
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
+        NetworkTracker.shared.clientCertificateManager.delegate = self
+        NetworkTracker.shared.serverCertificateManager.delegate = self
     }
 
     func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
@@ -143,8 +145,8 @@ extension OpenHABViewController: ServerCertificateManagerDelegate {
 @MainActor
 extension OpenHABViewController: ClientCertificateManagerDelegate {
     // Ask user whether to import the certificate
-    func askForClientCertificateImport() async -> Bool {
-        await withCheckedContinuation { continuation in
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
+        let shouldImport = await withCheckedContinuation { continuation in
             let alertController = UIAlertController(
                 title: NSLocalizedString("certificate_import_title", comment: ""),
                 message: NSLocalizedString("certificate_import_text", comment: ""),
@@ -164,10 +166,17 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
 
             self.present(alertController, animated: true)
         }
+        if shouldImport {
+            await clientCertificateManager!.clientCertificateAccepted(password: nil)
+            return true
+        } else {
+            clientCertificateManager!.clientCertificateRejected()
+            return false
+        }
     }
 
     // Ask user for password to decode PKCS#12
-    func askForCertificatePassword() async -> String? {
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
         await withCheckedContinuation { continuation in
             let alertController = UIAlertController(
                 title: NSLocalizedString("certificate_import_title", comment: ""),
@@ -197,7 +206,7 @@ extension OpenHABViewController: ClientCertificateManagerDelegate {
     }
 
     // Show alert if certificate import failed
-    func alertClientCertificateError(errMsg: String) async {
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
         let alertController = UIAlertController(
             title: NSLocalizedString("certificate_import_title", comment: ""),
             message: errMsg,

@@ -12,6 +12,7 @@
 import Kingfisher
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 struct IconView: View {

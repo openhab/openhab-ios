@@ -15,38 +15,56 @@ import XCTest
 
 @MainActor
 final class UserDefaultsTests: XCTestCase {
-    let data = UserDefaults(suiteName: "group.org.openhab.app")!
-
-    override func setUpWithError() throws {
-        super.setUp()
-        let defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
+    // Testing the consistency between Preferences and UserDefaults
+    func testConsistency() {
+        // Set Preferences from MainActor
+        let defaultsName: String
+        // Reset UserDefaults
+        let data = UserDefaults(suiteName: "group.org.openhab.app")!
+        do {
+            defaultsName = try XCTUnwrap(Bundle.main.bundleIdentifier)
+        } catch {
+            fatalError()
+        }
         data.removePersistentDomain(forName: defaultsName)
 
-        Preferences.username = Preferences.username
-        Preferences.localUrl = Preferences.localUrl
-        Preferences.remoteUrl = Preferences.remoteUrl
-        Preferences.password = Preferences.password
-        Preferences.ignoreSSL = Preferences.ignoreSSL
-        Preferences.demomode = Preferences.demomode
-        Preferences.idleOff = Preferences.idleOff
-        Preferences.iconType = Preferences.iconType
-        Preferences.defaultSitemap = Preferences.defaultSitemap
-        Preferences.sitemapForWatch = Preferences.sitemapForWatch
-    }
+        let random: String = UUID().uuidString
 
-    // Testing the consistency between properties of Preferences and the corresponding entry in UserDefaults
-    func testConsistency() {
-        XCTAssertEqual(Preferences.username, data.string(forKey: "username"))
-        XCTAssertNotEqual(Preferences.username, data.string(forKey: "usern"))
-        XCTAssertEqual(Preferences.localUrl, data.string(forKey: "localUrl"))
-        XCTAssertEqual(Preferences.remoteUrl, data.string(forKey: "remoteUrl"))
-        XCTAssertEqual(Preferences.password, data.string(forKey: "password"))
-        XCTAssertEqual(Preferences.ignoreSSL, data.bool(forKey: "ignoreSSL"))
-        //  XCTAssertEqual(Preferences.sitemapName, data.string(forKey: "sitemapName"))
-        XCTAssertEqual(Preferences.demomode, data.bool(forKey: "demomode"))
+        var home = Preferences.currentHomePreferences
+        home.remoteConnectionConfig.username = "testuser\(random)"
+        home.localConnectionConfig.url = "http://local\(random).test"
+        home.remoteConnectionConfig.url = "http://remote\(random).test"
+        home.remoteConnectionConfig.password = "secret\(random)"
+        home.remoteConnectionConfig.ignoreSSL = true
+        home.demomode = true
+        home.iconType = 2
+        home.defaultSitemap = "default\(random)"
+        home.sitemapForWatch = "watchmap\(random)"
+
+        Preferences.modifyActiveHome { preferences in
+            preferences.remoteConnectionConfig.username = "testuser\(random)"
+            preferences.localConnectionConfig.url = "http://local\(random).test"
+            preferences.remoteConnectionConfig.url = "http://remote\(random).test"
+            preferences.remoteConnectionConfig.password = "secret\(random)"
+            preferences.remoteConnectionConfig.ignoreSSL = true
+            preferences.demomode = true
+            preferences.iconType = 2
+            preferences.defaultSitemap = "default\(random)"
+            preferences.sitemapForWatch = "watchmap\(random)"
+        }
+
+        Preferences.idleOff = false
+
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.username, home.remoteConnectionConfig.username)
+        XCTAssertEqual(Preferences.currentHomePreferences.localConnectionConfig.url, home.localConnectionConfig.url)
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.url, home.remoteConnectionConfig.url)
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.password, home.remoteConnectionConfig.password)
+        XCTAssertEqual(Preferences.currentHomePreferences.remoteConnectionConfig.ignoreSSL, home.remoteConnectionConfig.ignoreSSL)
+        XCTAssertEqual(Preferences.currentHomePreferences.demomode, home.demomode)
         XCTAssertEqual(Preferences.idleOff, data.bool(forKey: "idleOff"))
-        XCTAssertEqual(Preferences.iconType, data.integer(forKey: "iconType"))
-        XCTAssertEqual(Preferences.defaultSitemap, data.string(forKey: "defaultSitemap"))
-        XCTAssertEqual(Preferences.sitemapForWatch, data.string(forKey: "sitemapForWatch"))
+        XCTAssertEqual(Preferences.currentHomePreferences.iconType, home.iconType)
+        XCTAssertEqual(Preferences.currentHomePreferences.defaultSitemap, home.defaultSitemap)
+        XCTAssertEqual(Preferences.currentHomePreferences.sitemapForWatch, home.sitemapForWatch)
+        XCTAssertEqual(home, try? JSONDecoder().decode(HomePreferences.self, from: data.data(forKey: "currentHomePreferences")!))
     }
 }

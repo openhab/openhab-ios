@@ -55,7 +55,7 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONItem() {
-        let json = """
+        let json = Data("""
                 {
                     "link": "https://192.168.2.63:8444/rest/items/lcnLightSwitch5_1",
                     "state": "OFF",
@@ -76,7 +76,7 @@ final class JSONParserTests: XCTestCase {
                     "gLcn"
                     ]
                 }
-        """.data(using: .utf8)!
+        """.utf8)
 
         do {
             let codingData = try decoder.decode(OpenHABItem.CodingData.self, from: json)
@@ -100,7 +100,7 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONWidget() {
-        let json = """
+        let json = Data("""
                 {
                 "widgetId": "0000",
                 "type": "Switch",
@@ -129,7 +129,7 @@ final class JSONParserTests: XCTestCase {
                 },
                 "widgets": []
                 }
-        """.data(using: .utf8)!
+        """.utf8)
 
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
@@ -168,7 +168,7 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONLinkedPage() {
-        let json = """
+        let json = Data("""
                 {   "id": "1304",
             "title": "EG West",
             "icon": "rollershutter",
@@ -253,7 +253,7 @@ final class JSONParserTests: XCTestCase {
             }
             ]
         }
-        """.data(using: .utf8)!
+        """.utf8)
         do {
             let sitemapPageCodingData = try decoder.decode(OpenHABPage.CodingData.self, from: json)
             let sitemapPage = sitemapPageCodingData.openHABSitemapPage
@@ -264,7 +264,7 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONWidgetMapping() {
-        let json = """
+        let json = Data("""
         [
             {
                 "command": "0",
@@ -279,7 +279,7 @@ final class JSONParserTests: XCTestCase {
                 "label": "Automatik"
             }
         ]
-        """.data(using: .utf8)!
+        """.utf8)
         do {
             let codingData = try decoder.decode([OpenHABWidgetMapping].self, from: json)
             XCTAssertEqual(codingData[0].label, "Overwrite", "WidgetMapping properly parsed")
@@ -289,7 +289,7 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONWidget2() {
-        let json = """
+        let json = Data("""
         {
             "widgetId": "01",
             "type": "Frame",
@@ -345,7 +345,7 @@ final class JSONParserTests: XCTestCase {
             }
             ]
             }
-        """.data(using: .utf8)!
+        """.utf8)
         do {
             let codingData = try decoder.decode(OpenHABWidget.CodingData.self, from: json)
             XCTAssertEqual(codingData.widgetId, "01", "Widget properly parsed")
@@ -380,9 +380,9 @@ final class JSONParserTests: XCTestCase {
     // swiftlint:disable line_length
 
     func testWatchSitemap() {
-        let json = """
+        let json = Data("""
         {"name":"watch","label":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch","homepage":{"id":"watch","title":"watch","link":"https://192.168.2.15:8444/rest/sitemaps/watch/watch","leaf":false,"timeout":false,"widgets":[{"widgetId":"00","type":"Frame","label":"Ground floor","icon":"frame","mappings":[],"widgets":[{"widgetId":"0000","type":"Switch","label":"Licht Oberlicht","icon":"switch","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch14_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch14_1","label":"Licht Oberlicht","tags":["Lighting"],"groupNames":["G_PresenceSimulation","gLcn"]},"widgets":[]},{"widgetId":"0001","type":"Switch","label":"Licht Keller WC Decke","icon":"colorpicker","mappings":[],"item":{"link":"https://192.168.2.15:8444/rest/items/lcnLightSwitch6_1","state":"OFF","editable":false,"type":"Switch","name":"lcnLightSwitch6_1","label":"Licht Keller WC Decke","category":"colorpicker","tags":["Lighting"],"groupNames":["gKellerLicht","gLcn"]},"widgets":[]}]}]}}
-        """.data(using: .utf8)!
+        """.utf8)
         do {
             let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: json)
             XCTAssertEqual(codingData.homepage?.link, "https://192.168.2.15:8444/rest/sitemaps/watch/watch", "OpenHABSitemapPage properly parsed")
@@ -444,60 +444,29 @@ final class JSONParserTests: XCTestCase {
     }
 
     func testJSONLargeSitemapParseSwift() throws {
-        let log = OSLog(
-            subsystem: "org.openhab.app",
-            category: "RecordDecoding"
-        )
+        let logger = Logger(subsystem: "org.openhab.app", category: "RecordDecoding")
 
-        if #available(iOS 12, *) {
-            let signpostID = OSSignpostID(log: log)
+        let jsonFile = "LargeSitemap"
+        let testBundle = Bundle.module
+        let url = try XCTUnwrap(testBundle.url(forResource: jsonFile, withExtension: "json"))
 
-            let jsonFile = "LargeSitemap"
-            os_signpost(
-                .begin,
-                log: log,
-                name: "Read File",
-                signpostID: signpostID,
-                "%{public}s",
-                jsonFile
-            )
+        let signposter = OSSignposter(subsystem: "org.openhab.app", category: "RecordDecoding")
 
-            let testBundle = Bundle.module
-            let url = testBundle.url(forResource: jsonFile, withExtension: "json")
-            let contents = try Data(contentsOf: url!)
-            os_signpost(
-                .end,
-                log: log,
-                name: "Read File",
-                signpostID: signpostID,
-                "%{public}s",
-                jsonFile
-            )
+        let state = signposter.beginInterval("Read File")
+        let contents = try Data(contentsOf: url)
+        signposter.endInterval("Read File", state)
 
-            os_signpost(
-                .begin,
-                log: log,
-                name: "Decode JSON",
-                signpostID: signpostID,
-                "Begin"
-            )
-            let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: contents)
-            os_signpost(
-                .end,
-                log: log,
-                name: "Decode JSON",
-                signpostID: signpostID,
-                "End"
-            )
+        let state2 = signposter.beginInterval("Decode JSON")
+        let codingData = try decoder.decode(Components.Schemas.SitemapDTO.self, from: contents)
+        signposter.endInterval("Decode JSON", state2)
 
-            let widgets = try XCTUnwrap(codingData.homepage?.widgets)
-            let widget = widgets[0]
-            XCTAssertEqual(widget.label, "Flat Scenes")
-            XCTAssertEqual(widget.widgets?[0].label, "Scenes")
-            XCTAssertEqual(codingData.homepage?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
-            let widget2 = widgets[10]
-            XCTAssertEqual(widget2.widgets?[0].label, "Admin Items")
-        }
+        let widgets = try XCTUnwrap(codingData.homepage?.widgets)
+        let widget = widgets[0]
+        XCTAssertEqual(widget.label, "Flat Scenes")
+        XCTAssertEqual(widget.widgets?[0].label, "Scenes")
+        XCTAssertEqual(codingData.homepage?.link, "https://192.168.0.9:8443/rest/sitemaps/default/default")
+        let widget2 = widgets[10]
+        XCTAssertEqual(widget2.widgets?[0].label, "Admin Items")
     }
 
     func testItemWithDescription() {

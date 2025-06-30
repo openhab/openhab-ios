@@ -25,9 +25,9 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     ]
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 
@@ -55,6 +55,8 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
 
     func handle(intent: OpenHABSetContactStateValueIntent) async -> OpenHABSetContactStateValueIntentResponse {
         logger.info("SetContactStateValueIntent for \(intent.item ?? "")")
+
+        await OpenHABItemCache.instance.waitUntilReady()
 
         guard let itemName = intent.item else {
             return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))

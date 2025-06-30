@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import openHAB
+import OpenHABCore
 import XCTest
 
 class OpenHABGeneralTests: XCTestCase {
@@ -30,7 +31,7 @@ class OpenHABGeneralTests: XCTestCase {
     }
 
     func testHexString() {
-        let iPhoneData: Data = "Tim iPhone".data(using: .utf8)!
+        let iPhoneData = Data("Tim iPhone".utf8)
         let hexWithReduce = iPhoneData.reduce("") { $0 + String(format: "%02X", $1) }
         XCTAssertEqual(hexWithReduce, "54696D206950686F6E65", "hex properly calculated with reduce")
     }

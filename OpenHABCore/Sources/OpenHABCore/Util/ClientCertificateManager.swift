@@ -13,22 +13,14 @@ import Foundation
 import os.log
 import Security
 
-// public protocol ClientCertificateManagerDelegate: AnyObject {
-//    // delegate should ask user for a decision on whether to import the client certificate into the keychain
-//    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?)
-//    // delegate should ask user for a decision on whether to import the client certificate into the keychain
-//    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?)
-//    // delegate should alert the user that an error occured importing the certificate
-//    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String)
-// }
-
+@MainActor
 public protocol ClientCertificateManagerDelegate: AnyObject {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForClientCertificateImport() async -> Bool
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForCertificatePassword() async -> String?
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String?
     // delegate should alert the user that an error occured importing the certificate
-    func alertClientCertificateError(errMsg: String) async
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async
 }
 
 public class ClientCertificateManager {
@@ -37,7 +29,7 @@ public class ClientCertificateManager {
     private var importingCertChain: [SecCertificate]?
     public var importingPassword: String?
 
-    weak var delegate: ClientCertificateManagerDelegate?
+    public weak var delegate: (any ClientCertificateManagerDelegate)?
 
     public var clientIdentities: [SecIdentity] = []
 
@@ -109,14 +101,14 @@ public class ClientCertificateManager {
             kSecValueRef as String: cert!
         ]
         var status = SecItemDelete(deleteCertQuery as NSDictionary)
-        os_log("SecItemDelete(cert) result=%{PUBLIC}d", log: .default, type: .info, status)
+        logger.info("SecItemDelete(cert) result = \(status) ")
         if status == noErr {
             let deleteKeyQuery: [String: Any] = [
                 kSecClass as String: kSecClassKey,
                 kSecValueRef as String: key!
             ]
             status = SecItemDelete(deleteKeyQuery as NSDictionary)
-            os_log("SecItemDelete(key) result=%{PUBLIC}d", log: .default, type: .info, status)
+            logger.info("SecItemDelete(key) result= \(status)")
         }
 
         // Figure out which certs in the certificate chain also need to be removed.
@@ -135,7 +127,7 @@ public class ClientCertificateManager {
                     ]
                     let status = SecItemDelete(deleteCertQuery as NSDictionary)
                     let summary = SecCertificateCopySubjectSummary(ct) as String? ?? ""
-                    os_log("SecItemDelete(certChain) %s result=%{PUBLIC}d", log: .default, type: .info, summary, status)
+                    logger.info("SecItemDelete(certChain) \(summary) result = \(status)")
                 }
             }
         }
@@ -159,13 +151,15 @@ public class ClientCertificateManager {
         return refCounts
     }
 
+    @MainActor
     public func startImportClientCertificate(url: URL) async -> Bool {
         do {
             // Import PKCS12 client cert
             importingRawCert = try Data(contentsOf: url)
 
             guard let delegate else { return false }
-            let shouldImport = await delegate.askForClientCertificateImport()
+
+            let shouldImport = await delegate.askForClientCertificateImport(self)
             return shouldImport
         } catch {
             logger.error("Failed to read certificate from URL: \(error.localizedDescription)")
@@ -174,7 +168,7 @@ public class ClientCertificateManager {
     }
 
     @MainActor
-    public func clientCertificateAccepted(password: String) async {
+    public func clientCertificateAccepted(password: String?) async {
         importingPassword = password
         let status = decodePKCS12()
 
@@ -183,7 +177,7 @@ public class ClientCertificateManager {
             await addClientCertificateToKeychain()
 
         case errSecAuthFailed:
-            guard let retryPassword = await delegate?.askForCertificatePassword() else {
+            guard let retryPassword = await delegate?.askForCertificatePassword(self) else {
                 logger.warning("Password prompt cancelled after auth failure")
                 return
             }
@@ -191,7 +185,7 @@ public class ClientCertificateManager {
 
         default:
             let errMsg = String(format: NSLocalizedString("unable_to_decode_certificate", comment: ""), "\(status)")
-            await delegate?.alertClientCertificateError(errMsg: errMsg)
+            await delegate?.alertClientCertificateError(self, errMsg: errMsg)
         }
     }
 
@@ -201,6 +195,7 @@ public class ClientCertificateManager {
         importingPassword = nil
     }
 
+    @MainActor
     func addClientCertificateToKeychain() async {
         guard let identity = importingIdentity else {
             logger.error("No identity available to import")
@@ -272,7 +267,7 @@ public class ClientCertificateManager {
                 errorMessage = NSLocalizedString("certficate_exists", comment: "")
             }
 
-            await delegate?.alertClientCertificateError(errMsg: errorMessage)
+            await delegate?.alertClientCertificateError(self, errMsg: errorMessage)
         }
     }
 
@@ -291,7 +286,7 @@ public class ClientCertificateManager {
             importingIdentity = identityDictionaries[0][kSecImportItemIdentity as String] as! SecIdentity?
             importingCertChain = identityDictionaries[0][kSecImportItemCertChain as String] as! [SecCertificate]?
         } else {
-            os_log("SecPKCS12Import failed; result=%{PUBLIC}d", log: .default, type: .info, status)
+            logger.info("SecPKCS12Import failed; result = \(status)")
         }
         return status
     }
@@ -338,12 +333,12 @@ public class ClientCertificateManager {
            let certificates = SecTrustCopyCertificateChain(trust) as? [SecCertificate] {
             let rootCA = certificates[chainSize - 1]
             let anchors = [rootCA]
-            os_log("Setting anchor for trust evaluation to %s", log: .default, type: .info, SecCertificateCopySubjectSummary(rootCA)! as String)
+            logger.info("Setting anchor for trust evaluation to \(SecCertificateCopySubjectSummary(rootCA)! as String)")
             SecTrustSetAnchorCertificates(trust, anchors as CFArray)
             trustResult = SecTrustResultType.proceed
             var trustError: CFError?
             if SecTrustEvaluateWithError(trust, &trustError) != true {
-                os_log("Trust evaluation failed building client certificate chain after anchor has been set: %s", log: .default, type: .info, trustError.debugDescription)
+                logger.info("Trust evaluation failed building client certificate chain after anchor has been set: \(trustError.debugDescription)")
                 SecTrustGetTrustResult(trust, &trustResult)
             }
         }

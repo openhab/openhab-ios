@@ -14,6 +14,8 @@ import os.log
 import UIKit
 
 class SliderUITableViewCell: GenericUITableViewCell {
+    let logger = Logger(subsystem: "org.openhab", category: "SliderUITableViewCell")
+
     private var step: Float = 1.0
 
     private var widgetValue: Double {
@@ -104,7 +106,7 @@ class SliderUITableViewCell: GenericUITableViewCell {
     }
 
     private func sliderDidChange(toValue value: Double) {
-        os_log("Slider new value = %g", log: .default, type: .info, value)
+        logger.info("Slider new value = \(value)")
         widget.sendCommand(value.valueText(step: Double(step)))
     }
 }

@@ -31,6 +31,8 @@ public struct OpenHABItem: Sendable {
         case undetermined = "" // Relevant only for SitemapWidgetEvent
     }
 
+    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
+
     public var type: ItemType?
     public var groupType: ItemType?
     public var name = ""
@@ -95,7 +97,7 @@ public extension OpenHABItem {
                 let hue = CGFloat(state: values[0], divisor: 360)
                 let saturation = CGFloat(state: values[1], divisor: 100)
                 let brightness = CGFloat(state: values[2], divisor: 100)
-                os_log("hue saturation brightness: %g %g %g", log: .default, type: .info, hue, saturation, brightness)
+                logger.info("hue saturation brightness: \(hue) \(saturation) \(brightness)")
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
                 return .black

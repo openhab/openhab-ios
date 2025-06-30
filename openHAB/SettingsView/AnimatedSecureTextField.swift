@@ -47,7 +47,7 @@ struct AnimatedSecureTextField: View {
 
 #Preview {
     struct PreviewWrapper: View {
-        @State private var password: String = "password12"
+        @State private var password = "password12"
         @State var isSecure = true
 
         var body: some View {

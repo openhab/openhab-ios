@@ -16,9 +16,9 @@ import os.log
 
 class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetStringValueIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 
@@ -42,6 +42,8 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
 
     func handle(intent: OpenHABSetStringValueIntent) async -> OpenHABSetStringValueIntentResponse {
         logger.info("SetStringValueIntent for \(intent.item ?? "")")
+
+        await OpenHABItemCache.instance.waitUntilReady()
 
         guard let itemName = intent.item else {
             return .failureInvalidItem(

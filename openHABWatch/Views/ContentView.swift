@@ -60,12 +60,12 @@ struct ContentView: View {
                 message: Text(viewModel.certificateErrorDescription),
                 primaryButton: .default(Text(NSLocalizedString("always", comment: ""))) {
                     if let client = viewModel.currentClient {
-                        client.completeEvaluation(.permitAlways)
+                        client.delegate.completeEvaluation(.permitAlways)
                     }
                 },
                 secondaryButton: .destructive(Text(NSLocalizedString("deny", comment: ""))) {
                     if let client = viewModel.currentClient {
-                        client.completeEvaluation(.deny)
+                        client.delegate.completeEvaluation(.deny)
                     }
                 }
             )
@@ -121,15 +121,14 @@ struct ContentView: View {
 }
 
 #Preview {
-    Group {
-        ContentView(viewModel: UserData())
+    let userData = UserData()
+    let appSettings = AppSettings()
 
-            .environmentObject({ () -> UserData in
-                let envObj = UserData()
-                return envObj
-            }())
+    return Group {
+        ContentView(viewModel: userData)
+            .environmentObject(userData)
 
-        ContentView(viewModel: UserData())
+        ContentView(viewModel: userData)
     }
-    .environmentObject(AppSettings())
+    .environmentObject(appSettings)
 }

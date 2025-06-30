@@ -16,9 +16,9 @@ import SwiftUI
 
 struct ColorPickerView: View {
     @State private var selectedColor: Color = .white
-    @State private var hue: Double = 0.0
-    @State private var saturation: Double = 0.0
-    @State private var brightness: Double = 0.0
+    @State private var hue = 0.0
+    @State private var saturation = 0.0
+    @State private var brightness = 0.0
 
     @ObservedObject var throttler = Throttler(maxInterval: 0.3)
 

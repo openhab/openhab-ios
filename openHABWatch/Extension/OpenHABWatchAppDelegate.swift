@@ -17,7 +17,7 @@ import WatchKit
 
 class OpenHABWatchAppDelegate: NSObject {
     var session: WCSession
-    let delegate: WCSessionDelegate
+    let delegate: any WCSessionDelegate
 
     override init() {
         delegate = AppMessageService.singleton
@@ -64,15 +64,15 @@ extension OpenHABWatchAppDelegate: WKApplicationDelegate {
 
 extension OpenHABWatchAppDelegate: ClientCertificateManagerDelegate {
     // delegate should ask user for a decision on whether to import the client certificate into the keychain
-    func askForClientCertificateImport() async -> Bool {
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
         true
     }
 
     // delegate should ask user for the export password used to decode the PKCS#12
-    func askForCertificatePassword() async -> String? {
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
         nil
     }
 
     // delegate should ask user for the export password used to decode the PKCS#12
-    func alertClientCertificateError(errMsg: String) {}
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) {}
 }

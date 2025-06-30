@@ -14,7 +14,7 @@ import Foundation
 import OpenHABCore
 import os.log
 import UniformTypeIdentifiers
-import UserNotifications
+@preconcurrency import UserNotifications
 
 enum NotificationServiceError: Error {
     case unknown
@@ -46,7 +46,8 @@ class NotificationService: UNNotificationServiceExtension {
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     var cancellables = Set<AnyCancellable>()
-
+    var networkTracker: NetworkTracker?
+    var cloudUserId: String?
     let logger = Logger(subsystem: "org.openhab.network", category: "NotificationService")
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
@@ -57,7 +58,7 @@ class NotificationService: UNNotificationServiceExtension {
         var notificationActions: [UNNotificationAction] = []
         let userInfo = bestAttemptContent.userInfo
 
-        os_log("didReceive userInfo %{PUBLIC}@", log: .default, type: .info, userInfo)
+        logger.info("didReceive userInfo \(userInfo)")
 
         if let title = userInfo["title"] as? String {
             bestAttemptContent.title = title
@@ -65,6 +66,8 @@ class NotificationService: UNNotificationServiceExtension {
         if let message = userInfo["message"] as? String {
             bestAttemptContent.body = message
         }
+
+        cloudUserId = userInfo["userId"] as? String
 
         // Check if the user has defined custom actions in the payload
         if let actionsArray = parseActions(userInfo), let category = parseCategory(userInfo) {
@@ -85,7 +88,7 @@ class NotificationService: UNNotificationServiceExtension {
                 }
             }
             if !notificationActions.isEmpty {
-                os_log("didReceive registering %{PUBLIC}@ for category %{PUBLIC}@", log: .default, type: .info, notificationActions, category)
+                logger.info("didReceive registering \(notificationActions) for category \(category)")
                 let notificationCategory =
                     UNNotificationCategory(
                         identifier: category,
@@ -95,7 +98,7 @@ class NotificationService: UNNotificationServiceExtension {
                     )
                 UNUserNotificationCenter.current().getNotificationCategories { existingCategories in
                     var updatedCategories = existingCategories
-                    os_log("handleNotification adding category %{PUBLIC}@", log: .default, type: .info, category)
+                    self.logger.info("handleNotification adding category \(category)")
                     updatedCategories.insert(notificationCategory)
                     UNUserNotificationCenter.current().setNotificationCategories(updatedCategories)
                 }
@@ -120,7 +123,7 @@ class NotificationService: UNNotificationServiceExtension {
                         throw NotificationServiceError.handleNotificationCouldNotAttach
                     }
                 } catch {
-                    os_log("Error fetching data: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+                    logger.error("Error fetching data: \(error.localizedDescription)")
                 }
                 contentHandler(bestAttemptContent)
             }
@@ -131,9 +134,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     override func serviceExtensionTimeWillExpire() {
-        // Called just before the extension will be terminated by the system.
-        // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
-        os_log("serviceExtensionTimeWillExpire", log: .default, type: .info)
+        logger.info("serviceExtensionTimeWillExpire")
         if let contentHandler, let bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
@@ -147,7 +148,7 @@ class NotificationService: UNNotificationServiceExtension {
                     return actionsArray
                 }
             } catch {
-                os_log("Error parsing actions: %{PUBLIC}@", log: .default, type: .info, error.localizedDescription)
+                logger.info("Error parsing actions: \(error.localizedDescription)")
             }
         }
         return nil
@@ -162,23 +163,44 @@ class NotificationService: UNNotificationServiceExtension {
         return nil
     }
 
+    private func downloadForAttachment(attachmentURLString: String) -> (URL?, String?) {
+        var returnValues: (URL?, String?)
+        Task {
+            do {
+                returnValues = if attachmentURLString.starts(with: "item:") {
+                    try await downloadItemImage(itemURI: attachmentURLString)
+                } else {
+                    try await downloadMedia(url: attachmentURLString)
+                }
+
+            } catch {
+                logger.error("Error fetching data: \(error.localizedDescription)")
+            }
+        }
+        return returnValues
+    }
+
     private func downloadAndAttachMedia(url: String) async throws -> UNNotificationAttachment? {
-        await NetworkTracker.shared.startTracking(connectionConfigurations: [Preferences.localConnectionConfig, Preferences.remoteConnectionConfig])
+        let (localURL, mimeType) = try await downloadMedia(url: url)
+        guard let localURL else { return nil }
+        return await attachFile(localURL: localURL, mimeType: mimeType)
+    }
 
-        guard let fullURL = await resolveFullURL(from: url) else { return nil }
+    private func downloadMedia(url: String) async throws -> (URL?, String?) {
+        guard let fullURL = await resolveFullURL(from: url) else { return (nil, nil) }
 
-        guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return nil }
+        guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return (nil, nil) }
 
         let client = HTTPClient(configuration: activeConfig)
 
         let (localURL, urlResponse) = try await client.downloadFile(url: fullURL)
-        return await attachFile(localURL: localURL, mimeType: urlResponse.mimeType)
+        return (localURL, urlResponse.mimeType)
     }
 
     // 🔹 Extracted helper function to determine full URL
     private func resolveFullURL(from url: String) async -> URL? {
         if url.starts(with: "/") {
-            guard let activeConfig = await NetworkTracker.shared.waitForActiveConnection()?.configuration else { return nil }
+            guard let activeConfig = await networkTracker().waitForActiveConnection()?.configuration else { return nil }
             return URL(string: activeConfig.url)?.appendingPathComponent(url)
         } else {
             return URL(string: url)
@@ -186,14 +208,20 @@ class NotificationService: UNNotificationServiceExtension {
     }
 
     func downloadAndAttachItemImage(itemURI: String) async throws -> UNNotificationAttachment? {
+        let (tempFileURL, mimeType) = try await downloadItemImage(itemURI: itemURI)
+        guard let tempFileURL else { return nil }
+        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
+    }
+
+    func downloadItemImage(itemURI: String) async throws -> (URL?, String?) {
         guard let itemURL = URL(string: itemURI), let scheme = itemURL.scheme else {
             throw NotificationServiceError.noScheme(itemURI)
         }
 
         let itemName = String(itemURL.absoluteString.dropFirst(scheme.count + 1))
 
-        let item = try await NetworkTracker.shared.getItemByName(id: itemName)
-        guard let state = item?.state else { return nil }
+        let item = try await networkTracker().getItemByName(id: itemName)
+        guard let state = item?.state else { return (nil, nil) }
 
         // Extract MIME type and base64 string
         let pattern = /^data:(.*?);base64,(.*)$/
@@ -211,9 +239,8 @@ class NotificationService: UNNotificationServiceExtension {
         let tempDirectory = FileManager.default.temporaryDirectory
         let tempFileURL = tempDirectory.appendingPathComponent(UUID().uuidString)
         try imageData.write(to: tempFileURL)
-
-        os_log("Image saved to temporary file: %{PUBLIC}@", log: .default, type: .info, tempFileURL.absoluteString)
-        return await attachFile(localURL: tempFileURL, mimeType: mimeType)
+        logger.info("Image saved to temporary file: \(tempFileURL.absoluteString)")
+        return (tempFileURL, mimeType)
     }
 
     func attachFile(localURL: URL, mimeType: String?) async -> UNNotificationAttachment? {
@@ -232,13 +259,38 @@ class NotificationService: UNNotificationServiceExtension {
                 try fileManager.moveItem(at: tempFile, to: newTempFile)
                 attachment = try UNNotificationAttachment(identifier: UUID().uuidString, url: newTempFile, options: nil)
             } else {
-                os_log("Unrecognized MIME type or file extension", log: .default, type: .error)
+                logger.error("Unrecognized MIME type or file extension")
                 attachment = nil
             }
             return attachment
         } catch {
-            os_log("Failed to create UNNotificationAttachment: %{PUBLIC}@", log: .default, type: .error, error.localizedDescription)
+            logger.error("Failed to create UNNotificationAttachment: \(error.localizedDescription)")
         }
         return nil
+    }
+
+    func networkTracker() async -> NetworkTracker {
+        if let tracker = networkTracker {
+            return tracker
+        }
+
+        let tracker = NetworkTracker.shared
+        let connections: [ConnectionConfiguration]
+
+        if let cloudUserId,
+           let instance = await Preferences.storedHome(forCloudUserId: cloudUserId) {
+            logger.info("Setting up network tracking for \(cloudUserId)")
+            connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
+        } else {
+            logger.info("Using default connection configurations")
+            connections = await [
+                Preferences.currentHomePreferences.localConnectionConfig,
+                Preferences.currentHomePreferences.remoteConnectionConfig
+            ]
+        }
+
+        await tracker.startTracking(connectionConfigurations: connections)
+        networkTracker = tracker
+        return tracker
     }
 }

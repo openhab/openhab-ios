@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -17,24 +18,26 @@ import WatchConnectivity
 // This class receives Watch Request for the configuration data like localUrl.
 // The functionality is activated in the AppDelegate.
 class WatchMessageService: NSObject, WCSessionDelegate {
+    @MainActor
     static let singleton = WatchMessageService()
 
     private lazy var logger = Logger(subsystem: "org.openhab.app", category: "WatchMessageService")
 
+    private var cachedWatchPreferences: [String: Data] = [:]
+    private let lock = NSLock()
+
+    private var preferencesSubscription: AnyCancellable?
+
     // This method gets called when the watch requests the data
+    // ⚠️ This is called off the main thread. Do NOT touch @MainActor stuff.
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        logger.info("Received message with reply handler: \(message, privacy: .public)")
+        guard message["request"] != nil else { return }
 
-        guard message["request"] != nil else {
-            logger.warning("Invalid message: no 'request' key.")
-            return
-        }
+        lock.lock()
+        let reply = cachedWatchPreferences
+        lock.unlock()
 
-        Task { @MainActor in
-            let prefs = WatchPreferences(fromPreferences: Preferences.self)
-            replyHandler(prefs.encodedWatchPreferences())
-            logger.debug("Sent WatchPreferences in replyHandler.")
-        }
+        replyHandler(reply) // ✅ Used synchronously — no concurrency violation
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
@@ -56,14 +59,32 @@ class WatchMessageService: NSObject, WCSessionDelegate {
     // MARK: - Sync Preferences
 
     @MainActor
-    public func syncPreferencesToWatch() {
+    public func subscribeToPreferences() {
+        preferencesSubscription = Preferences.$currentHomePreferences
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { _ in } receiveValue: { homeSettings in
+                self.syncPreferencesToWatch(homeSettings)
+            }
+    }
+
+    @MainActor
+    public func syncPreferencesToWatch(_ homeSettings: HomePreferences = Preferences.currentHomePreferences) {
         guard WCSession.default.activationState == .activated else {
             logger.warning("WCSession not activated; skipping sync.")
             return
         }
 
-        let prefs = WatchPreferences(fromPreferences: Preferences.self)
+        let prefs = WatchPreferences(fromPreferences: homeSettings)
         let context = prefs.encodedWatchPreferences()
+
+        guard cachedWatchPreferences != context else {
+            // avoid update of update unchanged preferences
+            return
+        }
+
+        lock.lock()
+        cachedWatchPreferences = context
+        lock.unlock()
 
         do {
             try WCSession.default.updateApplicationContext(context)
@@ -75,16 +96,16 @@ class WatchMessageService: NSObject, WCSessionDelegate {
 }
 
 @MainActor
-public extension WatchPreferences {
-    init(fromPreferences preferences: Preferences.Type) {
+extension WatchPreferences {
+    init(fromPreferences preferences: HomePreferences) {
         self.init(
-            localUrl: preferences.localUrl,
-            remoteUrl: preferences.remoteUrl,
-            username: preferences.username,
-            password: preferences.password,
-            alwaysSendCreds: preferences.alwaysSendCreds,
+            localUrl: preferences.localConnectionConfig.url,
+            remoteUrl: preferences.remoteConnectionConfig.url,
+            username: preferences.remoteConnectionConfig.username,
+            password: preferences.remoteConnectionConfig.password,
+            alwaysSendCreds: preferences.remoteConnectionConfig.alwaysSendBasicAuth,
             defaultSitemap: preferences.defaultSitemap,
-            ignoreSSL: preferences.ignoreSSL,
+            ignoreSSL: preferences.remoteConnectionConfig.ignoreSSL,
             sitemapForWatch: preferences.sitemapForWatch,
             sitemapForWatchLabel: preferences.sitemapForWatchLabel,
             iconType: preferences.iconType,

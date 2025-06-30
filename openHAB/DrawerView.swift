@@ -81,24 +81,16 @@ struct ConnectionView: View {
 }
 
 struct DrawerView: View {
-    struct MainSectionView: View {
-        var openHABIconwidth: CGFloat
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
+    struct MainSectionView<MenuEntry: View>: View {
+        var menuEntry: (Image, Text, TargetController) -> MenuEntry
 
         var body: some View {
             Section(header: Text("Main")) {
-                HStack {
-                    Image("openHABIcon")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: openHABIconwidth)
-                    Text("Home")
-                }
-                .onTapGesture {
-                    dismiss()
-                    onDismiss(.webview)
-                }
+                menuEntry(
+                    Image("openHABIcon"),
+                    Text("Home"),
+                    .webview
+                )
             }
         }
     }
@@ -146,16 +138,17 @@ struct DrawerView: View {
                         dismiss: dismiss
                     )
                     .onTapGesture(count: 2) {
-                        if sitemap.name == sitemapForWatch {
-                            sitemapForWatch = nil
-                            Preferences.sitemapForWatch = ""
-                            Preferences.sitemapForWatchLabel = ""
-                        } else {
-                            sitemapForWatch = sitemap.name
-                            Preferences.sitemapForWatch = sitemap.name
-                            Preferences.sitemapForWatchLabel = sitemap.label
+                        Preferences.modifyActiveHome { homePreferences in
+                            if sitemap.name == sitemapForWatch {
+                                sitemapForWatch = nil
+                                homePreferences.sitemapForWatch = ""
+                                homePreferences.sitemapForWatchLabel = ""
+                            } else {
+                                sitemapForWatch = sitemap.name
+                                homePreferences.sitemapForWatch = sitemap.name
+                                homePreferences.sitemapForWatchLabel = sitemap.label
+                            }
                         }
-                        WatchMessageService.singleton.syncPreferencesToWatch()
                     }
                 }
             }
@@ -200,46 +193,34 @@ struct DrawerView: View {
         }
     }
 
-    struct SystemSectionView: View {
-        var openHABIconwidth: CGFloat
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
+    struct SystemSectionView<MenuEntry: View>: View {
+        var menuEntry: (Image, Text, TargetController) -> MenuEntry
 
         var body: some View {
             Section(header: Text("System")) {
-                HStack {
-                    Image(systemSymbol: .gear)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: openHABIconwidth)
-                    Text(LocalizedStringKey("settings"))
-                }
-                .onTapGesture {
-                    dismiss()
-                    onDismiss(.settings)
+                settingsMenuEntry(image: .gear, text: "settings", goTo: .settings)
+
+                if Preferences.getNotificationConnection() != nil, !Preferences.currentHomePreferences.demomode {
+                    settingsMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
                 }
 
-                if Preferences.getLowestPriorityOpenHABConnection() != nil, !Preferences.demomode {
-                    HStack {
-                        Image(systemSymbol: .bell)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: openHABIconwidth)
-                        Text(LocalizedStringKey("notifications"))
-                    }
-                    .onTapGesture {
-                        dismiss()
-                        onDismiss(.notifications)
-                    }
-                }
+                settingsMenuEntry(image: .house, text: "Manage Homes", goTo: .homeSelection)
             }
+        }
+
+        private func settingsMenuEntry(image: SFSymbol, text: String, goTo target: TargetController) -> MenuEntry {
+            menuEntry(
+                Image(systemSymbol: image),
+                Text(LocalizedStringKey(text)),
+                target
+            )
         }
     }
 
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
     @State private var selectedSection: Int?
-    @State private var connectedUrl: String = "Not connected" // Default label text
+    @State private var connectedUrl = "Not connected" // Default label text
 
     @EnvironmentObject private var networkTracker: NetworkTracker
 
@@ -255,13 +236,13 @@ struct DrawerView: View {
     var body: some View {
         VStack {
             List {
-                MainSectionView(openHABIconwidth: openHABIconwidth, onDismiss: onDismiss, dismiss: dismiss)
+                MainSectionView(menuEntry: menuEntry)
 
                 TilesSectionView(uiTiles: uiTiles, tilesIconwidth: tilesIconwidth, onDismiss: onDismiss, dismiss: dismiss)
 
                 SitemapsSectionView(sitemaps: sitemaps, sitemapIconwidth: sitemapIconwidth, sitemapForWatch: $sitemapForWatch, onDismiss: onDismiss, dismiss: dismiss)
 
-                SystemSectionView(openHABIconwidth: openHABIconwidth, onDismiss: onDismiss, dismiss: dismiss)
+                SystemSectionView(menuEntry: menuEntry)
             }
             .listStyle(.inset)
 
@@ -273,12 +254,26 @@ struct DrawerView: View {
         .task {
             let activeConnection = networkTracker.activeConnection
             await updateSitemapsAndUITiles(activeConnection: activeConnection)
-            sitemapForWatch = Preferences.sitemapForWatch
+            sitemapForWatch = Preferences.currentHomePreferences.sitemapForWatch
         }
         .onReceive(networkTracker.$activeConnection) { activeConnection in
             Task {
                 await updateSitemapsAndUITiles(activeConnection: activeConnection)
             }
+        }
+    }
+
+    private func menuEntry(image: Image, text: Text, goTo target: TargetController) -> some View {
+        HStack {
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: openHABIconwidth)
+            text
+        }
+        .onTapGesture {
+            dismiss()
+            onDismiss(target)
         }
     }
 
@@ -294,7 +289,7 @@ struct DrawerView: View {
                     sitemaps = Array(sitemaps.dropLast())
                 }
 
-                switch SortSitemapsOrder(rawValue: Preferences.sortSitemapsby) ?? .label {
+                switch SortSitemapsOrder(rawValue: Preferences.currentHomePreferences.sortSitemapsBy) ?? .label {
                 case .label:
                     sitemaps.sort { $0.label < $1.label }
                 case .name:

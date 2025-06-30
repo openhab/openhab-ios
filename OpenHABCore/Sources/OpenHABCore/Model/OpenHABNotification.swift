@@ -32,17 +32,17 @@ public struct OpenHABNotification: Sendable {
 // Inspired by https://www.swiftbysundell.com/basics/codable?rq=codingdata
 public extension OpenHABNotification {
     struct CodingData: Decodable {
-        let id: String
-        let message: String?
-        let v: Int
-        let created: Date?
-
         private enum CodingKeys: String, CodingKey {
             case id = "_id"
             case message
             case v = "__v"
             case created
         }
+
+        let id: String
+        let message: String?
+        let v: Int
+        let created: Date?
     }
 }
 

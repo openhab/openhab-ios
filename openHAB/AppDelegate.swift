@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
+import Combine
 import Firebase
 import FirebaseMessaging
 import Kingfisher
@@ -18,7 +19,7 @@ import os.log
 import SDWebImageSVGCoder
 import SwiftMessages
 import UIKit
-import UserNotifications
+@preconcurrency import UserNotifications
 import WatchConnectivity
 
 actor AudioPlayerActor {
@@ -55,13 +56,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let audioPlayer = AudioPlayerActor()
     var window: UIWindow?
 
+    private var crashlyticsSubscriber: AnyCancellable?
+
     // Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
         didSet {
             if let session {
-                session.delegate = WatchMessageService.singleton
+                let watchMessageService = WatchMessageService.singleton
+                session.delegate = watchMessageService
                 session.activate()
-                os_log("Paired watch %{PUBLIC}@, watch app installed %{PUBLIC}@", log: .watch, type: .info, "\(session.isPaired)", "\(session.isWatchAppInstalled)")
+                logger.info("Paired watch \(session.isPaired), watch app installed \(session.isWatchAppInstalled)")
+                watchMessageService.subscribeToPreferences()
             }
         }
     }
@@ -72,29 +77,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        os_log("didFinishLaunchingWithOptions started", log: .viewCycle, type: .info)
+        logger.info("didFinishLaunchingWithOptions started")
 
         setupFirebase()
 
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
-        Preferences.migrateUserDefaultsIfRequired()
-        Preferences.migrateUserDefaultsToConnectionIfRequired()
+        Preferences.migratePreferences()
 
         registerForPushNotifications()
-
-        os_log("uniq id: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.identifierForVendor?.uuidString ?? "")
-        os_log("device name: %{PUBLIC}s", log: .notifications, type: .info, UIDevice.current.name)
+        logger.info("uniq id: \(UIDevice.current.identifierForVendor?.uuidString ?? "")")
+        logger.info("device name: \(UIDevice.current.name)")
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.playback, mode: .default, options: [])
         } catch {
-            os_log("Setting category to AVAudioSessionCategoryPlayback failed.", log: .default, type: .info)
+            logger.info("Setting category to AVAudioSessionCategoryPlayback failed.")
         }
-
-        os_log("didFinishLaunchingWithOptions ended", log: .viewCycle, type: .info)
+        logger.info("didFinishLaunchingWithOptions ended")
 
         activateWatchConnectivity()
 
@@ -108,7 +110,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(Preferences.sendCrashReports)
+        crashlyticsSubscriber = Preferences.$sendCrashReports.sink { [weak self] in
+            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
+            self?.logger.debug("setCrashlyticsCollectionEnabled to \($0)")
+        }
         Messaging.messaging().delegate = self
     }
 
@@ -116,7 +121,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if WCSession.isSupported() {
             session = WCSession.default
         } else {
-            os_log("WCSession is not supported - For instance on iPad", log: .watch, type: .debug)
+            logger.debug("WCSession is not supported - For instance on iPad")
         }
     }
 
@@ -130,12 +135,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         #endif
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, _ in
-            guard let self else { return }
-            os_log("Permission granted: %{PUBLIC}@", log: .notifications, type: .info, granted ? "YES" : "NO")
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+            self.logger.info("Permission granted: \(granted ? "YES" : "NO")")
             guard granted else { return }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
-                os_log("Notification settings: %{PUBLIC}@", log: .notifications, type: .info, settings)
+                self.logger.info("Notification settings: \(settings)")
 
                 guard settings.authorizationStatus == .authorized else { return }
                 DispatchQueue.main.async {
@@ -149,10 +153,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
         // Probably need to do this in a way compatible to Android app's URL
+        logger.info("Calling Application Bundle ID: \(options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")")
+        logger.info("URL: \(url.absoluteString)")
+        logger.info("URL scheme: \(url.scheme ?? "")")
+        logger.info("URL query: \(url.query ?? "")")
 
-        os_log("Calling Application Bundle ID: %{PUBLIC}@", log: .notifications, type: .info, options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")
-        os_log("URL scheme: %{PUBLIC}@", log: .notifications, type: .info, url.scheme ?? "")
-        os_log("URL query: %{PUBLIC}@", log: .notifications, type: .info, url.query ?? "")
+        if url.isFileURL {
+            logger.info("Loading Certificate")
+            let clientCertificateManager = NetworkTracker.shared.clientCertificateManager
+            Task { @MainActor in
+                await clientCertificateManager.startImportClientCertificate(url: url)
+            }
+            return true
+        }
 
         // remove the 'openhab' from the url
         let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
@@ -166,7 +179,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
-        os_log("Failed to get token for notifications: %{PUBLIC}@", log: .notifications, type: .error, error.localizedDescription)
+        logger.error("Failed to get token for notifications: \(error.localizedDescription)")
     }
 
     @MainActor
@@ -215,16 +228,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
         let message = userInfo["message"] as? String ?? NSLocalizedString("message_not_decoded", comment: "")
         let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-        await displayNotification(message: message, action: action)
+        let cloudUserId = userInfo["userId"] as? String
+        await displayNotification(message: message, action: action, cloudUserId: cloudUserId)
 
         return [] // Modify this if you want to show banners, alerts, etc.
     }
 
     // this is called when clicking a notification while in the background
-    @MainActor
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         var userInfo = response.notification.request.content.userInfo
         let actionIdentifier = response.actionIdentifier
+
         logger.info("Notification clicked: action \(actionIdentifier) userInfo \(userInfo)")
 
         if actionIdentifier != UNNotificationDismissActionIdentifier {
@@ -232,11 +246,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 userInfo["actionIdentifier"] = actionIdentifier
             }
             let action = userInfo["actionIdentifier"] as? String ?? userInfo["on-click"] as? String
-            notifyNotificationListeners(action: action)
+            let cloudUserId = userInfo["userId"] as? String
+
+            notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         }
     }
 
-    private func displayNotification(message: String, action: String?) async {
+    private func displayNotification(message: String, action: String?, cloudUserId: String?) async {
         logger.info("displayNotification \(message)")
 
         Task {
@@ -272,7 +288,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 // Use closure-based tap gesture insteae of #selector
                 let tapGesture = MessageTapGestureRecognizer {
                     Task {
-                        self.messageViewTapped(action: action)
+                        self.messageViewTapped(action: action, cloudUserId: cloudUserId)
                     }
                 }
                 view.addGestureRecognizer(tapGesture)
@@ -283,17 +299,17 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // Action to be performed when the notification message view is tapped
-    func messageViewTapped(action: String?) {
-        notifyNotificationListeners(action: action)
+    func messageViewTapped(action: String?, cloudUserId: String? = nil) {
+        notifyNotificationListeners(action: action, cloudUserId: cloudUserId)
         SwiftMessages.hideAll()
     }
 
     // ✅ Ensure this runs on the MainActor
     @MainActor
-    private func notifyNotificationListeners(action: String?) {
+    private func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
         if let navigationController = window?.rootViewController as? UINavigationController,
            let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
-            rootViewController.handleNotification(action: action)
+            rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
         }
     }
 }
@@ -329,7 +345,6 @@ extension AppDelegate {
 extension AppDelegate: MessagingDelegate {
     nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         Task { @MainActor in
-
             let safeToken = fcmToken ?? ""
             let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
             let deviceName = UIDevice.current.name

@@ -13,21 +13,21 @@
 import os.log
 import UIKit
 
-@propertyWrapper
-public struct UserDefault<T> {
+private let logger = Logger(subsystem: "org.openhab", category: "Preferences")
+
+@propertyWrapper @MainActor
+public struct UserDefault<T: Sendable> {
     private let key: String
     private let defaultValue: T
+    private let isHomeProperty: Bool
     private let subject: CurrentValueSubject<T, Never>
 
     public var wrappedValue: T {
         get {
-            Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
+            Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         }
         set {
-            Preferences.sharedDefaults.set(newValue, forKey: key)
-            DispatchQueue.main.async { [subject] in
-                subject.send(newValue)
-            }
+            Preferences.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject) { $0 }
         }
     }
 
@@ -35,36 +35,37 @@ public struct UserDefault<T> {
         subject.eraseToAnyPublisher()
     }
 
-    public init(_ key: String, defaultValue: T) {
+    public init(_ key: String, defaultValue: T, isHomeProperty: Bool = false) {
         self.key = key
         self.defaultValue = defaultValue
-        let currentValue = Preferences.sharedDefaults.object(forKey: key) as? T ?? defaultValue
+        self.isHomeProperty = isHomeProperty
+        let currentValue = Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: { $0 }, decoder: { $0 as? T })
         subject = CurrentValueSubject<T, Never>(currentValue)
     }
 }
 
-@propertyWrapper
-public struct UserDefaultObject<T: Codable> {
+@propertyWrapper @MainActor
+public struct UserDefaultObject<T: Codable & Sendable> {
     private let key: String
     private let defaultValue: T
+    private let isHomeProperty: Bool
     private let subject: CurrentValueSubject<T, Never>
+
+    private let objectDecoder: (Any) -> (T?) = {
+        guard let data = $0 as? Data else {
+            return nil
+        }
+        return try? JSONDecoder().decode(T.self, from: data)
+    }
+
+    private let objectEncoder: (T) -> (any Sendable)? = { try? JSONEncoder().encode($0) }
 
     public var wrappedValue: T {
         get {
-            guard let data = Preferences.sharedDefaults.data(forKey: key),
-                  let object = try? JSONDecoder().decode(T.self, from: data) else {
-                return defaultValue
-            }
-            return object
+            Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
         }
         set {
-            if let encoded = try? JSONEncoder().encode(newValue) {
-                Preferences.sharedDefaults.set(encoded, forKey: key)
-                // Relevant for Combine publication
-                DispatchQueue.main.async { [subject] in
-                    subject.send(newValue)
-                }
-            }
+            Preferences.preferenceChanged(newValue: newValue, key: key, isHomeProperty: isHomeProperty, subject: subject, converter: objectEncoder)
         }
     }
 
@@ -72,155 +73,321 @@ public struct UserDefaultObject<T: Codable> {
         subject.eraseToAnyPublisher()
     }
 
-    init(_ key: String, defaultValue: T) {
+    init(_ key: String, defaultValue: T, isHomeProperty: Bool = false) {
         self.key = key
         self.defaultValue = defaultValue
+        self.isHomeProperty = isHomeProperty
 
         // Combine publication
-        if let data = Preferences.sharedDefaults.data(forKey: key),
-           let object = try? JSONDecoder().decode(T.self, from: data) {
-            subject = CurrentValueSubject(object)
-        } else {
-            subject = CurrentValueSubject(defaultValue)
-        }
+        let currentValue = Preferences.getPreference(key: key, defaultValue: defaultValue, encoder: objectEncoder, decoder: objectDecoder)
+        subject = CurrentValueSubject(currentValue)
     }
 }
 
-@propertyWrapper
-public struct UserDefaultURL {
-    private let key: String
-    private let defaultValue: String
-    private let subject: CurrentValueSubject<String, Never>
+public struct HomePreferences: Codable, Sendable, Equatable {
+    public let id: UUID
+    public var defaultView = "web"
+    public var demomode = true
+    public var realTimeSliders = false
+    public var iconType = 0
+    public var defaultSitemap = "demo"
+    public var sortSitemapsBy = 0
+    public var defaultMainUIPath = ""
+    public var alwaysAllowWebRTC = false
+    public var sitemapForWatch = "watch"
+    public var localConnectionConfig: ConnectionConfiguration = .localDefault
+    public var remoteConnectionConfig: ConnectionConfiguration = .remoteDefault
+    public var sitemapForWatchLabel = "watch"
+    public var homeName = "Home"
 
-    public var wrappedValue: String {
-        get {
-            let storedValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
-            let trimmedUri = storedValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
-            return trimmedUri.isValidURL ? trimmedUri : defaultValue
-        }
-        set {
-            Preferences.sharedDefaults.set(newValue, forKey: key)
-            let defaultValue = defaultValue
-            // Trim and validate the new URL
-            let trimmedUri = newValue.removeTrailingSlashes().trimmingCharacters(in: .whitespacesAndNewlines)
-            DispatchQueue.main.async { [subject] in
-                if trimmedUri.isValidURL {
-                    subject.send(trimmedUri)
-                } else {
-                    subject.send(defaultValue)
-                }
-            }
-        }
-    }
-
-    public var projectedValue: AnyPublisher<String, Never> {
-        subject.eraseToAnyPublisher()
-    }
-
-    public init(_ key: String, defaultValue: String) {
-        self.key = key
-        self.defaultValue = defaultValue
-        let currentValue = Preferences.sharedDefaults.string(forKey: key) ?? defaultValue
-        subject = CurrentValueSubject<String, Never>(currentValue)
+    fileprivate init(id: UUID) {
+        self.id = id
     }
 }
 
 @MainActor
 public enum Preferences {
+    /// the currently applied settings set from storedHomes
+    @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: Preferences.activeHomeId))
+    public private(set) static var currentHomePreferences: HomePreferences
+
+    @UserDefault("sendCrashReports", defaultValue: false)
+    public static var sendCrashReports: Bool
+
+    @UserDefault("idleOff", defaultValue: false)
+    public static var idleOff: Bool
+
+    @UserDefault("currentWebViewPath", defaultValue: "")
+    public static var currentWebViewPath: String
+
+    /// settings for different homes
+    @UserDefaultObject("storedHomes", defaultValue: [:])
+    public private(set) static var storedHomes: [UUID: HomePreferences]
+
+    /// the currently applied settings set from storedHomes
+    @UserDefaultObject("activeHomeId", defaultValue: UUID())
+    private static var activeHomeId: UUID
+
+    @UserDefault("didMigrateToSharedDefaults", defaultValue: false)
+    private static var didMigrateToSharedDefaults: Bool
+
+    @UserDefault("didMigrateToMultipleHomes", defaultValue: false)
+    private static var didMigrateToMultipleHomes: Bool
+
+    private static var loadingStoredHome = false
+}
+
+// MARK: Retrieving preference from user defaults, reacting to preference change
+
+extension Preferences {
     static let sharedDefaults = UserDefaults(suiteName: "group.org.openhab.app")!
 
-    // MARK: - Public
+    fileprivate static func getPreference<T>(key: String, defaultValue: T, encoder: (T) -> (some Sendable)?, decoder: (Any?) -> T?) -> T {
+        let preferenceValue = sharedDefaults.object(forKey: key)
+        if let preferenceConverted = decoder(preferenceValue) {
+            logger.debug("Preference value \(key) is \(String(describing: preferenceConverted))")
+            return preferenceConverted
+        } else {
+            if let preferenceValue {
+                logger.error("Preference value \(key) was \(String(describing: preferenceValue)) but did not conform to \(T.self). Replace with default value.")
+            } else {
+                logger.info("Preference value \(key) was set for the first time. Using default value.")
+            }
+            let fallback = defaultValue
+            sharedDefaults.set(encoder(fallback), forKey: key)
+            return fallback
+        }
+    }
 
-    @UserDefaultURL("defaultView", defaultValue: "web") public static var defaultView: String
-    @UserDefaultURL("localUrl", defaultValue: "") public static var localUrl: String
-    @UserDefaultURL("remoteUrl", defaultValue: "https://myopenhab.org") public static var remoteUrl: String
-    @UserDefault("username", defaultValue: "test") public static var username: String
-    @UserDefault("password", defaultValue: "test") public static var password: String
-    @UserDefault("alwaysSendCreds", defaultValue: false) public static var alwaysSendCreds: Bool
-    @UserDefault("ignoreSSL", defaultValue: false) public static var ignoreSSL: Bool
-    @UserDefault("demomode", defaultValue: true) public static var demomode: Bool
-    @UserDefault("idleOff", defaultValue: false) public static var idleOff: Bool
-    @UserDefault("realTimeSliders", defaultValue: false) public static var realTimeSliders: Bool
-    @UserDefault("iconType", defaultValue: 0) public static var iconType: Int
-    @UserDefault("defaultSitemap", defaultValue: "demo") public static var defaultSitemap: String
-    @UserDefault("sendCrashReports", defaultValue: false) public static var sendCrashReports: Bool
-    @UserDefault("sortSitemapsBy", defaultValue: 0) public static var sortSitemapsby: Int
-    @UserDefault("defaultMainUIPath", defaultValue: "") public static var defaultMainUIPath: String
-    @UserDefault("alwaysAllowWebRTC", defaultValue: false) public static var alwaysAllowWebRTC: Bool
-    @UserDefault("sitemapForWatch", defaultValue: "watch") public static var sitemapForWatch: String
-    @UserDefaultObject("localConnectionConfig", defaultValue: ConnectionConfiguration.localDefault) public static var localConnectionConfig: ConnectionConfiguration
-    @UserDefaultObject("remoteConnectionConfig", defaultValue: ConnectionConfiguration.remoteDefault) public static var remoteConnectionConfig: ConnectionConfiguration
-    @UserDefault("sitemapForWatchLabel", defaultValue: "watch") public static var sitemapForWatchLabel: String
+    fileprivate static func preferenceChanged<T>(newValue: T, key: String, isHomeProperty: Bool, subject: CurrentValueSubject<T, Never>, sanitize: (T) -> (T?) = { $0 }, converter: (T) -> (some Sendable)?) {
+        guard let sanitized = sanitize(newValue) else {
+            logger.debug("Preference \(key) new value \(String(describing: newValue)) could not be sanitized, will be ignored")
+            return
+        }
+        let convertedValue = converter(sanitized)
+        guard convertedValue != nil else {
+            logger.debug("Preference \(key) conversion of new value \(String(describing: sanitized)) failed, do not store.")
+            return
+        }
+        logger.debug("Preference \(key) will be changed to value \(String(describing: newValue))")
+        sharedDefaults.set(convertedValue, forKey: key)
 
-    // MARK: - Private
+        DispatchQueue.main.async { [subject] in
+            subject.send(sanitized)
+        }
+    }
+}
 
-    @UserDefault("didMigrateToSharedDefaults", defaultValue: false) private static var didMigrateToSharedDefaults: Bool
-    @UserDefault("didMigrateToConnectionConfig", defaultValue: false) private static var didMigrateToConnectionConfig: Bool
-    @UserDefault("currentWebViewPath", defaultValue: "") public static var currentWebViewPath: String
+// MARK: Multiple homes
+
+public extension Preferences {
+    static func listStoredHomes() -> [UUID] {
+        let preferenceIds = storedHomes
+            .sorted { e1, e2 in
+                e1.value.homeName <= e2.value.homeName
+            }
+            .map(\.key)
+        return preferenceIds
+    }
+
+    static func createAndLoadNewStoredSettings(homeName: String) {
+        activeHomeId = UUID()
+        var newHome = HomePreferences(id: activeHomeId)
+        newHome.homeName = homeName
+        loadHomePreferences(newHome)
+    }
+
+    static func renameHome(_ homeId: UUID, newHomeName: String) {
+        if homeId == activeHomeId {
+            modifyActiveHome {
+                $0.homeName = newHomeName
+            }
+        } else {
+            var stored = storedHomes
+            stored[homeId]?.homeName = newHomeName
+            storedHomes = stored
+        }
+    }
+
+    /// helper function for when we update the remote connection cloudUserId for notifications
+    static func setCloudUserId(_ cloudUserId: String?, for homeId: UUID) {
+        if homeId == activeHomeId {
+            modifyActiveHome { homePreferences in
+                homePreferences.remoteConnectionConfig.cloudUserId = cloudUserId
+            }
+        } else {
+            var stored = storedHomes
+            var home = stored[homeId]
+            home?.remoteConnectionConfig.cloudUserId = cloudUserId
+            stored[homeId] = home
+            storedHomes = stored
+        }
+    }
+
+    static func deleteStoredHome(_ homeId: UUID) {
+        guard homeId != activeHomeId else {
+            // cannot remove current home
+            return
+        }
+        var stored = storedHomes
+        stored.removeValue(forKey: homeId)
+        storedHomes = stored
+    }
+
+    static func switchActiveHome(to homeId: UUID) {
+        guard let storedHome = storedHomes[homeId] else {
+            // we have not stored our settings in that list yet
+            return
+        }
+
+        activeHomeId = homeId
+
+        loadHomePreferences(storedHome)
+    }
+
+    private static func initializeStoredHomes() {
+        if storedHomes.isEmpty {
+            // first there might be no stored preferences, if no preference was changed since the update
+            storeActiveHome()
+        }
+    }
+
+    private static func loadHomePreferences(_ preferences: HomePreferences) {
+        loadingStoredHome = true
+        Preferences.currentHomePreferences = preferences
+        loadingStoredHome = false
+        storeActiveHome() // store home settings in case they were not yet there
+    }
+
+    private static func storeActiveHome() {
+        var all = storedHomes
+        let homeId = Preferences.activeHomeId
+        all[homeId] = Preferences.currentHomePreferences
+        storedHomes = all
+        logger.debug("Stored preferences for current home \(homeId.uuidString)")
+    }
+
+    static func modifyActiveHome(modificationFunction: (inout HomePreferences) -> Void) {
+        var homePreferences = currentHomePreferences
+        modificationFunction(&homePreferences)
+        currentHomePreferences = homePreferences
+        storeActiveHome()
+    }
 }
 
 public extension Preferences {
-    static func migrateUserDefaultsIfRequired() {
+    static func firstStoredHome(where predicate: (HomePreferences) -> Bool) -> (id: UUID, record: HomePreferences)? {
+        for (uuid, record) in storedHomes {
+            guard predicate(record) else { continue }
+            return (uuid, record)
+        }
+        return nil
+    }
+
+    static func storedHome(forCloudUserId id: String) -> HomePreferences? {
+        firstStoredHome { homePreferences in
+            homePreferences.remoteConnectionConfig.cloudUserId == id
+        }?.record
+    }
+}
+
+// MARK: Migration
+
+public extension Preferences {
+    static func migratePreferences() {
+        initializeStoredHomes()
+        migrateToSharedDefaultsIfRequired()
+        migrateToMultipleHomesIfRequired()
+    }
+
+    private static func migrateToSharedDefaultsIfRequired() {
         guard !didMigrateToSharedDefaults else { return }
 
-        didMigrateToSharedDefaults = true
-        Preferences.localUrl = UserDefaults.standard.string(forKey: "localUrl") ?? Preferences.localUrl
-        Preferences.remoteUrl = UserDefaults.standard.string(forKey: "remoteUrl") ?? Preferences.remoteUrl
-        Preferences.username = UserDefaults.standard.string(forKey: "username") ?? Preferences.username
-        Preferences.password = UserDefaults.standard.string(forKey: "password") ?? Preferences.password
-        Preferences.alwaysSendCreds = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? Preferences.alwaysSendCreds
-        Preferences.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? Preferences.ignoreSSL
-        Preferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? Preferences.demomode
+        modifyActiveHome { currentHomePreferences in
+            currentHomePreferences.localConnectionConfig.url = UserDefaults.standard.string(forKey: "localUrl") ?? currentHomePreferences.localConnectionConfig.url
+            currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.localConnectionConfig.alwaysSendBasicAuth
+            currentHomePreferences.localConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.localConnectionConfig.ignoreSSL
+            currentHomePreferences.remoteConnectionConfig.url = UserDefaults.standard.string(forKey: "remoteUrl") ?? currentHomePreferences.remoteConnectionConfig.url
+            currentHomePreferences.remoteConnectionConfig.username = UserDefaults.standard.string(forKey: "username") ?? currentHomePreferences.remoteConnectionConfig.username
+            currentHomePreferences.remoteConnectionConfig.password = UserDefaults.standard.string(forKey: "password") ?? currentHomePreferences.remoteConnectionConfig.password
+            currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? currentHomePreferences.remoteConnectionConfig.alwaysSendBasicAuth
+            currentHomePreferences.remoteConnectionConfig.ignoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? currentHomePreferences.remoteConnectionConfig.ignoreSSL
+            currentHomePreferences.demomode = UserDefaults.standard.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
+            currentHomePreferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
+            currentHomePreferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
+        }
+
         Preferences.idleOff = UserDefaults.standard.object(forKey: "idleOff") as? Bool ?? Preferences.idleOff
-        Preferences.realTimeSliders = UserDefaults.standard.object(forKey: "realTimeSliders") as? Bool ?? Preferences.realTimeSliders
-        Preferences.iconType = UserDefaults.standard.object(forKey: "iconType") as? Int ?? Preferences.iconType
-        Preferences.defaultSitemap = UserDefaults.standard.string(forKey: "defaultSitemap") ?? Preferences.defaultSitemap
         Preferences.sendCrashReports = UserDefaults.standard.object(forKey: "sendCrashReports") as? Bool ?? Preferences.sendCrashReports
+
+        didMigrateToSharedDefaults = true
+        // this was done implicitly
+        didMigrateToMultipleHomes = true
     }
 
-    static func migrateUserDefaultsToConnectionIfRequired() {
-        guard !didMigrateToConnectionConfig else { return }
+    private static func migrateToMultipleHomesIfRequired() {
+        guard !didMigrateToMultipleHomes else { return }
 
-        let oldLocalUrl = UserDefaults.standard.string(forKey: "localUrl") ?? Preferences.localUrl
-        let oldRemoteUrl = UserDefaults.standard.string(forKey: "remoteUrl") ?? Preferences.remoteUrl
-        let oldUsername = UserDefaults.standard.string(forKey: "username") ?? Preferences.username
-        let oldPassword = UserDefaults.standard.string(forKey: "password") ?? Preferences.password
-        let oldAlwaysSendCreds = UserDefaults.standard.object(forKey: "alwaysSendCreds") as? Bool ?? Preferences.alwaysSendCreds
-        let oldIgnoreSSL = UserDefaults.standard.object(forKey: "ignoreSSL") as? Bool ?? Preferences.ignoreSSL
+        migrateToSharedDefaultsIfRequired()
+
+        let oldLocalUrl = Preferences.sharedDefaults.string(forKey: "localUrl")
+        let oldRemoteUrl = Preferences.sharedDefaults.string(forKey: "remoteUrl")
+        let oldUsername = Preferences.sharedDefaults.string(forKey: "username")
+        let oldPassword = Preferences.sharedDefaults.string(forKey: "password")
+        let oldAlwaysSendCreds = Preferences.sharedDefaults.object(forKey: "alwaysSendCreds") as? Bool
+        let oldIgnoreSSL = Preferences.sharedDefaults.object(forKey: "ignoreSSL") as? Bool
 
         // Create new configuration
-        let newLocalConfiguration = ConnectionConfiguration(
-            url: oldLocalUrl,
-            username: "",
-            password: "",
-            alwaysSendBasicAuth: oldAlwaysSendCreds,
-            ignoreSSL: oldIgnoreSSL,
-            priority: 0
-        )
+        var newLocalConfiguration = Preferences.currentHomePreferences.localConnectionConfig
+        newLocalConfiguration.url = oldLocalUrl ?? newLocalConfiguration.url
+        newLocalConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newLocalConfiguration.alwaysSendBasicAuth
+        newLocalConfiguration.ignoreSSL = oldIgnoreSSL ?? newLocalConfiguration.ignoreSSL
 
-        let newRemoteConfiguration = ConnectionConfiguration(
-            url: oldRemoteUrl,
-            username: oldUsername,
-            password: oldPassword,
-            alwaysSendBasicAuth: oldAlwaysSendCreds,
-            ignoreSSL: oldIgnoreSSL,
-            priority: 1
-        )
+        var newRemoteConfiguration = Preferences.currentHomePreferences.remoteConnectionConfig
+        newRemoteConfiguration.url = oldRemoteUrl ?? newRemoteConfiguration.url
+        newRemoteConfiguration.username = oldUsername ?? newRemoteConfiguration.username
+        newRemoteConfiguration.password = oldPassword ?? newRemoteConfiguration.password
+        newRemoteConfiguration.alwaysSendBasicAuth = oldAlwaysSendCreds ?? newRemoteConfiguration.alwaysSendBasicAuth
+        newRemoteConfiguration.ignoreSSL = oldIgnoreSSL ?? newRemoteConfiguration.ignoreSSL
 
         // Save to Preferences
-        Preferences.localConnectionConfig = newLocalConfiguration
-        Preferences.remoteConnectionConfig = newRemoteConfiguration
-        didMigrateToConnectionConfig = true
+        modifyActiveHome { currentHomePreferences in
+            currentHomePreferences.defaultView = Preferences.sharedDefaults.string(forKey: "defaultView") ?? currentHomePreferences.defaultView
+            currentHomePreferences.demomode = Preferences.sharedDefaults.object(forKey: "demomode") as? Bool ?? currentHomePreferences.demomode
+            currentHomePreferences.realTimeSliders = Preferences.sharedDefaults.object(forKey: "realTimeSliders") as? Bool ?? currentHomePreferences.realTimeSliders
+            currentHomePreferences.iconType = Preferences.sharedDefaults.object(forKey: "iconType") as? Int ?? currentHomePreferences.iconType
+            currentHomePreferences.defaultSitemap = Preferences.sharedDefaults.string(forKey: "defaultSitemap") ?? currentHomePreferences.defaultSitemap
+            currentHomePreferences.sortSitemapsBy = Preferences.sharedDefaults.object(forKey: "sortSitemapsBy") as? Int ?? currentHomePreferences.sortSitemapsBy
+            currentHomePreferences.defaultMainUIPath = Preferences.sharedDefaults.string(forKey: "defaultMainUIPath") ?? currentHomePreferences.defaultMainUIPath
+            currentHomePreferences.alwaysAllowWebRTC = Preferences.sharedDefaults.object(forKey: "alwaysAllowWebRTC") as? Bool ?? currentHomePreferences.alwaysAllowWebRTC
+            currentHomePreferences.sitemapForWatch = Preferences.sharedDefaults.string(forKey: "sitemapForWatch") ?? currentHomePreferences.sitemapForWatch
+            currentHomePreferences.localConnectionConfig = newLocalConfiguration
+            currentHomePreferences.remoteConnectionConfig = newRemoteConfiguration
+            currentHomePreferences.sitemapForWatchLabel = Preferences.sharedDefaults.string(forKey: "sitemapForWatchLabel") ?? currentHomePreferences.sitemapForWatchLabel
+        }
+
+        didMigrateToMultipleHomes = true
     }
 }
 
-public extension Preferences {
-    static func getLowestPriorityOpenHABConnection() -> ConnectionConfiguration? {
-        let allConnections = [localConnectionConfig, remoteConnectionConfig]
+// MARK: All connections
 
-        return allConnections
-            .filter { $0.url.contains("openhab.org") }
-            .sorted { $0.priority < $1.priority }
+public extension Preferences {
+    static func getNotificationConnection() -> ConnectionConfiguration? {
+        getNotificationConnection(of: [Preferences.currentHomePreferences.remoteConnectionConfig])
+    }
+
+    static func getNotificationConnection(of homeConfig: HomePreferences) -> ConnectionConfiguration? {
+        getNotificationConnection(of: [homeConfig.remoteConnectionConfig])
+    }
+
+    // this will support mutliple connection configs, right now we just pass in the remote config
+    static func getNotificationConnection(of connections: [ConnectionConfiguration?]) -> ConnectionConfiguration? {
+        connections
+            .compactMap { $0 }
+            .filter { $0.supportsNotifications == true }
+            .sorted { $0.priority > $1.priority }
             .first
     }
 }
@@ -229,11 +396,12 @@ public extension Preferences {
 
 public extension ConnectionConfiguration {
     static let localDefault = ConnectionConfiguration(
-        url: "http://192.168.1.1:8080",
+        url: "https://openhab.local:8443",
         username: "",
         password: "",
         alwaysSendBasicAuth: false,
         ignoreSSL: false,
+        supportsNotifications: false,
         priority: 0
     )
 
@@ -243,6 +411,7 @@ public extension ConnectionConfiguration {
         password: "",
         alwaysSendBasicAuth: false,
         ignoreSSL: false,
+        supportsNotifications: true,
         priority: 1
     )
 }

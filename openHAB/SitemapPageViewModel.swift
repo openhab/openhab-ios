@@ -36,7 +36,7 @@ class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
     @Published var filteredWidgets: [OpenHABWidget] = []
     @Published var searchText = ""
-    @Published var error: LocalizedError?
+    @Published var error: (any LocalizedError)?
     @Published var isLoading = false
     @Published var openHABRootUrl: String?
 
@@ -167,7 +167,7 @@ class SitemapPageViewModel: ObservableObject {
             try await setupConnection()
             try await loadCurrentPage()
         } catch {
-            self.error = error as? LocalizedError
+            self.error = error as? any LocalizedError
         }
         isLoading = false
     }
@@ -257,7 +257,7 @@ class SitemapPageViewModel: ObservableObject {
             // Reload the sitemap data
             await selectSitemap()
         } catch {
-            self.error = error as? LocalizedError
+            self.error = error as? any LocalizedError
         }
     }
 

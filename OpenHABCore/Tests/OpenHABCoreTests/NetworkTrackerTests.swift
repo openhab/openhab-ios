@@ -84,11 +84,15 @@ final actor MockOpenAPIService: OpenAPIServiceProtocol {
 
 final class MockPathMonitor: NWPathMonitoring {
     private var handler: ((Bool) async -> Void)?
+    var onStartMonitoring: (() -> Void)?
 
-    init() {}
+    init(onStartMonitoring: (() -> Void)? = nil) {
+        self.onStartMonitoring = onStartMonitoring
+    }
 
     func startMonitoring(handler: @escaping (Bool) async -> Void) async {
         self.handler = handler
+        onStartMonitoring?()
     }
 
     func cancel() {
@@ -148,9 +152,11 @@ final class NetworkTrackerTests: XCTestCase {
 
     @MainActor
     func testTrackerGoesOfflineOnNetworkLoss() async {
-        let expectation = XCTestExpectation(description: "Status becomes .notConnected")
+        let statusSinkAttached = XCTestExpectation(description: "Combine sink attached")
+        let becameNotConnected = XCTestExpectation(description: "Status becomes .notConnected")
+        let monitorStarted = XCTestExpectation(description: "Path monitor started")
 
-        let mockMonitor = MockPathMonitor() // ⬅️ Hold on to this
+        let mockMonitor = MockPathMonitor { monitorStarted.fulfill() } // ⬅️ Hold on to this
         let tracker = NetworkTracker(
             monitor: mockMonitor,
             connectionPool: ConnectionPool { _ in MockOpenAPIService() },
@@ -160,10 +166,20 @@ final class NetworkTrackerTests: XCTestCase {
         var cancellables = Set<AnyCancellable>()
 
         tracker.$status
+            // swiftlint:disable trailing_closure
+            .handleEvents(
+                receiveSubscription: { _ in
+                    statusSinkAttached.fulfill()
+                },
+                receiveOutput: nil,
+                receiveCompletion: nil,
+                receiveCancel: nil
+            ) { _ in }
+            // swiftlint:enable trailing_closure
             .dropFirst()
             .sink { status in
                 if status == .notConnected {
-                    expectation.fulfill()
+                    becameNotConnected.fulfill()
                 }
             }
             .store(in: &cancellables)
@@ -173,12 +189,12 @@ final class NetworkTrackerTests: XCTestCase {
             ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
         ])
 
-        // Add small delay to let Combine attach the sink before simulating
-        try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        // 🚦 Wait until Combine and monitoring are ready before triggering anything
+        await fulfillment(of: [statusSinkAttached, monitorStarted], timeout: 2.0)
 
         // Simulate loss of network
         mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
 
-        await fulfillment(of: [expectation], timeout: 4.0)
+        await fulfillment(of: [becameNotConnected], timeout: 4.0)
     }
 }

@@ -16,9 +16,9 @@ import os.log
 
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 
@@ -42,6 +42,8 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
 
     func handle(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
         logger.info("SetColorValueIntent for \(intent.item ?? "")")
+
+        await OpenHABItemCache.instance.waitUntilReady()
 
         guard let itemName = intent.item else {
             return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))

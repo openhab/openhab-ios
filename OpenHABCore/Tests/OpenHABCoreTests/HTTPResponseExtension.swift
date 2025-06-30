@@ -77,7 +77,9 @@ public extension Data {
 
     static let crlf: ArraySlice<UInt8> = [0xD, 0xA]
 
-    static var multipartBodyString: String { String(decoding: multipartBodyAsSlice, as: UTF8.self) }
+    static var multipartBodyString: String? {
+        String(bytes: multipartBodyAsSlice, encoding: .utf8)
+    }
 
     static var multipartBodyAsSlice: [UInt8] {
         var bytes: [UInt8] = []
@@ -172,7 +174,9 @@ public extension Data {
         return bytes
     }
 
-    var pretty: String { String(decoding: self, as: UTF8.self) }
+    var pretty: String? {
+        String(data: self, encoding: .utf8)
+    }
 }
 
 public extension HTTPRequest {

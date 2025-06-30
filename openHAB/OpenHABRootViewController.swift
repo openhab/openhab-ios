@@ -27,6 +27,7 @@ enum TargetController {
     case notifications
     case browser(String)
     case tile(String)
+    case homeSelection
 }
 
 protocol ModalHandler: AnyObject {
@@ -65,10 +66,13 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
     }
 }
 
+// swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: (UIViewController & OpenHABViewable)!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
+
+    private var apsRegistrationData: [AnyHashable: Any]?
 
     private lazy var webViewController: OpenHABWebViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
@@ -82,7 +86,7 @@ class OpenHABRootViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        os_log("OpenHABRootViewController viewDidLoad", log: .default, type: .info)
+        logger.info("OpenHABRootViewController viewDidLoad")
         setupSideMenu()
 
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABRootViewController.handleApsRegistration(_:)), name: NSNotification.Name("apsRegistered"), object: nil)
@@ -92,7 +96,6 @@ class OpenHABRootViewController: UIViewController {
             alertController.addAction(
                 UIAlertAction(title: NSLocalizedString("activate", comment: ""), style: .default) { _ in
                     Preferences.sendCrashReports = true
-                    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
                     Crashlytics.crashlytics().sendUnsentReports()
                 }
             )
@@ -114,39 +117,32 @@ class OpenHABRootViewController: UIViewController {
         #if DEBUG
         if ProcessInfo.processInfo.environment["UITest"] != nil {
             // this is here to continue to make existing tests work, need to look at this later
-            Preferences.demomode = true
+            Preferences.modifyActiveHome { homePreferences in
+                homePreferences.demomode = true
+            }
         }
         // setup accessibilityIdentifiers for UITest
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "HamburgerButton"
         #endif
         // save this so we know if its changed later
-        isDemoMode = Preferences.demomode
+        isDemoMode = Preferences.currentHomePreferences.demomode
         switchToSavedView()
         setupTracker()
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        os_log("OpenHABRootController viewWillAppear", log: .viewCycle, type: .info)
+        logger.info("OpenHABRootController viewWillAppear")
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
         // if we have turned demo mode off/on, reset view
-        if isDemoMode != Preferences.demomode {
+        if isDemoMode != Preferences.currentHomePreferences.demomode {
             switchToSavedView()
-            isDemoMode = Preferences.demomode
+            isDemoMode = Preferences.currentHomePreferences.demomode
         }
     }
 
     fileprivate func setupTracker() {
-        let serverInfo = Publishers.CombineLatest(
-            Preferences.$localConnectionConfig,
-            Preferences.$remoteConnectionConfig
-        )
-        .eraseToAnyPublisher()
-
-//        let misc = Publishers.CombineLatest3(
-//            Preferences.$demomode,
-//        )
-//        .eraseToAnyPublisher()
+        let serverInfo = Preferences.$currentHomePreferences
 
         // Register for certificate trust notifications
         NotificationCenter.default.addObserver(
@@ -154,7 +150,24 @@ class OpenHABRootViewController: UIViewController {
             object: nil,
             queue: nil
         ) { [weak self] notification in
-            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_invalid", comment: ""))
+            guard
+                let summary = notification.userInfo?["summary"] as? String,
+                let domain = notification.userInfo?["domain"] as? String,
+                let client = notification.object as? HTTPClient
+            else {
+                return
+            }
+
+            let delegate = client.delegate
+
+            Task { @MainActor in
+                self?.handleCertificateTrust(
+                    summary: summary,
+                    domain: domain,
+                    delegate: delegate,
+                    messageTemplateKey: "ssl_certificate_invalid"
+                )
+            }
         }
 
         NotificationCenter.default.addObserver(
@@ -162,7 +175,25 @@ class OpenHABRootViewController: UIViewController {
             object: nil,
             queue: nil
         ) { [weak self] notification in
-            self?.handleCertificateTrust(notification, message: NSLocalizedString("ssl_certificate_no_match", comment: ""))
+            guard
+                let summary = notification.userInfo?["summary"] as? String,
+                let domain = notification.userInfo?["domain"] as? String,
+                let client = notification.object as? HTTPClient
+
+            else {
+                return
+            }
+
+            let delegate = client.delegate
+
+            Task { @MainActor in
+                self?.handleCertificateTrust(
+                    summary: summary,
+                    domain: domain,
+                    delegate: delegate,
+                    messageTemplateKey: "ssl_certificate_no_match"
+                )
+            }
         }
 
         NotificationCenter.default.addObserver(
@@ -170,15 +201,17 @@ class OpenHABRootViewController: UIViewController {
             object: nil,
             queue: nil
         ) { _ in
-            WatchMessageService.singleton.syncPreferencesToWatch()
-            NetworkTracker.shared.restartTracking()
+            Task { @MainActor in
+                WatchMessageService.singleton.syncPreferencesToWatch()
+                NetworkTracker.shared.restartTracking()
+            }
         }
 
-        Publishers.CombineLatest(serverInfo, Preferences.$demomode)
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
-            .sink { (serverInfoTuple, miscTuple) in
-                let (localConnectionConfig, remoteConnectionConfig) = serverInfoTuple
-                let (demomode) = miscTuple
+        serverInfo.debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
+            .sink { homeSettings in
+                let localConnectionConfig = homeSettings.localConnectionConfig
+                let remoteConnectionConfig = homeSettings.remoteConnectionConfig
+                let demomode = homeSettings.demomode
 
                 Task {
                     if demomode {
@@ -259,7 +292,7 @@ class OpenHABRootViewController: UIViewController {
             url = URL(string: urlString)
         } else {
             guard let rootUrl = activeConnection?.configuration.url else {
-                os_log("openTileURL failed: no active connection URL", log: .default, type: .error)
+                logger.error("openTileURL failed: no active connection URL")
                 return
             }
             url = Endpoint.resource(openHABRootUrl: rootUrl, path: urlString.prepare()).url
@@ -289,7 +322,9 @@ class OpenHABRootViewController: UIViewController {
                 self.modalDismissed(to: .settings)
             }
         case let .sitemap(sitemap):
-            Preferences.defaultSitemap = sitemap
+            Preferences.modifyActiveHome { homePreferences in
+                homePreferences.defaultSitemap = sitemap
+            }
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .sitemap(sitemap))
             }
@@ -305,6 +340,11 @@ class OpenHABRootViewController: UIViewController {
             SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
                 self.modalDismissed(to: .tile(urlString))
             }
+        case .homeSelection:
+            print("Dismissed to Home Selection")
+            SideMenuManager.default.rightMenuNavigationController?.dismiss(animated: true) {
+                self.modalDismissed(to: .homeSelection)
+            }
         }
     }
 
@@ -316,24 +356,101 @@ class OpenHABRootViewController: UIViewController {
     @objc
     func handleApsRegistration(_ note: Notification?) {
         logger.info("handleApsRegistration")
-        let theData = note?.userInfo
-        if theData != nil {
-            guard let config = Preferences.getLowestPriorityOpenHABConnection() else { return }
-            guard let deviceId = theData?["deviceId"] as? String, let deviceToken = theData?["deviceToken"] as? String, let deviceName = theData?["deviceName"] as? String else { return }
-            logger.info("Registering notifications with \(config.url)")
-            Task {
-                do {
-                    let client = HTTPClient(configuration: config)
-                    try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName)
-                    logger.info("my.openHAB registration succeeded")
-                } catch {
-                    logger.error("my.openHAB registration failed \(error.localizedDescription)")
+        apsRegistrationData = note?.userInfo
+        subscribeToOpenhabConnectionChanges()
+    }
+
+    private func subscribeToOpenhabConnectionChanges() {
+        struct UuidWithConnection: Hashable, Equatable {
+            let uuid: UUID
+            let connection: ConnectionConfiguration // not only URL, because auth and certs might be relevant for establishing the connection
+        }
+
+        let storedOpenHabConnections = Preferences.$storedHomes
+            .debounce(for: .seconds(1), scheduler: RunLoop.main) // avoid overexcited registrations / deregistrations in batch updates
+            .map { updatedPreferences in // we want to recognize changes in the OpenHab URLs for any of the homes
+                Set<UuidWithConnection>(updatedPreferences.compactMap { storedWithUuid in
+                    let (uuid, homeConfig) = storedWithUuid
+                    guard let connection = Preferences.getNotificationConnection(of: homeConfig) else { return nil }
+                    return UuidWithConnection(uuid: uuid, connection: connection)
+                })
+            }
+
+        // create a tuple that lets us inspect the previous value
+        let connectionsWithPreviousValues = storedOpenHabConnections
+            .scan((previous: Set<UuidWithConnection>(), current: Set<UuidWithConnection>())) { previous, current in
+                (previous: previous.current, current: current)
+            }
+
+        let differences = connectionsWithPreviousValues.map { (previous, current) in // diff set of previous and current OpenHab URLs
+            (newValues: current.subtracting(previous), deletedValues: previous.subtracting(current))
+        }
+
+        let openhabConnectionSubscription = differences.sink { [weak self] diff in
+            logger.info("openhabConnectionSubscription updated")
+            for newHome in diff.newValues {
+                logger.info("openhabConnectionSubscription uuid \(newHome.uuid) registering for push notifications ")
+                self?.registerHome(uuid: newHome.uuid, connection: newHome.connection)
+            }
+            for deletedHome in diff.deletedValues {
+                // TODO: implement deregistration
+                logger.warning("APNS Deregistration is missing (wanted to deregister \(deletedHome.connection.url))")
+            }
+        }
+
+        cancellables.insert(openhabConnectionSubscription)
+    }
+
+    private func registerHome(uuid: UUID, connection: ConnectionConfiguration) {
+        guard let apsRegistrationData else {
+            logger.fault("Cannot register homes for push notifications, no notification registration data available")
+            return
+        }
+        guard let deviceId = apsRegistrationData["deviceId"] as? String,
+              let deviceToken = apsRegistrationData["deviceToken"] as? String,
+              let deviceName = apsRegistrationData["deviceName"] as? String else {
+            return
+        }
+        logger.info("Registering notifications with \(connection.url)")
+        _ = registerHome(uuid, connection, deviceToken, deviceId, deviceName)
+    }
+
+    private func registerHome(_ uuid: UUID, _ config: ConnectionConfiguration, _ deviceToken: String, _ deviceId: String, _ deviceName: String) -> Task<Void, Never> {
+        Task {
+            do {
+                let client = HTTPClient(configuration: config)
+                if let cloudUserId = try await client.register(prefsURL: config.url, deviceToken: deviceToken, deviceId: deviceId, deviceName: deviceName) {
+                    Preferences.setCloudUserId(cloudUserId, for: uuid)
+                    logger.info("my.openHAB registration succeeded with cloudUserId \(cloudUserId)")
                 }
+                logger.info("my.openHAB registration succeeded without cloudUserId")
+            } catch {
+                logger.error("my.openHAB registration failed \(error.localizedDescription)")
             }
         }
     }
 
-    func handleNotification(action: String?) {
+    func handleNotification(action: String?, cloudUserId: String?) {
+        guard let action else { return }
+
+        logger.info("handleNotification cloudUserId: \(cloudUserId ?? "<none>")")
+        if let cloudUserId, let targetHome = Preferences.storedHome(forCloudUserId: cloudUserId), Preferences.currentHomePreferences.remoteConnectionConfig.cloudUserId != cloudUserId {
+            // if we need to switch homes, disconnnect the tracking fist,and wait for the tracker to start again with the updated preferences
+            Task {
+                await NetworkTracker.shared.stopTracking()
+                logger.info("Switching to home \(targetHome.id)")
+                Preferences.switchActiveHome(to: targetHome.id)
+                await NetworkTracker.shared.waitForActiveConnection()
+                handleNotificationInternal(action)
+            }
+            return
+        }
+        handleNotificationInternal(action)
+    }
+
+    private func handleNotificationInternal(_ action: String?) {
+        logger.info("handleNotificationInternal: \(action ?? "<none>")")
+
         guard let action else { return }
 
         let cmd = action.split(separator: ":").dropFirst().joined(separator: ":")
@@ -364,11 +481,11 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func uiCommandAction(_ command: String) {
-        os_log("navigateCommandAction:  %{PUBLIC}@", log: .notifications, type: .info, command)
+        logger.info("navigateCommandAction: \(command)")
         let regexPattern = /^(\/basicui\/app\\?.*|\/.*|.*)$/
         if let firstMatch = command.firstMatch(of: regexPattern) {
             let path = String(firstMatch.1)
-            os_log("navigateCommandAction path:  %{PUBLIC}@", log: .notifications, type: .info, path)
+            logger.info("navigateCommandAction path: \(path)")
             if path.starts(with: "/basicui/app?") {
                 if currentView !== sitemapViewController {
                     switchView(target: .sitemap(""))
@@ -396,7 +513,7 @@ class OpenHABRootViewController: UIViewController {
                 }
             }
         } else {
-            os_log("Invalid regex: %{PUBLIC}@", log: .notifications, type: .error, command)
+            logger.error("Invalid regex: \(command)")
         }
     }
 
@@ -416,10 +533,7 @@ class OpenHABRootViewController: UIViewController {
                 displayErrorNotification("Could not find server")
             } catch {
                 displayErrorNotification("Failed to establish a connection: \(error.localizedDescription)")
-                // TODO:
-                //            logger.error("Could not send data \(error.localizedDescription)")
-                //
-                //            self.displayErrorNotification("Request to \(url) failed: \(error.localizedDescription)")
+                logger.error("Could not send data \(error.localizedDescription)")
             }
         }
     }
@@ -456,7 +570,7 @@ class OpenHABRootViewController: UIViewController {
             guard keyValue.count == 2 else { continue }
             if keyValue[0] == "ios" {
                 if let url = URL(string: String(keyValue[1])) {
-                    os_log("appCommandAction opening %{public}@ %{public}@", log: .default, type: .error, String(keyValue[0]), String(keyValue[1]))
+                    logger.error("appCommandAction opening \(String(keyValue[0])) \(String(keyValue[1]))")
                     UIApplication.shared.open(url)
                     return
                 }
@@ -498,7 +612,7 @@ class OpenHABRootViewController: UIViewController {
     }
 
     func showSideMenu() {
-        os_log("OpenHABRootViewController showSideMenu", log: .viewCycle, type: .info)
+        logger.info("OpenHABRootViewController showSideMenu")
         if let menu = SideMenuManager.default.rightMenuNavigationController {
             // don't try and push an already visible menu less you crash the app
             dismiss(animated: false) {
@@ -546,8 +660,10 @@ class OpenHABRootViewController: UIViewController {
             currentView = targetView
 
             // Don't save our view in demo mode
-            if !Preferences.demomode {
-                Preferences.defaultView = currentView.viewName()
+            if !Preferences.currentHomePreferences.demomode {
+                Preferences.modifyActiveHome {
+                    $0.defaultView = currentView.viewName()
+                }
             }
         } else {
             // if we hit the menu item again while on the view, trigger a reload
@@ -559,14 +675,15 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func switchToSavedView() {
-        if Preferences.demomode {
+        if Preferences.currentHomePreferences.demomode {
             switchView(target: .sitemap(""))
         } else {
-            os_log("OpenHABRootViewController switchToSavedView %@", log: .viewCycle, type: .info, Preferences.defaultView == "sitemap" ? "sitemap" : "web")
-            switchView(target: Preferences.defaultView == "sitemap" ? .sitemap("") : .webview)
+            logger.info("OpenHABRootViewController switchToSavedView \(Preferences.currentHomePreferences.defaultView == "sitemap" ? "sitemap" : "web")")
+            switchView(target: Preferences.currentHomePreferences.defaultView == "sitemap" ? .sitemap("") : .webview)
         }
     }
 
+    @MainActor
     @objc func handleCertificateTrust(_ notification: Notification, message: String) {
         guard let summary = notification.userInfo?["summary"] as? String,
               let domain = notification.userInfo?["domain"] as? String,
@@ -582,27 +699,56 @@ class OpenHABRootViewController: UIViewController {
             )
 
             alert.addAction(UIAlertAction(title: "Always", style: .default) { _ in
-                client.completeEvaluation(.permitAlways)
+                client.delegate.completeEvaluation(.permitAlways)
             })
 
             alert.addAction(UIAlertAction(title: "Once", style: .default) { _ in
-                client.completeEvaluation(.permitOnce)
+                client.delegate.completeEvaluation(.permitOnce)
             })
 
             alert.addAction(UIAlertAction(title: "Deny", style: .cancel) { _ in
-                client.completeEvaluation(.deny)
+                client.delegate.completeEvaluation(.deny)
             })
 
             self.present(alert, animated: true)
         }
     }
+
+    @MainActor
+    @objc
+    func handleCertificateTrust(summary: String, domain: String, delegate: HTTPClientDelegate, messageTemplateKey: String) {
+        let title = NSLocalizedString("ssl_certificate_warning", comment: "")
+        let message = String(format: NSLocalizedString(messageTemplateKey, comment: ""), summary, domain)
+
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Always", style: .default) { _ in
+            delegate.completeEvaluation(.permitAlways)
+        })
+
+        alert.addAction(UIAlertAction(title: "Once", style: .default) { _ in
+            delegate.completeEvaluation(.permitOnce)
+        })
+
+        alert.addAction(UIAlertAction(title: "Deny", style: .cancel) { _ in
+            delegate.completeEvaluation(.deny)
+        })
+
+        present(alert, animated: true)
+    }
 }
+
+// swiftlint:enable type_body_length
 
 // MARK: - UISideMenuNavigationControllerDelegate
 
 extension OpenHABRootViewController: SideMenuNavigationControllerDelegate {
     nonisolated func sideMenuWillAppear(menu: SideMenuNavigationController, animated: Bool) {
-        os_log("OpenHABRootViewController sideMenuWillAppear", log: .viewCycle, type: .info)
+        logger.info("OpenHABRootViewController sideMenuWillAppear")
     }
 }
 
@@ -626,6 +772,9 @@ extension OpenHABRootViewController: ModalHandler {
                 break
             case let .tile(urlString):
                 openTileURL(urlString)
+            case .homeSelection:
+                let hostingController = UIHostingController(rootView: HomeSelectionView())
+                navigationController?.pushViewController(hostingController, animated: true)
             }
         }
     }

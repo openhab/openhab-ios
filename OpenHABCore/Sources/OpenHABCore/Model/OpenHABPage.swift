@@ -13,6 +13,8 @@ import Foundation
 import os.log
 
 public class OpenHABPage: NSObject, @unchecked Sendable {
+    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABItem")
+
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgets: [OpenHABWidget] = []
     public var pageId = ""
@@ -40,8 +42,7 @@ public class OpenHABPage: NSObject, @unchecked Sendable {
 
     private func sendCommand(_ item: OpenHABItem?, commandToSend command: String?) {
         guard let item else { return }
-
-        os_log("SitemapPage sending command %{PUBLIC}@ to %{PUBLIC}@", log: OSLog.remoteAccess, type: .info, command.orEmpty, item.name)
+        logger.info("SitemapPage sending command \(command.orEmpty) to \(item.name)")
         sendCommand?(item, command)
     }
 }
@@ -62,13 +63,6 @@ public extension OpenHABPage {
 
 public extension OpenHABPage {
     struct CodingData: Decodable {
-        let pageId: String?
-        let title: String?
-        let link: String?
-        let leaf: Bool?
-        let widgets: [OpenHABWidget.CodingData]?
-        let icon: String?
-
         private enum CodingKeys: String, CodingKey {
             case pageId = "id"
             case title
@@ -77,6 +71,13 @@ public extension OpenHABPage {
             case widgets
             case icon
         }
+
+        let pageId: String?
+        let title: String?
+        let link: String?
+        let leaf: Bool?
+        let widgets: [OpenHABWidget.CodingData]?
+        let icon: String?
     }
 }
 

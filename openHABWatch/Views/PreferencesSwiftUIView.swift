@@ -31,12 +31,6 @@ struct HighlightDotRowModifier: ViewModifier {
     }
 }
 
-extension View {
-    func highlightDotRow(if condition: Bool) -> some View {
-        modifier(HighlightDotRowModifier(showDot: condition))
-    }
-}
-
 struct CompactLabeledContentStyle: LabeledContentStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack {
@@ -78,6 +72,12 @@ struct PreferencesSwiftUIView: View {
         .refreshable {
             AppMessageService.singleton.requestApplicationContext()
         }
+    }
+}
+
+extension View {
+    func highlightDotRow(if condition: Bool) -> some View {
+        modifier(HighlightDotRowModifier(showDot: condition))
     }
 }
 

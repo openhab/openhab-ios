@@ -20,15 +20,15 @@ final class MockClientCertDelegate: ClientCertificateManagerDelegate {
     var receivedErrorMessage: String?
     var receivedErrorCode: OSStatus?
 
-    func askForClientCertificateImport() async -> Bool {
+    func askForClientCertificateImport(_ clientCertificateManager: ClientCertificateManager?) async -> Bool {
         shouldImport
     }
 
-    func askForCertificatePassword() async -> String? {
+    func askForCertificatePassword(_ clientCertificateManager: ClientCertificateManager?) async -> String? {
         password
     }
 
-    func alertClientCertificateError(errMsg: String) async {
+    func alertClientCertificateError(_ clientCertificateManager: ClientCertificateManager?, errMsg: String) async {
         receivedErrorMessage = errMsg
         if let code = Int(errMsg.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
             receivedErrorCode = OSStatus(code)
@@ -91,10 +91,19 @@ final class ClientCertificateManagerTests: XCTestCase {
         XCTAssertNotNil(manager.importingIdentity)
     }
 
+//    func testClientCertificateAcceptedFailsAndAlerts() async {
+//        manager.importingRawCert = Data([0x00, 0x01, 0x02]) // invalid cert
+//        await manager.clientCertificateAccepted(password: "badpassword")
+//        XCTAssertNotNil(delegate.receivedErrorMessage)
+//    }
+
+    @MainActor
     func testClientCertificateAcceptedFailsAndAlerts() async {
         manager.importingRawCert = Data([0x00, 0x01, 0x02]) // invalid cert
         await manager.clientCertificateAccepted(password: "badpassword")
-        XCTAssertNotNil(delegate.receivedErrorMessage)
+
+        let errorMessage = await MainActor.run { delegate.receivedErrorMessage }
+        XCTAssertNotNil(errorMessage)
     }
 
     // Helper to load valid PKCS#12 mock

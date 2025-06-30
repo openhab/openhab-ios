@@ -19,6 +19,8 @@ enum VideoEncoding: String {
 }
 
 class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
+    private let logger = Logger(subsystem: "org.openhab", category: "VideoUITableViewCell")
+
     private var activityIndicator: UIActivityIndicatorView = if #available(iOS 13.0, *) {
         .init(style: .medium)
     } else {
@@ -124,20 +126,25 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
             bringSubviewToFront(playerView)
             let playerItem = AVPlayerItem(asset: AVAsset(url: url))
             playerObserver = playerItem.observe(\.status, options: [.new, .old]) { [weak self] playerItem, _ in
+                guard let self else { return }
+
                 switch playerItem.status {
                 case .failed:
-                    os_log("Failed to load video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
-                    self?.url = nil
+                    logger.debug("Failed to load video with URL: \(url.absoluteString)")
+                    Task { @MainActor in
+                        self.url = nil
+                    }
                 case .readyToPlay:
-                    os_log("Loaded video with URL: %{PUBLIC}@", log: .urlComposition, type: .debug, url.absoluteString)
+                    logger.debug("Loaded video with URL: \(url.absoluteString)")
                 default: return
                 }
-
-                self?.activityIndicator.isHidden = true
-                if playerItem.status == .readyToPlay, playerItem.presentationSize != .zero {
-                    let aspectRatio = playerItem.presentationSize.width / playerItem.presentationSize.height
-                    self?.updateAspectRatio(forView: self?.playerView, aspectRatio: aspectRatio)
-                    self?.didLoad?()
+                Task { @MainActor in
+                    self.activityIndicator.isHidden = true
+                    if playerItem.status == .readyToPlay, playerItem.presentationSize != .zero {
+                        let aspectRatio = playerItem.presentationSize.width / playerItem.presentationSize.height
+                        self.updateAspectRatio(forView: self.playerView, aspectRatio: aspectRatio)
+                        self.didLoad?()
+                    }
                 }
             }
             playerView?.playerLayer.player = AVPlayer(playerItem: playerItem)
@@ -163,11 +170,15 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
 
         activeTask = Task {
             do {
-                let client = HTTPClient(username: Preferences.username, password: Preferences.username, alwaysSendBasicAuth: Preferences.alwaysSendCreds)
+                guard let config = NetworkTracker.shared.activeConnection?.configuration else {
+                    logger.warning("No openHAB configuration found.")
+                    throw HTTPClientError.noConfiguration
+                }
+                let client = HTTPClient(configuration: config)
                 let (byteStream, _) = try await client.processStream(url: url)
                 await handleMJPEGStream(byteStream)
             } catch {
-                os_log("Failed to start MJPEG stream: %@", log: .decoding, type: .error, error.localizedDescription)
+                logger.error("Failed to start MJPEG stream: \(error.localizedDescription)")
             }
         }
 
@@ -195,7 +206,7 @@ class VideoUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
                     }
                 }
             } catch {
-                os_log("Failed to process MJPEG stream: %@", log: .decoding, type: .error, error.localizedDescription)
+                logger.error("Failed to process MJPEG stream: \(error.localizedDescription)")
             }
         }
     }

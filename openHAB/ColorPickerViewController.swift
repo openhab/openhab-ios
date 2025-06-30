@@ -15,6 +15,8 @@ import os.log
 import UIKit
 
 class ColorPickerViewController: DefaultColorPickerViewController {
+    private let logger = Logger(subsystem: "org.openhab", category: "ColorPickerViewController")
+
     var widget: OpenHABWidget?
 
     /// Throttle engine
@@ -32,12 +34,12 @@ class ColorPickerViewController: DefaultColorPickerViewController {
     }
 
     required init?(coder: NSCoder) {
-        os_log("ColorPickerViewController initWithCoder", log: .viewCycle, type: .info)
+        logger.info("ColorPickerViewController initWithCoder")
         super.init(coder: coder)
     }
 
     override func viewDidLoad() {
-        os_log("ColorPickerViewController viewDidLoad", log: .viewCycle, type: .info)
+        logger.info("ColorPickerViewController viewDidLoad")
 
         if let color = widget?.item?.stateAsUIColor() {
             selectedColor = color
@@ -66,13 +68,13 @@ class ColorPickerViewController: DefaultColorPickerViewController {
         saturation *= 100
         brightness *= 100
 
-        os_log("Color changed to HSB(%g, %g, %g).", log: .default, type: .info, hue, saturation, brightness)
+        logger.info("Color changed to HSB(\(hue), \(saturation), \(brightness)).")
 
         widget?.sendCommand("\(hue),\(saturation),\(brightness)")
     }
 }
 
-extension ColorPickerViewController: ColorPickerDelegate {
+extension ColorPickerViewController: @preconcurrency ColorPickerDelegate {
     func colorPicker(_ colorPicker: ColorPickerController, selectedColor: UIColor, usingControl: any ColorControl) {
         if let throttler {
             throttler.throttle { DispatchQueue.main.async { self.sendColorUpdate(color: selectedColor) } }

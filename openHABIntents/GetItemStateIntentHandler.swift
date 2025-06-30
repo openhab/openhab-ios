@@ -16,9 +16,9 @@ import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 
@@ -38,6 +38,8 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
 
     func handle(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
         logger.info("GetItemStateIntent for \(intent.item ?? "")")
+        await OpenHABItemCache.instance.waitUntilReady()
+        // Proceed to fetch item and complete
 
         guard let itemName = intent.item else {
             return .failureInvalidItem(

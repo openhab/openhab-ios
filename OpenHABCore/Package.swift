@@ -31,15 +31,32 @@ let package = Package(
                 .product(name: "Kingfisher", package: "Kingfisher", condition: .when(platforms: [.iOS, .watchOS])),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
-                .product(name: "HTTPTypes", package: "swift-http-types"), // ✅ From `swift-http-types`
+                .product(name: "HTTPTypes", package: "swift-http-types"),
                 .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder"),
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
             ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableExperimentalFeature("StrictConcurrency")
-//                , .unsafeFlags(["-strict-concurrency=targeted"])
-//                .enableUpcomingFeature("all")
+                .enableUpcomingFeature("ConciseMagicFile"),
+                .enableUpcomingFeature("DisableOutwardActorInference"),
+                .enableUpcomingFeature("DynamicActorIsolation"),
+                .enableUpcomingFeature("ExistentialAny"),
+                .enableUpcomingFeature("ForwardTrailingClosures"),
+                .enableUpcomingFeature("GlobalActorIsolatedTypesUsability"),
+                .enableUpcomingFeature("GlobalConcurrency"),
+                .enableUpcomingFeature("ImplicitOpenExistentials"),
+                .enableUpcomingFeature("ImportObjcForwardDeclarations"),
+                .enableUpcomingFeature("InferSendableFromCaptures"),
+//                .enableUpcomingFeature("InternalImportsByDefault"),
+                .enableUpcomingFeature("IsolatedDefaultValues"),
+                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableUpcomingFeature("NonfrozenEnumExhaustivity"),
+                .enableUpcomingFeature("RegionBasedIsolation"),
+                .enableUpcomingFeature("StrictConcurrency"),
+                .unsafeFlags([
+                    "-Xfrontend", "-enable-actor-data-race-checks",
+                    "-Xfrontend", "-strict-concurrency=complete"
+                ])
             ]
         ),
         .testTarget(
@@ -47,7 +64,7 @@ let package = Package(
             dependencies: [
                 "OpenHABCore",
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "HTTPTypes", package: "swift-http-types"), // ✅ From `swift-http-types`
+                .product(name: "HTTPTypes", package: "swift-http-types"),
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
             ],
             resources: [

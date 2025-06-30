@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Foundation
 import MapKit
 import os.log
@@ -59,7 +60,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case text, number, date, time, datetime, unknown
     }
 
-    public var id: String = ""
+    private let logger = Logger(subsystem: "org.openhab", category: "OpenHABWidget")
+
+    public var id = ""
 
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
@@ -87,7 +90,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     @Published public var item: OpenHABItem?
     public var linkedPage: OpenHABPage?
     public var mappings: [OpenHABWidgetMapping] = []
-    public var image: UIImage?
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
     public var switchSupport = false
@@ -187,7 +189,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func sendItemUpdate(state: NumberState?) {
         guard let item, let state else {
-            os_log("ItemUpdate for Item or State = nil", log: .default, type: .info)
+            logger.info("ItemUpdate for Item or State = nil")
             return
         }
         if item.isOfTypeOrGroupType(.numberWithDimension) {
@@ -205,11 +207,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func sendCommand(_ command: String?) {
         guard let item else {
-            os_log("Command for Item = nil", log: .default, type: .info)
+            logger.info("Command for Item = nil")
             return
         }
         guard let sendCommand else {
-            os_log("sendCommand closure not set", log: .default, type: .info)
+            logger.info("sendCommand closure not set")
             return
         }
         sendCommand(item, command)

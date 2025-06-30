@@ -16,9 +16,9 @@ import os.log
 
 class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetNumberValueIntent")
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 
@@ -42,6 +42,8 @@ class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling
 
     func handle(intent: OpenHABSetNumberValueIntent) async -> OpenHABSetNumberValueIntentResponse {
         logger.info("SetNumberValueIntent for \(intent.item ?? "")")
+
+        await OpenHABItemCache.instance.waitUntilReady()
 
         guard let itemName = intent.item else {
             return .failureInvalidItem(

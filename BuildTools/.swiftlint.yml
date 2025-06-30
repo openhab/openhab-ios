@@ -32,6 +32,11 @@ excluded:
   - .build
   - ../OpenHABCore/Sources/OpenHABCore/GeneratedSources/*
   - ../OpenHABCore/swift-openapi-generator
+  - ../vendor
+  - ../DerivedData
+  - ../openHAB/Intents/Generated
+  - ../openHABWatch/Intents/Generated
+  - ../OsLogRewriter/.build
 
 nesting:
     type_level: 2
@@ -103,4 +108,7 @@ file_name:
   suffix_pattern: "Extension?|\\+.*"
 
 opening_brace:
-  allow_multiline_func: true
+  ignore_multiline_function_signatures: true
+
+redundant_type_annotation:
+  consider_default_literal_types_redundant: true

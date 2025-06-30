@@ -16,6 +16,8 @@ import OpenHABCore
 import os.log
 
 class SliderWithSwitchSupportUITableViewCell: GenericUITableViewCell {
+    private let logger = Logger(subsystem: "org.openhab", category: "SliderWithSwitchSupportUITableViewCell")
+
     private var step: Float = 1.0
 
     private var widgetValue: Double {
@@ -116,17 +118,17 @@ class SliderWithSwitchSupportUITableViewCell: GenericUITableViewCell {
     }
 
     private func sliderDidChange(toValue value: Double) {
-        os_log("Slider new value = %g", log: .default, type: .info, value)
+        logger.info("Slider new value = \(value)")
         widget.sendCommand(value.valueText(step: Double(step)))
     }
 
     @objc
     func switchChange() {
         if (widgetSwitch?.isOn)! {
-            os_log("Switch to ON", log: .viewCycle, type: .info)
+            logger.info("Switch to ON")
             widget.sendCommand("ON")
         } else {
-            os_log("Switch to OFF", log: .viewCycle, type: .info)
+            logger.info("Switch to OFF")
             widget.sendCommand("OFF")
         }
     }

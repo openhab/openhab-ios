@@ -23,18 +23,26 @@ public protocol ItemCacheProtocol {
 public actor OpenHABItemCache {
     public static let instance = OpenHABItemCache()
 
+    private lazy var setupTask: Task<Void, Never> = Task { [weak self] in
+        await self?.setup()
+    }
+
     public var items: [OpenHABItem]?
-    var cancellables = Set<AnyCancellable>()
-    var timeout: Double = 20
-    var lastLoad = Date().timeIntervalSince1970
+    private let ttl: TimeInterval = 20
+    var lastLoad = Date()
 
     private let logger = Logger(subsystem: "org.openhab.app.watchkitapp", category: "OpenHABItemCache")
 
     private init() {}
 
+    public func waitUntilReady() async {
+        await setupTask.value
+    }
+
     public func setup() async {
-        let connection1 = await Preferences.localConnectionConfig
-        let connection2 = await Preferences.remoteConnectionConfig
+        let connection1: ConnectionConfiguration = await Preferences.currentHomePreferences.localConnectionConfig
+        let connection2: ConnectionConfiguration = await Preferences.currentHomePreferences.remoteConnectionConfig
+        logger.info("Local: \(connection1.url), Remote: \(connection2.url)")
         await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
     }
 
@@ -51,9 +59,9 @@ public actor OpenHABItemCache {
 
     public func getItem(name: String) async -> OpenHABItem? {
         logger.info("getItem")
-        let now = Date().timeIntervalSince1970
+        let now = Date()
 
-        if items == nil || (now - lastLoad) > 10 {
+        if items == nil || now.timeIntervalSince(lastLoad) > ttl {
             return await reload(name: name)
         }
         return getItem(name)
@@ -81,11 +89,11 @@ public actor OpenHABItemCache {
 
     public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
         logger.info("OpenHABItemCache Loading items ")
-        lastLoad = Date().timeIntervalSince1970
 
         do {
             items = try await NetworkTracker.shared.getItems().filter { $0.type != .group }
             // swiftformat:disable next redundantSelf
+            lastLoad = Date()
             logger.info("Loaded \(self.items?.count ?? 0) items to cache")
             return items?.filtered(by: searchTerm, for: types).sorted(by: \.name).map(\.name) ?? []
         } catch {

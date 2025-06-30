@@ -26,9 +26,9 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetSwitchStateIntent")
 
-    private let itemCache: ItemCacheProtocol
+    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 
@@ -63,6 +63,8 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     func handle(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
         let itemName = intent.item ?? ""
         logger.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
+
+        await OpenHABItemCache.instance.waitUntilReady()
 
         guard !itemName.isEmpty else {
             return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
