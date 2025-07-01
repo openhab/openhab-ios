@@ -37,22 +37,22 @@ class OpenHABGeneralTests: XCTestCase {
 
     func testWebViewURLParsing() {
         let localURL = "http://openhab.local:8080"
-        
+
         // Test external HTTP URL
         let httpURL = "http://camera.example.com/stream"
         let httpResult = httpURL.lowercased().hasPrefix("http://") || httpURL.lowercased().hasPrefix("https://") ? httpURL : localURL + httpURL
         XCTAssertEqual(httpResult, httpURL, "External HTTP URL should not be modified")
-        
+
         // Test external HTTPS URL
         let httpsURL = "https://camera.example.com/stream"
         let httpsResult = httpsURL.lowercased().hasPrefix("http://") || httpsURL.lowercased().hasPrefix("https://") ? httpsURL : localURL + httpsURL
         XCTAssertEqual(httpsResult, httpsURL, "External HTTPS URL should not be modified")
-        
+
         // Test relative URL
         let relativeURL = "/proxy/camera"
         let relativeResult = relativeURL.lowercased().hasPrefix("http://") || relativeURL.lowercased().hasPrefix("https://") ? relativeURL : localURL + relativeURL
         XCTAssertEqual(relativeResult, localURL + relativeURL, "Relative URL should be combined with local URL")
-        
+
         // Test case-insensitive HTTPS
         let uppercaseHttpsURL = "HTTPS://example.com/image.jpg"
         let uppercaseResult = uppercaseHttpsURL.lowercased().hasPrefix("http://") || uppercaseHttpsURL.lowercased().hasPrefix("https://") ? uppercaseHttpsURL : localURL + uppercaseHttpsURL
