@@ -92,6 +92,10 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var mappings: [OpenHABWidgetMapping] = []
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
+    public var unit = ""
+    public var pattern = ""
+    public var staticIcon: Bool?
+    public var labelSource = ""
     public var switchSupport = false
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
@@ -136,7 +140,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     }
 
     public var stateValueAsNumberState: NumberState? {
-        item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
+        state.parseAsNumber(format: item?.stateDescription?.numberPattern)
     }
 
     public var adjustedValue: Double {
@@ -284,7 +288,11 @@ public extension OpenHABWidget {
                      widgets: [OpenHABWidget],
                      visibility: Bool?,
                      switchSupport: Bool?,
-                     forceAsItem: Bool?) {
+                     forceAsItem: Bool?,
+                     unit: String?,
+                     pattern: String?,
+                     staticIcon: Bool?,
+                     labelSource: String?) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -325,6 +333,10 @@ public extension OpenHABWidget {
         self.switchSupport = switchSupport ?? false
 
         self.forceAsItem = forceAsItem
+        self.unit = unit ?? ""
+        self.pattern = pattern ?? ""
+        self.staticIcon = staticIcon ?? false
+        self.labelSource = labelSource ?? ""
         stateEnumBinding = stateEnum
     }
 }
@@ -360,6 +372,10 @@ public extension OpenHABWidget {
         let visibility: Bool?
         let switchSupport: Bool?
         let forceAsItem: Bool?
+        let unit: String?
+        let pattern: String?
+        let staticIcon: Bool?
+        let labelSource: String?
     }
 }
 
@@ -394,7 +410,11 @@ public extension OpenHABWidget.CodingData {
             widgets: mappedWidgets,
             visibility: visibility,
             switchSupport: switchSupport,
-            forceAsItem: forceAsItem
+            forceAsItem: forceAsItem,
+            unit: unit,
+            pattern: pattern,
+            staticIcon: staticIcon,
+            labelSource: labelSource
         )
     }
 }
@@ -411,11 +431,6 @@ extension [OpenHABWidget] {
 
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {
-//        widget.unit
-//        widget.staticIcon
-//        widget.visibility
-//        widget.labelSource
-//        widget.pattern
         self.init(
             widgetId: widget.widgetId.orEmpty,
             label: widget.label.orEmpty,
@@ -444,7 +459,11 @@ extension OpenHABWidget {
             widgets: widget.widgets?.compactMap { OpenHABWidget($0) } ?? [],
             visibility: widget.visibility,
             switchSupport: widget.switchSupport,
-            forceAsItem: widget.forceAsItem
+            forceAsItem: widget.forceAsItem,
+            unit: widget.unit,
+            pattern: widget.pattern,
+            staticIcon: widget.staticIcon,
+            labelSource: widget.labelSource
         )
     }
 }
