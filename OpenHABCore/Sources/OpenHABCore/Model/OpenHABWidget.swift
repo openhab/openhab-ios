@@ -140,7 +140,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     }
 
     public var stateValueAsNumberState: NumberState? {
-        state.parseAsNumber(format: item?.stateDescription?.numberPattern)
+        if state != "" {
+            state.parseAsNumber(format: item?.stateDescription?.numberPattern)
+        } else {
+            item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
+        }
     }
 
     public var adjustedValue: Double {
