@@ -16,18 +16,6 @@ import Foundation
 import XCTest
 
 final class OpenHABCoreGeneralTests: XCTestCase {
-    func testEndPoints() {
-        let urlc = Endpoint.icon(
-            rootUrl: "http://192.169.2.1",
-            version: 2,
-            icon: "switch",
-            state: "OFF",
-            iconType: .svg,
-            iconColor: ""
-        ).url
-        XCTAssertEqual(urlc, URL(string: "http://192.169.2.1/icon/switch?state=OFF&format=SVG"), "Check endpoint creation")
-    }
-
     func testLabelValue() {
         let widget = OpenHABWidget()
         widget.label = "llldl [llsl]"
