@@ -47,7 +47,7 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
     }
 }
 
-public struct Endpoint {
+public struct Endpoint: Equatable {
     static let logger = Logger(subsystem: "org.openhab.app", category: "EndPoint")
 
     let baseURL: String
@@ -131,7 +131,7 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
+    static func icon1(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
         guard var icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
@@ -196,6 +196,93 @@ public extension Endpoint {
             path: "/icon/\(icon)",
             queryItems: queryItems
         )
+    }
+
+    // swiftlint:disable:next function_parameter_count
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
+        guard let icon, !icon.isEmpty else {
+            return Endpoint(baseURL: "", path: "", queryItems: [])
+        }
+
+        guard version >= 2 else {
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/icon/\(icon)",
+                queryItems: []
+            )
+        }
+
+        var queryItems: [URLQueryItem] = []
+
+        var iconSource = "oh"
+        var iconSet = "classic"
+        var iconName = "none"
+
+        let segments = icon.components(separatedBy: ":")
+        switch segments.count {
+        case 1:
+            iconName = segments[0]
+        case 2:
+            iconSource = segments[0]
+            iconName = segments[1]
+            if iconSource == "material" {
+                iconSet = "baseline"
+            }
+        case 3:
+            iconSource = segments[0]
+            iconSet = segments[1]
+            iconName = segments[2]
+        default:
+            break
+        }
+
+        switch iconSource {
+        case "material":
+            iconSource = "iconify"
+            iconName = iconName.replacingOccurrences(of: "_", with: "-")
+            iconName = "\(iconSet)-\(iconName)"
+            iconSet = "ic"
+        case "f7":
+            iconSource = "iconify"
+            iconSet = "f7"
+            iconName = iconName.replacingOccurrences(of: "_", with: "-")
+        default:
+            break
+        }
+
+        if iconSource == "if" || iconSource == "iconify" {
+            queryItems.append(URLQueryItem(name: "height", value: "64"))
+            if !iconColor.isEmpty {
+                queryItems.append(URLQueryItem(name: "color", value: iconColor))
+            }
+            return Endpoint(
+                baseURL: "https://api.iconify.design/",
+                path: "/\(iconSet)/\(iconName).svg",
+                queryItems: queryItems
+            )
+        } else {
+            let format = (iconType == .png) ? "PNG" : "SVG"
+            if iconSource != "oh" {
+                iconSet = "classic"
+                iconName = "none"
+            }
+
+            var queryItems = [
+                URLQueryItem(name: "format", value: format),
+                URLQueryItem(name: "anyFormat", value: "true"),
+                URLQueryItem(name: "iconset", value: iconSet)
+            ]
+
+            if !state.isEmpty {
+                queryItems.append(URLQueryItem(name: "state", value: state))
+            }
+
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/icon/\(iconName)",
+                queryItems: queryItems
+            )
+        }
     }
 
     static func iconForDrawer(rootUrl: String, icon: String) -> Endpoint {
