@@ -15,6 +15,16 @@ import OpenHABCore
 import os.log
 
 class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling {
+    func resolveHome(for intent: OpenHABSetStringValueIntent) async -> INStringResolutionResult {
+        // TODO:
+        INStringResolutionResult.success(with: intent.home ?? "Home")
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetStringValueIntent) async throws -> INObjectCollection<NSString> {
+        // TODO:
+        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+    }
+
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetStringValueIntent")
     private let itemCache: any ItemCacheProtocol
 

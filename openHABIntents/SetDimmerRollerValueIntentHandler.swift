@@ -15,6 +15,16 @@ import OpenHABCore
 import os.log
 
 class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIntentHandling {
+    func resolveHome(for intent: OpenHABSetDimmerRollerValueIntent) async -> INStringResolutionResult {
+        // TODO:
+        INStringResolutionResult.success(with: intent.home ?? "Home")
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent) async throws -> INObjectCollection<NSString> {
+        // TODO:
+        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+    }
+
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetDimmerRollerValueIntent")
     private let itemCache: any ItemCacheProtocol
 
@@ -23,6 +33,7 @@ class SetDimmerRollerValueIntentHandler: NSObject, OpenHABSetDimmerRollerValueIn
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetDimmerRollerValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
+        // TODO:
         let items = await itemCache.getItemNames(
             searchTerm: searchTerm,
             types: [.dimmer, .rollershutter]

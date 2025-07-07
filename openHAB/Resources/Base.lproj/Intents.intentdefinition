@@ -9,11 +9,11 @@
 	<key>INIntentDefinitionNamespace</key>
 	<string>aK4nIm</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>21C52</string>
+	<string>24F74</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
-	<string>13C100</string>
+	<string>16F6</string>
 	<key>INIntentDefinitionToolsVersion</key>
-	<string>13.2.1</string>
+	<string>16.4</string>
 	<key>INIntents</key>
 	<array>
 		<dict>
@@ -32,10 +32,10 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>1</integer>
+			<integer>4</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
-				<key>item</key>
+				<key>item,home</key>
 				<dict>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
@@ -92,6 +92,90 @@
 					<true/>
 					<key>INIntentParameterTag</key>
 					<integer>1</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
+					<key>INIntentParameterDisplayName</key>
+					<string>home</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>k6pj4o</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>2</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>Sentences</string>
+						<key>INIntentParameterMetadataDefaultValue</key>
+						<string>"asdf"</string>
+						<key>INIntentParameterMetadataDefaultValueID</key>
+						<string>6BeO57</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>home</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Home name</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>P9kblb</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Configuration</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>blabla</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>rsrXB9</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>There are ${count} configured homes with an item named '${item}'’.</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>7BE642</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>For which home do you want to get the value?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>4WCzFG</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Just to confirm, you wanted ‘${home}’?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>iKSmqU</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Confirmation</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsDynamicEnumeration</key>
+					<true/>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>4</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>
@@ -178,10 +262,10 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>2</integer>
+			<integer>3</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
-				<key>item,action</key>
+				<key>item,action,home</key>
 				<dict>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
@@ -197,16 +281,18 @@
 			<string>SetSwitchState</string>
 			<key>INIntentParameterCombinations</key>
 			<dict>
-				<key>item,action</key>
+				<key>item,action,home</key>
 				<dict>
 					<key>INIntentParameterCombinationIsLinked</key>
+					<true/>
+					<key>INIntentParameterCombinationIsPrimary</key>
 					<true/>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Send ${action} to ${item}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>IpbXHW</string>
+					<string>jyXazc</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -296,6 +382,84 @@
 					<true/>
 					<key>INIntentParameterTag</key>
 					<integer>2</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
+					<key>INIntentParameterDisplayName</key>
+					<string>home</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>X9cN9h</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>3</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>Sentences</string>
+						<key>INIntentParameterMetadataDefaultValueID</key>
+						<string>6BeO57</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>home</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Home name</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>v3hsWV</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Configuration</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>There are ${count} configured homes with an item named '${item}'’.</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>YUoeAL</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>For which home do you want to get the value?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>h91G9C</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Just to confirm, you wanted ‘${home}’?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>Jn2aNw</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Confirmation</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsDynamicEnumeration</key>
+					<true/>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>3</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>
@@ -392,10 +556,10 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>3</integer>
+			<integer>4</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
@@ -411,16 +575,18 @@
 			<string>SetDimmerRollerValue</string>
 			<key>INIntentParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationIsLinked</key>
+					<true/>
+					<key>INIntentParameterCombinationIsPrimary</key>
 					<true/>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Set ${item} to ${value}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>Cdg015</string>
+					<string>Ch9Akw</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -506,6 +672,84 @@
 					<integer>3</integer>
 					<key>INIntentParameterType</key>
 					<string>Integer</string>
+				</dict>
+				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
+					<key>INIntentParameterDisplayName</key>
+					<string>home</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>ZuBsOg</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>3</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>Sentences</string>
+						<key>INIntentParameterMetadataDefaultValueID</key>
+						<string>6BeO57</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>home</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Home name</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>rVXwR2</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Configuration</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>There are ${count} configured homes with an item named '${item}'’.</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>BaNYuS</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>For which home do you want to get the value?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>QATq1i</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Just to confirm, you wanted ‘${home}’?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>exrmKW</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Confirmation</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsDynamicEnumeration</key>
+					<true/>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>4</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -608,10 +852,10 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>4</integer>
+			<integer>5</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
@@ -627,16 +871,18 @@
 			<string>SetNumberValue</string>
 			<key>INIntentParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationIsLinked</key>
+					<true/>
+					<key>INIntentParameterCombinationIsPrimary</key>
 					<true/>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Set ${item} to ${value}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>Gjd9MH</string>
+					<string>qYPBPC</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -722,6 +968,84 @@
 					<integer>4</integer>
 					<key>INIntentParameterType</key>
 					<string>Decimal</string>
+				</dict>
+				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
+					<key>INIntentParameterDisplayName</key>
+					<string>home</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>zLlY3g</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>3</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>Sentences</string>
+						<key>INIntentParameterMetadataDefaultValueID</key>
+						<string>6BeO57</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>home</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Home name</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>IS2nO0</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Configuration</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>There are ${count} configured homes with an item named '${item}'’.</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>lLFYtM</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>For which home do you want to get the value?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>jbUbYw</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Just to confirm, you wanted ‘${home}’?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>VEApie</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Confirmation</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsDynamicEnumeration</key>
+					<true/>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>5</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -816,10 +1140,10 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>5</integer>
+			<integer>6</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
@@ -835,16 +1159,18 @@
 			<string>SetStringValue</string>
 			<key>INIntentParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationIsLinked</key>
+					<true/>
+					<key>INIntentParameterCombinationIsPrimary</key>
 					<true/>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Set ${item} to ${value}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>EEj00Q</string>
+					<string>1cBKdm</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -934,6 +1260,84 @@
 					</array>
 					<key>INIntentParameterTag</key>
 					<integer>5</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
+					<key>INIntentParameterDisplayName</key>
+					<string>home</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>71MWtI</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>3</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>Sentences</string>
+						<key>INIntentParameterMetadataDefaultValueID</key>
+						<string>6BeO57</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>home</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Home name</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>YFIIBn</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Configuration</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>There are ${count} configured homes with an item named '${item}'’.</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>MIqlld</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>For which home do you want to get the value?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>3LMXV8</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Just to confirm, you wanted ‘${home}’?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>gobcZi</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Confirmation</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsDynamicEnumeration</key>
+					<true/>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>6</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>
@@ -1030,10 +1434,10 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>5</integer>
+			<integer>6</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
@@ -1049,16 +1453,18 @@
 			<string>SetColorValue</string>
 			<key>INIntentParameterCombinations</key>
 			<dict>
-				<key>item,value</key>
+				<key>item,value,home</key>
 				<dict>
 					<key>INIntentParameterCombinationIsLinked</key>
+					<true/>
+					<key>INIntentParameterCombinationIsPrimary</key>
 					<true/>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Set ${item} to ${value} (HSB)</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>1SeS3V</string>
+					<string>E07xjp</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -1150,6 +1556,84 @@
 					</array>
 					<key>INIntentParameterTag</key>
 					<integer>5</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
+					<key>INIntentParameterDisplayName</key>
+					<string>home</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>iBrALm</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>3</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>Sentences</string>
+						<key>INIntentParameterMetadataDefaultValueID</key>
+						<string>6BeO57</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>home</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Home name</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>eFNxrT</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Configuration</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>There are ${count} configured homes with an item named '${item}'’.</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>jP4VSa</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>For which home do you want to get the value?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>mHbznY</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Just to confirm, you wanted ‘${home}’?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>tkWfxz</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Confirmation</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsDynamicEnumeration</key>
+					<true/>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>6</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>
@@ -1246,10 +1730,10 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>2</integer>
+			<integer>3</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
-				<key>item,state</key>
+				<key>item,state,home</key>
 				<dict>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
@@ -1265,16 +1749,18 @@
 			<string>SetContactStateValue</string>
 			<key>INIntentParameterCombinations</key>
 			<dict>
-				<key>item,state</key>
+				<key>item,state,home</key>
 				<dict>
 					<key>INIntentParameterCombinationIsLinked</key>
+					<true/>
+					<key>INIntentParameterCombinationIsPrimary</key>
 					<true/>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Set the state of ${item} to ${state}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>qu9K9v</string>
+					<string>WsMKz2</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -1364,6 +1850,84 @@
 					<true/>
 					<key>INIntentParameterTag</key>
 					<integer>2</integer>
+					<key>INIntentParameterType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INIntentParameterConfigurable</key>
+					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
+					<key>INIntentParameterDisplayName</key>
+					<string>home</string>
+					<key>INIntentParameterDisplayNameID</key>
+					<string>7GA2x6</string>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>3</integer>
+					<key>INIntentParameterMetadata</key>
+					<dict>
+						<key>INIntentParameterMetadataCapitalization</key>
+						<string>Sentences</string>
+						<key>INIntentParameterMetadataDefaultValueID</key>
+						<string>6BeO57</string>
+					</dict>
+					<key>INIntentParameterName</key>
+					<string>home</string>
+					<key>INIntentParameterPromptDialogs</key>
+					<array>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Home name</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>Ncumus</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Configuration</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>There are ${count} configured homes with an item named '${item}'’.</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>H2V4UV</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>For which home do you want to get the value?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>9Pu17E</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Just to confirm, you wanted ‘${home}’?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>0hYnWM</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>Confirmation</string>
+						</dict>
+					</array>
+					<key>INIntentParameterSupportsDynamicEnumeration</key>
+					<true/>
+					<key>INIntentParameterSupportsResolution</key>
+					<true/>
+					<key>INIntentParameterTag</key>
+					<integer>3</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>

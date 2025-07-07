@@ -15,6 +15,16 @@ import OpenHABCore
 import os.log
 
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
+    func resolveHome(for intent: OpenHABSetColorValueIntent) async -> INStringResolutionResult {
+        // TODO:
+        INStringResolutionResult.success(with: intent.home ?? "Home")
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<NSString> {
+        // TODO:
+        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+    }
+
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
     private let itemCache: any ItemCacheProtocol
 

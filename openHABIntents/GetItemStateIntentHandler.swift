@@ -15,6 +15,16 @@ import OpenHABCore
 import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
+    func resolveHome(for intent: OpenHABGetItemStateIntent) async -> INStringResolutionResult {
+        // TODO:
+        INStringResolutionResult.success(with: intent.home ?? "Home")
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
+        // TODO:
+        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+    }
+
     private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
     private let itemCache: any ItemCacheProtocol
 

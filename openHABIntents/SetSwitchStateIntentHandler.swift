@@ -15,6 +15,16 @@ import OpenHABCore
 import os
 
 final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling {
+    func resolveHome(for intent: OpenHABSetSwitchStateIntent) async -> INStringResolutionResult {
+        // TODO:
+        INStringResolutionResult.success(with: intent.home ?? "Home")
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
+        // TODO:
+        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+    }
+
     private static let onLabel = NSLocalizedString("on", comment: "").capitalized
     private static let offLabel = NSLocalizedString("off", comment: "").capitalized
 

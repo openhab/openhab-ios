@@ -15,6 +15,16 @@ import OpenHABCore
 import os.log
 
 class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIntentHandling {
+    func resolveHome(for intent: OpenHABSetContactStateValueIntent) async -> INStringResolutionResult {
+        // TODO:
+        INStringResolutionResult.success(with: intent.home ?? "Home")
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
+        // TODO:
+        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+    }
+
     private static let onLabel = NSLocalizedString("on", comment: "").capitalized
     private static let offLabel = NSLocalizedString("off", comment: "").capitalized
 
