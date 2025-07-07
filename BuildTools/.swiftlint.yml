@@ -76,7 +76,9 @@ identifier_name:
     - id
     - a
     - b
+    - g
     - i
+    - r
     - v
 
 private_outlet:
