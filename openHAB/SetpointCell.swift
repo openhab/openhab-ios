@@ -14,13 +14,22 @@ import os.log
 import UIKit
 
 class SetpointCell: GenericUITableViewCell {
+    private let setpointService: SetPointService
+
     @IBOutlet private var downButton: UIButton!
     @IBOutlet private var upButton: UIButton!
     required init?(coder: NSCoder) {
+        setpointService = SetPointService()
+
         super.init(coder: coder)
 
         selectionStyle = .none
         separatorInset = .zero
+    }
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        setpointService = SetPointService()
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
 
     override func displayWidget() {
@@ -32,20 +41,25 @@ class SetpointCell: GenericUITableViewCell {
 
     private func handleUpDown(down: Bool) {
         var numberState = widget?.stateValueAsNumberState
-        let stateValue = numberState?.value ?? widget.minValue
-        let newValue: Double = down ? stateValue - widget.step : stateValue + widget.step
+        let currentValue = numberState?.value ?? widget.minValue
 
-        let limitedNewValue = newValue.clamped(to: widget.minValue ... widget.maxValue)
+        let limitedNewValue = setpointService.calculateNewValue(
+            currentValue: currentValue,
+            step: widget.step,
+            minValue: widget.minValue,
+            maxValue: widget.maxValue,
+            isDecreasing: down
+        )
 
-        guard limitedNewValue != stateValue else {
+        guard limitedNewValue != currentValue else {
             // nothing to update, skip sending value
             return
         }
 
         if numberState != nil {
-            numberState?.value = newValue
+            numberState?.value = limitedNewValue
         } else {
-            numberState = NumberState(value: newValue)
+            numberState = NumberState(value: limitedNewValue)
         }
 
         widget.sendItemUpdate(state: numberState)
