@@ -89,6 +89,18 @@
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
 		DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32D1B32C8C98C40018D974 /* IconWithAction.swift */; };
 		DA35E2B02E1EDB86003987BB /* WidgetSetpointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */; };
+		DA35E2BD2E1EEA9D003987BB /* WidgetMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B52E1EEA9D003987BB /* WidgetMapView.swift */; };
+		DA35E2BE2E1EEA9D003987BB /* WidgetDatePickerInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B32E1EEA9D003987BB /* WidgetDatePickerInputView.swift */; };
+		DA35E2BF2E1EEA9D003987BB /* WidgetWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */; };
+		DA35E2C02E1EEA9D003987BB /* WidgetColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B22E1EEA9D003987BB /* WidgetColorPickerView.swift */; };
+		DA35E2C12E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B92E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift */; };
+		DA35E2C22E1EEA9D003987BB /* WidgetTextInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BA2E1EEA9D003987BB /* WidgetTextInputView.swift */; };
+		DA35E2C32E1EEA9D003987BB /* WidgetImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B42E1EEA9D003987BB /* WidgetImageView.swift */; };
+		DA35E2C42E1EEA9D003987BB /* WidgetSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B82E1EEA9D003987BB /* WidgetSelectionView.swift */; };
+		DA35E2C52E1EEA9D003987BB /* WidgetRollershutterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B62E1EEA9D003987BB /* WidgetRollershutterView.swift */; };
+		DA35E2C62E1EEA9D003987BB /* WidgetSegmentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */; };
+		DA35E2C72E1EEA9D003987BB /* WidgetVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */; };
+		DA35E2C92E1EF15B003987BB /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2C82E1EF15B003987BB /* ColorExtension.swift */; };
 		DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4642312D7EE6CA006C3908 /* LoggerView.swift */; };
 		DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800132D836892009CF127 /* ConnectionSettingsView.swift */; };
 		DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800152D836EF0009CF127 /* MainUISettingsView.swift */; };
@@ -413,6 +425,18 @@
 		DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewRow.swift; sourceTree = "<group>"; };
 		DA32D1B32C8C98C40018D974 /* IconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconWithAction.swift; sourceTree = "<group>"; };
 		DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSetpointView.swift; sourceTree = "<group>"; };
+		DA35E2B22E1EEA9D003987BB /* WidgetColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetColorPickerView.swift; sourceTree = "<group>"; };
+		DA35E2B32E1EEA9D003987BB /* WidgetDatePickerInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDatePickerInputView.swift; sourceTree = "<group>"; };
+		DA35E2B42E1EEA9D003987BB /* WidgetImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetImageView.swift; sourceTree = "<group>"; };
+		DA35E2B52E1EEA9D003987BB /* WidgetMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetMapView.swift; sourceTree = "<group>"; };
+		DA35E2B62E1EEA9D003987BB /* WidgetRollershutterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRollershutterView.swift; sourceTree = "<group>"; };
+		DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSegmentedView.swift; sourceTree = "<group>"; };
+		DA35E2B82E1EEA9D003987BB /* WidgetSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSelectionView.swift; sourceTree = "<group>"; };
+		DA35E2B92E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSliderWithSwitchView.swift; sourceTree = "<group>"; };
+		DA35E2BA2E1EEA9D003987BB /* WidgetTextInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTextInputView.swift; sourceTree = "<group>"; };
+		DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetVideoView.swift; sourceTree = "<group>"; };
+		DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetWebView.swift; sourceTree = "<group>"; };
+		DA35E2C82E1EF15B003987BB /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		DA4642312D7EE6CA006C3908 /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
 		DA4800132D836892009CF127 /* ConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSettingsView.swift; sourceTree = "<group>"; };
 		DA4800152D836EF0009CF127 /* MainUISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainUISettingsView.swift; sourceTree = "<group>"; };
@@ -815,6 +839,32 @@
 			path = openHABTestsSwift;
 			sourceTree = "<group>";
 		};
+		DA35E2B12E1EEA58003987BB /* SwiftUI */ = {
+			isa = PBXGroup;
+			children = (
+				DAEA21DF2DBF483E00D54342 /* WidgetGenericView.swift */,
+				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
+				DAEA21D72DBF472D00D54342 /* WidgetViewFactory.swift */,
+				DA64ACA92DBEADB000294F60 /* WidgetRow.swift */,
+				DA35E2B22E1EEA9D003987BB /* WidgetColorPickerView.swift */,
+				DA35E2B32E1EEA9D003987BB /* WidgetDatePickerInputView.swift */,
+				DA35E2B42E1EEA9D003987BB /* WidgetImageView.swift */,
+				DA35E2B52E1EEA9D003987BB /* WidgetMapView.swift */,
+				DA35E2B62E1EEA9D003987BB /* WidgetRollershutterView.swift */,
+				DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */,
+				DA35E2B82E1EEA9D003987BB /* WidgetSelectionView.swift */,
+				DA35E2B92E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift */,
+				DA35E2BA2E1EEA9D003987BB /* WidgetTextInputView.swift */,
+				DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */,
+				DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */,
+				DAEA21D92DBF477E00D54342 /* WidgetSwitchView.swift */,
+				DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */,
+				DAEA21DB2DBF47DA00D54342 /* WidgetSliderView.swift */,
+				DAEA21DD2DBF481300D54342 /* WidgetTextView.swift */,
+			);
+			path = SwiftUI;
+			sourceTree = "<group>";
+		};
 		DA48001F2D837CD8009CF127 /* SettingsView */ = {
 			isa = PBXGroup;
 			children = (
@@ -943,6 +993,7 @@
 		DF4B83FD18857FA100F34902 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				DA35E2C82E1EF15B003987BB /* ColorExtension.swift */,
 				DA2AEB752D92D32000897D80 /* Cells */,
 				DA4642312D7EE6CA006C3908 /* LoggerView.swift */,
 				653B54C1285E714900298ECD /* OpenHABViewController.swift */,
@@ -961,9 +1012,7 @@
 				DA6B2EEE2C861BC900DF77CF /* DrawerView.swift */,
 				DF4B84101886DA9900F34902 /* Widgets */,
 				DFFD8FCE18EDBD30003B502A /* Util */,
-				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
-				DAEA21D72DBF472D00D54342 /* WidgetViewFactory.swift */,
-				DA64ACA92DBEADB000294F60 /* WidgetRow.swift */,
+				DA35E2B12E1EEA58003987BB /* SwiftUI */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1105,15 +1154,10 @@
 			isa = PBXGroup;
 			children = (
 				938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */,
-				DAEA21DF2DBF483E00D54342 /* WidgetGenericView.swift */,
 				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */,
 				938BF9D224EFD0B700E6B52F /* UIViewController+Localization.swift */,
 				935B484525342B8E00E44CF0 /* URL+Static.swift */,
-				DAEA21D92DBF477E00D54342 /* WidgetSwitchView.swift */,
-				DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */,
-				DAEA21DB2DBF47DA00D54342 /* WidgetSliderView.swift */,
-				DAEA21DD2DBF481300D54342 /* WidgetTextView.swift */,
 			);
 			name = Util;
 			sourceTree = "<group>";
@@ -1637,6 +1681,7 @@
 				DAEA21DA2DBF477E00D54342 /* WidgetSwitchView.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
 				DAEA21DC2DBF47DA00D54342 /* WidgetSliderView.swift in Sources */,
+				DA35E2C92E1EF15B003987BB /* ColorExtension.swift in Sources */,
 				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
 				DA35E2B02E1EDB86003987BB /* WidgetSetpointView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
@@ -1650,6 +1695,17 @@
 				DA64ACA82DBEAD8300294F60 /* SitemapPageView.swift in Sources */,
 				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
 				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
+				DA35E2BD2E1EEA9D003987BB /* WidgetMapView.swift in Sources */,
+				DA35E2BE2E1EEA9D003987BB /* WidgetDatePickerInputView.swift in Sources */,
+				DA35E2BF2E1EEA9D003987BB /* WidgetWebView.swift in Sources */,
+				DA35E2C02E1EEA9D003987BB /* WidgetColorPickerView.swift in Sources */,
+				DA35E2C12E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift in Sources */,
+				DA35E2C22E1EEA9D003987BB /* WidgetTextInputView.swift in Sources */,
+				DA35E2C32E1EEA9D003987BB /* WidgetImageView.swift in Sources */,
+				DA35E2C42E1EEA9D003987BB /* WidgetSelectionView.swift in Sources */,
+				DA35E2C52E1EEA9D003987BB /* WidgetRollershutterView.swift in Sources */,
+				DA35E2C62E1EEA9D003987BB /* WidgetSegmentedView.swift in Sources */,
+				DA35E2C72E1EEA9D003987BB /* WidgetVideoView.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
