@@ -24,6 +24,8 @@ enum WidgetViewFactory {
             WidgetTextView(widget: widget)
         case .frame:
             EmptyView() // ignore frames
+        case .setpoint:
+            WidgetSetpointView(widget: widget)
         default:
             WidgetGenericView(widget: widget)
         }

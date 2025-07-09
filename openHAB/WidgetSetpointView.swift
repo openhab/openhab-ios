@@ -12,7 +12,7 @@
 import OpenHABCore
 import SwiftUI
 
-struct WidgetSwitchView: View {
+struct WidgetSetpointView: View {
     @ObservedObject var widget: OpenHABWidget
 
     var body: some View {

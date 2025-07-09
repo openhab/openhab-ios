@@ -10,23 +10,56 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import OpenHABCore
+import os.log
 import SwiftUI
 
 struct WidgetSwitchView: View {
     @ObservedObject var widget: OpenHABWidget
 
-    var body: some View {
-        Toggle(isOn: Binding(
-            get: {
-                widget.state.uppercased() == "ON"
-            },
-            set: { newValue in
-                let newState = newValue ? "ON" : "OFF"
-                widget.state = newState // 1. Update local state immediately
-                widget.sendCommand(newState) // 2. Send to server
-            }
-        )) {
-            Text(widget.labelText ?? widget.label)
+    private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
+
+    private var effectiveState: String {
+        var state = widget.state
+        // If state is nil or empty using the item state (OH 1.x compatibility)
+        if state.isEmpty {
+            state = widget.item?.state ?? ""
         }
+        return state
+    }
+
+    private var isOn: Bool {
+        effectiveState.parseAsBool()
+    }
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(widget.labelText ?? widget.label)
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+
+                if let labelValue = widget.labelValue, !labelValue.isEmpty {
+                    Text(labelValue)
+                        .font(.caption)
+                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+                }
+            }
+
+            Spacer()
+
+            Toggle("", isOn: Binding(
+                get: { isOn },
+                set: { newValue in
+                    let newState = newValue ? "ON" : "OFF"
+                    if newValue {
+                        logger.info("Switch to ON")
+                    } else {
+                        logger.info("Switch to OFF")
+                    }
+                    widget.sendCommand(newState)
+                }
+            ))
+            .labelsHidden()
+        }
+        .contentShape(Rectangle())
     }
 }
