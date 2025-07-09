@@ -15,7 +15,7 @@ import SwiftUI
 
 struct WidgetTextInputView: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var inputText: String = ""
+    @State private var inputText = ""
     @FocusState private var isTextFieldFocused: Bool
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")

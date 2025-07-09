@@ -11,6 +11,7 @@
 
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 struct WidgetRollershutterView: View {
@@ -36,11 +37,11 @@ struct WidgetRollershutterView: View {
             }
 
             HStack(spacing: 12) {
-                Button(action: {
+                Button {
                     logger.info("up button pressed")
                     widget.sendCommand("UP")
-                }) {
-                    Image(systemName: "chevron.up")
+                } label: {
+                    Image(systemSymbol: .chevronUp)
                         .font(.title2)
                         .foregroundColor(.primary)
                         .frame(width: 44, height: 44)
@@ -49,11 +50,11 @@ struct WidgetRollershutterView: View {
                 }
                 .buttonStyle(.plain)
 
-                Button(action: {
+                Button {
                     logger.info("stop button pressed")
                     widget.sendCommand("STOP")
-                }) {
-                    Image(systemName: "stop.fill")
+                } label: {
+                    Image(systemSymbol: .stopFill)
                         .font(.title2)
                         .foregroundColor(.primary)
                         .frame(width: 44, height: 44)
@@ -62,11 +63,11 @@ struct WidgetRollershutterView: View {
                 }
                 .buttonStyle(.plain)
 
-                Button(action: {
+                Button {
                     logger.info("down button pressed")
                     widget.sendCommand("DOWN")
-                }) {
-                    Image(systemName: "chevron.down")
+                } label: {
+                    Image(systemSymbol: .chevronDown)
                         .font(.title2)
                         .foregroundColor(.primary)
                         .frame(width: 44, height: 44)

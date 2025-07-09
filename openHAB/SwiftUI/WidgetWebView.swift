@@ -13,7 +13,36 @@ import OpenHABCore
 import SwiftUI
 import WebKit
 
+struct WidgetWebViewContainer: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let labelText = widget.labelText, !labelText.isEmpty {
+                Text(labelText)
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+            }
+
+            WidgetWebView(widget: widget)
+                .frame(height: 300)
+                .cornerRadius(8)
+
+            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+                Text(labelValue)
+                    .font(.caption)
+                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+            }
+        }
+    }
+}
+
 struct WidgetWebView: UIViewRepresentable {
+    class Coordinator: NSObject, WKNavigationDelegate {
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+            print("WebView failed to load: \(error.localizedDescription)")
+        }
+    }
+
     @ObservedObject var widget: OpenHABWidget
 
     private var webURL: URL? {
@@ -36,34 +65,5 @@ struct WidgetWebView: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
-    }
-
-    class Coordinator: NSObject, WKNavigationDelegate {
-        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            print("WebView failed to load: \(error.localizedDescription)")
-        }
-    }
-}
-
-struct WidgetWebViewContainer: View {
-    @ObservedObject var widget: OpenHABWidget
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let labelText = widget.labelText, !labelText.isEmpty {
-                Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
-            }
-
-            WidgetWebView(widget: widget)
-                .frame(height: 300)
-                .cornerRadius(8)
-
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                Text(labelValue)
-                    .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
-            }
-        }
     }
 }

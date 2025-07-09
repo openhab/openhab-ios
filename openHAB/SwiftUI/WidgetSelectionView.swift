@@ -15,7 +15,7 @@ import SwiftUI
 
 struct WidgetSelectionView: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var selectedIndex: Int = 0
+    @State private var selectedIndex = 0
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSelectionView")
 

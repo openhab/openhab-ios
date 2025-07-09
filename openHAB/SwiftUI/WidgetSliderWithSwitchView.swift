@@ -43,12 +43,6 @@ struct WidgetSliderWithSwitchView: View {
         }
     }
 
-    private func adj(_ raw: Double) -> Double {
-        var valueAdjustedToStep = Double(floor(Float((raw - widget.minValue) / step)) * Float(step))
-        valueAdjustedToStep += widget.minValue
-        return valueAdjustedToStep.clamped(to: widget.minValue ... widget.maxValue)
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -97,6 +91,12 @@ struct WidgetSliderWithSwitchView: View {
         .onChange(of: widget.item?.state) { _ in
             sliderValue = adjustedValue
         }
+    }
+
+    private func adj(_ raw: Double) -> Double {
+        var valueAdjustedToStep = Double(floor(Float((raw - widget.minValue) / step)) * Float(step))
+        valueAdjustedToStep += widget.minValue
+        return valueAdjustedToStep.clamped(to: widget.minValue ... widget.maxValue)
     }
 }
 

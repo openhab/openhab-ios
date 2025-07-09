@@ -11,6 +11,7 @@
 
 import OpenHABCore
 import os.log
+import SFSafeSymbols
 import SwiftUI
 
 struct WidgetSetpointView: View {
@@ -52,7 +53,7 @@ struct WidgetSetpointView: View {
 
                 HStack(spacing: 12) {
                     Button(action: decreaseValue) {
-                        Image(systemName: "minus")
+                        Image(systemSymbol: .minus)
                             .font(.title2)
                             .foregroundColor(.primary)
                             .frame(width: 44, height: 44)
@@ -63,7 +64,7 @@ struct WidgetSetpointView: View {
                     .disabled(currentValue <= widget.minValue)
 
                     Button(action: increaseValue) {
-                        Image(systemName: "plus")
+                        Image(systemSymbol: .plus)
                             .font(.title2)
                             .foregroundColor(.primary)
                             .frame(width: 44, height: 44)
