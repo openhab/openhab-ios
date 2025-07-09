@@ -65,7 +65,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     func loadSettings() {
-        defaultSitemap = Preferences.defaultSitemap
+        defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
     }
 
     func startPageHandling() {
