@@ -13,8 +13,7 @@ import OpenHABCore
 import SwiftUI
 
 struct WidgetGenericView: View {
-    let widget: OpenHABWidget
-
+    @ObservedObject var widget: OpenHABWidget
     var body: some View {
         HStack {
 //            if let iconUrl = widget.iconUrl {

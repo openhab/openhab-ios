@@ -13,8 +13,7 @@ import OpenHABCore
 import SwiftUI
 
 struct WidgetSliderView: View {
-    let widget: OpenHABWidget
-
+    @ObservedObject var widget: OpenHABWidget
     // Example: assuming widget has a numeric value as text
     var currentValue: Double {
         Double(widget.labelValue ?? "") ?? 0.0

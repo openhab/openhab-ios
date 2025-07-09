@@ -13,7 +13,7 @@ import OpenHABCore
 import SwiftUI
 
 struct WidgetTextView: View {
-    let widget: OpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
         VStack(alignment: .leading) {

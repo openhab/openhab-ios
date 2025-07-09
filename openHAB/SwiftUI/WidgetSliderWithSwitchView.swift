@@ -99,17 +99,3 @@ struct WidgetSliderWithSwitchView: View {
         return valueAdjustedToStep.clamped(to: widget.minValue ... widget.maxValue)
     }
 }
-
-extension Double {
-    func clamped(to range: ClosedRange<Double>) -> Double {
-        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
-    }
-
-    func valueText(step: Double) -> String {
-        if step.truncatingRemainder(dividingBy: 1) == 0 {
-            String(format: "%.0f", self)
-        } else {
-            String(format: "%.1f", self)
-        }
-    }
-}
