@@ -40,12 +40,12 @@ class SitemapPageViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var openHABRootUrl: String?
 
+    @ObservedObject var networkTracker = NetworkTracker.shared
     private var openAPIService: OpenAPIService?
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
     private var defaultSitemap = ""
     private var pageId = ""
-    private var trackerTask: Task<Void, Never>?
 
     var relevantWidgets: [OpenHABWidget] {
         if searchText.isEmpty {
@@ -61,7 +61,7 @@ class SitemapPageViewModel: ObservableObject {
 
     init() {
         loadSettings()
-        startWatchingActiveServer()
+        setupActiveConnectionObserver()
     }
 
     func loadSettings() {
@@ -231,18 +231,21 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     deinit {
-        trackerTask?.cancel()
+        pageHandlingTask?.cancel()
     }
 
-    func startWatchingActiveServer() {
-        trackerTask = Task {
-            for await activeConnection in NetworkTracker.shared.$activeConnection.stream() {
-                if let activeConnection {
-                    logger.info("Tracker URL \(activeConnection.configuration.url)")
-                    await handleActiveConnection(activeConnection)
-                    break
-                }
-            }
+    private func setupActiveConnectionObserver() {
+        // The @ObservedObject will automatically trigger view updates
+        // We'll handle the connection changes in the view's onChange modifier
+    }
+
+    func handleActiveConnectionChange(_ activeConnection: ConnectionInfo?) {
+        guard let activeConnection else { return }
+
+        logger.info("SitemapPageViewModel tracker URL \(activeConnection.configuration.url)")
+
+        Task {
+            await handleActiveConnection(activeConnection)
         }
     }
 

@@ -33,6 +33,12 @@ struct WidgetSwitchView: View {
 
     var body: some View {
         HStack {
+            // Icon
+            if WidgetIconView.shouldShowIcon(for: widget) {
+                WidgetIconView(widget: widget)
+                    .frame(width: 24, height: 24)
+            }
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(widget.labelText ?? widget.label)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))

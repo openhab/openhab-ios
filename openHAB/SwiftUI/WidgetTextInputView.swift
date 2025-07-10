@@ -21,23 +21,32 @@ struct WidgetTextInputView: View {
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let labelText = widget.labelText, !labelText.isEmpty {
-                Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+        HStack(alignment: .top, spacing: 8) {
+            // Icon
+            if WidgetIconView.shouldShowIcon(for: widget) {
+                WidgetIconView(widget: widget)
+                    .frame(width: 24, height: 24)
+                    .padding(.top, 4) // Align with text
             }
 
-            TextField("Enter text", text: $inputText)
-                .textFieldStyle(.roundedBorder)
-                .focused($isTextFieldFocused)
-                .onSubmit {
-                    sendTextCommand()
+            VStack(alignment: .leading, spacing: 8) {
+                if let labelText = widget.labelText, !labelText.isEmpty {
+                    Text(labelText)
+                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
                 }
 
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                Text(labelValue)
-                    .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+                TextField("Enter text", text: $inputText)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($isTextFieldFocused)
+                    .onSubmit {
+                        sendTextCommand()
+                    }
+
+                if let labelValue = widget.labelValue, !labelValue.isEmpty {
+                    Text(labelValue)
+                        .font(.caption)
+                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+                }
             }
         }
         .onAppear {

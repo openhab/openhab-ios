@@ -13,7 +13,7 @@ import OpenHABCore
 import SwiftUI
 
 enum WidgetViewFactory {
-    @ViewBuilder
+    @MainActor @ViewBuilder
     static func view(for widget: OpenHABWidget) -> some View {
         switch widget.type {
         case .switchWidget:

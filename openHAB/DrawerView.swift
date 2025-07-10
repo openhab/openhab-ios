@@ -30,33 +30,6 @@ enum DrawerViewError: Error, CustomDebugStringConvertible {
     }
 }
 
-struct ImageView: View {
-    let url: String
-
-    @EnvironmentObject var networkTracker: NetworkTracker
-
-    var body: some View {
-        if !url.isEmpty {
-            switch url {
-            case _ where url.hasPrefix("data:image"):
-                let provider = Base64ImageDataProvider(base64String: url.deletingPrefix("data:image/png;base64,"), cacheKey: UUID().uuidString)
-                return KFImage(source: .provider(provider)).resizable()
-            case _ where url.hasPrefix("http"):
-                return KFImage(URL(string: url)).resizable()
-            default:
-                let builtURL = Endpoint.resource(
-                    openHABRootUrl: networkTracker.activeConnection?.configuration.url ?? "",
-                    path: url.prepare()
-                ).url
-                return KFImage(builtURL).resizable()
-            }
-        } else {
-            // This will always fallback to placeholder
-            return KFImage(URL(string: "bundle://openHABIcon")).placeholder { Image("openHABIcon").resizable() }
-        }
-    }
-}
-
 // Display the connected URL
 struct ConnectionView: View {
     @StateObject private var networkTracker = NetworkTracker.shared

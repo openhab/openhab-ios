@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import OpenHABCore
 import SwiftUI
 
 struct SitemapPageView: View {
@@ -28,6 +29,9 @@ struct SitemapPageView: View {
         }
         .task {
             viewModel.startPageHandling()
+        }
+        .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
+            viewModel.handleActiveConnectionChange(activeConnection)
         }
         .alert("Error", isPresented: .constant(viewModel.error != nil), actions: {
             Button("OK", role: .cancel) {}

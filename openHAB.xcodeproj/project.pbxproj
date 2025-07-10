@@ -101,6 +101,8 @@
 		DA35E2C62E1EEA9D003987BB /* WidgetSegmentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */; };
 		DA35E2C72E1EEA9D003987BB /* WidgetVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */; };
 		DA35E2C92E1EF15B003987BB /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2C82E1EF15B003987BB /* ColorExtension.swift */; };
+		DA35E2CB2E1F93AD003987BB /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2CA2E1F93AD003987BB /* ImageView.swift */; };
+		DA35E2CD2E1F96CA003987BB /* WidgetIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */; };
 		DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4642312D7EE6CA006C3908 /* LoggerView.swift */; };
 		DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800132D836892009CF127 /* ConnectionSettingsView.swift */; };
 		DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4800152D836EF0009CF127 /* MainUISettingsView.swift */; };
@@ -437,6 +439,8 @@
 		DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetVideoView.swift; sourceTree = "<group>"; };
 		DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetWebView.swift; sourceTree = "<group>"; };
 		DA35E2C82E1EF15B003987BB /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
+		DA35E2CA2E1F93AD003987BB /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
+		DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIconView.swift; sourceTree = "<group>"; };
 		DA4642312D7EE6CA006C3908 /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
 		DA4800132D836892009CF127 /* ConnectionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSettingsView.swift; sourceTree = "<group>"; };
 		DA4800152D836EF0009CF127 /* MainUISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainUISettingsView.swift; sourceTree = "<group>"; };
@@ -843,6 +847,7 @@
 			isa = PBXGroup;
 			children = (
 				DAEA21DF2DBF483E00D54342 /* WidgetGenericView.swift */,
+				DA35E2CA2E1F93AD003987BB /* ImageView.swift */,
 				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
 				DAEA21D72DBF472D00D54342 /* WidgetViewFactory.swift */,
 				DA64ACA92DBEADB000294F60 /* WidgetRow.swift */,
@@ -861,6 +866,7 @@
 				DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */,
 				DAEA21DB2DBF47DA00D54342 /* WidgetSliderView.swift */,
 				DAEA21DD2DBF481300D54342 /* WidgetTextView.swift */,
+				DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -1684,6 +1690,7 @@
 				DA35E2C92E1EF15B003987BB /* ColorExtension.swift in Sources */,
 				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
 				DA35E2B02E1EDB86003987BB /* WidgetSetpointView.swift in Sources */,
+				DA35E2CB2E1F93AD003987BB /* ImageView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,
@@ -1706,6 +1713,7 @@
 				DA35E2C52E1EEA9D003987BB /* WidgetRollershutterView.swift in Sources */,
 				DA35E2C62E1EEA9D003987BB /* WidgetSegmentedView.swift in Sources */,
 				DA35E2C72E1EEA9D003987BB /* WidgetVideoView.swift in Sources */,
+				DA35E2CD2E1F96CA003987BB /* WidgetIconView.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,

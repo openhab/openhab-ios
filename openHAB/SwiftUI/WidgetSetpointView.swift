@@ -40,13 +40,15 @@ struct WidgetSetpointView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
+                // Icon
+                if WidgetIconView.shouldShowIcon(for: widget) {
+                    WidgetIconView(widget: widget)
+                        .frame(width: 24, height: 24)
+                }
+
                 VStack(alignment: .leading, spacing: 2) {
                     Text(widget.labelText ?? widget.label)
                         .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
-
-                    Text(formattedValue)
-                        .font(.caption)
-                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
                 }
 
                 Spacer()
@@ -62,6 +64,10 @@ struct WidgetSetpointView: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(currentValue <= widget.minValue)
+
+                    Text(formattedValue)
+                        .font(.caption)
+                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
 
                     Button(action: increaseValue) {
                         Image(systemSymbol: .plus)
