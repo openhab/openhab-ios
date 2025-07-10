@@ -40,7 +40,6 @@ struct WidgetSetpointView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                // Icon
                 if WidgetIconView.shouldShowIcon(for: widget) {
                     WidgetIconView(widget: widget)
                         .frame(width: 24, height: 24)
@@ -55,12 +54,9 @@ struct WidgetSetpointView: View {
 
                 HStack(spacing: 12) {
                     Button(action: decreaseValue) {
-                        Image(systemSymbol: .minus)
+                        Image(systemSymbol: .chevronDownCircleFill)
                             .font(.title2)
                             .foregroundColor(.primary)
-                            .frame(width: 44, height: 44)
-                            .background(Color.secondary.opacity(0.2))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                     .disabled(currentValue <= widget.minValue)
@@ -70,12 +66,9 @@ struct WidgetSetpointView: View {
                         .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
 
                     Button(action: increaseValue) {
-                        Image(systemSymbol: .plus)
+                        Image(systemSymbol: .chevronUpCircleFill)
                             .font(.title2)
                             .foregroundColor(.primary)
-                            .frame(width: 44, height: 44)
-                            .background(Color.secondary.opacity(0.2))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                     .disabled(currentValue >= widget.maxValue)
@@ -118,4 +111,9 @@ struct WidgetSetpointView: View {
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(limitedNewValue)")
         widget.sendItemUpdate(state: numberState)
     }
+}
+
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
+    WidgetSetpointView(widget: widget)
 }

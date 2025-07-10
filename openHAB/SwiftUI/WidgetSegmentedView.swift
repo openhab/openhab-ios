@@ -32,20 +32,10 @@ struct WidgetSegmentedView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        HStack {
             if let labelText = widget.labelText, !labelText.isEmpty {
-                HStack {
-                    Text(labelText)
-                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
-
-                    Spacer()
-
-                    if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                        Text(labelValue)
-                            .font(.caption)
-                            .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
-                    }
-                }
+                Text(labelText)
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
             }
 
             if !mappings.isEmpty {
@@ -68,8 +58,7 @@ struct WidgetSegmentedView: View {
     }
 }
 
-extension Int {
-    func clamped(to range: ClosedRange<Int>) -> Int {
-        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
-    }
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[4]
+    WidgetSegmentedView(widget: widget)
 }

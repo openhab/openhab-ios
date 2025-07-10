@@ -22,21 +22,18 @@ struct WidgetRollershutterView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
+                if WidgetIconView.shouldShowIcon(for: widget) {
+                    WidgetIconView(widget: widget)
+                        .frame(width: 24, height: 24)
+                }
+
                 VStack(alignment: .leading, spacing: 2) {
                     Text(widget.labelText ?? widget.label)
                         .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
-
-                    if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                        Text(labelValue)
-                            .font(.caption)
-                            .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
-                    }
                 }
 
                 Spacer()
-            }
 
-            HStack(spacing: 12) {
                 Button {
                     logger.info("up button pressed")
                     widget.sendCommand("UP")
@@ -44,9 +41,6 @@ struct WidgetRollershutterView: View {
                     Image(systemSymbol: .chevronUp)
                         .font(.title2)
                         .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(Color.secondary.opacity(0.2))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
 
@@ -57,9 +51,6 @@ struct WidgetRollershutterView: View {
                     Image(systemSymbol: .stopFill)
                         .font(.title2)
                         .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(Color.secondary.opacity(0.2))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
 
@@ -70,14 +61,14 @@ struct WidgetRollershutterView: View {
                     Image(systemSymbol: .chevronDown)
                         .font(.title2)
                         .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(Color.secondary.opacity(0.2))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
-
-                Spacer()
             }
         }
     }
+}
+
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[5]
+    WidgetRollershutterView(widget: widget)
 }

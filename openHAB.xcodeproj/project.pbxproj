@@ -115,6 +115,7 @@
 		DA50C7BD2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BC2B0A51BD0009F716 /* SliderWithSwitchSupportRow.swift */; };
 		DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA50C7BE2B0A652F0009F716 /* SliderWithSwitchSupportUITableViewCell.swift */; };
 		DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5ED9BD2C850955004875E0 /* ClientCertificatesViewModel.swift */; };
+		DA6454DE2E204B95006005E8 /* PreviewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7224D123828D3300712D20 /* PreviewConstants.swift */; };
 		DA64ACA62DBEAD5600294F60 /* SitemapPageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA64ACA52DBEAD5600294F60 /* SitemapPageViewModel.swift */; };
 		DA64ACA82DBEAD8300294F60 /* SitemapPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */; };
 		DA64ACAA2DBEADB000294F60 /* WidgetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA64ACA92DBEADB000294F60 /* WidgetRow.swift */; };
@@ -858,12 +859,12 @@
 				DA35E2B62E1EEA9D003987BB /* WidgetRollershutterView.swift */,
 				DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */,
 				DA35E2B82E1EEA9D003987BB /* WidgetSelectionView.swift */,
+				DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */,
 				DA35E2B92E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift */,
 				DA35E2BA2E1EEA9D003987BB /* WidgetTextInputView.swift */,
 				DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */,
 				DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */,
 				DAEA21D92DBF477E00D54342 /* WidgetSwitchView.swift */,
-				DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */,
 				DAEA21DB2DBF47DA00D54342 /* WidgetSliderView.swift */,
 				DAEA21DD2DBF481300D54342 /* WidgetTextView.swift */,
 				DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */,
@@ -983,7 +984,6 @@
 		DAF457A723DBA2C40018B495 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				DA7224D123828D3300712D20 /* PreviewConstants.swift */,
 				934B610B2348D2F9009112D5 /* Color+Extension.swift */,
 				DAF4578123D630C70018B495 /* IconView.swift */,
 				DAF4578623D798A50018B495 /* TextLabelView.swift */,
@@ -1159,6 +1159,7 @@
 		DFFD8FCE18EDBD30003B502A /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				DA7224D123828D3300712D20 /* PreviewConstants.swift */,
 				938EDCE022C4FEB800661CA1 /* ScaleAspectFitImageView.swift */,
 				DFFD8FD018EDBD4F003B502A /* UICircleButton.swift */,
 				938BF9C524EFCC0700E6B52F /* UILabel+Localization.swift */,
@@ -1747,6 +1748,7 @@
 				DFA16EBB18883DE500EDB0BB /* SliderUITableViewCell.swift in Sources */,
 				DFA13CB418872EBD006355C3 /* SwitchUITableViewCell.swift in Sources */,
 				DFFD8FD118EDBD4F003B502A /* UICircleButton.swift in Sources */,
+				DA6454DE2E204B95006005E8 /* PreviewConstants.swift in Sources */,
 				DA48001C2D837556009CF127 /* SitemapSettingsView.swift in Sources */,
 				938BF9C624EFCC0700E6B52F /* UILabel+Localization.swift in Sources */,
 			);

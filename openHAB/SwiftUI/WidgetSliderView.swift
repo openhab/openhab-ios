@@ -20,9 +20,16 @@ struct WidgetSliderView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
+        HStack {
+            if WidgetIconView.shouldShowIcon(for: widget) {
+                WidgetIconView(widget: widget)
+                    .frame(width: 24, height: 24)
+            }
+
             Text(widget.labelText ?? "")
                 .font(.headline)
+            Spacer()
+
             Slider(value: .constant(currentValue), in: 0 ... 100)
                 .disabled(true) // unless you want editable
             if let value = widget.labelValue {

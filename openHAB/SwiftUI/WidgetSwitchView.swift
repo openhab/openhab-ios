@@ -33,7 +33,6 @@ struct WidgetSwitchView: View {
 
     var body: some View {
         HStack {
-            // Icon
             if WidgetIconView.shouldShowIcon(for: widget) {
                 WidgetIconView(widget: widget)
                     .frame(width: 24, height: 24)
@@ -68,4 +67,9 @@ struct WidgetSwitchView: View {
         }
         .contentShape(Rectangle())
     }
+}
+
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[2]
+    WidgetSwitchView(widget: widget)
 }

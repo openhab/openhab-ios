@@ -10,9 +10,25 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+import OpenHABCore
+import os.log
 
 enum PreviewConstants {
+    static let logger = Logger(subsystem: "org.openhab", category: "PreviewConstants")
+
     static let remoteURLString = "http://192.168.2.10:8080"
+
+    static var openHABSitemapPage: OpenHABPage? {
+        let data = sitemapJson
+        do {
+            let sitemapPage = try data.decoded(as: Components.Schemas.PageDTO.self)
+            let openHABSitemapPage = OpenHABPage(sitemapPage)
+            return openHABSitemapPage
+        } catch {
+            logger.error("Should not throw \(error.localizedDescription)")
+            return nil
+        }
+    }
 
     static let sitemapJson = Data("""
     {
@@ -103,7 +119,7 @@ enum PreviewConstants {
                 "sendFrequency": 0,
                 "item": {
                     "link": "http://192.168.2.10:8080/rest/items/lcnLightDimmer",
-                    "state": "100",
+                    "state": "95",
                     "stateDescription": {
                         "pattern": "%s",
                         "readOnly": false,

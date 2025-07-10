@@ -22,7 +22,6 @@ struct WidgetTextInputView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            // Icon
             if WidgetIconView.shouldShowIcon(for: widget) {
                 WidgetIconView(widget: widget)
                     .frame(width: 24, height: 24)
