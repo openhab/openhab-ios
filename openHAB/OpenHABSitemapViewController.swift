@@ -799,6 +799,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             let selectionItemState = widget.item?.state
             logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
             let hostingController = UIHostingController(rootView: SelectionView(
+                labelText: widget.labelText,
                 mappings: widget.mappingsOrItemOptions,
                 selectionItemState: selectionItemState,
                 onSelection: { selectedMappingIndex in
