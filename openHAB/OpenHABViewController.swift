@@ -26,6 +26,11 @@ class OpenHABViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         NetworkTracker.shared.clientCertificateManager.delegate = self
         NetworkTracker.shared.serverCertificateManager.delegate = self
+        setNeedsStatusBarAppearanceUpdate()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
 
     func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
@@ -52,6 +57,10 @@ class OpenHABViewController: UIViewController {
         if let rc = parent as? OpenHABRootViewController {
             rc.showSideMenu()
         }
+    }
+
+    override var prefersStatusBarHidden: Bool {
+        Preferences.hideStatusBar
     }
 
     @objc

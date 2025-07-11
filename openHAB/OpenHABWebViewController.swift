@@ -359,6 +359,9 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                 let string = openHABTrackedRootUrl
                 logger.info("navigation change base: \(string) path: \(path)")
                 Preferences.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
+
+                // Wake up screen saver immediately on changes to the webview
+                NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
             }
         }
     }

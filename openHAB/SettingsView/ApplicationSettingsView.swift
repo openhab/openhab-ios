@@ -12,6 +12,7 @@
 import OpenHABCore
 import os
 import SwiftUI
+import UIKit
 
 struct ApplicationSettingsView: View {
     @Binding var settingsIdleOff: Bool
@@ -21,6 +22,26 @@ struct ApplicationSettingsView: View {
     var body: some View {
         Section(header: Text(LocalizedStringKey("application_settings"))) {
             Toggle("Disable Idle Timeout", isOn: $settingsIdleOff)
+                .onChange(of: settingsIdleOff) { newValue in
+                    if let keyWindow = UIApplication.shared.windows.first {
+                        if newValue {
+                            ScreenSaverManager.shared.startMonitoring(window: keyWindow)
+                        } else {
+                            NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
+                        }
+                    }
+                }
+
+            // Screen Saver settings available only when idle timeout is disabled
+            NavigationLink("Screen Saver Settings") {
+                ScreenSaverSettingsView()
+            }
+            .disabled(!settingsIdleOff)
+
+            Toggle("Hide Status Bar", isOn: Binding(
+                get: { Preferences.hideStatusBar },
+                set: { Preferences.hideStatusBar = $0; UIApplication.shared.windows.first?.rootViewController?.setNeedsStatusBarAppearanceUpdate() }
+            ))
 
             NavigationLink("Client Certificates") {
                 ClientCertificatesView()

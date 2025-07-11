@@ -117,6 +117,48 @@ public enum Preferences {
     @UserDefault("idleOff", defaultValue: false)
     public static var idleOff: Bool
 
+    @UserDefault("screensaverEnabled", defaultValue: false)
+    public static var screensaverEnabled: Bool
+
+    @UserDefault("screensaverShowsTime", defaultValue: true)
+    public static var screensaverShowsTime: Bool
+
+    @UserDefault("screensaverShowsDate", defaultValue: true)
+    public static var screensaverShowsDate: Bool
+
+    @UserDefault("screensaverIdleInterval", defaultValue: 120.0)
+    public static var screensaverIdleInterval: Double
+
+    @UserDefault("screensaverMovementInterval", defaultValue: 8.0)
+    public static var screensaverMovementInterval: Double
+
+    @UserDefault("screensaverFontName", defaultValue: "")
+    public static var screensaverFontName: String
+
+    @UserDefault("screensaverTimeFontRatio", defaultValue: 0.2)
+    public static var screensaverTimeFontRatio: Double
+
+    @UserDefault("screensaverDateFontRatio", defaultValue: 0.4)
+    public static var screensaverDateFontRatio: Double
+
+    @UserDefault("screensaverEnableDimming", defaultValue: true)
+    public static var screensaverEnableDimming: Bool
+
+    @UserDefault("screensaverDimmingOffset", defaultValue: -0.4)
+    public static var screensaverDimmingOffset: Double
+
+    @UserDefault("screensaverShowsSeconds", defaultValue: false)
+    public static var screensaverShowsSeconds: Bool
+
+    @UserDefault("screensaverUse24Hour", defaultValue: false)
+    public static var screensaverUse24Hour: Bool
+
+    @UserDefault("screensaverFadeDuration", defaultValue: 2.0)
+    public static var screensaverFadeDuration: Double
+
+    @UserDefault("hideStatusBar", defaultValue: false)
+    public static var hideStatusBar: Bool
+
     @UserDefault("currentWebViewPath", defaultValue: "")
     public static var currentWebViewPath: String
 

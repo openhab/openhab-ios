@@ -102,6 +102,18 @@ class OpenHABRootViewController: UIViewController {
         isDemoMode = Preferences.currentHomePreferences.demomode
         switchToSavedView()
         setupTracker()
+
+        // little hack to get the first load to respect the status bar preference, and adds a nice fade affect
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self else { return }
+            UIView.animate(withDuration: 1) {
+                UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }
+                    .flatMap(\.windows)
+                    .first?.rootViewController?
+                    .setNeedsStatusBarAppearanceUpdate()
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -113,6 +125,10 @@ class OpenHABRootViewController: UIViewController {
             switchToSavedView()
             isDemoMode = Preferences.currentHomePreferences.demomode
         }
+    }
+
+    override var prefersStatusBarHidden: Bool {
+        Preferences.hideStatusBar
     }
 
     fileprivate func setupTracker() {
