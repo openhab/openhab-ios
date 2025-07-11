@@ -8,6 +8,9 @@
       location = "group:openHAB.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:NetworkTrackerViewModel.swift">
+      location = "group:NetworkTrackerViewModel 2.swift">
+   </FileRef>
+   <FileRef
+      location = "group:CommonUI">
    </FileRef>
 </Workspace>

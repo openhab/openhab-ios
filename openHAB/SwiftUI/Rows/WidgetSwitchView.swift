@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -40,12 +41,12 @@ struct WidgetSwitchView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(widget.labelText ?? widget.label)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
 
                 if let labelValue = widget.labelValue, !labelValue.isEmpty {
                     Text(labelValue)
                         .font(.caption)
-                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
                 }
             }
 

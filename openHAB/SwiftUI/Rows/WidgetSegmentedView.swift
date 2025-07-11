@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -35,7 +36,7 @@ struct WidgetSegmentedView: View {
         HStack {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             if !mappings.isEmpty {

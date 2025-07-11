@@ -12,7 +12,7 @@
 import OpenHABCore
 import SwiftUI
 
-extension Color {
+public extension Color {
     init(fromString string: String) {
         self.init(UIColor(fromString: string))
     }

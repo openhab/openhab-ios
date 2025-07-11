@@ -9,15 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import OpenHABCore
-import SwiftUI
+@testable import CommonUI
+import Testing
 
-extension Color {
-    init(fromString string: String) {
-        self.init(UIColor(fromString: string))
-    }
-
-    init(hex: String) {
-        self.init(UIColor(hex: hex))
-    }
+@Test func example() async throws {
+    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
 }

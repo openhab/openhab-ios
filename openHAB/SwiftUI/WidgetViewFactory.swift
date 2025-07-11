@@ -43,7 +43,7 @@ enum WidgetViewFactory {
         case .text:
             WidgetTextView(widget: widget)
         case .frame:
-            EmptyView() // ignore frames
+            WidgetFrameView(widget: widget)
         case .setpoint:
             WidgetSetpointView(widget: widget)
         case .selection:

@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SwiftUI
@@ -23,7 +24,7 @@ struct WidgetColorPickerView: View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             ColorPicker("Color", selection: $selectedColor, supportsOpacity: false)
@@ -35,7 +36,7 @@ struct WidgetColorPickerView: View {
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
         .onAppear {

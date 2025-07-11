@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import CoreLocation
 import MapKit
 import OpenHABCore
@@ -36,7 +37,7 @@ struct WidgetMapView: View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
             Map(coordinateRegion: $region, annotationItems: coordinates.map { [$0] } ?? []) { coordinate in
@@ -53,7 +54,7 @@ struct WidgetMapView: View {
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
     }

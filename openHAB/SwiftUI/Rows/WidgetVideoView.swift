@@ -9,14 +9,16 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Kingfisher
+import AVKit
+import CommonUI
 import OpenHABCore
 import SwiftUI
 
-struct WidgetImageView: View {
+struct WidgetVideoView: View {
     @ObservedObject var widget: OpenHABWidget
+    @State private var player: AVPlayer?
 
-    private var imageURL: URL? {
+    private var videoURL: URL? {
         guard !widget.url.isEmpty else { return nil }
         return URL(string: widget.url)
     }
@@ -25,30 +27,25 @@ struct WidgetImageView: View {
         VStack(alignment: .leading, spacing: 8) {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            if let imageURL {
-                KFImage(imageURL)
-                    .placeholder {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 200)
-                            .overlay(
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            )
-                    }
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 300)
+            if let videoURL {
+                VideoPlayer(player: player)
+                    .frame(height: 200)
                     .cornerRadius(8)
+                    .onAppear {
+                        player = AVPlayer(url: videoURL)
+                    }
+                    .onDisappear {
+                        player?.pause()
+                    }
             } else {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 200)
                     .overlay(
-                        Text("No Image URL")
+                        Text("No Video URL")
                             .foregroundColor(.secondary)
                     )
                     .cornerRadius(8)
@@ -57,7 +54,7 @@ struct WidgetImageView: View {
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)
                     .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(UIColor(fromString: widget.valuecolor)))
+                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
     }

@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import os.log
 import SFSafeSymbols
@@ -29,7 +30,7 @@ struct WidgetRollershutterView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(widget.labelText ?? widget.label)
-                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(UIColor(fromString: widget.labelcolor)))
+                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                 }
 
                 Spacer()

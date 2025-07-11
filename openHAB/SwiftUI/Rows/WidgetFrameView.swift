@@ -12,20 +12,23 @@
 import OpenHABCore
 import SwiftUI
 
-struct DetailTextLabelView: View {
+struct WidgetFrameView: View {
     @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
-        if let label = widget.labelValue {
-            Text(label)
-                .font(.footnote)
+        HStack {
+            Text(widget.labelText?.uppercased() ?? "")
+                .font(.callout)
                 .lineLimit(1)
-                .foregroundColor(!widget.valuecolor.isEmpty ? Color(widget.valuecolor) : .secondary)
+            Spacer()
         }
+        .listRowBackground(Color(UIColor.systemGroupedBackground))
     }
 }
 
 #Preview {
-    let widget = UserData(preview: true).widgets[2]
-    DetailTextLabelView(widget: widget)
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
+    List([widget]) { widget in
+        WidgetFrameView(widget: widget)
+    }
 }
