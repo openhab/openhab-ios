@@ -21,8 +21,7 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
-        // TODO:
-        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+        await INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
     }
 
     private static let onLabel = NSLocalizedString("on", comment: "").capitalized

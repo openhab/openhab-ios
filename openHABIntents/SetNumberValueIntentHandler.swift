@@ -21,8 +21,7 @@ class SetNumberValueIntentHandler: NSObject, OpenHABSetNumberValueIntentHandling
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetNumberValueIntent) async throws -> INObjectCollection<NSString> {
-        // TODO:
-        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+        await INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
     }
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetNumberValueIntent")

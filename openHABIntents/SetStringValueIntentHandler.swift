@@ -21,8 +21,7 @@ class SetStringValueIntentHandler: NSObject, OpenHABSetStringValueIntentHandling
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetStringValueIntent) async throws -> INObjectCollection<NSString> {
-        // TODO:
-        INObjectCollection(items: ["Home", "Lehmgrubenweg"])
+        await INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
     }
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetStringValueIntent")
