@@ -13,33 +13,24 @@ import OpenHABCore
 import SwiftUI
 import UIKit
 
-extension UIApplication {
-    var keyWindowActiveScene: UIWindow? {
-        connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first { $0.activationState == .foregroundActive }?
-            .windows
-            .first { $0.isKeyWindow }
-    }
-}
-
 struct ScreenSaverSettingsView: View {
     @State private var config: ScreenSaverConfiguration = {
-        var c = ScreenSaverConfiguration()
-        c.isEnabled = Preferences.screensaverEnabled
-        c.showsTime = Preferences.screensaverShowsTime
-        c.showsDate = Preferences.screensaverShowsDate
-        c.idleInterval = Preferences.screensaverIdleInterval
-        c.movementInterval = Preferences.screensaverMovementInterval
-        c.fontName = Preferences.screensaverFontName.isEmpty ? nil : Preferences.screensaverFontName
-        c.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
-        c.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
-        c.enablesAutoDimming = Preferences.screensaverEnableDimming
-        c.dimmingOffset = CGFloat(Preferences.screensaverDimmingOffset)
-        c.showsSeconds = Preferences.screensaverShowsSeconds
-        c.uses24HourTime = Preferences.screensaverUse24Hour
-        c.fadeDuration = Preferences.screensaverFadeDuration
-        return c
+        var config = ScreenSaverConfiguration()
+        config.isEnabled = Preferences.screensaverEnabled
+        config.showsTime = Preferences.screensaverShowsTime
+        config.showsDate = Preferences.screensaverShowsDate
+        config.idleInterval = Preferences.screensaverIdleInterval
+        config.movementInterval = Preferences.screensaverMovementInterval
+        config.fontName = Preferences.screensaverFontName.isEmpty ? nil : Preferences.screensaverFontName
+        config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
+        config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
+        config.enablesAutoDimming = Preferences.screensaverEnableDimming
+        config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
+        config.showsSeconds = Preferences.screensaverShowsSeconds
+        config.uses24HourTime = Preferences.screensaverUse24Hour
+        config.fadeDuration = Preferences.screensaverFadeDuration
+        config.restoresBrightness = Preferences.screensaverRestoreBrightness
+        return config
     }()
 
     var body: some View {
@@ -140,12 +131,20 @@ struct ScreenSaverSettingsView: View {
                     set: { config.enablesAutoDimming = $0 }
                 ))
 
-                Slider(value: Binding(
-                    get: { Double(config.dimmingOffset) },
-                    set: { config.dimmingOffset = CGFloat($0) }
-                ), in: -0.9 ... 0.5, step: 0.05) {
-                    Text("Dim Offset: \(String(format: "%.2f", config.dimmingOffset))")
+                Toggle("Restore Previous Value on Wake", isOn: Binding(
+                    get: { config.restoresBrightness },
+                    set: { config.restoresBrightness = $0 }
+                )).disabled(!config.enablesAutoDimming)
+
+                VStack(alignment: .leading) {
+                    Text("Dim Level: \(Int(config.dimLevel * 100)) %")
+                        .font(.caption)
+                    Slider(value: Binding(
+                        get: { Double(config.dimLevel * 100) },
+                        set: { config.dimLevel = CGFloat($0) / 100 }
+                    ), in: 0 ... 100, step: 1)
                 }
+                .disabled(!config.enablesAutoDimming)
             }
             .disabled(!config.isEnabled)
         }
@@ -162,11 +161,22 @@ struct ScreenSaverSettingsView: View {
             Preferences.screensaverTimeFontRatio = Double(config.timeFontSizeRatio)
             Preferences.screensaverDateFontRatio = Double(config.dateFontRelativeSize)
             Preferences.screensaverEnableDimming = config.enablesAutoDimming
-            Preferences.screensaverDimmingOffset = Double(config.dimmingOffset)
+            Preferences.screensaverDimLevel = Double(config.dimLevel)
             Preferences.screensaverShowsSeconds = config.showsSeconds
             Preferences.screensaverUse24Hour = config.uses24HourTime
             Preferences.screensaverFadeDuration = config.fadeDuration
+            Preferences.screensaverRestoreBrightness = config.restoresBrightness
         }
+    }
+}
+
+extension UIApplication {
+    var keyWindowActiveScene: UIWindow? {
+        connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }?
+            .windows
+            .first { $0.isKeyWindow }
     }
 }
 

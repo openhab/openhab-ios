@@ -17,14 +17,9 @@ private class ScreenSaverHostingViewController: UIViewController {
     override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }
 }
 
-/// Notifications that other parts of the app can send to control the screensaver
-extension Notification.Name {
-    static let disableScreenSaver = Notification.Name("disableScreenSaver")
-    static let wakeScreenSaver = Notification.Name("wakeScreenSaver")
-}
-
+@MainActor
 final class ScreenSaverManager: NSObject {
-    @MainActor static let shared = ScreenSaverManager()
+    static let shared = ScreenSaverManager()
 
     private let logger = Logger(subsystem: "org.openhab", category: "ScreenSaver")
 
@@ -42,8 +37,7 @@ final class ScreenSaverManager: NSObject {
     /// the entire screen, including the system status bar.
     private var overlayWindow: UIWindow?
 
-    /// Remembers the screen brightness before the dimming is applied so it can
-    /// be restored when the saver is dismissed.
+    /// Remembers the screen brightness before the dimming is applied
     private var previousBrightness: CGFloat?
 
     override private init() {
@@ -52,14 +46,14 @@ final class ScreenSaverManager: NSObject {
         NotificationCenter.default.addObserver(self, selector: #selector(handleWakeNotification), name: .wakeScreenSaver, object: nil)
     }
 
-    @MainActor func startMonitoring(window: UIWindow, configuration: ScreenSaverConfiguration = ScreenSaverConfiguration()) {
+    func startMonitoring(window: UIWindow, configuration: ScreenSaverConfiguration = ScreenSaverConfiguration()) {
         self.configuration = configuration
         self.window = window
         attachGestureRecognizers(to: window)
         resetIdleTimer()
     }
 
-    @MainActor public func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
+    public func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
         configuration = newConfiguration
         if saverView != nil {
             dismissSaverIfNeeded()
@@ -70,7 +64,7 @@ final class ScreenSaverManager: NSObject {
         }
     }
 
-    @MainActor private func attachGestureRecognizers(to window: UIWindow) {
+    private func attachGestureRecognizers(to window: UIWindow) {
         let tap = UITapGestureRecognizer(target: self, action: #selector(userInteracted))
         tap.cancelsTouchesInView = false
         tap.delaysTouchesEnded = false
@@ -83,8 +77,7 @@ final class ScreenSaverManager: NSObject {
         window.addGestureRecognizer(pan)
     }
 
-    @MainActor @objc private func userInteracted() {
-        logger.debug("User interaction detected, resetting idle timer")
+    @objc private func userInteracted() {
         dismissSaverIfNeeded()
         resetIdleTimer()
     }
@@ -98,14 +91,13 @@ final class ScreenSaverManager: NSObject {
         ) { [weak self] _ in
             guard let self else { return }
 
-            // Hop to the main actor before touching UI-bound state.
             Task { @MainActor in
                 self.showSaver()
             }
         }
     }
 
-    @MainActor private func showSaver() {
+    private func showSaver() {
         guard configuration.isEnabled else { return }
         guard saverView == nil, let baseWindow = window else { return }
         logger.debug("Presenting screen saver (overlay window)")
@@ -153,11 +145,13 @@ final class ScreenSaverManager: NSObject {
         applyDimming()
     }
 
-    @MainActor private func dismissSaverIfNeeded() {
+    private func dismissSaverIfNeeded() {
         guard let saver = saverView else { return }
         logger.debug("Dismissing screen saver")
         saver.stopAnimation()
-        restoreBrightnessIfNeeded()
+        if configuration.enablesAutoDimming, configuration.restoresBrightness {
+            restoreBrightnessIfNeeded()
+        }
         UIView.animate(withDuration: 0.2, animations: {
             saver.alpha = 0
         }) { _ in
@@ -170,32 +164,37 @@ final class ScreenSaverManager: NSObject {
         overlayWindow = nil
     }
 
-    @MainActor private func applyDimming() {
+    private func applyDimming() {
         guard configuration.enablesAutoDimming else { return }
         previousBrightness = UIScreen.main.brightness
-        var target = previousBrightness ?? 1.0
-        target += configuration.dimmingOffset
-        target = min(max(target, 0.05), 1.0)
+        var target = configuration.dimLevel
+        target = min(max(target, 0.0), 1.0)
         UIScreen.main.brightness = target
     }
 
-    @MainActor private func restoreBrightnessIfNeeded() {
+    private func restoreBrightnessIfNeeded() {
         guard let original = previousBrightness else { return }
         UIScreen.main.brightness = original
         previousBrightness = nil
     }
 
-    @MainActor @objc private func handleDisableNotification() {
+    @objc private func handleDisableNotification() {
         logger.debug("Received disable screen saver notification")
         idleTimer?.invalidate()
         dismissSaverIfNeeded()
     }
 
-    @MainActor @objc private func handleWakeNotification() {
+    @objc private func handleWakeNotification() {
         logger.debug("Received wake screen saver notification")
         resetIdleTimer()
         dismissSaverIfNeeded()
     }
+}
+
+/// Notifications that other parts of the app can send to control the screensaver
+extension Notification.Name {
+    static let disableScreenSaver = Notification.Name("disableScreenSaver")
+    static let wakeScreenSaver = Notification.Name("wakeScreenSaver")
 }
 
 extension ScreenSaverManager: UIGestureRecognizerDelegate {

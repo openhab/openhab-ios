@@ -13,12 +13,8 @@ import CoreGraphics
 import Foundation
 
 struct ScreenSaverConfiguration {
-    /// Time (in seconds) after the last user interaction before the screen
-    /// saver is displayed.
     var idleInterval: TimeInterval = 15 // 2 minutes
 
-    /// How often (in seconds) the time / date label should move to another
-    /// random location.
     var movementInterval: TimeInterval = 8
 
     var showsTime = true
@@ -31,16 +27,12 @@ struct ScreenSaverConfiguration {
 
     var isEnabled = false
 
-    /// When `true` the screen brightness will be automatically reduced when
-    /// the screen saver becomes active.
     var enablesAutoDimming = true
 
-    /// Relative offset that will be added to the current screen brightness when
-    /// the screen saver is shown.  Negative values dim the screen, positive
-    /// values brighten it.
-    var dimmingOffset: CGFloat = -0.4
+    var dimLevel: CGFloat = 0.3
 
-    /// Font name that will be used for both the time and date.
+    var restoresBrightness = true
+
     /// If `nil` the system  font is used for the time/date
     var fontName: String?
 

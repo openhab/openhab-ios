@@ -144,8 +144,8 @@ public enum Preferences {
     @UserDefault("screensaverEnableDimming", defaultValue: true)
     public static var screensaverEnableDimming: Bool
 
-    @UserDefault("screensaverDimmingOffset", defaultValue: -0.4)
-    public static var screensaverDimmingOffset: Double
+    @UserDefault("screensaverDimLevel", defaultValue: 0.3)
+    public static var screensaverDimLevel: Double
 
     @UserDefault("screensaverShowsSeconds", defaultValue: false)
     public static var screensaverShowsSeconds: Bool
@@ -155,6 +155,9 @@ public enum Preferences {
 
     @UserDefault("screensaverFadeDuration", defaultValue: 2.0)
     public static var screensaverFadeDuration: Double
+
+    @UserDefault("screensaverRestoreBrightness", defaultValue: true)
+    public static var screensaverRestoreBrightness: Bool
 
     @UserDefault("hideStatusBar", defaultValue: false)
     public static var hideStatusBar: Bool

@@ -9,9 +9,13 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import os.log
 import UIKit
 
+@MainActor
 final class ScreenSaverView: UIView {
+    private let logger = Logger(subsystem: "org.openhab", category: "ScreenSaverView")
+
     private let configuration: ScreenSaverConfiguration
 
     private lazy var label: UILabel = {
@@ -38,6 +42,10 @@ final class ScreenSaverView: UIView {
         commonInit()
     }
 
+    deinit {
+        movementTimer?.invalidate()
+    }
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -53,12 +61,6 @@ final class ScreenSaverView: UIView {
 
         updateLabelText()
     }
-
-    deinit {
-        movementTimer?.invalidate()
-    }
-
-    // MARK: - Public API
 
     func startAnimation() {
         scheduleMovement()
@@ -121,13 +123,22 @@ final class ScreenSaverView: UIView {
             UIFont.systemFont(ofSize: dateFontSize, weight: .regular)
         }
 
+        // Use a square-root curve so the text dims more gently at first and
+        // only gets very dark at the lowest levels
+        let alphaFactor: CGFloat = {
+            let clamped = min(max(configuration.dimLevel, 0.0), 1.0)
+            // .5 is about as dark as we can go while still visible
+            let alpha = 0.5 + 0.5 * sqrt(clamped)
+            return min(1.0, alpha)
+        }()
+
         let attributed = NSMutableAttributedString()
 
         // Date above time
         if let dateString {
             let dateAttr: [NSAttributedString.Key: Any] = [
                 .font: dateFont,
-                .foregroundColor: UIColor.white.withAlphaComponent(0.85)
+                .foregroundColor: UIColor.white.withAlphaComponent(0.85 * alphaFactor)
             ]
             attributed.append(NSAttributedString(string: dateString, attributes: dateAttr))
         }
@@ -138,7 +149,7 @@ final class ScreenSaverView: UIView {
             }
             let timeAttr: [NSAttributedString.Key: Any] = [
                 .font: timeFont,
-                .foregroundColor: UIColor.white
+                .foregroundColor: UIColor.white.withAlphaComponent(alphaFactor)
             ]
             attributed.append(NSAttributedString(string: timeString, attributes: timeAttr))
         }
@@ -152,13 +163,26 @@ final class ScreenSaverView: UIView {
         layoutIfNeeded()
 
         let labelSize = label.intrinsicContentSize
+        // Ensure the label fully fits within the view
         guard bounds.width > labelSize.width, bounds.height > labelSize.height else { return }
 
-        let maxX = bounds.width - labelSize.width
-        let maxY = bounds.height - labelSize.height
+        // Keep the label away from the very edges by introducing a small margin.
+        let edgeMargin: CGFloat = 20
 
-        let randomX = CGFloat.random(in: 0 ... maxX)
-        let randomY = CGFloat.random(in: 0 ... maxY)
+        // Calculate the area the label can occupy after accounting for the margin on all sides.
+        let availableWidth = bounds.width - labelSize.width - edgeMargin * 2
+        let availableHeight = bounds.height - labelSize.height - edgeMargin * 2
+
+        // If the view is too small to honour the margin, fall back to the original screen size.
+        guard availableWidth > 0, availableHeight > 0 else {
+            let fallbackX = CGFloat.random(in: 0 ... (bounds.width - labelSize.width))
+            let fallbackY = CGFloat.random(in: 0 ... (bounds.height - labelSize.height))
+            label.frame = CGRect(origin: CGPoint(x: fallbackX, y: fallbackY), size: labelSize)
+            return
+        }
+
+        let randomX = edgeMargin + CGFloat.random(in: 0 ... availableWidth)
+        let randomY = edgeMargin + CGFloat.random(in: 0 ... availableHeight)
 
         let animations = {
             self.label.frame = CGRect(origin: CGPoint(x: randomX, y: randomY), size: labelSize)

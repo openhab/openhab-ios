@@ -104,7 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         SDImageCodersManager.shared.addCoder(SVGCoder)
 
         /// load and start the screensaver
-        if Preferences.idleOff, let keyWindow = UIApplication.shared.firstKeyWindow {
+        if let keyWindow = UIApplication.shared.firstKeyWindow {
             var config = ScreenSaverConfiguration()
             config.isEnabled = Preferences.screensaverEnabled
             config.showsTime = Preferences.screensaverShowsTime
@@ -115,9 +115,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
             config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
             config.enablesAutoDimming = Preferences.screensaverEnableDimming
-            config.dimmingOffset = CGFloat(Preferences.screensaverDimmingOffset)
+            config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
             config.showsSeconds = Preferences.screensaverShowsSeconds
             config.uses24HourTime = Preferences.screensaverUse24Hour
+            config.restoresBrightness = Preferences.screensaverRestoreBrightness
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
         }
@@ -358,7 +359,7 @@ extension AppDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        if Preferences.idleOff, let keyWindow = UIApplication.shared.firstKeyWindow {
+        if let keyWindow = UIApplication.shared.firstKeyWindow {
             var config = ScreenSaverConfiguration()
             config.isEnabled = Preferences.screensaverEnabled
             config.showsTime = Preferences.screensaverShowsTime
@@ -369,9 +370,10 @@ extension AppDelegate {
             config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
             config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
             config.enablesAutoDimming = Preferences.screensaverEnableDimming
-            config.dimmingOffset = CGFloat(Preferences.screensaverDimmingOffset)
+            config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
             config.showsSeconds = Preferences.screensaverShowsSeconds
             config.uses24HourTime = Preferences.screensaverUse24Hour
+            config.restoresBrightness = Preferences.screensaverRestoreBrightness
 
             ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
         }
