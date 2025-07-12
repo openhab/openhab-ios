@@ -20,4 +20,8 @@ public extension Double {
         numberFormatter.decimalSeparator = "."
         return numberFormatter.string(from: NSNumber(value: self)) ?? ""
     }
+
+    var asColorTemperatureInKelvin: Double {
+        self < 1000 ? 1_000_000 / self : self
+    }
 }

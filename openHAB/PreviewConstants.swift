@@ -300,7 +300,125 @@ enum PreviewConstants {
                            ]
                        },
                        "widgets": []
-            }
+            },
+               {
+                    "widgetId": "11",
+                    "type": "Setpoint",
+                    "visibility": true,
+                    "label": "item in seconds [2400.0 s]",
+                    "labelSource": "SITEMAP_WIDGET",
+                    "icon": "",
+                    "staticIcon": false,
+                    "pattern": "%.1f s",
+                    "unit": "s",
+                    "mappings": [],
+                    "minValue": 300,
+                    "maxValue": 3600,
+                    "step": 60,
+                    "item": {
+                      "link": "http://192.168.2.10:8080/rest/items/testTime",
+                      "state": "2400 s",
+                      "stateDescription": {
+                        "pattern": "%.0f %unit%",
+                        "readOnly": false,
+                        "options": []
+                      },
+                      "unitSymbol": "s",
+                      "type": "Number:Time",
+                      "name": "testTime",
+                      "label": "",
+                      "category": "",
+                      "tags": [],
+                      "groupNames": []
+                    },
+                    "widgets": []
+                  },
+                  {
+                    "widgetId": "12",
+                    "type": "Setpoint",
+                    "visibility": true,
+                    "label": "item in minutes [40.0 min]",
+                    "labelSource": "SITEMAP_WIDGET",
+                    "icon": "",
+                    "staticIcon": false,
+                    "pattern": "%.1f min",
+                    "unit": "min",
+                    "mappings": [],
+                    "minValue": 5,
+                    "maxValue": 60,
+                    "step": 5,
+                    "state": "40 min",
+                    "item": {
+                      "link": "http://192.168.2.10:8080/rest/items/testTime",
+                      "state": "2400 s",
+                      "stateDescription": {
+                        "pattern": "%.0f %unit%",
+                        "readOnly": false,
+                        "options": []
+                      },
+                      "unitSymbol": "s",
+                      "type": "Number:Time",
+                      "name": "testTime",
+                      "label": "",
+                      "category": "",
+                      "tags": [],
+                      "groupNames": []
+                    },
+                    "widgets": []
+                  },
+              {
+                "widgetId": "13",
+                "type": "Colortemperaturepicker",
+                "visibility": true,
+                "label": "Color Temperature [1 K]",
+                "labelSource": "SITEMAP_WIDGET",
+                "icon": "colorwheel",
+                "staticIcon": true,
+                "pattern": "%.0f %unit%",
+                "unit": "K",
+                "mappings": [],
+                "item": {
+                  "link": "http://192.168.2.10:8080/rest/items/test_LEDLight_ColorTemp",
+                  "state": "1000.0 K",
+                  "stateDescription": {
+                    "pattern": "%.0f %unit%",
+                    "readOnly": false,
+                    "options": []
+                  },
+                  "unitSymbol": "K",
+                  "type": "Number:Temperature",
+                  "name": "test_LEDLight_ColorTemp",
+                  "label": "",
+                  "category": "",
+                  "tags": [],
+                  "groupNames": []
+                },
+                "widgets": []
+              },
+              {
+                "widgetId": "14",
+                "type": "Slider",
+                "visibility": true,
+                "label": "Brightness",
+                "labelSource": "SITEMAP_WIDGET",
+                "icon": "",
+                "staticIcon": false,
+                "unit": "",
+                "mappings": [],
+                "switchSupport": false,
+                "releaseOnly": false,
+                "item": {
+                  "link": "http://192.168.2.10:8080/rest/items/test_LEDLight_Brightness",
+                  "state": "NULL",
+                  "type": "Dimmer",
+                  "name": "test_LEDLight_Brightness",
+                  "label": "",
+                  "category": "",
+                  "tags": [],
+                  "groupNames": []
+                },
+                "widgets": []
+              }
         ]
     }
     """.utf8)

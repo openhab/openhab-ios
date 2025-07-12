@@ -189,20 +189,8 @@ struct ColorTemperaturePickerRowView: View {
     }
 }
 
-// Helper extension for clamping values
-private extension Double {
-    func clamped(to range: ClosedRange<Double>) -> Double {
-        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
-    }
-}
-
 #Preview {
-    // Create a mock widget for preview
-    let widget = OpenHABWidget()
-//    widget.labelText = "Color Temperature"
-//    widget.minValue = NSNumber(value: 2000)
-//    widget.maxValue = NSNumber(value: 6500)
-
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
     ColorTemperaturePickerRowView(widget: widget)
         .padding()
 }

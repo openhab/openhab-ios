@@ -294,8 +294,7 @@ public extension OpenHABWidget {
         self.icon = icon
         self.url = url ?? ""
         self.period = period ?? ""
-        self.minValue = minValue ?? 0.0
-        self.maxValue = maxValue ?? 100.0
+
         self.step = step ?? 1.0
         // Consider a minimal refresh rate of 100 ms, but 0 is special and means 'no refresh'
         if let refreshVal = refresh, refreshVal > 0 {
@@ -320,7 +319,15 @@ public extension OpenHABWidget {
         self.widgets = widgets
 
         // Sanitize minValue, maxValue and step: min <= max, step >= 0
-        self.maxValue = max(self.minValue, self.maxValue)
+        if type != .colortemperaturepicker {
+            self.minValue = minValue ?? 0.0
+            self.maxValue = maxValue ?? 100.0
+            self.maxValue = max(self.minValue, self.maxValue)
+        } else {
+            self.minValue = minValue ?? 1000.0
+            self.maxValue = maxValue ?? 10000.0
+            self.maxValue = max(self.minValue, self.maxValue)
+        }
         self.step = abs(self.step)
         self.visibility = visibility ?? true
         self.switchSupport = switchSupport ?? false
