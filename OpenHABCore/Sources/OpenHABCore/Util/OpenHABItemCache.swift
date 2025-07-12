@@ -13,40 +13,31 @@ import Combine
 import Foundation
 import os.log
 
-public protocol ItemCacheProtocol {
-    func getItem(name: String) async -> OpenHABItem?
-    func sendCommand(_ item: OpenHABItem, commandToSend: String) async
-    func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String]
-    func sendState(_ item: OpenHABItem, stateToSend: String) async
-}
-
 public actor OpenHABItemCache {
     private static let logger = Logger(subsystem: "org.openhab.app.openHABIntents", category: "OpenHABItemCache")
+    private static var networkTrackers: [UUID: NetworkTracker] = [:]
+
     public static let instance = OpenHABItemCache()
 
-    private lazy var setupTask: Task<Void, Never> = Task { [weak self] in
-        await self?.setup()
-    }
-
-    public var items: [UUID: [OpenHABItem]]?
+    public var items: [UUID: [OpenHABItem]] = [:]
     private let ttl: TimeInterval = 20
-    var lastLoad = Date()
+    var lastLoad: [UUID: Date] = [:]
 
     private let logger = Logger(subsystem: "org.openhab.app.openHABIntents", category: "OpenHABItemCache")
 
     private init() {}
 
-    static func getNonGroupItemsForAllHomes() async throws -> [UUID: [OpenHABItem]] {
-        let allItemsArray = try await getItemsForAllHomes().map { (uuid, items) in (uuid, items.filter { $0.type != .group }) }
+    static func loadNonGroupItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
+        let allItemsArray = try await loadItemsForHomes(homes).map { (uuid, items) in (uuid, items.filter { $0.type != .group }) }
         return Dictionary(uniqueKeysWithValues: allItemsArray)
     }
 
-    static func getItemsForAllHomes() async throws -> [UUID: [OpenHABItem]] {
+    static func loadItemsForHomes(_ homes: [UUID]) async throws -> [UUID: [OpenHABItem]] {
         await withThrowingTaskGroup { @Sendable group in
-            for homeId in await Preferences.storedHomes.keys {
+            for homeId in homes {
                 group.addTask {
                     // TODO: consider the possibility that two local connections might be the same
-                    guard let items = await OpenHABItemCache.getItems(homeId: homeId) else {
+                    guard let items = await loadItems(homeId: homeId) else {
                         logger.error("Item search for home with id \(homeId) failed")
                         return (id: homeId, items: [] as [OpenHABItem])
                     }
@@ -66,152 +57,102 @@ public actor OpenHABItemCache {
         }
     }
 
-    static func getItems(homeId: UUID) async -> [OpenHABItem]? {
-        if await homeId == Preferences.currentHomePreferences.id {
-            return try? await NetworkTracker.shared.getItems()
-        } else {
-            guard let homePreferences = await Preferences.storedHomes[homeId] else {
-                Logger(subsystem: "org.openhab.app.watchkitapp", category: "OpenHABItemCache")
-                    .error("No home for id \(homeId) found")
-                return nil
-            }
-            return await performWithTemporaryNetworkTracker(for: homePreferences) { networkTracker in
-                try? await networkTracker.getItems()
-            }
+    static func loadItems(homeId: UUID) async -> [OpenHABItem]? {
+        guard let networkTracker = await OpenHABItemCache.assureNetworkTracker(homeId: homeId) else {
+            logger.error("Home \(homeId) not reachable")
+            return nil
         }
+        return try? await networkTracker.getItems()
     }
 
-    static func performWithTemporaryNetworkTracker<T: Sendable>(for home: HomePreferences,
-                                                                actions: (_ networkTracker: NetworkTracker) async throws -> T) async rethrows -> T {
-        let networkTracker = NetworkTracker()
-        await networkTracker.startTracking(connectionConfigurations: [home.remoteConnectionConfig, home.localConnectionConfig])
-        // TODO: I would love to use defer here to make sure the network tracker stops, but stopTracking() is async and not allowed in defer.
-        let result: T
+    static func assureNetworkTracker(homeId: UUID) async -> NetworkTracker? {
+        if networkTrackers[homeId] == nil, let homePreferences = Preferences.storedHomes[homeId] {
+            let tracker = NetworkTracker()
+            networkTrackers[homeId] = tracker
+            await tracker.startTracking(connectionConfigurations: [homePreferences.localConnectionConfig, homePreferences.remoteConnectionConfig])
+        }
+        // TODO: do we need to make sure / wait that the connection is live?
+        return networkTrackers[homeId]
+    }
+
+    public func getAllCachedItems() async -> [UUID: [OpenHABItem]] {
+        await reloadCacheIfNeeded(homes: Preferences.listStoredHomes())
+        return items
+    }
+
+    public func getCachedItem(name: String, home: UUID) async -> [OpenHABItem]? {
+        await reloadCacheIfNeeded(homes: [home])
+        return items[home]?.filter { $0.name == name }
+    }
+
+    public func sendCommand(to item: OpenHABItem, home: UUID, command: String) async {
+        guard let networkTracker = await OpenHABItemCache.assureNetworkTracker(homeId: home) else {
+            logger.error("Home \(home) not reachable")
+            return
+        }
+
         do {
-            result = try await actions(networkTracker)
-        } catch {
-            await networkTracker.stopTracking()
-            throw error
-        }
-        await networkTracker.stopTracking()
-        return result
-    }
-
-    public func waitUntilReady() async {
-        await setupTask.value
-    }
-
-    public func setup() async {
-        let connection1: ConnectionConfiguration = await Preferences.currentHomePreferences.localConnectionConfig
-        let connection2: ConnectionConfiguration = await Preferences.currentHomePreferences.remoteConnectionConfig
-        logger.info("Local: \(connection1.url), Remote: \(connection2.url)")
-        await NetworkTracker.shared.startTracking(connectionConfigurations: [connection1, connection2])
-    }
-
-    public func getItemNames(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
-        logger.info("getItemNames")
-        guard let items else {
-            return await reload(searchTerm: searchTerm, types: types)
-        }
-
-        return items.flatMap { (_, items: [OpenHABItem]) in items }
-            .filtered(by: searchTerm, for: types)
-            .sorted(by: \.name)
-            .map(\.name)
-    }
-
-    public func getItem(name: String) async -> OpenHABItem? {
-        logger.info("getItem")
-        let now = Date()
-
-        if items == nil || now.timeIntervalSince(lastLoad) > ttl {
-            return await reload(name: name)
-        }
-        return getItem(name)
-    }
-
-    func getItem(_ name: String) -> OpenHABItem? {
-        // TODO: consider associated home
-        items?.flatMap { (_: UUID, items: [OpenHABItem]) in items }
-            .first { $0.name == name }
-    }
-
-    public func sendCommand(_ item: OpenHABItem, commandToSend command: String) async {
-        do {
-            try await sendCommand(to: item, command: command)
+            try await networkTracker.send(to: item, command: command)
         } catch {
             logger.info("Could not send command: \(error.localizedDescription)")
         }
     }
 
-    func sendCommand(to item: OpenHABItem, home: UUID? = nil, command: String) async throws {
-        if let home, await home != Preferences.currentHomePreferences.id {
-            guard let homeConfig = await Preferences.storedHomes[home] else { return } // TODO: log warning (or throw?)
-            try await OpenHABItemCache.performWithTemporaryNetworkTracker(for: homeConfig) { networkTracker in
-                try await networkTracker.send(to: item, command: command)
-            }
-        } else {
-            try await NetworkTracker.shared.send(to: item, command: command)
+    public func sendState(_ item: OpenHABItem, home: UUID, state: String) async {
+        guard let networkTracker = await OpenHABItemCache.assureNetworkTracker(homeId: home) else {
+            logger.error("Home \(home) not reachable")
+            return
         }
-    }
 
-    public func sendState(_ item: OpenHABItem, stateToSend state: String) async {
         do {
-            try await sendState(for: item, state: state)
+            try await networkTracker.updateState(item: item, state: state)
         } catch {
             logger.info("Could not send state: \(error.localizedDescription)")
         }
     }
 
-    func sendState(for item: OpenHABItem, home: UUID? = nil, state: String) async throws {
-        if let home, await home != Preferences.currentHomePreferences.id {
-            guard let homeConfig = await Preferences.storedHomes[home] else { return } // TODO: log warning (or throw?)
-            try await OpenHABItemCache.performWithTemporaryNetworkTracker(for: homeConfig) { networkTracker in
-                try await networkTracker.updateState(item: item, state: state)
-            }
-        } else {
-            try await NetworkTracker.shared.updateState(item: item, state: state)
+    public func reloadCacheIfNeeded(homes: [UUID]) async {
+        let homesNeedingReload = homes.filter { Date.now.timeIntervalSince(lastLoad[$0] ?? Date.distantPast) > ttl }
+        await forceCacheReload(homes: homesNeedingReload)
+    }
+
+    public func forceCacheReload(homes: [UUID]) async {
+        logger.info("reload items")
+        do {
+            let loadedItems = try await OpenHABItemCache.loadNonGroupItemsForHomes(homes)
+            homes.forEach { items[$0] = loadedItems[$0] }
+            let now = Date.now
+            homes.forEach { lastLoad[$0] = now }
+            let itemCounts = items.map { ($0.key, $0.value.count) }
+            logger.info("Loaded \(itemCounts) items to cache")
+        } catch {
+            logger.error("Could not reload \(error.localizedDescription)")
         }
     }
 
-    public func reload(searchTerm: String?, types: [OpenHABItem.ItemType]?) async -> [String] {
-        logger.info("OpenHABItemCache Loading items ")
+    public func forceCacheReload() async {
+        let homes = Preferences.listStoredHomes()
+        // some house keeping
+        let networkTrackersToRemove = OpenHABItemCache.networkTrackers.filter { !homes.contains($0.key) }
+        for networkTracker in networkTrackersToRemove {
+            await networkTracker.value.stopTracking()
+            OpenHABItemCache.networkTrackers.removeValue(forKey: networkTracker.key)
+        }
+        items = [:]
+        lastLoad = [:]
+        await forceCacheReload(homes: homes)
+    }
 
-        do {
-            items = try await OpenHABItemCache.getNonGroupItemsForAllHomes()
-            // swiftformat:disable next redundantSelf
-            lastLoad = Date()
-            logger.info("Loaded \(self.items?.count ?? 0) items to cache")
-            return items?.flatMap { (_: UUID, items: [OpenHABItem]) in
-                items
-            }
+    func matchingItemNames(_ itemsList: [OpenHABItem], searchTerm: String? = nil, types: [OpenHABItem.ItemType]? = nil) -> [String] {
+        itemsList
             .filtered(by: searchTerm, for: types)
-            .sorted(by: \.name)
-            .map(\.name) ?? []
-        } catch {
-            logger.error("Could not reload \(error.localizedDescription)")
-            return []
-        }
-    }
-
-    public func reload(name: String) async -> OpenHABItem? {
-        do {
-            items = try await OpenHABItemCache.getNonGroupItemsForAllHomes()
-            return items?.flatMap { (_: UUID, items: [OpenHABItem]) in
-                items
-            }
-            .first { $0.name == name }
-        } catch {
-            logger.error("Could not reload \(error.localizedDescription)")
-            return nil
-        }
+            .map(\.name)
+            .sorted()
     }
 }
 
-extension OpenHABItemCache: ItemCacheProtocol {}
-
-private extension [OpenHABItem] {
-    func filtered(by searchTerm: String?, for types: [OpenHABItem.ItemType]?) -> [OpenHABItem] {
+public extension [OpenHABItem] {
+    func filtered(by searchTerm: String? = nil, for types: [OpenHABItem.ItemType]? = nil) -> [OpenHABItem] {
         // TODO: maybe allow home name for filtering and fuzzier search
         filter {
             (searchTerm == nil || $0.name.contains(searchTerm.orEmpty)) &&

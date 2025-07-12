@@ -25,9 +25,9 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     }
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
-    private let itemCache: any ItemCacheProtocol
+    private let itemCache: OpenHABItemCache
 
-    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
+    init(itemCache: OpenHABItemCache = OpenHABItemCache.instance) {
         self.itemCache = itemCache
     }
 
