@@ -164,6 +164,7 @@
 		DAEA21E02DBF483E00D54342 /* GenericRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
+		DAEE35072E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEE35062E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift */; };
 		DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */; };
 		DAF0A28D2C56EF8900A14A6A /* SetpointCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A28C2C56EF8900A14A6A /* SetpointCell.swift */; };
 		DAF0A28F2C56F1EE00A14A6A /* ColorPickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A28E2C56F1EE00A14A6A /* ColorPickerCell.swift */; };
@@ -502,6 +503,7 @@
 		DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericRowView.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
+		DAEE35062E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTemperaturePickerRowView.swift; sourceTree = "<group>"; };
 		DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollershutterCell.swift; sourceTree = "<group>"; };
 		DAF0A28C2C56EF8900A14A6A /* SetpointCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetpointCell.swift; sourceTree = "<group>"; };
 		DAF0A28E2C56F1EE00A14A6A /* ColorPickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerCell.swift; sourceTree = "<group>"; };
@@ -916,6 +918,7 @@
 				DAEA21DD2DBF481300D54342 /* TextRowView.swift */,
 				DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */,
 				DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */,
+				DAEE35062E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift */,
 			);
 			path = Rows;
 			sourceTree = "<group>";
@@ -1701,6 +1704,7 @@
 				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
 				DA35E2B02E1EDB86003987BB /* SetpointRowView.swift in Sources */,
 				DA35E2CB2E1F93AD003987BB /* ImageView.swift in Sources */,
+				DAEE35072E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
 				2F6412EE2CE494A80039FB28 /* DatePickerUITableViewCell.swift in Sources */,

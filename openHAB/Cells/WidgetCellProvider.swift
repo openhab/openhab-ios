@@ -48,7 +48,7 @@ enum WidgetCellFactory {
         case .video: VideoCellProvider()
         case .webview: WebViewCellProvider()
         case .mapview: MapViewCellProvider()
-        case .group, .text, .defaultWidget, .unknown:
+        case .group, .text, .defaultWidget, .colortemperaturepicker, .unknown:
             GenericCellProvider()
         }
     }

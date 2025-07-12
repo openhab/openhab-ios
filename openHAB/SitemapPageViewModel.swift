@@ -74,6 +74,10 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
+    deinit {
+        pageHandlingTask?.cancel()
+    }
+
     func loadSettings() {
         defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
     }
@@ -238,10 +242,6 @@ class SitemapPageViewModel: ObservableObject {
         defaultSitemap = name
         pageId = path ?? ""
         await startPageHandling()
-    }
-
-    deinit {
-        pageHandlingTask?.cancel()
     }
 
     private func setupActiveConnectionObserver() {

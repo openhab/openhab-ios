@@ -58,6 +58,8 @@ enum RowViewFactory {
             WidgetWebViewContainer(widget: widget)
         case .mapview:
             MapRowView(widget: widget)
+        case .colortemperaturepicker:
+            ColorTemperaturePickerRowView(widget: widget)
         case .group, .defaultWidget, .unknown:
             GenericRowView(widget: widget)
         }

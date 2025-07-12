@@ -53,6 +53,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case text = "Text"
         case video = "Video"
         case webview = "Webview"
+        case colortemperaturepicker = "Colortemperaturepicker"
         case unknown = "Unknown"
     }
 
