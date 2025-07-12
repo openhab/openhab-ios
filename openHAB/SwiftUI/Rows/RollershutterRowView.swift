@@ -15,7 +15,7 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-struct WidgetRollershutterView: View {
+struct RollershutterRowView: View {
     @ObservedObject var widget: OpenHABWidget
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetRollershutterView")
@@ -71,5 +71,5 @@ struct WidgetRollershutterView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[5]
-    WidgetRollershutterView(widget: widget)
+    RollershutterRowView(widget: widget)
 }

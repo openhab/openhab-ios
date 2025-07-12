@@ -9,15 +9,16 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import AVKit
 import CommonUI
-import Kingfisher
 import OpenHABCore
 import SwiftUI
 
-struct WidgetImageView: View {
+struct VideoRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @State private var player: AVPlayer?
 
-    private var imageURL: URL? {
+    private var videoURL: URL? {
         guard !widget.url.isEmpty else { return nil }
         return URL(string: widget.url)
     }
@@ -29,27 +30,22 @@ struct WidgetImageView: View {
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            if let imageURL {
-                KFImage(imageURL)
-                    .placeholder {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 200)
-                            .overlay(
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            )
-                    }
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxHeight: 300)
+            if let videoURL {
+                VideoPlayer(player: player)
+                    .frame(height: 200)
                     .cornerRadius(8)
+                    .onAppear {
+                        player = AVPlayer(url: videoURL)
+                    }
+                    .onDisappear {
+                        player?.pause()
+                    }
             } else {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 200)
                     .overlay(
-                        Text("No Image URL")
+                        Text("No Video URL")
                             .foregroundColor(.secondary)
                     )
                     .cornerRadius(8)

@@ -24,7 +24,7 @@ struct WidgetWebViewContainer: View {
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            WidgetWebView(widget: widget)
+            WebRowView(widget: widget)
                 .frame(height: 300)
                 .cornerRadius(8)
 
@@ -37,7 +37,7 @@ struct WidgetWebViewContainer: View {
     }
 }
 
-struct WidgetWebView: UIViewRepresentable {
+struct WebRowView: UIViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate {
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
             print("WebView failed to load: \(error.localizedDescription)")

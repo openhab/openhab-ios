@@ -64,6 +64,16 @@ class SitemapPageViewModel: ObservableObject {
         setupActiveConnectionObserver()
     }
 
+    init(pageUrl: String, title: String) {
+        loadSettings()
+        setupActiveConnectionObserver()
+        // Set the pageId from the URL for navigation
+        if let urlComponents = URLComponents(string: pageUrl),
+           let pageIdValue = urlComponents.queryItems?.first(where: { $0.name == "sitemap" })?.value {
+            pageId = pageIdValue
+        }
+    }
+
     func loadSettings() {
         defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
     }

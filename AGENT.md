@@ -22,3 +22,4 @@
 - Use SFSafeSymbols for SF Symbols, avoid force unwrapping, prefer optionals
 - TableViewCell pattern: GenericUITableViewCell subclasses for sitemap widgets
 - Error handling: Result types in OpenHABCore, UIKit error alerts in main app
+- Avoid trailing closure syntax when passing multiple closures (use parentheses for all closures to prevent multiple_closures_with_trailing_closure warnings)

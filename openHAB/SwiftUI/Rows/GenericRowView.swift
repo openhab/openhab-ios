@@ -12,7 +12,7 @@
 import OpenHABCore
 import SwiftUI
 
-struct WidgetGenericView: View {
+struct GenericRowView: View {
     @ObservedObject var widget: OpenHABWidget
     var body: some View {
         HStack {

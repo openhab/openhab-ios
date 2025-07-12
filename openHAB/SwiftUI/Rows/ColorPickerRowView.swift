@@ -14,7 +14,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct WidgetColorPickerView: View {
+struct ColorPickerRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedColor: Color = .white
 

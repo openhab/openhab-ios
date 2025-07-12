@@ -15,7 +15,7 @@ import MapKit
 import OpenHABCore
 import SwiftUI
 
-struct WidgetMapView: View {
+struct MapRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),

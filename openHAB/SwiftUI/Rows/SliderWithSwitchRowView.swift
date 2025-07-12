@@ -14,7 +14,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct WidgetSliderWithSwitchView: View {
+struct SliderWithSwitchRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var sliderValue: Double = 0
 

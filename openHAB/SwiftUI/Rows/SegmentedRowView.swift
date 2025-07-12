@@ -14,7 +14,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct WidgetSegmentedView: View {
+struct SegmentedRowView: View {
     @ObservedObject var widget: OpenHABWidget
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSegmentedView")
@@ -61,5 +61,5 @@ struct WidgetSegmentedView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[4]
-    WidgetSegmentedView(widget: widget)
+    SegmentedRowView(widget: widget)
 }

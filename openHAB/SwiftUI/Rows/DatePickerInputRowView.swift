@@ -14,7 +14,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct WidgetDatePickerInputView: View {
+struct DatePickerInputRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedDate = Date()
 

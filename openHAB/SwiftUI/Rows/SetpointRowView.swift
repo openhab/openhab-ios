@@ -15,7 +15,7 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
-struct WidgetSetpointView: View {
+struct SetpointRowView: View {
     @ObservedObject var widget: OpenHABWidget
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSetpointView")
@@ -116,5 +116,5 @@ struct WidgetSetpointView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
-    WidgetSetpointView(widget: widget)
+    SetpointRowView(widget: widget)
 }

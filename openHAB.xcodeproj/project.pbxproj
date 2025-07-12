@@ -88,18 +88,18 @@
 		DA2E0B0E23DCC153009B0A99 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0D23DCC152009B0A99 /* MapView.swift */; };
 		DA2E0B1023DCC439009B0A99 /* MapViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */; };
 		DA32D1B42C8C98C40018D974 /* IconWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32D1B32C8C98C40018D974 /* IconWithAction.swift */; };
-		DA35E2B02E1EDB86003987BB /* WidgetSetpointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */; };
-		DA35E2BD2E1EEA9D003987BB /* WidgetMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B52E1EEA9D003987BB /* WidgetMapView.swift */; };
-		DA35E2BE2E1EEA9D003987BB /* WidgetDatePickerInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B32E1EEA9D003987BB /* WidgetDatePickerInputView.swift */; };
-		DA35E2BF2E1EEA9D003987BB /* WidgetWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */; };
-		DA35E2C02E1EEA9D003987BB /* WidgetColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B22E1EEA9D003987BB /* WidgetColorPickerView.swift */; };
-		DA35E2C12E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B92E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift */; };
-		DA35E2C22E1EEA9D003987BB /* WidgetTextInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BA2E1EEA9D003987BB /* WidgetTextInputView.swift */; };
-		DA35E2C32E1EEA9D003987BB /* WidgetImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B42E1EEA9D003987BB /* WidgetImageView.swift */; };
-		DA35E2C42E1EEA9D003987BB /* WidgetSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B82E1EEA9D003987BB /* WidgetSelectionView.swift */; };
-		DA35E2C52E1EEA9D003987BB /* WidgetRollershutterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B62E1EEA9D003987BB /* WidgetRollershutterView.swift */; };
-		DA35E2C62E1EEA9D003987BB /* WidgetSegmentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */; };
-		DA35E2C72E1EEA9D003987BB /* WidgetVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */; };
+		DA35E2B02E1EDB86003987BB /* SetpointRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2AF2E1EDB86003987BB /* SetpointRowView.swift */; };
+		DA35E2BD2E1EEA9D003987BB /* MapRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B52E1EEA9D003987BB /* MapRowView.swift */; };
+		DA35E2BE2E1EEA9D003987BB /* DatePickerInputRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B32E1EEA9D003987BB /* DatePickerInputRowView.swift */; };
+		DA35E2BF2E1EEA9D003987BB /* WebRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */; };
+		DA35E2C02E1EEA9D003987BB /* ColorPickerRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B22E1EEA9D003987BB /* ColorPickerRowView.swift */; };
+		DA35E2C12E1EEA9D003987BB /* SliderWithSwitchRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B92E1EEA9D003987BB /* SliderWithSwitchRowView.swift */; };
+		DA35E2C22E1EEA9D003987BB /* TextInputRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BA2E1EEA9D003987BB /* TextInputRowView.swift */; };
+		DA35E2C32E1EEA9D003987BB /* ImageRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B42E1EEA9D003987BB /* ImageRowView.swift */; };
+		DA35E2C42E1EEA9D003987BB /* SelectionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B82E1EEA9D003987BB /* SelectionRowView.swift */; };
+		DA35E2C52E1EEA9D003987BB /* RollershutterRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B62E1EEA9D003987BB /* RollershutterRowView.swift */; };
+		DA35E2C62E1EEA9D003987BB /* SegmentedRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B72E1EEA9D003987BB /* SegmentedRowView.swift */; };
+		DA35E2C72E1EEA9D003987BB /* VideoRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */; };
 		DA35E2CB2E1F93AD003987BB /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2CA2E1F93AD003987BB /* ImageView.swift */; };
 		DA35E2CD2E1F96CA003987BB /* WidgetIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */; };
 		DA4642322D7EE6CA006C3908 /* LoggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4642312D7EE6CA006C3908 /* LoggerView.swift */; };
@@ -157,11 +157,11 @@
 		DAD0857B2AE4782F001D36BE /* OpenHABWatchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */; };
 		DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */; };
 		DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */; };
-		DAEA21D82DBF472D00D54342 /* WidgetViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D72DBF472D00D54342 /* WidgetViewFactory.swift */; };
-		DAEA21DA2DBF477E00D54342 /* WidgetSwitchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D92DBF477E00D54342 /* WidgetSwitchView.swift */; };
-		DAEA21DC2DBF47DA00D54342 /* WidgetSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DB2DBF47DA00D54342 /* WidgetSliderView.swift */; };
-		DAEA21DE2DBF481300D54342 /* WidgetTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DD2DBF481300D54342 /* WidgetTextView.swift */; };
-		DAEA21E02DBF483E00D54342 /* WidgetGenericView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DF2DBF483E00D54342 /* WidgetGenericView.swift */; };
+		DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */; };
+		DAEA21DA2DBF477E00D54342 /* SwitchRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */; };
+		DAEA21DC2DBF47DA00D54342 /* SliderRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */; };
+		DAEA21DE2DBF481300D54342 /* TextRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DD2DBF481300D54342 /* TextRowView.swift */; };
+		DAEA21E02DBF483E00D54342 /* GenericRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */; };
 		DAEAA89D21E6B06400267EA3 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89C21E6B06300267EA3 /* ReusableView.swift */; };
 		DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAA89E21E6B16600267EA3 /* UITableView.swift */; };
 		DAF0A28B2C56E3A300A14A6A /* RollershutterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */; };
@@ -427,18 +427,18 @@
 		DA2E0B0D23DCC152009B0A99 /* MapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		DA2E0B0F23DCC439009B0A99 /* MapViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewRow.swift; sourceTree = "<group>"; };
 		DA32D1B32C8C98C40018D974 /* IconWithAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconWithAction.swift; sourceTree = "<group>"; };
-		DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSetpointView.swift; sourceTree = "<group>"; };
-		DA35E2B22E1EEA9D003987BB /* WidgetColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetColorPickerView.swift; sourceTree = "<group>"; };
-		DA35E2B32E1EEA9D003987BB /* WidgetDatePickerInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDatePickerInputView.swift; sourceTree = "<group>"; };
-		DA35E2B42E1EEA9D003987BB /* WidgetImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetImageView.swift; sourceTree = "<group>"; };
-		DA35E2B52E1EEA9D003987BB /* WidgetMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetMapView.swift; sourceTree = "<group>"; };
-		DA35E2B62E1EEA9D003987BB /* WidgetRollershutterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRollershutterView.swift; sourceTree = "<group>"; };
-		DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSegmentedView.swift; sourceTree = "<group>"; };
-		DA35E2B82E1EEA9D003987BB /* WidgetSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSelectionView.swift; sourceTree = "<group>"; };
-		DA35E2B92E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSliderWithSwitchView.swift; sourceTree = "<group>"; };
-		DA35E2BA2E1EEA9D003987BB /* WidgetTextInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTextInputView.swift; sourceTree = "<group>"; };
-		DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetVideoView.swift; sourceTree = "<group>"; };
-		DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetWebView.swift; sourceTree = "<group>"; };
+		DA35E2AF2E1EDB86003987BB /* SetpointRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetpointRowView.swift; sourceTree = "<group>"; };
+		DA35E2B22E1EEA9D003987BB /* ColorPickerRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerRowView.swift; sourceTree = "<group>"; };
+		DA35E2B32E1EEA9D003987BB /* DatePickerInputRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerInputRowView.swift; sourceTree = "<group>"; };
+		DA35E2B42E1EEA9D003987BB /* ImageRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRowView.swift; sourceTree = "<group>"; };
+		DA35E2B52E1EEA9D003987BB /* MapRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRowView.swift; sourceTree = "<group>"; };
+		DA35E2B62E1EEA9D003987BB /* RollershutterRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollershutterRowView.swift; sourceTree = "<group>"; };
+		DA35E2B72E1EEA9D003987BB /* SegmentedRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedRowView.swift; sourceTree = "<group>"; };
+		DA35E2B82E1EEA9D003987BB /* SelectionRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionRowView.swift; sourceTree = "<group>"; };
+		DA35E2B92E1EEA9D003987BB /* SliderWithSwitchRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchRowView.swift; sourceTree = "<group>"; };
+		DA35E2BA2E1EEA9D003987BB /* TextInputRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputRowView.swift; sourceTree = "<group>"; };
+		DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRowView.swift; sourceTree = "<group>"; };
+		DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRowView.swift; sourceTree = "<group>"; };
 		DA35E2CA2E1F93AD003987BB /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIconView.swift; sourceTree = "<group>"; };
 		DA4642312D7EE6CA006C3908 /* LoggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerView.swift; sourceTree = "<group>"; };
@@ -495,11 +495,11 @@
 		DAD488B3287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = Resources/nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		DAD488B4287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		DAEA21D72DBF472D00D54342 /* WidgetViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViewFactory.swift; sourceTree = "<group>"; };
-		DAEA21D92DBF477E00D54342 /* WidgetSwitchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSwitchView.swift; sourceTree = "<group>"; };
-		DAEA21DB2DBF47DA00D54342 /* WidgetSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSliderView.swift; sourceTree = "<group>"; };
-		DAEA21DD2DBF481300D54342 /* WidgetTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTextView.swift; sourceTree = "<group>"; };
-		DAEA21DF2DBF483E00D54342 /* WidgetGenericView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetGenericView.swift; sourceTree = "<group>"; };
+		DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowViewFactory.swift; sourceTree = "<group>"; };
+		DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchRowView.swift; sourceTree = "<group>"; };
+		DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderRowView.swift; sourceTree = "<group>"; };
+		DAEA21DD2DBF481300D54342 /* TextRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRowView.swift; sourceTree = "<group>"; };
+		DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericRowView.swift; sourceTree = "<group>"; };
 		DAEAA89C21E6B06300267EA3 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		DAEAA89E21E6B16600267EA3 /* UITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableView.swift; sourceTree = "<group>"; };
 		DAF0A28A2C56E3A300A14A6A /* RollershutterCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollershutterCell.swift; sourceTree = "<group>"; };
@@ -851,7 +851,7 @@
 			children = (
 				DA35E2CA2E1F93AD003987BB /* ImageView.swift */,
 				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
-				DAEA21D72DBF472D00D54342 /* WidgetViewFactory.swift */,
+				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
 				DAC949FF2E21A473007E67B7 /* Rows */,
 			);
 			path = SwiftUI;
@@ -897,25 +897,25 @@
 		DAC949FF2E21A473007E67B7 /* Rows */ = {
 			isa = PBXGroup;
 			children = (
-				DA35E2B22E1EEA9D003987BB /* WidgetColorPickerView.swift */,
-				DA35E2B32E1EEA9D003987BB /* WidgetDatePickerInputView.swift */,
+				DA35E2B22E1EEA9D003987BB /* ColorPickerRowView.swift */,
+				DA35E2B32E1EEA9D003987BB /* DatePickerInputRowView.swift */,
 				DAC949FD2E21A2D1007E67B7 /* WidgetFrameView.swift */,
-				DAEA21DF2DBF483E00D54342 /* WidgetGenericView.swift */,
+				DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */,
 				DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */,
-				DA35E2B42E1EEA9D003987BB /* WidgetImageView.swift */,
-				DA35E2B52E1EEA9D003987BB /* WidgetMapView.swift */,
-				DA35E2B62E1EEA9D003987BB /* WidgetRollershutterView.swift */,
+				DA35E2B42E1EEA9D003987BB /* ImageRowView.swift */,
+				DA35E2B52E1EEA9D003987BB /* MapRowView.swift */,
+				DA35E2B62E1EEA9D003987BB /* RollershutterRowView.swift */,
 				DA64ACA92DBEADB000294F60 /* WidgetRow.swift */,
-				DA35E2B72E1EEA9D003987BB /* WidgetSegmentedView.swift */,
-				DA35E2B82E1EEA9D003987BB /* WidgetSelectionView.swift */,
-				DA35E2AF2E1EDB86003987BB /* WidgetSetpointView.swift */,
-				DAEA21DB2DBF47DA00D54342 /* WidgetSliderView.swift */,
-				DA35E2B92E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift */,
-				DAEA21D92DBF477E00D54342 /* WidgetSwitchView.swift */,
-				DA35E2BA2E1EEA9D003987BB /* WidgetTextInputView.swift */,
-				DAEA21DD2DBF481300D54342 /* WidgetTextView.swift */,
-				DA35E2BB2E1EEA9D003987BB /* WidgetVideoView.swift */,
-				DA35E2BC2E1EEA9D003987BB /* WidgetWebView.swift */,
+				DA35E2B72E1EEA9D003987BB /* SegmentedRowView.swift */,
+				DA35E2B82E1EEA9D003987BB /* SelectionRowView.swift */,
+				DA35E2AF2E1EDB86003987BB /* SetpointRowView.swift */,
+				DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */,
+				DA35E2B92E1EEA9D003987BB /* SliderWithSwitchRowView.swift */,
+				DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */,
+				DA35E2BA2E1EEA9D003987BB /* TextInputRowView.swift */,
+				DAEA21DD2DBF481300D54342 /* TextRowView.swift */,
+				DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */,
+				DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */,
 			);
 			path = Rows;
 			sourceTree = "<group>";
@@ -1695,11 +1695,11 @@
 				DF4B84131886DAC400F34902 /* FrameUITableViewCell.swift in Sources */,
 				DF4B84161886EACA00F34902 /* GenericUITableViewCell.swift in Sources */,
 				935B484625342B8E00E44CF0 /* URL+Static.swift in Sources */,
-				DAEA21DA2DBF477E00D54342 /* WidgetSwitchView.swift in Sources */,
+				DAEA21DA2DBF477E00D54342 /* SwitchRowView.swift in Sources */,
 				B7D5ECE121499E55001B0EC6 /* MapViewTableViewCell.swift in Sources */,
-				DAEA21DC2DBF47DA00D54342 /* WidgetSliderView.swift in Sources */,
+				DAEA21DC2DBF47DA00D54342 /* SliderRowView.swift in Sources */,
 				DA77E19B2D886D9B007CFF0F /* SingleConnectionSettingsView.swift in Sources */,
-				DA35E2B02E1EDB86003987BB /* WidgetSetpointView.swift in Sources */,
+				DA35E2B02E1EDB86003987BB /* SetpointRowView.swift in Sources */,
 				DA35E2CB2E1F93AD003987BB /* ImageView.swift in Sources */,
 				DA6B2EF52C89F8F200DF77CF /* ColorPickerView.swift in Sources */,
 				DA4800142D836892009CF127 /* ConnectionSettingsView.swift in Sources */,
@@ -1712,25 +1712,25 @@
 				DA64ACA82DBEAD8300294F60 /* SitemapPageView.swift in Sources */,
 				DA4800212D839D3A009CF127 /* AnimatedSecureTextField.swift in Sources */,
 				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
-				DA35E2BD2E1EEA9D003987BB /* WidgetMapView.swift in Sources */,
-				DA35E2BE2E1EEA9D003987BB /* WidgetDatePickerInputView.swift in Sources */,
+				DA35E2BD2E1EEA9D003987BB /* MapRowView.swift in Sources */,
+				DA35E2BE2E1EEA9D003987BB /* DatePickerInputRowView.swift in Sources */,
 				DAC949FE2E21A2D1007E67B7 /* WidgetFrameView.swift in Sources */,
-				DA35E2BF2E1EEA9D003987BB /* WidgetWebView.swift in Sources */,
-				DA35E2C02E1EEA9D003987BB /* WidgetColorPickerView.swift in Sources */,
-				DA35E2C12E1EEA9D003987BB /* WidgetSliderWithSwitchView.swift in Sources */,
-				DA35E2C22E1EEA9D003987BB /* WidgetTextInputView.swift in Sources */,
-				DA35E2C32E1EEA9D003987BB /* WidgetImageView.swift in Sources */,
-				DA35E2C42E1EEA9D003987BB /* WidgetSelectionView.swift in Sources */,
-				DA35E2C52E1EEA9D003987BB /* WidgetRollershutterView.swift in Sources */,
-				DA35E2C62E1EEA9D003987BB /* WidgetSegmentedView.swift in Sources */,
-				DA35E2C72E1EEA9D003987BB /* WidgetVideoView.swift in Sources */,
+				DA35E2BF2E1EEA9D003987BB /* WebRowView.swift in Sources */,
+				DA35E2C02E1EEA9D003987BB /* ColorPickerRowView.swift in Sources */,
+				DA35E2C12E1EEA9D003987BB /* SliderWithSwitchRowView.swift in Sources */,
+				DA35E2C22E1EEA9D003987BB /* TextInputRowView.swift in Sources */,
+				DA35E2C32E1EEA9D003987BB /* ImageRowView.swift in Sources */,
+				DA35E2C42E1EEA9D003987BB /* SelectionRowView.swift in Sources */,
+				DA35E2C52E1EEA9D003987BB /* RollershutterRowView.swift in Sources */,
+				DA35E2C62E1EEA9D003987BB /* SegmentedRowView.swift in Sources */,
+				DA35E2C72E1EEA9D003987BB /* VideoRowView.swift in Sources */,
 				DA35E2CD2E1F96CA003987BB /* WidgetIconView.swift in Sources */,
 				DAC65FC7236EDF3900F4501E /* SpinnerViewController.swift in Sources */,
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
 				DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */,
 				DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */,
-				DAEA21D82DBF472D00D54342 /* WidgetViewFactory.swift in Sources */,
+				DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */,
 				DA64ACAA2DBEADB000294F60 /* WidgetRow.swift in Sources */,
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
@@ -1744,11 +1744,11 @@
 				DA2AEBA02D92FB6500897D80 /* NoIconDisplayableCell.swift in Sources */,
 				DA2AEB702D92CF3E00897D80 /* UITableViewCellExtension.swift in Sources */,
 				DA4800162D836EF0009CF127 /* MainUISettingsView.swift in Sources */,
-				DAEA21DE2DBF481300D54342 /* WidgetTextView.swift in Sources */,
+				DAEA21DE2DBF481300D54342 /* TextRowView.swift in Sources */,
 				DAEAA89F21E6B16600267EA3 /* UITableView.swift in Sources */,
 				2F55E7BB2DEE447700EC8350 /* SettingsView.swift in Sources */,
 				DA4800182D837221009CF127 /* AboutSettingsView.swift in Sources */,
-				DAEA21E02DBF483E00D54342 /* WidgetGenericView.swift in Sources */,
+				DAEA21E02DBF483E00D54342 /* GenericRowView.swift in Sources */,
 				653B54C2285E714900298ECD /* OpenHABViewController.swift in Sources */,
 				DA2AEB6E2D92BAD800897D80 /* PageLoader.swift in Sources */,
 				DFA16EC118898A8400EDB0BB /* SegmentedUITableViewCell.swift in Sources */,

@@ -12,54 +12,54 @@
 import OpenHABCore
 import SwiftUI
 
-enum WidgetViewFactory {
+enum RowViewFactory {
     @MainActor @ViewBuilder
     static func view(for widget: OpenHABWidget) -> some View {
         switch widget.type {
         case .switchWidget:
             if !widget.mappings.isEmpty {
-                WidgetSegmentedView(widget: widget)
+                SegmentedRowView(widget: widget)
             } else if widget.item?.isOfTypeOrGroupType(.switchItem) ?? false {
-                WidgetSwitchView(widget: widget)
+                SwitchRowView(widget: widget)
             } else if widget.item?.isOfTypeOrGroupType(.rollershutter) ?? false {
-                WidgetRollershutterView(widget: widget)
+                RollershutterRowView(widget: widget)
             } else if !widget.mappingsOrItemOptions.isEmpty {
-                WidgetSegmentedView(widget: widget)
+                SegmentedRowView(widget: widget)
             } else {
-                WidgetSwitchView(widget: widget)
+                SwitchRowView(widget: widget)
             }
         case .slider:
             if widget.switchSupport {
-                WidgetSliderWithSwitchView(widget: widget)
+                SliderWithSwitchRowView(widget: widget)
             } else {
-                WidgetSliderView(widget: widget)
+                SliderRowView(widget: widget)
             }
         case .input:
             if [.date, .time, .datetime].contains(widget.inputHint) {
-                WidgetDatePickerInputView(widget: widget)
+                DatePickerInputRowView(widget: widget)
             } else {
-                WidgetTextInputView(widget: widget)
+                TextInputRowView(widget: widget)
             }
         case .text:
-            WidgetTextView(widget: widget)
+            TextRowView(widget: widget)
         case .frame:
             WidgetFrameView(widget: widget)
         case .setpoint:
-            WidgetSetpointView(widget: widget)
+            SetpointRowView(widget: widget)
         case .selection:
-            WidgetSelectionView(widget: widget)
+            SelectionRowView(widget: widget)
         case .colorpicker:
-            WidgetColorPickerView(widget: widget)
+            ColorPickerRowView(widget: widget)
         case .image, .chart:
-            WidgetImageView(widget: widget)
+            ImageRowView(widget: widget)
         case .video:
-            WidgetVideoView(widget: widget)
+            VideoRowView(widget: widget)
         case .webview:
             WidgetWebViewContainer(widget: widget)
         case .mapview:
-            WidgetMapView(widget: widget)
+            MapRowView(widget: widget)
         case .group, .defaultWidget, .unknown:
-            WidgetGenericView(widget: widget)
+            GenericRowView(widget: widget)
         }
     }
 }

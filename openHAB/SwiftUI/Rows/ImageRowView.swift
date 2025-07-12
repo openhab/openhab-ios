@@ -10,18 +10,16 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import CommonUI
+import Kingfisher
 import OpenHABCore
-import os.log
 import SwiftUI
 
-struct WidgetSelectionView: View {
+struct ImageRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var selectedIndex = 0
 
-    private let logger = Logger(subsystem: "org.openhab", category: "WidgetSelectionView")
-
-    private var mappings: [OpenHABWidgetMapping] {
-        widget.mappingsOrItemOptions
+    private var imageURL: URL? {
+        guard !widget.url.isEmpty else { return nil }
+        return URL(string: widget.url)
     }
 
     var body: some View {
@@ -31,19 +29,30 @@ struct WidgetSelectionView: View {
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            if !mappings.isEmpty {
-                Picker("Selection", selection: $selectedIndex) {
-                    ForEach(mappings.indices, id: \.self) { index in
-                        Text(mappings[index].label)
-                            .tag(index)
+            if let imageURL {
+                KFImage(imageURL)
+                    .placeholder {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 200)
+                            .overlay(
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            )
                     }
-                }
-                .pickerStyle(.menu)
-                .onChange(of: selectedIndex) { newIndex in
-                    guard let mapping = mappings[safe: newIndex] else { return }
-                    logger.info("Selection changed to: \(mapping.label)")
-                    widget.sendCommand(mapping.command)
-                }
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: 300)
+                    .cornerRadius(8)
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 200)
+                    .overlay(
+                        Text("No Image URL")
+                            .foregroundColor(.secondary)
+                    )
+                    .cornerRadius(8)
             }
 
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
@@ -51,9 +60,6 @@ struct WidgetSelectionView: View {
                     .font(.caption)
                     .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
-        }
-        .onAppear {
-            selectedIndex = Int(widget.mappingIndex(byCommand: widget.item?.state) ?? 0)
         }
     }
 }

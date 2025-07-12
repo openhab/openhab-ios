@@ -12,12 +12,8 @@
 import OpenHABCore
 import SwiftUI
 
-struct WidgetSliderView: View {
+struct TextRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    // Example: assuming widget has a numeric value as text
-    var currentValue: Double {
-        Double(widget.labelValue ?? "") ?? 0.0
-    }
 
     var body: some View {
         HStack {
@@ -28,20 +24,19 @@ struct WidgetSliderView: View {
 
             Text(widget.labelText ?? "")
                 .font(.headline)
+
             Spacer()
 
-            Slider(value: .constant(currentValue), in: 0 ... 100)
-                .disabled(true) // unless you want editable
             if let value = widget.labelValue {
                 Text(value)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
             }
         }
-        .padding()
     }
 }
 
-// #Preview {
-//    WidgetSliderView()
-// }
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
+    TextRowView(widget: widget)
+}

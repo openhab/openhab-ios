@@ -14,7 +14,7 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct WidgetSwitchView: View {
+struct SwitchRowView: View {
     @ObservedObject var widget: OpenHABWidget
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
@@ -72,5 +72,5 @@ struct WidgetSwitchView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[2]
-    WidgetSwitchView(widget: widget)
+    SwitchRowView(widget: widget)
 }

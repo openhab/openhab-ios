@@ -9,18 +9,19 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import AVKit
 import CommonUI
 import OpenHABCore
+import os.log
 import SwiftUI
 
-struct WidgetVideoView: View {
+struct SelectionRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var player: AVPlayer?
+    @State private var selectedIndex = 0
 
-    private var videoURL: URL? {
-        guard !widget.url.isEmpty else { return nil }
-        return URL(string: widget.url)
+    private let logger = Logger(subsystem: "org.openhab", category: "WidgetSelectionView")
+
+    private var mappings: [OpenHABWidgetMapping] {
+        widget.mappingsOrItemOptions
     }
 
     var body: some View {
@@ -30,25 +31,19 @@ struct WidgetVideoView: View {
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            if let videoURL {
-                VideoPlayer(player: player)
-                    .frame(height: 200)
-                    .cornerRadius(8)
-                    .onAppear {
-                        player = AVPlayer(url: videoURL)
+            if !mappings.isEmpty {
+                Picker("Selection", selection: $selectedIndex) {
+                    ForEach(mappings.indices, id: \.self) { index in
+                        Text(mappings[index].label)
+                            .tag(index)
                     }
-                    .onDisappear {
-                        player?.pause()
-                    }
-            } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 200)
-                    .overlay(
-                        Text("No Video URL")
-                            .foregroundColor(.secondary)
-                    )
-                    .cornerRadius(8)
+                }
+                .pickerStyle(.menu)
+                .onChange(of: selectedIndex) { newIndex in
+                    guard let mapping = mappings[safe: newIndex] else { return }
+                    logger.info("Selection changed to: \(mapping.label)")
+                    widget.sendCommand(mapping.command)
+                }
             }
 
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
@@ -56,6 +51,9 @@ struct WidgetVideoView: View {
                     .font(.caption)
                     .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
+        }
+        .onAppear {
+            selectedIndex = Int(widget.mappingIndex(byCommand: widget.item?.state) ?? 0)
         }
     }
 }

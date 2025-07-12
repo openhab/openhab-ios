@@ -14,13 +14,40 @@ import SwiftUI
 
 struct SitemapPageView: View {
     @StateObject public var viewModel = SitemapPageViewModel()
+    @State private var showSelectionSheet = false
+    @State private var showInputAlert = false
+    @State private var selectedWidget: OpenHABWidget?
 
     var body: some View {
         List(viewModel.relevantWidgets) { widget in
-            WidgetViewFactory.view(for: widget)
-                .onTapGesture {
-                    viewModel.widgetTapped(widget)
+            Group {
+                if let linkedPage = widget.linkedPage {
+                    NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
+                        RowViewFactory.view(for: widget)
+                    }
+                } else if widget.type == .selection {
+                    Button {
+                        selectedWidget = widget
+                        showSelectionSheet = true
+                    } label: {
+                        RowViewFactory.view(for: widget)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                } else if widget.type == .input {
+                    Button {
+                        selectedWidget = widget
+                        showInputAlert = true
+                    } label: {
+                        RowViewFactory.view(for: widget)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    RowViewFactory.view(for: widget)
+                        .onTapGesture {
+                            viewModel.widgetTapped(widget)
+                        }
                 }
+            }
         }
         .navigationTitle(viewModel.pageTitle)
         .searchable(text: $viewModel.searchText)
@@ -32,6 +59,28 @@ struct SitemapPageView: View {
         }
         .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
             viewModel.handleActiveConnectionChange(activeConnection)
+        }
+        .sheet(isPresented: $showSelectionSheet) {
+            if let widget = selectedWidget {
+                SelectionView(
+                    mappings: widget.mappingsOrItemOptions,
+                    selectionItemState: widget.item?.state
+                ) { selectedMappingIndex in
+                    let selectedMapping = widget.mappingsOrItemOptions[selectedMappingIndex]
+                    viewModel.sendCommand(widget.item, commandToSend: selectedMapping.command)
+                    showSelectionSheet = false
+                }
+            }
+        }
+        .alert("Input", isPresented: $showInputAlert) {
+            if let widget = selectedWidget {
+                TextField("Enter value", text: .constant(widget.state))
+                Button("Cancel", role: .cancel) {}
+                Button("OK") {
+                    // Handle input submission
+                    showInputAlert = false
+                }
+            }
         }
         .alert("Error", isPresented: .constant(viewModel.error != nil), actions: {
             Button("OK", role: .cancel) {}
