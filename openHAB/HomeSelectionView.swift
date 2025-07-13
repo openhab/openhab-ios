@@ -94,6 +94,8 @@ struct HomeSelectionView: View {
                         rename(home: homeForAlert)
                         showingRenameHomeAlert.toggle()
                     }
+                } message: {
+                    Text("Renaming the home might cause external integrations like shortcuts to fail")
                 }
             }
             .alert("Delete home \(homeNameForAlert)?", isPresented: $showingDeleteHomeAlert) {
