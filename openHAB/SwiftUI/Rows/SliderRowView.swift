@@ -27,21 +27,19 @@ struct SliderRowView: View {
             }
 
             Text(widget.labelText ?? "")
-                .font(.headline)
             Spacer()
-
-            Slider(value: .constant(currentValue), in: 0 ... 100)
-                .disabled(true) // unless you want editable
             if let value = widget.labelValue {
                 Text(value)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
+            Slider(value: .constant(currentValue), in: 0 ... 100)
+                .disabled(true) // unless you want editable
         }
-        .padding()
     }
 }
 
-// #Preview {
-//    WidgetSliderView()
-// }
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
+    SliderRowView(widget: widget)
+}

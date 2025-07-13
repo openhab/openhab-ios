@@ -31,6 +31,7 @@ struct SitemapPageView: View {
                             RowViewFactory.view(for: widget)
                         }
                         .buttonStyle(.plain)
+                        .padding(.vertical, -6)
                         .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 24))
                     } else if widget.type == .selection {
                         Button {

@@ -390,7 +390,8 @@ extension OpenHABSitemapViewController {
         // on initial load ??? refreshControl?.endRefreshing()
 
         widgetTableView.reloadData()
-        parent?.navigationItem.title = currentPage?.title.components(separatedBy: "[")[0]
+        let pageTitle = currentPage?.title.components(separatedBy: "[")[0]
+        parent?.navigationItem.title = pageTitle?.isEmpty == false ? pageTitle : defaultSitemap.isEmpty ? "Sitemap" : defaultSitemap
     }
 
     // Select sitemap
@@ -484,9 +485,11 @@ extension OpenHABSitemapViewController {
             do {
                 // Initial page load
 
-                guard let configuration = NetworkTracker.shared.activeConnection?.configuration else {
-                    throw NetworkTrackerError.noActiveConnection
+                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+                    logger.error("Failed to establish connection within timeout")
+                    return
                 }
+                let configuration = activeConnection.configuration
 
                 if openAPIService == nil {
                     openAPIService = try OpenAPIService(connectionConfiguration: configuration)

@@ -39,41 +39,39 @@ struct SetpointRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                if IconView.shouldShowIcon(for: widget) {
-                    IconView(widget: widget)
-                        .frame(width: 24, height: 24)
+        HStack {
+            if IconView.shouldShowIcon(for: widget) {
+                IconView(widget: widget)
+                    .frame(width: 24, height: 24)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(widget.labelText ?? widget.label)
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+            }
+
+            Spacer()
+
+            HStack(spacing: 12) {
+                Button(action: decreaseValue) {
+                    Image(systemSymbol: .chevronDown)
+                        .font(.title2)
+                        .foregroundColor(.primary)
                 }
+                .buttonStyle(.plain)
+                .disabled(currentValue <= widget.minValue)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(widget.labelText ?? widget.label)
-                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                Text(formattedValue)
+                    .font(.caption.monospacedDigit())
+                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+
+                Button(action: increaseValue) {
+                    Image(systemSymbol: .chevronUp)
+                        .font(.title2)
+                        .foregroundColor(.primary)
                 }
-
-                Spacer()
-
-                HStack(spacing: 12) {
-                    Button(action: decreaseValue) {
-                        Image(systemSymbol: .chevronDown)
-                            .font(.title2)
-                            .foregroundColor(.primary)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(currentValue <= widget.minValue)
-
-                    Text(formattedValue)
-                        .font(.caption.monospacedDigit())
-                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-
-                    Button(action: increaseValue) {
-                        Image(systemSymbol: .chevronUp)
-                            .font(.title2)
-                            .foregroundColor(.primary)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(currentValue >= widget.maxValue)
-                }
+                .buttonStyle(.plain)
+                .disabled(currentValue >= widget.maxValue)
             }
         }
     }

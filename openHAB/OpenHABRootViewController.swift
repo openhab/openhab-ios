@@ -50,7 +50,7 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
     @objc dynamic required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Keep UIKit navigation bar visible for hamburger menu
@@ -86,6 +86,9 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
         navigationItem.hidesSearchBarWhenScrolling = false
     }
 
+    func getSitemapTitle() -> String {
+        viewModel.pageTitle
+    }
 
     func viewName() -> String { "sitemap" }
 
@@ -128,7 +131,7 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
-    private lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = HostingSitemapViewController()
+    lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = HostingSitemapViewController()
 
     private var activeConnection: ConnectionInfo?
 

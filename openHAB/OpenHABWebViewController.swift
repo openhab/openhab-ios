@@ -69,7 +69,7 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
-        parent?.navigationItem.title = "Main View"
+        updateNavigationTitle()
         NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
@@ -94,6 +94,7 @@ class OpenHABWebViewController: OpenHABViewController {
                     self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 case .connected:
                     self.hidePopupMessages()
+                    self.updateNavigationTitle()
                 default: break
                 }
             }
@@ -185,6 +186,15 @@ class OpenHABWebViewController: OpenHABViewController {
     func setHideNavBar(shouldHide: Bool) {
         hideNavBar = shouldHide
         navigationController?.setNavigationBarHidden(hideNavBar, animated: true)
+    }
+
+    private func updateNavigationTitle() {
+        if let rootController = parent as? OpenHABRootViewController,
+           let sitemapController = rootController.sitemapViewController as? HostingSitemapViewController {
+            parent?.navigationItem.title = sitemapController.getSitemapTitle()
+        } else {
+            parent?.navigationItem.title = "Main View"
+        }
     }
 
     // swiftformat:disable redundantSelf

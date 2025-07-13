@@ -56,7 +56,7 @@ class SitemapPageViewModel: ObservableObject {
     }
 
     var pageTitle: String {
-        currentPage?.title.components(separatedBy: "[")[0] ?? "Sitemap"
+        currentPage?.title ?? (defaultSitemap.isEmpty ? "Sitemap" : defaultSitemap)
     }
 
     var isLinked: Bool {
@@ -120,9 +120,11 @@ class SitemapPageViewModel: ObservableObject {
 //                    )
 //                }
 
-                guard let configuration = NetworkTracker.shared.activeConnection?.configuration else {
-                    throw NetworkTrackerError.noActiveConnection
+                guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
+                    logger.error("Failed to establish connection within timeout")
+                    return
                 }
+                let configuration = activeConnection.configuration
 
                 if openAPIService == nil {
                     openAPIService = try OpenAPIService(connectionConfiguration: configuration)
