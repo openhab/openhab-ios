@@ -63,23 +63,21 @@ class SitemapPageViewModel: ObservableObject {
         setupActiveConnectionObserver()
     }
 
-//
-//    init(pageUrl: String, title: String) {
-//        loadSettings()
-//        setupActiveConnectionObserver()
-//        // Set the pageId from the URL for navigation
-//        if let urlComponents = URLComponents(string: pageUrl),
-//           let pageIdValue = urlComponents.queryItems?.first(where: { $0.name == "sitemap" })?.value {
-//            pageId = pageIdValue
-//        }
-//    }
-
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
         setupActiveConnectionObserver()
-//        self.pageUrl = pageUrl
-//        self.pageTitle = title
-        self.pageId = pageId
+
+        // Extract pageId from URL if not provided
+        if pageId.isEmpty {
+            if let urlComponents = URLComponents(string: pageUrl),
+               let extractedPageId = urlComponents.queryItems?.first(where: { $0.name == "sitemap" })?.value {
+                self.pageId = extractedPageId
+            } else if let lastPathComponent = URL(string: pageUrl)?.lastPathComponent {
+                self.pageId = lastPathComponent
+            }
+        } else {
+            self.pageId = pageId
+        }
     }
 
     deinit {
