@@ -84,7 +84,7 @@ struct HomeSelectionView: View {
                     }
                 }
             }
-            .alert("Enter new name for home \(homeNameForAlert)", isPresented: $showingRenameHomeAlert) {
+            .alert("Enter new name for home \(homeNameForAlert)", isPresented: $showingRenameHomeAlert, actions: {
                 TextField("New name", text: $newHomeName)
                 HStack {
                     Button("Abort", role: .cancel) {
@@ -94,10 +94,10 @@ struct HomeSelectionView: View {
                         rename(home: homeForAlert)
                         showingRenameHomeAlert.toggle()
                     }
-                } message: {
-                    Text("Renaming the home might cause external integrations like shortcuts to fail")
                 }
-            }
+            }, message: {
+                Text("Warning: Renaming the home might cause external integrations like shortcuts to fail until reconfigured")
+            })
             .alert("Delete home \(homeNameForAlert)?", isPresented: $showingDeleteHomeAlert) {
                 HStack {
                     Button("Abort", role: .cancel) {
