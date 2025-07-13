@@ -148,7 +148,7 @@
 		DAC9395522B00E7600C5F423 /* XCTestCaseExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */; };
 		DAC949FA2E219F0D007E67B7 /* CommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = DAC949F92E219F0D007E67B7 /* CommonUI */; };
 		DAC949FC2E219F30007E67B7 /* CommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = DAC949FB2E219F30007E67B7 /* CommonUI */; };
-		DAC949FE2E21A2D1007E67B7 /* WidgetFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC949FD2E21A2D1007E67B7 /* WidgetFrameView.swift */; };
+		DAC949FE2E21A2D1007E67B7 /* FrameRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC949FD2E21A2D1007E67B7 /* FrameRowView.swift */; };
 		DAC9AF4924F966FA006DAE93 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4824F966FA006DAE93 /* LazyView.swift */; };
 		DACA368E2D7440B9003CD237 /* OpenHABWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */; };
 		DACE664A2C63B0760069E514 /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = DACE66492C63B0760069E514 /* OpenAPIURLSession */; };
@@ -482,7 +482,7 @@
 		DAC6608C236F771600F4501E /* PreferencesSwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSwiftUIView.swift; sourceTree = "<group>"; };
 		DAC9394322AD4A7A00C5F423 /* OpenHABWatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWatchTests.swift; sourceTree = "<group>"; };
 		DAC9395422B00E7600C5F423 /* XCTestCaseExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestCaseExtension.swift; sourceTree = "<group>"; };
-		DAC949FD2E21A2D1007E67B7 /* WidgetFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetFrameView.swift; sourceTree = "<group>"; };
+		DAC949FD2E21A2D1007E67B7 /* FrameRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameRowView.swift; sourceTree = "<group>"; };
 		DAC9AF4624F9669F006DAE93 /* OpenHABWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenHABWidgetExtension.swift; sourceTree = "<group>"; };
 		DAC9AF4824F966FA006DAE93 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
 		DACB636127D3FC6500041931 /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = error.png; sourceTree = "<group>"; };
@@ -916,7 +916,7 @@
 				DAEA21DD2DBF481300D54342 /* TextRowView.swift */,
 				DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */,
 				DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */,
-				DAC949FD2E21A2D1007E67B7 /* WidgetFrameView.swift */,
+				DAC949FD2E21A2D1007E67B7 /* FrameRowView.swift */,
 				DA35E2CC2E1F96CA003987BB /* WidgetIconView.swift */,
 				DA64ACA92DBEADB000294F60 /* WidgetRow.swift */,
 			);
@@ -1718,7 +1718,7 @@
 				DAC131112DA3213100075AE2 /* SetSwitchStateIntentHandlerTests.swift in Sources */,
 				DA35E2BD2E1EEA9D003987BB /* MapRowView.swift in Sources */,
 				DA35E2BE2E1EEA9D003987BB /* DatePickerInputRowView.swift in Sources */,
-				DAC949FE2E21A2D1007E67B7 /* WidgetFrameView.swift in Sources */,
+				DAC949FE2E21A2D1007E67B7 /* FrameRowView.swift in Sources */,
 				DA35E2BF2E1EEA9D003987BB /* WebRowView.swift in Sources */,
 				DA35E2C02E1EEA9D003987BB /* ColorPickerRowView.swift in Sources */,
 				DA35E2C12E1EEA9D003987BB /* SliderWithSwitchRowView.swift in Sources */,

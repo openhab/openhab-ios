@@ -12,13 +12,14 @@
 import OpenHABCore
 import SwiftUI
 
-struct WidgetFrameView: View {
+struct FrameRowView: View {
     @ObservedObject var widget: OpenHABWidget
 
     var body: some View {
         HStack {
             Text(widget.labelText?.uppercased() ?? "")
                 .font(.callout)
+                .foregroundColor(.secondary)
                 .lineLimit(1)
             Spacer()
         }
@@ -29,6 +30,6 @@ struct WidgetFrameView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
     List([widget]) { widget in
-        WidgetFrameView(widget: widget)
+        FrameRowView(widget: widget)
     }
 }

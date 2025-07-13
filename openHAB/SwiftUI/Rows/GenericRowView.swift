@@ -16,19 +16,15 @@ struct GenericRowView: View {
     @ObservedObject var widget: OpenHABWidget
     var body: some View {
         HStack {
-//            if let iconUrl = widget.iconUrl {
-//                KFImage(iconUrl)
-//                    .resizable()
-//                    .frame(width: 30, height: 30)
-//            }
-            VStack(alignment: .leading) {
-                Text(widget.labelText ?? "")
-                    .font(.headline)
-                if let value = widget.labelValue {
-                    Text(value)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
+            if WidgetIconView.shouldShowIcon(for: widget) {
+                WidgetIconView(widget: widget)
+                    .frame(width: 24, height: 24)
+            }
+            Text(widget.labelText ?? "")
+            Spacer()
+            if let value = widget.labelValue {
+                Text(value)
+                    .foregroundColor(.secondary)
             }
         }
         .padding()

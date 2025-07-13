@@ -41,6 +41,7 @@ struct SelectionRowView: View {
                     }
                 }
                 .pickerStyle(.menu)
+                .frame(height: 24) // 👈 Restrict height of the Picker
                 .onChange(of: selectedIndex) { newIndex in
                     guard let mapping = mappings[safe: newIndex] else { return }
                     logger.info("Selection changed to: \(mapping.label)")

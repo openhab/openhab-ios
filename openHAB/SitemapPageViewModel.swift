@@ -85,14 +85,18 @@ class SitemapPageViewModel: ObservableObject {
     func startPageHandling() {
         pageHandlingTask?.cancel()
 
-        guard !defaultSitemap.isEmpty else {
-            logger.error("startPageHandling: Cannot run with empty sitemap")
-            return
-        }
-
         logger.info("🚀 Starting page load and long polling flow...")
 
         pageHandlingTask = Task {
+            // If no default sitemap is set, try to discover and auto-select one
+            if defaultSitemap.isEmpty {
+                await discoverAndSelectSitemap()
+            }
+
+            guard !defaultSitemap.isEmpty else {
+                logger.error("startPageHandling: Cannot run with empty sitemap after discovery")
+                return
+            }
             do {
                 // Setup service if needed
 //                if openAPIService == nil {
@@ -242,6 +246,50 @@ class SitemapPageViewModel: ObservableObject {
         defaultSitemap = name
         pageId = path ?? ""
         await startPageHandling()
+    }
+
+    private func discoverAndSelectSitemap() async {
+        do {
+            try await setupConnection()
+            guard let service = openAPIService else {
+                logger.error("Could not setup service for sitemap discovery")
+                return
+            }
+
+            let sitemaps = try await service.openHABSitemaps()
+
+            // Filter out _default sitemap if there are multiple sitemaps available
+            let filteredSitemaps = sitemaps.count > 1 ? sitemaps.filter { $0.name != "_default" } : sitemaps
+
+            switch filteredSitemaps.count {
+            case 1:
+                // Auto-select the only available sitemap
+                defaultSitemap = filteredSitemaps[0].name
+                // swiftformat:disable:next redundantSelf
+                logger.info("Auto-selected single sitemap: \(self.defaultSitemap)")
+
+                // Save as default for future launches
+                Preferences.modifyActiveHome { homePreferences in
+                    homePreferences.defaultSitemap = defaultSitemap
+                }
+            case 2...:
+                // Multiple sitemaps available - select the first one
+                defaultSitemap = filteredSitemaps[0].name
+                // swiftformat:disable:next redundantSelf
+                logger.info("Auto-selected first sitemap from \(filteredSitemaps.count) available: \(self.defaultSitemap)")
+
+                // Save as default for future launches
+                Preferences.modifyActiveHome { homePreferences in
+                    homePreferences.defaultSitemap = defaultSitemap
+                }
+            default:
+                logger.error("No sitemaps available")
+                error = SitemapPageError.serviceUnavailable
+            }
+        } catch {
+            logger.error("Failed to discover sitemaps: \(error)")
+            self.error = error as? any LocalizedError ?? SitemapPageError.serviceUnavailable
+        }
     }
 
     private func setupActiveConnectionObserver() {

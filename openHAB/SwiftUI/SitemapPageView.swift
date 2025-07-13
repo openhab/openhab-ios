@@ -25,6 +25,8 @@ struct SitemapPageView: View {
                     NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
                         RowViewFactory.view(for: widget)
                     }
+                    .buttonStyle(.plain)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 24))
                 } else if widget.type == .selection {
                     Button {
                         selectedWidget = widget
@@ -32,7 +34,7 @@ struct SitemapPageView: View {
                     } label: {
                         RowViewFactory.view(for: widget)
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(.plain)
                 } else if widget.type == .input {
                     Button {
                         selectedWidget = widget
@@ -40,7 +42,7 @@ struct SitemapPageView: View {
                     } label: {
                         RowViewFactory.view(for: widget)
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(.plain)
                 } else {
                     RowViewFactory.view(for: widget)
                         .onTapGesture {
@@ -48,7 +50,6 @@ struct SitemapPageView: View {
                         }
                 }
             }
-//            .listRowInsets(EdgeInsets())
         }
         .listStyle(.plain)
         .navigationTitle(viewModel.pageTitle)

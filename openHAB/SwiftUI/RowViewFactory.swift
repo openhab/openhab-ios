@@ -43,7 +43,7 @@ enum RowViewFactory {
         case .text:
             TextRowView(widget: widget)
         case .frame:
-            WidgetFrameView(widget: widget)
+            FrameRowView(widget: widget)
         case .setpoint:
             SetpointRowView(widget: widget)
         case .selection:
