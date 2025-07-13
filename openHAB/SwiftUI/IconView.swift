@@ -15,7 +15,7 @@ import os.log
 import SwiftUI
 
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
-struct WidgetIconView: View {
+struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @Environment(\.colorScheme) private var colorScheme
 
@@ -93,7 +93,7 @@ struct WidgetIconView: View {
 
 // MARK: - Convenience Extensions
 
-extension WidgetIconView {
+extension IconView {
     /// Creates a widget icon view with standard size and default styling or custom icon color
     init(widget: OpenHABWidget) {
         self.init(
@@ -105,7 +105,7 @@ extension WidgetIconView {
 
 // MARK: - Widget Type Extensions
 
-extension WidgetIconView {
+extension IconView {
     /// Determines if a widget type should show an icon (equivalent to NoIconDisplayableCell protocol)
     static func shouldShowIcon(for widget: OpenHABWidget) -> Bool {
         // These widget types should not show icons (equivalent to NoIconDisplayableCell)
@@ -123,5 +123,5 @@ extension WidgetIconView {
     widget.icon = "switch"
     widget.label = "Test Switch"
 
-    return WidgetIconView(widget: widget)
+    return IconView(widget: widget)
 }

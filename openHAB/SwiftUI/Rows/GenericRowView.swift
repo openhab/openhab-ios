@@ -16,8 +16,8 @@ struct GenericRowView: View {
     @ObservedObject var widget: OpenHABWidget
     var body: some View {
         HStack {
-            if WidgetIconView.shouldShowIcon(for: widget) {
-                WidgetIconView(widget: widget)
+            if IconView.shouldShowIcon(for: widget) {
+                IconView(widget: widget)
                     .frame(width: 24, height: 24)
             }
             Text(widget.labelText ?? "")

@@ -41,8 +41,8 @@ struct SetpointRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                if WidgetIconView.shouldShowIcon(for: widget) {
-                    WidgetIconView(widget: widget)
+                if IconView.shouldShowIcon(for: widget) {
+                    IconView(widget: widget)
                         .frame(width: 24, height: 24)
                 }
 

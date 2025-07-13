@@ -23,8 +23,8 @@ struct TextInputRowView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            if WidgetIconView.shouldShowIcon(for: widget) {
-                WidgetIconView(widget: widget)
+            if IconView.shouldShowIcon(for: widget) {
+                IconView(widget: widget)
                     .frame(width: 24, height: 24)
                     .padding(.top, 4) // Align with text
             }
