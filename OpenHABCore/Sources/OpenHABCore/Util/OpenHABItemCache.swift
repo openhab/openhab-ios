@@ -80,6 +80,11 @@ public actor OpenHABItemCache {
         return items
     }
 
+    public func getCachedItems(home: UUID) async -> [OpenHABItem]? {
+        await reloadCacheIfNeeded(homes: [home])
+        return items[home]
+    }
+
     public func getCachedItem(name: String, home: UUID) async -> [OpenHABItem]? {
         await reloadCacheIfNeeded(homes: [home])
         return items[home]?.filter { $0.name == name }

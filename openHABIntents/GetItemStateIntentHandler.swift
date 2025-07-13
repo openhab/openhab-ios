@@ -15,6 +15,8 @@ import OpenHABCore
 import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
+    private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
+
     func resolveHome(for intent: OpenHABGetItemStateIntent) async -> INStringResolutionResult {
         // TODO: better (fuzzy?) resolution of home name
         logger.info("Resolving home for intent: \(intent)")
@@ -25,20 +27,12 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
         INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
     }
 
-    private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
-    private let itemCache: OpenHABItemCache
-
-    init(itemCache: OpenHABItemCache = OpenHABItemCache.instance) {
-        self.itemCache = itemCache
-    }
-
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache.getAllCachedItems().flatMap(\.value).filtered(by: searchTerm)
-        return INObjectCollection(items: items.map(\.name).map { $0 as NSString })
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache.getAllCachedItems().flatMap(\.value)
+        let items = await OpenHABIntentHelper.getItemOptions(home: intent.home)
         return INObjectCollection(items: items.map(\.name).map { $0 as NSString })
     }
 
@@ -55,12 +49,12 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
             )
         }
 
-        let homeIds = Preferences.storedHomes.values.filter { $0.homeName == homeName }.map(\.id)
-        guard homeIds.count == 1 else {
+        let homeId = Preferences.firstStoredHome { $0.homeName == homeName }.map(\.id)
+        guard let homeId else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
-        let items = await itemCache.getCachedItem(name: itemName, home: homeIds[0])
+        let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId)
 
         guard let items, items.count == 1 else {
             return .failureInvalidItem(itemName)
@@ -68,7 +62,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
 
         return .success(
             item: itemName,
-            state: items[0].state ?? NSLocalizedString("unknown", comment: "unknown item")
+            state: items[0].state ?? NSLocalizedString("unknownState", comment: "unknown item state")
         )
     }
 }

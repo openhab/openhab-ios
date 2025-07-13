@@ -45,4 +45,18 @@ public enum OpenHABIntentHelper {
             return .needsValue()
         }
     }
+
+    static func getItemOptions(home: String?, searchTerm: String?) async -> INObjectCollection<NSString> {
+        let allItems = await getItemOptions(home: home)
+        let items = allItems.filtered(by: searchTerm)
+        return INObjectCollection(items: items.map(\.name).map { $0 as NSString })
+    }
+
+    static func getItemOptions(home: String?) async -> [OpenHABItem] {
+        if let home, let homeId = Preferences.firstStoredHome(where: { $0.homeName == home })?.id {
+            await OpenHABItemCache.instance.getCachedItems(home: homeId) ?? []
+        } else {
+            await OpenHABItemCache.instance.getAllCachedItems().flatMap(\.value)
+        }
+    }
 }
