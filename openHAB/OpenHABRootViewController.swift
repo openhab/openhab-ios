@@ -38,6 +38,7 @@ private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootV
 
 class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHABViewable {
     private let viewModel: SitemapPageViewModel
+    private let searchController = UISearchController(searchResultsController: nil)
 
     init() {
         let viewModel = SitemapPageViewModel()
@@ -45,16 +46,46 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
         super.init(rootView: SitemapPageView(viewModel: viewModel))
     }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Hide UIKit navigation bar to let SwiftUI handle navigation
-        navigationController?.setNavigationBarHidden(true, animated: false)
-    }
-
     @available(*, unavailable)
     @objc dynamic required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Keep UIKit navigation bar visible for hamburger menu
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        setupSearchController()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        // Ensure hamburger menu is preserved when search controller is set up
+        if parent?.navigationItem.searchController !== searchController {
+            let existingRightBarButtonItem = parent?.navigationItem.rightBarButtonItem
+            parent?.navigationItem.searchController = searchController
+            parent?.navigationItem.hidesSearchBarWhenScrolling = true
+            if let rightButton = existingRightBarButtonItem {
+                parent?.navigationItem.rightBarButtonItem = rightButton
+            }
+        }
+    }
+
+    private func setupSearchController() {
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.delegate = self
+        searchController.delegate = self
+        searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
+        definesPresentationContext = true
+
+        // Assign to navigation item
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+    }
+
 
     func viewName() -> String { "sitemap" }
 
@@ -71,9 +102,21 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
     }
 }
 
+// MARK: - Search Controller Delegates
+
+extension HostingSitemapViewController: UISearchResultsUpdating, UISearchBarDelegate, UISearchControllerDelegate {
+    func updateSearchResults(for searchController: UISearchController) {
+        viewModel.searchText = searchController.searchBar.text ?? ""
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        viewModel.searchText = ""
+    }
+}
+
 // swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
-    var currentView: (UIViewController & OpenHABViewable)!
+    var currentView: (any UIViewController & OpenHABViewable)!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
 
@@ -85,7 +128,7 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
-    private lazy var sitemapViewController: (UIViewController & OpenHABViewable) = HostingSitemapViewController()
+    private lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = HostingSitemapViewController()
 
     private var activeConnection: ConnectionInfo?
 
@@ -138,7 +181,7 @@ class OpenHABRootViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         logger.info("OpenHABRootController viewWillAppear")
         super.viewWillAppear(animated)
-        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.prefersLargeTitles = false
         // if we have turned demo mode off/on, reset view
         if isDemoMode != Preferences.currentHomePreferences.demomode {
             switchToSavedView()
@@ -763,8 +806,9 @@ extension OpenHABRootViewController: ModalHandler {
     nonisolated func modalDismissed(to: TargetController) {
         Task { @MainActor in
             switch to {
-            case .sitemap:
+            case let .sitemap(sitemapName):
                 switchView(target: to)
+                await (sitemapViewController as? HostingSitemapViewController)?.pushSitemap(name: sitemapName, path: nil)
             case .settings:
                 let hostingController = UIHostingController(rootView: SettingsView())
                 navigationController?.pushViewController(hostingController, animated: true)

@@ -45,6 +45,7 @@ class SitemapPageViewModel: ObservableObject {
     private var pageHandlingTask: Task<Void, Never>?
     private var defaultSitemap = ""
     private var pageId = ""
+    private var isLinkedPage = false
 
     var relevantWidgets: [OpenHABWidget] {
         guard !searchText.isEmpty else { return currentPage?.widgets ?? [] }
@@ -58,6 +59,10 @@ class SitemapPageViewModel: ObservableObject {
         currentPage?.title.components(separatedBy: "[")[0] ?? "Sitemap"
     }
 
+    var isLinked: Bool {
+        isLinkedPage
+    }
+
     init() {
         loadSettings()
         setupActiveConnectionObserver()
@@ -66,6 +71,7 @@ class SitemapPageViewModel: ObservableObject {
     init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
         setupActiveConnectionObserver()
+        isLinkedPage = true
 
         // Extract pageId from URL if not provided
         if pageId.isEmpty {

@@ -123,8 +123,12 @@ class OpenHABSitemapViewController: OpenHABViewController, UISearchControllerDel
         super.viewDidAppear(animated)
 
         if parent?.navigationItem.searchController !== searchController {
+            let existingRightBarButtonItem = parent?.navigationItem.rightBarButtonItem
             parent?.navigationItem.searchController = searchController
             parent?.navigationItem.hidesSearchBarWhenScrolling = true
+            if let rightButton = existingRightBarButtonItem {
+                parent?.navigationItem.rightBarButtonItem = rightButton
+            }
         }
     }
 

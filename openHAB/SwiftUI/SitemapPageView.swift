@@ -18,12 +18,16 @@ struct SitemapPageView: View {
     @State private var showInputAlert = false
     @State private var selectedWidget: OpenHABWidget?
 
+    private var isLinkedPage: Bool {
+        viewModel.isLinked
+    }
+
     var body: some View {
         NavigationStack {
             List(viewModel.relevantWidgets) { widget in
                 Group {
                     if let linkedPage = widget.linkedPage {
-                        NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: ""))) {
+                        NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
                             RowViewFactory.view(for: widget)
                         }
                         .buttonStyle(.plain)
@@ -53,9 +57,9 @@ struct SitemapPageView: View {
                 }
             }
             .listStyle(.plain)
-            .navigationTitle(viewModel.pageTitle)
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $viewModel.searchText, prompt: "Search items in sitemap")
+            .navigationBarHidden(!isLinkedPage)
+            .navigationTitle(isLinkedPage ? viewModel.pageTitle : "")
+            .navigationBarTitleDisplayMode(.inline)
             .refreshable {
                 await viewModel.reload()
             }
