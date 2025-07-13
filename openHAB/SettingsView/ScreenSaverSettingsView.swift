@@ -147,6 +147,16 @@ struct ScreenSaverSettingsView: View {
                 .disabled(!config.enablesAutoDimming)
             }
             .disabled(!config.isEnabled)
+
+            Section {
+                Button("Test Screen Saver") {
+                    if let keyWindow = UIApplication.shared.keyWindowActiveScene {
+                        // Ensure the manager knows about the current key window in case monitoring was not started yet.
+                        ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+                    }
+                    ScreenSaverManager.shared.presentSaver(configuration: config)
+                }
+            }
         }
         .navigationTitle("Screen Saver")
         .onDisappear {

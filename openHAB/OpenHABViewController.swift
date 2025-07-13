@@ -31,10 +31,6 @@ class OpenHABViewController: UIViewController {
         NetworkTracker.shared.serverCertificateManager.delegate = self
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
     func showPopupMessage(seconds: Double, title: String, message: String, theme: Theme) {
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: seconds)

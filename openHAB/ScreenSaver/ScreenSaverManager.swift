@@ -178,6 +178,15 @@ final class ScreenSaverManager: NSObject {
         previousBrightness = nil
     }
 
+    /// Immediately presents the screen saver with the provided configuration, ignoring the idle timer.
+    /// This is used fo testing the screen saver in the Settings view (before settings are saved)
+    @MainActor
+    func presentSaver(configuration: ScreenSaverConfiguration) {
+        self.configuration = configuration
+        dismissSaverIfNeeded()
+        showSaver()
+    }
+
     @objc private func handleDisableNotification() {
         logger.debug("Received disable screen saver notification")
         idleTimer?.invalidate()

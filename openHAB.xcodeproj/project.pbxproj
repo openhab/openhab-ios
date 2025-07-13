@@ -732,13 +732,6 @@
 			path = Extension;
 			sourceTree = "<group>";
 		};
-		DA0DA9E02E0C9B51000C5D0A /* New Group */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "New Group";
-			sourceTree = "<group>";
-		};
 		DA1C2E4A230DC28F00FACFB0 /* fastlane */ = {
 			isa = PBXGroup;
 			children = (
@@ -1012,7 +1005,6 @@
 		DFB2621E18830A3600D3244D = {
 			isa = PBXGroup;
 			children = (
-				DA0DA9E02E0C9B51000C5D0A /* New Group */,
 				6557AF8E2C0241C10094D0C8 /* PrivacyInfo.xcprivacy */,
 				DA4D4DB4233F9ACB00B37E37 /* README.md */,
 				DA4D4E0E2340A00200B37E37 /* Changes.md */,
