@@ -351,7 +351,8 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         logger.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
         showActivityIndicator(show: false)
         hidePopupMessages()
-
+        // Wake up screen saver immediately on changes to the webview
+        NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
         // watch for URL changes so we can store the last visited path
         if let webviewURL = webView.url {
             let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))
@@ -359,16 +360,14 @@ extension OpenHABWebViewController: WKNavigationDelegate {
                 let string = openHABTrackedRootUrl
                 logger.info("navigation change base: \(string) path: \(path)")
                 Preferences.currentWebViewPath = path.hasSuffix("/") ? path : path + "/"
-
-                // Wake up screen saver immediately on changes to the webview
-                NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
             }
         }
     }
 
     func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         logger.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
-
+        // Wake up screen saver immediately on changes to the webview
+        NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {

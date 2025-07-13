@@ -11,9 +11,12 @@
 
 import Combine
 import OpenHABCore
+import os.log
 import SideMenu
 import SwiftMessages
 import UIKit
+
+private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
 
 class OpenHABViewController: UIViewController {
     var trackerCancellables = Set<AnyCancellable>()
@@ -26,7 +29,6 @@ class OpenHABViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(OpenHABViewController.didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         NetworkTracker.shared.clientCertificateManager.delegate = self
         NetworkTracker.shared.serverCertificateManager.delegate = self
-        setNeedsStatusBarAppearanceUpdate()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -37,6 +39,7 @@ class OpenHABViewController: UIViewController {
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: seconds)
         config.presentationStyle = .bottom
+        config.presentationContext = .view(view)
         SwiftMessages.hideAll()
         SwiftMessages.show(config: config) {
             let view = MessageView.viewFromNib(layout: .cardView)
@@ -57,10 +60,6 @@ class OpenHABViewController: UIViewController {
         if let rc = parent as? OpenHABRootViewController {
             rc.showSideMenu()
         }
-    }
-
-    override var prefersStatusBarHidden: Bool {
-        Preferences.hideStatusBar
     }
 
     @objc
