@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import SwiftUI
 import UIKit
 
 public enum OHInterfaceStyle: Int {
@@ -145,6 +146,14 @@ public extension UIColor {
     class var ohGray: UIColor {
         OHInterfaceStyle.current == .light ? UIColor(hex: "#808080") : UIColor(hex: "#808080")
     }
+
+    class var ohPrimary: UIColor {
+        UIColor(.primary)
+    }
+
+    class var ohSecondary: UIColor {
+        UIColor(.secondary)
+    }
 }
 
 public extension UIColor {
@@ -166,7 +175,9 @@ public extension UIColor {
             "aqua": UIColor.ohAqua,
             "black": UIColor.ohBlack,
             "silver": UIColor.ohSilver,
-            "gray": UIColor.ohGray
+            "gray": UIColor.ohGray,
+            "primary": UIColor.ohPrimary,
+            "secondary": UIColor.ohSecondary
         ]
 
         self.init(cgColor: namedColors.first { $0.key == string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }?.value.cgColor ?? UIColor(hex: string).cgColor)
