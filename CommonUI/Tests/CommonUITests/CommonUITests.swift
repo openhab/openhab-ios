@@ -10,8 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import CommonUI
-import Testing
 import Numerics
+import Testing
 
 struct ColorTemperatureTests {
     @Test func lowKelvinValue() {

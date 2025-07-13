@@ -19,49 +19,52 @@ struct SitemapPageView: View {
     @State private var selectedWidget: OpenHABWidget?
 
     var body: some View {
-        List(viewModel.relevantWidgets) { widget in
-            Group {
-                if let linkedPage = widget.linkedPage {
-                    NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
-                        RowViewFactory.view(for: widget)
-                    }
-                    .buttonStyle(.plain)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 24))
-                } else if widget.type == .selection {
-                    Button {
-                        selectedWidget = widget
-                        showSelectionSheet = true
-                    } label: {
-                        RowViewFactory.view(for: widget)
-                    }
-                    .buttonStyle(.plain)
-                } else if widget.type == .input {
-                    Button {
-                        selectedWidget = widget
-                        showInputAlert = true
-                    } label: {
-                        RowViewFactory.view(for: widget)
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    RowViewFactory.view(for: widget)
-                        .onTapGesture {
-                            viewModel.widgetTapped(widget)
+        NavigationStack {
+            List(viewModel.relevantWidgets) { widget in
+                Group {
+                    if let linkedPage = widget.linkedPage {
+                        NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: ""))) {
+                            RowViewFactory.view(for: widget)
                         }
+                        .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 24))
+                    } else if widget.type == .selection {
+                        Button {
+                            selectedWidget = widget
+                            showSelectionSheet = true
+                        } label: {
+                            RowViewFactory.view(for: widget)
+                        }
+                        .buttonStyle(.plain)
+                    } else if widget.type == .input {
+                        Button {
+                            selectedWidget = widget
+                            showInputAlert = true
+                        } label: {
+                            RowViewFactory.view(for: widget)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        RowViewFactory.view(for: widget)
+                            .onTapGesture {
+                                viewModel.widgetTapped(widget)
+                            }
+                    }
                 }
             }
-        }
-        .listStyle(.plain)
-        .navigationTitle(viewModel.pageTitle)
-        .searchable(text: $viewModel.searchText)
-        .refreshable {
-            await viewModel.reload()
-        }
-        .task {
-            viewModel.startPageHandling()
-        }
-        .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
-            viewModel.handleActiveConnectionChange(activeConnection)
+            .listStyle(.plain)
+            .navigationTitle(viewModel.pageTitle)
+            .navigationBarTitleDisplayMode(.large)
+            .searchable(text: $viewModel.searchText, prompt: "Search items in sitemap")
+            .refreshable {
+                await viewModel.reload()
+            }
+            .task {
+                viewModel.startPageHandling()
+            }
+            .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
+                viewModel.handleActiveConnectionChange(activeConnection)
+            }
         }
         .sheet(isPresented: $showSelectionSheet) {
             if let widget = selectedWidget {

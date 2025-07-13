@@ -43,7 +43,12 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
         let viewModel = SitemapPageViewModel()
         self.viewModel = viewModel
         super.init(rootView: SitemapPageView(viewModel: viewModel))
-        navigationItem.title = "Test" // viewModel.currentPage?.title.components(separatedBy: "[")[0]
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Hide UIKit navigation bar to let SwiftUI handle navigation
+        navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
     @available(*, unavailable)

@@ -21,11 +21,13 @@ struct ColorPickerRowView: View {
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        HStack {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
+
+            Spacer()
 
             ColorPicker("Color", selection: $selectedColor, supportsOpacity: false)
                 .labelsHidden()

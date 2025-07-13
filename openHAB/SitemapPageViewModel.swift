@@ -34,7 +34,6 @@ enum SitemapPageError: LocalizedError {
 @MainActor
 class SitemapPageViewModel: ObservableObject {
     @Published var currentPage: OpenHABPage?
-    @Published var filteredWidgets: [OpenHABWidget] = []
     @Published var searchText = ""
     @Published var error: (any LocalizedError)?
     @Published var isLoading = false
@@ -48,11 +47,11 @@ class SitemapPageViewModel: ObservableObject {
     private var pageId = ""
 
     var relevantWidgets: [OpenHABWidget] {
-        if searchText.isEmpty {
-            currentPage?.widgets ?? []
-        } else {
-            filteredWidgets
-        }
+        guard !searchText.isEmpty else { return currentPage?.widgets ?? [] }
+
+        return currentPage?.widgets.filter {
+            $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
+        } ?? []
     }
 
     var pageTitle: String {
@@ -64,14 +63,23 @@ class SitemapPageViewModel: ObservableObject {
         setupActiveConnectionObserver()
     }
 
-    init(pageUrl: String, title: String) {
+//
+//    init(pageUrl: String, title: String) {
+//        loadSettings()
+//        setupActiveConnectionObserver()
+//        // Set the pageId from the URL for navigation
+//        if let urlComponents = URLComponents(string: pageUrl),
+//           let pageIdValue = urlComponents.queryItems?.first(where: { $0.name == "sitemap" })?.value {
+//            pageId = pageIdValue
+//        }
+//    }
+
+    init(pageUrl: String, title: String, pageId: String = "") {
         loadSettings()
         setupActiveConnectionObserver()
-        // Set the pageId from the URL for navigation
-        if let urlComponents = URLComponents(string: pageUrl),
-           let pageIdValue = urlComponents.queryItems?.first(where: { $0.name == "sitemap" })?.value {
-            pageId = pageIdValue
-        }
+//        self.pageUrl = pageUrl
+//        self.pageTitle = title
+        self.pageId = pageId
     }
 
     deinit {
@@ -176,7 +184,6 @@ class SitemapPageViewModel: ObservableObject {
     private func updateUI(with page: OpenHABPage) {
         injectSendCommand(for: page.widgets)
         currentPage = page
-        filterWidgets()
     }
 
     func reload() async {
@@ -210,7 +217,6 @@ class SitemapPageViewModel: ObservableObject {
 
         injectSendCommand(for: page!.widgets)
         currentPage = page
-        filterWidgets()
     }
 
     private func injectSendCommand(for widgets: [OpenHABWidget]) {
@@ -221,16 +227,6 @@ class SitemapPageViewModel: ObservableObject {
 
             // If widget has nested children (e.g., frames/groups), inject recursively
             injectSendCommand(for: widget.widgets)
-        }
-    }
-
-    func filterWidgets() {
-        if searchText.isEmpty {
-            filteredWidgets = []
-        } else {
-            filteredWidgets = currentPage?.widgets.filter {
-                $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
-            } ?? []
         }
     }
 

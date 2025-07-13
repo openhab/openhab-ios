@@ -11,6 +11,7 @@
 
 import CommonUI
 import OpenHABCore
+import SFSafeSymbols
 import SwiftUI
 
 struct TextRowView: View {
@@ -32,6 +33,15 @@ struct TextRowView: View {
                 Text(value)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+            }
+        }
+        .contextMenu {
+            if let text = widget.labelValue ?? widget.labelText, !text.isEmpty {
+                Button {
+                    UIPasteboard.general.string = text
+                } label: {
+                    Label("Copy", systemSymbol: .squareAndArrowUp)
+                }
             }
         }
     }
