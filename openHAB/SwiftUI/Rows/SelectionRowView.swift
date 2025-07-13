@@ -25,14 +25,16 @@ struct SelectionRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        HStack {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
+            Spacer()
+
             if !mappings.isEmpty {
-                Picker("Selection", selection: $selectedIndex) {
+                Picker("", selection: $selectedIndex) {
                     ForEach(mappings.indices, id: \.self) { index in
                         Text(mappings[index].label)
                             .tag(index)
@@ -44,12 +46,6 @@ struct SelectionRowView: View {
                     logger.info("Selection changed to: \(mapping.label)")
                     widget.sendCommand(mapping.command)
                 }
-            }
-
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                Text(labelValue)
-                    .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
         .onAppear {

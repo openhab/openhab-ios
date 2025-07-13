@@ -39,18 +39,15 @@ struct SwitchRowView: View {
                     .frame(width: 24, height: 24)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(widget.labelText ?? widget.label)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-
-                if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                    Text(labelValue)
-                        .font(.caption)
-                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                }
-            }
-
+            Text(widget.labelText ?? widget.label)
+                .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             Spacer()
+
+            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+                Text(labelValue)
+                    .font(.caption)
+                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+            }
 
             Toggle("", isOn: Binding(
                 get: { isOn },

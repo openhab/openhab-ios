@@ -49,7 +49,7 @@ struct RollershutterRowView: View {
                     logger.info("stop button pressed")
                     widget.sendCommand("STOP")
                 } label: {
-                    Image(systemSymbol: .stopFill)
+                    Image(systemSymbol: .stop)
                         .font(.title2)
                         .foregroundColor(.primary)
                 }

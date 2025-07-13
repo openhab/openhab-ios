@@ -17,9 +17,10 @@ import SwiftUI
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct WidgetIconView: View {
     @ObservedObject var widget: OpenHABWidget
+    @Environment(\.colorScheme) private var colorScheme
+
     let size: CGSize
-    let iconType: IconType
-    let iconColor: String
+    let iconType: IconType = .svg
 
     @State private var imageLoadingFailed = false
 
@@ -28,13 +29,24 @@ struct WidgetIconView: View {
     private var iconURL: URL? {
         guard !widget.icon.isEmpty else { return nil }
 
+        var queriedIconColor: String {
+            switch colorScheme {
+            case .light:
+                return widget.iconColor.isEmpty ? "black" : widget.iconColor
+            case .dark:
+                return widget.iconColor.isEmpty ? "white" : widget.iconColor
+            @unknown default:
+                return widget.iconColor.isEmpty ? "black" : widget.iconColor
+            }
+        }
+
         return Endpoint.icon(
             rootUrl: NetworkTracker.shared.activeConnection?.configuration.url ?? "",
             version: NetworkTracker.shared.activeConnection?.version ?? 2,
             icon: widget.icon,
             state: widget.iconState(),
             iconType: iconType,
-            iconColor: iconColor.isEmpty ? "black" : iconColor
+            iconColor: queriedIconColor
         ).url
     }
 
@@ -83,12 +95,10 @@ struct WidgetIconView: View {
 
 extension WidgetIconView {
     /// Creates a widget icon view with standard size and default styling or custom icon color
-    init(widget: OpenHABWidget, size: CGSize = CGSize(width: 24, height: 24), iconColor: String = "") {
+    init(widget: OpenHABWidget) {
         self.init(
             widget: widget,
-            size: size,
-            iconType: .svg,
-            iconColor: iconColor
+            size: CGSize(width: 24, height: 24)
         )
     }
 }

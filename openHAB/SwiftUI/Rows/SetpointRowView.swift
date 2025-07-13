@@ -55,7 +55,7 @@ struct SetpointRowView: View {
 
                 HStack(spacing: 12) {
                     Button(action: decreaseValue) {
-                        Image(systemSymbol: .chevronDownCircleFill)
+                        Image(systemSymbol: .chevronDown)
                             .font(.title2)
                             .foregroundColor(.primary)
                     }
@@ -63,11 +63,11 @@ struct SetpointRowView: View {
                     .disabled(currentValue <= widget.minValue)
 
                     Text(formattedValue)
-                        .font(.caption)
+                        .font(.caption.monospacedDigit())
                         .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
 
                     Button(action: increaseValue) {
-                        Image(systemSymbol: .chevronUpCircleFill)
+                        Image(systemSymbol: .chevronUp)
                             .font(.title2)
                             .foregroundColor(.primary)
                     }

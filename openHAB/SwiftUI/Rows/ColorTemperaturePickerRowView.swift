@@ -89,7 +89,6 @@ struct ColorTemperaturePickerRowView: View {
                         .foregroundColor(.secondary)
                 }
             }
-
         }
         .onAppear {
             loadCurrentTemperature()

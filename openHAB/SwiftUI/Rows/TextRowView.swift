@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import SwiftUI
 
@@ -23,7 +24,7 @@ struct TextRowView: View {
             }
 
             Text(widget.labelText ?? "")
-                .font(.headline)
+                .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
 
             Spacer()
 

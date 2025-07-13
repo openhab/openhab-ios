@@ -48,7 +48,9 @@ struct SitemapPageView: View {
                         }
                 }
             }
+//            .listRowInsets(EdgeInsets())
         }
+        .listStyle(.plain)
         .navigationTitle(viewModel.pageTitle)
         .searchable(text: $viewModel.searchText)
         .refreshable {

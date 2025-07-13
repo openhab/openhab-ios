@@ -23,10 +23,7 @@ struct SegmentedRowView: View {
         widget.mappingsOrItemOptions
     }
 
-    private var selectedIndex: Int? {
-        guard !isMomentary else { return nil }
-        return Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1).clamped(to: -1 ... mappings.count - 1) == -1 ? nil : Int(widget.mappingIndex(byCommand: widget.item?.state) ?? -1)
-    }
+    @State private var selectedIndex: Int?
 
     private var isMomentary: Bool {
         mappings.count == 1 || widget.item?.state == "NULL"
@@ -34,26 +31,52 @@ struct SegmentedRowView: View {
 
     var body: some View {
         HStack {
+            if WidgetIconView.shouldShowIcon(for: widget) {
+                WidgetIconView(widget: widget)
+                    .frame(width: 24, height: 24)
+                    .padding(.top, 4) // Align with text
+            }
+
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
+            Spacer()
 
             if !mappings.isEmpty {
-                Picker("", selection: Binding<Int?>(
-                    get: { selectedIndex },
-                    set: { newIndex in
-                        guard let index = newIndex, let mapping = mappings[safe: index] else { return }
-                        logger.info("Segment pressed \(index)")
-                        widget.sendCommand(mapping.command)
+                if isMomentary {
+                    HStack {
+                        ForEach(mappings.indices, id: \.self) { index in
+                            Button {
+                                widget.sendCommand(mappings[index].command)
+                            } label: {
+                                Text(mappings[index].label)
+                                    .padding(.horizontal, 6)
+                            }
+                            .buttonStyle(.bordered)
+                        }
                     }
-                )) {
-                    ForEach(mappings.indices, id: \.self) { index in
-                        Text(mappings[index].label)
-                            .tag(index as Int?)
+                } else {
+                    Picker("", selection: Binding<Int>(
+                        get: { selectedIndex ?? -1 },
+                        set: { newIndex in
+                            selectedIndex = newIndex
+                            if let mapping = mappings[safe: newIndex] {
+                                widget.sendCommand(mapping.command)
+                            }
+                        }
+                    )) {
+                        ForEach(mappings.indices, id: \.self) { index in
+                            Text(mappings[index].label).tag(index)
+                        }
                     }
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
+            }
+        }
+        .onAppear {
+            if !isMomentary {
+                selectedIndex = widget.mappingIndex(byCommand: widget.item?.state)
             }
         }
     }
