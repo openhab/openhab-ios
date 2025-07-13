@@ -370,7 +370,7 @@ enum PreviewConstants {
                 "widgetId": "13",
                 "type": "Colortemperaturepicker",
                 "visibility": true,
-                "label": "Color Temperature [1 K]",
+                "label": "Color Temperature [2700 K]",
                 "labelSource": "SITEMAP_WIDGET",
                 "icon": "colorwheel",
                 "staticIcon": true,
@@ -379,7 +379,7 @@ enum PreviewConstants {
                 "mappings": [],
                 "item": {
                   "link": "http://192.168.2.10:8080/rest/items/test_LEDLight_ColorTemp",
-                  "state": "1000.0 K",
+                  "state": "2700.0 K",
                   "stateDescription": {
                     "pattern": "%.0f %unit%",
                     "readOnly": false,

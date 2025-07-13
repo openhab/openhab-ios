@@ -55,7 +55,7 @@ struct ColorTemperaturePickerRowView: View {
                             startPoint: .leading,
                             endPoint: .trailing
                         )
-                        .frame(height: 6)
+                        .frame(height: 10)
                         .cornerRadius(3)
 
                         // Actual slider
@@ -90,12 +90,6 @@ struct ColorTemperaturePickerRowView: View {
                 }
             }
 
-            // Widget value (current state)
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                Text(labelValue)
-                    .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-            }
         }
         .onAppear {
             loadCurrentTemperature()
@@ -116,13 +110,8 @@ struct ColorTemperaturePickerRowView: View {
     }
 
     // Generate gradient colors similar to Android implementation
-    private func colorTemperatureGradient() -> [Color] {
-        let steps = 20
-        let colors = (0 ..< steps).map { step in
-            let temperature = minTemperature + (maxTemperature - minTemperature) * Double(step) / Double(steps - 1)
-            return temperatureToColor(temperature)
-        }
-        return colors
+    private func colorTemperatureGradient(steps: Int = 20) -> [Color] {
+        stride(from: minTemperature, through: maxTemperature, by: (maxTemperature - minTemperature) / Double(steps)).map { Color(temperature: $0) }
     }
 
     private func loadCurrentTemperature() {
@@ -140,52 +129,6 @@ struct ColorTemperaturePickerRowView: View {
 
         logger.info("Sending color temperature command: \(command)K")
         widget.sendCommand(command)
-    }
-
-    // Convert temperature in Kelvin to approximate RGB color
-    private func temperatureToColor(_ kelvin: Double) -> Color {
-        let temp = kelvin / 100
-
-        var red: Double = 0
-        var green: Double = 0
-        var blue: Double = 0
-
-        // Calculate red
-        if temp <= 66 {
-            red = 255
-        } else {
-            red = temp - 60
-            red = 329.698727446 * pow(red, -0.1332047592)
-            red = red.clamped(to: 0 ... 255)
-        }
-
-        // Calculate green
-        if temp <= 66 {
-            green = temp
-            green = 99.4708025861 * log(green) - 161.1195681661
-            green = green.clamped(to: 0 ... 255)
-        } else {
-            green = temp - 60
-            green = 288.1221695283 * pow(green, -0.0755148492)
-            green = green.clamped(to: 0 ... 255)
-        }
-
-        // Calculate blue
-        if temp >= 66 {
-            blue = 255
-        } else if temp <= 19 {
-            blue = 0
-        } else {
-            blue = temp - 10
-            blue = 138.5177312231 * log(blue) - 305.0447927307
-            blue = blue.clamped(to: 0 ... 255)
-        }
-
-        return Color(
-            red: red / 255.0,
-            green: green / 255.0,
-            blue: blue / 255.0
-        )
     }
 }
 
