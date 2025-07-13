@@ -15,15 +15,6 @@ import OpenHABCore
 import os
 
 final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHandling {
-    func resolveHome(for intent: OpenHABSetSwitchStateIntent) async -> INStringResolutionResult {
-        // TODO:
-        INStringResolutionResult.success(with: intent.home ?? "Home")
-    }
-
-    func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
-        await INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
-    }
-
     private static let onLabel = NSLocalizedString("on", comment: "").capitalized
     private static let offLabel = NSLocalizedString("off", comment: "").capitalized
 
@@ -35,10 +26,13 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetSwitchStateIntent")
 
-    private let itemCache: OpenHABItemCache
+    func resolveHome(for intent: OpenHABSetSwitchStateIntent) async -> INStringResolutionResult {
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
+    }
 
-    init(itemCache: OpenHABItemCache = OpenHABItemCache.instance) {
-        self.itemCache = itemCache
+    func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
+        OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideActionOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
@@ -48,21 +42,12 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
         logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection with searchTerm: \(searchTerm ?? "<none>", privacy: .public)")
-
-        let itemNames = await itemCache
-            .getItemNames(
-                searchTerm: searchTerm,
-                types: [.switchItem]
-            )
-            .map(NSString.init)
-
-        return INObjectCollection(items: itemNames)
+        return await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm, itemTypes: [.switchItem])
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
         logger.info("SetSwitchStateIntentHandler provideItemOptionsCollection")
-
-        return try await provideItemOptionsCollection(for: intent, searchTerm: nil)
+        return await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.switchItem])
     }
 
     func confirm(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
@@ -70,10 +55,16 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     }
 
     func handle(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
-        let itemName = intent.item ?? ""
         logger.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
 
-        await OpenHABItemCache.instance.waitUntilReady()
+        guard let itemName = intent.item, let homeName = intent.home else {
+            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item / home name"))
+        }
+
+        let homeId = Preferences.firstStoredHome { $0.homeName == homeName }.map(\.id)
+        guard let homeId else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
+        }
 
         guard !itemName.isEmpty else {
             return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
@@ -87,11 +78,13 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
             return .failureInvalidAction(action, item: itemName)
         }
 
-        guard let item = await itemCache.getItem(name: itemName) else {
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId), !items.isEmpty else {
             return .failureInvalidItem(itemName)
         }
 
-        await itemCache.sendCommand(item, commandToSend: command)
+        let item = items[0]
+
+        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: command)
         return .success(action: action, item: itemName)
     }
 }

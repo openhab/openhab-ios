@@ -15,34 +15,23 @@ import OpenHABCore
 import os.log
 
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
+    private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
+
     func resolveHome(for intent: OpenHABSetColorValueIntent) async -> INStringResolutionResult {
-        // TODO:
-        INStringResolutionResult.success(with: intent.home ?? "Home")
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<NSString> {
-        await INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
-    }
-
-    private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
-    private let itemCache: OpenHABItemCache
-
-    init(itemCache: OpenHABItemCache = OpenHABItemCache.instance) {
-        self.itemCache = itemCache
+        OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache
-            .getItemNames(searchTerm: searchTerm, types: [.color])
-            .map(NSString.init)
-        return INObjectCollection(items: items)
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm, itemTypes: [.color])
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache
-            .getItemNames(searchTerm: nil, types: [.color])
-            .map(NSString.init)
-        return INObjectCollection(items: items)
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.color])
     }
 
     func confirm(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
@@ -52,10 +41,13 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     func handle(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
         logger.info("SetColorValueIntent for \(intent.item ?? "")")
 
-        await OpenHABItemCache.instance.waitUntilReady()
+        guard let itemName = intent.item, let homeName = intent.home else {
+            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item / home name"))
+        }
 
-        guard let itemName = intent.item else {
-            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
+        let homeId = Preferences.firstStoredHome { $0.homeName == homeName }.map(\.id)
+        guard let homeId else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
         guard var value = intent.value else {
@@ -75,11 +67,13 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
 
         value = "\(hue),\(sat),\(val)"
 
-        guard let item = await itemCache.getItem(name: itemName) else {
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId), !items.isEmpty else {
             return .failureInvalidItem(itemName)
         }
 
-        await itemCache.sendCommand(item, commandToSend: value)
+        let item = items[0]
+
+        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: value)
 
         return .success(value: value, item: itemName)
     }

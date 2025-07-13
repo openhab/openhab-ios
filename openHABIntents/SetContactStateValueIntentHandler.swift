@@ -15,15 +15,6 @@ import OpenHABCore
 import os.log
 
 class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIntentHandling {
-    func resolveHome(for intent: OpenHABSetContactStateValueIntent) async -> INStringResolutionResult {
-        // TODO:
-        INStringResolutionResult.success(with: intent.home ?? "Home")
-    }
-
-    func provideHomeOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
-        await INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
-    }
-
     private static let onLabel = NSLocalizedString("on", comment: "").capitalized
     private static let offLabel = NSLocalizedString("off", comment: "").capitalized
 
@@ -34,10 +25,14 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     ]
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
-    private let itemCache: OpenHABItemCache
 
-    init(itemCache: OpenHABItemCache = OpenHABItemCache.instance) {
-        self.itemCache = itemCache
+    func resolveHome(for intent: OpenHABSetContactStateValueIntent) async -> INStringResolutionResult {
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
+        OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideStateOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
@@ -45,17 +40,11 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache
-            .getItemNames(searchTerm: searchTerm, types: [.contact])
-            .map(NSString.init)
-        return INObjectCollection(items: items)
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm, itemTypes: [.contact])
     }
 
     func provideItemOptionsCollection(for intent: OpenHABSetContactStateValueIntent) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache
-            .getItemNames(searchTerm: nil, types: [.contact])
-            .map(NSString.init)
-        return INObjectCollection(items: items)
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, itemTypes: [.contact])
     }
 
     func confirm(intent: OpenHABSetContactStateValueIntent) async -> OpenHABSetContactStateValueIntentResponse {
@@ -65,10 +54,13 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
     func handle(intent: OpenHABSetContactStateValueIntent) async -> OpenHABSetContactStateValueIntentResponse {
         logger.info("SetContactStateValueIntent for \(intent.item ?? "")")
 
-        await OpenHABItemCache.instance.waitUntilReady()
+        guard let itemName = intent.item, let homeName = intent.home else {
+            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item / home name"))
+        }
 
-        guard let itemName = intent.item else {
-            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item name"))
+        let homeId = Preferences.firstStoredHome { $0.homeName == homeName }.map(\.id)
+        guard let homeId else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 
         guard let state = intent.state else {
@@ -82,11 +74,13 @@ class SetContactStateValueIntentHandler: NSObject, OpenHABSetContactStateValueIn
             return .failureInvalidAction(state: state, item: itemName)
         }
 
-        guard let item = await itemCache.getItem(name: itemName) else {
+        guard let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId), !items.isEmpty else {
             return .failureInvalidItem(itemName)
         }
 
-        await itemCache.sendState(item, stateToSend: realState)
+        let item = items[0]
+
+        await OpenHABItemCache.instance.sendCommand(to: item, home: homeId, command: realState)
 
         return .success(item: itemName, state: state)
     }

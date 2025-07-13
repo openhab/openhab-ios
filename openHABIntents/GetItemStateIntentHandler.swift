@@ -18,13 +18,12 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
 
     func resolveHome(for intent: OpenHABGetItemStateIntent) async -> INStringResolutionResult {
-        // TODO: better (fuzzy?) resolution of home name
         logger.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
     func provideHomeOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
-        INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
+        OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
@@ -32,8 +31,7 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
-        let items = await OpenHABIntentHelper.getItemOptions(home: intent.home)
-        return INObjectCollection(items: items.map(\.name).map { $0 as NSString })
+        await OpenHABIntentHelper.getItemOptions(home: intent.home)
     }
 
     func confirm(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
