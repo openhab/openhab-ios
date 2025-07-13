@@ -58,6 +58,8 @@ class OpenHABRootViewController: UIViewController {
 
     private var activeConnection: ConnectionInfo?
 
+    private var currentHomeId: UUID = Preferences.currentHomePreferences.id
+
     override func viewDidLoad() {
         super.viewDidLoad()
         logger.info("OpenHABRootViewController viewDidLoad")
@@ -182,7 +184,18 @@ class OpenHABRootViewController: UIViewController {
         }
 
         serverInfo.debounce(for: .milliseconds(500), scheduler: RunLoop.main) // ensures if multiple values are saved, we get called once
-            .sink { homeSettings in
+            .sink { [weak self] homeSettings in
+                guard let self else { return }
+
+                // If the active home has changed, force a reload of the current view to reflect the new configuration
+                if homeSettings.id != currentHomeId {
+                    currentHomeId = homeSettings.id
+                    // Only the web view needs a reload right now
+                    if currentView === webViewController {
+                        currentView.reloadView()
+                    }
+                }
+
                 let localConnectionConfig = homeSettings.localConnectionConfig
                 let remoteConnectionConfig = homeSettings.remoteConnectionConfig
                 let demomode = homeSettings.demomode
