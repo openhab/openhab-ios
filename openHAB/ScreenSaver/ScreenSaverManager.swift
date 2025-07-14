@@ -149,8 +149,13 @@ final class ScreenSaverManager: NSObject {
         guard let saver = saverView else { return }
         logger.debug("Dismissing screen saver")
         saver.stopAnimation()
-        if configuration.enablesAutoDimming, configuration.restoresBrightness {
-            restoreBrightnessIfNeeded()
+        if configuration.enablesAutoDimming {
+            if configuration.restoresBrightness {
+                restoreBrightnessIfNeeded()
+            } else {
+                let target = min(max(configuration.wakeBrightnessLevel, 0.0), 1.0)
+                UIScreen.main.brightness = target
+            }
         }
         UIView.animate(withDuration: 0.2, animations: {
             saver.alpha = 0

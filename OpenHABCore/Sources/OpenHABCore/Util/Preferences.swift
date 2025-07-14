@@ -159,6 +159,9 @@ public enum Preferences {
     @UserDefault("screensaverRestoreBrightness", defaultValue: true)
     public static var screensaverRestoreBrightness: Bool
 
+    @UserDefault("screensaverWakeBrightness", defaultValue: 1.0)
+    public static var screensaverWakeBrightness: Double
+
     @UserDefault("hideStatusBar", defaultValue: false)
     public static var hideStatusBar: Bool
 

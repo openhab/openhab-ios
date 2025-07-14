@@ -116,6 +116,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
             config.enablesAutoDimming = Preferences.screensaverEnableDimming
             config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
             config.showsSeconds = Preferences.screensaverShowsSeconds
             config.uses24HourTime = Preferences.screensaverUse24Hour
             config.restoresBrightness = Preferences.screensaverRestoreBrightness
@@ -371,6 +372,7 @@ extension AppDelegate {
             config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
             config.enablesAutoDimming = Preferences.screensaverEnableDimming
             config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
             config.showsSeconds = Preferences.screensaverShowsSeconds
             config.uses24HourTime = Preferences.screensaverUse24Hour
             config.restoresBrightness = Preferences.screensaverRestoreBrightness

@@ -13,7 +13,7 @@ import CoreGraphics
 import Foundation
 
 struct ScreenSaverConfiguration {
-    var idleInterval: TimeInterval = 15 // 2 minutes
+    var idleInterval: TimeInterval = 15
 
     var movementInterval: TimeInterval = 8
 
@@ -33,17 +33,15 @@ struct ScreenSaverConfiguration {
 
     var restoresBrightness = true
 
+    var wakeBrightnessLevel: CGFloat = 1.0
+
     /// If `nil` the system  font is used for the time/date
     var fontName: String?
 
-    /// The size of the time (clock) text expressed as a fraction of the
-    /// shorter screen edge (so a percentage value)
     var timeFontSizeRatio: CGFloat = 0.2
 
-    /// The size of the date text expressed relative to the computed time font
-    /// size (percentage value compared to the clock)
+    /// The size of the date text, percentage value compared to the clock
     var dateFontRelativeSize: CGFloat = 0.4
 
-    /// Duration in seconds for the fade in and fade out animation
     var fadeDuration: TimeInterval = 2.0
 }

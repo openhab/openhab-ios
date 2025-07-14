@@ -26,6 +26,7 @@ struct ScreenSaverSettingsView: View {
         config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
         config.enablesAutoDimming = Preferences.screensaverEnableDimming
         config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
+        config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
         config.showsSeconds = Preferences.screensaverShowsSeconds
         config.uses24HourTime = Preferences.screensaverUse24Hour
         config.fadeDuration = Preferences.screensaverFadeDuration
@@ -131,11 +132,6 @@ struct ScreenSaverSettingsView: View {
                     set: { config.enablesAutoDimming = $0 }
                 ))
 
-                Toggle("Restore Previous Value on Wake", isOn: Binding(
-                    get: { config.restoresBrightness },
-                    set: { config.restoresBrightness = $0 }
-                )).disabled(!config.enablesAutoDimming)
-
                 VStack(alignment: .leading) {
                     Text("Dim Level: \(Int(config.dimLevel * 100)) %")
                         .font(.caption)
@@ -145,6 +141,21 @@ struct ScreenSaverSettingsView: View {
                     ), in: 0 ... 100, step: 1)
                 }
                 .disabled(!config.enablesAutoDimming)
+
+                Toggle("Restore Previous Brightness on Wake", isOn: Binding(
+                    get: { config.restoresBrightness },
+                    set: { config.restoresBrightness = $0 }
+                )).disabled(!config.enablesAutoDimming)
+
+                VStack(alignment: .leading) {
+                    Text("Restore Brightness: \(Int(config.wakeBrightnessLevel * 100)) %")
+                        .font(.caption)
+                    Slider(value: Binding(
+                        get: { Double(config.wakeBrightnessLevel * 100) },
+                        set: { config.wakeBrightnessLevel = CGFloat($0) / 100 }
+                    ), in: 0 ... 100, step: 1)
+                }
+                .disabled(!config.enablesAutoDimming || config.restoresBrightness)
             }
             .disabled(!config.isEnabled)
 
@@ -172,6 +183,7 @@ struct ScreenSaverSettingsView: View {
             Preferences.screensaverDateFontRatio = Double(config.dateFontRelativeSize)
             Preferences.screensaverEnableDimming = config.enablesAutoDimming
             Preferences.screensaverDimLevel = Double(config.dimLevel)
+            Preferences.screensaverWakeBrightness = Double(config.wakeBrightnessLevel)
             Preferences.screensaverShowsSeconds = config.showsSeconds
             Preferences.screensaverUse24Hour = config.uses24HourTime
             Preferences.screensaverFadeDuration = config.fadeDuration
