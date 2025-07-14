@@ -81,6 +81,8 @@ struct SetpointRow: View {
         } else {
             numberState = NumberState(value: limitedNewValue)
         }
+        
+        widget.sendItemUpdate(state: numberState)
     }
 
     func decreaseValue() {
