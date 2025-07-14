@@ -25,8 +25,8 @@ final class ScreenSaverManager: NSObject {
 
     private(set) var configuration = ScreenSaverConfiguration()
 
-    private var idleTimer: Timer
-    
+    private var idleTimer: Timer?
+
     private weak var window: UIWindow?
 
     private var saverView: ScreenSaverView?
