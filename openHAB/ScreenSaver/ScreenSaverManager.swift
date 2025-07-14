@@ -26,18 +26,13 @@ final class ScreenSaverManager: NSObject {
     private(set) var configuration = ScreenSaverConfiguration()
 
     private var idleTimer: Timer?
-
-    /// The window we are observing / presenting the saver on.
+.
     private weak var window: UIWindow?
 
-    /// The currently visible screen saver (if any).
     private var saverView: ScreenSaverView?
 
-    /// Separate window sitting above the status bar to ensure the saver covers
-    /// the entire screen, including the system status bar.
     private var overlayWindow: UIWindow?
 
-    /// Remembers the screen brightness before the dimming is applied
     private var previousBrightness: CGFloat?
 
     override private init() {
@@ -117,7 +112,6 @@ final class ScreenSaverManager: NSObject {
         overlay.rootViewController = hostVC
         overlay.makeKeyAndVisible()
 
-        // Trigger status bar update
         hostVC.setNeedsStatusBarAppearanceUpdate()
 
         let saver = ScreenSaverView(configuration: configuration)
@@ -183,7 +177,6 @@ final class ScreenSaverManager: NSObject {
         previousBrightness = nil
     }
 
-    /// Immediately presents the screen saver with the provided configuration, ignoring the idle timer.
     /// This is used fo testing the screen saver in the Settings view (before settings are saved)
     @MainActor
     func presentSaver(configuration: ScreenSaverConfiguration) {
@@ -213,7 +206,6 @@ extension Notification.Name {
 
 extension ScreenSaverManager: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        // Allow our gesture recognizers to live side-by-side with the app's recognizers.
         true
     }
 }
