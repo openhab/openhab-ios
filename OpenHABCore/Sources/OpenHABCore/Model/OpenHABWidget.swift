@@ -59,7 +59,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     }
 
     public enum InputHint: String, Decodable {
-        case text, number, date, time, datetime, unknown
+        case text, number, date, time, dateTime, unknown
     }
 
     private let logger = Logger(subsystem: "org.openhab", category: "OpenHABWidget")

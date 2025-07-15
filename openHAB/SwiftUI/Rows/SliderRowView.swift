@@ -14,32 +14,64 @@ import SwiftUI
 
 struct SliderRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    // Example: assuming widget has a numeric value as text
-    var currentValue: Double {
-        Double(widget.labelValue ?? "") ?? 0.0
+    @State private var currentValue = 0.0
+    @State private var isUserInteracting = false
+
+    private var displayValue: Double {
+        isUserInteracting ? currentValue : (widget.stateValueAsNumberState?.value ?? widget.minValue)
+    }
+
+    private var sliderRange: ClosedRange<Double> {
+        widget.minValue ... widget.maxValue
     }
 
     var body: some View {
         HStack {
-            if IconView.shouldShowIcon(for: widget) {
-                IconView(widget: widget)
-                    .frame(width: 24, height: 24)
-            }
+            IconView(widget: widget)
+                .frame(width: 24, height: 24)
 
             Text(widget.labelText ?? "")
+
             Spacer()
+
             if let value = widget.labelValue {
                 Text(value)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            Slider(value: .constant(currentValue), in: 0 ... 100)
-                .disabled(true) // unless you want editable
+            Slider(value: $currentValue, in: sliderRange) { isEditing in
+                isUserInteracting = isEditing
+                if !isEditing {
+                    sendSliderUpdate(currentValue)
+                }
+            }
         }
+        .onAppear {
+            loadCurrentValue()
+        }
+        .onChange(of: widget.stateValueAsNumberState?.value) { newValue in
+            if !isUserInteracting, let newValue {
+                currentValue = newValue
+            }
+        }
+    }
+
+    private func loadCurrentValue() {
+        currentValue = widget.stateValueAsNumberState?.value ?? widget.minValue
+    }
+
+    private func sendSliderUpdate(_ newValue: Double) {
+        var numberState = widget.stateValueAsNumberState
+        numberState = numberState ?? NumberState(value: newValue)
+        numberState?.value = newValue
+        widget.sendItemUpdate(state: numberState)
     }
 }
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
-    SliderRowView(widget: widget)
+    VStack {
+        SliderRowView(widget: widget)
+        Spacer()
+    }
 }

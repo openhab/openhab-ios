@@ -49,5 +49,8 @@ struct TextRowView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
-    TextRowView(widget: widget)
+    VStack {
+        TextRowView(widget: widget)
+        Spacer()
+    }
 }

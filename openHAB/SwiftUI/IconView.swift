@@ -102,7 +102,7 @@ extension IconView {
         )
     }
 
-    init(icon: String, colorColor: Color = .primary) {
+    init(icon: String, iconColor: String = "primary") {
         let widget = OpenHABWidget(icon: icon, iconColor: iconColor)
         self.init(widget: widget)
     }

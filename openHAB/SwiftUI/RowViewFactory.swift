@@ -35,7 +35,7 @@ enum RowViewFactory {
                 SliderRowView(widget: widget)
             }
         case .input:
-            if [.date, .time, .datetime].contains(widget.inputHint) {
+            if [.date, .time, .dateTime].contains(widget.inputHint) {
                 DatePickerInputRowView(widget: widget)
             } else {
                 TextInputRowView(widget: widget)

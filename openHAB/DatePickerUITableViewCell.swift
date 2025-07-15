@@ -30,7 +30,7 @@ class DatePickerUITableViewCell: GenericUITableViewCell {
                 datePicker.datePickerMode = .date
             case .time:
                 datePicker.datePickerMode = .time
-            case .datetime:
+            case .dateTime:
                 datePicker.datePickerMode = .dateAndTime
             default:
                 fatalError("Must not use this cell for input other than date and time")

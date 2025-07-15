@@ -22,6 +22,11 @@ struct ColorPickerRowView: View {
 
     var body: some View {
         HStack {
+            if IconView.shouldShowIcon(for: widget) {
+                IconView(widget: widget)
+                    .frame(width: 24, height: 24)
+            }
+
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
@@ -76,5 +81,14 @@ struct ColorPickerRowView: View {
         }
 
         return Color(hue: hue / 360.0, saturation: saturation / 100.0, brightness: brightness / 100.0)
+    }
+}
+
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[15]
+    VStack {
+        ColorPickerRowView(widget: widget)
+            .padding()
+        Spacer()
     }
 }

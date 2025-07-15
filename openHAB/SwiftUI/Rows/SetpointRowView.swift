@@ -111,5 +111,8 @@ struct SetpointRowView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[3]
-    SetpointRowView(widget: widget)
+    VStack {
+        SetpointRowView(widget: widget)
+        Spacer()
+    }
 }

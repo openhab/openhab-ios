@@ -172,6 +172,13 @@ extension View {
 }
 
 #Preview {
-    let widget = PreviewConstants.openHABSitemapPage!.widgets.first { $0.type == .switchWidget }!
-    ButtonGridRowView(widget: widget)
+    if let widget = PreviewConstants.openHABSitemapPage!.widgets.first(where: { $0.type == .buttongrid }) {
+        VStack {
+            ButtonGridRowView(widget: widget)
+                .padding()
+            Spacer()
+        }
+    } else {
+        Text("No button grid widget found")
+    }
 }

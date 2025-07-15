@@ -84,5 +84,8 @@ struct SegmentedRowView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[4]
-    SegmentedRowView(widget: widget)
+    VStack {
+        SegmentedRowView(widget: widget)
+        Spacer()
+    }
 }

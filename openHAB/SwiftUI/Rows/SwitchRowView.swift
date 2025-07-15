@@ -69,5 +69,8 @@ struct SwitchRowView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[2]
-    SwitchRowView(widget: widget)
+    VStack {
+        SwitchRowView(widget: widget)
+        Spacer()
+    }
 }

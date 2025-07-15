@@ -818,7 +818,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             let textFieldAdder: ((UITextField) -> Void)?
 
             switch hint {
-            case .date, .time, .datetime:
+            case .date, .time, .dateTime:
                 // value setting is handeled by the cell itself
                 textExtractor = nil
                 textFieldAdder = nil

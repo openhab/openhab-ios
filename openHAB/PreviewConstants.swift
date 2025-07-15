@@ -13,6 +13,7 @@ import Foundation
 import OpenHABCore
 import os.log
 
+// swiftlint:disable type_body_length
 enum PreviewConstants {
     static let logger = Logger(subsystem: "org.openhab", category: "PreviewConstants")
 
@@ -418,8 +419,134 @@ enum PreviewConstants {
                   "groupNames": []
                 },
                 "widgets": []
-              }
+              },
+                  {
+                    "widgetId": "15",
+                    "type": "Colorpicker",
+                    "visibility": true,
+                    "label": "Color",
+                    "labelSource": "SITEMAP_WIDGET",
+                    "icon": "colorwheel",
+                    "staticIcon": false,
+                    "unit": "",
+                    "mappings": [],
+                    "item": {
+                      "link": "http://192.168.2.10:8080/rest/items/test_LEDLight_color",
+                      "state": "0,0,73",
+                      "type": "Color",
+                      "name": "test_LEDLight_color",
+                      "label": "test_LEDLight_color",
+                      "category": "",
+                      "tags": [],
+                      "groupNames": []
+                    },
+                    "widgets": []
+                  },
+                  {
+                    "widgetId": "16",
+                    "type": "Buttongrid",
+                    "visibility": true,
+                    "label": "Remote Control [-]",
+                    "labelSource": "SITEMAP_WIDGET",
+                    "icon": "screen",
+                    "staticIcon": true,
+                    "pattern": "%s",
+                    "unit": "",
+                    "mappings": [
+                      {
+                        "row": 1,
+                        "column": 1,
+                        "command": "POWER",
+                        "label": "Power",
+                        "icon": "switch-off"
+                      },
+                      {
+                        "row": 1,
+                        "column": 2,
+                        "command": "MENU",
+                        "label": "Menu"
+                      },
+                      {
+                        "row": 1,
+                        "column": 3,
+                        "command": "EXIT",
+                        "label": "Exit"
+                      },
+                      {
+                        "row": 2,
+                        "column": 2,
+                        "command": "UP",
+                        "label": "Up",
+                        "icon": "f7:arrowtriangle_up"
+                      },
+                      {
+                        "row": 2,
+                        "column": 4,
+                        "command": "VOL_PLUS",
+                        "label": "Volume +"
+                      },
+                      {
+                        "row": 3,
+                        "column": 1,
+                        "command": "LEFT",
+                        "label": "Left",
+                        "icon": "f7:arrowtriangle_left"
+                      },
+                      {
+                        "row": 3,
+                        "column": 2,
+                        "command": "OK",
+                        "label": "Ok"
+                      },
+                      {
+                        "row": 3,
+                        "column": 3,
+                        "command": "RIGHT",
+                        "label": "Right",
+                        "icon": "f7:arrowtriangle_right"
+                      },
+                      {
+                        "row": 3,
+                        "column": 4,
+                        "command": "MUTE",
+                        "label": "Mute",
+                        "icon": "soundvolume_mute"
+                      },
+                      {
+                        "row": 4,
+                        "column": 2,
+                        "command": "DOWN",
+                        "label": "Down",
+                        "icon": "f7:arrowtriangle_down"
+                      },
+                      {
+                        "row": 4,
+                        "column": 4,
+                        "command": "VOL_MINUS",
+                        "label": "Volume -"
+                      }
+                    ],
+                    "item": {
+                      "link": "http://192.168.2.10:8080/rest/items/test_RemoteControl",
+                      "state": "NULL",
+                      "stateDescription": {
+                        "pattern": "%s",
+                        "readOnly": false,
+                        "options": []
+                      },
+                      "type": "String",
+                      "name": "test_RemoteControl",
+                      "label": "test_RemoteControl",
+                      "category": "",
+                      "tags": [],
+                      "groupNames": []
+                    },
+                    "widgets": []
+                  }
+
         ]
     }
     """.utf8)
 }
+
+// swiftlint:enable type_body_length

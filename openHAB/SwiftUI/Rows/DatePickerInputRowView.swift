@@ -24,7 +24,7 @@ struct DatePickerInputRowView: View {
         switch widget.inputHint {
         case .date: .date
         case .time: .hourAndMinute
-        case .datetime: [.date, .hourAndMinute]
+        case .dateTime: [.date, .hourAndMinute]
         default: [.date, .hourAndMinute]
         }
     }
@@ -34,11 +34,17 @@ struct DatePickerInputRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        HStack {
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
+
+//            if let labelValue = widget.labelValue, !labelValue.isEmpty {
+//                Text(labelValue)
+//                    .font(.caption)
+//                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
+//            }
 
             DatePicker(
                 selection: $selectedDate,
@@ -46,15 +52,8 @@ struct DatePickerInputRowView: View {
             ) {
                 EmptyView()
             }
-            // TODO: Consider reintroducing a dynamic DatePicker style based on `useWheelStyle` if needed in the future.
             .onChange(of: selectedDate) { newDate in
                 sendDateCommand(newDate)
-            }
-
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                Text(labelValue)
-                    .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
         .onAppear {
@@ -72,7 +71,7 @@ struct DatePickerInputRowView: View {
             formatter.dateFormat = "yyyy-MM-dd"
         case .time:
             formatter.dateFormat = "HH:mm"
-        case .datetime:
+        case .dateTime:
             formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         default:
             formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
@@ -98,5 +97,14 @@ struct DatePickerInputRowView: View {
             }
         }
         return nil
+    }
+}
+
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
+    VStack {
+        ColorTemperaturePickerRowView(widget: widget)
+            .padding()
+        Spacer()
     }
 }

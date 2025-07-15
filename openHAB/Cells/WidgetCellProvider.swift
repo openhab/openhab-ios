@@ -35,7 +35,7 @@ enum WidgetCellFactory {
                 SliderProvider()
             }
         case .input:
-            if [.date, .time, .datetime].contains(widget.inputHint) {
+            if [.date, .time, .dateTime].contains(widget.inputHint) {
                 DatePickerInputProvider()
             } else {
                 TextInputProvider()

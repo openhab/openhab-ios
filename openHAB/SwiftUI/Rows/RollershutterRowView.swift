@@ -71,5 +71,8 @@ struct RollershutterRowView: View {
 
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[5]
-    RollershutterRowView(widget: widget)
+    VStack {
+        RollershutterRowView(widget: widget)
+        Spacer()
+    }
 }

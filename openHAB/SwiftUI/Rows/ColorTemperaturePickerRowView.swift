@@ -59,14 +59,14 @@ struct ColorTemperaturePickerRowView: View {
                         .cornerRadius(3)
 
                         // Actual slider
-                        Slider(
+                        CustomSliderView(
                             value: $selectedTemperature,
-                            in: minTemperature ... maxTemperature,
+                            range: minTemperature ... maxTemperature,
                             step: 100
-                        ) { _ in
+                        ) {
                             sendTemperatureCommand()
                         }
-                        .tint(.clear) // Hide default slider track
+                        .frame(height: 28)
                     }
 
                     // Cool indicator
@@ -131,8 +131,50 @@ struct ColorTemperaturePickerRowView: View {
     }
 }
 
+struct CustomSliderView: View {
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let step: Double
+    let onEditingChanged: () -> Void
+
+    @GestureState private var dragOffset: CGSize = .zero
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let height = geometry.size.height
+            let normalized = CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound))
+            let xPos = normalized * width
+
+            ZStack(alignment: .leading) {
+                Color.clear
+
+                Circle()
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(.white)
+                    .shadow(radius: 1)
+                    .overlay(Circle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
+                    .position(x: xPos, y: height / 2)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { gesture in
+                                let location = gesture.location.x.clamped(to: 0 ... width)
+                                let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
+                                let stepped = (raw / step).rounded() * step
+                                value = stepped.clamped(to: range)
+                                onEditingChanged()
+                            }
+                    )
+            }
+        }
+    }
+}
+
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
-    ColorTemperaturePickerRowView(widget: widget)
-        .padding()
+    VStack {
+        ColorTemperaturePickerRowView(widget: widget)
+            .padding()
+        Spacer()
+    }
 }
