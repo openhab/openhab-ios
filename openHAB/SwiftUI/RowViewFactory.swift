@@ -60,6 +60,8 @@ enum RowViewFactory {
             MapRowView(widget: widget)
         case .colortemperaturepicker:
             ColorTemperaturePickerRowView(widget: widget)
+        case .buttongrid:
+            ButtonGridRowView(widget: widget)
         case .group, .defaultWidget, .unknown:
             GenericRowView(widget: widget)
         }

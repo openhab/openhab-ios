@@ -101,6 +101,11 @@ extension IconView {
             size: CGSize(width: 24, height: 24)
         )
     }
+
+    init(icon: String, colorColor: Color = .primary) {
+        let widget = OpenHABWidget(icon: icon, iconColor: iconColor)
+        self.init(widget: widget)
+    }
 }
 
 // MARK: - Widget Type Extensions

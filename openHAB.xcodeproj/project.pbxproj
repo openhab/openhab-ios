@@ -156,6 +156,7 @@
 		DAD0857B2AE4782F001D36BE /* OpenHABWatchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */; };
 		DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */; };
 		DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */; };
+		DAE7B4A72E26927C00B9FE99 /* ButtonGridRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */; };
 		DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */; };
 		DAEA21DA2DBF477E00D54342 /* SwitchRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */; };
 		DAEA21DC2DBF47DA00D54342 /* SliderRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */; };
@@ -494,6 +495,7 @@
 		DAD488B3287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = Resources/nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		DAD488B4287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonGridRowView.swift; sourceTree = "<group>"; };
 		DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowViewFactory.swift; sourceTree = "<group>"; };
 		DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchRowView.swift; sourceTree = "<group>"; };
 		DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderRowView.swift; sourceTree = "<group>"; };
@@ -898,6 +900,7 @@
 		DAC949FF2E21A473007E67B7 /* Rows */ = {
 			isa = PBXGroup;
 			children = (
+				DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */,
 				DA35E2B22E1EEA9D003987BB /* ColorPickerRowView.swift */,
 				DAEE35062E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift */,
 				DA35E2B32E1EEA9D003987BB /* DatePickerInputRowView.swift */,
@@ -1730,6 +1733,7 @@
 				DA9F81872C85020F00B47B72 /* RTFTextView.swift in Sources */,
 				DA6B2EF12C87B59000DF77CF /* NotificationsView.swift in Sources */,
 				DA50C7BF2B0A65300009F716 /* SliderWithSwitchSupportUITableViewCell.swift in Sources */,
+				DAE7B4A72E26927C00B9FE99 /* ButtonGridRowView.swift in Sources */,
 				DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */,
 				DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */,
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,

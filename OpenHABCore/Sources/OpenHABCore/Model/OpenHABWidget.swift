@@ -54,6 +54,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case video = "Video"
         case webview = "Webview"
         case colortemperaturepicker = "Colortemperaturepicker"
+        case buttongrid = "Buttongrid"
         case unknown = "Unknown"
     }
 
@@ -334,6 +335,11 @@ public extension OpenHABWidget {
 
         self.forceAsItem = forceAsItem
         stateEnumBinding = stateEnum
+    }
+
+    convenience init(icon: String, iconColor: String? = nil) {
+        // swiftlint:disable:next line_length
+        self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil)
     }
 }
 
