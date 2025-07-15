@@ -22,31 +22,25 @@ struct TextInputRowView: View {
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            if IconView.shouldShowIcon(for: widget) {
-                IconView(widget: widget)
-                    .frame(width: 24, height: 24)
-                    .padding(.top, 4) // Align with text
+        HStack {
+            IconView(widget: widget)
+                .frame(width: 24, height: 24)
+
+            if let labelText = widget.labelText, !labelText.isEmpty {
+                Text(labelText)
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                if let labelText = widget.labelText, !labelText.isEmpty {
-                    Text(labelText)
-                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-                }
+            Spacer()
 
+            if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 TextField("Enter text", text: $inputText)
+                    .multilineTextAlignment(widget.inputHint == .number ? .trailing : .leading)
                     .textFieldStyle(.roundedBorder)
                     .focused($isTextFieldFocused)
                     .onSubmit {
                         sendTextCommand()
                     }
-
-                if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                    Text(labelValue)
-                        .font(.caption)
-                        .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-                }
             }
         }
         .onAppear {
@@ -63,5 +57,13 @@ struct TextInputRowView: View {
         logger.info("Sending text command: \(inputText)")
         widget.sendCommand(inputText)
         isTextFieldFocused = false
+    }
+}
+
+#Preview {
+    let widget = PreviewConstants.openHABSitemapPage!.widgets[17]
+    VStack {
+        TextInputRowView(widget: widget)
+        Spacer()
     }
 }

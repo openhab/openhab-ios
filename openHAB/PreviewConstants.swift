@@ -542,7 +542,36 @@ enum PreviewConstants {
                       "groupNames": []
                     },
                     "widgets": []
-                  }
+                  },
+     {
+            "widgetId": "17",
+            "type": "Input",
+            "visibility": true,
+            "label": "Meter [166000]",
+            "labelSource": "SITEMAP_WIDGET",
+            "icon": "energy",
+            "staticIcon": true,
+            "pattern": "%.0f %unit%",
+            "unit": "",
+            "mappings": [],
+            "inputHint": "number",
+            "item": {
+              "link": "http://192.168.2.10:8080/rest/items/Test_Meter_Reading",
+              "state": "166000.0",
+              "stateDescription": {
+                "pattern": "%.0f",
+                "readOnly": false,
+                "options": []
+              },
+              "type": "Number",
+              "name": "Test_Meter_Reading",
+              "label": "Test_Meter_Reading",
+              "category": "",
+              "tags": [],
+              "groupNames": []
+            },
+            "widgets": []
+          },
 
         ]
     }

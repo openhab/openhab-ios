@@ -75,6 +75,7 @@ struct SitemapPageView: View {
         .sheet(isPresented: $showSelectionSheet) {
             if let widget = selectedWidget {
                 SelectionView(
+                    labelText: widget.labelText,
                     mappings: widget.mappingsOrItemOptions,
                     selectionItemState: widget.item?.state
                 ) { selectedMappingIndex in

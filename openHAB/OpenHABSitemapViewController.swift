@@ -803,6 +803,7 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
             logger.info("Selected selection widget in status: \(selectionItemState ?? "unknown")")
             let hostingController = UIHostingController(
                 rootView: SelectionView(
+                    labelText: widget.labelText,
                     mappings: widget.mappingsOrItemOptions,
                     selectionItemState: selectionItemState
                 ) { selectedMappingIndex in

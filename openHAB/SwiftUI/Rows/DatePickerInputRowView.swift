@@ -35,16 +35,15 @@ struct DatePickerInputRowView: View {
 
     var body: some View {
         HStack {
+            IconView(widget: widget)
+                .frame(width: 24, height: 24)
+
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-//            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-//                Text(labelValue)
-//                    .font(.caption)
-//                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-//            }
+            Spacer()
 
             DatePicker(
                 selection: $selectedDate,

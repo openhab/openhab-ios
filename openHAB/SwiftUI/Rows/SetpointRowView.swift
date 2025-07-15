@@ -40,15 +40,11 @@ struct SetpointRowView: View {
 
     var body: some View {
         HStack {
-            if IconView.shouldShowIcon(for: widget) {
-                IconView(widget: widget)
-                    .frame(width: 24, height: 24)
-            }
+            IconView(widget: widget)
+                .frame(width: 24, height: 24)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(widget.labelText ?? widget.label)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-            }
+            Text(widget.labelText ?? widget.label)
+                .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
 
             Spacer()
 

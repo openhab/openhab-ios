@@ -32,10 +32,16 @@ struct ColorTemperaturePickerRowView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Label
-            if let labelText = widget.labelText, !labelText.isEmpty {
-                Text(labelText)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+            HStack {
+                IconView(widget: widget)
+                    .frame(width: 24, height: 24)
+
+                if let labelText = widget.labelText, !labelText.isEmpty {
+                    Text(labelText)
+                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                }
+
+                Spacer()
             }
 
             // Color temperature slider with gradient background

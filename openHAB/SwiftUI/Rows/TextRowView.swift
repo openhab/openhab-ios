@@ -19,10 +19,8 @@ struct TextRowView: View {
 
     var body: some View {
         HStack {
-            if IconView.shouldShowIcon(for: widget) {
-                IconView(widget: widget)
-                    .frame(width: 24, height: 24)
-            }
+            IconView(widget: widget)
+                .frame(width: 24, height: 24)
 
             Text(widget.labelText ?? "")
                 .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
