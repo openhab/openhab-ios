@@ -40,7 +40,7 @@ struct MapRowView: View {
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            Map(coordinateRegion: $region, annotationItems: coordinates.map { [$0] } ?? []) { coordinate in
+            Map(coordinateRegion: $region, annotationItems: coordinates != nil ? [coordinates!] : []) { coordinate in
                 MapPin(coordinate: coordinate, tint: .red)
             }
             .frame(height: 200)

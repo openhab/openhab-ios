@@ -101,11 +101,8 @@ struct SetpointRowView: View {
             return
         }
 
-        if numberState != nil {
-            numberState?.value = limitedNewValue
-        } else {
-            numberState = NumberState(value: limitedNewValue)
-        }
+        numberState = numberState ?? NumberState(value: limitedNewValue)
+        numberState?.value = limitedNewValue
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(limitedNewValue)")
         widget.sendItemUpdate(state: numberState)

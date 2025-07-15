@@ -76,12 +76,9 @@ struct SetpointRow: View {
             return
         }
 
-        if numberState != nil {
-            numberState?.value = limitedNewValue
-        } else {
-            numberState = NumberState(value: limitedNewValue)
-        }
-        
+        numberState = numberState ?? NumberState(value: limitedNewValue)
+        numberState?.value = limitedNewValue
+
         widget.sendItemUpdate(state: numberState)
     }
 

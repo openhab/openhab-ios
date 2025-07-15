@@ -17,6 +17,7 @@ import SwiftUI
 struct SelectionRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedIndex = 0
+    @ScaledMetric(relativeTo: .body) private var pickerHeight: CGFloat = 24
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSelectionView")
 
@@ -41,7 +42,7 @@ struct SelectionRowView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .frame(height: 24) // 👈 Restrict height of the Picker
+                .frame(height: pickerHeight) // 👈 Restrict height of the Picker
                 .onChange(of: selectedIndex) { newIndex in
                     guard let mapping = mappings[safe: newIndex] else { return }
                     logger.info("Selection changed to: \(mapping.label)")

@@ -17,6 +17,7 @@ struct SitemapPageView: View {
     @State private var showSelectionSheet = false
     @State private var showInputAlert = false
     @State private var selectedWidget: OpenHABWidget?
+    @State private var inputText = ""
 
     private var isLinkedPage: Bool {
         viewModel.isLinked
@@ -85,11 +86,14 @@ struct SitemapPageView: View {
         }
         .alert("Input", isPresented: $showInputAlert) {
             if let widget = selectedWidget {
-                TextField("Enter value", text: .constant(widget.state))
+                TextField("Enter value", text: $inputText)
                 Button("Cancel", role: .cancel) {}
                 Button("OK") {
                     // Handle input submission
                     showInputAlert = false
+                    if let item = widget.item {
+                        viewModel.sendCommand(item, commandToSend: inputText)
+                    }
                 }
             }
         }

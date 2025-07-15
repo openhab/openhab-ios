@@ -46,11 +46,7 @@ struct DatePickerInputRowView: View {
             ) {
                 EmptyView()
             }
-//        if useWheelStyle {
-//            .datePickerStyle(.wheel)
-//        } else {
-//            .datePickerStyle(.compact)
-//        }
+            // TODO: Consider reintroducing a dynamic DatePicker style based on `useWheelStyle` if needed in the future.
             .onChange(of: selectedDate) { newDate in
                 sendDateCommand(newDate)
             }

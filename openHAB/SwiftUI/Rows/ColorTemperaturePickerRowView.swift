@@ -66,7 +66,7 @@ struct ColorTemperaturePickerRowView: View {
                         ) { _ in
                             sendTemperatureCommand()
                         }
-                        .accentColor(.clear) // Hide default slider track
+                        .tint(.clear) // Hide default slider track
                     }
 
                     // Cool indicator
