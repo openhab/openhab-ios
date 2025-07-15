@@ -86,10 +86,6 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
-    deinit {
-        pageHandlingTask?.cancel()
-    }
-
     func loadSettings() {
         defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
     }
@@ -247,7 +243,7 @@ class SitemapPageViewModel: ObservableObject {
     func pushSitemap(name: String, path: String?) async {
         defaultSitemap = name
         pageId = path ?? ""
-        await startPageHandling()
+        startPageHandling()
     }
 
     private func discoverAndSelectSitemap() async {
@@ -345,6 +341,10 @@ class SitemapPageViewModel: ObservableObject {
                 os_log("SitemapPageViewModel: Failed to send command %{PUBLIC}@ to %{PUBLIC}@ — %{PUBLIC}@", log: .default, type: .error, command, itemname, error.localizedDescription)
             }
         }
+    }
+
+    deinit {
+        pageHandlingTask?.cancel()
     }
 }
 

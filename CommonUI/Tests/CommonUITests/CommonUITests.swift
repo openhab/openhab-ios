@@ -13,7 +13,7 @@
 import Numerics
 import Testing
 
-struct ColorTemperatureTests {
+struct CommonUITests {
     @Test func lowKelvinValue() {
         let color = componentsForColorTemperature(temperature: 1000)
         #expect(color.r.isApproximatelyEqual(to: 1.0, relativeTolerance: 0.01))

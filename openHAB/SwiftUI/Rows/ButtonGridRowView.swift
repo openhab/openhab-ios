@@ -14,73 +14,6 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-struct ButtonGridRowView: View {
-    @ObservedObject var widget: OpenHABWidget
-
-    private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridRowView")
-
-    // Maximum number of columns based on screen width
-    private let maxColumns = 12
-
-    private var buttons: [OpenHABWidgetMapping] {
-        widget.mappings
-    }
-
-//    private var showLabelAndIcon: Bool {
-//        !widget.label.isEmpty && widget.labelSource == .sitemapDefinition
-//    }
-
-    private var gridRows: Int {
-        buttons.map { $0.row ?? 1 }.max() ?? 1
-    }
-
-    private var gridColumns: Int {
-        min(buttons.map { $0.column ?? 1 }.max() ?? 1, maxColumns)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-//            if showLabelAndIcon {
-            HStack {
-                if IconView.shouldShowIcon(for: widget) {
-                    IconView(widget: widget)
-                        .frame(width: 24, height: 24)
-                }
-
-                Text(widget.labelText ?? widget.label)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-
-                Spacer()
-            }
-//            }
-
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: gridColumns), spacing: 8) {
-                ForEach(0 ..< gridRows, id: \.self) { row in
-                    ForEach(0 ..< gridColumns, id: \.self) { column in
-                        let button = buttonForPosition(row: row, column: column)
-
-                        if let button {
-                            ButtonGridButton(button: button, widget: widget)
-                        } else {
-                            // Empty cell to maintain grid structure
-                            Rectangle()
-                                .fill(Color.clear)
-                                .frame(height: 44)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func buttonForPosition(row: Int, column: Int) -> OpenHABWidgetMapping? {
-        buttons.first { button in
-            // OpenHAB uses 1-based indexing, convert to 0-based
-            (button.row ?? 1) - 1 == row && (button.column ?? 1) - 1 == column
-        }
-    }
-}
-
 struct ButtonGridButton: View {
     let button: OpenHABWidgetMapping
     let widget: OpenHABWidget
@@ -153,6 +86,73 @@ struct ButtonGridButton: View {
 
     private func handleTouchUp() {
         isPressed = false
+    }
+}
+
+struct ButtonGridRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridRowView")
+
+    // Maximum number of columns based on screen width
+    private let maxColumns = 12
+
+    private var buttons: [OpenHABWidgetMapping] {
+        widget.mappings
+    }
+
+//    private var showLabelAndIcon: Bool {
+//        !widget.label.isEmpty && widget.labelSource == .sitemapDefinition
+//    }
+
+    private var gridRows: Int {
+        buttons.map { $0.row ?? 1 }.max() ?? 1
+    }
+
+    private var gridColumns: Int {
+        min(buttons.map { $0.column ?? 1 }.max() ?? 1, maxColumns)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+//            if showLabelAndIcon {
+            HStack {
+                if IconView.shouldShowIcon(for: widget) {
+                    IconView(widget: widget)
+                        .frame(width: 24, height: 24)
+                }
+
+                Text(widget.labelText ?? widget.label)
+                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+
+                Spacer()
+            }
+//            }
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: gridColumns), spacing: 8) {
+                ForEach(0 ..< gridRows, id: \.self) { row in
+                    ForEach(0 ..< gridColumns, id: \.self) { column in
+                        let button = buttonForPosition(row: row, column: column)
+
+                        if let button {
+                            ButtonGridButton(button: button, widget: widget)
+                        } else {
+                            // Empty cell to maintain grid structure
+                            Rectangle()
+                                .fill(Color.clear)
+                                .frame(height: 44)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func buttonForPosition(row: Int, column: Int) -> OpenHABWidgetMapping? {
+        buttons.first { button in
+            // OpenHAB uses 1-based indexing, convert to 0-based
+            (button.row ?? 1) - 1 == row && (button.column ?? 1) - 1 == column
+        }
     }
 }
 

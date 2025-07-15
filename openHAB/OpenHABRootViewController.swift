@@ -107,16 +107,6 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
 
 // MARK: - Search Controller Delegates
 
-extension HostingSitemapViewController: UISearchResultsUpdating, UISearchBarDelegate, UISearchControllerDelegate {
-    func updateSearchResults(for searchController: UISearchController) {
-        viewModel.searchText = searchController.searchBar.text ?? ""
-    }
-
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        viewModel.searchText = ""
-    }
-}
-
 // swiftlint:disable type_body_length
 class OpenHABRootViewController: UIViewController {
     var currentView: (any UIViewController & OpenHABViewable)!
@@ -829,5 +819,15 @@ extension OpenHABRootViewController: ModalHandler {
                 navigationController?.pushViewController(hostingController, animated: true)
             }
         }
+    }
+}
+
+extension HostingSitemapViewController: UISearchResultsUpdating, UISearchBarDelegate, UISearchControllerDelegate {
+    func updateSearchResults(for searchController: UISearchController) {
+        viewModel.searchText = searchController.searchBar.text ?? ""
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        viewModel.searchText = ""
     }
 }

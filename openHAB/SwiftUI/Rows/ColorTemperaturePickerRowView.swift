@@ -15,6 +15,45 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+struct CustomSliderView: View {
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let step: Double
+    let onEditingChanged: () -> Void
+
+    @GestureState private var dragOffset: CGSize = .zero
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let height = geometry.size.height
+            let normalized = CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound))
+            let xPos = normalized * width
+
+            ZStack(alignment: .leading) {
+                Color.clear
+
+                Circle()
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(.white)
+                    .shadow(radius: 1)
+                    .overlay(Circle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
+                    .position(x: xPos, y: height / 2)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { gesture in
+                                let location = gesture.location.x.clamped(to: 0 ... width)
+                                let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
+                                let stepped = (raw / step).rounded() * step
+                                value = stepped.clamped(to: range)
+                                onEditingChanged()
+                            }
+                    )
+            }
+        }
+    }
+}
+
 struct ColorTemperaturePickerRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedTemperature: Double = 2700 // Default warm white
@@ -134,45 +173,6 @@ struct ColorTemperaturePickerRowView: View {
 
         logger.info("Sending color temperature command: \(command)K")
         widget.sendCommand(command)
-    }
-}
-
-struct CustomSliderView: View {
-    @Binding var value: Double
-    let range: ClosedRange<Double>
-    let step: Double
-    let onEditingChanged: () -> Void
-
-    @GestureState private var dragOffset: CGSize = .zero
-
-    var body: some View {
-        GeometryReader { geometry in
-            let width = geometry.size.width
-            let height = geometry.size.height
-            let normalized = CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound))
-            let xPos = normalized * width
-
-            ZStack(alignment: .leading) {
-                Color.clear
-
-                Circle()
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(.white)
-                    .shadow(radius: 1)
-                    .overlay(Circle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
-                    .position(x: xPos, y: height / 2)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { gesture in
-                                let location = gesture.location.x.clamped(to: 0 ... width)
-                                let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
-                                let stepped = (raw / step).rounded() * step
-                                value = stepped.clamped(to: range)
-                                onEditingChanged()
-                            }
-                    )
-            }
-        }
     }
 }
 
