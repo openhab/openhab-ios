@@ -14,53 +14,60 @@ import Intents
 import OpenHABCore
 
 public enum OpenHABIntentHelper {
-    static func resolveHome(home: String?, item: String?) async -> INStringResolutionResult {
-        if let home {
+    static func resolveHome(home: OpenHABHome?, item: String?) async -> OpenHABHomeResolutionResult {
+        if let home, let homeId = home.uuid {
             // TODO: fuzzy matching / account for potential renaming?
             // TODO: accept potential mismatches if item name is unique
-            let homeInPrefs = Preferences.storedHomes.values.map(\.homeName).filter { $0 == home }
-            if homeInPrefs.count == 1 {
+            let homePrefs = Preferences.storedHomes.first { $0.key == homeId }
+            if homePrefs != nil {
                 return .success(with: home)
-            } else if homeInPrefs.count > 1 {
-                return .disambiguation(with: homeInPrefs)
             } else {
-                return .unsupported() // given home is nowhere to be found
+                return .unsupported() // given home is not found in preferences
             }
         } else if let item {
             // try to find the home by home-specific item selection
             let allItems = await OpenHABItemCache.instance.getAllCachedItems()
-            let intentItems = allItems.map(\.key).filter { uuid in
+            let homeIdsWithMatchingItems = allItems.map(\.key).filter { uuid in
                 allItems[uuid]?.filtered(by: item).isEmpty != true
             }
-            let potentialHomeNames = intentItems.map { Preferences.storedHomes[$0]?.homeName }.filter { $0 != nil }.map { $0 ?? "" }
-            if potentialHomeNames.count == 1 {
-                guard let homeName = Preferences.storedHomes[intentItems[0]]?.homeName else {
-                    return .unsupported() // seems like we found an outdated cached item / home
-                }
-                return .success(with: homeName)
+            let potentialHomes = homeIdsWithMatchingItems
+                .compactMap { Preferences.storedHomes[$0] }
+                .map { OpenHABHome(home: $0) }
+            if potentialHomes.count == 1 {
+                return .success(with: potentialHomes[0])
             } else {
-                return .disambiguation(with: potentialHomeNames)
+                return .disambiguation(with: potentialHomes)
             }
         } else {
             return .needsValue()
         }
     }
 
-    static func getHomeOptions() -> INObjectCollection<NSString> {
-        INObjectCollection(items: Preferences.storedHomes.map(\.value.homeName).map { $0 as NSString })
+    static func getHomeOptions() -> INObjectCollection<OpenHABHome> {
+        INObjectCollection(items: Preferences.storedHomes.map { OpenHABHome(home: $0.value) })
     }
 
-    static func getItemOptions(home: String?, searchTerm: String? = nil, itemTypes: [OpenHABItem.ItemType]? = nil) async -> INObjectCollection<NSString> {
+    static func getItemOptions(home: OpenHABHome?, searchTerm: String? = nil, itemTypes: [OpenHABItem.ItemType]? = nil) async -> INObjectCollection<NSString> {
         let allItems = await getAllItems(home: home)
         let items = allItems.filtered(by: searchTerm, for: itemTypes)
         return INObjectCollection(items: items.map(\.name).map { $0 as NSString })
     }
 
-    private static func getAllItems(home: String?) async -> [OpenHABItem] {
-        if let home, let homeId = Preferences.firstStoredHome(where: { $0.homeName == home })?.id {
+    private static func getAllItems(home: OpenHABHome?) async -> [OpenHABItem] {
+        if let home, let homeId = home.uuid {
             await OpenHABItemCache.instance.getCachedItems(home: homeId) ?? []
         } else {
             await OpenHABItemCache.instance.getAllCachedItems().flatMap(\.value)
         }
+    }
+}
+
+extension OpenHABHome {
+    var uuid: UUID? {
+        UUID(uuidString: identifier ?? "")
+    }
+
+    convenience init(home: HomePreferences) {
+        self.init(identifier: home.id.uuidString, display: home.homeName)
     }
 }

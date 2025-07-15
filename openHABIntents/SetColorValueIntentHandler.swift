@@ -17,12 +17,12 @@ import os.log
 class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetColorValueIntent")
 
-    func resolveHome(for intent: OpenHABSetColorValueIntent) async -> INStringResolutionResult {
+    func resolveHome(for intent: OpenHABSetColorValueIntent) async -> OpenHABHomeResolutionResult {
         logger.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
-    func provideHomeOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<NSString> {
+    func provideHomeOptionsCollection(for intent: OpenHABSetColorValueIntent) async throws -> INObjectCollection<OpenHABHome> {
         OpenHABIntentHelper.getHomeOptions()
     }
 
@@ -41,12 +41,13 @@ class SetColorValueIntentHandler: NSObject, OpenHABSetColorValueIntentHandling {
     func handle(intent: OpenHABSetColorValueIntent) async -> OpenHABSetColorValueIntentResponse {
         logger.info("SetColorValueIntent for \(intent.item ?? "")")
 
-        guard let itemName = intent.item, let homeName = intent.home else {
-            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item / home name"))
+        guard let itemName = intent.item, let home = intent.home else {
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item / home name")
+            )
         }
 
-        let homeId = Preferences.firstStoredHome { $0.homeName == homeName }.map(\.id)
-        guard let homeId else {
+        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 

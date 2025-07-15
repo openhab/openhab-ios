@@ -26,12 +26,12 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SetSwitchStateIntent")
 
-    func resolveHome(for intent: OpenHABSetSwitchStateIntent) async -> INStringResolutionResult {
+    func resolveHome(for intent: OpenHABSetSwitchStateIntent) async -> OpenHABHomeResolutionResult {
         logger.info("Resolving home for intent: \(intent)")
         return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
     }
 
-    func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<NSString> {
+    func provideHomeOptionsCollection(for intent: OpenHABSetSwitchStateIntent) async throws -> INObjectCollection<OpenHABHome> {
         OpenHABIntentHelper.getHomeOptions()
     }
 
@@ -57,12 +57,13 @@ final class SetSwitchStateIntentHandler: NSObject, OpenHABSetSwitchStateIntentHa
     func handle(intent: OpenHABSetSwitchStateIntent) async -> OpenHABSetSwitchStateIntentResponse {
         logger.info("SetSwitchStateIntent for item: \(intent.item ?? "<none>", privacy: .public)")
 
-        guard let itemName = intent.item, let homeName = intent.home else {
-            return .failureInvalidItem(NSLocalizedString("empty", comment: "empty item / home name"))
+        guard let itemName = intent.item, let home = intent.home else {
+            return .failureInvalidItem(
+                NSLocalizedString("empty", comment: "empty item / home name")
+            )
         }
 
-        let homeId = Preferences.firstStoredHome { $0.homeName == homeName }.map(\.id)
-        guard let homeId else {
+        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
             return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
         }
 

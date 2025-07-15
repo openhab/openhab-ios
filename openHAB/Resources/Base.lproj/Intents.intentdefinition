@@ -32,7 +32,7 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>4</integer>
+			<integer>5</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>item,home</key>
@@ -106,17 +106,12 @@
 					<string>k6pj4o</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>2</integer>
-					<key>INIntentParameterMetadata</key>
-					<dict>
-						<key>INIntentParameterMetadataCapitalization</key>
-						<string>Sentences</string>
-						<key>INIntentParameterMetadataDefaultValue</key>
-						<string>"asdf"</string>
-						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>6BeO57</string>
-					</dict>
 					<key>INIntentParameterName</key>
 					<string>home</string>
+					<key>INIntentParameterObjectType</key>
+					<string>Home</string>
+					<key>INIntentParameterObjectTypeNamespace</key>
+					<string>aK4nIm</string>
 					<key>INIntentParameterPromptDialogs</key>
 					<array>
 						<dict>
@@ -175,9 +170,9 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>4</integer>
+					<integer>5</integer>
 					<key>INIntentParameterType</key>
-					<string>String</string>
+					<string>Object</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -262,7 +257,7 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>3</integer>
+			<integer>4</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>item,action,home</key>
@@ -396,15 +391,12 @@
 					<string>X9cN9h</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>3</integer>
-					<key>INIntentParameterMetadata</key>
-					<dict>
-						<key>INIntentParameterMetadataCapitalization</key>
-						<string>Sentences</string>
-						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>6BeO57</string>
-					</dict>
 					<key>INIntentParameterName</key>
 					<string>home</string>
+					<key>INIntentParameterObjectType</key>
+					<string>Home</string>
+					<key>INIntentParameterObjectTypeNamespace</key>
+					<string>aK4nIm</string>
 					<key>INIntentParameterPromptDialogs</key>
 					<array>
 						<dict>
@@ -459,9 +451,9 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>3</integer>
+					<integer>4</integer>
 					<key>INIntentParameterType</key>
-					<string>String</string>
+					<string>Object</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -556,7 +548,7 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>4</integer>
+			<integer>5</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>item,value,home</key>
@@ -684,15 +676,12 @@
 					<string>ZuBsOg</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>3</integer>
-					<key>INIntentParameterMetadata</key>
-					<dict>
-						<key>INIntentParameterMetadataCapitalization</key>
-						<string>Sentences</string>
-						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>6BeO57</string>
-					</dict>
 					<key>INIntentParameterName</key>
 					<string>home</string>
+					<key>INIntentParameterObjectType</key>
+					<string>Home</string>
+					<key>INIntentParameterObjectTypeNamespace</key>
+					<string>aK4nIm</string>
 					<key>INIntentParameterPromptDialogs</key>
 					<array>
 						<dict>
@@ -747,9 +736,9 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>4</integer>
+					<integer>5</integer>
 					<key>INIntentParameterType</key>
-					<string>String</string>
+					<string>Object</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -852,7 +841,7 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>5</integer>
+			<integer>6</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>item,value,home</key>
@@ -980,15 +969,12 @@
 					<string>zLlY3g</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>3</integer>
-					<key>INIntentParameterMetadata</key>
-					<dict>
-						<key>INIntentParameterMetadataCapitalization</key>
-						<string>Sentences</string>
-						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>6BeO57</string>
-					</dict>
 					<key>INIntentParameterName</key>
 					<string>home</string>
+					<key>INIntentParameterObjectType</key>
+					<string>Home</string>
+					<key>INIntentParameterObjectTypeNamespace</key>
+					<string>aK4nIm</string>
 					<key>INIntentParameterPromptDialogs</key>
 					<array>
 						<dict>
@@ -1043,9 +1029,9 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>5</integer>
+					<integer>6</integer>
 					<key>INIntentParameterType</key>
-					<string>String</string>
+					<string>Object</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -1140,7 +1126,7 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>6</integer>
+			<integer>7</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>item,value,home</key>
@@ -1274,15 +1260,12 @@
 					<string>71MWtI</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>3</integer>
-					<key>INIntentParameterMetadata</key>
-					<dict>
-						<key>INIntentParameterMetadataCapitalization</key>
-						<string>Sentences</string>
-						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>6BeO57</string>
-					</dict>
 					<key>INIntentParameterName</key>
 					<string>home</string>
+					<key>INIntentParameterObjectType</key>
+					<string>Home</string>
+					<key>INIntentParameterObjectTypeNamespace</key>
+					<string>aK4nIm</string>
 					<key>INIntentParameterPromptDialogs</key>
 					<array>
 						<dict>
@@ -1337,9 +1320,9 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>6</integer>
+					<integer>7</integer>
 					<key>INIntentParameterType</key>
-					<string>String</string>
+					<string>Object</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -1434,7 +1417,7 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>6</integer>
+			<integer>7</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>item,value,home</key>
@@ -1570,15 +1553,12 @@
 					<string>iBrALm</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>3</integer>
-					<key>INIntentParameterMetadata</key>
-					<dict>
-						<key>INIntentParameterMetadataCapitalization</key>
-						<string>Sentences</string>
-						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>6BeO57</string>
-					</dict>
 					<key>INIntentParameterName</key>
 					<string>home</string>
+					<key>INIntentParameterObjectType</key>
+					<string>Home</string>
+					<key>INIntentParameterObjectTypeNamespace</key>
+					<string>aK4nIm</string>
 					<key>INIntentParameterPromptDialogs</key>
 					<array>
 						<dict>
@@ -1633,9 +1613,9 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>6</integer>
+					<integer>7</integer>
 					<key>INIntentParameterType</key>
-					<string>String</string>
+					<string>Object</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -1730,7 +1710,7 @@
 			<key>INIntentKeyParameter</key>
 			<string>item</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>3</integer>
+			<integer>4</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>item,state,home</key>
@@ -1864,15 +1844,12 @@
 					<string>7GA2x6</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>3</integer>
-					<key>INIntentParameterMetadata</key>
-					<dict>
-						<key>INIntentParameterMetadataCapitalization</key>
-						<string>Sentences</string>
-						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>6BeO57</string>
-					</dict>
 					<key>INIntentParameterName</key>
 					<string>home</string>
+					<key>INIntentParameterObjectType</key>
+					<string>Home</string>
+					<key>INIntentParameterObjectTypeNamespace</key>
+					<string>aK4nIm</string>
 					<key>INIntentParameterPromptDialogs</key>
 					<array>
 						<dict>
@@ -1927,9 +1904,9 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>3</integer>
+					<integer>4</integer>
 					<key>INIntentParameterType</key>
-					<string>String</string>
+					<string>Object</string>
 				</dict>
 			</array>
 			<key>INIntentResponse</key>
@@ -2012,6 +1989,72 @@
 		</dict>
 	</array>
 	<key>INTypes</key>
-	<array/>
+	<array>
+		<dict>
+			<key>INTypeClassPrefix</key>
+			<string>OpenHAB</string>
+			<key>INTypeDisplayName</key>
+			<string>Home</string>
+			<key>INTypeDisplayNameID</key>
+			<string>zV2TH2</string>
+			<key>INTypeLastPropertyTag</key>
+			<integer>100</integer>
+			<key>INTypeName</key>
+			<string>Home</string>
+			<key>INTypeProperties</key>
+			<array>
+				<dict>
+					<key>INTypePropertyDefault</key>
+					<true/>
+					<key>INTypePropertyDisplayPriority</key>
+					<integer>1</integer>
+					<key>INTypePropertyName</key>
+					<string>identifier</string>
+					<key>INTypePropertyTag</key>
+					<integer>1</integer>
+					<key>INTypePropertyType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INTypePropertyDefault</key>
+					<true/>
+					<key>INTypePropertyDisplayPriority</key>
+					<integer>2</integer>
+					<key>INTypePropertyName</key>
+					<string>displayString</string>
+					<key>INTypePropertyTag</key>
+					<integer>2</integer>
+					<key>INTypePropertyType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INTypePropertyDefault</key>
+					<true/>
+					<key>INTypePropertyDisplayPriority</key>
+					<integer>3</integer>
+					<key>INTypePropertyName</key>
+					<string>pronunciationHint</string>
+					<key>INTypePropertyTag</key>
+					<integer>3</integer>
+					<key>INTypePropertyType</key>
+					<string>String</string>
+				</dict>
+				<dict>
+					<key>INTypePropertyDefault</key>
+					<true/>
+					<key>INTypePropertyDisplayPriority</key>
+					<integer>4</integer>
+					<key>INTypePropertyName</key>
+					<string>alternativeSpeakableMatches</string>
+					<key>INTypePropertySupportsMultipleValues</key>
+					<true/>
+					<key>INTypePropertyTag</key>
+					<integer>4</integer>
+					<key>INTypePropertyType</key>
+					<string>SpeakableString</string>
+				</dict>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
