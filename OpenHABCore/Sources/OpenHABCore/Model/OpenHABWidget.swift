@@ -104,6 +104,10 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var switchSupport = false
     public var labelSource = LabelSource.unknown
     public var releaseOnly: Bool?
+    public var row: Int?
+    public var column: Int?
+    public var releaseCommand: String?
+    public var command: String?
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -304,7 +308,8 @@ public extension OpenHABWidget {
                      releaseOnly: Bool? = nil,
                      row: Int? = nil,
                      column: Int? = nil,
-                     releaseCommand: String? = nil) {
+                     releaseCommand: String? = nil,
+                     command: String? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -355,6 +360,10 @@ public extension OpenHABWidget {
         stateEnumBinding = stateEnum
         self.labelSource = labelSource
         self.releaseOnly = releaseOnly
+        self.row = row
+        self.column = column
+        self.releaseCommand = releaseCommand
+        self.command = command
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
@@ -481,7 +490,8 @@ extension OpenHABWidget {
             releaseOnly: widget.releaseOnly,
             row: widget.row.map { Int($0) },
             column: widget.column.map { Int($0) },
-            releaseCommand: widget.releaseCommand
+            releaseCommand: widget.releaseCommand,
+            command: widget.command
         )
     }
 }

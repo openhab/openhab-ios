@@ -29,9 +29,10 @@ public class OpenHABPage: NSObject, @unchecked Sendable {
         self.title = title
         self.link = link
         self.leaf = leaf
-        var tempWidgets = [OpenHABWidget]()
-        tempWidgets.flatten(widgets)
-        self.widgets = tempWidgets
+//        var tempWidgets = [OpenHABWidget]()
+//        tempWidgets.flatten(widgets)
+//        self.widgets = tempWidgets
+        self.widgets = widgets
         for widget in self.widgets {
             widget.sendCommand = { [weak self] item, command in
                 self?.sendCommand(item, commandToSend: command)

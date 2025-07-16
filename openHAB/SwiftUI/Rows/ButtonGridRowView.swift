@@ -15,21 +15,22 @@ import os.log
 import SwiftUI
 
 struct ButtonGridButton: View {
-    let button: OpenHABWidgetMapping
-    let widget: OpenHABWidget
+    let button: OpenHABWidget
+    let targetWidget: OpenHABWidget
 
     @State private var isPressed = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridButton")
 
     private var isStateful: Bool {
-        // Mappings are typically stateless unless specified otherwise
+        // TODO: Mappings are typically stateless unless specified otherwise
+        // Handle widgets as well
         false
     }
 
     private var isSelected: Bool {
         guard isStateful else { return false }
-        return widget.item?.state == button.command
+        return targetWidget.item?.state == button.command
     }
 
     var body: some View {
@@ -37,8 +38,8 @@ struct ButtonGridButton: View {
             handleButtonPress()
         } label: {
             HStack {
-                if let icon = button.icon, !icon.isEmpty {
-                    IconView(icon: icon)
+                if !button.icon.isEmpty {
+                    IconView(icon: button.icon)
                         .frame(width: 16, height: 16)
                 } else {
                     Text(button.label)
@@ -74,9 +75,9 @@ struct ButtonGridButton: View {
 
     private func handleButtonPress() {
         // Send command on tap for mappings
-        if !button.command.isEmpty {
-            logger.info("Sending command: \(button.command)")
-            widget.sendCommand(button.command)
+        if let command = button.command, !command.isEmpty {
+            logger.info("Sending command: \(command)")
+            targetWidget.sendCommand(button.command)
         }
     }
 
@@ -97,8 +98,12 @@ struct ButtonGridRowView: View {
     // Maximum number of columns based on screen width
     private let maxColumns = 12
 
-    private var buttons: [OpenHABWidgetMapping] {
-        widget.mappings
+    private var buttons: [OpenHABWidget] {
+        let childButtons = widget.widgets // .filter(\.visibility)
+        let mappingButtons = widget.mappings.enumerated().map { (index, mapping) in
+            mapping.toWidget(widgetId: "\(widget.widgetId)-mappings-\(index)", item: widget.item)
+        }
+        return childButtons + mappingButtons
     }
 
     private var showLabelAndIcon: Bool {
@@ -135,7 +140,7 @@ struct ButtonGridRowView: View {
                         let button = buttonForPosition(row: row, column: column)
 
                         if let button {
-                            ButtonGridButton(button: button, widget: widget)
+                            ButtonGridButton(button: button, targetWidget: widget)
                         } else {
                             // Empty cell to maintain grid structure
                             Rectangle()
@@ -148,7 +153,7 @@ struct ButtonGridRowView: View {
         }
     }
 
-    private func buttonForPosition(row: Int, column: Int) -> OpenHABWidgetMapping? {
+    private func buttonForPosition(row: Int, column: Int) -> OpenHABWidget? {
         buttons.first { button in
             // OpenHAB uses 1-based indexing, convert to 0-based
             (button.row ?? 1) - 1 == row && (button.column ?? 1) - 1 == column
@@ -168,6 +173,23 @@ extension View {
                     onRelease()
                 }
         )
+    }
+}
+
+// Extension to convert OpenHABWidgetMapping to OpenHABWidget
+extension OpenHABWidgetMapping {
+    func toWidget(widgetId: String, item: OpenHABItem?) -> OpenHABWidget {
+        let widget = OpenHABWidget()
+        widget.widgetId = widgetId
+        widget.label = label
+        widget.command = command
+        widget.item = item
+        widget.type = .switchWidget
+        widget.visibility = true
+        widget.row = row
+        widget.column = column
+        widget.releaseCommand = releaseCommand
+        return widget
     }
 }
 
