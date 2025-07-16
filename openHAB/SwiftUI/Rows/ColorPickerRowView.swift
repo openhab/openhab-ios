@@ -49,6 +49,10 @@ struct ColorPickerRowView: View {
                 selectedColor = parseColor(from: state) ?? .white
             }
         }
+        .onChange(of: widget.item?.state ?? "") { newState in
+            guard !newState.isEmpty else { return }
+            selectedColor = parseColor(from: newState) ?? .white
+        }
     }
 
     private func sendColorCommand(_ color: Color) {

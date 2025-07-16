@@ -27,6 +27,10 @@ struct SelectionRowView: View {
 
     var body: some View {
         HStack {
+            IconView(widget: widget)
+                .frame(width: 24, height: 24)
+                .padding(.top, 4) // Align with text
+
             if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
@@ -51,7 +55,11 @@ struct SelectionRowView: View {
             }
         }
         .onAppear {
-            selectedIndex = Int(widget.mappingIndex(byCommand: widget.item?.state) ?? 0)
+            selectedIndex = widget.mapCommandtoIndex(with: widget.item?.state)
+        }
+        .onChange(of: widget.item?.state ?? "") { newState in
+            guard !newState.isEmpty else { return }
+            selectedIndex = widget.mapCommandtoIndex(with: newState)
         }
     }
 }

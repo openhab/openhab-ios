@@ -58,6 +58,13 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case unknown = "Unknown"
     }
 
+    public enum LabelSource: String, Decodable {
+        case sitemapDefinition = "SITEMAP_WIDGET"
+        case itemLabel = "ITEM_LABEL"
+        case itemName = "ITEM_NAME"
+        case unknown = "UNKNOWN"
+    }
+
     public enum InputHint: String, Decodable {
         case text, number, date, time, dateTime, unknown
     }
@@ -95,6 +102,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
     public var switchSupport = false
+    public var labelSource = LabelSource.unknown
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -223,6 +231,10 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         mappingsOrItemOptions.firstIndex { $0.command == command }
     }
 
+    public func mapCommandtoIndex(with command: String?) -> Int {
+        Int(mappingIndex(byCommand: command) ?? 0)
+    }
+
     public func iconState() -> String {
         var iconState = item?.state ?? ""
         if let item, let itemState = item.state {
@@ -286,7 +298,8 @@ public extension OpenHABWidget {
                      widgets: [OpenHABWidget],
                      visibility: Bool?,
                      switchSupport: Bool?,
-                     forceAsItem: Bool?) {
+                     forceAsItem: Bool?,
+                     labelSource: LabelSource = .unknown) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -335,11 +348,12 @@ public extension OpenHABWidget {
 
         self.forceAsItem = forceAsItem
         stateEnumBinding = stateEnum
+        self.labelSource = labelSource
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
         // swiftlint:disable:next line_length
-        self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil)
+        self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil, labelSource: .unknown)
     }
 }
 
@@ -458,7 +472,8 @@ extension OpenHABWidget {
             widgets: widget.widgets?.compactMap { OpenHABWidget($0) } ?? [],
             visibility: widget.visibility,
             switchSupport: widget.switchSupport,
-            forceAsItem: widget.forceAsItem
+            forceAsItem: widget.forceAsItem,
+            labelSource: OpenHABWidget.LabelSource(rawValue: widget.labelSource ?? "") ?? .unknown
         )
     }
 }

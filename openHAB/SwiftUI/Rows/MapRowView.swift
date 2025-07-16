@@ -41,7 +41,7 @@ struct MapRowView: View {
             }
 
             Map(coordinateRegion: $region, annotationItems: coordinates != nil ? [coordinates!] : []) { coordinate in
-                MapPin(coordinate: coordinate, tint: .red)
+                MapMarker(coordinate: coordinate, tint: .red)
             }
             .frame(height: 200)
             .cornerRadius(8)

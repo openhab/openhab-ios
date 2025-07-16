@@ -40,13 +40,13 @@ struct ButtonGridButton: View {
                 if let icon = button.icon, !icon.isEmpty {
                     IconView(icon: icon)
                         .frame(width: 16, height: 16)
+                } else {
+                    Text(button.label)
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
-
-                Text(button.label)
-                    .font(.caption)
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 44)
@@ -101,9 +101,9 @@ struct ButtonGridRowView: View {
         widget.mappings
     }
 
-//    private var showLabelAndIcon: Bool {
-//        !widget.label.isEmpty && widget.labelSource == .sitemapDefinition
-//    }
+    private var showLabelAndIcon: Bool {
+        !widget.label.isEmpty && widget.labelSource == .sitemapDefinition
+    }
 
     private var gridRows: Int {
         buttons.map { $0.row ?? 1 }.max() ?? 1
@@ -115,19 +115,19 @@ struct ButtonGridRowView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-//            if showLabelAndIcon {
-            HStack {
-                if IconView.shouldShowIcon(for: widget) {
-                    IconView(widget: widget)
-                        .frame(width: 24, height: 24)
+            if showLabelAndIcon {
+                HStack {
+                    if IconView.shouldShowIcon(for: widget) {
+                        IconView(widget: widget)
+                            .frame(width: 24, height: 24)
+                    }
+
+                    Text(widget.labelText ?? widget.label)
+                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+
+                    Spacer()
                 }
-
-                Text(widget.labelText ?? widget.label)
-                    .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
-
-                Spacer()
             }
-//            }
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: gridColumns), spacing: 8) {
                 ForEach(0 ..< gridRows, id: \.self) { row in

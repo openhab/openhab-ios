@@ -70,21 +70,37 @@ struct ColorTemperaturePickerRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                IconView(widget: widget)
-                    .frame(width: 24, height: 24)
+        HStack(alignment: .top) {
+            IconView(widget: widget)
+                .frame(width: 24, height: 24)
 
-                if let labelText = widget.labelText, !labelText.isEmpty {
-                    Text(labelText)
-                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+            VStack(spacing: 8) {
+                HStack {
+                    if let labelText = widget.labelText, !labelText.isEmpty {
+                        Text(labelText)
+                            .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                    }
+
+                    Spacer()
+
+                    // Temperature value display
+                    HStack {
+                        Text("\(Int(selectedTemperature))K")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        Text(" - ")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        // Temperature description
+                        Text(temperatureDescription)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
 
-                Spacer()
-            }
-
-            // Color temperature slider with gradient background
-            VStack(spacing: 8) {
+                // Color temperature slider with gradient background
                 HStack {
                     // Warm indicator
                     Image(systemSymbol: .sunMinFill)
@@ -119,24 +135,13 @@ struct ColorTemperaturePickerRowView: View {
                         .foregroundColor(.blue)
                         .font(.caption)
                 }
-
-                // Temperature value display
-                HStack {
-                    Text("\(Int(selectedTemperature))K")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    // Temperature description
-                    Text(temperatureDescription)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
             }
         }
         .onAppear {
-            loadCurrentTemperature()
+            selectedTemperature = loadCurrentTemperature(state: widget.item?.state) ?? 2700
+        }
+        .onChange(of: widget.item?.state ?? "") { newState in
+            selectedTemperature = loadCurrentTemperature(state: newState) ?? 2700
         }
     }
 
@@ -158,13 +163,12 @@ struct ColorTemperaturePickerRowView: View {
         stride(from: minTemperature, through: maxTemperature, by: (maxTemperature - minTemperature) / Double(steps)).map { Color(temperature: $0) }
     }
 
-    private func loadCurrentTemperature() {
-        guard let state = widget.item?.state, !state.isEmpty else { return }
+    private func loadCurrentTemperature(state: String?) -> Double? {
+        guard let state, !state.isEmpty else { return nil }
 
         // Parse color temperature directly from Kelvin value (like Android app)
-        if let kelvin = Double(state) {
-            selectedTemperature = kelvin.clamped(to: minTemperature ... maxTemperature)
-        }
+        let kelvin = state.parseAsNumber().value
+        return kelvin.clamped(to: minTemperature ... maxTemperature)
     }
 
     private func sendTemperatureCommand() {

@@ -76,8 +76,11 @@ struct SegmentedRowView: View {
         }
         .onAppear {
             if !isMomentary {
-                selectedIndex = widget.mappingIndex(byCommand: widget.item?.state)
+                selectedIndex = widget.mapCommandtoIndex(with: widget.item?.state)
             }
+        }
+        .onChange(of: widget.item?.state) { newState in
+            selectedIndex = widget.mapCommandtoIndex(with: newState)
         }
     }
 }
