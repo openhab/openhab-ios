@@ -479,8 +479,8 @@ extension OpenHABWidget {
             forceAsItem: widget.forceAsItem,
             labelSource: OpenHABWidget.LabelSource(rawValue: widget.labelSource ?? "") ?? .unknown,
             releaseOnly: widget.releaseOnly,
-            row: widget.row.map{ Int($0) },
-            column: widget.column.map{ Int($0) },
+            row: widget.row.map { Int($0) },
+            column: widget.column.map { Int($0) },
             releaseCommand: widget.releaseCommand
         )
     }
