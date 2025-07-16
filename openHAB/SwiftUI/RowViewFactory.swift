@@ -28,12 +28,8 @@ enum RowViewFactory {
             } else {
                 SwitchRowView(widget: widget)
             }
-        case .slider:
-            if widget.switchSupport {
-                SliderWithSwitchRowView(widget: widget)
-            } else {
-                SliderRowView(widget: widget)
-            }
+        case .slider: // SliderRowView also handles switchSupport
+            SliderRowView(widget: widget)
         case .input:
             if [.date, .time, .dateTime].contains(widget.inputHint) {
                 DatePickerInputRowView(widget: widget)

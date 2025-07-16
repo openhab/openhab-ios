@@ -27,18 +27,28 @@ struct SliderRowView: View {
 
     var body: some View {
         HStack {
-            IconView(widget: widget)
-                .frame(width: 24, height: 24)
+            HStack {
+                IconView(widget: widget)
+                    .frame(width: 24, height: 24)
 
-            Text(widget.labelText ?? "")
+                Text(widget.labelText ?? "")
 
-            Spacer()
+                Spacer()
 
-            if let value = widget.labelValue {
-                Text(value)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                if let value = widget.labelValue {
+                    Text(value)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
+            .contentShape(Rectangle()) // 🔍 Make row but not slider tappable
+            .onTapGesture {
+                // 🔄 Only send ON/OFF if not dragging the slider
+                if !isUserInteracting, widget.switchSupport {
+                    widget.sendCommand(currentValue <= widget.minValue ? "ON" : "OFF")
+                }
+            }
+
             Slider(value: $currentValue, in: sliderRange) { isEditing in
                 isUserInteracting = isEditing
                 if !isEditing {

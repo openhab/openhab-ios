@@ -103,6 +103,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var visibility = true
     public var switchSupport = false
     public var labelSource = LabelSource.unknown
+    public var releaseOnly: Bool?
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -299,7 +300,11 @@ public extension OpenHABWidget {
                      visibility: Bool?,
                      switchSupport: Bool?,
                      forceAsItem: Bool?,
-                     labelSource: LabelSource = .unknown) {
+                     labelSource: LabelSource = .unknown,
+                     releaseOnly: Bool? = nil,
+                     row: Int? = nil,
+                     column: Int? = nil,
+                     releaseCommand: String? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -349,11 +354,12 @@ public extension OpenHABWidget {
         self.forceAsItem = forceAsItem
         stateEnumBinding = stateEnum
         self.labelSource = labelSource
+        self.releaseOnly = releaseOnly
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
         // swiftlint:disable:next line_length
-        self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil, labelSource: .unknown)
+        self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil, labelSource: .unknown, releaseOnly: nil)
     }
 }
 
@@ -441,8 +447,6 @@ extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {
 //        widget.unit
 //        widget.staticIcon
-//        widget.visibility
-//        widget.labelSource
 //        widget.pattern
         self.init(
             widgetId: widget.widgetId.orEmpty,
@@ -473,7 +477,11 @@ extension OpenHABWidget {
             visibility: widget.visibility,
             switchSupport: widget.switchSupport,
             forceAsItem: widget.forceAsItem,
-            labelSource: OpenHABWidget.LabelSource(rawValue: widget.labelSource ?? "") ?? .unknown
+            labelSource: OpenHABWidget.LabelSource(rawValue: widget.labelSource ?? "") ?? .unknown,
+            releaseOnly: widget.releaseOnly,
+            row: widget.row.map{ Int($0) },
+            column: widget.column.map{ Int($0) },
+            releaseCommand: widget.releaseCommand
         )
     }
 }

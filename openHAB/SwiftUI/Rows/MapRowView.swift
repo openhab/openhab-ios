@@ -15,22 +15,16 @@ import MapKit
 import OpenHABCore
 import SwiftUI
 
-struct MapRowView: View {
+struct MapRowViewLegacy: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-    )
 
-    private var coordinates: CLLocationCoordinate2D? {
-        guard let state = widget.item?.state, !state.isEmpty else { return nil }
-        let components = state.split(separator: ",")
-        guard components.count >= 2,
-              let latitude = Double(components[0]),
-              let longitude = Double(components[1]) else {
-            return nil
-        }
-        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    private var region: MKCoordinateRegion {
+        let coordinate = CLLocationCoordinate2DIsValid(widget.coordinate) ? widget.coordinate : CLLocationCoordinate2D(latitude: 0, longitude: 0)
+        return MKCoordinateRegion(
+            center: coordinate,
+            latitudinalMeters: 1000.0,
+            longitudinalMeters: 1000.0
+        )
     }
 
     var body: some View {
@@ -40,22 +34,55 @@ struct MapRowView: View {
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            Map(coordinateRegion: $region, annotationItems: coordinates != nil ? [coordinates!] : []) { coordinate in
-                MapMarker(coordinate: coordinate, tint: .red)
+            Map(coordinateRegion: .constant(region), annotationItems: CLLocationCoordinate2DIsValid(widget.coordinate) ? [widget.coordinate] : []) { location in
+                MapMarker(coordinate: location, tint: .red)
             }
             .frame(height: 200)
             .cornerRadius(8)
-            .onAppear {
-                if let coordinates {
-                    region.center = coordinates
+        }
+    }
+}
+
+@available(iOS 17.0, *)
+private struct MapRowViewNew: View {
+    @ObservedObject var widget: OpenHABWidget
+    @State private var cameraPosition = MapCameraPosition.region(
+        MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+            latitudinalMeters: 1000,
+            longitudinalMeters: 1000
+        )
+    )
+
+    var body: some View {
+        VStack {
+            if CLLocationCoordinate2DIsValid(widget.coordinate) {
+                Map(position: $cameraPosition) {
+                    Marker("", coordinate: widget.coordinate)
+                }
+                .frame(height: 200)
+                .onAppear {
+                    cameraPosition = .region(
+                        MKCoordinateRegion(
+                            center: widget.coordinate,
+                            latitudinalMeters: 1000,
+                            longitudinalMeters: 1000
+                        )
+                    )
                 }
             }
+        }
+    }
+}
 
-            if let labelValue = widget.labelValue, !labelValue.isEmpty {
-                Text(labelValue)
-                    .font(.caption)
-                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
-            }
+struct MapRowView: View {
+    @ObservedObject var widget: OpenHABWidget
+
+    var body: some View {
+        if #available(iOS 17.0, *) {
+            MapRowViewNew(widget: widget)
+        } else {
+            MapRowViewLegacy(widget: widget)
         }
     }
 }

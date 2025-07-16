@@ -15,6 +15,12 @@ import os.log
 import SFSafeSymbols
 import SwiftUI
 
+enum RollerShutterCommand: String {
+    case up = "UP"
+    case down = "DOWN"
+    case stop = "STOP"
+}
+
 struct RollershutterRowView: View {
     @ObservedObject var widget: OpenHABWidget
 
@@ -37,7 +43,7 @@ struct RollershutterRowView: View {
 
                 Button {
                     logger.info("up button pressed")
-                    widget.sendCommand("UP")
+                    widget.sendCommand(RollerShutterCommand.up.rawValue)
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.title2)
@@ -47,7 +53,7 @@ struct RollershutterRowView: View {
 
                 Button {
                     logger.info("stop button pressed")
-                    widget.sendCommand("STOP")
+                    widget.sendCommand(RollerShutterCommand.stop.rawValue)
                 } label: {
                     Image(systemSymbol: .stop)
                         .font(.title2)
@@ -57,7 +63,7 @@ struct RollershutterRowView: View {
 
                 Button {
                     logger.info("down button pressed")
-                    widget.sendCommand("DOWN")
+                    widget.sendCommand(RollerShutterCommand.down.rawValue)
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.title2)

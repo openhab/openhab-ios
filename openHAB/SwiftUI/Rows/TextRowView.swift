@@ -29,8 +29,8 @@ struct TextRowView: View {
 
             if let value = widget.labelValue {
                 Text(value)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(.body)
+                    .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
         .contextMenu {

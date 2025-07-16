@@ -93,7 +93,6 @@
 		DA35E2BE2E1EEA9D003987BB /* DatePickerInputRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B32E1EEA9D003987BB /* DatePickerInputRowView.swift */; };
 		DA35E2BF2E1EEA9D003987BB /* WebRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */; };
 		DA35E2C02E1EEA9D003987BB /* ColorPickerRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B22E1EEA9D003987BB /* ColorPickerRowView.swift */; };
-		DA35E2C12E1EEA9D003987BB /* SliderWithSwitchRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B92E1EEA9D003987BB /* SliderWithSwitchRowView.swift */; };
 		DA35E2C22E1EEA9D003987BB /* TextInputRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2BA2E1EEA9D003987BB /* TextInputRowView.swift */; };
 		DA35E2C32E1EEA9D003987BB /* ImageRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B42E1EEA9D003987BB /* ImageRowView.swift */; };
 		DA35E2C42E1EEA9D003987BB /* SelectionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA35E2B82E1EEA9D003987BB /* SelectionRowView.swift */; };
@@ -436,7 +435,6 @@
 		DA35E2B62E1EEA9D003987BB /* RollershutterRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollershutterRowView.swift; sourceTree = "<group>"; };
 		DA35E2B72E1EEA9D003987BB /* SegmentedRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedRowView.swift; sourceTree = "<group>"; };
 		DA35E2B82E1EEA9D003987BB /* SelectionRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionRowView.swift; sourceTree = "<group>"; };
-		DA35E2B92E1EEA9D003987BB /* SliderWithSwitchRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderWithSwitchRowView.swift; sourceTree = "<group>"; };
 		DA35E2BA2E1EEA9D003987BB /* TextInputRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputRowView.swift; sourceTree = "<group>"; };
 		DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRowView.swift; sourceTree = "<group>"; };
 		DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRowView.swift; sourceTree = "<group>"; };
@@ -912,7 +910,6 @@
 				DA35E2B82E1EEA9D003987BB /* SelectionRowView.swift */,
 				DA35E2AF2E1EDB86003987BB /* SetpointRowView.swift */,
 				DAEA21DB2DBF47DA00D54342 /* SliderRowView.swift */,
-				DA35E2B92E1EEA9D003987BB /* SliderWithSwitchRowView.swift */,
 				DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */,
 				DA35E2BA2E1EEA9D003987BB /* TextInputRowView.swift */,
 				DAEA21DD2DBF481300D54342 /* TextRowView.swift */,
@@ -1721,7 +1718,6 @@
 				DAC949FE2E21A2D1007E67B7 /* FrameRowView.swift in Sources */,
 				DA35E2BF2E1EEA9D003987BB /* WebRowView.swift in Sources */,
 				DA35E2C02E1EEA9D003987BB /* ColorPickerRowView.swift in Sources */,
-				DA35E2C12E1EEA9D003987BB /* SliderWithSwitchRowView.swift in Sources */,
 				DA35E2C22E1EEA9D003987BB /* TextInputRowView.swift in Sources */,
 				DA35E2C32E1EEA9D003987BB /* ImageRowView.swift in Sources */,
 				DA35E2C42E1EEA9D003987BB /* SelectionRowView.swift in Sources */,
