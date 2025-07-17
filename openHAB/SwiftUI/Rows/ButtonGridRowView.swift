@@ -139,7 +139,8 @@ struct ButtonGridRowView: View {
                     ForEach(0 ..< gridColumns, id: \.self) { column in
                         let button = buttonForPosition(row: row, column: column)
 
-                        if let button {
+                        if let button,
+                           button.visibility {
                             ButtonGridButton(button: button, targetWidget: widget)
                         } else {
                             // Empty cell to maintain grid structure
@@ -184,11 +185,12 @@ extension OpenHABWidgetMapping {
         widget.label = label
         widget.command = command
         widget.item = item
-        widget.type = .switchWidget
+        widget.type = .button
         widget.visibility = true
         widget.row = row
         widget.column = column
         widget.releaseCommand = releaseCommand
+        widget.icon = icon ?? ""
         return widget
     }
 }

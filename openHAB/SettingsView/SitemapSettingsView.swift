@@ -22,6 +22,8 @@ struct SitemapSettingsView: View {
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
+    @State var cacheSizeResult: Result<UInt, KingfisherError>? = nil
+
     private let logger = Logger(subsystem: "org.openhab.app", category: "SitemapSettingsView")
 
     var body: some View {
@@ -31,15 +33,37 @@ struct SitemapSettingsView: View {
             }
 
             Button {
-                clearWebsiteCache()
-                showingCacheAlert = true
+                KingfisherManager.shared.cache.calculateDiskStorageSize { result in
+                    cacheSizeResult = result
+                    showingCacheAlert = true
+                }
             } label: {
-                NavigationLink("Clear Image Cache", destination: EmptyView())
+                NavigationLink("Check & Clear Image Cache", destination: EmptyView())
             }
             .foregroundColor(Color(uiColor: .label))
-            .alert("cache_cleared", isPresented: $showingCacheAlert) {
-                Button("OK", role: .cancel) {}
-            }
+            .alert(
+                "Image Cache",
+                isPresented: $showingCacheAlert,
+                presenting: cacheSizeResult,
+                actions: { result in
+                    switch result {
+                    case .success:
+                        Button("Clear") {
+                            clearWebsiteCache()
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    case .failure:
+                        Button("OK") {}
+                    }
+                }, message: { result in
+                    switch result {
+                    case let .success(size):
+                        Text("Size: \(size / 1_048_576) MB")
+                    case let .failure(error):
+                        Text(error.localizedDescription)
+                    }
+                }
+            )
 
             Picker(selection: $settingsIconType) {
                 ForEach(IconType.allCases, id: \.self) { icontype in

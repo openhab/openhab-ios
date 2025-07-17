@@ -17,17 +17,25 @@ import SwiftUI
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
+    @ObservedObject private var networkTracker = NetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
 
     let size: CGSize
     let iconType: IconType = .svg
 
     @State private var imageLoadingFailed = false
+    @State private var retryCount = 0
+    private let maxRetries = 3
+    private let retryDelay: TimeInterval = 1.0
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetIconView")
 
     private var iconURL: URL? {
-        guard !widget.icon.isEmpty else { return nil }
+        guard !widget.icon.isEmpty,
+              let activeConnection = networkTracker.activeConnection,
+              !activeConnection.configuration.url.isEmpty else {
+            return nil
+        }
 
         var queriedIconColor: String {
             switch colorScheme {
@@ -41,8 +49,8 @@ struct IconView: View {
         }
 
         return Endpoint.icon(
-            rootUrl: NetworkTracker.shared.activeConnection?.configuration.url ?? "",
-            version: NetworkTracker.shared.activeConnection?.version ?? 2,
+            rootUrl: activeConnection.configuration.url,
+            version: activeConnection.version,
             icon: widget.icon,
             state: widget.iconState(),
             iconType: iconType,
@@ -53,7 +61,7 @@ struct IconView: View {
     var body: some View {
         Group {
             if let iconURL, !imageLoadingFailed {
-                KFImage(iconURL)
+                KFImage.url(iconURL)
                     .placeholder {
                         // Show empty space while loading
                         Rectangle()
@@ -62,10 +70,12 @@ struct IconView: View {
                     }
                     .onFailure { error in
                         logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
+//                        handleLoadingFailure()
                         imageLoadingFailed = true
                     }
                     .onSuccess { _ in
                         imageLoadingFailed = false
+                        retryCount = 0
                     }
                     .setProcessor(OpenHABImageProcessor())
                     .fade(duration: 0.25)
@@ -82,12 +92,36 @@ struct IconView: View {
         }
         .onChange(of: widget.icon) { _ in
             // Reset loading state when icon changes
-            imageLoadingFailed = false
+            resetLoadingState()
         }
         .onChange(of: widget.iconState()) { _ in
             // Reset loading state when icon state changes
-            imageLoadingFailed = false
+            resetLoadingState()
         }
+        .onChange(of: networkTracker.activeConnection) { _ in
+            // Reset loading state when connection changes
+            resetLoadingState()
+        }
+    }
+
+    private func handleLoadingFailure() {
+        if retryCount < maxRetries {
+            retryCount += 1
+            logger.info("Retrying icon load for widget \(widget.label), attempt \(retryCount)/\(maxRetries)")
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay * Double(retryCount)) {
+                // Force reload by toggling imageLoadingFailed
+                imageLoadingFailed = false
+            }
+        } else {
+            logger.warning("Max retries reached for widget \(widget.label), giving up")
+            imageLoadingFailed = true
+        }
+    }
+
+    private func resetLoadingState() {
+        imageLoadingFailed = false
+        retryCount = 0
     }
 }
 

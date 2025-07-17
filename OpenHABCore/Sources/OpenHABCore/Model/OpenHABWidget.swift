@@ -55,6 +55,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         case webview = "Webview"
         case colortemperaturepicker = "Colortemperaturepicker"
         case buttongrid = "Buttongrid"
+        case button = "Button"
         case unknown = "Unknown"
     }
 
@@ -108,6 +109,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var column: Int?
     public var releaseCommand: String?
     public var command: String?
+    public var stateless: Bool?
+    public var readOnly = false
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -309,7 +312,8 @@ public extension OpenHABWidget {
                      row: Int? = nil,
                      column: Int? = nil,
                      releaseCommand: String? = nil,
-                     command: String? = nil) {
+                     command: String? = nil,
+                     stateless: Bool? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -443,11 +447,13 @@ public extension OpenHABWidget.CodingData {
 }
 
 //  Recursive parsing of nested widget structure
-extension [OpenHABWidget] {
+public extension [OpenHABWidget] {
     mutating func flatten(_ widgets: [Element]) {
         for widget in widgets {
             append(widget)
-            flatten(widget.widgets)
+            if widget.type != .buttongrid {
+                flatten(widget.widgets)
+            }
         }
     }
 }
@@ -491,7 +497,8 @@ extension OpenHABWidget {
             row: widget.row.map { Int($0) },
             column: widget.column.map { Int($0) },
             releaseCommand: widget.releaseCommand,
-            command: widget.command
+            command: widget.command,
+            stateless: widget.stateless
         )
     }
 }

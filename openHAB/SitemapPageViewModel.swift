@@ -48,11 +48,14 @@ class SitemapPageViewModel: ObservableObject {
     private var isLinkedPage = false
 
     var relevantWidgets: [OpenHABWidget] {
-        guard !searchText.isEmpty else { return currentPage?.widgets ?? [] }
+        var flattenedWidgets = [OpenHABWidget]()
+        flattenedWidgets.flatten(currentPage?.widgets ?? [])
 
-        return currentPage?.widgets.filter {
+        guard !searchText.isEmpty else { return flattenedWidgets }
+
+        return flattenedWidgets.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
-        } ?? []
+        }
     }
 
     var pageTitle: String {

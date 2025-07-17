@@ -902,6 +902,7 @@
 				DA35E2B22E1EEA9D003987BB /* ColorPickerRowView.swift */,
 				DAEE35062E224F6000B4A7F1 /* ColorTemperaturePickerRowView.swift */,
 				DA35E2B32E1EEA9D003987BB /* DatePickerInputRowView.swift */,
+				DAC949FD2E21A2D1007E67B7 /* FrameRowView.swift */,
 				DAEA21DF2DBF483E00D54342 /* GenericRowView.swift */,
 				DA35E2B42E1EEA9D003987BB /* ImageRowView.swift */,
 				DA35E2B52E1EEA9D003987BB /* MapRowView.swift */,
@@ -915,7 +916,6 @@
 				DAEA21DD2DBF481300D54342 /* TextRowView.swift */,
 				DA35E2BB2E1EEA9D003987BB /* VideoRowView.swift */,
 				DA35E2BC2E1EEA9D003987BB /* WebRowView.swift */,
-				DAC949FD2E21A2D1007E67B7 /* FrameRowView.swift */,
 			);
 			path = Rows;
 			sourceTree = "<group>";
