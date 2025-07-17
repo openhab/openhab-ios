@@ -14,11 +14,15 @@ import SwiftUI
 
 struct SliderRowView: View {
     @ObservedObject var widget: OpenHABWidget
-    @State private var currentValue = 0.0
-    @State private var isUserInteracting = false
+    @State private var sliderValue = 0.0
+    @State private var isDragging = false
+
+    @State private var updateTask: Task<Void, Never>?
+    @State private var lastSentTime = Date.distantPast
+    private let throttleInterval: TimeInterval = 0.9 // in seconds
 
     private var displayValue: Double {
-        isUserInteracting ? currentValue : (widget.stateValueAsNumberState?.value ?? widget.minValue)
+        isDragging ? sliderValue : (widget.stateValueAsNumberState?.value ?? widget.minValue)
     }
 
     private var sliderRange: ClosedRange<Double> {
@@ -43,16 +47,26 @@ struct SliderRowView: View {
             }
             .contentShape(Rectangle()) // 🔍 Make row but not slider tappable
             .onTapGesture {
-                // 🔄 Only send ON/OFF if not dragging the slider
-                if !isUserInteracting, widget.switchSupport {
-                    widget.sendCommand(currentValue <= widget.minValue ? "ON" : "OFF")
+                if widget.switchSupport {
+                    widget.sendCommand(sliderValue <= widget.minValue ? "ON" : "OFF")
                 }
             }
 
-            Slider(value: $currentValue, in: sliderRange) { isEditing in
-                isUserInteracting = isEditing
-                if !isEditing {
-                    sendSliderUpdate(currentValue)
+            Slider(
+                value: Binding(
+                    get: { sliderValue },
+                    set: { newValue in
+                        sliderValue = newValue
+                        if widget.shouldUseSliderUpdatesDuringMove() {
+                            sendSliderUpdate(newValue)
+                        }
+                    }
+                ),
+                in: sliderRange
+            ) { editing in
+                isDragging = editing
+                if !editing, !widget.shouldUseSliderUpdatesDuringMove() {
+                    sendSliderUpdate(sliderValue)
                 }
             }
         }
@@ -60,14 +74,17 @@ struct SliderRowView: View {
             loadCurrentValue()
         }
         .onChange(of: widget.stateValueAsNumberState?.value) { newValue in
-            if !isUserInteracting, let newValue {
-                currentValue = newValue
+            if !isDragging, let newValue {
+                sliderValue = newValue
             }
+        }
+        .onDisappear {
+            updateTask?.cancel()
         }
     }
 
     private func loadCurrentValue() {
-        currentValue = widget.stateValueAsNumberState?.value ?? widget.minValue
+        sliderValue = widget.stateValueAsNumberState?.value ?? widget.minValue
     }
 
     private func sendSliderUpdate(_ newValue: Double) {
@@ -75,6 +92,19 @@ struct SliderRowView: View {
         numberState = numberState ?? NumberState(value: newValue)
         numberState?.value = newValue
         widget.sendItemUpdate(state: numberState)
+    }
+
+    private func throttledsendSliderUpdate(_ newValue: Double) {
+        updateTask?.cancel()
+
+        updateTask = Task {
+            try? await Task.sleep(nanoseconds: UInt64(throttleInterval * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                sendSliderUpdate(sliderValue)
+                lastSentTime = Date()
+            }
+        }
     }
 }
 

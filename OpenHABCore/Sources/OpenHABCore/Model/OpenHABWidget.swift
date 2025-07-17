@@ -502,3 +502,29 @@ extension OpenHABWidget {
         )
     }
 }
+
+// Required for behavior of Slider
+public extension OpenHABWidget {
+    func shouldUseSliderUpdatesDuringMove() -> Bool {
+        if let releaseOnly {
+            return !releaseOnly
+        }
+
+        guard let item else {
+            return false
+        }
+
+        if item.isOfTypeOrGroupType(.dimmer) ||
+            item.isOfTypeOrGroupType(.number) ||
+            item.isOfTypeOrGroupType(.color) {
+            return true
+        }
+
+        if item.isOfTypeOrGroupType(.numberWithDimension) {
+            // Allow live updates for percent values, but not for e.g. temperatures
+            return stateValueAsNumberState?.unit == "%"
+        }
+
+        return false
+    }
+}
