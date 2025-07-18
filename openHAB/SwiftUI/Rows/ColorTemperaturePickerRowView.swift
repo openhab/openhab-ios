@@ -57,6 +57,7 @@ struct CustomSliderView: View {
 struct ColorTemperaturePickerRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedTemperature: Double = 2700 // Default warm white
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "ColorTemperaturePickerRowView")
 
@@ -176,7 +177,7 @@ struct ColorTemperaturePickerRowView: View {
         let command = "\(Int(selectedTemperature))"
 
         logger.info("Sending color temperature command: \(command)K")
-        widget.sendCommand(command)
+        viewModel.sendCommand(widget.item, commandToSend: command)
     }
 }
 

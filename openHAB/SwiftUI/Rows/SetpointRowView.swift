@@ -17,6 +17,8 @@ import SwiftUI
 
 struct SetpointRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var triggerFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSetpointView")
     private let setpointService = SetPointService()
@@ -49,25 +51,33 @@ struct SetpointRowView: View {
             Spacer()
 
             HStack(spacing: 12) {
-                Button(action: decreaseValue) {
+                Button {
+                    triggerFeedback.toggle()
+                    decreaseValue()
+                } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.body)
-                        .foregroundColor(.primary)
+                        .foregroundColor(currentValue <= widget.minValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .disabled(currentValue <= widget.minValue)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
 
                 Text(formattedValue)
                     .font(.body.monospacedDigit())
                     .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
 
-                Button(action: increaseValue) {
+                Button {
+                    triggerFeedback.toggle()
+                    increaseValue()
+                } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.body)
-                        .foregroundColor(.primary)
+                        .foregroundColor(currentValue >= widget.maxValue ? Color(.systemGray2) : Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
                 .disabled(currentValue >= widget.maxValue)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
             }
         }
     }
@@ -101,7 +111,7 @@ struct SetpointRowView: View {
         numberState?.value = limitedNewValue
 
         logger.info("Setpoint \(isDecreasing ? "decreased" : "increased") to \(limitedNewValue)")
-        widget.sendItemUpdate(state: numberState)
+        viewModel.sendToUpdate(item: widget.item, state: numberState)
     }
 }
 

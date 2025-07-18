@@ -17,6 +17,7 @@ import SwiftUI
 struct DatePickerInputRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedDate = Date()
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetDatePickerInputView")
 
@@ -78,7 +79,7 @@ struct DatePickerInputRowView: View {
 
         let command = formatter.string(from: date)
         logger.info("Sending date command: \(command)")
-        widget.sendCommand(command)
+        viewModel.sendCommand(widget.item, commandToSend: command)
     }
 
     private func parseDate(from state: String) -> Date? {

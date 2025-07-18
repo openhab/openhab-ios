@@ -20,6 +20,7 @@ struct SliderRowView: View {
     @State private var updateTask: Task<Void, Never>?
     @State private var lastSentTime = Date.distantPast
     private let throttleInterval: TimeInterval = 0.9 // in seconds
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private var displayValue: Double {
         isDragging ? sliderValue : (widget.stateValueAsNumberState?.value ?? widget.minValue)
@@ -48,7 +49,7 @@ struct SliderRowView: View {
             .contentShape(Rectangle()) // 🔍 Make row but not slider tappable
             .onTapGesture {
                 if widget.switchSupport {
-                    widget.sendCommand(sliderValue <= widget.minValue ? "ON" : "OFF")
+                    viewModel.sendCommand(widget.item, commandToSend: sliderValue <= widget.minValue ? "ON" : "OFF")
                 }
             }
 
@@ -91,7 +92,7 @@ struct SliderRowView: View {
         var numberState = widget.stateValueAsNumberState
         numberState = numberState ?? NumberState(value: newValue)
         numberState?.value = newValue
-        widget.sendItemUpdate(state: numberState)
+        viewModel.sendToUpdate(item: widget.item, state: numberState)
     }
 
     private func throttledsendSliderUpdate(_ newValue: Double) {

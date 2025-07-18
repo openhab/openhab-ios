@@ -18,6 +18,7 @@ struct SelectionRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedIndex = 0
     @ScaledMetric(relativeTo: .body) private var pickerHeight: CGFloat = 24
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSelectionView")
 
@@ -50,7 +51,7 @@ struct SelectionRowView: View {
                 .onChange(of: selectedIndex) { newIndex in
                     guard let mapping = mappings[safe: newIndex] else { return }
                     logger.info("Selection changed to: \(mapping.label)")
-                    widget.sendCommand(mapping.command)
+                    viewModel.sendCommand(widget.item, commandToSend: mapping.command)
                 }
             }
         }

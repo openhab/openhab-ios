@@ -23,6 +23,10 @@ enum RollerShutterCommand: String {
 
 struct RollershutterRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var triggerUpFeedback = false
+    @State private var triggerStopFeedback = false
+    @State private var triggerDownFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetRollershutterView")
 
@@ -42,35 +46,61 @@ struct RollershutterRowView: View {
                 Spacer()
 
                 Button {
+                    triggerUpFeedback.toggle()
                     logger.info("up button pressed")
-                    widget.sendCommand(RollerShutterCommand.up.rawValue)
+                    viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.up.rawValue)
                 } label: {
                     Image(systemSymbol: .chevronUp)
                         .font(.title2)
-                        .foregroundColor(.primary)
+                        .foregroundColor(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerUpFeedback)
 
                 Button {
+                    triggerStopFeedback.toggle()
                     logger.info("stop button pressed")
-                    widget.sendCommand(RollerShutterCommand.stop.rawValue)
+                    viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.stop.rawValue)
                 } label: {
                     Image(systemSymbol: .stop)
                         .font(.title2)
-                        .foregroundColor(.primary)
+                        .foregroundColor(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerStopFeedback)
 
                 Button {
+                    triggerDownFeedback.toggle()
                     logger.info("down button pressed")
-                    widget.sendCommand(RollerShutterCommand.down.rawValue)
+                    viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.down.rawValue)
                 } label: {
                     Image(systemSymbol: .chevronDown)
                         .font(.title2)
-                        .foregroundColor(.primary)
+                        .foregroundColor(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
+                .sensoryHeavyFeedbackIfAvailable(trigger: triggerDownFeedback)
             }
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func sensoryHeavyFeedbackIfAvailable(trigger: Bool) -> some View {
+        if #available(iOS 17.0, *) {
+            self.sensoryFeedback(.impact(weight: .heavy, intensity: 0.9), trigger: trigger)
+        } else {
+            self
+        }
+    }
+
+    @ViewBuilder
+    func sensoryStopFeedbackIfAvailable(trigger: Bool) -> some View {
+        if #available(iOS 17.0, *) {
+            self.sensoryFeedback(.impact(flexibility: .rigid), trigger: trigger)
+        } else {
+            self
         }
     }
 }

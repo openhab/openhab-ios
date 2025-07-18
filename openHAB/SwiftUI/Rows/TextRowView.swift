@@ -16,6 +16,7 @@ import SwiftUI
 
 struct TextRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         HStack {

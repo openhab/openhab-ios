@@ -18,6 +18,7 @@ struct TextInputRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var inputText = ""
     @FocusState private var isTextFieldFocused: Bool
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetTextInputView")
 
@@ -55,7 +56,7 @@ struct TextInputRowView: View {
 
     private func sendTextCommand() {
         logger.info("Sending text command: \(inputText)")
-        widget.sendCommand(inputText)
+        viewModel.sendCommand(widget.item, commandToSend: inputText)
         isTextFieldFocused = false
     }
 }

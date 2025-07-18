@@ -45,6 +45,7 @@ struct WebRowView: UIViewRepresentable {
     }
 
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private var webURL: URL? {
         guard !widget.url.isEmpty else { return nil }

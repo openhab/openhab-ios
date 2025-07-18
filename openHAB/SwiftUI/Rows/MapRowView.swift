@@ -53,6 +53,7 @@ private struct MapRowViewNew: View {
             longitudinalMeters: 1000
         )
     )
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     var body: some View {
         VStack {

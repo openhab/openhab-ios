@@ -346,6 +346,20 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
+    func sendToUpdate(item: OpenHABItem?, state: NumberState?) {
+        guard let item, let state else {
+            logger.info("ItemUpdate for Item or State = nil")
+            return
+        }
+        if item.isOfTypeOrGroupType(.numberWithDimension) {
+            // For number items, include unit (if present) in command
+            sendCommand(item, commandToSend: state.toString(locale: Locale(identifier: "US")))
+        } else {
+            // For all other items, send the plain value
+            sendCommand(item, commandToSend: state.stringValue)
+        }
+    }
+
     deinit {
         pageHandlingTask?.cancel()
     }

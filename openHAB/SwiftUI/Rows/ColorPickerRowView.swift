@@ -17,6 +17,7 @@ import SwiftUI
 struct ColorPickerRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var selectedColor: Color = .white
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
@@ -70,7 +71,7 @@ struct ColorPickerRowView: View {
 
         let command = "\(hueValue),\(saturationValue),\(brightnessValue)"
         logger.info("Sending color command: \(command)")
-        widget.sendCommand(command)
+        viewModel.sendCommand(widget.item, commandToSend: command)
     }
 
     private func parseColor(from state: String) -> Color? {

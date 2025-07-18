@@ -58,6 +58,7 @@ struct SitemapPageView: View {
                     }
                 }
             }
+            .environmentObject(viewModel)
             .listStyle(.plain)
             .navigationBarHidden(!isLinkedPage)
             .navigationTitle(isLinkedPage ? viewModel.pageTitle : "")

@@ -16,6 +16,7 @@ import SwiftUI
 
 struct SegmentedRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSegmentedView")
 
@@ -48,7 +49,7 @@ struct SegmentedRowView: View {
                     HStack {
                         ForEach(mappings.indices, id: \.self) { index in
                             Button {
-                                widget.sendCommand(mappings[index].command)
+                                viewModel.sendCommand(widget.item, commandToSend: mappings[index].command)
                             } label: {
                                 Text(mappings[index].label)
                                     .padding(.horizontal, 6)
@@ -62,7 +63,7 @@ struct SegmentedRowView: View {
                         set: { newIndex in
                             selectedIndex = newIndex
                             if let mapping = mappings[safe: newIndex] {
-                                widget.sendCommand(mapping.command)
+                                viewModel.sendCommand(widget.item, commandToSend: mapping.command)
                             }
                         }
                     )) {

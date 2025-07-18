@@ -16,6 +16,7 @@ import SwiftUI
 
 struct ImageRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private var imageURL: URL? {
         guard !widget.url.isEmpty else { return nil }

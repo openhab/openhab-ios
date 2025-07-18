@@ -17,6 +17,7 @@ import SwiftUI
 struct VideoRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @State private var player: AVPlayer?
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private var videoURL: URL? {
         guard !widget.url.isEmpty else { return nil }

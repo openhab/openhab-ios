@@ -19,6 +19,8 @@ struct ButtonGridButton: View {
     let targetWidget: OpenHABWidget
 
     @State private var isPressed = false
+    @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var triggerFeedback = false
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridButton")
 
@@ -35,6 +37,7 @@ struct ButtonGridButton: View {
 
     var body: some View {
         Button {
+            triggerFeedback.toggle()
             handleButtonPress()
         } label: {
             HStack {
@@ -63,6 +66,7 @@ struct ButtonGridButton: View {
         }
         .buttonStyle(PlainButtonStyle())
 //        .disabled(widget.readOnly)
+        .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
         .onPressGesture(
             onPress: {
                 handleTouchDown()
@@ -77,7 +81,7 @@ struct ButtonGridButton: View {
         // Send command on tap for mappings
         if let command = button.command, !command.isEmpty {
             logger.info("Sending command: \(command)")
-            targetWidget.sendCommand(button.command)
+            viewModel.sendCommand(targetWidget.item, commandToSend: button.command)
         }
     }
 

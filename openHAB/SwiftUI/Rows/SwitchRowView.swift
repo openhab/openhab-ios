@@ -16,6 +16,7 @@ import SwiftUI
 
 struct SwitchRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetSwitchView")
 
@@ -58,7 +59,7 @@ struct SwitchRowView: View {
                     } else {
                         logger.info("Switch to OFF")
                     }
-                    widget.sendCommand(newState)
+                    viewModel.sendCommand(widget.item, commandToSend: newState)
                 }
             ))
             .labelsHidden()
