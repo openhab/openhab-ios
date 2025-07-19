@@ -22,7 +22,7 @@ struct SitemapSettingsView: View {
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
-    @State var cacheSizeResult: Result<UInt, KingfisherError>? = nil
+    @State var cacheSizeResult: Result<UInt, KingfisherError>?
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "SitemapSettingsView")
 
@@ -34,8 +34,10 @@ struct SitemapSettingsView: View {
 
             Button {
                 KingfisherManager.shared.cache.calculateDiskStorageSize { result in
-                    cacheSizeResult = result
-                    showingCacheAlert = true
+                    Task { @MainActor in
+                               cacheSizeResult = result
+                               showingCacheAlert = true
+                           }
                 }
             } label: {
                 NavigationLink("Check & Clear Image Cache", destination: EmptyView())
