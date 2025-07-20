@@ -16,20 +16,22 @@ import os.log
 
 class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
     private let logger = Logger(subsystem: "org.openhab.app", category: "GetItemStateIntent")
-    private let itemCache: any ItemCacheProtocol
 
-    init(itemCache: any ItemCacheProtocol = OpenHABItemCache.instance) {
-        self.itemCache = itemCache
+    func resolveHome(for intent: OpenHABGetItemStateIntent) async -> OpenHABHomeResolutionResult {
+        logger.info("Resolving home for intent: \(intent)")
+        return await OpenHABIntentHelper.resolveHome(home: intent.home, item: intent.item)
+    }
+
+    func provideHomeOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<OpenHABHome> {
+        OpenHABIntentHelper.getHomeOptions()
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent, searchTerm: String?) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache.getItemNames(searchTerm: searchTerm, types: nil).map(NSString.init)
-        return INObjectCollection(items: items)
+        await OpenHABIntentHelper.getItemOptions(home: intent.home, searchTerm: searchTerm)
     }
 
     func provideItemOptionsCollection(for intent: OpenHABGetItemStateIntent) async throws -> INObjectCollection<NSString> {
-        let items = await itemCache.getItemNames(searchTerm: nil, types: nil).map(NSString.init)
-        return INObjectCollection(items: items)
+        await OpenHABIntentHelper.getItemOptions(home: intent.home)
     }
 
     func confirm(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
@@ -38,24 +40,26 @@ class GetItemStateIntentHandler: NSObject, OpenHABGetItemStateIntentHandling {
 
     func handle(intent: OpenHABGetItemStateIntent) async -> OpenHABGetItemStateIntentResponse {
         logger.info("GetItemStateIntent for \(intent.item ?? "")")
-        await OpenHABItemCache.instance.waitUntilReady()
-        // Proceed to fetch item and complete
 
-        guard let itemName = intent.item else {
+        guard let itemName = intent.item, let home = intent.home else {
             return .failureInvalidItem(
-                NSLocalizedString("empty", comment: "empty item name")
+                NSLocalizedString("empty", comment: "empty item / home name")
             )
         }
 
-        let item = await itemCache.getItem(name: itemName)
+        guard let homeId = home.uuid, Preferences.storedHomes[homeId] != nil else {
+            return .failureInvalidItem(NSLocalizedString("unknownHome", comment: "unknown home"))
+        }
 
-        guard let item else {
+        let items = await OpenHABItemCache.instance.getCachedItem(name: itemName, home: homeId)
+
+        guard let items, items.count == 1 else {
             return .failureInvalidItem(itemName)
         }
 
         return .success(
             item: itemName,
-            state: item.state ?? NSLocalizedString("unknown", comment: "unknown item")
+            state: items[0].state ?? NSLocalizedString("unknownState", comment: "unknown item state")
         )
     }
 }

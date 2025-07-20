@@ -15,7 +15,7 @@ import UIKit
 
 private let logger = Logger(subsystem: "org.openhab", category: "Preferences")
 
-@propertyWrapper @MainActor
+@propertyWrapper
 public struct UserDefault<T: Sendable> {
     private let key: String
     private let defaultValue: T
@@ -44,7 +44,7 @@ public struct UserDefault<T: Sendable> {
     }
 }
 
-@propertyWrapper @MainActor
+@propertyWrapper
 public struct UserDefaultObject<T: Codable & Sendable> {
     private let key: String
     private let defaultValue: T
@@ -105,7 +105,6 @@ public struct HomePreferences: Codable, Sendable, Equatable {
     }
 }
 
-@MainActor
 public enum Preferences {
     /// the currently applied settings set from storedHomes
     @UserDefaultObject("currentHomePreferences", defaultValue: HomePreferences(id: Preferences.activeHomeId))
