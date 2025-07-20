@@ -35,9 +35,9 @@ struct SitemapSettingsView: View {
             Button {
                 KingfisherManager.shared.cache.calculateDiskStorageSize { result in
                     Task { @MainActor in
-                               cacheSizeResult = result
-                               showingCacheAlert = true
-                           }
+                        cacheSizeResult = result
+                        showingCacheAlert = true
+                    }
                 }
             } label: {
                 NavigationLink("Check & Clear Image Cache", destination: EmptyView())

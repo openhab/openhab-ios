@@ -68,6 +68,23 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public enum InputHint: String, Decodable {
         case text, number, date, time, dateTime, unknown
+
+        public init(rawValue: String) {
+            switch rawValue.lowercased() {
+            case "text":
+                self = .text
+            case "number":
+                self = .number
+            case "date":
+                self = .date
+            case "time":
+                self = .time
+            case "datetime", "dateTime":
+                self = .dateTime
+            default:
+                self = .unknown
+            }
+        }
     }
 
     private let logger = Logger(subsystem: "org.openhab", category: "OpenHABWidget")
@@ -110,7 +127,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var releaseCommand: String?
     public var command: String?
     public var stateless: Bool?
-    public var readOnly = false
+    public var readOnly : Bool? {
+        item?.stateDescription?.readOnly
+    }
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -368,6 +387,7 @@ public extension OpenHABWidget {
         self.column = column
         self.releaseCommand = releaseCommand
         self.command = command
+        self.stateless = stateless
     }
 
     convenience init(icon: String, iconColor: String? = nil) {

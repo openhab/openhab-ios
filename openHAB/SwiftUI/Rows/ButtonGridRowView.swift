@@ -15,8 +15,7 @@ import os.log
 import SwiftUI
 
 struct ButtonGridButton: View {
-    let button: OpenHABWidget
-    let targetWidget: OpenHABWidget
+    let widget: OpenHABWidget
 
     @State private var isPressed = false
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -24,15 +23,14 @@ struct ButtonGridButton: View {
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridButton")
 
-    private var isStateful: Bool {
-        // TODO: Mappings are typically stateless unless specified otherwise
-        // Handle widgets as well
-        false
-    }
-
-    private var isSelected: Bool {
-        guard isStateful else { return false }
-        return targetWidget.item?.state == button.command
+    private var isChecked: Bool {
+        if let stateless = widget.stateless {
+            logger.debug("button.stateless : \(stateless)")
+        } else {
+            logger.debug("button.stateless : nil")
+        }
+        if let stateless = widget.stateless, stateless { return false }
+        return widget.item?.state == widget.command
     }
 
     var body: some View {
@@ -41,11 +39,11 @@ struct ButtonGridButton: View {
             handleButtonPress()
         } label: {
             HStack {
-                if !button.icon.isEmpty {
-                    IconView(icon: button.icon)
+                if !widget.icon.isEmpty {
+                    IconView(icon: widget.icon)
                         .frame(width: 16, height: 16)
                 } else {
-                    Text(button.label)
+                    Text(widget.label)
                         .font(.caption)
                         .foregroundColor(.primary)
                         .lineLimit(1)
@@ -56,11 +54,11 @@ struct ButtonGridButton: View {
             .frame(height: 44)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.accentColor : Color.secondary.opacity(0.1))
+                    .fill(isChecked ? Color.accentColor : Color.secondary.opacity(0.1))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: 1)
+                    .stroke(isChecked ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: 1)
             )
             .scaleEffect(isPressed ? 0.95 : 1.0)
         }
@@ -79,18 +77,29 @@ struct ButtonGridButton: View {
 
     private func handleButtonPress() {
         // Send command on tap for mappings
-        if let command = button.command, !command.isEmpty {
+        if let command = widget.command, !command.isEmpty {
             logger.info("Sending command: \(command)")
-            viewModel.sendCommand(targetWidget.item, commandToSend: button.command)
+            viewModel.sendCommand(widget.item, commandToSend: widget.command)
         }
     }
 
     private func handleTouchDown() {
         isPressed = true
+        // For buttons with releaseCommand, send command on press
+        if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty,
+           let command = widget.command {
+            logger.info("Sending press command: \(command)")
+            widget.sendCommand(command)
+        }
     }
 
     private func handleTouchUp() {
         isPressed = false
+        // For buttons with releaseCommand, send release command on release
+        if let releaseCommand = widget.releaseCommand, !releaseCommand.isEmpty {
+            logger.info("Sending release command: \(releaseCommand)")
+            widget.sendCommand(releaseCommand)
+        }
     }
 }
 
@@ -145,7 +154,7 @@ struct ButtonGridRowView: View {
 
                         if let button,
                            button.visibility {
-                            ButtonGridButton(button: button, targetWidget: widget)
+                            ButtonGridButton(widget: button)
                         } else {
                             // Empty cell to maintain grid structure
                             Rectangle()
@@ -193,7 +202,8 @@ extension OpenHABWidgetMapping {
         widget.visibility = true
         widget.row = row
         widget.column = column
-        widget.releaseCommand = releaseCommand
+        widget.releaseCommand = ""
+        widget.stateless = true
         widget.icon = icon ?? ""
         return widget
     }
