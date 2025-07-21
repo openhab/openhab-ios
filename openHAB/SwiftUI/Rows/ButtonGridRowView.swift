@@ -25,9 +25,9 @@ struct ButtonGridButton: View {
 
     private var isChecked: Bool {
         if let stateless = widget.stateless {
-            logger.debug("button.stateless : \(stateless)")
+            logger.debug("button.stateless: \(stateless)")
         } else {
-            logger.debug("button.stateless : nil")
+            logger.debug("button.stateless: nil")
         }
         if let stateless = widget.stateless, stateless { return false }
         return widget.item?.state == widget.command
