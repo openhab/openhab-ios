@@ -12,11 +12,14 @@
 import CommonUI
 import Kingfisher
 import OpenHABCore
+import os.log
 import SwiftUI
 
 struct ImageRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
+
+    private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
     private var imageURL: URL? {
         guard !widget.url.isEmpty else { return nil }
@@ -30,22 +33,17 @@ struct ImageRowView: View {
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }
 
-            if let imageURL {
-                KFImage(imageURL)
-                    .placeholder {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 200)
-                            .overlay(
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            )
-                    }
+            switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "") {
+            case let .embedded(data: data):
+                let provider = RawImageDataProvider(data: data, cacheKey: UUID().uuidString)
+                KFImage(source: .provider(provider)).resizable()
+            case let .link(url):
+                KFImage(url)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: 300)
                     .cornerRadius(8)
-            } else {
+            case .empty:
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 200)

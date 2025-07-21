@@ -127,7 +127,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var releaseCommand: String?
     public var command: String?
     public var stateless: Bool?
-    public var readOnly : Bool? {
+    public var readOnly: Bool? {
         item?.stateDescription?.readOnly
     }
 
@@ -293,6 +293,40 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         var valueAdjustedToStep = floor((raw - minValue) / step) * step
         valueAdjustedToStep += minValue
         return valueAdjustedToStep.clamped(to: minValue ... maxValue)
+    }
+
+    public func generateImageResult(rootUrl: String,
+                                    chartStyle: ChartStyle = .light) -> ImagePayload {
+        switch type {
+        case .chart:
+            guard let url = Endpoint.chart(
+                rootUrl: rootUrl,
+                period: period,
+                type: item?.type,
+                service: service,
+                name: item?.name,
+                legend: legend,
+                theme: chartStyle,
+                forceAsItem: forceAsItem
+            ).url else {
+                logger.error("Failed to generate chart URL")
+                return .empty
+            }
+            return .link(url: url)
+
+        case .image:
+            if let item {
+                return item.getImagePayload()
+            }
+            guard let url = URL(string: url) else {
+                logger.error("Invalid image URL: \(self.url)")
+                return .empty
+            }
+            return .link(url: url)
+
+        default:
+            return .empty
+        }
     }
 }
 

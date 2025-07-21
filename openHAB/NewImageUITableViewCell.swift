@@ -14,12 +14,6 @@ import OpenHABCore
 import os.log
 import UIKit
 
-enum ImageType {
-    case link(url: URL?)
-    case embedded(image: UIImage?)
-    case empty
-}
-
 class NewImageUITableViewCell: GenericUITableViewCell, NoIconDisplayableCell {
     private let logger = Logger(subsystem: "org.openhab", category: "NewImageUITableViewCell")
 
