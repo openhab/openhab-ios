@@ -32,6 +32,9 @@ struct GenericRowView: View {
     }
 }
 
-// #Preview {
-//    WidgetGenericView()
-// }
+ #Preview {
+     let widget = PreviewConstants.openHABSitemapPage!.widgets[6]
+     List([widget]) { widget in
+         GenericRowView(widget: widget)
+     }
+ }

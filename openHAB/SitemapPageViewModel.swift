@@ -109,16 +109,6 @@ class SitemapPageViewModel: ObservableObject {
                 return
             }
             do {
-                // Setup service if needed
-//                if openAPIService == nil {
-//                    guard let activeConnection = NetworkTracker.shared.activeConnection else {
-//                        throw SitemapPageError.noActiveConnection
-//                    }
-//                    openAPIService = try OpenAPIService(
-//                        connectionConfiguration: activeConnection.configuration
-//                    )
-//                }
-
                 guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else {
                     logger.error("Failed to establish connection within timeout")
                     return

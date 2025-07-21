@@ -95,7 +95,7 @@ struct SliderRowView: View {
         viewModel.sendToUpdate(item: widget.item, state: numberState)
     }
 
-    private func throttledsendSliderUpdate(_ newValue: Double) {
+    private func throttledSendSliderUpdate(_ newValue: Double) {
         updateTask?.cancel()
 
         updateTask = Task {
