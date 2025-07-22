@@ -29,7 +29,7 @@ struct MapRowViewLegacy: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }

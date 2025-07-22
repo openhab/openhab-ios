@@ -26,7 +26,7 @@ struct ColorPickerRowView: View {
             IconView(widget: widget)
                 .frame(width: 24, height: 24)
 
-            if let labelText = widget.labelText, !labelText.isEmpty {
+            if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }

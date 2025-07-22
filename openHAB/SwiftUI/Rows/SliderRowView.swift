@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import CommonUI
 import OpenHABCore
 import SwiftUI
 
@@ -36,7 +37,10 @@ struct SliderRowView: View {
                 IconView(widget: widget)
                     .frame(width: 24, height: 24)
 
-                Text(widget.labelText ?? "")
+                if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+                    Text(labelText)
+                        .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
+                }
 
                 Spacer()
 

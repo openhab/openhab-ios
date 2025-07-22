@@ -77,7 +77,7 @@ struct ColorTemperaturePickerRowView: View {
 
             VStack(spacing: 8) {
                 HStack {
-                    if let labelText = widget.labelText, !labelText.isEmpty {
+                    if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
                         Text(labelText)
                             .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     }

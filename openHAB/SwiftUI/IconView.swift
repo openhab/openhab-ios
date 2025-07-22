@@ -59,7 +59,12 @@ struct IconView: View {
     }
 
     var body: some View {
-        Group {
+        ZStack {
+            // No icon or failed to load - show empty space
+            Rectangle()
+                .fill(Color.clear)
+                .frame(width: size.width, height: size.height)
+
             if let iconURL, !imageLoadingFailed {
                 KFImage.url(iconURL)
                     .placeholder {
@@ -83,11 +88,6 @@ struct IconView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
                     .id(iconURL.absoluteString)
-            } else {
-                // No icon or failed to load - show empty space
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(width: size.width, height: size.height)
             }
         }
         .onChange(of: widget.icon) { _ in
