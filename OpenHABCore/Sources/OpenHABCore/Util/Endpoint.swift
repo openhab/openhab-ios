@@ -131,15 +131,18 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String, iconType: IconType, iconColor: String) -> Endpoint {
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String) -> Endpoint {
         guard var icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
 
         // determineOH2IconPath
-        var queryItems = [
-            URLQueryItem(name: "state", value: state)
-        ]
+        var queryItems: [URLQueryItem] = []
+        if let state {
+            queryItems.append(contentsOf: [
+                URLQueryItem(name: "state", value: state)
+            ])
+        }
         if version >= 4 {
             let components = icon.components(separatedBy: ":")
             var source = ""

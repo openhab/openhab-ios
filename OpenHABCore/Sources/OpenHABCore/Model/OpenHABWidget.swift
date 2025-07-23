@@ -262,31 +262,35 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         Int(mappingIndex(byCommand: command) ?? 0)
     }
 
-    public func iconState() -> String {
-        var iconState = item?.state ?? ""
-        if let item, let itemState = item.state {
-            if item.isOfTypeOrGroupType(.color) {
-                // For items that control a color item fetch the correct icon
-                if type == .slider || (type == .switchWidget && mappings.isEmpty) {
-                    if let brightness = itemState.parseAsBrightness() {
-                        iconState = String(brightness)
-                        if type == .switchWidget {
-                            iconState = iconState == "0" ? "OFF" : "ON"
-                        }
+    public func iconState() -> String? {
+        guard let item, let itemState = item.state else { return nil }
+        if item.isOfTypeOrGroupType(.color) {
+            // For items that control a color item fetch the correct icon
+            if type == .slider || (type == .switchWidget && mappings.isEmpty) {
+                if let brightness = itemState.parseAsBrightness() {
+                    let brightness = String(brightness)
+                    if type == .switchWidget {
+                        return brightness == "0" ? "OFF" : "ON"
                     } else {
-                        iconState = "OFF"
+                        return brightness
                     }
-                } else if let color = itemState.parseAsUIColor() {
-                    iconState = "#\(color.toHex() ?? "000000")"
+                } else {
+                    return "OFF"
                 }
-            } else if type == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
-                // For switch items without mappings (just ON and OFF) that control a dimmer item
-                // and which are not ON or OFF already, set the state to "OFF" instead of 0
-                // or to "ON" to fetch the correct icon
-                iconState = (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
+            } else if let color = itemState.parseAsUIColor() {
+                return "#\(color.toHex() ?? "000000")"
             }
+        } else if item.isOfTypeOrGroupType(.number) || item.isOfTypeOrGroupType(.numberWithDimension) {
+            let numberState = itemState.parseAsNumber(format: item.stateDescription?.numberPattern)
+            return numberState.toString(locale: Locale(identifier: "US"))
+        } else if type == .switchWidget, mappings.isEmpty, !item.isOfTypeOrGroupType(.rollershutter) {
+            // For switch items without mappings (just ON and OFF) that control a dimmer item
+            // and which are not ON or OFF already, set the state to "OFF" instead of 0
+            // or to "ON" to fetch the correct icon
+            return (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
         }
-        return iconState
+
+        return itemState
     }
 
     private func adj(_ raw: Double) -> Double {
