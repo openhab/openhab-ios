@@ -27,6 +27,9 @@ class OpenHABWebViewController: OpenHABViewController {
     private var sseTimer: Timer?
     private var commandQueue: [String] = []
     private var acceptsCommands = false
+    private var views: [UUID: WKWebView] = [:]
+    // TODO: remove myOhViews when we drop iOS 16 support
+    private var myOhViews: [UUID: WKWebView] = [:]
 
     private var js = """
     window.OHApp = {
@@ -49,7 +52,7 @@ class OpenHABWebViewController: OpenHABViewController {
         true
     }
 
-    private lazy var webView: WKWebView = newWebView()
+    private var webView: WKWebView = .init(frame: .zero)
 
     private var logger = Logger(subsystem: "org.openhab.app", category: "OpenHABWebViewController")
 
@@ -116,6 +119,7 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
+    @MainActor
     func loadWebView(force: Bool = false, path: String? = nil) {
         logger.info("loadWebView tracked URL: \(self.activeConfig?.url ?? "") forced \(force ? "true" : "false")")
         guard let activeConfig else { return }
@@ -131,10 +135,27 @@ class OpenHABWebViewController: OpenHABViewController {
         let url = URL(string: activeConfig.url)
 
         if let modifiedUrl = modifyUrl(orig: url, path: path) {
-            let request = URLRequest(url: modifiedUrl)
-            clearExistingPage()
             acceptsCommands = false
+            let request = URLRequest(url: modifiedUrl)
+            // TODO: remove this check once iOS 16 is dropped
+            let isMyOh = url?.host?.contains("myopenhab.org") ?? false
+            // create new (or resuse existing)
+            let newWebview = webView(for: Preferences.currentHomePreferences.id, isMyopenhab: isMyOh)
+            if newWebview != webView {
+                // Detach old instance
+                webView.stopLoading()
+                webView.navigationDelegate = nil
+                webView.uiDelegate = nil
+                webView.removeFromSuperview()
+                newWebview.navigationDelegate = self
+                newWebview.uiDelegate = self
+                webView = newWebview
+                view.addSubview(newWebview)
+            }
+            // DispatchQueue.main.async {
+            logger.info("Loading URL: \(modifiedUrl)")
             webView.load(request)
+            // }
         }
     }
 
@@ -144,7 +165,6 @@ class OpenHABWebViewController: OpenHABViewController {
         if url.host == "myopenhab.org" {
             url = URL(string: "https://home.myopenhab.org") ?? url
         }
-
         if let path {
             url = appendPathToURL(baseURL: url, path: path) ?? url
         } else if !Preferences.currentHomePreferences.defaultMainUIPath.isEmpty {
@@ -188,19 +208,8 @@ class OpenHABWebViewController: OpenHABViewController {
         navigationController?.setNavigationBarHidden(hideNavBar, animated: true)
     }
 
-    private func updateNavigationTitle() {
-        if let rootController = parent as? OpenHABRootViewController,
-           let sitemapController = rootController.sitemapViewController as? HostingSitemapViewController {
-            parent?.navigationItem.title = sitemapController.getSitemapTitle()
-        } else {
-            parent?.navigationItem.title = "Main View"
-        }
-    }
-
-    // swiftformat:disable redundantSelf
     func clearExistingPage() {
-        logger.info("clearExistingPage - webView.url \(String(describing: self.webView.url?.description))")
-
+        logger.info("clearExistingPage")
         setHideNavBar(shouldHide: false)
         // clear out existing page while we load.
         webView.stopLoading()
@@ -208,8 +217,7 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func pageLoadError(message: String) {
-        logger.info("pageLoadError - webView.url \(String(describing: self.webView.url?.description)) \(message)")
-        showActivityIndicator(show: false)
+        showActivityIndicator(show: true)
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
     }
 
@@ -253,20 +261,39 @@ class OpenHABWebViewController: OpenHABViewController {
         }
     }
 
-    private func newWebView() -> WKWebView {
+    func webView(for id: UUID, isMyopenhab: Bool) -> WKWebView {
+        // TODO: remove all iOS < 17 code when we drop iOS 16 support
+        if #unavailable(iOS 17) {
+            if isMyopenhab, let myExsiting = myOhViews[id] {
+                logger.info("Reusing myopenhab webview for id:\(id.uuidString)")
+                return myExsiting
+            }
+        }
+        if let existing = views[id] {
+            logger.info("Reusing webview for id:\(id.uuidString)")
+            return existing
+        }
         let config = WKWebViewConfiguration()
+        config.processPool = WKProcessPool() // isolates credential cache
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
         config.userContentController.add(self, name: "Native")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
 
-        let webView = WKWebView(frame: view.bounds, configuration: config)
-        // Alow rotation of webview
+        // iOS 17 allows Sandboxed profiles, which is fantastic, iOS 16 does not and agressively caches everything
+        if #available(iOS 17, *) {
+            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: id)
+        } else if isMyopenhab {
+            // for myopenhab, create a instance that does not persist or share states (private)
+            config.websiteDataStore = .nonPersistent()
+        }
+
+        let webview = WKWebView(frame: view.bounds, configuration: config)
+        webview.navigationDelegate = self
+        webview.uiDelegate = self
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.scrollView.bounces = false
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
         // support dark mode and avoid white flashing when loading
         webView.isOpaque = false
         webView.backgroundColor = UIColor.clear
@@ -278,7 +305,14 @@ class OpenHABWebViewController: OpenHABViewController {
             webView.isInspectable = true
         }
 
-        return webView
+        if #unavailable(iOS 17) {
+            if isMyopenhab {
+                myOhViews[id] = webview
+                return webview
+            }
+        }
+        views[id] = webview
+        return webview
     }
 }
 
@@ -361,7 +395,6 @@ extension OpenHABWebViewController: WKNavigationDelegate {
         logger.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
         showActivityIndicator(show: false)
         hidePopupMessages()
-
         // watch for URL changes so we can store the last visited path
         if let webviewURL = webView.url {
             let url = URL(string: webviewURL.path, relativeTo: URL(string: openHABTrackedRootUrl))
@@ -396,6 +429,10 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         logger.warning("webViewWebContentProcessDidTerminate - reloading view")
+        reloadView()
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
         reloadView()
     }
 }
