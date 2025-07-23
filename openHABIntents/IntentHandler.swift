@@ -17,7 +17,7 @@ class IntentHandler: INExtension {
         super.init()
 
         Task {
-            await OpenHABItemCache.instance.setup()
+            await OpenHABItemCache.instance.forceCacheReload()
         }
     }
 
