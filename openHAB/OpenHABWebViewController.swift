@@ -216,7 +216,6 @@ class OpenHABWebViewController: OpenHABViewController {
     }
 
     func pageLoadError(message: String) {
-        // logger.info("pageLoadError - webView.url \(String(describing: webView.url?.description)) \(message)")
         showActivityIndicator(show: true)
         showPopupMessage(seconds: 60, title: NSLocalizedString("error", comment: ""), message: message, theme: .error)
     }
