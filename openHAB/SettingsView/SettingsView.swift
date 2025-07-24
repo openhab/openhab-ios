@@ -145,6 +145,13 @@ struct SettingsView: View {
         }
         Preferences.idleOff = settingsIdleOff
         Preferences.sendCrashReports = settingsSendCrashReports
+
+        // Apply global UI changes immediately (status bar visibility)
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first?.rootViewController?
+            .setNeedsStatusBarAppearanceUpdate()
     }
 }
 

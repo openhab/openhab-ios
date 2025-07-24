@@ -11,9 +11,12 @@
 
 import Combine
 import OpenHABCore
+import os.log
 import SideMenu
 import SwiftMessages
 import UIKit
+
+private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
 
 class OpenHABViewController: UIViewController {
     var trackerCancellables = Set<AnyCancellable>()
@@ -32,6 +35,7 @@ class OpenHABViewController: UIViewController {
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: seconds)
         config.presentationStyle = .bottom
+        config.presentationContext = .view(view)
         SwiftMessages.hideAll()
         SwiftMessages.show(config: config) {
             let view = MessageView.viewFromNib(layout: .cardView)

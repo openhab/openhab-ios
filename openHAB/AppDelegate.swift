@@ -103,6 +103,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let SVGCoder = SDImageSVGCoder.shared
         SDImageCodersManager.shared.addCoder(SVGCoder)
 
+        /// load and start the screensaver
+        if let keyWindow = UIApplication.shared.firstKeyWindow {
+            var config = ScreenSaverConfiguration()
+            config.isEnabled = Preferences.screensaverEnabled
+            config.showsTime = Preferences.screensaverShowsTime
+            config.showsDate = Preferences.screensaverShowsDate
+            config.idleInterval = Preferences.screensaverIdleInterval
+            config.movementInterval = Preferences.screensaverMovementInterval
+            config.fontName = Preferences.screensaverFontName.isEmpty ? nil : Preferences.screensaverFontName
+            config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
+            config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
+            config.enablesAutoDimming = Preferences.screensaverEnableDimming
+            config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
+            config.showsSeconds = Preferences.screensaverShowsSeconds
+            config.uses24HourTime = Preferences.screensaverUse24Hour
+            config.restoresBrightness = Preferences.screensaverRestoreBrightness
+
+            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+        }
+
         return true
     }
 
@@ -307,6 +328,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     // ✅ Ensure this runs on the MainActor
     @MainActor
     private func notifyNotificationListeners(action: String?, cloudUserId: String? = nil) {
+        // Wake up screen saver immediately on incoming notification interaction
+        NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
+
         if let navigationController = window?.rootViewController as? UINavigationController,
            let rootViewController = navigationController.viewControllers.first as? OpenHABRootViewController {
             rootViewController.handleNotification(action: action, cloudUserId: cloudUserId)
@@ -322,6 +346,7 @@ extension AppDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+        NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -335,6 +360,25 @@ extension AppDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        if let keyWindow = UIApplication.shared.firstKeyWindow {
+            var config = ScreenSaverConfiguration()
+            config.isEnabled = Preferences.screensaverEnabled
+            config.showsTime = Preferences.screensaverShowsTime
+            config.showsDate = Preferences.screensaverShowsDate
+            config.idleInterval = Preferences.screensaverIdleInterval
+            config.movementInterval = Preferences.screensaverMovementInterval
+            config.fontName = Preferences.screensaverFontName.isEmpty ? nil : Preferences.screensaverFontName
+            config.timeFontSizeRatio = CGFloat(Preferences.screensaverTimeFontRatio)
+            config.dateFontRelativeSize = CGFloat(Preferences.screensaverDateFontRatio)
+            config.enablesAutoDimming = Preferences.screensaverEnableDimming
+            config.dimLevel = CGFloat(Preferences.screensaverDimLevel)
+            config.wakeBrightnessLevel = CGFloat(Preferences.screensaverWakeBrightness)
+            config.showsSeconds = Preferences.screensaverShowsSeconds
+            config.uses24HourTime = Preferences.screensaverUse24Hour
+            config.restoresBrightness = Preferences.screensaverRestoreBrightness
+
+            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

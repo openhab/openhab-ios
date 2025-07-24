@@ -57,12 +57,12 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="101" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="749" verticalCompressionResistancePriority="749" text="Temp blabla ballall llalla" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2sF-SD-siy">
-                                                    <rect key="frame" x="62.000000000000007" y="12" width="72.666666666666686" height="20"/>
+                                                    <rect key="frame" x="61.999999999999993" y="12" width="100.33333333333331" height="20"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <datePicker contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" style="compact" translatesAutoresizingMaskIntoConstraints="NO" id="z76-h7-KYr">
-                                                    <rect key="frame" x="142.66666666666666" y="4" width="197.99999999999997" height="36"/>
+                                                    <rect key="frame" x="170.33333333333331" y="4" width="170.33333333333331" height="36"/>
                                                 </datePicker>
                                             </subviews>
                                             <constraints>
@@ -732,10 +732,10 @@
             </objects>
             <point key="canvasLocation" x="2753" y="1654"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--OpenHAB Navigation Controller-->
         <scene sceneID="T9Q-vI-vaw">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="ni3-JL-qg0" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="ni3-JL-qg0" customClass="OpenHABNavigationController" customModule="openHAB" customModuleProvider="target" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="1IA-wu-eGo">
                         <rect key="frame" x="0.0" y="100" width="375" height="44"/>
