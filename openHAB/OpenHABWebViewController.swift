@@ -291,7 +291,8 @@ class OpenHABWebViewController: OpenHABViewController {
         let webview = WKWebView(frame: view.bounds, configuration: config)
         webview.navigationDelegate = self
         webview.uiDelegate = self
-        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+q        // Ensure the newly created webview resizes properly on rotation
+        webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.scrollView.bounces = false
         // support dark mode and avoid white flashing when loading
         webView.isOpaque = false
@@ -407,8 +408,7 @@ extension OpenHABWebViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
         logger.info("Challenge.protectionSpace.authenticationMethod: \(String(describing: challenge.protectionSpace.authenticationMethod))")
-        // Wake up screen saver immediately on changes to the webview
-        NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
+
         if let url = modifyUrl(orig: URL(string: openHABTrackedRootUrl)), challenge.protectionSpace.host == url.host {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 guard let serverTrust = challenge.protectionSpace.serverTrust else {
