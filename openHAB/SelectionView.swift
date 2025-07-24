@@ -15,6 +15,7 @@ import SFSafeSymbols
 import SwiftUI
 
 struct SelectionView: View {
+    let labelText: String?
     var mappings: [OpenHABWidgetMapping] // List of mappings (instead of AnyHashable, we use a concrete type)
     @State var selectionItemState: String? // To track the selected item state
     var onSelection: (Int) -> Void // Closure to handle selection
@@ -41,12 +42,13 @@ struct SelectionView: View {
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isButton)
         }
-        .navigationTitle("Select Mapping") // Navigation title
+        .navigationTitle(labelText ?? "Select Mapping") // Navigation title
     }
 }
 
 #Preview {
     SelectionView(
+        labelText: "Test Label",
         mappings: [
             OpenHABWidgetMapping(command: "command1", label: "Option 1"),
             OpenHABWidgetMapping(command: "command2", label: "Option 2")

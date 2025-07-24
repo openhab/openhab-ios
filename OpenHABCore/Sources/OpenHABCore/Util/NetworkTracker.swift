@@ -353,6 +353,7 @@ public final class NetworkTracker: ObservableObject {
         activeConnection = connection
         status = connection == nil ? .notConnected : .connected
         if let connection {
+            // TODO: suspicious call to "shared" instance with specific connection
             KingfisherManager.shared.defaultOptions = [.requestModifier(OpenHABAccessTokenAdapter(connectionConfiguration: connection.configuration))]
         } else {
             startRetryTask(30)
@@ -381,42 +382,42 @@ public extension NetworkTracker {
     }
 
     func send(to item: String, command: String) async throws {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return }
+        guard let activeConnection = await waitForActiveConnection() else { return }
         let configuration = activeConnection.configuration
         let service = try await connectionPool.getOrCreateService(for: configuration)
         try await service.sendItemCommand(itemname: item, command: command)
     }
 
-    func updateState(for item: OpenHABItem, state: String) async throws {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return }
+    func updateState(item: OpenHABItem, state: String) async throws {
+        guard let activeConnection = await waitForActiveConnection() else { return }
         let configuration = activeConnection.configuration
         let service = try await connectionPool.getOrCreateService(for: configuration)
         try await service.updateItemState(itemname: item.name, with: state)
     }
 
     func getItems() async throws -> [OpenHABItem] {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return [] }
+        guard let activeConnection = await waitForActiveConnection() else { return [] }
         let configuration = activeConnection.configuration
         let service = try await connectionPool.getOrCreateService(for: configuration)
         return try await service.getItems()
     }
 
     func getItemByName(id: String) async throws -> OpenHABItem? {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return nil }
+        guard let activeConnection = await waitForActiveConnection() else { return nil }
         let configuration = activeConnection.configuration
         let service = try await connectionPool.getOrCreateService(for: configuration)
         return try await service.getItemByName(id: id)
     }
 
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { return nil }
+        guard let activeConnection = await waitForActiveConnection() else { return nil }
         let configuration = activeConnection.configuration
         let service = try await connectionPool.getOrCreateService(for: configuration)
         return try await service.pollDataForPage(sitemapname: sitemapname, pageId: pageId, longPolling: longPolling)
     }
 
     func runNow(ruleUID: String, payload: [String: String]) async throws {
-        guard let activeConnection = await NetworkTracker.shared.waitForActiveConnection() else { throw NetworkTrackerError.noActiveConnection }
+        guard let activeConnection = await waitForActiveConnection() else { throw NetworkTrackerError.noActiveConnection }
         let configuration = activeConnection.configuration
         let service = try await connectionPool.getOrCreateService(for: configuration)
         try await service.runNow(ruleUID: ruleUID, payload: payload)
