@@ -291,7 +291,7 @@ class OpenHABWebViewController: OpenHABViewController {
         let webview = WKWebView(frame: view.bounds, configuration: config)
         webview.navigationDelegate = self
         webview.uiDelegate = self
-q        // Ensure the newly created webview resizes properly on rotation
+        // Ensure the newly created webview resizes properly on rotation
         webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.scrollView.bounces = false
         // support dark mode and avoid white flashing when loading
