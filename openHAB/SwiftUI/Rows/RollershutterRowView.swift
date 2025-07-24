@@ -39,7 +39,7 @@ struct RollershutterRowView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+                    if let labelText = widget.labelText, !labelText.isEmpty {
                         Text(labelText)
                             .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     }

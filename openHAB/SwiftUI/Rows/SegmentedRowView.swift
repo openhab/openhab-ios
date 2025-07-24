@@ -38,7 +38,7 @@ struct SegmentedRowView: View {
                     .padding(.top, 4) // Align with text
             }
 
-            if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+            if let labelText = widget.labelText, !labelText.isEmpty {
                 Text(labelText)
                     .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
             }

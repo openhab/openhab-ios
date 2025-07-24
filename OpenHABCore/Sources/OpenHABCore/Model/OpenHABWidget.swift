@@ -131,6 +131,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
         item?.stateDescription?.readOnly
     }
 
+    public var staticIcon: Bool?
+
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
     // Text prior to "["
@@ -370,7 +372,8 @@ public extension OpenHABWidget {
                      column: Int? = nil,
                      releaseCommand: String? = nil,
                      command: String? = nil,
-                     stateless: Bool? = nil) {
+                     stateless: Bool? = nil,
+                     staticIcon: Bool? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -426,6 +429,7 @@ public extension OpenHABWidget {
         self.releaseCommand = releaseCommand
         self.command = command
         self.stateless = stateless
+        self.staticIcon = staticIcon
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
@@ -556,7 +560,8 @@ extension OpenHABWidget {
             column: widget.column.map { Int($0) },
             releaseCommand: widget.releaseCommand,
             command: widget.command,
-            stateless: widget.stateless
+            stateless: widget.stateless,
+            staticIcon: widget.staticIcon
         )
     }
 }

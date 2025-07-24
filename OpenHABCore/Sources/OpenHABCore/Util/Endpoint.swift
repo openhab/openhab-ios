@@ -11,6 +11,7 @@
 
 import Foundation
 import os.log
+import UIKit
 
 public enum ChartStyle {
     case dark
@@ -61,7 +62,7 @@ public extension Endpoint {
         components?.path = path
         components?.queryItems = queryItems
         let url = components?.url
-//        Endpoint.logger.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
+        Endpoint.logger.debug("URL: \(url?.absoluteString ?? "", privacy: .private)")
         return url
     }
 
@@ -131,26 +132,25 @@ public extension Endpoint {
     }
 
     // swiftlint:disable:next function_parameter_count
-    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String) -> Endpoint {
-        guard var icon, !icon.isEmpty else {
+    static func icon(rootUrl: String, version: Int, icon: String?, state: String?, iconType: IconType, iconColor: String, staticIcon: Bool? = nil) -> Endpoint {
+        guard let icon, !icon.isEmpty else {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
 
         // determineOH2IconPath
         var queryItems: [URLQueryItem] = []
-        if let state {
-            queryItems.append(contentsOf: [
-                URLQueryItem(name: "state", value: state)
-            ])
-        }
+
+        var source = "oh"
+        var set = "classic"
+        var iconName = "none"
+
         if version >= 4 {
             let components = icon.components(separatedBy: ":")
-            var source = ""
-            var set = ""
+
             if components.count == 3 {
                 source = components[0]
                 set = components[1]
-                icon = components[2]
+                iconName = components[2]
             } else if components.count == 2 {
                 source = components[0]
                 if source == "material" {
@@ -158,35 +158,49 @@ public extension Endpoint {
                 } else {
                     set = "classic"
                 }
-                icon = components[1]
+                iconName = components[1]
+            } else if components.count == 1 {
+                iconName = icon
             }
             if source == "material" {
                 source = "iconify"
-                icon = icon.replacingOccurrences(of: "_", with: "-")
-                icon = "\(set)-\(icon)"
+                iconName = iconName.replacingOccurrences(of: "_", with: "-")
+                iconName = "\(set)-\(iconName)"
                 set = "ic"
             }
             if source == "f7" {
                 source = "iconify"
                 set = "f7"
-                icon = icon.replacingOccurrences(of: "_", with: "-")
+                iconName = iconName.replacingOccurrences(of: "_", with: "-")
             }
             if source == "if" || source == "iconify" {
                 queryItems = [URLQueryItem(name: "height", value: "64")]
-                if !iconColor.isEmpty {
-                    queryItems.append(URLQueryItem(name: "color", value: iconColor))
+                if !iconColor.isEmpty, let colorString = UIColor(fromString: iconColor).toHex() {
+                    queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
                 }
                 return Endpoint(
                     baseURL: "https://api.iconify.design/",
-                    path: "/\(set)/\(icon).svg",
+                    path: "/\(set)/\(iconName).svg",
                     queryItems: queryItems
                 )
             }
         }
+
+        // set unknown iconSource to oh:classic:none icon
+        if source != "oh" {
+            set = "classic"
+            iconName = "none"
+        }
+
+        if staticIcon != true {
+            queryItems.append(URLQueryItem(name: "state", value: state ?? "null"))
+        }
+
         if version >= 3 {
             queryItems.append(contentsOf: [
                 URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
-                URLQueryItem(name: "anyFormat", value: "true")
+                URLQueryItem(name: "anyFormat", value: "true"),
+                URLQueryItem(name: "iconset", value: set)
             ])
         } else {
             queryItems.append(
@@ -196,7 +210,7 @@ public extension Endpoint {
 
         return Endpoint(
             baseURL: rootUrl,
-            path: "/icon/\(icon)",
+            path: "/icon/\(iconName)",
             queryItems: queryItems
         )
     }
