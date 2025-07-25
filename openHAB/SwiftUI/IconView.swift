@@ -25,6 +25,7 @@ struct IconView: View {
 
     @State private var imageLoadingFailed = false
     @State private var retryCount = 0
+    @State private var refreshKey = 0
     private let maxRetries = 3
     private let retryDelay: TimeInterval = 1.0
 
@@ -67,17 +68,22 @@ struct IconView: View {
                 .frame(width: size.width, height: size.height)
 
             if let iconURL, !imageLoadingFailed {
-                KFImage.url(iconURL)
+                var resource: any Resource {
+                    KF.ImageResource(downloadURL: iconURL, cacheKey: nil)
+                }
+
+                KFImage(source: .network(resource))
+
+//                KFImage(iconURL)
+
                     .placeholder {
-                        // Show empty space while loading
                         Rectangle()
-                            .fill(Color.clear)
+                            .fill(Color.red)
                             .frame(width: size.width, height: size.height)
                     }
                     .onFailure { error in
                         logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
-//                        handleLoadingFailure()
-                        imageLoadingFailed = true
+                        handleLoadingFailure()
                     }
                     .onSuccess { _ in
                         imageLoadingFailed = false
@@ -88,14 +94,11 @@ struct IconView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
+                    .id("\(iconURL.absoluteString)-\(refreshKey)")
             }
         }
-        .onChange(of: widget.icon) { _ in
+        .onChange(of: widget) { _ in
             // Reset loading state when icon changes
-            resetLoadingState()
-        }
-        .onChange(of: widget.iconState()) { _ in
-            // Reset loading state when icon state changes
             resetLoadingState()
         }
         .onChange(of: networkTracker.activeConnection) { _ in
@@ -122,6 +125,12 @@ struct IconView: View {
     private func resetLoadingState() {
         imageLoadingFailed = false
         retryCount = 0
+        refreshKey += 1
+
+        // Force reload by invalidating cache for this URL
+        if let iconURL {
+            ImageCache.default.removeImage(forKey: iconURL.absoluteString, processorIdentifier: "org.openhab.svgprocessor")
+        }
     }
 }
 

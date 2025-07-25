@@ -47,6 +47,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
                     return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange, renderingMode: .alwaysOriginal)
                 }
             default:
+                logger.error("Not an SVG image")
                 return Kingfisher.DefaultImageProcessor().process(item: item, options: KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions))
             }
         }
