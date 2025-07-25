@@ -135,12 +135,10 @@ struct ButtonGridRowView: View {
         VStack(alignment: .leading, spacing: 8) {
             if showLabelAndIcon {
                 HStack {
-                    if IconView.shouldShowIcon(for: widget) {
-                        IconView(widget: widget)
-                            .frame(width: 24, height: 24)
-                    }
+                    IconView(widget: widget)
+                        .frame(width: 24, height: 24)
 
-                    if let labelText = widget.labelText, !labelText.isEmpty, widget.labelSource == .sitemapDefinition {
+                    if let labelText = widget.labelText, !labelText.isEmpty {
                         Text(labelText)
                             .foregroundColor(widget.labelcolor.isEmpty ? .primary : Color(fromString: widget.labelcolor))
                     }

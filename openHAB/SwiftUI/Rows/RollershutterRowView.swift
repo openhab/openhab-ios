@@ -33,10 +33,8 @@ struct RollershutterRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                if IconView.shouldShowIcon(for: widget) {
-                    IconView(widget: widget)
-                        .frame(width: 24, height: 24)
-                }
+                IconView(widget: widget)
+                    .frame(width: 24, height: 24)
 
                 VStack(alignment: .leading, spacing: 2) {
                     if let labelText = widget.labelText, !labelText.isEmpty {

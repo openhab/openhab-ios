@@ -54,7 +54,8 @@ struct IconView: View {
             icon: widget.icon,
             state: widget.iconState(),
             iconType: iconType,
-            iconColor: queriedIconColor
+            iconColor: queriedIconColor,
+            staticIcon: widget.staticIcon
         ).url
     }
 
@@ -87,7 +88,6 @@ struct IconView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id(iconURL.absoluteString)
             }
         }
         .onChange(of: widget.icon) { _ in
