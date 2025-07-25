@@ -521,10 +521,10 @@ public extension OpenHABWidget.CodingData {
             visibility: visibility,
             switchSupport: switchSupport,
             forceAsItem: forceAsItem,
-            labelSource:  OpenHABWidget.LabelSource(rawValue: labelSource ?? "") ?? .unknown,
+            labelSource: OpenHABWidget.LabelSource(rawValue: labelSource ?? "") ?? .unknown,
             staticIcon: staticIcon,
             unit: unit,
-            pattern: pattern,
+            pattern: pattern
         )
     }
 }

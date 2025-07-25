@@ -72,7 +72,6 @@ class OpenHABWebViewController: OpenHABViewController {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(hideNavBar, animated: animated)
         navigationController?.navigationBar.prefersLargeTitles = false
-        updateNavigationTitle()
         NetworkTracker.shared.$activeConnection
             .receive(on: DispatchQueue.main)
             .sink { activeConnection in
@@ -97,7 +96,6 @@ class OpenHABWebViewController: OpenHABViewController {
                     self.pageLoadError(message: NSLocalizedString("network_not_available", comment: ""))
                 case .connected:
                     self.hidePopupMessages()
-                    self.updateNavigationTitle()
                 default: break
                 }
             }

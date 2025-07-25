@@ -23,7 +23,7 @@ protocol OpenHABViewable: AnyObject {
 }
 
 class OpenHABViewController: UIViewController, OpenHABViewable {
-private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
+    private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
 
     var trackerCancellables = Set<AnyCancellable>()
 
