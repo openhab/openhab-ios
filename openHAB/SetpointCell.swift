@@ -32,6 +32,11 @@ class SetpointCell: GenericUITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        customDetailTextLabel.font = UIFont.monospacedDigitSystemFont(ofSize: customDetailTextLabel.font.pointSize, weight: .regular)
+    }
+
     override func displayWidget() {
         downButton.addTarget(self, action: #selector(SetpointCell.decreaseValue), for: .touchUpInside)
         upButton.addTarget(self, action: #selector(SetpointCell.increaseValue), for: .touchUpInside)

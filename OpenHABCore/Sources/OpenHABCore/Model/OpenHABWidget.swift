@@ -119,6 +119,9 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var mappings: [OpenHABWidgetMapping] = []
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
+    public var unit: String?
+    public var pattern: String?
+    public var staticIcon: Bool?
     public var switchSupport = false
     public var labelSource = LabelSource.unknown
     public var releaseOnly: Bool?
@@ -130,8 +133,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var readOnly: Bool? {
         item?.stateDescription?.readOnly
     }
-
-    public var staticIcon: Bool?
 
     @Published public var stateEnumBinding: WidgetTypeEnum = .unassigned
 
@@ -175,7 +176,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     }
 
     public var stateValueAsNumberState: NumberState? {
-        item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
+        if state != "" {
+            state.parseAsNumber(format: item?.stateDescription?.numberPattern)
+        } else {
+            item?.state?.parseAsNumber(format: item?.stateDescription?.numberPattern)
+        }
     }
 
     public var adjustedValue: Double {
@@ -373,7 +378,9 @@ public extension OpenHABWidget {
                      releaseCommand: String? = nil,
                      command: String? = nil,
                      stateless: Bool? = nil,
-                     staticIcon: Bool? = nil) {
+                     staticIcon: Bool? = nil,
+                     unit: String? = nil,
+                     pattern: String? = nil) {
         self.init()
         id = widgetId
         self.widgetId = widgetId
@@ -421,6 +428,10 @@ public extension OpenHABWidget {
         self.switchSupport = switchSupport ?? false
 
         self.forceAsItem = forceAsItem
+        self.unit = unit ?? ""
+        self.pattern = pattern ?? ""
+        self.staticIcon = staticIcon ?? false
+        self.labelSource = labelSource
         stateEnumBinding = stateEnum
         self.labelSource = labelSource
         self.releaseOnly = releaseOnly
@@ -430,6 +441,8 @@ public extension OpenHABWidget {
         self.command = command
         self.stateless = stateless
         self.staticIcon = staticIcon
+        self.unit = unit
+        self.pattern = pattern
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
@@ -469,6 +482,10 @@ public extension OpenHABWidget {
         let visibility: Bool?
         let switchSupport: Bool?
         let forceAsItem: Bool?
+        let unit: String?
+        let pattern: String?
+        let staticIcon: Bool?
+        let labelSource: String?
     }
 }
 
@@ -503,7 +520,11 @@ public extension OpenHABWidget.CodingData {
             widgets: mappedWidgets,
             visibility: visibility,
             switchSupport: switchSupport,
-            forceAsItem: forceAsItem
+            forceAsItem: forceAsItem,
+            labelSource:  OpenHABWidget.LabelSource(rawValue: labelSource ?? "") ?? .unknown,
+            staticIcon: staticIcon,
+            unit: unit,
+            pattern: pattern,
         )
     }
 }
@@ -522,9 +543,6 @@ public extension [OpenHABWidget] {
 
 extension OpenHABWidget {
     convenience init(_ widget: Components.Schemas.WidgetDTO) {
-//        widget.unit
-//        widget.staticIcon
-//        widget.pattern
         self.init(
             widgetId: widget.widgetId.orEmpty,
             label: widget.label.orEmpty,
@@ -561,7 +579,9 @@ extension OpenHABWidget {
             releaseCommand: widget.releaseCommand,
             command: widget.command,
             stateless: widget.stateless,
-            staticIcon: widget.staticIcon
+            staticIcon: widget.staticIcon,
+            unit: widget.unit,
+            pattern: widget.pattern
         )
     }
 }

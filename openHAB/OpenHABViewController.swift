@@ -11,6 +11,7 @@
 
 import Combine
 import OpenHABCore
+import os.log
 import SideMenu
 import SwiftMessages
 import UIKit
@@ -22,6 +23,8 @@ protocol OpenHABViewable: AnyObject {
 }
 
 class OpenHABViewController: UIViewController, OpenHABViewable {
+private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABViewController")
+
     var trackerCancellables = Set<AnyCancellable>()
 
     var activeTasks = Set<Task<Void, Never>>()
@@ -38,6 +41,7 @@ class OpenHABViewController: UIViewController, OpenHABViewable {
         var config = SwiftMessages.Config()
         config.duration = .seconds(seconds: seconds)
         config.presentationStyle = .bottom
+        config.presentationContext = .view(view)
         SwiftMessages.hideAll()
         SwiftMessages.show(config: config) {
             let view = MessageView.viewFromNib(layout: .cardView)

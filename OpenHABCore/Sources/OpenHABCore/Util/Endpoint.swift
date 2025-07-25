@@ -48,7 +48,7 @@ public enum SortSitemapsOrder: Int, CaseIterable, CustomStringConvertible {
     }
 }
 
-public struct Endpoint {
+public struct Endpoint: Equatable {
     static let logger = Logger(subsystem: "org.openhab.app", category: "EndPoint")
 
     let baseURL: String
@@ -137,6 +137,14 @@ public extension Endpoint {
             return Endpoint(baseURL: "", path: "", queryItems: [])
         }
 
+        guard version >= 2 else {
+            return Endpoint(
+                baseURL: rootUrl,
+                path: "/icon/\(icon)",
+                queryItems: []
+            )
+        }
+
         // determineOH2IconPath
         var queryItems: [URLQueryItem] = []
 
@@ -144,46 +152,48 @@ public extension Endpoint {
         var set = "classic"
         var iconName = "none"
 
-        if version >= 4 {
-            let components = icon.components(separatedBy: ":")
-
-            if components.count == 3 {
-                source = components[0]
-                set = components[1]
-                iconName = components[2]
-            } else if components.count == 2 {
-                source = components[0]
-                if source == "material" {
-                    set = "baseline"
-                } else {
-                    set = "classic"
-                }
-                iconName = components[1]
-            } else if components.count == 1 {
-                iconName = icon
-            }
+        let segments = icon.components(separatedBy: ":")
+        switch segments.count {
+        case 1:
+            iconName = segments[0]
+        case 2:
+            source = segments[0]
+            iconName = segments[1]
             if source == "material" {
-                source = "iconify"
-                iconName = iconName.replacingOccurrences(of: "_", with: "-")
-                iconName = "\(set)-\(iconName)"
-                set = "ic"
+                set = "baseline"
             }
-            if source == "f7" {
-                source = "iconify"
-                set = "f7"
-                iconName = iconName.replacingOccurrences(of: "_", with: "-")
+        case 3:
+            source = segments[0]
+            set = segments[1]
+            iconName = segments[2]
+        default:
+            break
+        }
+
+        switch source {
+        case "material":
+            source = "iconify"
+            iconName = iconName.replacingOccurrences(of: "_", with: "-")
+            iconName = "\(set)-\(iconName)"
+            set = "ic"
+        case "f7":
+            source = "iconify"
+            set = "f7"
+            iconName = iconName.replacingOccurrences(of: "_", with: "-")
+        default:
+            break
+        }
+
+        if source == "if" || source == "iconify" {
+            queryItems = [URLQueryItem(name: "height", value: "64")]
+            if !iconColor.isEmpty, let colorString = UIColor(fromString: iconColor).toHex() {
+                queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
             }
-            if source == "if" || source == "iconify" {
-                queryItems = [URLQueryItem(name: "height", value: "64")]
-                if !iconColor.isEmpty, let colorString = UIColor(fromString: iconColor).toHex() {
-                    queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
-                }
-                return Endpoint(
-                    baseURL: "https://api.iconify.design/",
-                    path: "/\(set)/\(iconName).svg",
-                    queryItems: queryItems
-                )
-            }
+            return Endpoint(
+                baseURL: "https://api.iconify.design/",
+                path: "/\(set)/\(iconName).svg",
+                queryItems: queryItems
+            )
         }
 
         // set unknown iconSource to oh:classic:none icon
@@ -196,17 +206,11 @@ public extension Endpoint {
             queryItems.append(URLQueryItem(name: "state", value: state ?? "null"))
         }
 
-        if version >= 3 {
-            queryItems.append(contentsOf: [
-                URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
-                URLQueryItem(name: "anyFormat", value: "true"),
-                URLQueryItem(name: "iconset", value: set)
-            ])
-        } else {
-            queryItems.append(
-                URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG")
-            )
-        }
+        queryItems.append(contentsOf: [
+            URLQueryItem(name: "format", value: (iconType == .png) ? "PNG" : "SVG"),
+            URLQueryItem(name: "anyFormat", value: "true"),
+            URLQueryItem(name: "iconset", value: set)
+        ])
 
         return Endpoint(
             baseURL: rootUrl,

@@ -18,10 +18,13 @@ import SFSafeSymbols
 public struct OpenHABImageProcessor: ImageProcessor {
     // `identifier` should be the same for processors with the same properties/functionality
     // It will be used when storing and retrieving the image to/from cache.
-    public let identifier = "org.openhab.svgprocessor"
+    public let identifier: String
     private let logger = Logger(subsystem: "org.openhab", category: "OpenHABImageProcessor")
 
-    public init() {}
+    /// - Parameter tint: The tint color used to tint the input image.
+    public init() {
+        identifier = "org.openhab.svgprocessor"
+    }
 
     // Convert input data/image to target image and return it.
     public func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
@@ -33,9 +36,7 @@ public struct OpenHABImageProcessor: ImageProcessor {
             guard !data.isEmpty else { return nil }
 
             switch data[0] {
-            case 0x3C: // svg
-                // <?xml version="1.0" encoding="UTF-8"?>
-                // <svg
+            case 0x3C: // Likely SVG, since it starts with '<'
                 if let image = SDImageSVGCoder.shared.decodedImage(with: data, options: nil) {
                     let size = image.size
                     if size.width > 1000 || size.height > 1000 {
