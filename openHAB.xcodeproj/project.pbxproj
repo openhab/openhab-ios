@@ -161,6 +161,7 @@
 		DAD0857B2AE4782F001D36BE /* OpenHABWatchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857A2AE4782F001D36BE /* OpenHABWatchUITests.swift */; };
 		DAD0857D2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0857C2AE4782F001D36BE /* OpenHABWatchLaunchTests.swift */; };
 		DAD0858B2AE56F0E001D36BE /* OpenHABWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0855F2AE47824001D36BE /* OpenHABWatch.swift */; };
+		DAE2800A2E35F5590028EE24 /* IconURLView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE280092E35F5590028EE24 /* IconURLView.swift */; };
 		DAE7B4A72E26927C00B9FE99 /* ButtonGridRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */; };
 		DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */; };
 		DAEA21DA2DBF477E00D54342 /* SwitchRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */; };
@@ -505,6 +506,7 @@
 		DAD488B3287DDDFE00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = Resources/nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		DAD488B4287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		DAD488B5287DDDFF00414693 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DAE280092E35F5590028EE24 /* IconURLView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconURLView.swift; sourceTree = "<group>"; };
 		DAE7B4A62E26927C00B9FE99 /* ButtonGridRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonGridRowView.swift; sourceTree = "<group>"; };
 		DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowViewFactory.swift; sourceTree = "<group>"; };
 		DAEA21D92DBF477E00D54342 /* SwitchRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchRowView.swift; sourceTree = "<group>"; };
@@ -867,6 +869,7 @@
 			children = (
 				DA35E2CA2E1F93AD003987BB /* ImageView.swift */,
 				DA35E2CC2E1F96CA003987BB /* IconView.swift */,
+				DAE280092E35F5590028EE24 /* IconURLView.swift */,
 				DA64ACA72DBEAD8300294F60 /* SitemapPageView.swift */,
 				DAEA21D72DBF472D00D54342 /* RowViewFactory.swift */,
 				DAC949FF2E21A473007E67B7 /* Rows */,
@@ -1755,6 +1758,7 @@
 				DA5ED9BE2C850955004875E0 /* ClientCertificatesViewModel.swift in Sources */,
 				DAEA21D82DBF472D00D54342 /* RowViewFactory.swift in Sources */,
 				DA21EAE22339621C001AB415 /* Throttler.swift in Sources */,
+				DAE2800A2E35F5590028EE24 /* IconURLView.swift in Sources */,
 				DAF4F6C0222734D300C24876 /* NewImageUITableViewCell.swift in Sources */,
 				DA6B2EEF2C861BC900DF77CF /* DrawerView.swift in Sources */,
 				DA48001A2D83742A009CF127 /* DebugSettingsView.swift in Sources */,
@@ -2357,7 +2361,6 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 50;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = PBAPXHRAM9;
 				DEVELOPMENT_TEAM = D6A95UZXVC;
 				"DEVELOPMENT_TEAM[sdk=watchos*]" = PBAPXHRAM9;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2882,7 +2885,7 @@
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 8.0.0;
+				minimumVersion = 8.5.0;
 			};
 		};
 		93F8063327AE6C620035A6B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {

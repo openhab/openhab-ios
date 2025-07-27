@@ -37,13 +37,16 @@ public struct OpenHABImageProcessor: ImageProcessor {
 
             switch data[0] {
             case 0x3C: // Likely SVG, since it starts with '<'
+                logger.info("Processing as SVG")
                 if let image = SDImageSVGCoder.shared.decodedImage(with: data, options: nil) {
                     let size = image.size
                     if size.width > 1000 || size.height > 1000 {
                         return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange, renderingMode: .alwaysOriginal)
                     }
+                    logger.info("SVG decoded successfully")
                     return image
                 } else {
+                    logger.error("Failed to decode SVG")
                     return UIImage(systemSymbol: .exclamationmarkTriangle).withTintColor(.orange, renderingMode: .alwaysOriginal)
                 }
             default:

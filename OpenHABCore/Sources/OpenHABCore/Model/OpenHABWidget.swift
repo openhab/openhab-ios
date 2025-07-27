@@ -94,7 +94,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
     @Published public var label = ""
-    public var icon = ""
+    @Published public var icon = ""
     public var type: WidgetType = .unknown
     public var url = ""
     public var period = ""
@@ -121,7 +121,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var visibility = true
     public var unit: String?
     public var pattern: String?
-    public var staticIcon: Bool?
+    @Published public var staticIcon: Bool?
     public var switchSupport = false
     public var labelSource = LabelSource.unknown
     public var releaseOnly: Bool?

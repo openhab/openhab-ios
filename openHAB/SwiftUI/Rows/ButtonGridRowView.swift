@@ -130,7 +130,7 @@ struct ButtonGridRowView: View {
     private var gridColumns: Int {
         min(buttons.map { $0.column ?? 1 }.max() ?? 1, maxColumns)
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if showLabelAndIcon {
@@ -146,6 +146,9 @@ struct ButtonGridRowView: View {
                     Spacer()
                 }
             }
+//            else {
+//                logger.debug("No label or icon")
+//            }
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: gridColumns), spacing: 8) {
                 ForEach(0 ..< gridRows, id: \.self) { row in

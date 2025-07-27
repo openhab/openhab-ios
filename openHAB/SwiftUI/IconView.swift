@@ -9,10 +9,23 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import Combine
 import Kingfisher
 import OpenHABCore
 import os.log
 import SwiftUI
+
+/// Shared storage for tracking cached icon keys
+class IconCacheTracker: ObservableObject {
+    static let shared = IconCacheTracker()
+    @Published var cachedKeys: [String] = []
+
+    func addCacheKey(_ key: String) {
+        if !cachedKeys.contains(key) {
+            cachedKeys.append(key)
+        }
+    }
+}
 
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
@@ -23,18 +36,15 @@ struct IconView: View {
     let size: CGSize
     let iconType: IconType = .svg
 
-    @State private var imageLoadingFailed = false
-    @State private var retryCount = 0
-    @State private var refreshKey = 0
-    private let maxRetries = 3
-    private let retryDelay: TimeInterval = 1.0
-
-    private let logger = Logger(subsystem: "org.openhab", category: "WidgetIconView")
+    private let logger = Logger(subsystem: "org.openhab", category: "IconView")
 
     private var iconURL: URL? {
-        guard !widget.icon.isEmpty,
-              let activeConnection = networkTracker.activeConnection,
-              !activeConnection.configuration.url.isEmpty else {
+        guard !widget.icon.isEmpty else { return nil }
+
+        guard
+            let activeConnection = networkTracker.activeConnection,
+            !activeConnection.configuration.url.isEmpty else {
+            logger.debug("No active connection to fetch icon")
             return nil
         }
 
@@ -55,7 +65,7 @@ struct IconView: View {
             icon: widget.icon,
             state: widget.iconState(),
             iconType: iconType,
-            iconColor: queriedIconColor,
+            iconColor: "black",
             staticIcon: widget.staticIcon
         ).url
     }
@@ -67,69 +77,29 @@ struct IconView: View {
                 .fill(Color.clear)
                 .frame(width: size.width, height: size.height)
 
-            if let iconURL, !imageLoadingFailed {
-                var resource: any Resource {
-                    KF.ImageResource(downloadURL: iconURL, cacheKey: nil)
-                }
-
-                KFImage(source: .network(resource))
-
-//                KFImage(iconURL)
-
-                    .placeholder {
-                        Rectangle()
-                            .fill(Color.red)
-                            .frame(width: size.width, height: size.height)
-                    }
+            if let iconURL {
+                KFImage(iconURL)
+                    .retry(maxCount: 3, interval: .seconds(5))
+                    .resizable()
+                    .setProcessor(OpenHABImageProcessor())
                     .onFailure { error in
                         logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
-                        handleLoadingFailure()
                     }
-                    .onSuccess { _ in
-                        imageLoadingFailed = false
-                        retryCount = 0
+                    .onSuccess { result in
+                        logger.debug("Loading of icon succeeded for widget \(widget.label)")
+                        if result.cacheType != .none {
+                            let cacheKey = iconURL.absoluteString
+                            IconCacheTracker.shared.addCacheKey(cacheKey)
+                            logger.debug("Icon loaded from cache: \(cacheKey)")
+                        }
                     }
-                    .setProcessor(OpenHABImageProcessor())
                     .fade(duration: 0.25)
-                    .resizable()
+                    .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
-                    .id("\(iconURL.absoluteString)-\(refreshKey)")
             }
-        }
-        .onChange(of: widget) { _ in
-            // Reset loading state when icon changes
-            resetLoadingState()
         }
         .onChange(of: networkTracker.activeConnection) { _ in
-            // Reset loading state when connection changes
-            resetLoadingState()
-        }
-    }
-
-    private func handleLoadingFailure() {
-        if retryCount < maxRetries {
-            retryCount += 1
-            logger.info("Retrying icon load for widget \(widget.label), attempt \(retryCount)/\(maxRetries)")
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay * Double(retryCount)) {
-                // Force reload by toggling imageLoadingFailed
-                imageLoadingFailed = false
-            }
-        } else {
-            logger.warning("Max retries reached for widget \(widget.label), giving up")
-            imageLoadingFailed = true
-        }
-    }
-
-    private func resetLoadingState() {
-        imageLoadingFailed = false
-        retryCount = 0
-        refreshKey += 1
-
-        // Force reload by invalidating cache for this URL
-        if let iconURL {
-            ImageCache.default.removeImage(forKey: iconURL.absoluteString, processorIdentifier: "org.openhab.svgprocessor")
         }
     }
 }

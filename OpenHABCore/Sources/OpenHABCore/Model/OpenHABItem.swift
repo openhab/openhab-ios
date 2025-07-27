@@ -97,7 +97,7 @@ public extension OpenHABItem {
                 let hue = CGFloat(state: values[0], divisor: 360)
                 let saturation = CGFloat(state: values[1], divisor: 100)
                 let brightness = CGFloat(state: values[2], divisor: 100)
-                logger.info("hue saturation brightness: \(hue) \(saturation) \(brightness)")
+                logger.info("State as UIColor hue saturation brightness: \(hue) \(saturation) \(brightness)")
                 return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
             } else {
                 return .black
