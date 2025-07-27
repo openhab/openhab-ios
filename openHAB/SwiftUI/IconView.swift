@@ -15,15 +15,27 @@ import OpenHABCore
 import os.log
 import SwiftUI
 
-/// Shared storage for tracking cached icon keys
-class IconCacheTracker: ObservableObject {
+/// Thread-safe actor for tracking cached icon keys
+actor IconCacheTracker {
     static let shared = IconCacheTracker()
-    @Published var cachedKeys: [String] = []
+    private var cachedKeys: [String] = []
 
     func addCacheKey(_ key: String) {
         if !cachedKeys.contains(key) {
             cachedKeys.append(key)
         }
+    }
+
+    func getCachedKeys() -> [String] {
+        cachedKeys
+    }
+
+    func clearCache() {
+        cachedKeys.removeAll()
+    }
+
+    func getCacheCount() -> Int {
+        cachedKeys.count
     }
 }
 
@@ -89,7 +101,9 @@ struct IconView: View {
                         logger.debug("Loading of icon succeeded for widget \(widget.label)")
                         if result.cacheType != .none {
                             let cacheKey = iconURL.absoluteString
-                            IconCacheTracker.shared.addCacheKey(cacheKey)
+                            Task {
+                                await IconCacheTracker.shared.addCacheKey(cacheKey)
+                            }
                             logger.debug("Icon loaded from cache: \(cacheKey)")
                         }
                     }
