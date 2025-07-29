@@ -70,6 +70,7 @@ struct IconView: View {
                 return widget.iconColor.isEmpty ? "black" : widget.iconColor
             }
         }
+        logger.debug("icon color: \(queriedIconColor)")
 
         return Endpoint.icon(
             rootUrl: activeConnection.configuration.url,
@@ -77,7 +78,7 @@ struct IconView: View {
             icon: widget.icon,
             state: widget.iconState(),
             iconType: iconType,
-            iconColor: "black",
+            iconColor: queriedIconColor,
             staticIcon: widget.staticIcon
         ).url
     }

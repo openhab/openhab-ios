@@ -29,6 +29,16 @@ public extension Color {
         let components = componentsForColorTemperature(temperature: temperature)
         self.init(red: components.r, green: components.g, blue: components.b)
     }
+
+    func hexString() -> String {
+        let components = cgColor?.components
+        let r: CGFloat = components?[0] ?? 0.0
+        let g: CGFloat = components?[1] ?? 0.0
+        let b: CGFloat = components?[2] ?? 0.0
+
+        let hexString = String(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+        return hexString
+    }
 }
 
 // For algorithm see https://web.archive.org/web/20151024031939/http://www.zombieprototypes.com/?p=210

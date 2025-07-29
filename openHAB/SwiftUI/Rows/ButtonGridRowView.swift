@@ -198,6 +198,7 @@ extension OpenHABWidgetMapping {
     func toWidget(widgetId: String, item: OpenHABItem?) -> OpenHABWidget {
         let widget = OpenHABWidget()
         widget.widgetId = widgetId
+        widget.id = widgetId
         widget.label = label
         widget.command = command
         widget.item = item

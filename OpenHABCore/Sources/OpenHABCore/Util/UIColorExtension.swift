@@ -166,14 +166,14 @@ public extension UIColor {
             "yellow": UIColor.ohYellow,
             "purple": UIColor.ohPurple,
             "fuchsia": UIColor.ohFuchsia,
-            "white": UIColor.ohWhite,
+            "white": UIColor.white, // .ohWhite,
             "lime": UIColor.ohLime,
             "green": UIColor.ohGreen,
             "navy": UIColor.ohNavy,
             "blue": UIColor.ohBlue,
             "teal": UIColor.ohTeal,
             "aqua": UIColor.ohAqua,
-            "black": UIColor.ohBlack,
+            "black": UIColor.black, // .ohBlack,
             "silver": UIColor.ohSilver,
             "gray": UIColor.ohGray,
             "primary": UIColor.ohPrimary,
@@ -230,6 +230,36 @@ public extension UIColor {
             return String(format: "%02lX%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255), lroundf(a * 255))
         } else {
             return String(format: "%02lX%02lX%02lX", lroundf(red * 255), lroundf(green * 255), lroundf(blue * 255))
+        }
+    }
+
+    var hexString: String? {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        let multiplier = CGFloat(255.999999)
+
+        guard getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return nil
+        }
+
+        if alpha == 1.0 {
+            return String(
+                format: "%02lX%02lX%02lX",
+                Int(red * multiplier),
+                Int(green * multiplier),
+                Int(blue * multiplier)
+            )
+        } else {
+            return String(
+                format: "%02lX%02lX%02lX%02lX",
+                Int(red * multiplier),
+                Int(green * multiplier),
+                Int(blue * multiplier),
+                Int(alpha * multiplier)
+            )
         }
     }
 }

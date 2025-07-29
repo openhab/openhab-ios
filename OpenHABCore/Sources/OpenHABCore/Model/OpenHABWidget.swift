@@ -285,7 +285,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
                     return "OFF"
                 }
             } else if let color = itemState.parseAsUIColor() {
-                return "#\(color.toHex() ?? "000000")"
+                return "#\(color.hexString ?? "000000")"
             }
         } else if item.isOfTypeOrGroupType(.number) || item.isOfTypeOrGroupType(.numberWithDimension) {
             let numberState = itemState.parseAsNumber(format: item.stateDescription?.numberPattern)

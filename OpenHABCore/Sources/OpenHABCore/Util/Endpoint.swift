@@ -56,6 +56,14 @@ public struct Endpoint: Equatable {
     var queryItems: [URLQueryItem]
 }
 
+extension UIColor {
+    var rgbaDescription: String {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        getRed(&r, green: &g, blue: &b, alpha: &a)
+        return String(format: "r: %.2f, g: %.2f, b: %.2f, a: %.2f", r, g, b, a)
+    }
+}
+
 public extension Endpoint {
     var url: URL? {
         var components = URLComponents(string: baseURL)
@@ -186,8 +194,14 @@ public extension Endpoint {
 
         if source == "if" || source == "iconify" {
             queryItems = [URLQueryItem(name: "height", value: "64")]
-            if !iconColor.isEmpty, let colorString = UIColor(fromString: iconColor).toHex() {
-                queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
+            if !iconColor.isEmpty {
+                let uiColor = UIColor(fromString: iconColor)
+                logger.info("\(uiColor.rgbaDescription)")
+                let colorString = uiColor.hexString
+                logger.debug("color : \(colorString ?? "No proper color")")
+                if let colorString {
+                    queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
+                }
             }
             return Endpoint(
                 baseURL: "https://api.iconify.design/",

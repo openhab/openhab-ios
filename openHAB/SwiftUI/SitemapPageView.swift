@@ -25,7 +25,7 @@ struct SitemapPageView: View {
 
     var body: some View {
         NavigationStack {
-            List(viewModel.relevantWidgets) { widget in
+            List(viewModel.relevantWidgets, id: \.id) { widget in
                 Group {
                     if let linkedPage = widget.linkedPage {
                         NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
