@@ -2757,6 +2757,138 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Initiates a new item state tracker connection
+    ///
+    /// - Remark: HTTP `GET /events/states`.
+    /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)`.
+    public func initNewStateTacker(_ input: Operations.initNewStateTacker.Input) async throws -> Operations.initNewStateTacker.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.initNewStateTacker.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/events/states",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    return .ok(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Get all events.
+    ///
+    /// - Remark: HTTP `GET /events`.
+    /// - Remark: Generated from `#/paths//events/get(getEvents)`.
+    public func getEvents(_ input: Operations.getEvents.Input) async throws -> Operations.getEvents.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.getEvents.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/events",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "topics",
+                    value: input.query.topics
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    return .ok(.init())
+                case 400:
+                    return .badRequest(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Changes the list of items a SSE connection will receive state updates to.
+    ///
+    /// - Remark: HTTP `POST /events/states/{connectionId}`.
+    /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)`.
+    public func updateItemListForStateUpdates(_ input: Operations.updateItemListForStateUpdates.Input) async throws -> Operations.updateItemListForStateUpdates.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.updateItemListForStateUpdates.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/events/states/{}",
+                    parameters: [
+                        input.path.connectionId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case .none:
+                    body = nil
+                case let .any(value):
+                    body = try converter.setOptionalRequestBodyAsBinary(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "*/*"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    return .ok(.init())
+                case 404:
+                    return .notFound(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
     /// Get all registered UI components in the specified namespace.
     ///
     /// - Remark: HTTP `GET /ui/components/{namespace}`.

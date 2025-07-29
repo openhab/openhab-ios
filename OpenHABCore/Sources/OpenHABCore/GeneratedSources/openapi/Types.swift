@@ -231,6 +231,21 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /sitemaps`.
     /// - Remark: Generated from `#/paths//sitemaps/get(getSitemaps)`.
     func getSitemaps(_ input: Operations.getSitemaps.Input) async throws -> Operations.getSitemaps.Output
+    /// Initiates a new item state tracker connection
+    ///
+    /// - Remark: HTTP `GET /events/states`.
+    /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)`.
+    func initNewStateTacker(_ input: Operations.initNewStateTacker.Input) async throws -> Operations.initNewStateTacker.Output
+    /// Get all events.
+    ///
+    /// - Remark: HTTP `GET /events`.
+    /// - Remark: Generated from `#/paths//events/get(getEvents)`.
+    func getEvents(_ input: Operations.getEvents.Input) async throws -> Operations.getEvents.Output
+    /// Changes the list of items a SSE connection will receive state updates to.
+    ///
+    /// - Remark: HTTP `POST /events/states/{connectionId}`.
+    /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)`.
+    func updateItemListForStateUpdates(_ input: Operations.updateItemListForStateUpdates.Input) async throws -> Operations.updateItemListForStateUpdates.Output
     /// Get all registered UI components in the specified namespace.
     ///
     /// - Remark: HTTP `GET /ui/components/{namespace}`.
@@ -766,6 +781,33 @@ extension APIProtocol {
     /// - Remark: Generated from `#/paths//sitemaps/get(getSitemaps)`.
     public func getSitemaps(headers: Operations.getSitemaps.Input.Headers = .init()) async throws -> Operations.getSitemaps.Output {
         try await getSitemaps(Operations.getSitemaps.Input(headers: headers))
+    }
+    /// Initiates a new item state tracker connection
+    ///
+    /// - Remark: HTTP `GET /events/states`.
+    /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)`.
+    public func initNewStateTacker() async throws -> Operations.initNewStateTacker.Output {
+        try await initNewStateTacker(Operations.initNewStateTacker.Input())
+    }
+    /// Get all events.
+    ///
+    /// - Remark: HTTP `GET /events`.
+    /// - Remark: Generated from `#/paths//events/get(getEvents)`.
+    public func getEvents(query: Operations.getEvents.Input.Query = .init()) async throws -> Operations.getEvents.Output {
+        try await getEvents(Operations.getEvents.Input(query: query))
+    }
+    /// Changes the list of items a SSE connection will receive state updates to.
+    ///
+    /// - Remark: HTTP `POST /events/states/{connectionId}`.
+    /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)`.
+    public func updateItemListForStateUpdates(
+        path: Operations.updateItemListForStateUpdates.Input.Path,
+        body: Operations.updateItemListForStateUpdates.Input.Body? = nil
+    ) async throws -> Operations.updateItemListForStateUpdates.Output {
+        try await updateItemListForStateUpdates(Operations.updateItemListForStateUpdates.Input(
+            path: path,
+            body: body
+        ))
     }
     /// Get all registered UI components in the specified namespace.
     ///
@@ -11202,6 +11244,281 @@ public enum Operations {
                     .json
                 ]
             }
+        }
+    }
+    /// Initiates a new item state tracker connection
+    ///
+    /// - Remark: HTTP `GET /events/states`.
+    /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)`.
+    public enum initNewStateTacker {
+        public static let id: Swift.String = "initNewStateTacker"
+        public struct Input: Sendable, Hashable {
+            /// Creates a new `Input`.
+            public init() {}
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// Creates a new `Ok`.
+                public init() {}
+            }
+            /// OK
+            ///
+            /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.initNewStateTacker.Output.Ok)
+            /// OK
+            ///
+            /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            public static var ok: Self {
+                .ok(.init())
+            }
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.initNewStateTacker.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+    }
+    /// Get all events.
+    ///
+    /// - Remark: HTTP `GET /events`.
+    /// - Remark: Generated from `#/paths//events/get(getEvents)`.
+    public enum getEvents {
+        public static let id: Swift.String = "getEvents"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/events/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// topics
+                ///
+                /// - Remark: Generated from `#/paths/events/GET/query/topics`.
+                public var topics: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - topics: topics
+                public init(topics: Swift.String? = nil) {
+                    self.topics = topics
+                }
+            }
+            public var query: Operations.getEvents.Input.Query
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            public init(query: Operations.getEvents.Input.Query = .init()) {
+                self.query = query
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// Creates a new `Ok`.
+                public init() {}
+            }
+            /// OK
+            ///
+            /// - Remark: Generated from `#/paths//events/get(getEvents)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.getEvents.Output.Ok)
+            /// OK
+            ///
+            /// - Remark: Generated from `#/paths//events/get(getEvents)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            public static var ok: Self {
+                .ok(.init())
+            }
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.getEvents.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct BadRequest: Sendable, Hashable {
+                /// Creates a new `BadRequest`.
+                public init() {}
+            }
+            /// Topic is empty or contains invalid characters
+            ///
+            /// - Remark: Generated from `#/paths//events/get(getEvents)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.getEvents.Output.BadRequest)
+            /// Topic is empty or contains invalid characters
+            ///
+            /// - Remark: Generated from `#/paths//events/get(getEvents)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            public static var badRequest: Self {
+                .badRequest(.init())
+            }
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.getEvents.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+    }
+    /// Changes the list of items a SSE connection will receive state updates to.
+    ///
+    /// - Remark: HTTP `POST /events/states/{connectionId}`.
+    /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)`.
+    public enum updateItemListForStateUpdates {
+        public static let id: Swift.String = "updateItemListForStateUpdates"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/events/states/{connectionId}/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/events/states/{connectionId}/POST/path/connectionId`.
+                public var connectionId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - connectionId:
+                public init(connectionId: Swift.String) {
+                    self.connectionId = connectionId
+                }
+            }
+            public var path: Operations.updateItemListForStateUpdates.Input.Path
+            /// - Remark: Generated from `#/paths/events/states/{connectionId}/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/events/states/{connectionId}/POST/requestBody/content/*\/*`.
+                case any(OpenAPIRuntime.HTTPBody)
+            }
+            public var body: Operations.updateItemListForStateUpdates.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - body:
+            public init(
+                path: Operations.updateItemListForStateUpdates.Input.Path,
+                body: Operations.updateItemListForStateUpdates.Input.Body? = nil
+            ) {
+                self.path = path
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// Creates a new `Ok`.
+                public init() {}
+            }
+            /// OK
+            ///
+            /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.updateItemListForStateUpdates.Output.Ok)
+            /// OK
+            ///
+            /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            public static var ok: Self {
+                .ok(.init())
+            }
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.updateItemListForStateUpdates.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// Creates a new `NotFound`.
+                public init() {}
+            }
+            /// Unknown connectionId
+            ///
+            /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.updateItemListForStateUpdates.Output.NotFound)
+            /// Unknown connectionId
+            ///
+            /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            public static var notFound: Self {
+                .notFound(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.updateItemListForStateUpdates.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
     }
     /// Get all registered UI components in the specified namespace.
