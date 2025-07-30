@@ -793,8 +793,14 @@ extension APIProtocol {
     ///
     /// - Remark: HTTP `GET /events`.
     /// - Remark: Generated from `#/paths//events/get(getEvents)`.
-    public func getEvents(query: Operations.getEvents.Input.Query = .init()) async throws -> Operations.getEvents.Output {
-        try await getEvents(Operations.getEvents.Input(query: query))
+    public func getEvents(
+        query: Operations.getEvents.Input.Query = .init(),
+        headers: Operations.getEvents.Input.Headers = .init()
+    ) async throws -> Operations.getEvents.Output {
+        try await getEvents(Operations.getEvents.Input(
+            query: query,
+            headers: headers
+        ))
     }
     /// Changes the list of items a SSE connection will receive state updates to.
     ///
@@ -11320,18 +11326,83 @@ public enum Operations {
                 }
             }
             public var query: Operations.getEvents.Input.Query
+            /// - Remark: Generated from `#/paths/events/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getEvents.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.getEvents.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.getEvents.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - query:
-            public init(query: Operations.getEvents.Input.Query = .init()) {
+            ///   - headers:
+            public init(
+                query: Operations.getEvents.Input.Query = .init(),
+                headers: Operations.getEvents.Input.Headers = .init()
+            ) {
                 self.query = query
+                self.headers = headers
             }
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/events/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/events/GET/responses/200/content/text\/event-stream`.
+                    case text_event_hyphen_stream(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.text_event_hyphen_stream`.
+                    ///
+                    /// - Throws: An error if `self` is not `.text_event_hyphen_stream`.
+                    /// - SeeAlso: `.text_event_hyphen_stream`.
+                    public var text_event_hyphen_stream: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .text_event_hyphen_stream(body):
+                                return body
+                            default:
+                                try throwUnexpectedResponseBody(
+                                    expectedContent: "text/event-stream",
+                                    body: self
+                                )
+                            }
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/events/GET/responses/200/content/application\/json`.
+                    case json(OpenAPIRuntime.OpenAPIValueContainer)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: OpenAPIRuntime.OpenAPIValueContainer {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            default:
+                                try throwUnexpectedResponseBody(
+                                    expectedContent: "application/json",
+                                    body: self
+                                )
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.getEvents.Output.Ok.Body
                 /// Creates a new `Ok`.
-                public init() {}
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.getEvents.Output.Ok.Body) {
+                    self.body = body
+                }
             }
             /// OK
             ///
@@ -11339,14 +11410,6 @@ public enum Operations {
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.getEvents.Output.Ok)
-            /// OK
-            ///
-            /// - Remark: Generated from `#/paths//events/get(getEvents)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            public static var ok: Self {
-                .ok(.init())
-            }
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
@@ -11403,6 +11466,37 @@ public enum Operations {
             ///
             /// A response with a code that is not documented in the OpenAPI document.
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case text_event_hyphen_stream
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "text/event-stream":
+                    self = .text_event_hyphen_stream
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .text_event_hyphen_stream:
+                    return "text/event-stream"
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .text_event_hyphen_stream,
+                    .json
+                ]
+            }
         }
     }
     /// Changes the list of items a SSE connection will receive state updates to.

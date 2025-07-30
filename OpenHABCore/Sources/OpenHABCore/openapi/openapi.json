@@ -5890,7 +5890,11 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/event-stream": {},
+              "application/json": {}
+            }
           },
           "400": {
             "description": "Topic is empty or contains invalid characters"

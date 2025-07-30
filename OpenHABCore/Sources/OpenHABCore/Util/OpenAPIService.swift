@@ -204,6 +204,8 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
+    
+    // Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         logger.info("Creating subscription")
         let result = try await client.createSitemapEventSubscription()

@@ -2818,12 +2818,45 @@ public struct Client: APIProtocol {
                     name: "topics",
                     value: input.query.topics
                 )
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
                 return (request, nil)
             },
             deserializer: { response, responseBody in
                 switch response.status.code {
                 case 200:
-                    return .ok(.init())
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.getEvents.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "text/event-stream",
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "text/event-stream":
+                        body = try converter.getResponseBodyAsBinary(
+                            OpenAPIRuntime.HTTPBody.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .text_event_hyphen_stream(value)
+                            }
+                        )
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            OpenAPIRuntime.OpenAPIValueContainer.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
                 case 400:
                     return .badRequest(.init())
                 default:
