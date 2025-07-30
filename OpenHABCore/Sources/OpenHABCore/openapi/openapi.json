@@ -5892,8 +5892,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/event-stream": {},
-              "application/json": {}
+              "text/event-stream": {}
             }
           },
           "400": {

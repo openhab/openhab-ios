@@ -11366,30 +11366,6 @@ public enum Operations {
                             switch self {
                             case let .text_event_hyphen_stream(body):
                                 return body
-                            default:
-                                try throwUnexpectedResponseBody(
-                                    expectedContent: "text/event-stream",
-                                    body: self
-                                )
-                            }
-                        }
-                    }
-                    /// - Remark: Generated from `#/paths/events/GET/responses/200/content/application\/json`.
-                    case json(OpenAPIRuntime.OpenAPIValueContainer)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: OpenAPIRuntime.OpenAPIValueContainer {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            default:
-                                try throwUnexpectedResponseBody(
-                                    expectedContent: "application/json",
-                                    body: self
-                                )
                             }
                         }
                     }
@@ -11469,14 +11445,11 @@ public enum Operations {
         }
         @frozen public enum AcceptableContentType: AcceptableProtocol {
             case text_event_hyphen_stream
-            case json
             case other(Swift.String)
             public init?(rawValue: Swift.String) {
                 switch rawValue.lowercased() {
                 case "text/event-stream":
                     self = .text_event_hyphen_stream
-                case "application/json":
-                    self = .json
                 default:
                     self = .other(rawValue)
                 }
@@ -11487,14 +11460,11 @@ public enum Operations {
                     return string
                 case .text_event_hyphen_stream:
                     return "text/event-stream"
-                case .json:
-                    return "application/json"
                 }
             }
             public static var allCases: [Self] {
                 [
-                    .text_event_hyphen_stream,
-                    .json
+                    .text_event_hyphen_stream
                 ]
             }
         }

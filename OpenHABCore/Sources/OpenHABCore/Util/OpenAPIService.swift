@@ -204,7 +204,6 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
-    
     // Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         logger.info("Creating subscription")
@@ -221,6 +220,13 @@ public extension OpenAPIService {
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
         return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
+    }
+
+    func openHABEvents(topics: String? = nil) async throws -> AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<OpenHABEvent>> {
+        let query: Operations.getEvents.Input.Query = topics == nil ? .init() : Operations.getEvents.Input.Query(topics: topics)
+        return try await client.getEvents(query: query)
+            .ok.body.text_event_hyphen_stream
+            .asDecodedServerSentEventsWithJSONData(of: OpenHABEvent.self)
     }
 }
 
