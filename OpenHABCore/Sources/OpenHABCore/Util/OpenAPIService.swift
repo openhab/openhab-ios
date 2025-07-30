@@ -84,6 +84,7 @@ public actor OpenAPIService {
 
         client = Client(
             serverURL: serverURL,
+            configuration: .init(dateTranscoder: ISO8601DateTranscoder(options: [.withInternetDateTime, .withFractionalSeconds, .withTimeZone, .withColonSeparatorInTimeZone])),
             transport: URLSessionTransport(configuration: .init(session: session)),
             middlewares: [
                 LoggingMiddleware(),
@@ -112,23 +113,6 @@ public actor OpenAPIService {
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
 //        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         return config
-    }
-
-    // timeoutIntervalForRequest/timeoutIntervalForResource need to be passed through URLSessionConfiguration when URLSession is created. Therefore create a new APIClient to change values.
-    public func updateForLongPolling(_ newlongPolling: Bool) async {
-        guard newlongPolling != longPolling else { return }
-        longPolling = newlongPolling
-
-        let config = prepareURLSessionConfiguration(longPolling: longPolling)
-        let session = URLSession(configuration: config)
-        client = Client(
-            serverURL: url!.appending(path: "/rest"),
-            transport: URLSessionTransport(configuration: .init(session: session)),
-            middlewares: [
-                LoggingMiddleware(),
-                AuthorisationMiddleware(configuration: connectionConfiguration)
-            ]
-        )
     }
 }
 
@@ -276,22 +260,6 @@ public extension OpenAPIService {
         let result = try await client.pollDataForSitemap(path: path, query: query, headers: headers)
             .ok.body.json
         return OpenHABSitemap(result)
-    }
-
-    // Unused currently
-    // To be used when migrating to SSE
-    func pollDataForSitemap(sitemapname: String, longPolling: Bool, subscriptionId: String? = nil) async throws -> OpenHABSitemap? {
-        var headers = Operations.pollDataForSitemap.Input.Headers()
-        if longPolling {
-            logger.info("Long-polling, setting X-Atmosphere-Transport")
-            headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
-        } else {
-            headers.X_hyphen_Atmosphere_hyphen_Transport = nil
-        }
-        let query = Operations.pollDataForSitemap.Input.Query(subscriptionid: subscriptionId)
-        let path = Operations.pollDataForSitemap.Input.Path(sitemapname: sitemapname)
-        await updateForLongPolling(longPolling)
-        return try await pollDataForSitemap(path: path, query: query, headers: headers)
     }
 }
 

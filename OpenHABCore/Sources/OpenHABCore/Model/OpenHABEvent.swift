@@ -31,27 +31,6 @@ public struct OpenHABEvent: Decodable, Hashable, Sendable {
         let oldValue: String?
         let lastStateUpdate: Date?
         let lastStateChange: Date?
-
-        // Custom decoder to parse ISO8601 with zone offset and region
-        init(from decoder: any Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            type = try container.decode(String.self, forKey: .type)
-            value = try container.decode(String.self, forKey: .value)
-            oldType = try container.decodeIfPresent(String.self, forKey: .oldType)
-            oldValue = try container.decodeIfPresent(String.self, forKey: .oldValue)
-
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds, .withTimeZone, .withColonSeparatorInTimeZone]
-
-            func parseDate(_ key: CodingKeys) -> Date? {
-                guard let raw = try? container.decode(String.self, forKey: key) else { return nil }
-                let trimmed = raw.components(separatedBy: "[").first ?? raw
-                return formatter.date(from: trimmed)
-            }
-
-            lastStateUpdate = parseDate(.lastStateUpdate)
-            lastStateChange = parseDate(.lastStateChange)
-        }
     }
 
     let topic: String
