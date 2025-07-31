@@ -329,9 +329,9 @@ class SitemapPageViewModel: ObservableObject {
         Task {
             do {
                 try await openAPIService?.sendItemCommand(itemname: itemname, command: command)
-                os_log("SitemapPageViewModel: Successfully sent command %{PUBLIC}@ to %{PUBLIC}@", log: .default, type: .info, command, itemname)
+                logger.info("Successfully sent command \(command) to \(itemname)")
             } catch {
-                os_log("SitemapPageViewModel: Failed to send command %{PUBLIC}@ to %{PUBLIC}@ — %{PUBLIC}@", log: .default, type: .error, command, itemname, error.localizedDescription)
+                logger.info("Failed to send command\(command) to \(itemname): \(error.localizedDescription)")
             }
         }
     }
