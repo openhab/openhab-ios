@@ -105,6 +105,7 @@ struct ButtonGridButton: View {
 
 struct ButtonGridRowView: View {
     @ObservedObject var widget: OpenHABWidget
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     private let logger = Logger(subsystem: "org.openhab", category: "ButtonGridRowView")
 
@@ -158,6 +159,7 @@ struct ButtonGridRowView: View {
                         if let button,
                            button.visibility {
                             ButtonGridButton(widget: button)
+                                .id(viewModel.pageId + button.widgetId)
                         } else {
                             // Empty cell to maintain grid structure
                             Rectangle()
