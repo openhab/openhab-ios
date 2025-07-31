@@ -44,7 +44,7 @@ class SitemapPageViewModel: ObservableObject {
     private var activeConnectionInfo: ConnectionInfo?
     private var pageHandlingTask: Task<Void, Never>?
     private var defaultSitemap = ""
-    private var pageId = ""
+    @Published var pageId = ""
     private var isLinkedPage = false
 
     var relevantWidgets: [OpenHABWidget] {

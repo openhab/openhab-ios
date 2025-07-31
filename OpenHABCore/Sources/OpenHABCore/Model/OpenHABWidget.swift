@@ -271,6 +271,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public func iconState() -> String? {
         guard let item, let itemState = item.state else { return nil }
+        guard !itemState.isNoneIcon else { return nil }
         if item.isOfTypeOrGroupType(.color) {
             // For items that control a color item fetch the correct icon
             if type == .slider || (type == .switchWidget && mappings.isEmpty) {
@@ -296,7 +297,6 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
             // or to "ON" to fetch the correct icon
             return (itemState == "0" || itemState == "OFF") ? "OFF" : "ON"
         }
-
         return itemState
     }
 

@@ -187,3 +187,10 @@ public extension String? {
         }
     }
 }
+
+public extension String {
+    var isNoneIcon: Bool {
+        let pattern = #"^(oh:([a-z]+:)?)?none$"#
+        return range(of: pattern, options: .regularExpression) != nil
+    }
+}

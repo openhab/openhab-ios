@@ -22,4 +22,20 @@ struct StringExtensionTests {
         #expect("///".removeTrailingSlashes() == "")
         #expect("".removeTrailingSlashes() == "")
     }
+
+    @Test
+    func testIsNoneIcon() throws {
+        let testCases: [String: Bool] = [
+            "none": true,
+            "oh:none": true,
+            "oh:classic:none": true,
+            "oh:foo:none": true,
+            "f7:none": false,
+            "lights": false
+        ]
+
+        for (input, expected) in testCases {
+            #expect(input.isNoneIcon == expected, "\(input) failed")
+        }
+    }
 }

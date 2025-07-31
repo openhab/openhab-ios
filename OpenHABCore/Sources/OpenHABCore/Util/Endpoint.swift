@@ -216,8 +216,8 @@ public extension Endpoint {
             iconName = "none"
         }
 
-        if staticIcon != true {
-            queryItems.append(URLQueryItem(name: "state", value: state ?? "null"))
+        if staticIcon != true, let state {
+            queryItems.append(URLQueryItem(name: "state", value: state))
         }
 
         queryItems.append(contentsOf: [

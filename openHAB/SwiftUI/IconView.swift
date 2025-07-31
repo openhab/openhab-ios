@@ -44,11 +44,14 @@ struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
     @ObservedObject private var networkTracker = NetworkTracker.shared
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var viewModel: SitemapPageViewModel
 
     let size: CGSize
     let iconType: IconType = .svg
 
     private let logger = Logger(subsystem: "org.openhab", category: "IconView")
+
+    @State private var currentImage: UIImage?
 
     private var iconURL: URL? {
         guard !widget.icon.isEmpty else { return nil }
@@ -97,9 +100,11 @@ struct IconView: View {
                     .setProcessor(OpenHABImageProcessor())
                     .onFailure { error in
                         logger.error("Icon loading failed for widget \(widget.label): \(error.localizedDescription)")
+                        logger.error("Failed URL: \(iconURL.absoluteString)")
                     }
                     .onSuccess { result in
                         logger.debug("Loading of icon succeeded for widget \(widget.label)")
+                        currentImage = result.image
                         if result.cacheType != .none {
                             let cacheKey = iconURL.absoluteString
                             Task {
@@ -108,13 +113,15 @@ struct IconView: View {
                             logger.debug("Icon loaded from cache: \(cacheKey)")
                         }
                     }
-                    .fade(duration: 0.25)
+                    .placeholder { _ in
+                        // Workaround to show current image before new image is displayed. See https://github.com/onevcat/Kingfisher/issues/2028
+                        Image(uiImage: currentImage ?? .init()).resizable()
+                    }
                     .cancelOnDisappear(true)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size.width, height: size.height)
+                    .id(viewModel.pageId + widget.id)
             }
-        }
-        .onChange(of: networkTracker.activeConnection) { _ in
         }
     }
 }
