@@ -203,6 +203,7 @@ public extension Endpoint {
                     queryItems.append(URLQueryItem(name: "color", value: "#\(colorString)"))
                 }
             }
+
             return Endpoint(
                 baseURL: "https://api.iconify.design/",
                 path: "/\(set)/\(iconName).svg",

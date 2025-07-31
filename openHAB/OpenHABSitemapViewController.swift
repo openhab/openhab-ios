@@ -728,8 +728,6 @@ extension OpenHABSitemapViewController: UITableViewDelegate, UITableViewDataSour
                     iconColor: iconColor
                 ).url {
                     logger.info("URL: \(urlc.absoluteString, privacy: .private) , color: \(iconColor)")
-                    var imageRequest = URLRequest(url: urlc)
-                    imageRequest.timeoutInterval = 10.0
                     cell.imageView?.kf.setImage(
                         with: KF.ImageResource(downloadURL: urlc), // , cacheKey: urlc.path + (urlc.query ?? "")),
                         placeholder: nil,
