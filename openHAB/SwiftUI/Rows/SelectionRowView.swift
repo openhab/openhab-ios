@@ -53,6 +53,7 @@ struct SelectionRowView: View {
                     logger.info("Selection changed to: \(mapping.label)")
                     viewModel.sendCommand(widget.item, commandToSend: mapping.command)
                 }
+                .disabled(widget.readOnly ?? false)
             }
         }
         .onAppear {

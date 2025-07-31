@@ -55,6 +55,7 @@ struct DatePickerInputRowView: View {
             .onChange(of: selectedDate) { newDate in
                 sendDateCommand(newDate)
             }
+            .disabled(widget.readOnly ?? false)
         }
         .onAppear {
             if let state = widget.item?.state, !state.isEmpty {

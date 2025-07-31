@@ -38,6 +38,7 @@ struct ColorPickerRowView: View {
                 .onChange(of: selectedColor) { newColor in
                     sendColorCommand(newColor)
                 }
+                .disabled(widget.readOnly ?? false)
 
             if let labelValue = widget.labelValue, !labelValue.isEmpty {
                 Text(labelValue)

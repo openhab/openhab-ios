@@ -64,6 +64,7 @@ struct SwitchRowView: View {
                 }
             ))
             .labelsHidden()
+            .disabled(widget.readOnly ?? false)
         }
         .contentShape(Rectangle())
     }

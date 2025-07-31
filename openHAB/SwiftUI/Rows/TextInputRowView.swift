@@ -42,6 +42,7 @@ struct TextInputRowView: View {
                     .onSubmit {
                         sendTextCommand()
                     }
+                    .disabled(widget.readOnly ?? false)
             }
         }
         .onAppear {

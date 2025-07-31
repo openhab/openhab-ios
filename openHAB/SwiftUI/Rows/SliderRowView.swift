@@ -52,7 +52,7 @@ struct SliderRowView: View {
             }
             .contentShape(Rectangle()) // 🔍 Make row but not slider tappable
             .onTapGesture {
-                if widget.switchSupport {
+                if widget.switchSupport, !(widget.readOnly ?? false) {
                     viewModel.sendCommand(widget.item, commandToSend: sliderValue <= widget.minValue ? "ON" : "OFF")
                 }
             }
@@ -74,6 +74,7 @@ struct SliderRowView: View {
                     sendSliderUpdate(sliderValue)
                 }
             }
+            .disabled(widget.readOnly ?? false)
         }
         .onAppear {
             loadCurrentValue()

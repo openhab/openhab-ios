@@ -129,6 +129,7 @@ struct ColorTemperaturePickerRowView: View {
                             sendTemperatureCommand()
                         }
                         .frame(height: 28)
+                        .disabled(widget.readOnly ?? false)
                     }
 
                     // Cool indicator

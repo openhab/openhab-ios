@@ -64,6 +64,7 @@ struct SetpointRowView: View {
                 .buttonStyle(.plain)
                 .disabled(currentValue <= widget.minValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
+                .disabled(widget.readOnly ?? false)
 
                 Text(formattedValue)
                     .font(.body.monospacedDigit())
@@ -80,6 +81,7 @@ struct SetpointRowView: View {
                 .buttonStyle(.plain)
                 .disabled(currentValue >= widget.maxValue)
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
+                .disabled(widget.readOnly ?? false)
             }
         }
     }
