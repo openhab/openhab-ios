@@ -63,7 +63,7 @@ struct ButtonGridButton: View {
             .scaleEffect(isPressed ? 0.95 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
-//        .disabled(widget.readOnly)
+        .disabled(widget.readOnly ?? false)
         .sensoryHeavyFeedbackIfAvailable(trigger: triggerFeedback)
         .onPressGesture(
             onPress: {
@@ -147,24 +147,22 @@ struct ButtonGridRowView: View {
                     Spacer()
                 }
             }
-//            else {
-//                logger.debug("No label or icon")
-//            }
+            HStack {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: gridColumns), spacing: 8) {
+                    ForEach(0 ..< gridRows, id: \.self) { row in
+                        ForEach(0 ..< gridColumns, id: \.self) { column in
+                            let button = buttonForPosition(row: row, column: column)
 
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: gridColumns), spacing: 8) {
-                ForEach(0 ..< gridRows, id: \.self) { row in
-                    ForEach(0 ..< gridColumns, id: \.self) { column in
-                        let button = buttonForPosition(row: row, column: column)
-
-                        if let button,
-                           button.visibility {
-                            ButtonGridButton(widget: button)
-                                .id(viewModel.pageId + button.widgetId)
-                        } else {
-                            // Empty cell to maintain grid structure
-                            Rectangle()
-                                .fill(Color.clear)
-                                .frame(height: 44)
+                            if let button,
+                               button.visibility {
+                                ButtonGridButton(widget: button)
+                                    .id(viewModel.pageId + button.widgetId)
+                            } else {
+                                // Empty cell to maintain grid structure
+                                Rectangle()
+                                    .fill(Color.clear)
+                                    .frame(height: 44)
+                            }
                         }
                     }
                 }

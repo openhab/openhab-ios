@@ -239,27 +239,21 @@ public extension UIColor {
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
 
-        let multiplier = CGFloat(255.999999)
-
         guard getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
             return nil
         }
 
-        if alpha == 1.0 {
-            return String(
-                format: "%02lX%02lX%02lX",
-                Int(red * multiplier),
-                Int(green * multiplier),
-                Int(blue * multiplier)
-            )
-        } else {
-            return String(
-                format: "%02lX%02lX%02lX%02lX",
-                Int(red * multiplier),
-                Int(green * multiplier),
-                Int(blue * multiplier),
-                Int(alpha * multiplier)
-            )
+        let r = UInt8(round(red * 255))
+        let g = UInt8(round(green * 255))
+        let b = UInt8(round(blue * 255))
+        let a = UInt8(round(alpha * 255))
+
+        func toHex(_ value: UInt8) -> String {
+            let hex = String(value, radix: 16, uppercase: true)
+            return hex.count == 1 ? "0" + hex : hex
         }
+
+        let components = [r, g, b] + (a == 255 ? [] : [a])
+        return components.map(toHex).joined()
     }
 }
