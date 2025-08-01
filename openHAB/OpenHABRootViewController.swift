@@ -577,7 +577,6 @@ class OpenHABRootViewController: UIViewController {
         let pairs = command.split(separator: ",")
         for pair in pairs {
             let keyValue = pair.split(separator: "=", maxSplits: 1)
-            // guard keyValue.count == 2 else { continue }
             if keyValue[0] == "ios" {
                 if let url = URL(string: String(keyValue[1])) {
                     logger.error("appCommandAction opening \(String(keyValue[0])) \(String(keyValue[1]))")
