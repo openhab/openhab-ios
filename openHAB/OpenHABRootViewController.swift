@@ -587,13 +587,15 @@ class OpenHABRootViewController: UIViewController {
                 // do nothing
             } else {
                 switch pair.lowercased() {
-                case "screensaver_on":
+                case "screensaver_wake":
                     fallthrough
                 case "screen_on":
                     NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
-                case "screensaver_off":
+                case "screensaver_activate":
                     fallthrough
                 case "screen_off":
+                    NotificationCenter.default.post(name: .activateScreenSaver, object: nil)
+                case "screensaver_disable":
                     NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
                 default:
                     break
