@@ -23,6 +23,8 @@ struct CustomSliderView: View {
 
     @GestureState private var dragOffset: CGSize = .zero
 
+    @State private var lastSendTime: Date = .distantPast
+
     var body: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
@@ -46,6 +48,13 @@ struct CustomSliderView: View {
                                 let raw = Double(location / width) * (range.upperBound - range.lowerBound) + range.lowerBound
                                 let stepped = (raw / step).rounded() * step
                                 value = stepped.clamped(to: range)
+                                let now = Date()
+                                if now.timeIntervalSince(lastSendTime) > 0.2 {
+                                    lastSendTime = now
+                                    onEditingChanged()
+                                }
+                            }
+                            .onEnded { _ in
                                 onEditingChanged()
                             }
                     )

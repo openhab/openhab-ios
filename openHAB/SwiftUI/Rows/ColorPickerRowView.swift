@@ -19,6 +19,9 @@ struct ColorPickerRowView: View {
     @State private var selectedColor: Color = .white
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
+    @State private var lastSendTime: Date = .distantPast
+    @State private var debounceTask: Task<Void, Never>?
+
     private let logger = Logger(subsystem: "org.openhab", category: "WidgetColorPickerView")
 
     var body: some View {
@@ -36,7 +39,19 @@ struct ColorPickerRowView: View {
             ColorPicker("Color", selection: $selectedColor, supportsOpacity: false)
                 .labelsHidden()
                 .onChange(of: selectedColor) { newColor in
-                    sendColorCommand(newColor)
+                    let now = Date()
+                    if now.timeIntervalSince(lastSendTime) > 0.2 {
+                        lastSendTime = now
+                        sendColorCommand(newColor)
+                    }
+                    // ColorPicker does not provide an .onEnded like Slider as it doesn’t expose the drag lifecycle.
+                    // It only emits onChange when the color value changes.
+                    // Therefore, we debounce final send after 0.3s of no changes
+                    debounceTask?.cancel()
+                    debounceTask = Task {
+                        try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+                        sendColorCommand(newColor)
+                    }
                 }
                 .disabled(widget.readOnly ?? false)
 

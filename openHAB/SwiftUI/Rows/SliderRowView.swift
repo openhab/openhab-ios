@@ -23,6 +23,8 @@ struct SliderRowView: View {
     private let throttleInterval: TimeInterval = 0.9 // in seconds
     @EnvironmentObject var viewModel: SitemapPageViewModel
 
+    @State private var lastSendTime: Date = .distantPast
+
     private var displayValue: Double {
         isDragging ? sliderValue : (widget.stateValueAsNumberState?.value ?? widget.minValue)
     }
@@ -63,7 +65,10 @@ struct SliderRowView: View {
                     set: { newValue in
                         sliderValue = newValue
                         if widget.shouldUseSliderUpdatesDuringMove() {
-                            sendSliderUpdate(newValue)
+                            let now = Date()
+                            if now.timeIntervalSince(lastSendTime) > 0.2 {
+                                sendSliderUpdate(newValue)
+                            }
                         }
                     }
                 ),
