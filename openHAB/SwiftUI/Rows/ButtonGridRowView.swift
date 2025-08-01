@@ -15,7 +15,7 @@ import os.log
 import SwiftUI
 
 struct ButtonGridButton: View {
-    let widget: OpenHABWidget
+    @ObservedObject var widget: OpenHABWidget
 
     @State private var isPressed = false
     @EnvironmentObject var viewModel: SitemapPageViewModel
@@ -40,7 +40,7 @@ struct ButtonGridButton: View {
         } label: {
             HStack {
                 if !widget.icon.isEmpty {
-                    IconView(icon: widget.icon)
+                    IconView(widget: widget)
                         .frame(width: 16, height: 16)
                 } else {
                     Text(widget.label)

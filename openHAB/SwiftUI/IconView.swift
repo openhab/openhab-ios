@@ -129,17 +129,12 @@ struct IconView: View {
 // MARK: - Convenience Extensions
 
 extension IconView {
-    /// Creates a widget icon view with standard size and default styling or custom icon color
+    /// Creates a widget icon view with standard size
     init(widget: OpenHABWidget) {
         self.init(
             widget: widget,
             size: CGSize(width: 24, height: 24)
         )
-    }
-
-    init(icon: String, iconColor: String = "primary") {
-        let widget = OpenHABWidget(icon: icon, iconColor: iconColor)
-        self.init(widget: widget)
     }
 }
 
@@ -162,6 +157,5 @@ extension IconView {
     let widget = OpenHABWidget()
     widget.icon = "switch"
     widget.label = "Test Switch"
-
     return IconView(widget: widget)
 }
