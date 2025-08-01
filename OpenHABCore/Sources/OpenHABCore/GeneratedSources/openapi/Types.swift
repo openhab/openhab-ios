@@ -786,8 +786,8 @@ extension APIProtocol {
     ///
     /// - Remark: HTTP `GET /events/states`.
     /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)`.
-    public func initNewStateTacker() async throws -> Operations.initNewStateTacker.Output {
-        try await initNewStateTacker(Operations.initNewStateTacker.Input())
+    public func initNewStateTacker(headers: Operations.initNewStateTacker.Input.Headers = .init()) async throws -> Operations.initNewStateTacker.Output {
+        try await initNewStateTacker(Operations.initNewStateTacker.Input(headers: headers))
     }
     /// Get all events.
     ///
@@ -11259,13 +11259,54 @@ public enum Operations {
     public enum initNewStateTacker {
         public static let id: Swift.String = "initNewStateTacker"
         public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/events/states/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.initNewStateTacker.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.initNewStateTacker.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.initNewStateTacker.Input.Headers
             /// Creates a new `Input`.
-            public init() {}
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.initNewStateTacker.Input.Headers = .init()) {
+                self.headers = headers
+            }
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/events/states/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/events/states/GET/responses/200/content/text\/event-stream`.
+                    case text_event_hyphen_stream(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.text_event_hyphen_stream`.
+                    ///
+                    /// - Throws: An error if `self` is not `.text_event_hyphen_stream`.
+                    /// - SeeAlso: `.text_event_hyphen_stream`.
+                    public var text_event_hyphen_stream: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .text_event_hyphen_stream(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.initNewStateTacker.Output.Ok.Body
                 /// Creates a new `Ok`.
-                public init() {}
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.initNewStateTacker.Output.Ok.Body) {
+                    self.body = body
+                }
             }
             /// OK
             ///
@@ -11273,14 +11314,6 @@ public enum Operations {
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.initNewStateTacker.Output.Ok)
-            /// OK
-            ///
-            /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            public static var ok: Self {
-                .ok(.init())
-            }
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
@@ -11302,6 +11335,31 @@ public enum Operations {
             ///
             /// A response with a code that is not documented in the OpenAPI document.
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case text_event_hyphen_stream
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "text/event-stream":
+                    self = .text_event_hyphen_stream
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .text_event_hyphen_stream:
+                    return "text/event-stream"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .text_event_hyphen_stream
+                ]
+            }
         }
     }
     /// Get all events.
@@ -11491,8 +11549,8 @@ public enum Operations {
             public var path: Operations.updateItemListForStateUpdates.Input.Path
             /// - Remark: Generated from `#/paths/events/states/{connectionId}/POST/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/events/states/{connectionId}/POST/requestBody/content/*\/*`.
-                case any(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/events/states/{connectionId}/POST/requestBody/content/application\/json`.
+                case json([Swift.String])
             }
             public var body: Operations.updateItemListForStateUpdates.Input.Body?
             /// Creates a new `Input`.

@@ -41,6 +41,7 @@ class OpenHABRootViewController: UIViewController {
     var currentView: OpenHABViewController!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
+    private var streamTask: Task<Void, Never>?
 
     private var apsRegistrationData: [AnyHashable: Any]?
 
@@ -102,6 +103,7 @@ class OpenHABRootViewController: UIViewController {
         isDemoMode = Preferences.currentHomePreferences.demomode
         switchToSavedView()
         setupTracker()
+        startSSEListening()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -112,6 +114,38 @@ class OpenHABRootViewController: UIViewController {
         if isDemoMode != Preferences.currentHomePreferences.demomode {
             switchToSavedView()
             isDemoMode = Preferences.currentHomePreferences.demomode
+        }
+    }
+
+    private func startSSEListening() {
+        ItemEventStream.startMonitoringNetwork()
+        print("Starting SSE")
+        streamTask = Task { [weak self] in
+            guard let self else { return }
+            for await msg in await ItemEventStream.shared.stream() {
+                await MainActor.run { self.handleSSEMessage(msg) }
+            }
+        }
+    }
+
+    private func handleSSEMessage(_ msg: StreamOutput<StateStreamMessage>) {
+        switch msg {
+        case .connected:
+            print("SSE Connected")
+        case let .disconnected(err):
+            print("SSE Disconnected:", err ?? "nil")
+        case let .event(sm):
+            switch sm {
+            case let .state(item, state):
+                print("SSE Item \(item): \(state)")
+                handleNotificationInternal(state)
+            case let .ready(uuid, _):
+                print("SSE Session UUID:", uuid)
+            case let .alive(interval):
+                print("SSE Heartbeat interval:", interval, "s")
+            case let .unknown(raw):
+                print("SSE Unknown:", raw)
+            }
         }
     }
 
@@ -186,6 +220,7 @@ class OpenHABRootViewController: UIViewController {
                 let localConnectionConfig = homeSettings.localConnectionConfig
                 let remoteConnectionConfig = homeSettings.remoteConnectionConfig
                 let demomode = homeSettings.demomode
+                let sseCommandItem = homeSettings.sseCommandItem
 
                 Task {
                     if demomode {
@@ -202,6 +237,7 @@ class OpenHABRootViewController: UIViewController {
                             localConnectionConfig,
                             remoteConnectionConfig
                         ])
+                        await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
                     }
                 }
             }
@@ -437,10 +473,11 @@ class OpenHABRootViewController: UIViewController {
         case action.hasPrefix("http"):
             httpCommandAction(action)
         case action.hasPrefix("app"):
-            appCommandAction(action)
+            appCommandAction(cmd)
         case action.hasPrefix("rule"):
             ruleCommandAction(action)
         default:
+            appCommandAction(action)
             return
         }
     }
@@ -537,16 +574,30 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func appCommandAction(_ command: String) {
-        let content = command.dropFirst(4) // Remove "app:"
-        let pairs = content.split(separator: ",")
+        let pairs = command.split(separator: ",")
         for pair in pairs {
             let keyValue = pair.split(separator: "=", maxSplits: 1)
-            guard keyValue.count == 2 else { continue }
+            // guard keyValue.count == 2 else { continue }
             if keyValue[0] == "ios" {
                 if let url = URL(string: String(keyValue[1])) {
                     logger.error("appCommandAction opening \(String(keyValue[0])) \(String(keyValue[1]))")
                     UIApplication.shared.open(url)
                     return
+                }
+            } else if keyValue[0] == "android" {
+                // do nothing
+            } else {
+                switch pair.lowercased() {
+                case "screensaver_on":
+                    fallthrough
+                case "screen_on":
+                    NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
+                case "screensaver_off":
+                    fallthrough
+                case "screen_off":
+                    NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
+                default:
+                    break
                 }
             }
         }

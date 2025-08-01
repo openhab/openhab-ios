@@ -99,6 +99,7 @@ public struct HomePreferences: Codable, Sendable, Equatable {
     public var remoteConnectionConfig: ConnectionConfiguration = .remoteDefault
     public var sitemapForWatchLabel = "watch"
     public var homeName = "Home"
+    public var sseCommandItem = ""
 
     fileprivate init(id: UUID) {
         self.id = id

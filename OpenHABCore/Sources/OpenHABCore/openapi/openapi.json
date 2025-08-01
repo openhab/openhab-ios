@@ -5866,7 +5866,10 @@
         "operationId": "initNewStateTacker",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/event-stream": {}
+            }
           }
         }
       }
@@ -5921,7 +5924,7 @@
         "requestBody": {
           "description": "items",
           "content": {
-            "*/*": {
+            "application/json": {
               "schema": {
                 "uniqueItems": true,
                 "type": "array",

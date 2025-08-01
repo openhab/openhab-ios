@@ -30,6 +30,7 @@ struct SettingsView: View {
     @State var settingsRemoteConnectionConfiguration = ConnectionConfiguration(url: "", username: "", password: "")
     @State var settingsHomeName = ""
     @State var viewAppearedOnce = false
+    @State var settingsSSECommandItem = ""
 
     @Environment(\.dismiss) private var dismiss
 
@@ -44,7 +45,8 @@ struct SettingsView: View {
             )
 
             ApplicationSettingsView(
-                settingsIdleOff: $settingsIdleOff
+                settingsIdleOff: $settingsIdleOff,
+                settingsSSECommandItem: $settingsSSECommandItem
             )
 
             MainUISettingsView(
@@ -129,6 +131,7 @@ struct SettingsView: View {
         settingsLocalConnectionConfiguration = Preferences.currentHomePreferences.localConnectionConfig
         settingsRemoteConnectionConfiguration = Preferences.currentHomePreferences.remoteConnectionConfig
         settingsHomeName = Preferences.currentHomePreferences.homeName
+        settingsSSECommandItem = Preferences.currentHomePreferences.sseCommandItem
     }
 
     func saveSettings() {
@@ -142,6 +145,7 @@ struct SettingsView: View {
             homePreferences.sitemapForWatchLabel = sitemaps.first { $0.name == settingsSitemapForWatch }?.label ?? "unknown"
             homePreferences.localConnectionConfig = settingsLocalConnectionConfiguration
             homePreferences.remoteConnectionConfig = settingsRemoteConnectionConfiguration
+            homePreferences.sseCommandItem = settingsSSECommandItem
         }
         Preferences.idleOff = settingsIdleOff
         Preferences.sendCrashReports = settingsSendCrashReports

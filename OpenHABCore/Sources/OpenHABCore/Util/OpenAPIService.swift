@@ -72,8 +72,8 @@ public actor OpenAPIService {
             config.timeoutIntervalForRequest = 35.0
             config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         case .shortTerm:
-            config.timeoutIntervalForRequest = 2.0
-            config.timeoutIntervalForResource = 2.0
+            config.timeoutIntervalForRequest = 10.0
+            config.timeoutIntervalForResource = 10.0
         }
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
         let url = URL(string: connectionConfiguration.url) ?? URL(staticString: "about:blank")
@@ -269,6 +269,19 @@ public extension OpenAPIService {
         try await client.getItems()
             .ok.body.json
             .compactMap(OpenHABItem.init)
+    }
+}
+
+public extension OpenAPIService {
+    func initNewStateTacker() async throws -> Operations.initNewStateTacker.Output {
+        try await client.initNewStateTacker()
+    }
+
+    func updateItemListForStateUpdates(connectionId: String, items: [String]) async throws {
+        let path = Operations.updateItemListForStateUpdates.Input.Path(connectionId: connectionId)
+        let body = Operations.updateItemListForStateUpdates.Input.Body.json(.init(items))
+        let response = try await client.updateItemListForStateUpdates(path: path, body: body)
+        _ = try response.ok
     }
 }
 

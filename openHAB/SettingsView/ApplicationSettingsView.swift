@@ -16,8 +16,10 @@ import UIKit
 
 struct ApplicationSettingsView: View {
     @Binding var settingsIdleOff: Bool
+    @Binding var settingsSSECommandItem: String
 
     private let logger = Logger(subsystem: "org.openhab.app", category: "ApplicationSettingsView")
+    @State private var selectedItemName: String? = nil
 
     var body: some View {
         Section(header: Text(LocalizedStringKey("application_settings"))) {
@@ -35,6 +37,26 @@ struct ApplicationSettingsView: View {
             NavigationLink("Client Certificates") {
                 ClientCertificatesView()
             }
+
+            NavigationLink {
+                ItemSelectionView(selectedItemName: $selectedItemName)
+            } label: {
+                Text("Command Item \(selectedItemName?.isEmpty == false ? "(" + selectedItemName! + ")" : "")")
+            }
+        }
+        .onChange(of: selectedItemName) { newSelection in
+            handleItemSelectionChange(newSelection)
+        }
+        .onAppear {
+            selectedItemName = settingsSSECommandItem
+        }
+    }
+
+    private func handleItemSelectionChange(_ selected: String?) {
+        if let selected {
+            settingsSSECommandItem = selected
+        } else {
+            settingsSSECommandItem = ""
         }
     }
 }
@@ -42,11 +64,12 @@ struct ApplicationSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State private var idleOff = false
-
+        @State private var sseCommandItem = ""
         var body: some View {
             Form {
                 ApplicationSettingsView(
-                    settingsIdleOff: $idleOff
+                    settingsIdleOff: $idleOff,
+                    settingsSSECommandItem: $sseCommandItem
                 )
             }
         }

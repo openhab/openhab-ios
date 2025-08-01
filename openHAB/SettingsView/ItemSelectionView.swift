@@ -1,0 +1,76 @@
+// Copyright (c) 2010-2025 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+//
+//  ItemSelectionView.swift
+//  openHAB
+//
+
+import OpenHABCore
+import os
+import SwiftUI
+
+struct ItemSelectionView: View {
+    @Binding var selectedItemName: String?
+    @State private var items: [OpenHABItem] = []
+
+    @State private var searchText = ""
+    @State private var isLoading = true
+
+    private var filteredItems: [OpenHABItem] {
+        if searchText.isEmpty { return items }
+        return items.filter { item in
+            (item.label.localizedCaseInsensitiveContains(searchText)) ||
+                item.name.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    var body: some View {
+        VStack {
+            if isLoading {
+                Spacer()
+                ProgressView("Loading Items…")
+                Spacer()
+            } else {
+                TextField("Search", text: $searchText)
+                    .textFieldStyle(.roundedBorder)
+                    .padding(.horizontal)
+
+                List {
+                    ForEach(filteredItems, id: \.name) { item in
+                        Button {
+                            selectedItemName = (selectedItemName == item.name) ? nil : item.name
+                        } label: {
+                            HStack {
+                                Text(item.name)
+                                Spacer()
+                                if selectedItemName == item.name {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Items")
+        .onAppear {
+            Task {
+                do {
+                    items = try await NetworkTracker.shared.getItems()
+                } catch {
+                    // Handle error / log if needed
+                }
+                isLoading = false
+            }
+        }
+    }
+}
