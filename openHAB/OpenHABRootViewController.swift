@@ -608,7 +608,7 @@ class OpenHABRootViewController: UIViewController {
                 break
             }
         case "idletimer":
-            switch arg1.lowercased() {
+            switch arg1 {
             case "enable":
                 UIApplication.shared.isIdleTimerDisabled = false
             case "disable":
@@ -627,10 +627,6 @@ class OpenHABRootViewController: UIViewController {
                     .lowercased()
                     .components(separatedBy: CharacterSet.alphanumerics.inverted)
                     .joined()
-            }
-
-            for voice in AVSpeechSynthesisVoice.speechVoices() {
-                print("\(voice.name) | \(voice.language)")
             }
 
             let utterance = AVSpeechUtterance(string: arg1)
