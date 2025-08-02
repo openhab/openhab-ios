@@ -33,4 +33,5 @@ struct FrameRowView: View {
     List([widget]) { widget in
         FrameRowView(widget: widget)
     }
+    .environmentObject(SitemapPageViewModel())
 }

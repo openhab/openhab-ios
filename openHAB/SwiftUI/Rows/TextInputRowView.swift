@@ -68,4 +68,5 @@ struct TextInputRowView: View {
         TextInputRowView(widget: widget)
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

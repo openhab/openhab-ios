@@ -56,9 +56,9 @@ struct SwitchRowView: View {
                 set: { newValue in
                     let newState = newValue ? "ON" : "OFF"
                     if newValue {
-                        logger.info("Switch to ON")
+                        logger.info("\("Switch to ON")")
                     } else {
-                        logger.info("Switch to OFF")
+                        logger.info("\("Switch to OFF")")
                     }
                     viewModel.sendCommand(widget.item, commandToSend: newState)
                 }
@@ -76,4 +76,5 @@ struct SwitchRowView: View {
         SwitchRowView(widget: widget)
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

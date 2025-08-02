@@ -47,7 +47,7 @@ struct RollershutterRowView: View {
 
                 Button {
                     triggerUpFeedback.toggle()
-                    logger.info("up button pressed")
+                    logger.info("\("up button pressed")")
                     viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.up.rawValue)
                 } label: {
                     Image(systemSymbol: .chevronUp)
@@ -59,7 +59,7 @@ struct RollershutterRowView: View {
 
                 Button {
                     triggerStopFeedback.toggle()
-                    logger.info("stop button pressed")
+                    logger.info("\("stop button pressed")")
                     viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.stop.rawValue)
                 } label: {
                     Image(systemSymbol: .stop)
@@ -71,7 +71,7 @@ struct RollershutterRowView: View {
 
                 Button {
                     triggerDownFeedback.toggle()
-                    logger.info("down button pressed")
+                    logger.info("\("down button pressed")")
                     viewModel.sendCommand(widget.item, commandToSend: RollerShutterCommand.down.rawValue)
                 } label: {
                     Image(systemSymbol: .chevronDown)
@@ -111,4 +111,5 @@ extension View {
         RollershutterRowView(widget: widget)
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

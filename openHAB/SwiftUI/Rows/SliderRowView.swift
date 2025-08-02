@@ -125,4 +125,5 @@ struct SliderRowView: View {
         SliderRowView(widget: widget)
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

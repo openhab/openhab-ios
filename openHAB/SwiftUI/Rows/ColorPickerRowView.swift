@@ -110,4 +110,5 @@ struct ColorPickerRowView: View {
             .padding()
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

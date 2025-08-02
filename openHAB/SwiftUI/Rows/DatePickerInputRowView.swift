@@ -104,8 +104,9 @@ struct DatePickerInputRowView: View {
 #Preview {
     let widget = PreviewConstants.openHABSitemapPage!.widgets[13]
     VStack {
-        ColorTemperaturePickerRowView(widget: widget)
+        DatePickerInputRowView(widget: widget)
             .padding()
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

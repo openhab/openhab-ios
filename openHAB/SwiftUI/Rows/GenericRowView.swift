@@ -37,4 +37,5 @@ struct GenericRowView: View {
     List([widget]) { widget in
         GenericRowView(widget: widget)
     }
+    .environmentObject(SitemapPageViewModel())
 }

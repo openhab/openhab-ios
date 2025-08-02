@@ -52,4 +52,5 @@ struct TextRowView: View {
         TextRowView(widget: widget)
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

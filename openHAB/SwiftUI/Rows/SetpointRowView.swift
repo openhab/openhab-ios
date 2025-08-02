@@ -125,4 +125,5 @@ struct SetpointRowView: View {
         SetpointRowView(widget: widget)
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

@@ -90,4 +90,5 @@ struct SegmentedRowView: View {
         SegmentedRowView(widget: widget)
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }

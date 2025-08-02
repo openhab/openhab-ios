@@ -198,4 +198,5 @@ struct ColorTemperaturePickerRowView: View {
             .padding()
         Spacer()
     }
+    .environmentObject(SitemapPageViewModel())
 }
