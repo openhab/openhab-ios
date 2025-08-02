@@ -475,9 +475,10 @@ class OpenHABRootViewController: UIViewController {
         case action.hasPrefix("app"):
             appCommandAction(cmd)
         case action.hasPrefix("rule"):
-            ruleCommandAction(action)
+            ruleCommandAction(cmd)
+        case action.hasPrefix("device"):
+            deviceAction(cmd)
         default:
-            appCommandAction(action)
             return
         }
     }
@@ -583,34 +584,57 @@ class OpenHABRootViewController: UIViewController {
                     UIApplication.shared.open(url)
                     return
                 }
-            } else if keyValue[0] == "android" {
-                // do nothing
-            } else {
-                switch pair.lowercased() {
-                case "screensaver_wake":
-                    fallthrough
-                case "screen_on":
-                    NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
-                case "screensaver_activate":
-                    fallthrough
-                case "screen_off":
+            }
+        }
+    }
+
+    private func deviceAction(_ action: String) {
+        let cmd = action.split(separator: ":")
+        if cmd.isEmpty { return }
+        switch cmd[0].lowercased() {
+        case "screensaver":
+            if cmd.count == 2 {
+                switch cmd[1].lowercased() {
+                case "activate":
                     NotificationCenter.default.post(name: .activateScreenSaver, object: nil)
-                case "screensaver_disable":
+                case "disable":
                     NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
+                case "wake":
+                    NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
                 default:
                     break
                 }
             }
+        case "idletimer":
+            if cmd.count == 2 {
+                switch cmd[1].lowercased() {
+                case "enable":
+                    UIApplication.shared.isIdleTimerDisabled = false
+                case "disable":
+                    UIApplication.shared.isIdleTimerDisabled = true
+                default:
+                    break
+                }
+            }
+        case "brightness":
+            if cmd.count == 2 {
+                if let value = Double(cmd[1]) {
+                    let target = min(max(value, 0.0), 1.0)
+                    UIScreen.main.brightness = target
+                }
+            }
+        default:
+            break
         }
     }
 
     private func ruleCommandAction(_ command: String) {
         let components = command.split(separator: ":", maxSplits: 2)
 
-        guard components.count == 3, components[0] == "rule" else { return }
+        guard components.count == 2 else { return }
 
-        let uuid = String(components[1])
-        let propertiesString = String(components[2])
+        let uuid = String(components[0])
+        let propertiesString = String(components[1])
 
         let propertyPairs = propertiesString.split(separator: ",")
         var properties: [String: String] = [:]
