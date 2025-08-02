@@ -18,12 +18,18 @@ import SwiftUI
 struct ImageRowView: View {
     @ObservedObject var widget: OpenHABWidget
     @EnvironmentObject var viewModel: SitemapPageViewModel
+    @State private var refreshTimer: Timer?
+    @State private var forceRefreshKey = UUID()
 
     private let logger = Logger(subsystem: "org.openhab", category: "ImageRowView")
 
     private var imageURL: URL? {
         guard !widget.url.isEmpty else { return nil }
         return URL(string: widget.url)
+    }
+
+    private var shouldCache: Bool {
+        widget.refresh == 0
     }
 
     var body: some View {
@@ -35,11 +41,19 @@ struct ImageRowView: View {
 
             switch widget.generateImageResult(rootUrl: viewModel.openHABRootUrl ?? "") {
             case let .embedded(data: data):
-                let provider = RawImageDataProvider(data: data, cacheKey: UUID().uuidString)
-                KFImage(source: .provider(provider)).resizable()
+                let provider = RawImageDataProvider(data: data, cacheKey: shouldCache ? widget.widgetId : "\(widget.widgetId)-\(forceRefreshKey)")
+                KFImage(source: .provider(provider))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: 300)
+                    .cornerRadius(8)
             case let .link(url):
                 KFImage(url)
                     .resizable()
+                    .cacheMemoryOnly(!shouldCache)
+                    .forceRefresh(shouldCache ? false : true)
+                    .cacheOriginalImage(!shouldCache ? false : true)
+                    .id(shouldCache ? url?.absoluteString : "\(url?.absoluteString ?? "")-\(forceRefreshKey)")
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: 300)
                     .cornerRadius(8)
@@ -60,5 +74,36 @@ struct ImageRowView: View {
                     .foregroundColor(widget.valuecolor.isEmpty ? .secondary : Color(fromString: widget.valuecolor))
             }
         }
+        .onAppear {
+            setupRefreshTimer()
+        }
+        .onDisappear {
+            stopRefreshTimer()
+        }
+        .onChange(of: widget.refresh) { _ in
+            setupRefreshTimer()
+        }
+    }
+
+    private func setupRefreshTimer() {
+        stopRefreshTimer()
+
+        guard widget.refresh != 0 else { return }
+
+        let refreshInterval = TimeInterval(Double(widget.refresh) / 1000)
+        guard refreshInterval > 0.09 else { return }
+
+        logger.info("Scheduling image refresh every \(refreshInterval) seconds")
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: refreshInterval, repeats: true) { _ in
+            Task { @MainActor in
+                logger.info("Refreshing image on \(refreshInterval) seconds schedule")
+                forceRefreshKey = UUID()
+            }
+        }
+    }
+
+    private func stopRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
     }
 }
