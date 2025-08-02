@@ -39,6 +39,7 @@ final class ScreenSaverManager: NSObject {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(handleDisableNotification), name: .disableScreenSaver, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleWakeNotification), name: .wakeScreenSaver, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleActivateNotification), name: .activateScreenSaver, object: nil)
     }
 
     func startMonitoring(window: UIWindow, configuration: ScreenSaverConfiguration = ScreenSaverConfiguration()) {
@@ -196,12 +197,19 @@ final class ScreenSaverManager: NSObject {
         resetIdleTimer()
         dismissSaverIfNeeded()
     }
+
+    @objc private func handleActivateNotification() {
+        logger.debug("Received activate screen saver notification")
+        dismissSaverIfNeeded()
+        showSaver()
+    }
 }
 
 /// Notifications that other parts of the app can send to control the screensaver
 extension Notification.Name {
     static let disableScreenSaver = Notification.Name("disableScreenSaver")
     static let wakeScreenSaver = Notification.Name("wakeScreenSaver")
+    static let activateScreenSaver = Notification.Name("activateScreenSaver")
 }
 
 extension ScreenSaverManager: UIGestureRecognizerDelegate {

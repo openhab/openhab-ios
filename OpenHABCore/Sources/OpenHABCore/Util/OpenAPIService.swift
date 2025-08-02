@@ -72,8 +72,8 @@ public actor OpenAPIService {
             config.timeoutIntervalForRequest = 35.0
             config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         case .shortTerm:
-            config.timeoutIntervalForRequest = 2.0
-            config.timeoutIntervalForResource = 2.0
+            config.timeoutIntervalForRequest = 10.0
+            config.timeoutIntervalForResource = 10.0
         }
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
         let url = URL(string: connectionConfiguration.url) ?? URL(staticString: "about:blank")
@@ -84,6 +84,7 @@ public actor OpenAPIService {
 
         client = Client(
             serverURL: serverURL,
+            configuration: .init(dateTranscoder: ISO8601DateTranscoder(options: [.withInternetDateTime, .withFractionalSeconds, .withTimeZone, .withColonSeparatorInTimeZone])),
             transport: URLSessionTransport(configuration: .init(session: session)),
             middlewares: [
                 LoggingMiddleware(),
@@ -112,23 +113,6 @@ public actor OpenAPIService {
 //        config.timeoutIntervalForRequest = if longPolling { 35.0 } else { 20.0 }
 //        config.timeoutIntervalForResource = config.timeoutIntervalForRequest + 25
         return config
-    }
-
-    // timeoutIntervalForRequest/timeoutIntervalForResource need to be passed through URLSessionConfiguration when URLSession is created. Therefore create a new APIClient to change values.
-    public func updateForLongPolling(_ newlongPolling: Bool) async {
-        guard newlongPolling != longPolling else { return }
-        longPolling = newlongPolling
-
-        let config = prepareURLSessionConfiguration(longPolling: longPolling)
-        let session = URLSession(configuration: config)
-        client = Client(
-            serverURL: url!.appending(path: "/rest"),
-            transport: URLSessionTransport(configuration: .init(session: session)),
-            middlewares: [
-                LoggingMiddleware(),
-                AuthorisationMiddleware(configuration: connectionConfiguration)
-            ]
-        )
     }
 }
 
@@ -204,6 +188,7 @@ public extension OpenAPIService {
 }
 
 public extension OpenAPIService {
+    // Returns subscription id or nil
     func openHABcreateSubscription() async throws -> String? {
         logger.info("Creating subscription")
         let result = try await client.createSitemapEventSubscription()
@@ -219,6 +204,13 @@ public extension OpenAPIService {
             .ok.body.text_event_hyphen_stream
             .asDecodedServerSentEventsWithJSONData(of: Components.Schemas.SitemapWidgetEvent.self)
         return decodedSequence.compactMap { OpenHABSitemapWidgetEvent($0.data) }
+    }
+
+    func openHABEvents(topics: String? = nil) async throws -> AsyncThrowingMapSequence<ServerSentEventsDeserializationSequence<ServerSentEventsLineDeserializationSequence<HTTPBody>>, ServerSentEventWithJSONData<OpenHABEvent>> {
+        let query: Operations.getEvents.Input.Query = topics == nil ? .init() : Operations.getEvents.Input.Query(topics: topics)
+        return try await client.getEvents(query: query)
+            .ok.body.text_event_hyphen_stream
+            .asDecodedServerSentEventsWithJSONData(of: OpenHABEvent.self)
     }
 }
 
@@ -269,22 +261,6 @@ public extension OpenAPIService {
             .ok.body.json
         return OpenHABSitemap(result)
     }
-
-    // Unused currently
-    // To be used when migrating to SSE
-    func pollDataForSitemap(sitemapname: String, longPolling: Bool, subscriptionId: String? = nil) async throws -> OpenHABSitemap? {
-        var headers = Operations.pollDataForSitemap.Input.Headers()
-        if longPolling {
-            logger.info("Long-polling, setting X-Atmosphere-Transport")
-            headers.X_hyphen_Atmosphere_hyphen_Transport = "long-polling"
-        } else {
-            headers.X_hyphen_Atmosphere_hyphen_Transport = nil
-        }
-        let query = Operations.pollDataForSitemap.Input.Query(subscriptionid: subscriptionId)
-        let path = Operations.pollDataForSitemap.Input.Path(sitemapname: sitemapname)
-        await updateForLongPolling(longPolling)
-        return try await pollDataForSitemap(path: path, query: query, headers: headers)
-    }
 }
 
 // Array of items
@@ -293,6 +269,19 @@ public extension OpenAPIService {
         try await client.getItems()
             .ok.body.json
             .compactMap(OpenHABItem.init)
+    }
+}
+
+public extension OpenAPIService {
+    func initNewStateTacker() async throws -> Operations.initNewStateTacker.Output {
+        try await client.initNewStateTacker()
+    }
+
+    func updateItemListForStateUpdates(connectionId: String, items: [String]) async throws {
+        let path = Operations.updateItemListForStateUpdates.Input.Path(connectionId: connectionId)
+        let body = Operations.updateItemListForStateUpdates.Input.Body.json(.init(items))
+        let response = try await client.updateItemListForStateUpdates(path: path, body: body)
+        _ = try response.ok
     }
 }
 
