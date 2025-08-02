@@ -65,7 +65,7 @@ struct ItemSelectionView: View {
         .onAppear {
             Task {
                 do {
-                    items = try await NetworkTracker.shared.getItems()
+                    items = try await NetworkTracker.shared.getItems().filter { $0.type == .stringItem }
                 } catch {
                     // Handle error / log if needed
                 }

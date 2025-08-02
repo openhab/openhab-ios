@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import AVFoundation
 import Combine
 import FirebaseCrashlytics
 import Foundation
@@ -58,6 +59,7 @@ class OpenHABRootViewController: UIViewController {
     }()
 
     private var activeConnection: ConnectionInfo?
+    private let synthesizer = AVSpeechSynthesizer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -589,40 +591,60 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func deviceAction(_ action: String) {
-        let cmd = action.split(separator: ":")
-        if cmd.isEmpty { return }
-        switch cmd[0].lowercased() {
+        let cmdParts = action.split(separator: ":")
+        if cmdParts.isEmpty { return }
+        let command = cmdParts[0].lowercased()
+        let arg1 = cmdParts.count > 1 ? cmdParts[1].lowercased() : ""
+        switch command {
         case "screensaver":
-            if cmd.count == 2 {
-                switch cmd[1].lowercased() {
-                case "activate":
-                    NotificationCenter.default.post(name: .activateScreenSaver, object: nil)
-                case "disable":
-                    NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
-                case "wake":
-                    NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
-                default:
-                    break
-                }
+            switch arg1 {
+            case "activate":
+                NotificationCenter.default.post(name: .activateScreenSaver, object: nil)
+            case "disable":
+                NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
+            case "wake":
+                NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
+            default:
+                break
             }
         case "idletimer":
-            if cmd.count == 2 {
-                switch cmd[1].lowercased() {
-                case "enable":
-                    UIApplication.shared.isIdleTimerDisabled = false
-                case "disable":
-                    UIApplication.shared.isIdleTimerDisabled = true
-                default:
-                    break
-                }
+            switch arg1.lowercased() {
+            case "enable":
+                UIApplication.shared.isIdleTimerDisabled = false
+            case "disable":
+                UIApplication.shared.isIdleTimerDisabled = true
+            default:
+                break
             }
         case "brightness":
-            if cmd.count == 2 {
-                if let value = Double(cmd[1]) {
-                    let target = min(max(value, 0.0), 1.0)
-                    UIScreen.main.brightness = target
-                }
+            if let value = Double(arg1) {
+                let target = min(max(value, 0.0), 1.0)
+                UIScreen.main.brightness = target
             }
+        case "tts":
+            func normalizeVoiceName(from input: String) -> String {
+                input
+                    .lowercased()
+                    .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                    .joined()
+            }
+
+            for voice in AVSpeechSynthesisVoice.speechVoices() {
+                print("\(voice.name) | \(voice.language)")
+            }
+
+            let utterance = AVSpeechUtterance(string: arg1)
+            if cmdParts.count > 3 {
+                print("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
+                let voice = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.lowercased() == cmdParts[2].lowercased() && normalizeVoiceName(from: $0.name) == normalizeVoiceName(from: String(cmdParts[3])) }
+                if !voice.isEmpty {
+                    print("setting custom voice \(voice[0].name)")
+                    utterance.voice = voice[0]
+                }
+            } else if cmdParts.count > 2 {
+                utterance.voice = AVSpeechSynthesisVoice(language: String(cmdParts[2]))
+            }
+            synthesizer.speak(utterance)
         default:
             break
         }
