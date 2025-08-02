@@ -1,0 +1,227 @@
+// Copyright (c) 2010-2025 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+import Combine
+import Foundation
+import OpenAPIRuntime
+import OpenAPIURLSession
+import OSLog
+
+/**
+ Example usage:
+
+ ```
+ ItemEventStream.startMonitoringNetwork()
+ Task {
+     await ItemEventStream.trackItems(["PanelDansOffice", "F1_Kitchen"])
+ }
+ print("Starting SSE")
+ streamTask = Task { [weak self] in
+     guard let self else { return }
+     for await msg in await ItemEventStream.stream() {
+         await MainActor.run { self.handle(msg) }
+     }
+ }
+ ```
+ */
+
+public enum StreamOutput<Event: Sendable>: Sendable {
+    case connected
+    case disconnected((any Error)?) // `nil` when closed intentionally
+    case event(Event)
+}
+
+public enum StateStreamMessage: Sendable, Equatable {
+    case ready(uuid: String, lastEventID: String?)
+    case state(item: String, state: String)
+    case alive(interval: Int)
+    case unknown(raw: String)
+}
+
+public actor EventStream<Event: Sendable> {
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "EventStream",
+        category: "SSE"
+    )
+    private var trackedItems: Set<String> = []
+    private var continuations
+        = [UUID: AsyncStream<StreamOutput<Event>>.Continuation]()
+    private var listenTask: Task<Void, Never>?
+    private var currentConfig: ConnectionConfiguration?
+    private var sessionUUID: String?
+    private var service: OpenAPIService?
+
+    public func stream() -> AsyncStream<StreamOutput<Event>> {
+        AsyncStream { continuation in
+            let id = UUID()
+            continuations[id] = continuation
+            continuation.onTermination = { [weak self] _ in
+                guard let self else { return }
+                Task { [id] in
+                    await self.cleanupContinuation(id)
+                }
+            }
+        }
+    }
+
+    public func trackItems(_ items: [String]) async {
+        trackedItems = Set(items)
+        await sendTrackedItemsIfPossible()
+    }
+
+    private func cleanupContinuation(_ id: UUID) {
+        continuations[id]?.finish()
+        continuations.removeValue(forKey: id)
+    }
+
+    // NetworkManager callback
+    private func updateConnection(_ info: ConnectionInfo?) {
+        let newConfig = info?.configuration
+
+        guard currentConfig != newConfig else { return }
+
+        currentConfig = info?.configuration
+
+        logger.info("Network changed – restarting SSE connection")
+
+        listenTask?.cancel()
+        listenTask = nil
+
+        guard let cfg = currentConfig else {
+            broadcast(.disconnected(nil))
+            return
+        }
+        listenTask = Task { await listen(using: cfg) }
+    }
+
+    /// Try and send the item right away, if the connection is not up, they will be sent when its ready
+    private func sendTrackedItemsIfPossible() async {
+        guard
+            !trackedItems.isEmpty,
+            let uuid = sessionUUID,
+            let service
+        else { return }
+        do {
+            try await service.updateItemListForStateUpdates(
+                connectionId: uuid,
+                items: Array(trackedItems)
+            )
+        } catch {
+            logger.error("Failed to update item list: \(error.localizedDescription)")
+        }
+    }
+
+    private func listen(using config: ConnectionConfiguration) async {
+        var backoff: TimeInterval = 1
+        let maxBackoff: TimeInterval = 30
+
+        while !Task.isCancelled {
+            do {
+                let service = try OpenAPIService(connectionConfiguration: config)
+                let response = try await service.initNewStateTacker()
+                let eventStream = try response.ok.body.text_event_hyphen_stream.asDecodedServerSentEvents()
+                self.service = service
+                broadcast(.connected)
+
+                for try await sse in eventStream {
+                    logger.info("SSE event: \(sse.event ?? "empty")")
+                    for rawMessage in parse(sse) {
+                        if let message = rawMessage as? Event {
+                            broadcast(.event(message))
+                        }
+                    }
+                }
+                // if we get here we have lost the connection
+                throw CancellationError()
+            } catch is CancellationError {
+                // normal cleanup, just return
+                return
+            } catch {
+                broadcast(.disconnected(error))
+                // give a little time before we try connecting again
+                logger.error("SSE error: \(error.localizedDescription, privacy: .public) – retrying in \(backoff, privacy: .public)s")
+                try? await Task.sleep(for: .seconds(backoff))
+                backoff = min(backoff * 2, maxBackoff)
+            }
+        }
+    }
+
+    private func broadcast(_ msg: StreamOutput<Event>) {
+        // the "ready" message carries the UUID string we need to store
+        if case let .event(raw as StateStreamMessage) = msg,
+           case let .ready(uuid, _) = raw {
+            sessionUUID = uuid
+            // Re‑send the item subscription when we have a fresh UUID.
+            Task { await self.sendTrackedItemsIfPossible() }
+        }
+        continuations.values.forEach { $0.yield(msg) }
+    }
+
+    private func parse(_ sse: ServerSentEvent) -> [StateStreamMessage] {
+        switch sse.event ?? "" {
+        case "ready":
+            if let uuid = sse.data {
+                return [.ready(uuid: uuid, lastEventID: sse.id)]
+            }
+        case "alive":
+            if let data = sse.data!.data(using: String.Encoding.utf8),
+               let obj = try? JSONDecoder().decode(
+                   Alive.self, from: data
+               ) {
+                return [.alive(interval: obj.interval)]
+            }
+        default:
+            // sometime message omit the `event:` field and send only `data:` with the JSON.
+            if let data = sse.data?.data(using: String.Encoding.utf8),
+               let changes = try? JSONDecoder().decode(ItemStateChanges.self, from: data) {
+                return changes.wrapped.map { key, value in
+                    .state(item: key, state: value.state)
+                }
+            }
+        }
+        return [.unknown(raw: sse.data ?? "nil")]
+    }
+
+    // Alive and Item State Chnage message structures
+    private struct Alive: Decodable { let type: String; let interval: Int }
+    // Multiple items can come in a single message which makes this a little more complicated
+    private struct ItemStateChanges: Decodable {
+        struct Value: Decodable { let state: String }
+        let wrapped: [String: Value]
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            wrapped = try container.decode([String: Value].self)
+        }
+
+        var first: (String, Value)? { wrapped.first }
+    }
+}
+
+/// Helper so callers can just use `ItemEventStream` and not  EventStream<StateStreamMessage>
+public typealias ItemEventStream = EventStream<StateStreamMessage>
+
+public extension ItemEventStream {
+    static let shared = ItemEventStream()
+    /// helper function so callers can write something like:
+    /// `await ItemEventStream.trackItems(["KitchenLight"])`.
+    nonisolated static func trackItems(_ items: [String]) async {
+        await shared.trackItems(items)
+    }
+
+    nonisolated static func startMonitoringNetwork() {
+        Task.detached { [weak hub = Self.shared] in
+            guard let hub else { return }
+            for await conn in NetworkTracker.shared.$activeConnection.values {
+                await hub.updateConnection(conn)
+            }
+        }
+    }
+}

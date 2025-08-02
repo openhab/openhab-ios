@@ -10,3 +10,4 @@ filter:
         - root
         - systeminfo
         - rules
+        - events

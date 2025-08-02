@@ -2757,6 +2757,186 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Initiates a new item state tracker connection
+    ///
+    /// - Remark: HTTP `GET /events/states`.
+    /// - Remark: Generated from `#/paths//events/states/get(initNewStateTacker)`.
+    public func initNewStateTacker(_ input: Operations.initNewStateTacker.Input) async throws -> Operations.initNewStateTacker.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.initNewStateTacker.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/events/states",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.initNewStateTacker.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "text/event-stream"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "text/event-stream":
+                        body = try converter.getResponseBodyAsBinary(
+                            OpenAPIRuntime.HTTPBody.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .text_event_hyphen_stream(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Get all events.
+    ///
+    /// - Remark: HTTP `GET /events`.
+    /// - Remark: Generated from `#/paths//events/get(getEvents)`.
+    public func getEvents(_ input: Operations.getEvents.Input) async throws -> Operations.getEvents.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.getEvents.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/events",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "topics",
+                    value: input.query.topics
+                )
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.getEvents.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "text/event-stream"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "text/event-stream":
+                        body = try converter.getResponseBodyAsBinary(
+                            OpenAPIRuntime.HTTPBody.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .text_event_hyphen_stream(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    return .badRequest(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Changes the list of items a SSE connection will receive state updates to.
+    ///
+    /// - Remark: HTTP `POST /events/states/{connectionId}`.
+    /// - Remark: Generated from `#/paths//events/states/{connectionId}/post(updateItemListForStateUpdates)`.
+    public func updateItemListForStateUpdates(_ input: Operations.updateItemListForStateUpdates.Input) async throws -> Operations.updateItemListForStateUpdates.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.updateItemListForStateUpdates.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/events/states/{}",
+                    parameters: [
+                        input.path.connectionId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case .none:
+                    body = nil
+                case let .json(value):
+                    body = try converter.setOptionalRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    return .ok(.init())
+                case 404:
+                    return .notFound(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
     /// Get all registered UI components in the specified namespace.
     ///
     /// - Remark: HTTP `GET /ui/components/{namespace}`.

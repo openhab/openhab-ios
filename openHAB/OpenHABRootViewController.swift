@@ -9,6 +9,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
+import AVFoundation
 import Combine
 import FirebaseCrashlytics
 import Foundation
@@ -112,6 +113,7 @@ class OpenHABRootViewController: UIViewController {
     var currentView: (any UIViewController & OpenHABViewable)!
     var isDemoMode = false
     var cancellables = Set<AnyCancellable>()
+    private var streamTask: Task<Void, Never>?
 
     private var apsRegistrationData: [AnyHashable: Any]?
 
@@ -124,6 +126,7 @@ class OpenHABRootViewController: UIViewController {
     lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = HostingSitemapViewController()
 
     private var activeConnection: ConnectionInfo?
+    private let synthesizer = AVSpeechSynthesizer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -169,6 +172,7 @@ class OpenHABRootViewController: UIViewController {
         isDemoMode = Preferences.currentHomePreferences.demomode
         switchToSavedView()
         setupTracker()
+        startSSEListening()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -179,6 +183,38 @@ class OpenHABRootViewController: UIViewController {
         if isDemoMode != Preferences.currentHomePreferences.demomode {
             switchToSavedView()
             isDemoMode = Preferences.currentHomePreferences.demomode
+        }
+    }
+
+    private func startSSEListening() {
+        ItemEventStream.startMonitoringNetwork()
+        print("Starting SSE")
+        streamTask = Task { [weak self] in
+            guard let self else { return }
+            for await msg in await ItemEventStream.shared.stream() {
+                await MainActor.run { self.handleSSEMessage(msg) }
+            }
+        }
+    }
+
+    private func handleSSEMessage(_ msg: StreamOutput<StateStreamMessage>) {
+        switch msg {
+        case .connected:
+            print("SSE Connected")
+        case let .disconnected(err):
+            print("SSE Disconnected:", err ?? "nil")
+        case let .event(sm):
+            switch sm {
+            case let .state(item, state):
+                print("SSE Item \(item): \(state)")
+                handleNotificationInternal(state)
+            case let .ready(uuid, _):
+                print("SSE Session UUID:", uuid)
+            case let .alive(interval):
+                print("SSE Heartbeat interval:", interval, "s")
+            case let .unknown(raw):
+                print("SSE Unknown:", raw)
+            }
         }
     }
 
@@ -253,6 +289,7 @@ class OpenHABRootViewController: UIViewController {
                 let localConnectionConfig = homeSettings.localConnectionConfig
                 let remoteConnectionConfig = homeSettings.remoteConnectionConfig
                 let demomode = homeSettings.demomode
+                let sseCommandItem = homeSettings.sseCommandItem
 
                 Task {
                     if demomode {
@@ -269,6 +306,7 @@ class OpenHABRootViewController: UIViewController {
                             localConnectionConfig,
                             remoteConnectionConfig
                         ])
+                        await ItemEventStream.trackItems(sseCommandItem.isEmpty ? [] : [sseCommandItem])
                     }
                 }
             }
@@ -504,9 +542,11 @@ class OpenHABRootViewController: UIViewController {
         case action.hasPrefix("http"):
             httpCommandAction(action)
         case action.hasPrefix("app"):
-            appCommandAction(action)
+            appCommandAction(cmd)
         case action.hasPrefix("rule"):
-            ruleCommandAction(action)
+            ruleCommandAction(cmd)
+        case action.hasPrefix("device"):
+            deviceAction(cmd)
         default:
             return
         }
@@ -604,11 +644,9 @@ class OpenHABRootViewController: UIViewController {
     }
 
     private func appCommandAction(_ command: String) {
-        let content = command.dropFirst(4) // Remove "app:"
-        let pairs = content.split(separator: ",")
+        let pairs = command.split(separator: ",")
         for pair in pairs {
             let keyValue = pair.split(separator: "=", maxSplits: 1)
-            guard keyValue.count == 2 else { continue }
             if keyValue[0] == "ios" {
                 if let url = URL(string: String(keyValue[1])) {
                     logger.error("appCommandAction opening \(String(keyValue[0])) \(String(keyValue[1]))")
@@ -619,13 +657,69 @@ class OpenHABRootViewController: UIViewController {
         }
     }
 
+    private func deviceAction(_ action: String) {
+        let cmdParts = action.split(separator: ":")
+        if cmdParts.isEmpty { return }
+        let command = cmdParts[0].lowercased()
+        let arg1 = cmdParts.count > 1 ? cmdParts[1].lowercased() : ""
+        switch command {
+        case "screensaver":
+            switch arg1 {
+            case "activate":
+                NotificationCenter.default.post(name: .activateScreenSaver, object: nil)
+            case "disable":
+                NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
+            case "wake":
+                NotificationCenter.default.post(name: .wakeScreenSaver, object: nil)
+            default:
+                break
+            }
+        case "idletimer":
+            switch arg1 {
+            case "enable":
+                UIApplication.shared.isIdleTimerDisabled = false
+            case "disable":
+                UIApplication.shared.isIdleTimerDisabled = true
+            default:
+                break
+            }
+        case "brightness":
+            if let value = Double(arg1) {
+                let target = min(max(value, 0.0), 1.0)
+                UIScreen.main.brightness = target
+            }
+        case "tts":
+            func normalizeVoiceName(from input: String) -> String {
+                input
+                    .lowercased()
+                    .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                    .joined()
+            }
+
+            let utterance = AVSpeechUtterance(string: arg1)
+            if cmdParts.count > 3 {
+                print("Filtering voice \(cmdParts[2]) \(cmdParts[3])")
+                let voice = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.lowercased() == cmdParts[2].lowercased() && normalizeVoiceName(from: $0.name) == normalizeVoiceName(from: String(cmdParts[3])) }
+                if !voice.isEmpty {
+                    print("setting custom voice \(voice[0].name)")
+                    utterance.voice = voice[0]
+                }
+            } else if cmdParts.count > 2 {
+                utterance.voice = AVSpeechSynthesisVoice(language: String(cmdParts[2]))
+            }
+            synthesizer.speak(utterance)
+        default:
+            break
+        }
+    }
+
     private func ruleCommandAction(_ command: String) {
         let components = command.split(separator: ":", maxSplits: 2)
 
-        guard components.count == 3, components[0] == "rule" else { return }
+        guard components.count == 2 else { return }
 
-        let uuid = String(components[1])
-        let propertiesString = String(components[2])
+        let uuid = String(components[0])
+        let propertiesString = String(components[1])
 
         let propertyPairs = propertiesString.split(separator: ",")
         var properties: [String: String] = [:]
