@@ -67,7 +67,6 @@ struct ItemSelectionView: View {
                 do {
                     items = try await NetworkTracker.shared.getItems().filter { $0.type == .stringItem }
                 } catch {
-                    // Handle error / log if needed
                 }
                 isLoading = false
             }
