@@ -25,36 +25,47 @@ struct SitemapPageView: View {
 
     var body: some View {
         NavigationStack {
-            List(viewModel.relevantWidgets, id: \.id) { widget in
-                Group {
-                    if let linkedPage = widget.linkedPage {
-                        NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
-                            RowViewFactory.view(for: widget)
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.vertical, -6)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 24))
-                    } else if widget.type == .selection {
-                        Button {
-                            selectedWidget = widget
-                            showSelectionSheet = true
-                        } label: {
-                            RowViewFactory.view(for: widget)
-                        }
-                        .buttonStyle(.plain)
-                    } else if widget.type == .input {
-                        Button {
-                            selectedWidget = widget
-                            showInputAlert = true
-                        } label: {
-                            RowViewFactory.view(for: widget)
-                        }
-                        .buttonStyle(.plain)
-                    } else {
+            List {
+                if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
+                    // Show skeleton/placeholder rows while loading
+                    ForEach(placeholderWidgets, id: \.id) { widget in
                         RowViewFactory.view(for: widget)
-                            .onTapGesture {
-                                viewModel.widgetTapped(widget)
+                            .redacted(reason: .placeholder)
+                            .disabled(true)
+                    }
+                } else {
+                    ForEach(viewModel.relevantWidgets, id: \.id) { widget in
+                        Group {
+                            if let linkedPage = widget.linkedPage {
+                                NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
+                                    RowViewFactory.view(for: widget)
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.vertical, -6)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 24))
+                            } else if widget.type == .selection {
+                                Button {
+                                    selectedWidget = widget
+                                    showSelectionSheet = true
+                                } label: {
+                                    RowViewFactory.view(for: widget)
+                                }
+                                .buttonStyle(.plain)
+                            } else if widget.type == .input {
+                                Button {
+                                    selectedWidget = widget
+                                    showInputAlert = true
+                                } label: {
+                                    RowViewFactory.view(for: widget)
+                                }
+                                .buttonStyle(.plain)
+                            } else {
+                                RowViewFactory.view(for: widget)
+                                    .onTapGesture {
+                                        viewModel.widgetTapped(widget)
+                                    }
                             }
+                        }
                     }
                 }
             }
@@ -110,5 +121,19 @@ struct SitemapPageView: View {
 
     init(viewModel: SitemapPageViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
+    }
+}
+
+extension SitemapPageView {
+    /// Creates placeholder widgets for skeleton loading state
+    private var placeholderWidgets: [OpenHABWidget] {
+        [
+            PreviewConstants.openHABSitemapPage!.widgets[3],
+            PreviewConstants.openHABSitemapPage!.widgets[5],
+            PreviewConstants.openHABSitemapPage!.widgets[2],
+            PreviewConstants.openHABSitemapPage!.widgets[6],
+            PreviewConstants.openHABSitemapPage!.widgets[17],
+            PreviewConstants.openHABSitemapPage!.widgets[4]
+        ]
     }
 }
