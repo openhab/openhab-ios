@@ -41,4 +41,26 @@ struct UIColorTests {
         let fallback = UIColor(hex: "notAColor")
         #expect(color == fallback)
     }
+
+    @Test
+    func hexStringForMultipleColors() {
+        // Array of (UIColor, expectedHexString)
+        let testCases: [(UIColor, String?)] = [
+            (UIColor.red, "FF0000"),
+            (UIColor.green, "00FF00"),
+            (UIColor.blue, "0000FF"),
+            (UIColor.white, "FFFFFF"),
+            (UIColor.black, "000000"),
+            (UIColor(red: 1, green: 0, blue: 0, alpha: 0.5), "FF000080"), // 50% alpha
+            (UIColor(patternImage: UIImage()), nil) // Non-RGB color should return nil
+        ]
+
+        for (index, testCase) in testCases.enumerated() {
+            let (color, expectedHex) = testCase
+            #expect(
+                color.hexString == expectedHex,
+                "Case \(index): Expected \(expectedHex ?? "nil"), got \(color.hexString ?? "nil")"
+            )
+        }
+    }
 }
