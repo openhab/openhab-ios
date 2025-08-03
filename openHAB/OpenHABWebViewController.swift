@@ -293,16 +293,16 @@ class OpenHABWebViewController: OpenHABViewController {
         webview.uiDelegate = self
         // Ensure the newly created webview resizes properly on rotation
         webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        webView.scrollView.bounces = false
+        webview.scrollView.bounces = false
         // support dark mode and avoid white flashing when loading
-        webView.isOpaque = false
-        webView.backgroundColor = UIColor.clear
+        webview.isOpaque = false
+        webview.backgroundColor = UIColor.clear
         if UIDevice.current.userInterfaceIdiom == .pad {
             // since ios 13 Safari sets the user agent to desktop mode on iPads so the view renders correctly with larger screens
-            webView.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+            webview.customUserAgent = "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
         }
         if #available(iOS 16.4, *) {
-            webView.isInspectable = true
+            webview.isInspectable = true
         }
 
         if #unavailable(iOS 17) {
