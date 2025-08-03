@@ -105,7 +105,7 @@ public protocol NetworkTracking: ObservableObject {
     var activeConnection: ConnectionInfo? { get }
 }
 
-@available(*, deprecated)
+/// @available(*, deprecated)
 public final class NetworkTracker: ObservableObject {
     public static let shared = NetworkTracker()
 

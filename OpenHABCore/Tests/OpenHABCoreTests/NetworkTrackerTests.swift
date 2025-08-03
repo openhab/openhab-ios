@@ -166,16 +166,10 @@ final class NetworkTrackerTests: XCTestCase {
         var cancellables = Set<AnyCancellable>()
 
         tracker.$status
-            // swiftlint:disable trailing_closure
-            .handleEvents(
-                receiveSubscription: { _ in
-                    statusSinkAttached.fulfill()
-                },
-                receiveOutput: nil,
-                receiveCompletion: nil,
-                receiveCancel: nil
-            ) { _ in }
-            // swiftlint:enable trailing_closure
+            .handleEvents { _ in
+                statusSinkAttached.fulfill()
+            } receiveRequest: { _ in
+            }
             .dropFirst()
             .sink { status in
                 if status == .notConnected {

@@ -53,7 +53,7 @@ struct ItemSelectionView: View {
                                 Text(item.name)
                                 Spacer()
                                 if selectedItemName == item.name {
-                                    Image(systemName: "checkmark")
+                                    Image(systemSymbol: .checkmark)
                                 }
                             }
                         }

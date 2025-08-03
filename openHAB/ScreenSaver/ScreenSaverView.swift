@@ -42,10 +42,6 @@ final class ScreenSaverView: UIView {
         commonInit()
     }
 
-    deinit {
-        movementTimer?.invalidate()
-    }
-
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -201,5 +197,9 @@ final class ScreenSaverView: UIView {
             label.alpha = 1.0
             animations()
         }
+    }
+
+    deinit {
+        movementTimer?.invalidate()
     }
 }
