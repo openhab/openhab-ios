@@ -16,6 +16,7 @@
 
 import OpenHABCore
 import os
+import SFSafeSymbols
 import SwiftUI
 
 struct ItemSelectionView: View {
