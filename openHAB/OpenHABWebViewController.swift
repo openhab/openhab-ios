@@ -32,20 +32,45 @@ class OpenHABWebViewController: OpenHABViewController {
     private var myOhViews: [UUID: WKWebView] = [:]
 
     private var js = """
-    window.OHApp = {
-        exitToApp : function(){
-            window.webkit.messageHandlers.Native.postMessage('exitToApp');
-        },
-        goFullscreen : function(){
-            window.webkit.messageHandlers.Native.postMessage('goFullscreen');
-        },
-        sseConnected : function(connected) {
-            window.webkit.messageHandlers.Native.postMessage('sseConnected-' + connected);
-        },
-        ready : function() {
-            window.webkit.messageHandlers.Native.postMessage('ready');
-        },
-    }
+    (function() {
+        // Main UI Callbacks
+        window.OHApp = {
+            exitToApp : function(){
+                window.webkit.messageHandlers.mainUi.postMessage('exitToApp');
+            },
+            goFullscreen : function(){
+                window.webkit.messageHandlers.mainUi.postMessage('goFullscreen');
+            },
+            sseConnected : function(connected) {
+                window.webkit.messageHandlers.mainUi.postMessage('sseConnected-' + connected);
+            },
+            ready : function() {
+                window.webkit.messageHandlers.mainUi.postMessage('ready');
+            },
+        }
+
+        // Detect Path changes in SPA
+        function notifyPathChange() {
+            window.webkit.messageHandlers.pathChanged.postMessage(window.location.pathname);
+        }
+
+        const originalPushState = history.pushState;
+        history.pushState = function() {
+            originalPushState.apply(this, arguments);
+            notifyPathChange();
+        };
+
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function() {
+            originalReplaceState.apply(this, arguments);
+            notifyPathChange();
+        };
+
+        window.addEventListener('popstate', notifyPathChange);
+
+        // Notify initial path on load
+        notifyPathChange();
+    })();
     """
 
     override open var shouldAutorotate: Bool {
@@ -151,10 +176,8 @@ class OpenHABWebViewController: OpenHABViewController {
                 webView = newWebview
                 view.addSubview(newWebview)
             }
-            // DispatchQueue.main.async {
             logger.info("Loading URL: \(modifiedUrl)")
             webView.load(request)
-            // }
         }
     }
 
@@ -277,7 +300,8 @@ class OpenHABWebViewController: OpenHABViewController {
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
         // adds: window.webkit.messageHandlers.xxxx.postMessage to JS env
-        config.userContentController.add(self, name: "Native")
+        config.userContentController.add(self, name: "mainUi")
+        config.userContentController.add(self, name: "pathChanged")
         config.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false))
 
         // iOS 17 allows Sandboxed profiles, which is fantastic, iOS 16 does not and agressively caches everything
@@ -320,7 +344,11 @@ extension OpenHABWebViewController: WKScriptMessageHandler {
     @MainActor
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         logger.info("WKScriptMessage \(message.name)")
-        if let callbackName = message.body as? String {
+        if message.name == "pathChanged", let newPath = message.body as? String {
+            print("path changed to: \(newPath)")
+            Preferences.currentWebViewPath = newPath
+        }
+        if message.name == "mainUi", let callbackName = message.body as? String {
             logger.info("WKScriptMessage \(callbackName)")
             switch callbackName {
             case "exitToApp":
