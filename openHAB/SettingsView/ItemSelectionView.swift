@@ -67,8 +67,7 @@ struct ItemSelectionView: View {
             Task {
                 do {
                     items = try await NetworkTracker.shared.getItems().filter { $0.type == .stringItem }
-                } catch {
-                }
+                } catch {}
                 isLoading = false
             }
         }
