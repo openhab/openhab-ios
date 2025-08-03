@@ -12,7 +12,7 @@
 @testable import OpenHABCore
 import Testing
 
-struct ComparableTests {
+struct ComparableTest {
     @Test
     func clampedWithValueBelowRange() {
         // Int

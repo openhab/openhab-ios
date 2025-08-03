@@ -152,9 +152,9 @@ final class ScreenSaverManager: NSObject {
                 UIScreen.main.brightness = target
             }
         }
-        UIView.animate(withDuration: 0.2, animations: {
+        UIView.animate(withDuration: 0.2) {
             saver.alpha = 0
-        }) { _ in
+        } completion: { _ in
             saver.removeFromSuperview()
         }
         saverView = nil

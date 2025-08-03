@@ -16,6 +16,7 @@
 
 import OpenHABCore
 import os
+import SFSafeSymbols
 import SwiftUI
 
 struct ItemSelectionView: View {
@@ -53,7 +54,7 @@ struct ItemSelectionView: View {
                                 Text(item.name)
                                 Spacer()
                                 if selectedItemName == item.name {
-                                    Image(systemName: "checkmark")
+                                    Image(systemSymbol: .checkmark)
                                 }
                             }
                         }
@@ -66,8 +67,7 @@ struct ItemSelectionView: View {
             Task {
                 do {
                     items = try await NetworkTracker.shared.getItems().filter { $0.type == .stringItem }
-                } catch {
-                }
+                } catch {}
                 isLoading = false
             }
         }
