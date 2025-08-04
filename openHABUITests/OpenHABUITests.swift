@@ -22,7 +22,6 @@ class OpenHABUITests: XCTestCase {
         app.launch()
     }
 
-    @MainActor
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
@@ -30,12 +29,13 @@ class OpenHABUITests: XCTestCase {
     @MainActor
     func testShots() {
         let app = XCUIApplication()
+        app.activate()
+
         let hamburgerButton = app.navigationBars.buttons["HamburgerButton"]
         hamburgerButton.tap()
         sleep(3)
 
-        let tablesQuery = app.tables
-        tablesQuery.staticTexts["Home"].tap()
+        app.staticTexts["Home"].tap()
         sleep(10)
         snapshot("0_MainUI")
 
@@ -57,11 +57,13 @@ class OpenHABUITests: XCTestCase {
         if !webViewsQuery.staticTexts["Floorplans"].exists {
             // Left side menu in webUI
             menuStaticText = webViewsQuery.staticTexts["menu"]
+            sleep(2)
             menuStaticText?.tap()
             sleep(1)
         }
-        webViewsQuery.staticTexts["Floorplans"].tap()
-        sleep(2)
+
+        app/*@START_MENU_TOKEN@*/ .staticTexts["Floorplans"]/*[[".links[\"Floorplans\"].staticTexts.firstMatch",".links.staticTexts[\"Floorplans\"]",".staticTexts[\"Floorplans\"]"],[[[-1,2],[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
+        sleep(10)
         snapshot("3_Floorplans")
 
         menuStaticText?.tap()
@@ -70,37 +72,28 @@ class OpenHABUITests: XCTestCase {
         webViewsQuery.links.allElementsBoundByIndex[1].tap()
         sleep(2)
 
-        // right menu in webUI
-        webViewsQuery.staticTexts["square_arrow_right"].tap()
-        tablesQuery.staticTexts["Main Menu"].tap()
-        sleep(5)
+        app.webViews/*@START_MENU_TOKEN@*/ .staticTexts["square_arrow_right"]/*[[".links[\"square_arrow_right\"].staticTexts.firstMatch",".links.staticTexts[\"square_arrow_right\"]",".staticTexts[\"square_arrow_right\"]"],[[[-1,2],[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
+
+        app/*@START_MENU_TOKEN@*/ .staticTexts["Main Menu"]/*[[".otherElements.staticTexts[\"Main Menu\"]",".staticTexts[\"Main Menu\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
+        app.cells/*@START_MENU_TOKEN@*/ .containing(.staticText, identifier: "Widget Overview").firstMatch/*[[".element(boundBy: 11)",".containing(.staticText, identifier: \"Widget Overview\").firstMatch"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
+        sleep(10)
         snapshot("4_MainSitemap")
 
-        let widgetTable = app.tables["OpenHABSitemapViewControllerWidgetTableView"]
-
-        widgetTable.staticTexts["Widget Overview"].tap()
-        sleep(3)
-        widgetTable.staticTexts["BINARY WIDGETS"].swipeDown()
+        app.staticTexts["BINARY WIDGETS"].swipeUp()
         sleep(6)
         snapshot("5_WidgetOverview")
 
         app.navigationBars.buttons.element(boundBy: 0).tap()
         sleep(2)
-        widgetTable.staticTexts["Ground Floor"].tap()
-        sleep(5)
-        widgetTable.staticTexts["Kitchen"].tap()
-        sleep(5)
-        snapshot("6_Kitchen")
-
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(2)
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(2)
 
         hamburgerButton.tap()
+        sleep(3)
+        app.staticTexts["settings"].tap()
         sleep(2)
-        tablesQuery.staticTexts["Settings"].tap()
+        snapshot("7_Settings_Demo")
+
+        app.staticTexts["Demo Mode"].tap()
         sleep(2)
-        snapshot("7_Settings")
+        snapshot("8_Settings_Server")
     }
 }
