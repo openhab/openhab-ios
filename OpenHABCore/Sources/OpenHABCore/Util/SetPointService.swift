@@ -12,8 +12,6 @@
 import Foundation
 
 public struct SetPointService {
-    public init() {}
-
     /// Calculates a new value for a setpoint
     /// - Parameters:
     ///   - currentValue: The current value of the setpoint
@@ -30,4 +28,6 @@ public struct SetPointService {
         let newValue = isDecreasing ? currentValue - step : currentValue + step
         return newValue.clamped(to: minValue ... maxValue)
     }
+
+    public init() {}
 }

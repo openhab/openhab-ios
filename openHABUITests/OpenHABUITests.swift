@@ -13,13 +13,16 @@ import os.log
 import XCTest
 
 class OpenHABUITests: XCTestCase {
-    @MainActor
-    override func setUp() {
-        let app = XCUIApplication()
-        app.launchEnvironment = ["UITest": "1"]
-        setupSnapshot(app)
+    override func setUp() async throws {
+        try await super.setUp()
+
+        let app = await XCUIApplication()
+        await MainActor.run {
+            app.launchEnvironment = ["UITest": "1"]
+        }
         continueAfterFailure = false
-        app.launch()
+        await setupSnapshot(app)
+        await app.launch()
     }
 
     override func tearDown() {
