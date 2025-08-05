@@ -18,7 +18,6 @@ build/
 BuildTools/.build
 OpenHABCore/Package.resolved
 
-#OpenHABCore/Sources/OpenHABCore/GeneratedSources
 swift-openapi-generator/
 OpenHABCore/swift-openapi-generator/
 vendor/

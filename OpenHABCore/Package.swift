@@ -47,7 +47,7 @@ let package = Package(
                 .enableUpcomingFeature("ImplicitOpenExistentials"),
                 .enableUpcomingFeature("ImportObjcForwardDeclarations"),
                 .enableUpcomingFeature("InferSendableFromCaptures"),
-//                .enableUpcomingFeature("InternalImportsByDefault"),
+                .enableUpcomingFeature("InternalImportsByDefault"),
                 .enableUpcomingFeature("IsolatedDefaultValues"),
                 .enableUpcomingFeature("MemberImportVisibility"),
                 .enableUpcomingFeature("NonfrozenEnumExhaustivity"),
