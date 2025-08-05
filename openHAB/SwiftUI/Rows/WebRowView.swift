@@ -25,7 +25,7 @@ struct WidgetWebViewContainer: View {
             }
 
             WebRowView(widget: widget)
-                .frame(height: 300)
+                .frame(height: widget.preferredRowHeight)
                 .cornerRadius(8)
 
             if let labelValue = widget.labelValue, !labelValue.isEmpty {

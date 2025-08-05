@@ -37,7 +37,7 @@ struct MapRowViewLegacy: View {
             Map(coordinateRegion: .constant(region), annotationItems: CLLocationCoordinate2DIsValid(widget.coordinate) ? [widget.coordinate] : []) { location in
                 MapMarker(coordinate: location, tint: .red)
             }
-            .frame(height: 200)
+            .frame(height: widget.preferredRowHeight)
             .cornerRadius(8)
         }
     }
@@ -61,7 +61,7 @@ private struct MapRowViewNew: View {
                 Map(position: $cameraPosition) {
                     Marker("", coordinate: widget.coordinate)
                 }
-                .frame(height: 200)
+                .frame(height: widget.preferredRowHeight)
                 .onAppear {
                     cameraPosition = .region(
                         MKCoordinateRegion(

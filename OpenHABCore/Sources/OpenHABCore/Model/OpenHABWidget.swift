@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
+@_exported import Combine
 import Foundation
-import MapKit
+@_exported import MapKit
 import os.log
 
 public enum WidgetTypeEnum {
@@ -537,6 +537,21 @@ public extension [OpenHABWidget] {
             if widget.type != .buttongrid {
                 flatten(widget.widgets)
             }
+        }
+    }
+}
+
+public extension OpenHABWidget {
+    var preferredRowHeight: CGFloat? {
+        switch type {
+        case .frame:
+            label.isEmpty ? 0 : 35.0
+        case .image, .chart, .video:
+            nil // Automatic sizing
+        case .webview, .mapview:
+            44.0 * CGFloat(height ?? 8)
+        default:
+            44.0
         }
     }
 }
