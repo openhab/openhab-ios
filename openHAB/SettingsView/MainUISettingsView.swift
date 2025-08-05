@@ -58,9 +58,9 @@ struct MainUISettingsView: View {
             }
 
             Button {
-                let websiteDataTypes = NSSet(array: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache])
+                let websiteDataTypes: Set<String> = [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache]
                 let date = Date(timeIntervalSince1970: 0)
-                WKWebsiteDataStore.default().removeData(ofTypes: websiteDataTypes as! Set<String>, modifiedSince: date) {}
+                WKWebsiteDataStore.default().removeData(ofTypes: websiteDataTypes, modifiedSince: date) {}
                 showingCacheAlert = true
             } label: {
                 NavigationLink("Clear Web Cache", destination: EmptyView())

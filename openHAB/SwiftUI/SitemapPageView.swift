@@ -42,7 +42,7 @@ struct SitemapPageView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .padding(.vertical, -6)
-                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 24))
+//                                .listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 24))
                             } else if widget.type == .selection {
                                 Button {
                                     selectedWidget = widget
@@ -126,7 +126,7 @@ struct SitemapPageView: View {
 
 extension SitemapPageView {
     /// Creates placeholder widgets for skeleton loading state
-    private var placeholderWidgets: [OpenHABWidget] {
+    public var placeholderWidgets: [OpenHABWidget] {
         [
             PreviewConstants.openHABSitemapPage!.widgets[3],
             PreviewConstants.openHABSitemapPage!.widgets[5],
@@ -136,4 +136,13 @@ extension SitemapPageView {
             PreviewConstants.openHABSitemapPage!.widgets[4]
         ]
     }
+}
+
+#Preview {
+    let previewViewModel = SitemapPageViewModel(
+        pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
+        title: PreviewConstants.openHABSitemapPage?.title ?? "Preview Page",
+        widgets: SitemapPageView(viewModel: SitemapPageViewModel()).placeholderWidgets
+    )
+    SitemapPageView(viewModel: previewViewModel)
 }

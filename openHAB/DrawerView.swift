@@ -54,142 +54,6 @@ struct ConnectionView: View {
 }
 
 struct DrawerView: View {
-    struct MainSectionView<MenuEntry: View>: View {
-        var menuEntry: (Image, Text, TargetController) -> MenuEntry
-
-        var body: some View {
-            Section(header: Text("Main")) {
-                menuEntry(
-                    Image("openHABIcon"),
-                    Text("Home"),
-                    .webview
-                )
-            }
-        }
-    }
-
-    struct TilesSectionView: View {
-        var uiTiles: [OpenHABUiTile]
-        var tilesIconwidth: CGFloat
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            Section(header: Text("Tiles")) {
-                ForEach(uiTiles, id: \.url) { tile in
-                    HStack {
-                        ImageView(url: tile.imageUrl)
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: tilesIconwidth)
-                        Text(tile.name)
-                    }
-                    .onTapGesture {
-                        dismiss()
-                        onDismiss(.tile(tile.url))
-                    }
-                }
-            }
-        }
-    }
-
-    //  Handle double-tap gesture for selecting or deselecting the sitemap for the watch
-    struct SitemapsSectionView: View {
-        var sitemaps: [OpenHABSitemap]
-        var sitemapIconwidth: CGFloat
-        @Binding var sitemapForWatch: String?
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            Section(header: Text("Sitemaps")) {
-                ForEach(sitemaps, id: \.name) { sitemap in
-                    SitemapRowView(
-                        sitemap: sitemap,
-                        sitemapIconwidth: sitemapIconwidth,
-                        isWatchSitemap: sitemap.name == sitemapForWatch,
-                        onDismiss: onDismiss,
-                        dismiss: dismiss
-                    )
-                    .onTapGesture(count: 2) {
-                        Preferences.modifyActiveHome { homePreferences in
-                            if sitemap.name == sitemapForWatch {
-                                sitemapForWatch = nil
-                                homePreferences.sitemapForWatch = ""
-                                homePreferences.sitemapForWatchLabel = ""
-                            } else {
-                                sitemapForWatch = sitemap.name
-                                homePreferences.sitemapForWatch = sitemap.name
-                                homePreferences.sitemapForWatchLabel = sitemap.label
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    struct SitemapRowView: View {
-        @EnvironmentObject var networkTracker: NetworkTracker
-        var sitemap: OpenHABSitemap
-        var sitemapIconwidth: CGFloat
-        var isWatchSitemap: Bool
-        var onDismiss: (TargetController) -> Void
-        var dismiss: DismissAction
-
-        var body: some View {
-            HStack {
-                if sitemap.icon.isEmpty {
-                    Image("openHABIcon")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: sitemapIconwidth)
-                } else {
-                    let url = Endpoint.iconForDrawer(
-                        rootUrl: networkTracker.activeConnection?.configuration.url ?? "",
-                        icon: sitemap.icon
-                    ).url
-                    KFImage(url).placeholder { Image("openHABIcon").resizable() }
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: sitemapIconwidth)
-                }
-                Text(sitemap.label)
-                if isWatchSitemap {
-                    Spacer()
-                    Image(systemSymbol: .applewatchWatchface)
-                }
-            }
-            .onTapGesture {
-                dismiss()
-                onDismiss(.sitemap(sitemap.name))
-            }
-        }
-    }
-
-    struct SystemSectionView<MenuEntry: View>: View {
-        var menuEntry: (Image, Text, TargetController) -> MenuEntry
-
-        var body: some View {
-            Section(header: Text("System")) {
-                settingsMenuEntry(image: .gear, text: "settings", goTo: .settings)
-
-                if Preferences.getNotificationConnection() != nil, !Preferences.currentHomePreferences.demomode {
-                    settingsMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
-                }
-
-                settingsMenuEntry(image: .house, text: "Manage Homes", goTo: .homeSelection)
-            }
-        }
-
-        private func settingsMenuEntry(image: SFSymbol, text: String, goTo target: TargetController) -> MenuEntry {
-            menuEntry(
-                Image(systemSymbol: image),
-                Text(LocalizedStringKey(text)),
-                target
-            )
-        }
-    }
-
     @State private var sitemaps: [OpenHABSitemap] = []
     @State private var uiTiles: [OpenHABUiTile] = []
     @State private var selectedSection: Int?
@@ -200,22 +64,69 @@ struct DrawerView: View {
     var onDismiss: (TargetController) -> Void
     @Environment(\.dismiss) private var dismiss
 
-    @ScaledMetric var openHABIconwidth = 20.0
-    @ScaledMetric var tilesIconwidth = 20.0
-    @ScaledMetric var sitemapIconwidth = 20.0
+    @ScaledMetric var iconWidth = 20.0
 
     @State private var sitemapForWatch: String?
+
+    var mainSection: some View {
+        Section(header: Text("Main")) {
+            menuEntry(image: Image("openHABIcon").resizable(), goTo: .webview) {
+                Text("Home").accessibilityIdentifier("Home")
+            }
+        }
+    }
+
+    var tilesSection: some View {
+        Section(header: Text("Tiles")) {
+            ForEach(uiTiles, id: \.url) { tile in
+                menuEntry(
+                    image: ImageView(url: tile.imageUrl),
+                    goTo: .tile(tile.url)
+                ) {
+                    Text(tile.name)
+                }
+            }
+        }
+    }
+
+    var sitemapsSection: some View {
+        Section(header: Text("Sitemaps")) {
+            ForEach(sitemaps, id: \.name) { sitemap in
+                menuEntry(
+                    image: sitemapIcon(for: sitemap),
+                    goTo: .sitemap(sitemap.name)
+                ) {
+                    HStack {
+                        Text(sitemap.label)
+                        if sitemap.name == sitemapForWatch {
+                            Spacer()
+                            Image(systemSymbol: .applewatchWatchface)
+                        }
+                    }
+                }
+                .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
+            }
+        }
+    }
+
+    var systemSection: some View {
+        Section(header: Text("System")) {
+            systemMenuEntry(image: .gear, text: "settings", goTo: .settings)
+            if Preferences.getNotificationConnection() != nil,
+               !Preferences.currentHomePreferences.demomode {
+                systemMenuEntry(image: .bell, text: "notifications", goTo: .notifications)
+            }
+            systemMenuEntry(image: .house, text: "Manage Homes", goTo: .homeSelection)
+        }
+    }
 
     var body: some View {
         VStack {
             List {
-                MainSectionView(menuEntry: menuEntry)
-
-                TilesSectionView(uiTiles: uiTiles, tilesIconwidth: tilesIconwidth, onDismiss: onDismiss, dismiss: dismiss)
-
-                SitemapsSectionView(sitemaps: sitemaps, sitemapIconwidth: sitemapIconwidth, sitemapForWatch: $sitemapForWatch, onDismiss: onDismiss, dismiss: dismiss)
-
-                SystemSectionView(menuEntry: menuEntry)
+                mainSection
+                tilesSection
+                sitemapsSection
+                systemSection
             }
             .listStyle(.inset)
 
@@ -241,12 +152,66 @@ struct DrawerView: View {
             image
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: openHABIconwidth)
+                .frame(width: iconWidth, height: iconWidth)
             text
         }
         .onTapGesture {
             dismiss()
             onDismiss(target)
+        }
+    }
+
+    private func menuEntry(image: some View,
+                           goTo target: TargetController,
+                           @ViewBuilder label: () -> some View) -> some View {
+        HStack {
+            image
+                .aspectRatio(contentMode: .fit)
+                .frame(width: iconWidth, height: iconWidth)
+            label()
+        }
+        .contentShape(Rectangle()) // entire row tappable
+        .onTapGesture {
+            dismiss()
+            onDismiss(target)
+        }
+    }
+
+    func systemMenuEntry(image: SFSymbol, text: String, goTo target: TargetController) -> some View {
+        menuEntry(image: Image(systemSymbol: image), goTo: target) {
+            Text(LocalizedStringKey(text))
+                .accessibilityLabel(text)
+        }
+    }
+
+    func sitemapIcon(for sitemap: OpenHABSitemap) -> some View {
+        Group {
+            if sitemap.icon.isEmpty {
+                Image("openHABIcon").resizable()
+            } else {
+                let url = Endpoint.iconForDrawer(
+                    rootUrl: networkTracker.activeConnection?.configuration.url ?? "",
+                    icon: sitemap.icon
+                ).url
+                KFImage(url)
+                    .placeholder { Image("openHABIcon").resizable() }
+                    .resizable()
+            }
+        }
+        .aspectRatio(contentMode: .fit)
+    }
+
+    func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
+        Preferences.modifyActiveHome { prefs in
+            if sitemap.name == sitemapForWatch {
+                sitemapForWatch = nil
+                prefs.sitemapForWatch = ""
+                prefs.sitemapForWatchLabel = ""
+            } else {
+                sitemapForWatch = sitemap.name
+                prefs.sitemapForWatch = sitemap.name
+                prefs.sitemapForWatchLabel = sitemap.label
+            }
         }
     }
 

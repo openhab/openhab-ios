@@ -20,6 +20,7 @@ struct ConnectionSettingsView: View {
 
     var body: some View {
         Toggle("Demo Mode", isOn: $settingsDemomode)
+            .accessibilityIdentifier("Demo Mode")
 
         if !settingsDemomode {
             SingleConnectionSettingsView(headerText: "Local server", connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)

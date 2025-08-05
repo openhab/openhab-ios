@@ -28,7 +28,6 @@ struct GenericRowView: View {
                     .foregroundColor(.secondary)
             }
         }
-        .padding()
     }
 }
 

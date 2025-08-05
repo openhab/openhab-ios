@@ -26,6 +26,8 @@ struct ItemSelectionView: View {
     @State private var searchText = ""
     @State private var isLoading = true
 
+    private let logger = Logger(subsystem: "org.openhab.app", category: "ItemSelectionView")
+
     private var filteredItems: [OpenHABItem] {
         if searchText.isEmpty { return items }
         return items.filter { item in
@@ -67,7 +69,9 @@ struct ItemSelectionView: View {
             Task {
                 do {
                     items = try await NetworkTracker.shared.getItems().filter { $0.type == .stringItem }
-                } catch {}
+                } catch {
+                    logger.error("Failed to load items: \(error.localizedDescription)")
+                }
                 isLoading = false
             }
         }

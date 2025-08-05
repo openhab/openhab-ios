@@ -177,6 +177,7 @@ struct HomeSelectionView: View {
 
     private func select(home: UUID) {
         Preferences.switchActiveHome(to: home)
+        dismiss()
     }
 
     private func loadHomesList() {

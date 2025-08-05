@@ -89,6 +89,20 @@ class SitemapPageViewModel: ObservableObject {
         }
     }
 
+    /// Initializes the view model with a fixed set of widgets, without loading or polling
+    init(pageUrl: String = "", title: String = "Preview Page", pageId: String = "", widgets: [OpenHABWidget]) {
+        isLinkedPage = !pageUrl.isEmpty
+        self.pageId = pageId
+        currentPage = OpenHABPage(
+            pageId: pageId.isEmpty ? UUID().uuidString : pageId,
+            title: title,
+            link: pageUrl,
+            leaf: false,
+            widgets: widgets,
+            icon: ""
+        )
+    }
+
     func loadSettings() {
         defaultSitemap = Preferences.currentHomePreferences.defaultSitemap
     }

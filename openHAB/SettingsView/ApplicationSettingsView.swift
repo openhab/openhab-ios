@@ -41,7 +41,7 @@ struct ApplicationSettingsView: View {
             NavigationLink {
                 ItemSelectionView(selectedItemName: $selectedItemName)
             } label: {
-                Text("Command Item \(selectedItemName?.isEmpty == false ? "(" + selectedItemName! + ")" : "")")
+                Text("Command Item \(selectedItemName?.isEmpty == false ? "(\(selectedItemName ?? ""))" : "")")
             }
         }
         .onChange(of: selectedItemName) { newSelection in
