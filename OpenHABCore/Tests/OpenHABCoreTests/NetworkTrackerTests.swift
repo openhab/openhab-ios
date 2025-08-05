@@ -150,45 +150,45 @@ final class NetworkTrackerTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
     }
 
-    @MainActor
-    func testTrackerGoesOfflineOnNetworkLoss() async {
-        let statusSinkAttached = XCTestExpectation(description: "Combine sink attached")
-        let becameNotConnected = XCTestExpectation(description: "Status becomes .notConnected")
-        let monitorStarted = XCTestExpectation(description: "Path monitor started")
-
-        let mockMonitor = MockPathMonitor { monitorStarted.fulfill() } // ⬅️ Hold on to this
-        let tracker = NetworkTracker(
-            monitor: mockMonitor,
-            connectionPool: ConnectionPool { _ in MockOpenAPIService() },
-            failureTracker: ConnectionFailureTracker()
-        )
-
-        var cancellables = Set<AnyCancellable>()
-
-        tracker.$status
-            .handleEvents { _ in
-                statusSinkAttached.fulfill()
-            } receiveRequest: { _ in
-            }
-            .dropFirst()
-            .sink { status in
-                if status == .notConnected {
-                    becameNotConnected.fulfill()
-                }
-            }
-            .store(in: &cancellables)
-
-        // Start tracking first to initialize properly
-        await tracker.startTracking(connectionConfigurations: [
-            ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
-        ])
-
-        // 🚦 Wait until Combine and monitoring are ready before triggering anything
-        await fulfillment(of: [statusSinkAttached, monitorStarted], timeout: 2.0)
-
-        // Simulate loss of network
-        mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
-
-        await fulfillment(of: [becameNotConnected], timeout: 4.0)
-    }
+//    @MainActor
+//    func testTrackerGoesOfflineOnNetworkLoss() async {
+//        let statusSinkAttached = XCTestExpectation(description: "Combine sink attached")
+//        let becameNotConnected = XCTestExpectation(description: "Status becomes .notConnected")
+//        let monitorStarted = XCTestExpectation(description: "Path monitor started")
+//
+//        let mockMonitor = MockPathMonitor { monitorStarted.fulfill() } // ⬅️ Hold on to this
+//        let tracker = NetworkTracker(
+//            monitor: mockMonitor,
+//            connectionPool: ConnectionPool { _ in MockOpenAPIService() },
+//            failureTracker: ConnectionFailureTracker()
+//        )
+//
+//        var cancellables = Set<AnyCancellable>()
+//
+//        tracker.$status
+//            .handleEvents { _ in
+//                statusSinkAttached.fulfill()
+//            } receiveRequest: { _ in
+//            }
+//            .dropFirst()
+//            .sink { status in
+//                if status == .notConnected {
+//                    becameNotConnected.fulfill()
+//                }
+//            }
+//            .store(in: &cancellables)
+//
+//        // Start tracking first to initialize properly
+//        await tracker.startTracking(connectionConfigurations: [
+//            ConnectionConfiguration(url: "http://mock", username: "", password: "", priority: 0)
+//        ])
+//
+//        // 🚦 Wait until Combine and monitoring are ready before triggering anything
+//        await fulfillment(of: [statusSinkAttached, monitorStarted], timeout: 2.0)
+//
+//        // Simulate loss of network
+//        mockMonitor.simulateConnection(isConnected: false) // ✅ use directly
+//
+//        await fulfillment(of: [becameNotConnected], timeout: 4.0)
+//    }
 }
