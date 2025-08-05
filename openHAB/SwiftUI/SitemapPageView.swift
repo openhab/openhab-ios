@@ -24,64 +24,61 @@ struct SitemapPageView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
-                    // Show skeleton/placeholder rows while loading
-                    ForEach(placeholderWidgets, id: \.id) { widget in
-                        RowViewFactory.view(for: widget)
-                            .redacted(reason: .placeholder)
-                            .disabled(true)
-                    }
-                } else {
-                    ForEach(viewModel.relevantWidgets, id: \.id) { widget in
-                        Group {
-                            if let linkedPage = widget.linkedPage {
-                                NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
-                                    RowViewFactory.view(for: widget)
-                                }
-                                .buttonStyle(.plain)
-                                .padding(.vertical, -6)
-                            } else if widget.type == .selection {
-                                Button {
-                                    selectedWidget = widget
-                                    showSelectionSheet = true
-                                } label: {
-                                    RowViewFactory.view(for: widget)
-                                }
-                                .buttonStyle(.plain)
-                            } else if widget.type == .input {
-                                Button {
-                                    selectedWidget = widget
-                                    showInputAlert = true
-                                } label: {
-                                    RowViewFactory.view(for: widget)
-                                }
-                                .buttonStyle(.plain)
-                            } else {
+        List {
+            if viewModel.isLoading, viewModel.relevantWidgets.isEmpty {
+                // Show skeleton/placeholder rows while loading
+                ForEach(placeholderWidgets, id: \.id) { widget in
+                    RowViewFactory.view(for: widget)
+                        .redacted(reason: .placeholder)
+                        .disabled(true)
+                }
+            } else {
+                ForEach(viewModel.relevantWidgets, id: \.id) { widget in
+                    Group {
+                        if let linkedPage = widget.linkedPage {
+                            NavigationLink(destination: SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: linkedPage.link, title: linkedPage.title))) {
                                 RowViewFactory.view(for: widget)
-                                    .onTapGesture {
-                                        viewModel.widgetTapped(widget)
-                                    }
                             }
+                            .buttonStyle(.plain)
+                            .padding(.vertical, -6)
+                        } else if widget.type == .selection {
+                            Button {
+                                selectedWidget = widget
+                                showSelectionSheet = true
+                            } label: {
+                                RowViewFactory.view(for: widget)
+                            }
+                            .buttonStyle(.plain)
+                        } else if widget.type == .input {
+                            Button {
+                                selectedWidget = widget
+                                showInputAlert = true
+                            } label: {
+                                RowViewFactory.view(for: widget)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            RowViewFactory.view(for: widget)
+                                .onTapGesture {
+                                    viewModel.widgetTapped(widget)
+                                }
                         }
                     }
                 }
             }
-            .environmentObject(viewModel)
-            .listStyle(.plain)
-            .navigationBarHidden(!isLinkedPage)
-            .navigationTitle(isLinkedPage ? viewModel.pageTitle : "")
-            .navigationBarTitleDisplayMode(.inline)
-            .refreshable {
-                await viewModel.reload()
-            }
-            .task {
-                viewModel.startPageHandling()
-            }
-            .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
-                viewModel.handleActiveConnectionChange(activeConnection)
-            }
+        }
+        .environmentObject(viewModel)
+        .listStyle(.plain)
+        .navigationTitle(viewModel.pageTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .refreshable {
+            await viewModel.reload()
+        }
+        .task {
+            viewModel.startPageHandling()
+        }
+        .onChange(of: viewModel.networkTracker.activeConnection) { activeConnection in
+            viewModel.handleActiveConnectionChange(activeConnection)
         }
         .sheet(isPresented: $showSelectionSheet) {
             if let widget = selectedWidget {

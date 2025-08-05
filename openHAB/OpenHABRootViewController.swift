@@ -37,14 +37,23 @@ protocol ModalHandler: AnyObject {
 
 private let logger = Logger(subsystem: "org.openhab.UI", category: "OpenHABRootViewController")
 
-class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHABViewable {
+class HostingSitemapViewController: UIHostingController<SitemapNavigationView>, OpenHABViewable {
     private let viewModel: SitemapPageViewModel
-    private let searchController = UISearchController(searchResultsController: nil)
+
+    private weak var rootViewController: OpenHABRootViewController?
 
     init() {
         let viewModel = SitemapPageViewModel()
         self.viewModel = viewModel
-        super.init(rootView: SitemapPageView(viewModel: viewModel))
+        super.init(rootView: SitemapNavigationView(viewModel: viewModel, onShowSideMenu: {}))
+    }
+
+    func setRootViewController(_ rootViewController: OpenHABRootViewController) {
+        self.rootViewController = rootViewController
+        // Update the closure after initialization
+        rootView = SitemapNavigationView(viewModel: viewModel) { [weak self] in
+            self?.rootViewController?.showSideMenu()
+        }
     }
 
     @available(*, unavailable)
@@ -54,37 +63,8 @@ class HostingSitemapViewController: UIHostingController<SitemapPageView>, OpenHA
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Keep UIKit navigation bar visible for hamburger menu
-        navigationController?.setNavigationBarHidden(false, animated: false)
-        setupSearchController()
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-        // Ensure hamburger menu is preserved when search controller is set up
-        if parent?.navigationItem.searchController !== searchController {
-            let existingRightBarButtonItem = parent?.navigationItem.rightBarButtonItem
-            parent?.navigationItem.searchController = searchController
-            parent?.navigationItem.hidesSearchBarWhenScrolling = true
-            if let rightButton = existingRightBarButtonItem {
-                parent?.navigationItem.rightBarButtonItem = rightButton
-            }
-        }
-    }
-
-    private func setupSearchController() {
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.autocapitalizationType = .none
-        searchController.searchBar.delegate = self
-        searchController.delegate = self
-        searchController.searchBar.placeholder = NSLocalizedString("search_items", comment: "")
-        definesPresentationContext = true
-
-        // Assign to navigation item
-        navigationItem.searchController = searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
+        // Hide UIKit navigation bar since SwiftUI now handles navigation
+        navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
     func getSitemapTitle() -> String {
@@ -123,7 +103,11 @@ class OpenHABRootViewController: UIViewController {
         return viewController
     }()
 
-    lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = HostingSitemapViewController()
+    lazy var sitemapViewController: any (UIViewController & OpenHABViewable) = {
+        let controller = HostingSitemapViewController()
+        controller.setRootViewController(self)
+        return controller
+    }()
 
     private var activeConnection: ConnectionInfo?
     private let synthesizer = AVSpeechSynthesizer()
@@ -913,15 +897,5 @@ extension OpenHABRootViewController: ModalHandler {
                 navigationController?.pushViewController(hostingController, animated: true)
             }
         }
-    }
-}
-
-extension HostingSitemapViewController: UISearchResultsUpdating, UISearchBarDelegate, UISearchControllerDelegate {
-    func updateSearchResults(for searchController: UISearchController) {
-        viewModel.searchText = searchController.searchBar.text ?? ""
-    }
-
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        viewModel.searchText = ""
     }
 }
